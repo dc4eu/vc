@@ -15,8 +15,8 @@ WORKDIR /
 RUN apt-get update && apt-get install -y curl procps
 RUN rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/src/app/bin/wallet-verifier /wallet-verifier
+COPY --from=builder /go/src/app/bin/vc-verifier /vc-verifier
 
 HEALTHCHECK --interval=27s --timeout=30s CMD curl --connect-timeout 5 http://localhost:8080/health | grep -q STATUS_OK
 
-CMD [ "./wallet-verifier" ]
+CMD [ "./vc-verifier" ]

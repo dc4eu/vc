@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"wallet/pkg/model"
+	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

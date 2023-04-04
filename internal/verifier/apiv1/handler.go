@@ -2,7 +2,7 @@ package apiv1
 
 import (
 	"context"
-	"wallet/pkg/model"
+	"vc/pkg/model"
 )
 
 // Status return status for each ladok instance

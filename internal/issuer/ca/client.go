@@ -2,8 +2,8 @@ package ca
 
 import (
 	"context"
-	"wallet/pkg/logger"
-	"wallet/pkg/model"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 
 	"github.com/masv3971/gosunetca"
 )
@@ -26,7 +26,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Logger) (*Client, erro
 	c.caClient, err = gosunetca.New(gosunetca.Config{
 		ServerURL: cfg.Issuer.CA.ServerURL,
 		Token:     cfg.Issuer.CA.Token,
-		UserAgent: "wallet",
+		UserAgent: "vc",
 	})
 	if err != nil {
 		return nil, err

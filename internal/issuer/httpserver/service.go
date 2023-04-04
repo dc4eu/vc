@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 	"time"
-	"wallet/internal/issuer/apiv1"
-	"wallet/pkg/helpers"
-	"wallet/pkg/logger"
-	"wallet/pkg/model"
+	"vc/internal/issuer/apiv1"
+	"vc/pkg/helpers"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -64,7 +64,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.regEndpoint(ctx, "/api/v1/pdf/:id", "GET", s.endpointGetSignedPDF)
 	s.regEndpoint(ctx, "/api/v1/pdf", "POST", s.endpointSignPDF)
 
-	//s.regEndpoint(ctx, "/api/v1/wallet"...)
+	//s.regEndpoint(ctx, "/api/v1/vc"...)
 
 	s.regEndpoint(ctx, "/health", "GET", s.endpointStatus)
 

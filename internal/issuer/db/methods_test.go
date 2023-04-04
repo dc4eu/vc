@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 	"testing"
-	"wallet/pkg/logger"
+	"vc/pkg/logger"
 	"wallet/pkg/model"
 
 	"github.com/stretchr/testify/assert"

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"wallet/pkg/logger"
-	"wallet/pkg/model"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"

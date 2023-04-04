@@ -6,12 +6,12 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"wallet/internal/issuer/apiv1"
-	"wallet/internal/issuer/ca"
-	"wallet/internal/issuer/db"
-	"wallet/internal/issuer/httpserver"
-	"wallet/pkg/configuration"
-	"wallet/pkg/logger"
+	"vc/internal/issuer/apiv1"
+	"vc/internal/issuer/ca"
+	"vc/internal/issuer/db"
+	"vc/internal/issuer/httpserver"
+	"vc/pkg/configuration"
+	"vc/pkg/logger"
 )
 
 type service interface {
@@ -34,7 +34,7 @@ func main() {
 	}
 
 	mainLog = logger.New("main", cfg.Common.Production)
-	log = logger.New("wallet_issuer", cfg.Common.Production)
+	log = logger.New("vc_issuer", cfg.Common.Production)
 
 	db, err := db.New(ctx, cfg, log.New("db"))
 	services["db"] = db

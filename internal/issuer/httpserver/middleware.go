@@ -3,7 +3,7 @@ package httpserver
 import (
 	"context"
 	"time"
-	"wallet/pkg/helpers"
+	"vc/pkg/helpers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

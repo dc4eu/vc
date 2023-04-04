@@ -2,10 +2,10 @@ package apiv1
 
 import (
 	"context"
-	"wallet/internal/issuer/ca"
-	"wallet/internal/issuer/db"
-	"wallet/pkg/logger"
-	"wallet/pkg/model"
+	"vc/internal/issuer/ca"
+	"vc/internal/issuer/db"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 )
 
 // Client holds the public api object

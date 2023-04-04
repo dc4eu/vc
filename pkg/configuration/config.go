@@ -3,19 +3,19 @@ package configuration
 import (
 	"errors"
 	"os"
-	"wallet/pkg/helpers"
-	"wallet/pkg/logger"
-	"wallet/pkg/model"
+	"vc/pkg/helpers"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
 )
 
 type envVars struct {
-	EduIDConfigYAML string `envconfig:"WALLET_CONFIG_YAML" required:"true"`
+	EduIDConfigYAML string `envconfig:"VC_CONFIG_YAML" required:"true"`
 }
 
-// Parse parses config file from WALLET_CONFIG_YAML environment variable
+// Parse parses config file from vc_CONFIG_YAML environment variable
 func Parse(logger *logger.Logger) (*model.Cfg, error) {
 	logger.Info("Read environmental variable")
 	var env envVars

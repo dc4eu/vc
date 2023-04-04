@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"wallet/internal/verifier/apiv1"
-	"wallet/internal/verifier/httpserver"
-	"wallet/pkg/configuration"
-	"wallet/pkg/logger"
+	"vc/internal/verifier/apiv1"
+	"vc/internal/verifier/httpserver"
+	"vc/pkg/configuration"
+	"vc/pkg/logger"
 )
 
 type service interface {
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	mainLog = logger.New("main", cfg.Common.Production)
-	log = logger.New("wallet_verifier", cfg.Common.Production)
+	log = logger.New("vc_verifier", cfg.Common.Production)
 
 	apiv1, err := apiv1.New(ctx, cfg, log.New("apiv1"))
 	if err != nil {

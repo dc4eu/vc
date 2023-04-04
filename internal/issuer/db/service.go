@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"wallet/pkg/logger"
-	"wallet/pkg/model"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

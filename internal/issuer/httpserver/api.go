@@ -2,8 +2,8 @@ package httpserver
 
 import (
 	"context"
-	"wallet/internal/issuer/apiv1"
-	"wallet/pkg/model"
+	"vc/internal/issuer/apiv1"
+	"vc/pkg/model"
 )
 
 // Apiv1 interface

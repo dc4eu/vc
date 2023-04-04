@@ -15,8 +15,8 @@ WORKDIR /
 RUN apt-get update && apt-get install -y curl procps
 RUN rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/src/app/bin/wallet-issuer /wallet-issuer
+COPY --from=builder /go/src/app/bin/vc-issuer /vc-issuer
 
 HEALTHCHECK --interval=27s --timeout=30s CMD curl --connect-timeout 5 http://localhost:8080/health | grep -q STATUS_OK
 
-CMD [ "./wallet-issuer" ]
+CMD [ "./vc-issuer" ]

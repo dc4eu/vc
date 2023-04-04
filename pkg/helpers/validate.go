@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"wallet/pkg/logger"
+	"vc/pkg/logger"
 
 	"github.com/go-playground/validator/v10"
 )

@@ -2,7 +2,7 @@ package httpserver
 
 import (
 	"context"
-	"wallet/internal/issuer/apiv1"
+	"vc/internal/issuer/apiv1"
 
 	"github.com/gin-gonic/gin"
 )

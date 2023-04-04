@@ -2,7 +2,7 @@ package httpserver
 
 import (
 	"context"
-	"wallet/pkg/model"
+	"vc/pkg/model"
 )
 
 // Apiv1 interface

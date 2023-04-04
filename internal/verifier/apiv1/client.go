@@ -2,8 +2,8 @@ package apiv1
 
 import (
 	"context"
-	"wallet/pkg/logger"
-	"wallet/pkg/model"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 )
 
 // Client holds the public api object

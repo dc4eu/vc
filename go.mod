@@ -1,4 +1,4 @@
-module wallet
+module vc
 
 go 1.20
 

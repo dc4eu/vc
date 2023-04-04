@@ -3,14 +3,14 @@ package model
 import "time"
 
 var (
-	//StatusOKWalletIssue status ok
-	StatusOKWalletIssue = "STATUS_OK_wallet_issue"
-	// StatusFailWalletIssue status fail
-	StatusFailWalletIssue = "STATUS_FAIL_wallet_issue"
-	// StatusOKWalletVerify status ok
-	StatusOKWalletVerify = "STATUS_OK_wallet_verify"
-	// StatusFailWalletVerify status fail
-	StatusFailWalletVerify = "STATUS_FAIL_wallet_verify"
+	//StatusOKVcIssue status ok
+	StatusOKVcIssue = "STATUS_OK_vc_issue"
+	// StatusFailVcIssue status fail
+	StatusFailVcIssue = "STATUS_FAIL_vc_issue"
+	// StatusOKVcVerify status ok
+	StatusOKVcVerify = "STATUS_OK_vc_verify"
+	// StatusFailVcVerify status fail
+	StatusFailVcVerify = "STATUS_FAIL_vc_verify"
 )
 
 // Status type
@@ -39,7 +39,7 @@ func (s ManyStatus) Check() *Status {
 	}
 	status := &Status{
 		Healthy:   true,
-		Status:    StatusOKWalletIssue,
+		Status:    StatusOKVcIssue,
 		Timestamp: time.Now(),
 	}
 	return status

@@ -1,0 +1,59 @@
+package db
+
+import (
+	"context"
+	"testing"
+	"wallet/pkg/logger"
+	"wallet/pkg/model"
+
+	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+)
+
+func TestSaveTransaction(t *testing.T) {
+	t.SkipNow()
+	tts := []struct {
+		name  string
+		tFunc func(mt *mtest.T) error //func(mt *mtest.T) *actor.Actor
+		have  string
+		want  string
+		resp  bson.D
+	}{
+		{
+			name: "OK",
+			tFunc: func(mt *mtest.T) error {
+				return nil
+			},
+			have: "have",
+		},
+	}
+	opts := mtest.NewOptions().DatabaseName("wallet").ClientType(mtest.Mock)
+	mt := mtest.New(t, opts)
+	defer mt.Close()
+	for _, tt := range tts {
+		mt.Run(tt.name, func(mt *mtest.T) {
+			mt.AddMockResponses(tt.resp)
+
+			//mongo := NewMongo(testMongoURI, testDbName, nil)
+			s, err := New(context.Background(), &model.Cfg{
+				Common: model.Common{},
+				Issuer: model.Issuer{
+					APIServer: model.APIServer{},
+					Mongo: model.Mongo{
+						URI: "",
+					},
+					CA: model.CA{},
+				},
+				Verifier: model.Verifier{},
+			}, logger.NewSimple("test-db"))
+			//mongo.db = mt.DB
+			s.dbIssuer = mt.DB
+
+			// Test function
+			err = s.SaveTransaction(context.Background(), &model.Transaction{})
+			assert.NoError(t, err)
+			//assert.Equal(t, tt.want, got)
+		})
+	}
+}

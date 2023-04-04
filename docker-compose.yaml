@@ -1,0 +1,80 @@
+---
+version: "3"
+
+services:
+  issuer:
+    container_name: "wallet_issuer"
+    build:
+      context: .
+      dockerfile: Dockerfile_issuer
+    volumes:
+      - ./cert:/cert:ro
+      - ./dev_config_docker.yaml:/config.yaml:ro
+    depends_on:
+      - redis
+      - mongo
+    networks:
+      wallet-net:
+        ipv4_address: 172.16.50.2
+    expose:
+      - 8080
+    environment:
+      - "WALLET_CONFIG_YAML=config.yaml"
+      - "HTTP_PROXY=haproxy:8080"
+
+  verifier:
+    container_name: "wallet_verifier"
+    build:
+      context: .
+      dockerfile: Dockerfile_verifier
+    volumes:
+      - ./cert:/cert:ro
+      - ./dev_config2.yaml:/config.yaml:ro
+    depends_on:
+      - redis
+      - mongo
+      - issuer
+    networks:
+      wallet-net:
+        ipv4_address: 172.16.50.3
+    expose:
+      - 8080
+    environment:
+      - "WALLET_CONFIG_YAML=config.yaml"
+      - "HTTP_PROXY=haproxy:8080"
+
+  redis:
+    image: redis:alpine
+    container_name: "wallet_redis"
+    expose:
+      - 6379
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      wallet-net:
+        ipv4_address: 172.16.50.4
+    
+  mongo:
+    image: mongo:4.0.10
+    container_name: "wallet_mongo"
+    expose:
+      - 27017
+    volumes:
+      - mongo_data:/data
+    networks:
+      wallet-net:
+        ipv4_address: 172.16.50.6
+
+networks:
+  wallet-net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-wallet
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.50.0/24
+volumes:
+  redis_data:
+  mongo_data:

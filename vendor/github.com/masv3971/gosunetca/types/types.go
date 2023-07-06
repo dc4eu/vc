@@ -1,46 +1,30 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+)
 
-// SignMetaRequest is the meta data for the sign request
-type SignMetaRequest struct {
-	Version  int    `json:"version"`
-	KeyLabel string `json:"key_label"`
-	Encoding string `json:"encoding"`
-	KeyType  string `json:"key_type"`
-}
-
-// UnsignedDocument is a document to sign
-type UnsignedDocument struct {
-	ID   string `json:"id"`
-	Data string `json:"data,omitempty"` //base64 encoded
+type Document struct {
+	TransactionID string `json:"transaction_id" bson:"transaction_id" redis:"transaction_id"`
+	Data          string `json:"data" bson:"data" redis:"data"`
+	RevokedTS     int64  `json:"revoked_ts,omitempty" bson:"revoked_ts" redis:"revoke_ts"`
+	ModifyTS      int64  `json:"modify_ts,omitempty" bson:"modify_ts" redis:"modify_ts"`
+	CreateTS      int64  `json:"create_ts,omitempty" mongo:"create_ts" redis:"create_ts"`
 }
 
 // SignRequest is the request for the sign endpoint
 type SignRequest struct {
-	Meta      SignMetaRequest    `json:"meta"`
-	Documents []UnsignedDocument `json:"documents"`
-}
-
-// SignMetaReply is the meta data for the sign reply
-type SignMetaReply struct {
-	Version            int    `json:"version"`
-	Encoding           string `json:"encoding"`
-	SignerPublicKey    string `json:"signer_public_key"`
-	SignatureAlgorithm string `json:"signature_algorithm"`
-}
-
-// SignedDocument is a document that has been signed
-type SignedDocument struct {
-	ID        string `json:"id"`
-	Signature string `json:"signature"`
+	*Document
+	// TransactionID string `json:"transaction_id"`
+	// PDFB64Data    string `json:"pdf_b64_data,omitempty" redis:"data"` //base64 encoded
 }
 
 // SignReply is the reply for the sign endpoint
-type SignReply struct {
-	Meta            SignMetaReply    `json:"meta"`
-	SignatureValues []SignedDocument `json:"signature_values"`
-}
+//type SignReply struct {
+//	*Document
+////	TransactionID    string `json:"transaction_id"`
+////	SignedPDFB64Data string `json:" signed_pdf_b64_data" redis:"data"`
+//}
 
 // MissingTokenReply is the reply when the token is missing
 type MissingTokenReply struct {

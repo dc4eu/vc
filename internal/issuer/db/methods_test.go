@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 	"vc/pkg/logger"
-	"wallet/pkg/model"
+	"vc/pkg/model"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -48,10 +48,9 @@ func TestSaveTransaction(t *testing.T) {
 				Verifier: model.Verifier{},
 			}, logger.NewSimple("test-db"))
 			//mongo.db = mt.DB
-			s.dbIssuer = mt.DB
 
 			// Test function
-			err = s.SaveTransaction(context.Background(), &model.Transaction{})
+			err = s.DocumentsColl.Save(context.Background(), &model.Document{})
 			assert.NoError(t, err)
 			//assert.Equal(t, tt.want, got)
 		})

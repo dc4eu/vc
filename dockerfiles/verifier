@@ -1,0 +1,26 @@
+## Compile
+FROM golang:1.20.1 AS builder
+
+WORKDIR /go/src/app
+
+COPY . .
+
+RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o /go/src/app/bin/vc_verifier -ldflags "-w -s --extldflags '-static'" ./cmd/verifier/main.go
+
+
+# Deploy
+FROM debian:bullseye
+
+WORKDIR /
+
+RUN apt-get update && apt-get install -y curl procps
+RUN rm -rf /var/lib/apt/lists/*
+
+
+COPY --from=builder /go/src/app/bin/vc_verifier /vc_verifier
+
+EXPOSE 8081
+
+HEALTHCHECK --interval=27s --timeout=30s CMD curl --connect-timeout 5 http://localhost:8081/health | grep -q STATUS_OK
+
+CMD [ "./vc_verifier" ]

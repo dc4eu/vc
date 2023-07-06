@@ -2,57 +2,93 @@ package apiv1
 
 import (
 	"context"
+	"time"
 	"vc/pkg/model"
 
 	"github.com/google/uuid"
 )
 
-// SignPDFRequest is the request for sign pdf
-type SignPDFRequest struct {
-	PDF string `json:"pdf"`
+// PDFSignRequest is the request for sign pdf
+type PDFSignRequest struct {
+	PDF      string `json:"pdf"`
+	LadokUID string `json:"ladok_uid"`
 }
 
-// SignPDFReply is the reply for sign pdf
-type SignPDFReply struct {
-	TransactionID string `json:"transaction_id"`
+// PDFSignReply is the reply for sign pdf
+type PDFSignReply struct {
+	TransactionID string `json:"transaction_id" validate:"required"`
 }
 
-// SignPDF is the request to sign pdf
-func (c *Client) SignPDF(ctx context.Context, req *SignPDFRequest) (*SignPDFReply, error) {
+// PDFSign is the request to sign pdf
+func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
 	transactionID := uuid.New().String()
 
-	transactionDoc := &model.Transaction{
-		//ID:            transactionID,
-		TransactionID: transactionID,
-		KeyLabel:      "test",
-		KeyType:       "test",
-		HashType:      "test",
-	}
+	unsignedDocument := &model.UnsignedDocument{Data: req.PDF, TS: time.Now().Unix()}
 
-	if err := c.db.SaveTransaction(ctx, transactionDoc); err != nil {
+	if err := c.kv.Doc.SaveUnsigned(ctx, transactionID, unsignedDocument.Data, unsignedDocument.TS); err != nil {
+		return nil, err
+	}
+	if err := c.kv.Doc.SaveLadokUID(ctx, transactionID, req.LadokUID); err != nil {
 		return nil, err
 	}
 
-	// Save transationID to DB
-	reply := &SignPDFReply{
+	go func() error {
+		c.logger.Info("sending document to CA")
+		if err := c.ca.SignDocuments(ctx, unsignedDocument, transactionID); err != nil {
+			return err
+		}
+		return nil
+	}()
+
+	reply := &PDFSignReply{
 		TransactionID: transactionID,
 	}
+
 	return reply, nil
 }
 
-// GetSignedPDFRequest is the request for get signed pdf
-type GetSignedPDFRequest struct {
-	TransactionID string `uri:"transaction_id"`
+// PDFGetSignedRequest is the request for get signed pdf
+type PDFGetSignedRequest struct {
+	TransactionID string `uri:"transaction_id" binding:"required"`
 }
 
-// GetSignedPDFReply is the reply for get signed pdf
-type GetSignedPDFReply struct {
-	PDF string `json:"pdf"`
+// PDFGetSignedReply is the reply for the signed pdf
+type PDFGetSignedReply struct {
+	Document *model.SignedDocument `json:"document" validate:"required"`
 }
 
-// GetSignedPDF is the request to get signed pdf
-func (c *Client) GetSignedPDF(ctx context.Context, req *GetSignedPDFRequest) (*GetSignedPDFReply, error) {
-	return nil, nil
+// PDFGetSigned is the request to get signed pdfs
+func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*PDFGetSignedReply, error) {
+	signedDoc, ts, err := c.kv.Doc.GetSigned(ctx, req.TransactionID)
+	//doc, err := c.db.DocumentsColl.Get(ctx, req.TransactionID)
+	if err != nil {
+		return nil, err
+	}
+	resp := &PDFGetSignedReply{
+		Document: &model.SignedDocument{
+			Data: signedDoc,
+			TS:   ts,
+		},
+	}
+	return resp, nil
+}
+
+// PDFRevokeRequest is the request for revoke pdf
+type PDFRevokeRequest struct {
+	LadokUID string `json:"ladok_uid"`
+}
+
+// PDFRevokeReply is the reply for revoke pdf
+type PDFRevokeReply struct {
+	Status bool `json:"status"`
+}
+
+// PDFRevoke is the request to revoke pdf
+func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevokeReply, error) {
+	if err := c.db.DocumentsColl.Revoke(ctx, req.LadokUID); err != nil {
+		return nil, err
+	}
+	return &PDFRevokeReply{Status: true}, nil
 }
 
 // Status return status for each ladok instance

@@ -4,8 +4,8 @@ import (
 	"github.com/go-playground/validator"
 )
 
-// Check checks for validation error
-func Check(s interface{}) error {
+// check checks for validation error
+func check(s interface{}) error {
 	validate := validator.New()
 
 	err := validate.Struct(s)

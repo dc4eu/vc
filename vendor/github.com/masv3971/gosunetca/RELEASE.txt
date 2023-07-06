@@ -1,2 +1,5 @@
 v0.0.1 : init commit
 v0.0.2 : change import path
+v0.0.3 : Change title of README
+v0.0.4 : Export endpoint service type
+v0.0.5 : Better types

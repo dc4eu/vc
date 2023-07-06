@@ -29,7 +29,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 		config: config,
 		logger: logger,
 		apiv1:  api,
-		server: &http.Server{Addr: config.Issuer.APIServer.Host},
+		server: &http.Server{Addr: config.Verifier.APIServer.Addr},
 	}
 
 	switch s.config.Common.Production {

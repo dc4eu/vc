@@ -8,6 +8,7 @@ import (
 	"testing"
 	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
+	"vc/internal/issuer/kv"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
@@ -17,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var mockBase64PDF = `JVBERi0xLjcKJeLjz9MKNyAwIG9iago8PC9OYW1lczw8L0VtYmVkZGVkRmlsZXM8PC9OYW1lc1td
+var mockBase64PDF = string(`JVBERi0xLjcKJeLjz9MKNyAwIG9iago8PC9OYW1lczw8L0VtYmVkZGVkRmlsZXM8PC9OYW1lc1td
 Pj4+Pi9QYWdlcyAxIDAgUi9UeXBlL0NhdGFsb2c+PgplbmRvYmoKNCAwIG9iago8PC9GaWx0ZXIv
 RmxhdGVEZWNvZGUvTGVuZ3RoIDE0MD4+CnN0cmVhbQp4AaTOsarCMBQG4D1P8Y/3Lsf/pE3SrIUq
 uAlnl2qSYhFFF1/fzV18gY+P2DtidZSQ8HKjYbNtofhSQ+vmpDHnufYnX4ZOU67RF+Ya27lXH6FR
@@ -44,7 +45,7 @@ ZGUvSURbPGI0ZGRiZTAyNjgyMTBkY2YzYWExYjlkNjliYTM5NmY1PiA8YjRkZGJlMDI2ODIxMGRj
 ZjNhYTFiOWQ2OWJhMzk2ZjU+XS9JbmRleFswIDIzXS9JbmZvIDYgMCBSL0xlbmd0aCA4MC9Sb290
 IDcgMCBSL1NpemUgMjMvVHlwZS9YUmVmL1dbMSAyIDJdPj4Kc3RyZWFtCnicJMvtCYAwDITh99LW
 bxAUnMORHMjpXKhy5M9DLrnA0ntwMRsZxAOeQvV13DMW6QY4EGyG/GimmkHhZSu+na6sWZnMqPjg
-DwAA//+YqQV8CmVuZHN0cmVhbQplbmRvYmoKc3RhcnR4cmVmCjEyODMKJSVFT0YK`
+DwAA//+YqQV8CmVuZHN0cmVhbQplbmRvYmoKc3RhcnR4cmVmCjEyODMKJSVFT0YK`)
 
 func mockClient(t *testing.T, caURL string) *Client {
 	ctx := context.Background()
@@ -52,20 +53,23 @@ func mockClient(t *testing.T, caURL string) *Client {
 	cfg := &model.Cfg{
 		Issuer: model.Issuer{
 			CA: model.CA{
-				ServerURL: caURL,
-				Token:     "test-token",
-				KeyLabel:  "test-key-label",
-				KeyType:   "secp256r1",
+				Addr:     caURL,
+				Token:    "test-token",
+				KeyLabel: "test-key-label",
+				KeyType:  "secp256r1",
 			},
 		},
 	}
-	ca, err := ca.New(ctx, cfg, log)
-	assert.NoError(t, err)
-
 	db, err := db.New(ctx, cfg, log)
 	assert.NoError(t, err)
 
-	c, err := New(ctx, ca, db, cfg, log)
+	kv, err := kv.New(ctx, cfg, log)
+	assert.NoError(t, err)
+
+	ca, err := ca.New(ctx, kv, db, cfg, log)
+	assert.NoError(t, err)
+
+	c, err := New(ctx, ca, kv, db, cfg, log)
 	assert.NoError(t, err)
 
 	return c
@@ -113,15 +117,15 @@ func mockSetup(t *testing.T) (*http.ServeMux, *httptest.Server, *Client) {
 func TestSignPDF(t *testing.T) {
 	tts := []struct {
 		name string
-		have *SignPDFRequest
-		want *SignPDFReply
+		have *PDFSignRequest
+		want *PDFSignReply
 	}{
 		{
 			name: "OK",
-			have: &SignPDFRequest{
+			have: &PDFSignRequest{
 				PDF: mockBase64PDF,
 			},
-			want: &SignPDFReply{
+			want: &PDFSignReply{
 				TransactionID: "xyz",
 			},
 		},
@@ -134,7 +138,7 @@ func TestSignPDF(t *testing.T) {
 
 			mockGenericEndpointServer(t, mux, client.cfg.Issuer.CA.Token, http.MethodPost, "/pkcs11_sign", mocks.JSONSignDocumentReply200, http.StatusOK)
 
-			got, err := client.SignPDF(context.Background(), tt.have)
+			got, err := client.PDFSign(context.Background(), tt.have)
 			assert.NoError(t, err)
 			_, err = uuid.Parse(got.TransactionID)
 			assert.NoError(t, err)

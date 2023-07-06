@@ -2,7 +2,7 @@ package model
 
 // APIServer holds the api server configuration
 type APIServer struct {
-	Host string `yaml:"host" validate:"required"`
+	Addr string `yaml:"addr" validate:"required"`
 }
 
 // Mongo holds the database configuration
@@ -10,12 +10,18 @@ type Mongo struct {
 	URI string `yaml:"uri" validate:"required"`
 }
 
+// KeyValue holds the keyvalue configuration
+type KeyValue struct {
+	Addr string `yaml:"addr" validate:"required"`
+	DB   int    `yaml:"db" validate:"required"`
+}
+
 // CA holds the ca configuration
 type CA struct {
-	ServerURL string `yaml:"server_url" validate:"required"`
-	Token     string `yaml:"token" validate:"required"`
-	KeyLabel  string `yaml:"key_label" validate:"required"`
-	KeyType   string `yaml:"key_type" validate:"required"`
+	Addr     string `yaml:"addr" validate:"required"`
+	Token    string `yaml:"token" validate:"required"`
+	KeyLabel string `yaml:"key_label" validate:"required"`
+	KeyType  string `yaml:"key_type" validate:"required"`
 }
 
 // Log holds the log configuration
@@ -35,10 +41,13 @@ type Issuer struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
 	Mongo     Mongo     `yaml:"mongo" validate:"required"`
 	CA        CA        `yaml:"ca" validate:"required"`
+	KeyValue  KeyValue  `yaml:"key_value" validate:"required"`
 }
 
 // Verifier holds the verifier configuration
-type Verifier struct{}
+type Verifier struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+}
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {

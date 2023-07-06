@@ -8,11 +8,11 @@ import (
 )
 
 func (s *Service) endpointSignPDF(ctx context.Context, c *gin.Context) (interface{}, error) {
-	request := &apiv1.SignPDFRequest{}
+	request := &apiv1.PDFSignRequest{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.SignPDF(ctx, request)
+	reply, err := s.apiv1.PDFSign(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -20,11 +20,23 @@ func (s *Service) endpointSignPDF(ctx context.Context, c *gin.Context) (interfac
 }
 
 func (s *Service) endpointGetSignedPDF(ctx context.Context, c *gin.Context) (interface{}, error) {
-	request := &apiv1.GetSignedPDFRequest{}
+	request := &apiv1.PDFGetSignedRequest{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.GetSignedPDF(ctx, request)
+	reply, err := s.apiv1.PDFGetSigned(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointPDFRevoke(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.PDFRevokeRequest{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.PDFRevoke(ctx, request)
 	if err != nil {
 		return nil, err
 	}

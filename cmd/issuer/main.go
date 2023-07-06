@@ -10,6 +10,7 @@ import (
 	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/httpserver"
+	"vc/internal/issuer/kv"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 )
@@ -36,21 +37,26 @@ func main() {
 	mainLog = logger.New("main", cfg.Common.Production)
 	log = logger.New("vc_issuer", cfg.Common.Production)
 
-	db, err := db.New(ctx, cfg, log.New("db"))
-	services["db"] = db
+	dbService, err := db.New(ctx, cfg, log.New("db"))
+	services["dbService"] = dbService
 	if err != nil {
 		panic(err)
 	}
-	sunetCA, err := ca.New(ctx, cfg, log.New("ca"))
+	kvService, err := kv.New(ctx, cfg, log.New("keyvalue"))
+	services["kvService"] = kvService
 	if err != nil {
 		panic(err)
 	}
-	apiv1, err := apiv1.New(ctx, sunetCA, db, cfg, log.New("apiv1"))
+	caClient, err := ca.New(ctx, kvService, dbService, cfg, log.New("ca"))
 	if err != nil {
 		panic(err)
 	}
-	httpserver, err := httpserver.New(ctx, cfg, apiv1, log.New("httpserver"))
-	services["httpserver"] = httpserver
+	apiv1Client, err := apiv1.New(ctx, caClient, kvService, dbService, cfg, log.New("apiv1"))
+	if err != nil {
+		panic(err)
+	}
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, log.New("httpserver"))
+	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
 	}

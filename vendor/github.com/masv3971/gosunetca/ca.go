@@ -11,7 +11,17 @@ import (
 	"net/url"
 
 	"github.com/masv3971/gosunetca/types"
+
+	"github.com/go-logr/logr"
 )
+
+// Config is the configuration for the client
+type Config struct {
+	ServerURL string `validate:"required"`
+	Token     string `validate:"required"`
+	UserAgent string
+	//Logger    logr.Logger
+}
 
 // Client is the client for the SUNET CA API
 type Client struct {
@@ -19,20 +29,14 @@ type Client struct {
 	token     string
 	serverURL string
 	userAgent string
+	Log
 
-	Sign *endpointsSign
-}
-
-// Config is the configuration for the client
-type Config struct {
-	ServerURL string `validate:"required"`
-	Token     string `validate:"required"`
-	UserAgent string
+	Sign *SignService
 }
 
 // New create a new client
-func New(config Config) (*Client, error) {
-	if err := Check(config); err != nil {
+func New(ctx context.Context, config Config) (*Client, error) {
+	if err := check(config); err != nil {
 		return nil, err
 	}
 
@@ -42,14 +46,16 @@ func New(config Config) (*Client, error) {
 		token:     config.Token,
 		userAgent: config.UserAgent,
 	}
+	c.Logger = logr.FromContextOrDiscard(ctx)
 
-	c.Sign = &endpointsSign{client: c, endpoint: "/pkcs11_sign"}
+	c.Sign = &SignService{client: c, endpoint: "/pdfsign01"}
 
 	return c, nil
 }
 
 // NewRequest make a new request
 func (c *Client) newRequest(ctx context.Context, method, path string, body interface{}) (*http.Request, error) {
+	c.Log.Debug("newRequest", "method", method, "path", path, "body", body)
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, err
@@ -86,6 +92,7 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body inter
 
 // Do does the new request
 func (c *Client) do(ctx context.Context, req *http.Request, value interface{}) (*http.Response, error) {
+	c.Log.Debug("do", "method", req.Method, "path", req.URL.Path, "body", req.Body)
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err

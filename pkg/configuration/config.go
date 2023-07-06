@@ -15,10 +15,10 @@ type envVars struct {
 	EduIDConfigYAML string `envconfig:"VC_CONFIG_YAML" required:"true"`
 }
 
-// Parse parses config file from vc_CONFIG_YAML environment variable
+// Parse parses config file from VC_CONFIG_YAML environment variable
 func Parse(logger *logger.Logger) (*model.Cfg, error) {
 	logger.Info("Read environmental variable")
-	var env envVars
+	env := envVars{}
 	if err := envconfig.Process("", &env); err != nil {
 		return nil, err
 	}

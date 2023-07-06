@@ -29,7 +29,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 		config: config,
 		logger: logger,
 		apiv1:  api,
-		server: &http.Server{Addr: config.Issuer.APIServer.Host},
+		server: &http.Server{Addr: config.Issuer.APIServer.Addr},
 	}
 
 	switch s.config.Common.Production {
@@ -61,12 +61,11 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 		c.JSON(status, gin.H{"error": p, "data": nil})
 	})
 
-	s.regEndpoint(ctx, "/api/v1/pdf/:id", "GET", s.endpointGetSignedPDF)
-	s.regEndpoint(ctx, "/api/v1/pdf", "POST", s.endpointSignPDF)
+	s.regEndpoint(ctx, http.MethodPost, "/api/v1/pdf", s.endpointSignPDF)
+	s.regEndpoint(ctx, http.MethodGet, "/api/v1/pdf/:transaction_id", s.endpointGetSignedPDF)
+	s.regEndpoint(ctx, http.MethodPost, "/api/v1/pdf/revoke", s.endpointPDFRevoke)
 
-	//s.regEndpoint(ctx, "/api/v1/vc"...)
-
-	s.regEndpoint(ctx, "/health", "GET", s.endpointStatus)
+	s.regEndpoint(ctx, http.MethodGet, "/health", s.endpointStatus)
 
 	// Run http server
 	go func() {
@@ -81,7 +80,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	return s, nil
 }
 
-func (s *Service) regEndpoint(ctx context.Context, path, method string, handler func(context.Context, *gin.Context) (interface{}, error)) {
+func (s *Service) regEndpoint(ctx context.Context, method, path string, handler func(context.Context, *gin.Context) (interface{}, error)) {
 	s.gin.Handle(method, path, func(c *gin.Context) {
 		res, err := handler(ctx, c)
 

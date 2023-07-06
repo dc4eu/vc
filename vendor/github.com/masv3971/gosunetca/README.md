@@ -1,4 +1,4 @@
-# goladok3
+# gosunetCA
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/masv3971/gosunetca.svg)](https://pkg.go.dev/github.com/masv3971/gosunetca)
 

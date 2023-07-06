@@ -13,9 +13,9 @@ import (
 
 // DB is the interface for the database
 type DB interface {
-	connect(ctx context.Context) error
-	SaveTransaction(ctx context.Context, doc *model.Transaction) error
-	GetTransation(ctx context.Context, transationID string) (*model.Transaction, error)
+	//connect(ctx context.Context) error
+	Save(ctx context.Context, doc *model.Document) error
+	Get(ctx context.Context, transactionID string) (*model.Document, error)
 }
 
 // Service is the database service
@@ -24,10 +24,7 @@ type Service struct {
 	cfg      *model.Cfg
 	log      *logger.Logger
 
-	dbIssuer   *mongo.Database
-	dbVerifier *mongo.Database
-
-	CollIssuerTransactions *mongo.Collection
+	DocumentsColl PDFColl
 }
 
 // New creates a new database service
@@ -44,6 +41,12 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Logger) (*Service, err
 		return nil, err
 	}
 
+	service.DocumentsColl = PDFColl{
+		service: service,
+		coll:    service.dbClient.Database("issuer").Collection("documents"),
+	}
+	service.DocumentsColl.createIndex(ctx)
+
 	return service, nil
 }
 
@@ -54,10 +57,6 @@ func (s *Service) connect(ctx context.Context) error {
 		return err
 	}
 	s.dbClient = client
-	s.dbIssuer = client.Database("issuer")
-	s.dbVerifier = client.Database("verifier")
-
-	s.CollIssuerTransactions = s.dbIssuer.Collection("transactions")
 
 	return nil
 }

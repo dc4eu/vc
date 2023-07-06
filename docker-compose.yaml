@@ -4,7 +4,13 @@ version: "3"
 services:
   issuer:
     container_name: "vc_issuer"
-    image: vc_issuer:latest
+    image: docker.sunet.se/dc4eu/issuer:latest
+    healthcheck:
+      test: curl --fail http://issuer:8080/health || exit 1
+      interval: 20s
+      retries: 5
+      timeout: 10s
+    restart: always
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
@@ -12,14 +18,21 @@ services:
       - redis
       - mongo
     networks:
-      vc-net:
-        ipv4_address: 172.16.50.2
+      - vc-net
+      #vc-net:
+      #  ipv4_address: 172.16.50.10
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
   verifier:
     container_name: "vc_verifier"
-    image: vc_verifier:latest
+    image: docker.sunet.se/dc4eu/verifier:latest
+    healthcheck:
+      test: curl --fail http://verifier:8080/health || exit 1
+      interval: 20s
+      retries: 5
+      timeout: 10s
+    restart: always
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
@@ -28,47 +41,85 @@ services:
       - mongo
       - issuer
     networks:
-      vc-net:
-        ipv4_address: 172.16.50.3
+      - vc-net
+      #vc-net:
+      #  ipv4_address: 172.16.50.11
     environment:
       - "VC_CONFIG_YAML=config.yaml"
+
+  datastore:
+    container_name: "vc_datastore"
+    image: docker.sunet.se/dc4eu/datastore:latest
+    healthcheck:
+      test: curl --fail http://datastore:8080/health || exit 1
+      interval: 20s
+      retries: 5
+      timeout: 10s
+    restart: always
+    volumes:
+      - ./cert:/cert:ro
+      - ./dev_config_docker.yaml:/config.yaml:ro
+    depends_on:
+      - redis
+      - mongo
+      - issuer
+    networks:
+      - vc-net
+      #vc-net:
+      #  ipv4_address: 172.16.50.12
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
+  haproxy:
+    container_name: "vc_haproxy"
+    image: "haproxytech/haproxy-alpine:2.4"
+    ports:
+      - 80:80
+      - 8404:8404
+    volumes:
+      - ./dev_haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - vc-net
 
   redis:
     image: redis:alpine
     container_name: "vc_redis"
+    restart: always
     expose:
       - 6379
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
     networks:
-      vc-net:
-        ipv4_address: 172.16.50.4
-    
+      - vc-net
+
   mongo:
     image: mongo:4.0.10
     container_name: "vc_mongo"
+    restart: always
     expose:
       - 27017
     volumes:
       - mongo_data:/data
     networks:
-      vc-net:
-        ipv4_address: 172.16.50.6
+      - vc-net
 
   ca:
     container_name: "vc_ca"
-    image: mockca:latest
+    image: docker.sunet.se/dc4eu/mockca:latest
+    restart: always
     depends_on:
       - redis
       - mongo
       - issuer
       - verifier
     networks:
-      vc-net:
-        ipv4_address: 172.16.50.7
+      - vc-net
+    # vc-net:
+    #   ipv4_address: 172.16.50.20
     environment:
-      - "CA_SLEEP=3"
+      - "CA_SLEEP=20"
+      - "CA_ADDR=vc_ca:8080"
 
 networks:
   vc-net:

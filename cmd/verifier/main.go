@@ -21,8 +21,8 @@ func main() {
 	ctx := context.Background()
 
 	var (
-		log      *logger.Logger
-		mainLog  *logger.Logger
+		log      *logger.Log
+		mainLog  *logger.Log
 		services = make(map[string]service)
 	)
 
@@ -54,7 +54,7 @@ func main() {
 
 	for serviceName, service := range services {
 		if err := service.Close(ctx); err != nil {
-			mainLog.Warn("serviceName", serviceName, "error", err)
+			mainLog.Trace("serviceName", serviceName, "error", err)
 		}
 	}
 

@@ -34,7 +34,7 @@ func (c *PDFColl) Save(ctx context.Context, doc *model.Document) error {
 }
 
 // AddSigned adds a signed document to a document
-func (c *PDFColl) AddSigned(ctx context.Context, transactionID string, doc *model.SignedDocument) error {
+func (c *PDFColl) AddSigned(ctx context.Context, transactionID string, doc *model.Document) error {
 	filter := bson.M{"transaction_id": transactionID}
 	update := bson.M{"$set": bson.M{"signed": doc}}
 	_, err := c.coll.UpdateOne(ctx, filter, update)

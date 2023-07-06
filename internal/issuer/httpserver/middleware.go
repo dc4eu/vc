@@ -34,13 +34,22 @@ func (s *Service) middlewareLogger(ctx context.Context) gin.HandlerFunc {
 	}
 }
 
+func (s *Service) middlewareAuthLog(ctx context.Context) gin.HandlerFunc {
+	log := s.logger.New("http")
+	return func(c *gin.Context) {
+		u, _ := c.Get("user")
+		c.Next()
+		log.Info("auth", "user", u, "req_id", c.GetString("req_id"))
+	}
+}
+
 func (s *Service) middlewareCrash(ctx context.Context) gin.HandlerFunc {
 	log := s.logger.New("http")
 	return func(c *gin.Context) {
 		defer func() {
 			if r := recover(); r != nil {
 				status := c.Writer.Status()
-				log.Error("crash", "error", r, "status", status, "url", c.Request.URL.Path, "method", c.Request.Method)
+				log.Trace("crash", "error", r, "status", status, "url", c.Request.URL.Path, "method", c.Request.Method)
 				renderContent(c, 500, gin.H{"data": nil, "error": helpers.NewError("internal_server_error")})
 			}
 		}()

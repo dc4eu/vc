@@ -1,23 +1,18 @@
 package model
 
-// UnsignedDocument is the unsigned document model
-type UnsignedDocument struct {
-	Data string `json:"data" bson:"data"`
-	TS   int64  `json:"ts" bson:"ts"`
-}
-
-// SignedDocument is the signed document model
-type SignedDocument struct {
-	Data       string `json:"data" bson:"data"`
-	TS         int64  `json:"ts" bson:"ts"`
-	SHA256Hash string `json:"sha256_hash" bson:"sha256_hash"`
-}
+//// PDFDocument is the unsigned document model
+//type PDFDocument struct {
+//	Data       string `json:"data" bson:"data" redis:"data"`
+//	TS         int64  `json:"ts" bson:"ts" redis:"data"`
+//	SHA256Hash string `json:"sha256_hash" bson:"sha256_hash" redis:"sha256_hash"`
+//}
 
 // Document is the document model
 type Document struct {
-	TransactionID string            `json:"transaction_id" bson:"transaction_id"`
-	Signed        *SignedDocument   `json:"signed" bson:"signed"`
-	Unsigned      *UnsignedDocument `json:"unsigned" bson:"unsigned"`
-	RevokedTS     int64             `json:"revoked_ts" bson:"revoked_ts"`
-	LadokUID      string            `json:"ladok_uid" bson:"ladok_uid"`
+	TransactionID string `json:"transaction_id" bson:"transaction_id"`
+	//Signed        string `json:"signed" bson:"signed"`
+	//Unsigned      string `json:"unsigned" bson:"unsigned"`
+	Data      string `json:"data" bson:"data"`
+	RevokedTS int64  `json:"revoked_ts" bson:"revoked_ts"`
+	ModifyTS  int64  `json:"modify_ts" bson:"modify_ts"`
 }

@@ -9,8 +9,10 @@ import (
 	"vc/internal/issuer/apiv1"
 	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
+	"vc/internal/issuer/ehic"
 	"vc/internal/issuer/httpserver"
 	"vc/internal/issuer/kv"
+	"vc/internal/issuer/pda1"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 )
@@ -24,8 +26,8 @@ func main() {
 	ctx := context.Background()
 
 	var (
-		log      *logger.Logger
-		mainLog  *logger.Logger
+		log      *logger.Log
+		mainLog  *logger.Log
 		services = make(map[string]service)
 	)
 
@@ -51,6 +53,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	ehicService, err := ehic.New(ctx, cfg, log.New("ehic"))
+	services["ehicService"] = ehicService
+	if err != nil {
+		panic(err)
+	}
+	pda1Service, err := pda1.New(ctx, cfg, log.New("pda1"))
+	services["pda1Service"] = pda1Service
+	if err != nil {
+		panic(err)
+	}
 	apiv1Client, err := apiv1.New(ctx, caClient, kvService, dbService, cfg, log.New("apiv1"))
 	if err != nil {
 		panic(err)
@@ -71,7 +83,7 @@ func main() {
 
 	for serviceName, service := range services {
 		if err := service.Close(ctx); err != nil {
-			mainLog.Warn("serviceName", serviceName, "error", err)
+			mainLog.Trace("serviceName", serviceName, "error", err)
 		}
 	}
 

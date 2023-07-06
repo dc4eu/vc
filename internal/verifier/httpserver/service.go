@@ -17,14 +17,14 @@ import (
 // Service is the service object for httpserver
 type Service struct {
 	config *model.Cfg
-	logger *logger.Logger
+	logger *logger.Log
 	server *http.Server
 	apiv1  Apiv1
 	gin    *gin.Engine
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Log) (*Service, error) {
 	s := &Service{
 		config: config,
 		logger: logger,
@@ -61,14 +61,16 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 		c.JSON(status, gin.H{"error": p, "data": nil})
 	})
 
-	s.regEndpoint(ctx, "/health", "GET", s.endpointStatus)
-	s.regEndpoint(ctx, "/monitoring/cert/client", "GET", s.endpointMonitoringCertClient)
+	sgRoot := s.gin.Group("/")
+	s.regEndpoint(ctx, sgRoot, "health", "GET", s.endpointStatus)
+
+	//	sgAPIv1 := sgRoot.Group("/api/v1")
 
 	// Run http server
 	go func() {
 		err := s.server.ListenAndServe()
 		if err != nil {
-			s.logger.New("http").Fatal("listen_error", "error", err)
+			s.logger.New("http").Trace("listen_error", "error", err)
 		}
 	}()
 
@@ -77,8 +79,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	return s, nil
 }
 
-func (s *Service) regEndpoint(ctx context.Context, path, method string, handler func(context.Context, *gin.Context) (interface{}, error)) {
-	s.gin.Handle(method, path, func(c *gin.Context) {
+func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, path, method string, handler func(context.Context, *gin.Context) (interface{}, error)) {
+	rg.Handle(method, path, func(c *gin.Context) {
 		res, err := handler(ctx, c)
 
 		status := 200

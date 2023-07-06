@@ -1,64 +1,69 @@
 package logger
 
 import (
+	"github.com/go-logr/logr"
+	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-// Logger for portability
-type Logger struct {
-	zap.Logger
+//type Logger interface {
+//	New(path string) *Log
+//	Warn(msg string, args ...interface{})
+//	Error(msg string, args ...interface{})
+//	Fatal(msg string, args ...interface{})
+//	Debug(msg string, args ...interface{})
+//	Info(msg string, args ...interface{})
+//}
+
+// Log for portability
+type Log struct {
+	//zap.Logger
+	logr.Logger
 }
 
 // New creates a default logger based on what kind of environment is used.
-func New(name string, production bool) *Logger {
-	var config zap.Config
+func New(name string, production bool) *Log {
+	var zc zap.Config
 
 	switch production {
 	case true:
-		config = zap.NewProductionConfig()
+		zc = zap.NewProductionConfig()
 	case false:
-		config = zap.NewDevelopmentConfig()
-		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		zc = zap.NewDevelopmentConfig()
+		zc.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	config.DisableCaller = true
-	log, _ := config.Build()
+	zc.DisableCaller = true
+	zc.DisableStacktrace = true
+	z, _ := zc.Build()
 
-	return &Logger{Logger: *log.Named(name)}
+	log := zapr.NewLogger(z)
+
+	return &Log{Logger: log.WithName(name)}
 }
 
 // NewSimple creates a simple logger for barbaric purposes
-func NewSimple(name string) *Logger {
-	return &Logger{Logger: *zap.L().Named(name)}
+func NewSimple(name string) *Log {
+	return &Log{Logger: zapr.NewLogger(zap.L().Named(name))}
 }
 
 // New creates a sub-logger of the original one
-func (l *Logger) New(path string) *Logger {
-	return &Logger{Logger: *l.Named(path)}
-}
-
-// Warn log
-func (l *Logger) Warn(msg string, args ...interface{}) {
-	l.Logger.Sugar().Warnw(msg, args...)
-}
-
-// Error log
-func (l *Logger) Error(msg string, args ...interface{}) {
-	l.Logger.Sugar().Errorw(msg, args...)
-}
-
-// Fatal log
-func (l *Logger) Fatal(msg string, args ...interface{}) {
-	l.Logger.Sugar().Fatalw(msg, args...)
-}
-
-// Debug log
-func (l *Logger) Debug(msg string, args ...interface{}) {
-	l.Logger.Sugar().Debugw(msg, args...)
+func (l *Log) New(path string) *Log {
+	return &Log{Logger: l.WithName(path)}
 }
 
 // Info log
-func (l *Logger) Info(msg string, args ...interface{}) {
-	l.Logger.Sugar().Infow(msg, args...)
+func (l *Log) Info(msg string, args ...interface{}) {
+	l.Logger.V(0).WithValues(args...).Info(msg)
+}
+
+// Debug log
+func (l *Log) Debug(msg string, args ...interface{}) {
+	l.Logger.V(1).WithValues(args...).Info(msg)
+}
+
+// Trace log
+func (l *Log) Trace(msg string, args ...interface{}) {
+	l.Logger.V(2).WithValues(args...).Info(msg)
 }

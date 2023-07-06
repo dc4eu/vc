@@ -40,10 +40,7 @@ func TestSaveTransaction(t *testing.T) {
 				Common: model.Common{},
 				Issuer: model.Issuer{
 					APIServer: model.APIServer{},
-					Mongo: model.Mongo{
-						URI: "",
-					},
-					CA: model.CA{},
+					CA:        model.CA{},
 				},
 				Verifier: model.Verifier{},
 			}, logger.NewSimple("test-db"))

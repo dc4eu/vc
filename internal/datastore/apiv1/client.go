@@ -1,0 +1,28 @@
+package apiv1
+
+import (
+	"context"
+	"vc/internal/datastore/db"
+	"vc/pkg/logger"
+	"vc/pkg/model"
+)
+
+// Client holds the public api object
+type Client struct {
+	cfg    *model.Cfg
+	db     *db.Service
+	logger *logger.Log
+}
+
+// New creates a new instance of the public api
+func New(ctx context.Context, db *db.Service, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
+	c := &Client{
+		cfg:    cfg,
+		db:     db,
+		logger: logger,
+	}
+
+	c.logger.Info("Started")
+
+	return c, nil
+}

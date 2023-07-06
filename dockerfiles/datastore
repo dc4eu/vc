@@ -1,0 +1,23 @@
+# Compile
+FROM golang:1.20.1 AS builder
+
+WORKDIR /go/src/app
+
+COPY . .
+
+RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_datastore -ldflags "-w -s --extldflags '-static'" ./cmd/datastore/main.go
+#RUN GOOS=linux GOARCH=amd64 go build -v -o bin/vc_datastore -ldflags "-w -s --extldflags '-static'" ./cmd/datastore/main.go
+
+# Deploy
+FROM debian:bookworm-slim
+
+WORKDIR /
+
+RUN apt-get update && apt-get install -y curl procps iputils-ping
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /go/src/app/bin/vc_datastore /vc_datastore
+
+EXPOSE 8080
+
+CMD [ "./vc_datastore" ]

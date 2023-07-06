@@ -16,7 +16,7 @@ type envVars struct {
 }
 
 // Parse parses config file from VC_CONFIG_YAML environment variable
-func Parse(logger *logger.Logger) (*model.Cfg, error) {
+func Parse(logger *logger.Log) (*model.Cfg, error) {
 	logger.Info("Read environmental variable")
 	env := envVars{}
 	if err := envconfig.Process("", &env); err != nil {

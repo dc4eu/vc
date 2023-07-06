@@ -1,58 +1,62 @@
 package model
 
-import "time"
-
-var (
-	//StatusOKVcIssue status ok
-	StatusOKVcIssue = "STATUS_OK_vc_issue"
-	// StatusFailVcIssue status fail
-	StatusFailVcIssue = "STATUS_FAIL_vc_issue"
-	// StatusOKVcVerify status ok
-	StatusOKVcVerify = "STATUS_OK_vc_verify"
-	// StatusFailVcVerify status fail
-	StatusFailVcVerify = "STATUS_FAIL_vc_verify"
+import (
+	"fmt"
+	"log"
+	"time"
 )
 
-// Status type
-type Status struct {
-	Name                      string    `json:"name,omitempty"`
-	SchoolName                string    `json:"school_name,omitempty"`
-	Healthy                   bool      `json:"healthy,omitempty"`
-	Status                    string    `json:"status,omitempty"`
-	Message                   string    `json:"message,omitempty"`
-	Timestamp                 time.Time `json:"timestamp,omitempty"`
-	ClientCertificateWarnings []string  `json:"client_certificates,omitempty"`
+var (
+	//StatusOK status ok
+	StatusOK = "STATUS_OK_%s"
+	// StatusFail status fail
+	StatusFail = "STATUS_FAIL_%s"
+)
+
+// Health contains status for each service
+type Health struct {
+	ServiceName string   `json:"service_name,omitempty"`
+	Probes      []*Probe `json:"probes,omitempty"`
+	Status      string   `json:"status,omitempty"`
 }
 
-// ManyStatus contains many status objects
-type ManyStatus []*Status
+// Probe type
+type Probe struct {
+	Name          string    `json:"name,omitempty"`
+	Healthy       bool      `json:"healthy,omitempty"`
+	Message       string    `json:"message,omitempty"`
+	LastCheckedTS time.Time `json:"timestamp,omitempty"`
+}
+
+// ProbeStore contains the previous probe result and the next time to check
+type ProbeStore struct {
+	NextCheck      time.Time
+	PreviousResult *Probe
+}
+
+// Probes contains probes
+type Probes []*Probe
 
 // Check checks the status of each status, return the first that does not pass.
-func (s ManyStatus) Check() *Status {
-	for _, status := range s {
-		if s == nil {
-			continue
-		}
-		if !status.Healthy {
-			return status
-		}
+func (probes Probes) Check(serviceName string) *Health {
+	health := &Health{
+		ServiceName: serviceName,
+		Probes:      []*Probe{},
+		Status:      fmt.Sprintf(StatusOK, serviceName),
 	}
-	status := &Status{
-		Healthy:   true,
-		Status:    StatusOKVcIssue,
-		Timestamp: time.Now(),
+
+	if probes == nil {
+		log.Println("probe is nil")
+		return health
 	}
-	return status
-}
 
-// MonitoringCertClients contains status for client certificates
-type MonitoringCertClients map[string]*MonitoringCertClient
+	for _, probe := range probes {
+		log.Println("check each probe")
+		if !probe.Healthy {
+			health.Status = fmt.Sprintf(StatusFail, serviceName)
+		}
+		health.Probes = append(health.Probes, probe)
+	}
 
-// MonitoringCertClient contains status for client certificates
-type MonitoringCertClient struct {
-	Valid       bool      `json:"valid,omitempty"`
-	Fingerprint string    `json:"fingerprint,omitempty"`
-	NotAfter    time.Time `json:"not_after,omitempty"`
-	DaysLeft    int       `json:"days_left,omitempty"`
-	LastChecked time.Time `json:"last_checked,omitempty"`
+	return health
 }

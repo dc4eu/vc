@@ -2,6 +2,7 @@ package kv
 
 import (
 	"context"
+	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
@@ -12,15 +13,18 @@ import (
 type Service struct {
 	redisClient *redis.Client
 	cfg         *model.Cfg
-	log         *logger.Logger
+	log         *logger.Log
+	probeStore  *model.ProbeStore
 
 	Doc *Doc
 }
 
 // New creates a new instance of kv
-func New(ctx context.Context, cfg *model.Cfg, log *logger.Logger) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	c := &Service{
-		cfg: cfg,
+		cfg:        cfg,
+		log:        log,
+		probeStore: &model.ProbeStore{},
 	}
 
 	c.redisClient = redis.NewClient(&redis.Options{
@@ -35,6 +39,29 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Logger) (*Service, err
 	}
 
 	return c, nil
+}
+
+// Status returns the status of the database
+func (c *Service) Status(ctx context.Context) *model.Probe {
+	if time.Now().Before(c.probeStore.NextCheck) {
+		return c.probeStore.PreviousResult
+	}
+	probe := &model.Probe{
+		Name:          "kv",
+		Healthy:       true,
+		Message:       "OK",
+		LastCheckedTS: time.Now(),
+	}
+
+	_, err := c.redisClient.Ping(ctx).Result()
+	if err != nil {
+		probe.Message = err.Error()
+		probe.Healthy = false
+	}
+	c.probeStore.PreviousResult = probe
+	c.probeStore.NextCheck = time.Now().Add(time.Second * 10)
+
+	return probe
 }
 
 // Close closes the connection to the database

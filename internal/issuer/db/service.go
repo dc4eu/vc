@@ -22,13 +22,13 @@ type DB interface {
 type Service struct {
 	dbClient *mongo.Client
 	cfg      *model.Cfg
-	log      *logger.Logger
+	log      *logger.Log
 
 	DocumentsColl PDFColl
 }
 
 // New creates a new database service
-func New(ctx context.Context, cfg *model.Cfg, log *logger.Logger) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	service := &Service{
 		log: log,
 		cfg: cfg,
@@ -52,7 +52,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Logger) (*Service, err
 
 // connect connects to the database
 func (s *Service) connect(ctx context.Context) error {
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(s.cfg.Issuer.Mongo.URI))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
 	if err != nil {
 		return err
 	}

@@ -7,6 +7,5 @@ import (
 
 // Apiv1 interface
 type Apiv1 interface {
-	Status(ctx context.Context) (*model.Status, error)
-	MonitoringCertClient(ctx context.Context) (*model.MonitoringCertClients, error)
+	Status(ctx context.Context) (*model.Health, error)
 }

@@ -14,17 +14,22 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+type routerGroup struct {
+	apiv1 *gin.RouterGroup
+}
+
 // Service is the service object for httpserver
 type Service struct {
-	config *model.Cfg
-	logger *logger.Logger
-	server *http.Server
-	apiv1  Apiv1
-	gin    *gin.Engine
+	config      *model.Cfg
+	logger      *logger.Log
+	server      *http.Server
+	apiv1       Apiv1
+	gin         *gin.Engine
+	routerGroup routerGroup
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Logger) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Log) (*Service, error) {
 	s := &Service{
 		config: config,
 		logger: logger,
@@ -60,18 +65,21 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 		p := helpers.Problem404()
 		c.JSON(status, gin.H{"error": p, "data": nil})
 	})
+	rgRoot := s.gin.Group("/")
+	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
-	s.regEndpoint(ctx, http.MethodPost, "/api/v1/pdf", s.endpointSignPDF)
-	s.regEndpoint(ctx, http.MethodGet, "/api/v1/pdf/:transaction_id", s.endpointGetSignedPDF)
-	s.regEndpoint(ctx, http.MethodPost, "/api/v1/pdf/revoke", s.endpointPDFRevoke)
+	rgAPIv1 := rgRoot.Group("api/v1", gin.BasicAuth(s.config.Common.BasicAuth))
+	rgAPIv1.Use(s.middlewareAuthLog(ctx))
 
-	s.regEndpoint(ctx, http.MethodGet, "/health", s.endpointStatus)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/ladok/pdf/sign", s.endpointSignPDF)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodGet, "/ladok/pdf/:transaction_id", s.endpointGetSignedPDF)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPut, "/ladok/pdf/revoke/:transaction_id", s.endpointPDFRevoke)
 
 	// Run http server
 	go func() {
 		err := s.server.ListenAndServe()
 		if err != nil {
-			s.logger.New("http").Fatal("listen_error", "error", err)
+			s.logger.New("http").Trace("listen_error", "error", err)
 		}
 	}()
 
@@ -80,8 +88,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	return s, nil
 }
 
-func (s *Service) regEndpoint(ctx context.Context, method, path string, handler func(context.Context, *gin.Context) (interface{}, error)) {
-	s.gin.Handle(method, path, func(c *gin.Context) {
+func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, handler func(context.Context, *gin.Context) (interface{}, error)) {
+	rg.Handle(method, path, func(c *gin.Context) {
 		res, err := handler(ctx, c)
 
 		status := 200

@@ -15,11 +15,11 @@ type Client struct {
 	cfg    *model.Cfg
 	db     *db.Service
 	kv     *kv.Service
-	logger *logger.Logger
+	logger *logger.Log
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, ca *ca.Client, kvService *kv.Service, db *db.Service, cfg *model.Cfg, logger *logger.Logger) (*Client, error) {
+func New(ctx context.Context, ca *ca.Client, kvService *kv.Service, db *db.Service, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:    cfg,
 		db:     db,

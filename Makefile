@@ -42,7 +42,7 @@ stop:
 
 restart: stop start
 
-release-tag:
+get_release-tag:
 	@date +'%Y%m%d%H%M%S%9N'
 
 ifndef VERSION
@@ -86,3 +86,12 @@ clean_docker_images:
 
 ci_build: docker-build docker-push
 	$(info CI Build)
+
+release-tag:
+	git tag -s ${RELEASE} -m"release ${RELEASE}"
+
+release_push:
+	git push --tags
+
+release: release-tag release_push
+	$(info making release ${RELEASE})

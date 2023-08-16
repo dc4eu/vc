@@ -25,9 +25,9 @@ func (c *Client) LadokUpload(ctx context.Context, req *LadokUploadRequest) (*Lad
 	uploadID := uuid.NewString()
 
 	req.Data.Meta = &model.Meta{
-		UploadID:  uploadID,
-		Timestamp: time.Now(),
-		Type:      "ladok",
+		UploadID:     uploadID,
+		Timestamp:    time.Now(),
+		DocumentType: "ladok",
 	}
 
 	if err := helpers.Check(req.Data, c.logger.New("validate_LadokUpload")); err != nil {

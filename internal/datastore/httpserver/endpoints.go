@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"vc/internal/datastore/apiv1"
+	"vc/pkg/model"
 
 	"github.com/gin-gonic/gin"
 )
@@ -88,7 +89,56 @@ func (s *Service) endpointLadokID(ctx context.Context, c *gin.Context) (any, err
 	return reply, nil
 }
 
-func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (interface{}, error) {
+func (s *Service) endpointGenericUpload(ctx context.Context, c *gin.Context) (any, error) {
+	request := &model.GenericUpload{}
+	if err := s.bindRequest(c, request); err != nil {
+		s.logger.Info("endpointGenericUpload", "error", err)
+		return nil, err
+	}
+	reply, err := s.apiv1.GenericUpload(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointGenericList(ctx context.Context, c *gin.Context) (any, error) {
+	request := &model.GenericAttributes{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.GenericList(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointGenericDocument(ctx context.Context, c *gin.Context) (any, error) {
+	request := &model.GenericAttributes{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.GenericDocument(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointGenericQR(ctx context.Context, c *gin.Context) (any, error) {
+	request := &model.GenericAttributes{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.GenericQR(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {
 	reply, err := s.apiv1.Status(ctx)
 	if err != nil {
 		return nil, err

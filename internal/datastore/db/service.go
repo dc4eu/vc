@@ -34,6 +34,7 @@ type Service struct {
 	EHICColl      *EHICColl
 	EducationColl *EducationColl
 	LadokColl     *LadokColl
+	GenericColl   *GenericColl
 }
 
 // New creates a new database service
@@ -65,6 +66,11 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 	service.LadokColl = &LadokColl{
 		Service: service,
 		Coll:    service.DBClient.Database("datastore").Collection("ladok"),
+	}
+
+	service.GenericColl = &GenericColl{
+		Service: service,
+		Coll:    service.DBClient.Database("datastore").Collection("generic"),
 	}
 
 	return service, nil

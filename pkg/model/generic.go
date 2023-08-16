@@ -32,8 +32,8 @@ type GenericAttributes struct {
 	Gender           string `json:"gender" bson:"gender"`
 }
 
-func castDocumentToStruct(in, out any, log *logger.Log) error {
-	b, err := json.Marshal(in)
+func (g *GenericUpload) validateDocument(out any, log *logger.Log) error {
+	b, err := json.Marshal(g.Document)
 	if err != nil {
 		log.Info("cant marshal document")
 		return err
@@ -42,31 +42,17 @@ func castDocumentToStruct(in, out any, log *logger.Log) error {
 		log.Info("cant unmarshal document")
 		return err
 	}
-	return nil
+
+	return helpers.Check(out, log)
 }
 
 // Validate validates the generic upload
 func (g *GenericUpload) Validate(log *logger.Log) error {
 	switch g.DocumentType {
 	case "PDA1":
-		l := log.New("PDA1")
-		v := &PDA1{}
-		//	vv, ok := g.Document.(PDA1)
-		//	if !ok {
-		//		return ErrInvalidDocumentType
-		//	}
-
-		if err := castDocumentToStruct(g.Document, v, l); err != nil {
-			return err
-		}
-
-		g.Document = v
-
-		l.Info("cast", "document", g)
-		return helpers.Check(g, l)
+		return g.validateDocument(&PDA1{}, log.New("PDA1"))
 	case "EHIC":
-		g.Document = g.Document.(*EHIC)
-		return helpers.Check(g, log.New("EHIC"))
+		return g.validateDocument(&EHIC{}, log.New("EHIC"))
 	default:
 		return ErrInvalidDocumentType
 	}

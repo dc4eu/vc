@@ -2,18 +2,22 @@ package ca
 
 import (
 	"context"
+	"errors"
 
 	"github.com/masv3971/gosunetca/types"
 )
 
-// SignDocuments sends documents to the CA to be signed
-func (c *Client) SignDocuments(ctx context.Context, document *types.Document) error {
-	c.log.Debug("sending document to CA")
+// SignDocument sends documents to the CA to be signed
+func (c *Client) SignDocument(ctx context.Context, document *types.Document) error {
 	c.log.Debug("SignDocuments", "transactionID", document.TransactionID)
 
-	signDocument, _, err := c.caClient.Sign.Documents(ctx, document)
+	signDocument, _, err := c.caClient.PDF.Sign(ctx, document)
 	if err != nil {
 		return err
+	}
+
+	if signDocument.Error != "" {
+		return errors.New("error signing document, error: " + signDocument.Error)
 	}
 
 	c.log.Debug("SignDocuments", "transactionID:", document.TransactionID, "data", signDocument.Data)
@@ -26,4 +30,19 @@ func (c *Client) SignDocuments(ctx context.Context, document *types.Document) er
 	}
 
 	return nil
+}
+
+// ValidateDocument sends documents to the CA to be validated
+func (c *Client) ValidateDocument(ctx context.Context, document *types.Document) (*types.Validation, error) {
+	c.log.Info("ValidateDocument")
+	verifyDocument, _, err := c.caClient.PDF.Validate(ctx, document)
+	if err != nil {
+		return nil, err
+	}
+
+	if verifyDocument.Error != "" {
+		return nil, errors.New("error verifying document, error: " + verifyDocument.Error)
+	}
+	c.log.Debug("validateDocument", "message", verifyDocument.Valid)
+	return verifyDocument, nil
 }

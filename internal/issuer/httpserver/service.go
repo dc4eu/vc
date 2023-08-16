@@ -72,6 +72,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	rgAPIv1.Use(s.middlewareAuthLog(ctx))
 
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/ladok/pdf/sign", s.endpointSignPDF)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/ladok/pdf/validate", s.endpointValidatePDF)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodGet, "/ladok/pdf/:transaction_id", s.endpointGetSignedPDF)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPut, "/ladok/pdf/revoke/:transaction_id", s.endpointPDFRevoke)
 

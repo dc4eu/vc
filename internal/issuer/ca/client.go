@@ -35,8 +35,9 @@ func New(ctx context.Context, kvService *kv.Service, dbService *db.Service, cfg 
 	c.caClient, err = gosunetca.New(ctx, gosunetca.Config{
 		ServerURL: cfg.Issuer.CA.Addr,
 		Token:     cfg.Issuer.CA.Token,
+		Location:  cfg.Issuer.CA.Location,
+		Reason:    cfg.Issuer.CA.Reason,
 		UserAgent: "vc",
-		//Logger:    c.log.Logger.WithName("gosunetca"),
 	})
 	if err != nil {
 		return nil, err

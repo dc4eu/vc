@@ -29,27 +29,45 @@ func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignRepl
 		Data:          req.PDF,
 	}
 
-	c.logger.Debug("1")
-
 	if err := c.kv.Doc.SaveUnsigned(ctx, unsignedDocument); err != nil {
 		return nil, err
 	}
 
-	c.logger.Debug("2")
 	go func() error {
 		c.logger.Debug("sending document to CA")
-		if err := c.ca.SignDocuments(ctx, unsignedDocument); err != nil {
+		if err := c.ca.SignDocument(ctx, unsignedDocument); err != nil {
 			return err
 		}
 		return nil
 	}()
 
-	c.logger.Debug("3")
 	reply := &PDFSignReply{
 		TransactionID: transactionID,
 	}
 
 	return reply, nil
+}
+
+// PDFValidateRequest is the request for verify pdf
+type PDFValidateRequest struct {
+	PDF string `json:"pdf"`
+}
+
+// PDFValidateReply is the reply for verify pdf
+type PDFValidateReply struct {
+	MSG string `json:"msg"`
+}
+
+// PDFValidate is the handler for verify pdf
+func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*types.Validation, error) {
+	validateCandidate := &types.Document{
+		Data: req.PDF,
+	}
+	res, err := c.ca.ValidateDocument(ctx, validateCandidate)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // PDFGetSignedRequest is the request for get signed pdf

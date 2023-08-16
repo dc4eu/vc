@@ -1,23 +1,29 @@
 package helpers
 
 import (
-	"errors"
-	"fmt"
+	"reflect"
+	"strings"
 	"vc/pkg/logger"
 
 	"github.com/go-playground/validator/v10"
 )
 
 // Check checks for validation error
-func Check(s interface{}, log *logger.Log) error {
+func Check(s any, log *logger.Log) error {
 	validate := validator.New()
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+
+		if name == "-" {
+			return ""
+		}
+
+		return name
+	})
 
 	err := validate.Struct(s)
 	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			msg := fmt.Sprintf("Validation error: Field %q of type %q violates rule: %q\n", err.Namespace(), err.Kind(), err.Tag())
-			return errors.New(msg)
-		}
+		return NewErrorFromError(err)
 	}
 	return nil
 }

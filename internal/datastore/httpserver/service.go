@@ -3,6 +3,8 @@ package httpserver
 import (
 	"context"
 	"net/http"
+	"reflect"
+	"strings"
 	"time"
 	"vc/internal/datastore/apiv1"
 	"vc/pkg/helpers"
@@ -40,6 +42,15 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	}
 
 	apiValidator := validator.New()
+	apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+
+		if name == "-" {
+			return ""
+		}
+
+		return name
+	})
 	binding.Validator = &defaultValidator{
 		Validate: apiValidator,
 	}
@@ -64,18 +75,23 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
-	rgApiV1 := rgRoot.Group("api/v1")
+	rgAPIV1 := rgRoot.Group("api/v1")
 
-	rgEHIC := rgApiV1.Group("/ehic")
+	rgEHIC := rgAPIV1.Group("/ehic")
 	s.regEndpoint(ctx, rgEHIC, "POST", "/upload", s.endpointEHICUpload)
 	s.regEndpoint(ctx, rgEHIC, "GET", "/:upload_id", s.endpointEHICID)
 
-	rgPDA1 := rgApiV1.Group("/pda1")
+	rgPDA1 := rgAPIV1.Group("/pda1")
 	s.regEndpoint(ctx, rgPDA1, "POST", "/upload", s.endpointPDA1Upload)
 	s.regEndpoint(ctx, rgPDA1, "GET", "/:upload_id", s.endpointPDA1ID)
 	s.regEndpoint(ctx, rgPDA1, "POST", "/", s.endpointPDA1Search)
 
-	rgLadok := rgApiV1.Group("/ladok")
+	s.regEndpoint(ctx, rgAPIV1, "POST", "/upload", s.endpointGenericUpload)
+	s.regEndpoint(ctx, rgAPIV1, "POST", "/list", s.endpointGenericList)
+	s.regEndpoint(ctx, rgAPIV1, "POST", "/document", s.endpointGenericDocument)
+	s.regEndpoint(ctx, rgAPIV1, "POST", "/qr", s.endpointGenericQR)
+
+	rgLadok := rgAPIV1.Group("/ladok")
 	s.regEndpoint(ctx, rgLadok, "POST", "/upload", s.endpointLadokUpload)
 	s.regEndpoint(ctx, rgLadok, "GET", "/:upload_id", s.endpointLadokID)
 

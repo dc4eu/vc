@@ -40,7 +40,12 @@ stop:
 	$(info stopping VC)
 	docker-compose -f docker-compose.yaml rm -s -f
 
-restart: stop start
+hard_restart: stop start
+
+restart:
+	docker restart vc_issuer
+	docker restart vc_verifier
+	docker restart vc_datastore
 
 get_release-tag:
 	@date +'%Y%m%d%H%M%S%9N'

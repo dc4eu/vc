@@ -20,6 +20,7 @@
         "oneof",
         "pdfapi",
         "pdfcpu",
+        "qrcode",
         "secp",
         "Seqno",
         "Statehome",

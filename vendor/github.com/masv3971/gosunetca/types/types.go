@@ -4,12 +4,23 @@ import (
 	"fmt"
 )
 
+// Document is the general document type
 type Document struct {
 	TransactionID string `json:"transaction_id" bson:"transaction_id" redis:"transaction_id"`
 	Data          string `json:"data" bson:"data" redis:"data"`
+	Error         string `json:"error,omitempty" bson:"-" redis:"-"`
+	Message       string `json:"message,omitempty" bson:"-" redis:"-"`
 	RevokedTS     int64  `json:"revoked_ts,omitempty" bson:"revoked_ts" redis:"revoke_ts"`
 	ModifyTS      int64  `json:"modify_ts,omitempty" bson:"modify_ts" redis:"modify_ts"`
 	CreateTS      int64  `json:"create_ts,omitempty" mongo:"create_ts" redis:"create_ts"`
+	Reason        string `json:"reason,omitempty"`
+	Location      string `json:"location,omitempty"`
+}
+
+// Validation is the reply for the validate endpoint
+type Validation struct {
+	Valid bool   `json:"valid"`
+	Error string `json:"error,omitempty"`
 }
 
 // SignRequest is the request for the sign endpoint

@@ -19,6 +19,8 @@ import (
 type Config struct {
 	ServerURL string `validate:"required"`
 	Token     string `validate:"required"`
+	Location  string `validate:"required"`
+	Reason    string `validate:"required"`
 	UserAgent string
 	//Logger    logr.Logger
 }
@@ -29,9 +31,11 @@ type Client struct {
 	token     string
 	serverURL string
 	userAgent string
+	location  string
+	reason    string
 	Log
 
-	Sign *SignService
+	PDF *PDFService
 }
 
 // New create a new client
@@ -42,13 +46,17 @@ func New(ctx context.Context, config Config) (*Client, error) {
 
 	c := &Client{
 		client:    &http.Client{},
-		serverURL: config.ServerURL,
 		token:     config.Token,
+		serverURL: config.ServerURL,
 		userAgent: config.UserAgent,
+		location:  config.Location,
+		reason:    config.Reason,
+		Log:       Log{},
+		PDF:       &PDFService{},
 	}
 	c.Logger = logr.FromContextOrDiscard(ctx)
 
-	c.Sign = &SignService{client: c, endpoint: "/pdfsign01"}
+	c.PDF = &PDFService{client: c, baseURL: "/pdf"}
 
 	return c, nil
 }
@@ -56,6 +64,7 @@ func New(ctx context.Context, config Config) (*Client, error) {
 // NewRequest make a new request
 func (c *Client) newRequest(ctx context.Context, method, path string, body interface{}) (*http.Request, error) {
 	c.Log.Debug("newRequest", "method", method, "path", path, "body", body)
+
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, err
@@ -92,7 +101,7 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body inter
 
 // Do does the new request
 func (c *Client) do(ctx context.Context, req *http.Request, value interface{}) (*http.Response, error) {
-	c.Log.Debug("do", "method", req.Method, "path", req.URL.Path, "body", req.Body)
+	c.Log.Debug("do", "method", req.Method, "path", req.URL.Path)
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err

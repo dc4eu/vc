@@ -25,9 +25,9 @@ func (c *Client) EHICUpload(ctx context.Context, req *EHICUploadRequest) (*EHICU
 	uploadID := uuid.NewString()
 
 	req.Data.Meta = &model.Meta{
-		UploadID:  uploadID,
-		Timestamp: time.Now(),
-		Type:      "ehic",
+		UploadID:     uploadID,
+		Timestamp:    time.Now(),
+		DocumentType: "ehic",
 	}
 
 	if err := helpers.Check(req.Data, c.logger.New("validate_EHICUpload")); err != nil {

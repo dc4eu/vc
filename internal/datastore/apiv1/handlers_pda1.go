@@ -27,7 +27,7 @@ func (c *Client) PDA1Upload(ctx context.Context, req *PDA1UploadRequest) (*PDA1U
 	req.Data.Meta = &model.Meta{
 		UploadID:  uploadID,
 		Timestamp: time.Now(),
-		Type:      "pda1",
+		DocumentType: "PDA1",
 	}
 
 	if err := helpers.Check(req.Data, c.logger.New("validate_PDA1Upload")); err != nil {

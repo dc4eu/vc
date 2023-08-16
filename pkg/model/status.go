@@ -51,7 +51,6 @@ func (probes Probes) Check(serviceName string) *Health {
 	}
 
 	for _, probe := range probes {
-		log.Println("check each probe")
 		if !probe.Healthy {
 			health.Status = fmt.Sprintf(StatusFail, serviceName)
 		}

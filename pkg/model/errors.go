@@ -20,4 +20,7 @@ var (
 
 	// ErrCertificateNotValid error for not valid certificate
 	ErrCertificateNotValid = errors.New("ERR_CERTIFICATE_NOT_VALID")
+
+	// ErrInvalidDocumentType error for invalid document type
+	ErrInvalidDocumentType = errors.New("ERR_INVALID_DOCUMENT_TYPE")
 )

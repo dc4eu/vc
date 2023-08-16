@@ -4,19 +4,19 @@ import "time"
 
 // PDA1 model for the PDA1
 type PDA1 struct {
-	PersonalDetails           PDA1Section1 `json:"personalDetails" bson:"personal_details"`
-	MemberStateLegislation    PDA1Section2 `json:"memberStateLegislation" bson:"member_state_legislation"`
-	StatusConfirmation        PDA1Section3 `json:"statusConfirmation" bson:"status_confirmation"`
-	EmploymentDetails         PDA1Section4 `json:"employmentDetails" bson:"employment_details"`
-	ActivityEmploymentDetails PDA1Section5 `json:"activityEmploymentDetails" bson:"activity_employment_details"`
-	CompletingInstitution     PDA1Section6 `json:"completingInstitution" bson:"completing_institution"`
+	PersonalDetails           PDA1Section1 `json:"personalDetails" bson:"personalDetails" validate:"required"`
+	MemberStateLegislation    PDA1Section2 `json:"memberStateLegislation" bson:"memberStateLegislation"`
+	StatusConfirmation        PDA1Section3 `json:"statusConfirmation" bson:"statusConfirmation"`
+	EmploymentDetails         PDA1Section4 `json:"employmentDetails" bson:"employmentDetails"`
+	ActivityEmploymentDetails PDA1Section5 `json:"activityEmploymentDetails" bson:"activityEmploymentDetails"`
+	CompletingInstitution     PDA1Section6 `json:"completingInstitution" bson:"completingInstitution"`
 }
 
 // PDA1AddressType is the model for the PDA1 address type
 type PDA1AddressType struct {
-	BuildingName string `json:"buildingName" bson:"building_name"`
-	StreetNo     string `json:"streetNo" bson:"street_no"`
-	PostCode     string `json:"postCode" bson:"post_code"`
+	BuildingName string `json:"buildingName" bson:"buildingName"`
+	StreetNo     string `json:"streetNo" bson:"streetNo"`
+	PostCode     string `json:"postCode" bson:"postCode"`
 	Town         string `json:"town" bson:"town"`
 	Region       string `json:"region" bson:"region"`
 	CountryCode  string `json:"countryCode" bson:"country_code" validate:"oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SI SK UK"`
@@ -41,21 +41,21 @@ type PDA1WorkPlaceAddressType struct {
 type PDA1BirthPlaceType struct {
 	Town        string `json:"town" bson:"town"`
 	Region      string `json:"region" bson:"region"`
-	CountryCode string `json:"countryCode" bson:"country_code" validate:"oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SI SK UK"`
+	CountryCode string `json:"countryCode" bson:"countryCode" validate:"oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SI SK UK"`
 }
 
 // PDA1Section1 is the model for the PDA1 section 1
 type PDA1Section1 struct {
-	PersonalIdentificationNumber string             `json:"personalIdentificationNumber" bson:"personal_identification_number"`
+	PersonalIdentificationNumber string             `json:"personalIdentificationNumber" bson:"personalIdentificationNumber"`
 	Sex                          string             `json:"sex" bson:"sex" validate:"oneof=01 02 98 99"`
 	Surname                      string             `json:"surname" bson:"surname"`
 	Forenames                    string             `json:"forenames" bson:"forenames"`
-	SurnameAtBirth               string             `json:"surnameAtBirth" bson:"surname_at_birth"`
-	DateBirth                    string             `json:"dateBirth" bson:"date_birth"`
+	SurnameAtBirth               string             `json:"surnameAtBirth" bson:"surnameAtBirth"`
+	DateBirth                    string             `json:"dateBirth" bson:"dateBirth"`
 	Nationality                  string             `json:"nationality" bson:"nationality" validate:"oneof=AT BE BG HR CY CZ DK EE FI FR DE EL HU IS IE IT LV LI LT LU MT NL NO PL PT RO SK SI ES SE CH UK XR XS XU AF AL DZ AD AO AG AR AM AU AZ BS BH BD BB BY BZ BJ BT BO BA BW BR BN BF BI KH CM CA CV CF TD CL CN CO KM CG CD CR CI CU DJ DM DO EC EG SV GQ ER ET FJ GA GM GE GH GD GT GN GW GY HT VA HN IN ID IR IQ IL JM JP JO KZ KE KI KP KR KW KG LA LB LS LR LY MK MG MW MY MV ML MH MR MU MX FM MD MC MN ME MA MZ MM NA NR NP NZ NI NE NG OM PK PW PS PA PG PY PE PH QA RU RW KN LC VC WS SM ST SA SN RS SC SL SG SB SO ZA SS LK SD SR SZ SY TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE US UY UZ VU VE VN YE ZM ZW BQAQ BUMM BYAA CTKI CSHH DYBJ NQAQ TPTL FXFR AIDJ FQHH DDDE GEHH JTUM MIUM ANHH NTHH NHVU PCHH PZPA CSXX SKIN RHZW HVBF PUUM SUHH VDVN WKUM YDYE YUCS ZRCD"`
-	PlaceBirth                   PDA1BirthPlaceType `json:"placeBirth" bson:"place_birth"`
-	StateOfResidenceAddress      PDA1AddressType    `json:"stateOfResidenceAddress" bson:"state_of_residence_address"`
-	StateOfStayAddress           PDA1AddressType    `json:"stateOfStayAddress" bson:"state_of_stay_address"`
+	PlaceBirth                   PDA1BirthPlaceType `json:"placeBirth" bson:"placeBirth"`
+	StateOfResidenceAddress      PDA1AddressType    `json:"stateOfResidenceAddress" bson:"stateOfResidenceAddress"`
+	StateOfStayAddress           PDA1AddressType    `json:"stateOfStayAddress" bson:"stateOfStayAddress"`
 }
 
 // PDA1Section2 is the model for the PDA1 section 2

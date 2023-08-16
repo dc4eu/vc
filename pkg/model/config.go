@@ -23,6 +23,8 @@ type CA struct {
 	Token    string `yaml:"token" validate:"required"`
 	KeyLabel string `yaml:"key_label" validate:"required"`
 	KeyType  string `yaml:"key_type" validate:"required"`
+	Location string `yaml:"location" validate:"required"`
+	Reason   string `yaml:"reason" validate:"required"`
 }
 
 // Log holds the log configuration
@@ -42,9 +44,8 @@ type Common struct {
 // Issuer holds the issuer configuration
 type Issuer struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
-	//Mongo     Mongo     `yaml:"mongo" validate:"required"`
-	CA       CA       `yaml:"ca" validate:"required"`
-	KeyValue KeyValue `yaml:"key_value" validate:"required"`
+	CA        CA        `yaml:"ca" validate:"required"`
+	KeyValue  KeyValue  `yaml:"key_value" validate:"required"`
 }
 
 // PDF holds the pdf configuration (special Ladok case)

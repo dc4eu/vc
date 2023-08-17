@@ -1,15 +1,32 @@
 package model
 
-import (
-	"encoding/json"
-	"vc/pkg/helpers"
-	"vc/pkg/logger"
-)
+import "time"
 
 // GenericUpload is a generic type for upload
 type GenericUpload struct {
-	GenericAttributes
-	Document any `json:"document" bson:"document"`
+	Attributes *GenericAttributes `json:"attributes" bson:"attributes" validate:"required"`
+	Revoke     *Revoke            `json:"revoke,omitempty" bson:"revoke"`
+	Collect    *Collect           `json:"collect,omitempty" bson:"collect"`
+	Document   *GenericDocument   `json:"document" bson:"document" validate:"required"`
+}
+
+// GenericDocument is a generic type for document
+type GenericDocument struct {
+	PDA1 *PDA1 `json:"pda1" bson:"pda1,omitempty" validate:"required_without=EHIC"`
+	EHIC *EHIC `json:"ehic" bson:"ehic,omitempty" validate:"required_without=PDA1"`
+}
+
+// Revoke is a generic type for revocation
+type Revoke struct {
+	Token string    `json:"token" bson:"token"`
+	TS    time.Time `json:"ts" bson:"ts"`
+}
+
+// Collect is a generic type for collect
+type Collect struct {
+	Token        string    `json:"token" bson:"token"`
+	ValidUntilTS time.Time `json:"valid_until_ts" bson:"valid_until_ts"`
+	UsedTS       time.Time `json:"used_ts" bson:"used_ts"`
 }
 
 // GenericAttributes is the generic attributes
@@ -30,30 +47,4 @@ type GenericAttributes struct {
 	PlaceOfBirth     string `json:"place_of_birth" bson:"place_of_birth"`
 	CurrentAddress   string `json:"current_address" bson:"current_address"`
 	Gender           string `json:"gender" bson:"gender"`
-}
-
-func (g *GenericUpload) validateDocument(out any, log *logger.Log) error {
-	b, err := json.Marshal(g.Document)
-	if err != nil {
-		log.Info("cant marshal document")
-		return err
-	}
-	if err := json.Unmarshal(b, &out); err != nil {
-		log.Info("cant unmarshal document")
-		return err
-	}
-
-	return helpers.Check(out, log)
-}
-
-// Validate validates the generic upload
-func (g *GenericUpload) Validate(log *logger.Log) error {
-	switch g.DocumentType {
-	case "PDA1":
-		return g.validateDocument(&PDA1{}, log.New("PDA1"))
-	case "EHIC":
-		return g.validateDocument(&EHIC{}, log.New("EHIC"))
-	default:
-		return ErrInvalidDocumentType
-	}
 }

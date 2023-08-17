@@ -34,12 +34,13 @@ func (c *GenericColl) Save(ctx context.Context, doc *model.GenericUpload) error 
 // Get return matching document if any, or error
 func (c *GenericColl) Get(ctx context.Context, attr *model.GenericAttributes) (*model.GenericUpload, error) {
 	filter := bson.M{
-		"first_name":    attr.FirstName,
-		"last_name":     attr.LastName,
-		"date_of_birth": attr.DateOfBirth,
-		"document_type": attr.DocumentType,
-		"document_id":   attr.DocumentID,
+		"attributes.first_name":    attr.FirstName,
+		"attributes.last_name":     attr.LastName,
+		"attributes.date_of_birth": attr.DateOfBirth,
+		"attributes.document_type": attr.DocumentType,
+		"attributes.document_id":   attr.DocumentID,
 	}
+
 	res := &model.GenericUpload{}
 	if err := c.Coll.FindOne(ctx, filter).Decode(res); err != nil {
 		return nil, err
@@ -48,18 +49,20 @@ func (c *GenericColl) Get(ctx context.Context, attr *model.GenericAttributes) (*
 }
 
 // List returns all matching documents if any, or error
-func (c *GenericColl) List(ctx context.Context, attr *model.GenericAttributes) ([]*model.GenericUpload, error) {
+func (c *GenericColl) List(ctx context.Context, attr *model.GenericAttributes) ([]model.GenericUpload, error) {
 	filter := bson.M{
-		"first_name":    attr.FirstName,
-		"last_name":     attr.LastName,
-		"date_of_birth": attr.DateOfBirth,
-		"document_type": attr.DocumentType,
+		"attributes.first_name":    attr.FirstName,
+		"attributes.last_name":     attr.LastName,
+		"attributes.date_of_birth": attr.DateOfBirth,
+		"attributes.document_type": attr.DocumentType,
 	}
-	res := []*model.GenericUpload{}
+
 	cursor, err := c.Coll.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
+
+	res := []model.GenericUpload{}
 	if err := cursor.All(ctx, &res); err != nil {
 		return nil, err
 	}
@@ -69,10 +72,10 @@ func (c *GenericColl) List(ctx context.Context, attr *model.GenericAttributes) (
 // Revoke revokes a document
 func (c *GenericColl) Revoke(ctx context.Context, attr *model.GenericAttributes) error {
 	filter := bson.M{
-		"first_name":    attr.FirstName,
-		"last_name":     attr.LastName,
-		"date_of_birth": attr.DateOfBirth,
-		"document_type": attr.DocumentType,
+		"attributes.first_name":    attr.FirstName,
+		"attribute.last_name":      attr.LastName,
+		"attributes.date_of_birth": attr.DateOfBirth,
+		"attributes.document_type": attr.DocumentType,
 	}
 	_, err := c.Coll.DeleteOne(ctx, filter)
 	return err

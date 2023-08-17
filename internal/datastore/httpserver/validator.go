@@ -13,7 +13,7 @@ type defaultValidator struct {
 
 var _ binding.StructValidator = &defaultValidator{}
 
-func (v *defaultValidator) ValidateStruct(obj interface{}) error {
+func (v *defaultValidator) ValidateStruct(obj any) error {
 	if kindOfData(obj) == reflect.Struct {
 		if err := v.Validate.Struct(obj); err != nil {
 			return err
@@ -22,11 +22,11 @@ func (v *defaultValidator) ValidateStruct(obj interface{}) error {
 	return nil
 }
 
-func (v *defaultValidator) Engine() interface{} {
+func (v *defaultValidator) Engine() any {
 	return v.Validate
 }
 
-func kindOfData(data interface{}) reflect.Kind {
+func kindOfData(data any) reflect.Kind {
 	value := reflect.ValueOf(data)
 	valueType := value.Kind()
 	if valueType == reflect.Ptr {

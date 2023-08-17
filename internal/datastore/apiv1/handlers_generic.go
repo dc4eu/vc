@@ -16,12 +16,7 @@ type GenericUploadReply struct {
 
 // GenericUpload uploads a generic document with a set of attributes
 func (c *Client) GenericUpload(ctx context.Context, req *model.GenericUpload) (*GenericUploadReply, error) {
-	c.logger.Info("before validate", "request", req)
-	if err := req.Validate(c.logger.New("validate")); err != nil {
-		c.logger.Info("validate error", "error", err)
-		return nil, err
-	}
-	c.logger.Info("after validate")
+	//helpers.Check(req, c.logger.New("validate"))
 	if err := c.db.GenericColl.Save(ctx, req); err != nil {
 		return nil, err
 	}
@@ -29,7 +24,7 @@ func (c *Client) GenericUpload(ctx context.Context, req *model.GenericUpload) (*
 }
 
 // GenericList return a list of generic documents
-func (c *Client) GenericList(ctx context.Context, req *model.GenericAttributes) ([]*model.GenericUpload, error) {
+func (c *Client) GenericList(ctx context.Context, req *model.GenericAttributes) ([]model.GenericUpload, error) {
 	list, err := c.db.GenericColl.List(ctx, req)
 	if err != nil {
 		return nil, err

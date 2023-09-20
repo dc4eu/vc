@@ -8,7 +8,7 @@ import (
 type Document struct {
 	TransactionID string `json:"transaction_id" bson:"transaction_id" redis:"transaction_id"`
 	Data          string `json:"data" bson:"data" redis:"data"`
-	Error         string `json:"error,omitempty" bson:"-" redis:"-"`
+	Error         string `json:"error,omitempty" bson:"error" redis:"error"`
 	Message       string `json:"message,omitempty" bson:"-" redis:"-"`
 	RevokedTS     int64  `json:"revoked_ts,omitempty" bson:"revoked_ts" redis:"revoke_ts"`
 	ModifyTS      int64  `json:"modify_ts,omitempty" bson:"modify_ts" redis:"modify_ts"`

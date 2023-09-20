@@ -1,6 +1,7 @@
 NAME 					:= vc
 SERVERS 				:= issuer verifier
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
+LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 
 
 build: build-issuer build-verifier build-datastore
@@ -17,6 +18,10 @@ build-verifier:
 build-datastore:
 	$(info Building datastore)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_datastore ${LDFLAGS} ./cmd/datastore/main.go
+
+build-registry:
+	$(info Building registry)
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_registry ${LDFLAGS_DYNAMIC} ./cmd/registry/main.go
 
 test: test-issuer test-verifier test-datastore
 
@@ -54,11 +59,12 @@ ifndef VERSION
 VERSION := latest
 endif
 
-docker-build: docker-build-issuer docker-build-verifier docker-build-datastore
+docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
 
-DOCKER_TAG_ISSUER := docker.sunet.se/dc4eu/issuer:$(VERSION)
-DOCKER_TAG_VERIFIER := docker.sunet.se/dc4eu/verifier:$(VERSION)
-DOCKER_TAG_DATASTORE := docker.sunet.se/dc4eu/datastore:$(VERSION)
+DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
+DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
+DOCKER_TAG_DATASTORE	:= docker.sunet.se/dc4eu/datastore:$(VERSION)
+DOCKER_TAG_REGISTRY 	:= docker.sunet.se/dc4eu/registry:$(VERSION)
 
 docker-build-issuer:
 	$(info Docker Building issuer with tag: $(VERSION))
@@ -72,11 +78,16 @@ docker-build-datastore:
 	$(info Docker Building datastore with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_DATASTORE) --file dockerfiles/datastore .
 
+docker-build-registry:
+	$(info Docker Building registry with tag: $(VERSION))
+	docker build --tag $(DOCKER_TAG_REGISTRY) --file dockerfiles/registry .
+
 docker-push:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_ISSUER)
 	docker push $(DOCKER_TAG_VERIFIER)
 	docker push $(DOCKER_TAG_DATASTORE)
+	docker push $(DOCKER_TAG_REGISTRY)
 
 clean_redis:
 	$(info Cleaning redis volume)
@@ -87,6 +98,7 @@ clean_docker_images:
 	docker rmi $(DOCKER_TAG_ISSUER) -f
 	docker rmi $(DOCKER_TAG_VERIFIER) -f
 	docker rmi $(DOCKER_TAG_DATASTORE) -f
+	docker rmi $(DOCKER_TAG_REGISTRY) -f
 
 
 ci_build: docker-build docker-push

@@ -126,7 +126,7 @@ func TestSignPDF(t *testing.T) {
 				PDF: mockBase64PDF,
 			},
 			want: &PDFSignReply{
-				TransactionID: "xyz",
+				TransactionID: "facd0582-565a-11ee-bf9b-63c55c70830a",
 			},
 		},
 	}

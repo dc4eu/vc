@@ -16,11 +16,7 @@ func (c *Client) SignDocument(ctx context.Context, document *types.Document) err
 		return err
 	}
 
-	if signDocument.Error != "" {
-		return errors.New("error signing document, error: " + signDocument.Error)
-	}
-
-	c.log.Debug("SignDocuments", "transactionID:", document.TransactionID, "data", signDocument.Data)
+	c.log.Debug("SignDocuments", "transactionID:", document.TransactionID, "data", signDocument.Data, "error", signDocument.Error)
 
 	if err := c.kv.Doc.SaveSigned(ctx, signDocument); err != nil {
 		return err

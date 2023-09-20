@@ -2,7 +2,6 @@ package kv
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -56,10 +55,6 @@ func (d *Doc) AddTTLUnsigned(ctx context.Context, transactionID string) error {
 
 // SaveSigned saves the signed document and the timestamp when it was signed
 func (d *Doc) SaveSigned(ctx context.Context, doc *types.Document) error {
-	// Add modifyTS to the document
-	if doc.Data == "" {
-		return errors.New("Data is empty")
-	}
 	key := fmt.Sprintf(d.key, doc.TransactionID, "signed")
 	d.client.log.Debug("SaveSigned", "key", key)
 	if err := d.client.redisClient.HSet(ctx, key, doc).Err(); err != nil {

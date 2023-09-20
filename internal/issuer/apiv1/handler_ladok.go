@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"vc/pkg/helpers"
 	"vc/pkg/model"
 
 	"github.com/google/uuid"
@@ -10,7 +11,7 @@ import (
 
 // PDFSignRequest is the request for sign pdf
 type PDFSignRequest struct {
-	PDF string `json:"pdf"`
+	PDF string `json:"pdf" validate:"required,base64"`
 }
 
 // PDFSignReply is the reply for sign pdf
@@ -20,6 +21,9 @@ type PDFSignReply struct {
 
 // PDFSign is the request to sign pdf
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
+	if err := helpers.Check(req, c.logger); err != nil {
+		return nil, err
+	}
 	transactionID := uuid.New().String()
 
 	c.logger.Debug("PDFSign", "transaction_id", transactionID)
@@ -77,7 +81,7 @@ type PDFGetSignedRequest struct {
 
 // PDFGetSignedReply is the reply for the signed pdf
 type PDFGetSignedReply struct {
-	Document *types.Document `json:"document" validate:"required"`
+	Document *types.Document `json:"document,omitempty"`
 	Message  string          `json:"message,omitempty"`
 }
 
@@ -91,10 +95,17 @@ func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*P
 	if err != nil {
 		return nil, err
 	}
-	resp := &PDFGetSignedReply{
-		Document: signedDoc,
+
+	if signedDoc.Error != "" {
+		resp := &PDFGetSignedReply{
+			Message: signedDoc.Error,
+		}
+		return resp, nil
 	}
-	return resp, nil
+
+	return &PDFGetSignedReply{
+		Document: signedDoc,
+	}, nil
 }
 
 // PDFRevokeRequest is the request for revoke pdf

@@ -29,7 +29,8 @@ type CA struct {
 
 // Log holds the log configuration
 type Log struct {
-	Level string `yaml:"level"`
+	Level      string `yaml:"level"`
+	FolderPath string `yaml:"folder_path"`
 }
 
 // Common holds the common configuration
@@ -48,6 +49,18 @@ type Issuer struct {
 	KeyValue  KeyValue  `yaml:"key_value" validate:"required"`
 }
 
+// Registry holds the registry configuration
+type Registry struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+	SMT       SMT       `yaml:"smt" validate:"required"`
+}
+
+// SMT Spares Merkel Tree configuration
+type SMT struct {
+	UpdatePeriodicity int    `yaml:"update_periodicity" validate:"required"`
+	InitLeaf          string `yaml:"init_leaf" validate:"required"`
+}
+
 // PDF holds the pdf configuration (special Ladok case)
 type PDF struct {
 	KeepSignedDuration   int `yaml:"keep_signed_duration"`
@@ -62,7 +75,6 @@ type Verifier struct {
 // Datastore holds the datastore configuration
 type Datastore struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
-	//Mongo     Mongo     `yaml:"mongo" validate:"required"`
 }
 
 // Cfg is the main configuration structure for this application
@@ -71,4 +83,5 @@ type Cfg struct {
 	Issuer    Issuer    `yaml:"issuer"`
 	Verifier  Verifier  `yaml:"verifier"`
 	Datastore Datastore `yaml:"datastore"`
+	Registry  Registry  `yaml:"registry"`
 }

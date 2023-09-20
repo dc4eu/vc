@@ -12,8 +12,9 @@ type GenericUpload struct {
 
 // GenericDocument is a generic type for document
 type GenericDocument struct {
-	PDA1 *PDA1 `json:"pda1" bson:"pda1,omitempty" validate:"required_without=EHIC"`
-	EHIC *EHIC `json:"ehic" bson:"ehic,omitempty" validate:"required_without=PDA1"`
+	PDA1   *PDA1   `json:"pda1,omitempty" bson:"pda1,omitempty" validate:"required_without=EHIC"`
+	EHIC   *EHIC   `json:"ehic,omitempty" bson:"ehic,omitempty" validate:"required_without=PDA1"`
+	Testv1 *Testv1 `json:"testv1,omitempty" bson:"testv1,omitempty" validate:"required_without=PDA1,EHIC"`
 }
 
 // Revoke is a generic type for revocation

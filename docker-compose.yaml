@@ -70,6 +70,29 @@ services:
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
+  registry:
+    container_name: "vc_registry"
+    image: docker.sunet.se/dc4eu/registry:latest
+    healthcheck:
+      test: curl --fail http://registry:8080/health || exit 1
+      interval: 20s
+      retries: 5
+      timeout: 10s
+    restart: always
+    volumes:
+      - ./cert:/cert:ro
+      - ./dev_config_docker.yaml:/config.yaml:ro
+    depends_on:
+      - redis
+      - mongo
+      - issuer
+    networks:
+      - vc-net
+      #vc-net:
+      #  ipv4_address: 172.16.50.11
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
   haproxy:
     container_name: "vc_haproxy"
     image: "haproxytech/haproxy-alpine:2.4"

@@ -1,6 +1,11 @@
 package logger
 
 import (
+	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
+
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
@@ -23,7 +28,8 @@ type Log struct {
 }
 
 // New creates a default logger based on what kind of environment is used.
-func New(name string, production bool) *Log {
+func New(name, logPath string, production bool) (*Log, error) {
+
 	var zc zap.Config
 
 	switch production {
@@ -36,11 +42,25 @@ func New(name string, production bool) *Log {
 
 	zc.DisableCaller = true
 	zc.DisableStacktrace = true
-	z, _ := zc.Build()
+
+	if logPath != "" {
+		if err := os.MkdirAll(logPath, fs.ModeDir); err != nil {
+			return nil, err
+		}
+
+		zc.OutputPaths = []string{
+			filepath.Join(logPath, fmt.Sprintf("%s.log", name)),
+		}
+	}
+
+	z, err := zc.Build()
+	if err != nil {
+		return nil, err
+	}
 
 	log := zapr.NewLogger(z)
 
-	return &Log{Logger: log.WithName(name)}
+	return &Log{Logger: log.WithName(name)}, nil
 }
 
 // NewSimple creates a simple logger for barbaric purposes

@@ -20,19 +20,17 @@ func main() {
 	wg := &sync.WaitGroup{}
 	ctx := context.Background()
 
-	var (
-		log      *logger.Log
-		mainLog  *logger.Log
-		services = make(map[string]service)
-	)
+	services := make(map[string]service)
 
 	cfg, err := configuration.Parse(logger.NewSimple("Configuration"))
 	if err != nil {
 		panic(err)
 	}
 
-	mainLog = logger.New("main", cfg.Common.Production)
-	log = logger.New("vc_verifier", cfg.Common.Production)
+	log, err := logger.New("vc_verifier", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	if err != nil {
+		panic(err)
+	}
 
 	apiv1, err := apiv1.New(ctx, cfg, log.New("apiv1"))
 	if err != nil {
@@ -50,6 +48,7 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
+	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

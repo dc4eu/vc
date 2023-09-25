@@ -15,6 +15,7 @@ import (
 	"vc/internal/issuer/pda1"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
+	"vc/pkg/rpcclient"
 )
 
 type service interface {
@@ -22,7 +23,7 @@ type service interface {
 }
 
 func main() {
-	wg := &sync.WaitGroup{}
+	var wg sync.WaitGroup
 	ctx := context.Background()
 
 	services := make(map[string]service)
@@ -37,6 +38,10 @@ func main() {
 		panic(err)
 	}
 
+	rpcClients, err := rpcclient.New(cfg, log.New("rpc"))
+	if err != nil {
+		panic(err)
+	}
 	dbService, err := db.New(ctx, cfg, log.New("db"))
 	services["dbService"] = dbService
 	if err != nil {
@@ -61,7 +66,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	apiv1Client, err := apiv1.New(ctx, caClient, kvService, dbService, cfg, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, rpcClients, pda1Service, caClient, kvService, dbService, cfg, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}

@@ -47,6 +47,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 	}
 	service.DocumentsColl.createIndex(ctx)
 
+	service.log.Info("Started")
 	return service, nil
 }
 

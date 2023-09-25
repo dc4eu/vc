@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"vc/pkg/ehic"
 	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,8 +28,8 @@ func (c *EHICColl) createIndex(ctx context.Context) error {
 
 // EHICUpload is the model for the EHIC push/upload integration
 type EHICUpload struct {
-	Data *model.EHIC `json:"data" validate:"required"`
-	Meta *model.Meta `json:"meta" validate:"required"`
+	Data *ehic.Document `json:"data" validate:"required"`
+	Meta *model.Meta    `json:"meta" validate:"required"`
 }
 
 // Save saves one document to the PDA1 collection

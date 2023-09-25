@@ -73,6 +73,8 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 		Coll:    service.DBClient.Database("datastore").Collection("generic"),
 	}
 
+	service.log.Info("Started")
+
 	return service, nil
 }
 

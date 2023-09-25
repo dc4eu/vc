@@ -38,6 +38,8 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 		key:    "doc:%s:%s",
 	}
 
+	c.log.Info("Started")
+
 	return c, nil
 }
 

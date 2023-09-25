@@ -39,7 +39,7 @@ func New(ctx context.Context, wg *sync.WaitGroup, db *db.Service, cfg *model.Cfg
 		return nil, err
 	}
 
-	wg.Add(1)
+	s.wg.Add(1)
 	go func() {
 		for {
 			select {
@@ -52,7 +52,7 @@ func New(ctx context.Context, wg *sync.WaitGroup, db *db.Service, cfg *model.Cfg
 			case <-s.quitChan:
 				s.log.Info("Stop updating tree")
 				s.ticker.Stop()
-				wg.Done()
+				s.wg.Done()
 				return
 			}
 		}

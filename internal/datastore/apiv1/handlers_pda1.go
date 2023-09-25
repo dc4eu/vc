@@ -6,6 +6,7 @@ import (
 	"vc/internal/datastore/db"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
+	"vc/pkg/pda1"
 
 	"github.com/google/uuid"
 )
@@ -25,8 +26,8 @@ func (c *Client) PDA1Upload(ctx context.Context, req *PDA1UploadRequest) (*PDA1U
 	uploadID := uuid.NewString()
 
 	req.Data.Meta = &model.Meta{
-		UploadID:  uploadID,
-		Timestamp: time.Now(),
+		UploadID:     uploadID,
+		Timestamp:    time.Now(),
 		DocumentType: "PDA1",
 	}
 
@@ -65,7 +66,7 @@ type PDA1SearchRequest struct {
 }
 
 // PDA1Search searches PDA1 data and return one result, if any
-func (c *Client) PDA1Search(ctx context.Context, req *PDA1SearchRequest) (*model.PDA1, error) {
+func (c *Client) PDA1Search(ctx context.Context, req *PDA1SearchRequest) (*pda1.Document, error) {
 	res, err := c.db.PDA1Coll.Search(ctx, req.Data)
 	if err != nil {
 		return nil, err

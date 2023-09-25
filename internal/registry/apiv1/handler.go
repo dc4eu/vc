@@ -24,6 +24,7 @@ func (c *Client) Add(ctx context.Context, req *AddRequest) (*AddReply, error) {
 	if err := c.tree.Insert(req.Entity); err != nil {
 		return nil, err
 	}
+	c.logger.Info("Hash added")
 
 	return nil, nil
 }
@@ -31,7 +32,6 @@ func (c *Client) Add(ctx context.Context, req *AddRequest) (*AddReply, error) {
 // RevokeRequest is the request for verify pdf
 type RevokeRequest struct {
 	Entity string `json:"entity" validate:"required"`
-
 }
 
 // RevokeReply is the reply for verify pdf
@@ -43,6 +43,7 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 	if err := c.tree.Remove(req.Entity); err != nil {
 		return nil, err
 	}
+	c.logger.Info("Hash revoked")
 
 	return nil, nil
 }

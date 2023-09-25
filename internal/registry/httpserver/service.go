@@ -14,18 +14,13 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type routerGroup struct {
-	apiv1 *gin.RouterGroup
-}
-
 // Service is the service object for httpserver
 type Service struct {
-	config      *model.Cfg
-	logger      *logger.Log
-	server      *http.Server
-	apiv1       Apiv1
-	gin         *gin.Engine
-	routerGroup routerGroup
+	config *model.Cfg
+	logger *logger.Log
+	server *http.Server
+	apiv1  Apiv1
+	gin    *gin.Engine
 }
 
 // New creates a new httpserver service

@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"vc/pkg/model"
+	"vc/pkg/pda1"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -25,7 +25,7 @@ func (c *EducationColl) createIndex(ctx context.Context) error {
 }
 
 // Save saves one document to the PDA1 collection
-func (c *EducationColl) Save(ctx context.Context, doc *model.PDA1) error {
+func (c *EducationColl) Save(ctx context.Context, doc *pda1.Document) error {
 	_, err := c.Coll.InsertOne(ctx, doc)
 	return err
 }

@@ -55,6 +55,18 @@ func (s *Service) endpointPDFRevoke(ctx context.Context, c *gin.Context) (any, e
 	return reply, nil
 }
 
+func (s *Service) endpointGenericGet(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.GetRequest{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.Get(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (interface{}, error) {
 	reply, err := s.apiv1.Status(ctx)
 	if err != nil {

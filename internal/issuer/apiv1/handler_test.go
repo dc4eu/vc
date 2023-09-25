@@ -9,8 +9,10 @@ import (
 	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/kv"
+	"vc/internal/issuer/pda1"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/rpcclient"
 
 	"github.com/google/uuid"
 	"github.com/masv3971/gosunetca/mocks"
@@ -60,6 +62,12 @@ func mockClient(t *testing.T, caURL string) *Client {
 			},
 		},
 	}
+	rpcClient, err := rpcclient.New(cfg, log)
+	assert.NoError(t, err)
+
+	pda1, err := pda1.New(ctx, cfg, log)
+	assert.NoError(t, err)
+
 	db, err := db.New(ctx, cfg, log)
 	assert.NoError(t, err)
 
@@ -69,7 +77,7 @@ func mockClient(t *testing.T, caURL string) *Client {
 	ca, err := ca.New(ctx, kv, db, cfg, log)
 	assert.NoError(t, err)
 
-	c, err := New(ctx, ca, kv, db, cfg, log)
+	c, err := New(ctx, rpcClient, pda1, ca, kv, db, cfg, log)
 	assert.NoError(t, err)
 
 	return c

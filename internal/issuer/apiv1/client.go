@@ -5,30 +5,36 @@ import (
 	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/kv"
+	"vc/internal/issuer/pda1"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/rpcclient"
 )
 
 // Client holds the public api object
 type Client struct {
-	ca     *ca.Client
-	cfg    *model.Cfg
-	db     *db.Service
-	kv     *kv.Service
-	logger *logger.Log
+	pda1      *pda1.Service
+	rpcClient *rpcclient.Client
+	ca        *ca.Client
+	cfg       *model.Cfg
+	db        *db.Service
+	kv        *kv.Service
+	log       *logger.Log
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, ca *ca.Client, kvService *kv.Service, db *db.Service, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, rpcClient *rpcclient.Client, pda1 *pda1.Service, ca *ca.Client, kvService *kv.Service, db *db.Service, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:    cfg,
-		db:     db,
-		kv:     kvService,
-		logger: logger,
-		ca:     ca,
+		pda1:      pda1,
+		cfg:       cfg,
+		db:        db,
+		kv:        kvService,
+		log:       logger,
+		ca:        ca,
+		rpcClient: rpcClient,
 	}
 
-	c.logger.Info("Started")
+	c.log.Info("Started")
 
 	return c, nil
 }

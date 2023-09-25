@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"vc/pkg/model"
+	"vc/pkg/pda1"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,8 +28,8 @@ func (c *PDA1Coll) createIndex(ctx context.Context) error {
 
 // PDA1Upload is the uploaded document
 type PDA1Upload struct {
-	Data *model.PDA1 `json:"data" validate:"required"`
-	Meta *model.Meta `json:"meta"`
+	Data *pda1.Document `json:"data" validate:"required"`
+	Meta *model.Meta    `json:"meta"`
 }
 
 // Save saves one document to the PDA1 collection
@@ -60,7 +61,7 @@ type PDA1SearchAttributes struct {
 // Search returns matching document if any, or error
 // This needs a clear definition of uniqueness in terms of the search attributes
 // Maybe have a pre-defined set of search attributes that needs to be present in order to guarantee uniqueness?
-func (c *PDA1Coll) Search(ctx context.Context, d *PDA1SearchAttributes) (*model.PDA1, error) {
+func (c *PDA1Coll) Search(ctx context.Context, d *PDA1SearchAttributes) (*pda1.Document, error) {
 	filter := bson.M{}
 
 	if d.PersonalIdentificationNumber != "" {

@@ -42,23 +42,15 @@ type Common struct {
 	BasicAuth  map[string]string `yaml:"basic_auth" validate:"required"`
 }
 
-// Issuer holds the issuer configuration
-type Issuer struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	CA        CA        `yaml:"ca" validate:"required"`
-	KeyValue  KeyValue  `yaml:"key_value" validate:"required"`
-}
-
-// Registry holds the registry configuration
-type Registry struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	SMT       SMT       `yaml:"smt" validate:"required"`
-}
-
 // SMT Spares Merkel Tree configuration
 type SMT struct {
 	UpdatePeriodicity int    `yaml:"update_periodicity" validate:"required"`
 	InitLeaf          string `yaml:"init_leaf" validate:"required"`
+}
+
+// RPCServer holds the rpc configuration
+type RPCServer struct {
+	Addr string `yaml:"addr" validate:"required"`
 }
 
 // PDF holds the pdf configuration (special Ladok case)
@@ -67,14 +59,31 @@ type PDF struct {
 	KeepUnsignedDuration int `yaml:"keep_unsigned_duration"`
 }
 
+// Issuer holds the issuer configuration
+type Issuer struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+	CA        CA        `yaml:"ca" validate:"required"`
+	KeyValue  KeyValue  `yaml:"key_value" validate:"required"`
+	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+}
+
+// Registry holds the registry configuration
+type Registry struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+	SMT       SMT       `yaml:"smt" validate:"required"`
+	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+}
+
 // Verifier holds the verifier configuration
 type Verifier struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
+	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
 }
 
 // Datastore holds the datastore configuration
 type Datastore struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
+	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
 }
 
 // Cfg is the main configuration structure for this application

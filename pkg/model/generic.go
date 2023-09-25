@@ -1,6 +1,11 @@
 package model
 
-import "time"
+import (
+	"time"
+	"vc/pkg/ehic"
+	"vc/pkg/pda1"
+	"vc/pkg/testv1"
+)
 
 // GenericUpload is a generic type for upload
 type GenericUpload struct {
@@ -12,9 +17,9 @@ type GenericUpload struct {
 
 // GenericDocument is a generic type for document
 type GenericDocument struct {
-	PDA1   *PDA1   `json:"pda1,omitempty" bson:"pda1,omitempty" validate:"required_without=EHIC"`
-	EHIC   *EHIC   `json:"ehic,omitempty" bson:"ehic,omitempty" validate:"required_without=PDA1"`
-	Testv1 *Testv1 `json:"testv1,omitempty" bson:"testv1,omitempty" validate:"required_without=PDA1,EHIC"`
+	PDA1   *pda1.Document   `json:"pda1,omitempty" bson:"pda1,omitempty" validate:"required_without=EHIC"`
+	EHIC   *ehic.Document   `json:"ehic,omitempty" bson:"ehic,omitempty" validate:"required_without=PDA1"`
+	Testv1 *testv1.Document `json:"testv1,omitempty" bson:"testv1,omitempty" validate:"required_without=PDA1,EHIC"`
 }
 
 // Revoke is a generic type for revocation

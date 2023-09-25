@@ -21,12 +21,12 @@ type PDFSignReply struct {
 
 // PDFSign is the request to sign pdf
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
-	if err := helpers.Check(req, c.logger); err != nil {
+	if err := helpers.Check(req, c.log); err != nil {
 		return nil, err
 	}
 	transactionID := uuid.New().String()
 
-	c.logger.Debug("PDFSign", "transaction_id", transactionID)
+	c.log.Debug("PDFSign", "transaction_id", transactionID)
 
 	unsignedDocument := &types.Document{
 		TransactionID: transactionID,
@@ -38,7 +38,7 @@ func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignRepl
 	}
 
 	go func() error {
-		c.logger.Debug("sending document to CA")
+		c.log.Debug("sending document to CA")
 		if err := c.ca.SignDocument(ctx, unsignedDocument); err != nil {
 			return err
 		}

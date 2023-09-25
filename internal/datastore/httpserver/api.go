@@ -5,6 +5,7 @@ import (
 	"vc/internal/datastore/apiv1"
 	"vc/internal/datastore/db"
 	"vc/pkg/model"
+	"vc/pkg/pda1"
 )
 
 // Apiv1 interface
@@ -14,7 +15,7 @@ type Apiv1 interface {
 
 	PDA1Upload(ctx context.Context, req *apiv1.PDA1UploadRequest) (*apiv1.PDA1UploadReply, error)
 	PDA1ID(ctx context.Context, req *apiv1.PDA1IDRequest) (*db.PDA1Upload, error)
-	PDA1Search(ctx context.Context, req *apiv1.PDA1SearchRequest) (*model.PDA1, error)
+	PDA1Search(ctx context.Context, req *apiv1.PDA1SearchRequest) (*pda1.Document, error)
 
 	GenericUpload(ctx context.Context, req *model.GenericUpload) (*apiv1.GenericUploadReply, error)
 	GenericList(ctx context.Context, req *model.GenericAttributes) ([]model.GenericUpload, error)

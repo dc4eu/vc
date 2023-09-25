@@ -18,6 +18,8 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 		log: log,
 		cfg: cfg,
 	}
+
+	s.log.Info("Started")
 	return s, nil
 }
 

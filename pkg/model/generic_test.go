@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"vc/pkg/testv1"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,12 +36,12 @@ func TestGenericUploadTestv1JSON(t *testing.T) {
 					Gender:                  "gender",
 				},
 				Document: &GenericDocument{
-					Testv1: &Testv1{
-						Name: Testv1Name{
+					Testv1: &testv1.Document{
+						Name: testv1.Name{
 							GivenName:  "given_name",
 							FamilyName: "family_name",
 						},
-						Address: Testv1Address{
+						Address: testv1.Address{
 							Country: "country",
 							Street:  "street",
 						},

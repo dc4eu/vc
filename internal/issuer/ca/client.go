@@ -43,5 +43,7 @@ func New(ctx context.Context, kvService *kv.Service, dbService *db.Service, cfg 
 		return nil, err
 	}
 
+	c.log.Info("Started")
+
 	return c, nil
 }

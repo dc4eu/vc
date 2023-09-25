@@ -14,13 +14,11 @@ require (
 	github.com/masv3971/gosdjwt v0.0.0-00010101000000-000000000000
 	github.com/masv3971/gosunetca v0.0.4
 	github.com/moogar0880/problems v0.1.1
-	github.com/nats-io/nats.go v1.30.0
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.8.4
 	github.com/wealdtech/go-merkletree v1.0.0
 	go.mongodb.org/mongo-driver v1.12.1
-	go.nanomsg.org/mangos/v3 v3.4.2
 	go.uber.org/zap v1.25.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/sqlite v1.5.3
@@ -50,9 +48,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
-	github.com/nats-io/nats-server/v2 v2.10.0 // indirect
-	github.com/nats-io/nkeys v0.4.5 // indirect
-	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.1.5 // indirect

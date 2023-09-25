@@ -4,7 +4,7 @@ LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 
 
-build: build-issuer build-verifier build-datastore
+build: build-issuer build-verifier build-datastore build-registry
 
 build-issuer:
 	$(info Building issuer)
@@ -51,6 +51,7 @@ restart:
 	docker restart vc_issuer
 	docker restart vc_verifier
 	docker restart vc_datastore
+	docker restart vc_registry
 
 get_release-tag:
 	@date +'%Y%m%d%H%M%S%9N'

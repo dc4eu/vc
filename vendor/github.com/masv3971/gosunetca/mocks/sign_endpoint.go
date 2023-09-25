@@ -20,19 +20,9 @@ var JSONSignDocumentRequest200 = []byte(`{
 
 // MockRequestSign is a sample request to the Sign endpoint.
 var MockRequestSign = &types.SignRequest{
-	Meta: types.SignMetaRequest{
-		TransactionID: "52de6acc-ef0e-11ed-93d2-0bb8bcf1b0c5",
-		Version:       1,
-		KeyLabel:      "pkcs11_sign_test15",
-		//Encoding:      "base64",
-		KeyType: "secp256r1",
-	},
-	Document: types.Document{
+	Document: &types.Document{
 		TransactionID: "",
-		TS:            0,
-		Encoding:      "base64",
 		Data:          "0c91fecff72ca85921e655c52d2bed0e39c9111eff1d8b140be96a49eaec9149",
-		SHA256Hash:    "",
 	},
 }
 
@@ -42,21 +32,21 @@ var JSONSignDocumentReply200 = []byte(`{
     "pdf_b64_data": "MEUCIQDz2Uqs1GE5sJGgW2R1gVTJRJdj8JVxqwMzNnboiNA9pAIgFhWhr85H/EARoyotYhjjI49SWOnsvQpl4jnzpZ0rMj0="
   }`)
 
-// MockReplySign is a sample response from the Sign endpoint.
-var MockReplySign = &types.SignReply{
-	Meta: types.SignMetaReply{
-		Version:            1,
-		SignerPublicKey:    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE32cZi4nLmKIxdwbzg6BcDfOPQoJ+\n5NyBNFt2BceWkZ+Rv+gJXOkrb5isXo5IOtvPzDRJLs9GL35du0hChwOGnw==\n-----END PUBLIC KEY-----\n",
-		SignatureAlgorithm: "sha256_ecdsa",
-	},
-	Document: types.Document{
-		TransactionID: "677fd5c0-ef0d-11ed-ba24-87b4bf5b52b1",
-		Encoding:      "base64",
-		TS:            0,
-		Data:          "0c91fecff72ca85921e655c52d2bed0e39c9111eff1d8b140be96a49eaec9149",
-		SHA256Hash:    "",
-	},
-}
+//// MockReplySign is a sample response from the Sign endpoint.
+//var MockReplySign = &types.SignReply{
+//	Meta: types.SignMetaReply{
+//		Version:            1,
+//		SignerPublicKey:    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE32cZi4nLmKIxdwbzg6BcDfOPQoJ+\n5NyBNFt2BceWkZ+Rv+gJXOkrb5isXo5IOtvPzDRJLs9GL35du0hChwOGnw==\n-----END PUBLIC KEY-----\n",
+//		SignatureAlgorithm: "sha256_ecdsa",
+//	},
+//	Document: types.Document{
+//		TransactionID: "677fd5c0-ef0d-11ed-ba24-87b4bf5b52b1",
+//		Encoding:      "base64",
+//		TS:            0,
+//		Data:          "0c91fecff72ca85921e655c52d2bed0e39c9111eff1d8b140be96a49eaec9149",
+//		SHA256Hash:    "",
+//	},
+//}
 
 // JSONReply401 is a sample response from CA when token is missing.
 var JSONReply401 = []byte(`{

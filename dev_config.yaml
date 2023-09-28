@@ -1,0 +1,50 @@
+---
+common:
+  mongo:
+    uri: mongodb://localhost:27017
+  basic_auth:
+    admin: admin
+
+issuer:
+  api_server:
+     addr: localhost:8080
+  production: false
+  http_proxy:
+  log:
+    level:
+  ca:
+    addr: https://example.com/ca
+    token: 99b900ea-b8e2-11ed-a633-bf231b1f0412
+    key_label: Ladok-sign-v1
+    key_type: secp256r1
+    location: tidan
+    reason: test
+  key_value:
+    addr: Ladok-sign-v1
+    db: 3
+    pdf:
+      keep_signed_duration: 1
+      keep_unsigned_duration: 1
+  rpc_server:
+    addr: localhost:8090
+
+verifier:
+  api_server:
+     addr: localhost:8081
+  rpc_server:
+    addr: localhost:8091
+
+datastore:
+  api_server:
+      addr: localhost:8082
+  rpc_server:
+    addr: localhost:8092
+
+registry:
+  api_server:
+      addr: localhost:8083
+  smt:
+    update_periodicity: 5
+    init_leaf: 575cea4a-5725-11ee-8287-2b486b7ace28
+  rpc_server:
+    addr: localhost:8083

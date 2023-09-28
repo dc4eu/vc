@@ -113,3 +113,6 @@ release_push:
 
 release: release-tag release_push
 	$(info making release ${RELEASE})
+
+proto-registry:
+	protoc --proto_path=./proto/ --go_out=. --go-grpc_out=. ./proto/apiv1/registry/v1-registry.proto 

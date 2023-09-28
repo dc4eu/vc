@@ -2,13 +2,13 @@ package httpserver
 
 import (
 	"context"
-	"vc/internal/registry/apiv1"
+	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (s *Service) endpointAdd(ctx context.Context, c *gin.Context) (interface{}, error) {
-	request := &apiv1.AddRequest{}
+	request := &apiv1_registry.AddRequest{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
@@ -20,7 +20,7 @@ func (s *Service) endpointAdd(ctx context.Context, c *gin.Context) (interface{},
 }
 
 func (s *Service) endpointRevoke(ctx context.Context, c *gin.Context) (interface{}, error) {
-	request := &apiv1.RevokeRequest{}
+	request := &apiv1_registry.RevokeRequest{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (s *Service) endpointRevoke(ctx context.Context, c *gin.Context) (interface
 }
 
 func (s *Service) endpointValidate(ctx context.Context, c *gin.Context) (interface{}, error) {
-	request := &apiv1.ValidateRequest{}
+	request := &apiv1_registry.ValidateRequest{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}

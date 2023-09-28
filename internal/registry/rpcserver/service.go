@@ -2,11 +2,13 @@ package rpcserver
 
 import (
 	"context"
-	"net/http"
-	"net/rpc"
+	"net"
+	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
 	"vc/internal/registry/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+
+	"google.golang.org/grpc"
 )
 
 // Service is the service object for rpcserver
@@ -14,64 +16,36 @@ type Service struct {
 	apiv1      Apiv1
 	log        *logger.Log
 	cfg        *model.Cfg
-	server     *http.Server
-	handler    *V1
-	probeStore *model.ProbeStore
+	listener   net.Listener
+	grpcServer *grpc.Server
+	apiv1_registry.RegistryServiceServer
 }
 
 // New creates a new rpcserver service
 func New(ctx context.Context, api *apiv1.Client, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	s := &Service{
-		log:    log,
-		cfg:    cfg,
-		server: &http.Server{Addr: cfg.Registry.RPCServer.Addr},
+		log:        log,
+		cfg:        cfg,
+		grpcServer: grpc.NewServer(),
 	}
 
-	s.handler = &V1{
-		log:   log,
-		apiv1: api,
+	var err error
+	s.listener, err = net.Listen("tcp", cfg.Registry.RPCServer.Addr)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := rpc.RegisterName("RegistryV1", s.handler); err != nil {
-		s.log.Error(err, "Error while registering rpc handler")
-	}
-	rpc.HandleHTTP()
-
-	// Run http server
+	apiv1_registry.RegisterRegistryServiceServer(s.grpcServer, s)
 	go func() {
-		err := s.server.ListenAndServe()
-		if err != nil {
-			s.log.New("http").Trace("listen_error", "error", err)
+		if err := s.grpcServer.Serve(s.listener); err != nil {
+			s.log.Error(err, "failed to serve")
 		}
 	}()
+
 	s.log.Info("Started")
 
 	return s, nil
 }
-
-// Status returns the status of the database
-//func (s *Service) Status(ctx context.Context) *model.Probe {
-//	if time.Now().Before(s.probeStore.NextCheck) {
-//		return s.probeStore.PreviousResult
-//	}
-//	probe := &model.Probe{
-//		Name:          "kv",
-//		Healthy:       true,
-//		Message:       "OK",
-//		LastCheckedTS: time.Now(),
-//	}
-//
-//	s.server
-//	_, err := c.redisClient.Ping(ctx).Result()
-//	if err != nil {
-//		probe.Message = err.Error()
-//		probe.Healthy = false
-//	}
-//	c.probeStore.PreviousResult = probe
-//	c.probeStore.NextCheck = time.Now().Add(time.Second * 10)
-//
-//	return probe
-//}
 
 // Close closes the service
 func (s *Service) Close(ctx context.Context) error {

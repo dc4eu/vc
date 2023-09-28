@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package registry;
+
+option go_package = "internal/gen/registry/apiv1.registry";
+
+import "google/protobuf/timestamp.proto";
+
+service RegistryService {
+    rpc Add (AddRequest) returns (AddReply) {}
+    rpc Revoke (RevokeRequest) returns (RevokeReply) {}
+    rpc Validate (ValidateRequest) returns (ValidateReply) {}
+    rpc Status (StatusRequest) returns (StatusReply) {}
+}
+
+message AddRequest {
+    string Entity = 1;
+}
+
+message AddReply {
+    bool Status = 1; 
+}
+
+message RevokeRequest {
+    string Entity = 1;
+}
+
+message RevokeReply {
+    bool Status = 1;
+}
+
+message ValidateRequest {
+    string Entity = 1;
+}
+
+message ValidateReply {
+    bool Valid = 1;
+}
+
+message StatusRequest {}
+
+message StatusReply {
+    string ServiceName = 1;
+    repeated StatusProbe Probes = 2;
+    string Status = 3;
+
+}
+
+message StatusProbe {
+    string Name = 1;
+    bool Healthy = 2;
+    string Message = 3;
+    google.protobuf.Timestamp LastCheckedTS = 4;
+}

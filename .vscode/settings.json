@@ -4,9 +4,11 @@
         "bson",
         "ehic",
         "EHICID",
+        "EIDAS",
         "envconfig",
         "goladok3",
         "gonic",
+        "gosdjwt",
         "gosunetca",
         "httpserver",
         "kelseyhightower",
@@ -22,12 +24,16 @@
         "pdfapi",
         "pdfcpu",
         "qrcode",
+        "rpcclient",
+        "rpcserver",
+        "SDJWT",
         "secp",
         "Seqno",
         "Statehome",
         "stretchr",
         "sunetca",
         "testv",
-        "transation"
+        "transation",
+        "UIDPID"
     ]
 }

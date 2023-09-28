@@ -1,0 +1,64 @@
+---
+common:
+  mongo:
+    uri: mongodb://mongo:27017
+  production: false
+  basic_auth:
+    ladok: xyz
+
+issuer:
+  api_server:
+    addr: issuer:8080
+  http_proxy:
+  log:
+    level:
+  ca:
+    addr: "http://ca:8080/"
+    token: 99b900ea-b8e2-11ed-a633-bf231b1f0412
+    key_label: Ladok-sign-v1
+    key_type: secp256r1
+    location: "Umeå"
+    reason: "Ladok"
+  key_value:
+    db: 3
+    addr: redis:6379
+    pdf:
+      keep_signed_duration: 3600
+      keep_unsigned_duration: 3600
+  rpc_server:
+    addr: issuer:8090
+  rpc_client:
+    default_config:
+      methodConfig:
+      - name:
+        - service: grpc.examples.echo.Echo
+        waitForReady: true
+        retryPolicy:
+          MaxAttempts: 4
+          InitialBackoff: ".01s"
+          MaxBackoff: ".01s"
+          BackoffMultiplier: 1
+          RetryableStatusCodes:
+            - UNAVAILABLE
+  
+datastore:
+  api_server:
+    addr: datastore:8080
+  rpc_server: 
+    addr: datastore:8090
+  
+verifier:
+  api_server:
+    addr: verifier:8080
+  rpc_server:
+    addr: verifier:8090
+
+registry:
+  api_server:
+    addr: registry:8080
+  smt:
+    update_periodicity: 5
+    init_leaf: 575cea4a-5725-11ee-8287-2b486b7ace28
+  rpc_server:
+    addr: registry:8090
+

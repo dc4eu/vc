@@ -50,7 +50,8 @@ type SMT struct {
 
 // RPCServer holds the rpc configuration
 type RPCServer struct {
-	Addr string `yaml:"addr" validate:"required"`
+	Addr     string `yaml:"addr" validate:"required"`
+	Insecure bool   `yaml:"insecure"`
 }
 
 // PDF holds the pdf configuration (special Ladok case)

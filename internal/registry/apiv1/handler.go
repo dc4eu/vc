@@ -2,21 +2,13 @@ package apiv1
 
 import (
 	"context"
+	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 )
 
-// AddRequest is the request to add a registry
-type AddRequest struct {
-	Entity string `json:"entity" validate:"required"`
-}
-
-// AddReply is the reply for registry
-type AddReply struct {
-}
-
 // Add adds a new entity into the registry
-func (c *Client) Add(ctx context.Context, req *AddRequest) (*AddReply, error) {
+func (c *Client) Add(ctx context.Context, req *apiv1_registry.AddRequest) (*apiv1_registry.AddReply, error) {
 	if err := helpers.Check(req, c.logger); err != nil {
 		return nil, err
 	}
@@ -39,7 +31,7 @@ type RevokeReply struct {
 }
 
 // Revoke revokes an entity in the registry
-func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
+func (c *Client) Revoke(ctx context.Context, req *apiv1_registry.RevokeRequest) (*apiv1_registry.RevokeReply, error) {
 	if err := c.tree.Remove(req.Entity); err != nil {
 		return nil, err
 	}
@@ -59,13 +51,13 @@ type ValidateReply struct {
 }
 
 // Validate validates an entity in the registry
-func (c *Client) Validate(ctx context.Context, req *ValidateRequest) (*ValidateReply, error) {
+func (c *Client) Validate(ctx context.Context, req *apiv1_registry.ValidateRequest) (*apiv1_registry.ValidateReply, error) {
 	valid, err := c.tree.Validate(req.Entity)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ValidateReply{Valid: valid}, nil
+	return &apiv1_registry.ValidateReply{Valid: valid}, nil
 }
 
 // Status return status for each ladok instance

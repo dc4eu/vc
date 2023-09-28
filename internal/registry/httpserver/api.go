@@ -2,15 +2,15 @@ package httpserver
 
 import (
 	"context"
-	"vc/internal/registry/apiv1"
+	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
 	"vc/pkg/model"
 )
 
 // Apiv1 interface
 type Apiv1 interface {
-	Add(ctx context.Context, req *apiv1.AddRequest) (*apiv1.AddReply, error)
-	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
-	Validate(ctx context.Context, req *apiv1.ValidateRequest) (*apiv1.ValidateReply, error)
+	Add(ctx context.Context, req *apiv1_registry.AddRequest) (*apiv1_registry.AddReply, error)
+	Revoke(ctx context.Context, req *apiv1_registry.RevokeRequest) (*apiv1_registry.RevokeReply, error)
+	Validate(ctx context.Context, req *apiv1_registry.ValidateRequest) (*apiv1_registry.ValidateReply, error)
 
 	Status(ctx context.Context) (*model.Health, error)
 }

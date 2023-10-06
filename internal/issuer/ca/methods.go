@@ -31,6 +31,9 @@ func (c *Client) SignDocument(ctx context.Context, document *types.Document) err
 // ValidateDocument sends documents to the CA to be validated
 func (c *Client) ValidateDocument(ctx context.Context, document *types.Document) (*types.Validation, error) {
 	c.log.Info("ValidateDocument")
+	if c.kv.Doc.IsRevoked(ctx, document.TransactionID) {
+	        return nil, errors.New("document is revoked")
+	}
 	verifyDocument, _, err := c.caClient.PDF.Validate(ctx, document)
 	if err != nil {
 		return nil, err

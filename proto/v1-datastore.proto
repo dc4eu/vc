@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package v1.datastore;
+
+option go_package = "vc/internal/gen/v1/v1.datastore";
+
+service DatastoreService {
+    rpc List (ListRequest) returns (ListReply) {}
+}
+
+message ListRequest {
+}
+
+message ListReply {
+    string Status = 1;
+}
+

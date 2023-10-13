@@ -4,6 +4,7 @@ import (
 	"context"
 	"vc/internal/datastore/apiv1"
 	"vc/internal/datastore/db"
+	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/model"
 	"vc/pkg/pda1"
 )
@@ -25,5 +26,5 @@ type Apiv1 interface {
 	LadokUpload(ctx context.Context, req *apiv1.LadokUploadRequest) (*apiv1.LadokUploadReply, error)
 	LadokID(ctx context.Context, req *apiv1.LadokIDRequest) (*db.LadokUpload, error)
 
-	Status(ctx context.Context) (*model.Health, error)
+	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 }

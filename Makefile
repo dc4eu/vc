@@ -4,7 +4,7 @@ LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 
 
-build: build-issuer build-verifier build-datastore build-registry
+build: proto build-issuer build-verifier build-datastore build-registry
 
 build-issuer:
 	$(info Building issuer)
@@ -60,7 +60,7 @@ ifndef VERSION
 VERSION := latest
 endif
 
-docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
+docker-build: proto docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
 
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
@@ -114,5 +114,29 @@ release_push:
 release: release-tag release_push
 	$(info making release ${RELEASE})
 
+proto: proto-status proto-registry
+
 proto-registry:
-	protoc --proto_path=./proto/ --go_out=. --go-grpc_out=. ./proto/apiv1/registry/v1-registry.proto 
+	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go-grpc_out=. --go_opt=module=vc --go_out=. ./proto/v1-status-model.proto ./proto/v1-registry.proto
+
+proto-status:
+	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-status-model.proto 
+
+swagger-fmt:
+	swag fmt
+
+swagger-issuer:
+	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency
+	swagger-fmt
+
+swagger-registry:
+	swag init -d internal/registry/apiv1/ -g client.go --output docs/registry --parseDependency
+	swagger-fmt
+
+swagger-datastore:
+	swag init -d internal/datastore/apiv1/ -g client.go --output docs/datastore --parseDependency
+	swagger-fmt
+
+swagger-verifier:
+	swag init -d internal/verifier/apiv1/ -g client.go --output docs/verifier --parseDependency
+	swagger-fmt

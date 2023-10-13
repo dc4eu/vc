@@ -1,2 +1,4 @@
 .devcontainer
 bin/
+pki/*
+!pki/create_pki.sh

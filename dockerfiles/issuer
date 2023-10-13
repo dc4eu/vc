@@ -5,6 +5,12 @@ WORKDIR /go/src/app
 
 COPY . .
 
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
+RUN swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency
+
+RUN swag fmt
+
 RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_issuer -ldflags "-w -s --extldflags '-static'" ./cmd/issuer/main.go
 
 # Deploy
@@ -16,6 +22,7 @@ RUN apt-get update && apt-get install -y curl procps iputils-ping
 RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/app/bin/vc_issuer /vc_issuer
+COPY --from=builder /go/src/app/docs /docs
 
 EXPOSE 8080
 

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.12
-// source: apiv1/registry/v1-registry.proto
+// source: v1-registry.proto
 
 package apiv1_registry
 
@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	apiv1_status "vc/internal/gen/status/apiv1.status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -25,7 +26,7 @@ type RegistryServiceClient interface {
 	Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddReply, error)
 	Revoke(ctx context.Context, in *RevokeRequest, opts ...grpc.CallOption) (*RevokeReply, error)
 	Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateReply, error)
-	Status(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusReply, error)
+	Status(ctx context.Context, in *apiv1_status.StatusRequest, opts ...grpc.CallOption) (*apiv1_status.StatusReply, error)
 }
 
 type registryServiceClient struct {
@@ -38,7 +39,7 @@ func NewRegistryServiceClient(cc grpc.ClientConnInterface) RegistryServiceClient
 
 func (c *registryServiceClient) Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddReply, error) {
 	out := new(AddReply)
-	err := c.cc.Invoke(ctx, "/registry.RegistryService/Add", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/v1.registry.RegistryService/Add", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +48,7 @@ func (c *registryServiceClient) Add(ctx context.Context, in *AddRequest, opts ..
 
 func (c *registryServiceClient) Revoke(ctx context.Context, in *RevokeRequest, opts ...grpc.CallOption) (*RevokeReply, error) {
 	out := new(RevokeReply)
-	err := c.cc.Invoke(ctx, "/registry.RegistryService/Revoke", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/v1.registry.RegistryService/Revoke", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,16 +57,16 @@ func (c *registryServiceClient) Revoke(ctx context.Context, in *RevokeRequest, o
 
 func (c *registryServiceClient) Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateReply, error) {
 	out := new(ValidateReply)
-	err := c.cc.Invoke(ctx, "/registry.RegistryService/Validate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/v1.registry.RegistryService/Validate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *registryServiceClient) Status(ctx context.Context, in *StatusRequest, opts ...grpc.CallOption) (*StatusReply, error) {
-	out := new(StatusReply)
-	err := c.cc.Invoke(ctx, "/registry.RegistryService/Status", in, out, opts...)
+func (c *registryServiceClient) Status(ctx context.Context, in *apiv1_status.StatusRequest, opts ...grpc.CallOption) (*apiv1_status.StatusReply, error) {
+	out := new(apiv1_status.StatusReply)
+	err := c.cc.Invoke(ctx, "/v1.registry.RegistryService/Status", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ type RegistryServiceServer interface {
 	Add(context.Context, *AddRequest) (*AddReply, error)
 	Revoke(context.Context, *RevokeRequest) (*RevokeReply, error)
 	Validate(context.Context, *ValidateRequest) (*ValidateReply, error)
-	Status(context.Context, *StatusRequest) (*StatusReply, error)
+	Status(context.Context, *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 	mustEmbedUnimplementedRegistryServiceServer()
 }
 
@@ -96,7 +97,7 @@ func (UnimplementedRegistryServiceServer) Revoke(context.Context, *RevokeRequest
 func (UnimplementedRegistryServiceServer) Validate(context.Context, *ValidateRequest) (*ValidateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Validate not implemented")
 }
-func (UnimplementedRegistryServiceServer) Status(context.Context, *StatusRequest) (*StatusReply, error) {
+func (UnimplementedRegistryServiceServer) Status(context.Context, *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
 }
 func (UnimplementedRegistryServiceServer) mustEmbedUnimplementedRegistryServiceServer() {}
@@ -122,7 +123,7 @@ func _RegistryService_Add_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/registry.RegistryService/Add",
+		FullMethod: "/v1.registry.RegistryService/Add",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RegistryServiceServer).Add(ctx, req.(*AddRequest))
@@ -140,7 +141,7 @@ func _RegistryService_Revoke_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/registry.RegistryService/Revoke",
+		FullMethod: "/v1.registry.RegistryService/Revoke",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RegistryServiceServer).Revoke(ctx, req.(*RevokeRequest))
@@ -158,7 +159,7 @@ func _RegistryService_Validate_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/registry.RegistryService/Validate",
+		FullMethod: "/v1.registry.RegistryService/Validate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RegistryServiceServer).Validate(ctx, req.(*ValidateRequest))
@@ -167,7 +168,7 @@ func _RegistryService_Validate_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _RegistryService_Status_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StatusRequest)
+	in := new(apiv1_status.StatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -176,10 +177,10 @@ func _RegistryService_Status_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/registry.RegistryService/Status",
+		FullMethod: "/v1.registry.RegistryService/Status",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RegistryServiceServer).Status(ctx, req.(*StatusRequest))
+		return srv.(RegistryServiceServer).Status(ctx, req.(*apiv1_status.StatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -188,7 +189,7 @@ func _RegistryService_Status_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RegistryService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "registry.RegistryService",
+	ServiceName: "v1.registry.RegistryService",
 	HandlerType: (*RegistryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -209,5 +210,5 @@ var RegistryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "apiv1/registry/v1-registry.proto",
+	Metadata: "v1-registry.proto",
 }

@@ -1,16 +1,17 @@
 syntax = "proto3";
 
-package registry;
+package v1.registry;
 
-option go_package = "internal/gen/registry/apiv1.registry";
+option go_package = "vc/internal/gen/issuer/apiv1.issuer";
 
 import "google/protobuf/timestamp.proto";
+import "v1-status-model.proto";
 
 service RegistryService {
     rpc Add (AddRequest) returns (AddReply) {}
     rpc Revoke (RevokeRequest) returns (RevokeReply) {}
     rpc Validate (ValidateRequest) returns (ValidateReply) {}
-    rpc Status (StatusRequest) returns (StatusReply) {}
+    rpc Status (v1.status.StatusRequest) returns (v1.status.StatusReply) {}
 }
 
 message AddRequest {
@@ -35,20 +36,4 @@ message ValidateRequest {
 
 message ValidateReply {
     bool Valid = 1;
-}
-
-message StatusRequest {}
-
-message StatusReply {
-    string ServiceName = 1;
-    repeated StatusProbe Probes = 2;
-    string Status = 3;
-
-}
-
-message StatusProbe {
-    string Name = 1;
-    bool Healthy = 2;
-    string Message = 3;
-    google.protobuf.Timestamp LastCheckedTS = 4;
 }

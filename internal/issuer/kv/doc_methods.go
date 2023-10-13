@@ -55,6 +55,9 @@ func (d *Doc) AddTTLUnsigned(ctx context.Context, transactionID string) error {
 
 // SaveSigned saves the signed document and the timestamp when it was signed
 func (d *Doc) SaveSigned(ctx context.Context, doc *types.Document) error {
+	if doc.TransactionID == "" {
+		return fmt.Errorf("transaction_id is empty")
+	}
 	key := fmt.Sprintf(d.key, doc.TransactionID, "signed")
 	d.client.log.Debug("SaveSigned", "key", key)
 	if err := d.client.redisClient.HSet(ctx, key, doc).Err(); err != nil {

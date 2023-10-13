@@ -3,7 +3,8 @@ name: test-golang
 on: [push, pull_request]
 
 jobs:
-  uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
+  common:
+    uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
 
   steps:
     - name: Run tests

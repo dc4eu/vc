@@ -3,8 +3,11 @@ package kv
 import (
 	"context"
 	"time"
+	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -14,7 +17,7 @@ type Service struct {
 	redisClient *redis.Client
 	cfg         *model.Cfg
 	log         *logger.Log
-	probeStore  *model.ProbeStore
+	probeStore  *apiv1_status.StatusProbeStore
 
 	Doc *Doc
 }
@@ -24,7 +27,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 	c := &Service{
 		cfg:        cfg,
 		log:        log,
-		probeStore: &model.ProbeStore{},
+		probeStore: &apiv1_status.StatusProbeStore{},
 	}
 
 	c.redisClient = redis.NewClient(&redis.Options{
@@ -44,15 +47,15 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 }
 
 // Status returns the status of the database
-func (c *Service) Status(ctx context.Context) *model.Probe {
-	if time.Now().Before(c.probeStore.NextCheck) {
+func (c *Service) Status(ctx context.Context) *apiv1_status.StatusProbe {
+	if time.Now().Before(c.probeStore.NextCheck.AsTime()) {
 		return c.probeStore.PreviousResult
 	}
-	probe := &model.Probe{
+	probe := &apiv1_status.StatusProbe{
 		Name:          "kv",
 		Healthy:       true,
 		Message:       "OK",
-		LastCheckedTS: time.Now(),
+		LastCheckedTS: timestamppb.Now(),
 	}
 
 	_, err := c.redisClient.Ping(ctx).Result()
@@ -61,7 +64,7 @@ func (c *Service) Status(ctx context.Context) *model.Probe {
 		probe.Healthy = false
 	}
 	c.probeStore.PreviousResult = probe
-	c.probeStore.NextCheck = time.Now().Add(time.Second * 10)
+	c.probeStore.NextCheck = timestamppb.New(time.Now().Add(time.Second * 10))
 
 	return probe
 }

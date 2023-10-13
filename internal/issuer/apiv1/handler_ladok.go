@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
@@ -20,6 +21,16 @@ type PDFSignReply struct {
 }
 
 // PDFSign is the request to sign pdf
+//
+//	@Summary		Sign pdf
+//	@ID				ladok-pdf-sign
+//	@Description	sign base64 encoded PDF
+//	@Tags			ladok,pdf
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}		PDFSignReply
+//	@Param			req	body PDFSignRequest true " "
+//	@Router			/ladok/pdf/sign [post]
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
 	if err := helpers.Check(req, c.log); err != nil {
 		return nil, err
@@ -63,6 +74,16 @@ type PDFValidateReply struct {
 }
 
 // PDFValidate is the handler for verify pdf
+//
+//	@Summary		Validate pdf
+//	@ID				ladok-pdf-validate
+//	@Description	validate a signed base64 encoded PDF
+//	@Tags			ladok,pdf
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}		PDFValidateReply
+//	@Param			req	body PDFValidateRequest true " "
+//	@Router			/ladok/pdf/validate [post]
 func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*types.Validation, error) {
 	validateCandidate := &types.Document{
 		Data: req.PDF,
@@ -86,6 +107,16 @@ type PDFGetSignedReply struct {
 }
 
 // PDFGetSigned is the request to get signed pdfs
+//
+//	@Summary		fetch singed pdf
+//	@ID				ladok-pdf-fetch
+//	@Description	fetch a singed pdf
+//	@Tags			ladok,pdf
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}		PDFGetSignedReply
+//	@Param			req	body PDFValidateRequest true " "
+//	@Router			/ladok/pdf/:transaction_id [get]
 func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*PDFGetSignedReply, error) {
 	if !c.kv.Doc.ExistsSigned(ctx, req.TransactionID) {
 		return &PDFGetSignedReply{Message: "Document does not exist, please try again later"}, nil
@@ -119,6 +150,16 @@ type PDFRevokeReply struct {
 }
 
 // PDFRevoke is the request to revoke pdf
+//
+//	@Summary		revoke signed pdf
+//	@ID				ladok-pdf-revoke
+//	@Description	revoke a singed pdf
+//	@Tags			ladok,pdf
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}		PDFRevokeReply
+//	@Param			req	body PDFValidateRequest true " "
+//	@Router			/ladok/pdf/revoke/:transaction_id [put]
 func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevokeReply, error) {
 	if err := c.kv.Doc.SaveRevoked(ctx, req.TransactionID); err != nil {
 		return &PDFRevokeReply{Status: false}, err
@@ -127,7 +168,7 @@ func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevo
 }
 
 // Status return status for each ladok instance
-func (c *Client) Status(ctx context.Context) (*model.Health, error) {
+func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	probes := model.Probes{}
 	probes = append(probes, c.kv.Status(ctx))
 

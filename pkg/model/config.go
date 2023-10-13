@@ -2,7 +2,8 @@ package model
 
 // APIServer holds the api server configuration
 type APIServer struct {
-	Addr string `yaml:"addr" validate:"required"`
+	Addr       string            `yaml:"addr" validate:"required"`
+	PublicKeys map[string]string `yaml:"public_keys"`
 }
 
 // Mongo holds the database configuration

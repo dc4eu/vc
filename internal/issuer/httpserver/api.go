@@ -2,8 +2,8 @@ package httpserver
 
 import (
 	"context"
+	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/internal/issuer/apiv1"
-	"vc/pkg/model"
 
 	"github.com/masv3971/gosunetca/types"
 )
@@ -17,5 +17,5 @@ type Apiv1 interface {
 
 	Get(ctx context.Context, indata *apiv1.GetRequest) (*apiv1.GetReply, error)
 
-	Status(ctx context.Context) (*model.Health, error)
+	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 }

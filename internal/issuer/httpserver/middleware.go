@@ -43,6 +43,16 @@ func (s *Service) middlewareAuthLog(ctx context.Context) gin.HandlerFunc {
 	}
 }
 
+func (s *Service) middlewareValidationCert(ctx context.Context) gin.HandlerFunc {
+	log := s.logger.New("http")
+	return func(c *gin.Context) {
+		s.server.TLSConfig = s.tlsConfig
+		c.Next()
+		//log.Info("cert", "status", c.Writer.Status(), "url", c.Request.URL.String(), "method", c.Request.Method, "req_id", c.GetString("req_id"))
+		log.Info("applying TLS config")
+	}
+}
+
 func (s *Service) middlewareCrash(ctx context.Context) gin.HandlerFunc {
 	log := s.logger.New("http")
 	return func(c *gin.Context) {

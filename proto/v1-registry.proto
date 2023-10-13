@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package v1.registry;
+
+option go_package = "vc/internal/gen/registry/apiv1.registry";
+
+import "v1-status-model.proto";
+
+service RegistryService {
+    rpc Add (AddRequest) returns (AddReply) {}
+    rpc Revoke (RevokeRequest) returns (RevokeReply) {}
+    rpc Validate (ValidateRequest) returns (ValidateReply) {}
+    rpc Status (v1.status.StatusRequest) returns (v1.status.StatusReply) {}
+}
+
+message AddRequest {
+    string Entity = 1;
+}
+
+message AddReply {
+    bool Status = 1; 
+}
+
+message RevokeRequest {
+    string Entity = 1;
+}
+
+message RevokeReply {
+    bool Status = 1;
+}
+
+message ValidateRequest {
+    string Entity = 1;
+}
+
+message ValidateReply {
+    bool Valid = 1;
+}

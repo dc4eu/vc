@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 	"time"
 	"vc/internal/issuer/apiv1"
@@ -26,6 +27,7 @@ type Service struct {
 	apiv1       Apiv1
 	gin         *gin.Engine
 	routerGroup routerGroup
+	tlsConfig   *tls.Config
 }
 
 // New creates a new httpserver service
@@ -74,6 +76,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/get", s.endpointGenericGet)
 
 	rgLadokPDFv1 := rgAPIv1.Group("/ladok/pdf")
+	rgLadokPDFv1.Use(s.middlewareValidationCert(ctx))
 	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/sign", s.endpointSignPDF)
 	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/validate", s.endpointValidatePDF)
 	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodGet, "/:transaction_id", s.endpointGetSignedPDF)

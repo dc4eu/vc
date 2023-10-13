@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	apiv1_status "vc/internal/gen/status/apiv1.status"
 )
 
 var (
@@ -35,13 +36,13 @@ type ProbeStore struct {
 }
 
 // Probes contains probes
-type Probes []*Probe
+type Probes []*apiv1_status.StatusProbe
 
 // Check checks the status of each status, return the first that does not pass.
-func (probes Probes) Check(serviceName string) *Health {
-	health := &Health{
+func (probes Probes) Check(serviceName string) *apiv1_status.StatusReply {
+	health := &apiv1_status.StatusReply{
 		ServiceName: serviceName,
-		Probes:      []*Probe{},
+		Probes:      []*apiv1_status.StatusProbe{},
 		Status:      fmt.Sprintf(StatusOK, serviceName),
 	}
 

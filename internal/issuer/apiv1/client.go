@@ -11,6 +11,10 @@ import (
 	"vc/pkg/rpcclient"
 )
 
+//	@title		Test title
+//	@version	0.1.0
+//	@BasePath	/api/v1
+
 // Client holds the public api object
 type Client struct {
 	pda1      *pda1.Service

@@ -6,7 +6,7 @@ jobs:
   test:
     uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
 
-  steps:
-    - name: Run tests
-      run: |
-        make test
+    steps:
+      - name: Run tests
+        run: |
+          make test

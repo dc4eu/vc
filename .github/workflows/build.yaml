@@ -6,7 +6,7 @@ jobs:
   build:
     uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
 
-  steps:
-    - name: Build
-      run: |
-        make build
+    steps:
+      - name: Build
+        run: |
+          make build

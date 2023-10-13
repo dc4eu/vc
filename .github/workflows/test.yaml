@@ -15,5 +15,4 @@ jobs:
           cache-dependency-path: "**/*.sum"
 
       - name: Run tests
-        run: |
-          make test
+        run: make test

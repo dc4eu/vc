@@ -9,6 +9,8 @@ common:
 issuer:
   api_server:
     addr: issuer:8080
+    public_keys:
+      ladok: cert/ladok_utv_dev.crt
   http_proxy:
   log:
     level:

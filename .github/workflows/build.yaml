@@ -3,7 +3,7 @@ name: build-golang
 on: [push, pull_request]
 
 jobs:
-  common:
+  build:
     uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
 
   steps:

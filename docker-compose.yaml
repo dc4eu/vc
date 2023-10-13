@@ -17,6 +17,8 @@ services:
     depends_on:
       - redis
       - mongo
+      - datastore
+      - registry
     networks:
       - vc-net
     environment:
@@ -37,7 +39,6 @@ services:
     depends_on:
       - redis
       - mongo
-      - issuer
     networks:
       - vc-net
     environment:
@@ -58,12 +59,11 @@ services:
     depends_on:
       - redis
       - mongo
-      - issuer
     networks:
       - vc-net
     environment:
       - "VC_CONFIG_YAML=config.yaml"
-
+ 
   registry:
     container_name: "vc_registry"
     image: docker.sunet.se/dc4eu/registry:latest
@@ -79,7 +79,6 @@ services:
     depends_on:
       - redis
       - mongo
-      - issuer
     networks:
       - vc-net
     environment:
@@ -93,8 +92,10 @@ services:
       - 8404:8404
     volumes:
       - ./dev_haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./pki/vc.pem:/etc/ssl/vc.pem:ro
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.200
 
   redis:
     image: redis:alpine

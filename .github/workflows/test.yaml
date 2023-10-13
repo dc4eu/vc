@@ -1,12 +1,23 @@
 name: test-golang
-
 on: [push, pull_request]
 
 jobs:
-  test:
-    uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
 
     steps:
+
+
+jobs:
+  checkout_and_install_go:
+    runs-on: ubuntu-latest
+  test:
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
       - name: Run tests
         run: |
           make test

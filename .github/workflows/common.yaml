@@ -1,8 +1,6 @@
 name: Checkout repository and install Go
-
 on:
   workflow_call:
-
 jobs:
   checkout_and_install_go:
     runs-on: ubuntu-latest

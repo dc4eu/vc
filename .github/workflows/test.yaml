@@ -3,7 +3,7 @@ name: test-golang
 on: [push, pull_request]
 
 jobs:
-  uses: ./.github/workflows/common.yaml@main
+  uses: ./.github/workflows/common.yaml@masv_pipeline
 
   steps:
     - name: Build

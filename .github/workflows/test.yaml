@@ -2,11 +2,6 @@ name: test-golang
 on: [push, pull_request]
 
 jobs:
-
-    steps:
-
-
-jobs:
   checkout_and_install_go:
     runs-on: ubuntu-latest
   test:

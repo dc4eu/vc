@@ -1,12 +1,18 @@
 name: build-golang
-
 on: [push, pull_request]
 
 jobs:
-  build:
-    uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
-
+  test:
+    runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
       - name: Build
         run: |
           make build

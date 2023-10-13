@@ -1,4 +1,4 @@
-name: test-golang
+name: build-golang
 
 on: [push, pull_request]
 
@@ -6,6 +6,6 @@ jobs:
   uses: SUNET/vc/.github/workflows/common.yaml@masv_pipeline
 
   steps:
-    - name: Run tests
+    - name: Build
       run: |
-        make test
+        make build

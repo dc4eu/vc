@@ -1,0 +1,17 @@
+name: Checkout repository and install Go
+
+on:
+  workflow_call:
+
+jobs:
+  checkout_and_install_go:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod

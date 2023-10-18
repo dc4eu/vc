@@ -41,9 +41,11 @@ type Probes []*apiv1_status.StatusProbe
 // Check checks the status of each status, return the first that does not pass.
 func (probes Probes) Check(serviceName string) *apiv1_status.StatusReply {
 	health := &apiv1_status.StatusReply{
-		ServiceName: serviceName,
-		Probes:      []*apiv1_status.StatusProbe{},
-		Status:      fmt.Sprintf(StatusOK, serviceName),
+		Data: &apiv1_status.StatusReply_Data{
+			ServiceName: serviceName,
+			Probes:      []*apiv1_status.StatusProbe{},
+			Status:      fmt.Sprintf(StatusOK, serviceName),
+		},
 	}
 
 	if probes == nil {
@@ -53,9 +55,9 @@ func (probes Probes) Check(serviceName string) *apiv1_status.StatusReply {
 
 	for _, probe := range probes {
 		if !probe.Healthy {
-			health.Status = fmt.Sprintf(StatusFail, serviceName)
+			health.Data.Status = fmt.Sprintf(StatusFail, serviceName)
 		}
-		health.Probes = append(health.Probes, probe)
+		health.Data.Probes = append(health.Data.Probes, probe)
 	}
 
 	return health

@@ -8,3 +8,9 @@ type Meta struct {
 	Timestamp    time.Time `json:"timestamp" bson:"timestamp"`
 	DocumentType string    `json:"document_type"`
 }
+
+// Response is a generic type for responses
+type Response struct {
+	Data  any `json:"data"`
+	Error any `json:"error"`
+}

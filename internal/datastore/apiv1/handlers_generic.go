@@ -15,6 +15,17 @@ type GenericUploadReply struct {
 }
 
 // GenericUpload uploads a generic document with a set of attributes
+//
+//	@Summary		Generic upload
+//	@ID				generic-upload
+//	@Description	Upload endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	model.Response{data=GenericUploadReply}	"Success"
+//	@Failure		400	{object}	model.Response{error=helpers.Error}		"Bad Request"
+//	@Param			req	body		model.GenericUpload						true	" "
+//	@Router			/upload [post]
 func (c *Client) GenericUpload(ctx context.Context, req *model.GenericUpload) (*GenericUploadReply, error) {
 	//helpers.Check(req, c.logger.New("validate"))
 	if err := c.db.GenericColl.Save(ctx, req); err != nil {
@@ -24,6 +35,17 @@ func (c *Client) GenericUpload(ctx context.Context, req *model.GenericUpload) (*
 }
 
 // GenericList return a list of generic documents
+//
+//	@Summary		Generic list documents
+//	@ID				generic-list
+//	@Description	List documents endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	model.Response{data=[]model.GenericUpload}	"Success"
+//	@Failure		400	{object}	model.Response{error=helpers.Error}			"Bad Request"
+//	@Param			req	body		model.GenericAttributes						true	" "
+//	@Router			/list [post]
 func (c *Client) GenericList(ctx context.Context, req *model.GenericAttributes) ([]model.GenericUpload, error) {
 	list, err := c.db.GenericColl.List(ctx, req)
 	if err != nil {
@@ -33,6 +55,17 @@ func (c *Client) GenericList(ctx context.Context, req *model.GenericAttributes) 
 }
 
 // GenericDocument return a specific generic document
+//
+//	@Summary		Generic get one document
+//	@ID				generic-get
+//	@Description	Get document endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	model.Response{data=model.GenericUpload}	"Success"
+//	@Failure		400	{object}	model.Response{error=helpers.Error}		"Bad Request"
+//	@Param			req	body		model.GenericAttributes					true	" "
+//	@Router			/document [post]
 func (c *Client) GenericDocument(ctx context.Context, req *model.GenericAttributes) (*model.GenericUpload, error) {
 	doc, err := c.db.GenericColl.Get(ctx, req)
 	if err != nil {
@@ -47,6 +80,17 @@ type GenericQRReply struct {
 }
 
 // GenericQR returns a QR code for a specific generic document
+//
+//	@Summary		Generic QR code generator
+//	@ID				generic-qr
+//	@Description	QR code generator endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	model.Response{data=GenericQRReply}	"Success"
+//	@Failure		400	{object}	model.Response{error=helpers.Error}		"Bad Request"
+//	@Param			req	body		model.GenericAttributes					true	" "
+//	@Router			/qr [post]
 func (c *Client) GenericQR(ctx context.Context, req *model.GenericAttributes) (*GenericQRReply, error) {
 	collectID := "generic"
 	url := fmt.Sprintf("https://example.org/issuer/api/v1/?document_id=%s&collect_id=%s", req.DocumentID, collectID)

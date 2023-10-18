@@ -1,0 +1,222 @@
+basePath: /issuer/api/v1
+definitions:
+  apiv1.PDFGetSignedReply:
+    properties:
+      document:
+        $ref: '#/definitions/types.Document'
+      message:
+        type: string
+    type: object
+  apiv1.PDFRevokeReply:
+    properties:
+      status:
+        type: boolean
+    type: object
+  apiv1.PDFSignReply:
+    properties:
+      transaction_id:
+        type: string
+    required:
+    - transaction_id
+    type: object
+  apiv1.PDFSignRequest:
+    properties:
+      pdf:
+        type: string
+    required:
+    - pdf
+    type: object
+  apiv1.PDFValidateReply:
+    properties:
+      msg:
+        type: string
+    type: object
+  apiv1.PDFValidateRequest:
+    properties:
+      pdf:
+        type: string
+    type: object
+  helpers.Error:
+    properties:
+      details: {}
+      title:
+        type: string
+    type: object
+  model.Response:
+    properties:
+      data: {}
+      error: {}
+    type: object
+  types.Document:
+    properties:
+      create_ts:
+        type: integer
+      data:
+        type: string
+      error:
+        type: string
+      location:
+        type: string
+      message:
+        type: string
+      modify_ts:
+        type: integer
+      reason:
+        type: string
+      revoked_ts:
+        type: integer
+      transaction_id:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Issuer API
+  version: 0.1.0
+paths:
+  /ladok/pdf/{transaction_id}:
+    get:
+      consumes:
+      - application/json
+      description: fetch a singed pdf
+      operationId: ladok-pdf-fetch
+      parameters:
+      - description: transaction_id
+        in: path
+        name: transaction_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiv1.PDFGetSignedReply'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/helpers.Error'
+              type: object
+      summary: fetch singed pdf
+      tags:
+      - ladok
+  /ladok/pdf/revoke/{transaction_id}:
+    put:
+      consumes:
+      - application/json
+      description: revoke a singed pdf
+      operationId: ladok-pdf-revoke
+      parameters:
+      - description: transaction_id
+        in: path
+        name: transaction_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiv1.PDFRevokeReply'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/helpers.Error'
+              type: object
+      summary: revoke signed pdf
+      tags:
+      - ladok
+  /ladok/pdf/sign:
+    post:
+      consumes:
+      - application/json
+      description: sign base64 encoded PDF
+      operationId: ladok-pdf-sign
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.PDFSignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiv1.PDFSignReply'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/helpers.Error'
+              type: object
+      summary: Sign pdf
+      tags:
+      - ladok
+  /ladok/pdf/validate:
+    post:
+      consumes:
+      - application/json
+      description: validate a signed base64 encoded PDF
+      operationId: ladok-pdf-validate
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.PDFValidateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiv1.PDFValidateReply'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                error:
+                  $ref: '#/definitions/helpers.Error'
+              type: object
+      summary: Validate pdf
+      tags:
+      - ladok
+swagger: "2.0"

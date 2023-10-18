@@ -11,9 +11,13 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
+	_ "vc/docs/datastore"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Service is the service object for httpserver
@@ -72,6 +76,9 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
 	rgAPIV1 := rgRoot.Group("api/v1")
+
+	rgDocs := rgRoot.Group("/swagger")
+	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	rgEHIC := rgAPIV1.Group("/ehic")
 	s.regEndpoint(ctx, rgEHIC, "POST", "/upload", s.endpointEHICUpload)

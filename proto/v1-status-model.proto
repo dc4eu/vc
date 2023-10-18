@@ -10,10 +10,12 @@ option go_package = "vc/internal/gen/status/apiv1.status";
 message StatusRequest {}
 
 message StatusReply {
-    string serviceName = 1;
-    repeated StatusProbe probes = 2;
-    string status = 3;
-
+    message Data {
+        string serviceName = 1;
+        repeated StatusProbe probes = 2;
+        string status = 3;
+    }
+    Data data = 10;
 }
 
 message StatusProbe {

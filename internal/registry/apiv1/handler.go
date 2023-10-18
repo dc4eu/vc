@@ -64,7 +64,6 @@ func (c *Client) Validate(ctx context.Context, req *apiv1_registry.ValidateReque
 // Status return status for each ladok instance
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	probes := model.Probes{}
-	//probes = append(probes, c.kv.Status(ctx))
 
 	status := probes.Check("registry")
 

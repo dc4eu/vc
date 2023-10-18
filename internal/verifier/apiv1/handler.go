@@ -10,13 +10,6 @@ import (
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	probes := model.Probes{}
 
-	//for _, ladok := range c.ladokInstances {
-	//	redis := ladok.Atom.StatusRedis(ctx)
-	//	ladok := ladok.Rest.StatusLadok(ctx)
-
-	//	manyStatus = append(manyStatus, redis)
-	//	manyStatus = append(manyStatus, ladok)
-	//}
 	status := probes.Check("verifier")
 
 	return status, nil

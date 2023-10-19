@@ -14,7 +14,6 @@ import (
 
 	_ "vc/docs/issuer"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -69,7 +68,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.server.IdleTimeout = time.Second * 90
 
 	// Middlewares
-	s.gin.Use(cors.Default())
+	//s.gin.Use(cors.Default())
 	s.gin.Use(s.middlewareTraceID(ctx))
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))

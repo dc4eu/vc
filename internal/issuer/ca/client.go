@@ -2,6 +2,7 @@ package ca
 
 import (
 	"context"
+	"os"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/kv"
 	"vc/pkg/logger"
@@ -38,6 +39,7 @@ func New(ctx context.Context, kvService *kv.Service, dbService *db.Service, cfg 
 		Location:  cfg.Issuer.CA.Location,
 		Reason:    cfg.Issuer.CA.Reason,
 		UserAgent: "vc",
+		ProxyURL:  os.Getenv("HTTP_PROXY"),
 	})
 	if err != nil {
 		return nil, err

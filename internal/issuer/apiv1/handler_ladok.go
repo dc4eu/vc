@@ -55,6 +55,7 @@ func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignRepl
 	go func() error {
 		c.log.Debug("sending document to CA")
 		if err := c.ca.SignDocument(ctx, unsignedDocument); err != nil {
+			c.log.Error(err, "failed to send document to CA")
 			return err
 		}
 		return nil

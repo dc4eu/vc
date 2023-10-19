@@ -11,9 +11,13 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
+	_ "vc/docs/datastore"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Service is the service object for httpserver
@@ -66,30 +70,33 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))
 	s.gin.Use(s.middlewareCrash(ctx))
-	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, gin.H{"error": helpers.Problem404(), "data": nil}) })
+	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, helpers.Problem404()) })
 
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
+	rgDocs := rgRoot.Group("/swagger")
+	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	rgAPIV1 := rgRoot.Group("api/v1")
 
 	rgEHIC := rgAPIV1.Group("/ehic")
-	s.regEndpoint(ctx, rgEHIC, "POST", "/upload", s.endpointEHICUpload)
-	s.regEndpoint(ctx, rgEHIC, "GET", "/:upload_id", s.endpointEHICID)
+	s.regEndpoint(ctx, rgEHIC, http.MethodPost, "/upload", s.endpointEHICUpload)
+	s.regEndpoint(ctx, rgEHIC, http.MethodGet, "/:upload_id", s.endpointEHICID)
 
 	rgPDA1 := rgAPIV1.Group("/pda1")
-	s.regEndpoint(ctx, rgPDA1, "POST", "/upload", s.endpointPDA1Upload)
-	s.regEndpoint(ctx, rgPDA1, "GET", "/:upload_id", s.endpointPDA1ID)
-	s.regEndpoint(ctx, rgPDA1, "POST", "/", s.endpointPDA1Search)
+	s.regEndpoint(ctx, rgPDA1, http.MethodPost, "/upload", s.endpointPDA1Upload)
+	s.regEndpoint(ctx, rgPDA1, http.MethodGet, "/:upload_id", s.endpointPDA1ID)
+	s.regEndpoint(ctx, rgPDA1, http.MethodPost, "/", s.endpointPDA1Search)
 
-	s.regEndpoint(ctx, rgAPIV1, "POST", "/upload", s.endpointGenericUpload)
-	s.regEndpoint(ctx, rgAPIV1, "POST", "/list", s.endpointGenericList)
-	s.regEndpoint(ctx, rgAPIV1, "POST", "/document", s.endpointGenericDocument)
-	s.regEndpoint(ctx, rgAPIV1, "POST", "/qr", s.endpointGenericQR)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointGenericUpload)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/list", s.endpointGenericList)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGenericDocument)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/qr", s.endpointGenericQR)
 
 	rgLadok := rgAPIV1.Group("/ladok")
-	s.regEndpoint(ctx, rgLadok, "POST", "/upload", s.endpointLadokUpload)
-	s.regEndpoint(ctx, rgLadok, "GET", "/:upload_id", s.endpointLadokID)
+	s.regEndpoint(ctx, rgLadok, http.MethodPost, "/upload", s.endpointLadokUpload)
+	s.regEndpoint(ctx, rgLadok, http.MethodGet, "/:upload_id", s.endpointLadokID)
 
 	// Run http server
 	go func() {
@@ -107,14 +114,12 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, handler func(context.Context, *gin.Context) (interface{}, error)) {
 	rg.Handle(method, path, func(c *gin.Context) {
 		res, err := handler(ctx, c)
-
-		status := 200
-
 		if err != nil {
-			status = 400
+			renderContent(c, 400, gin.H{"error": helpers.NewErrorFromError(err)})
+			return
 		}
 
-		renderContent(c, status, gin.H{"data": res, "error": helpers.NewErrorFromError(err)})
+		renderContent(c, 200, res)
 	})
 }
 
@@ -125,7 +130,7 @@ func renderContent(c *gin.Context, code int, data interface{}) {
 	case "*/*": // curl
 		c.JSON(code, data)
 	default:
-		c.JSON(406, gin.H{"data": nil, "error": helpers.NewErrorDetails("not_acceptable", "Accept header is invalid. It should be \"application/json\".")})
+		c.JSON(406, gin.H{"error": helpers.NewErrorDetails("not_acceptable", "Accept header is invalid. It should be \"application/json\".")})
 	}
 }
 

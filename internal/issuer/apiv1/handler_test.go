@@ -134,7 +134,11 @@ func TestSignPDF(t *testing.T) {
 				PDF: mockBase64PDF,
 			},
 			want: &PDFSignReply{
-				TransactionID: "facd0582-565a-11ee-bf9b-63c55c70830a",
+				Data: struct {
+					TransactionID string `json:"transaction_id" validate:"required"`
+				}{
+					TransactionID: "facd0582-565a-11ee-bf9b-63c55c70830a",
+				},
 			},
 		},
 	}
@@ -148,7 +152,7 @@ func TestSignPDF(t *testing.T) {
 
 			got, err := client.PDFSign(context.Background(), tt.have)
 			assert.NoError(t, err)
-			_, err = uuid.Parse(got.TransactionID)
+			_, err = uuid.Parse(got.Data.TransactionID)
 			assert.NoError(t, err)
 
 		})

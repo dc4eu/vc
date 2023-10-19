@@ -24,6 +24,10 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("Error: [%s] %+v", e.Title, e.Details)
 }
 
+type ErrorResponse struct {
+	Error *Error `json:"error"`
+}
+
 func NewError(id string) *Error {
 	return &Error{Title: id}
 }

@@ -147,7 +147,7 @@ services:
     networks:
       - vc-net
     environment:
-      - "CA_SLEEP=20"
+      - "CA_SLEEP=2"
       - "CA_ADDR=vc_ca:8080"
 
 networks:

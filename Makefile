@@ -126,17 +126,13 @@ swagger-fmt:
 	swag fmt
 
 swagger-issuer:
-	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency
-	swagger-fmt
+	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency --packageName docs
 
 swagger-registry:
-	swag init -d internal/registry/apiv1/ -g client.go --output docs/registry --parseDependency
-	swagger-fmt
+	swag init -d internal/registry/apiv1/ -g client.go --output docs/registry --parseDependency --packageName docs
 
 swagger-datastore:
-	swag init -d internal/datastore/apiv1/ -g client.go --output docs/datastore --parseDependency
-	swagger-fmt
+	swag init -d internal/datastore/apiv1/ -g client.go --output docs/datastore --parseDependency --packageName docs
 
 swagger-verifier:
-	swag init -d internal/verifier/apiv1/ -g client.go --output docs/verifier --parseDependency
-	swagger-fmt
+	swag init -d internal/verifier/apiv1/ -g client.go --output docs/verifier --parseDependency --packageName docs

@@ -19,8 +19,9 @@ type Document struct {
 
 // Validation is the reply for the validate endpoint
 type Validation struct {
-	Valid bool   `json:"valid"`
-	Error string `json:"error,omitempty"`
+	Valid   bool   `json:"valid"`
+	Message string `json:"message"`
+	Error   string `json:"error,omitempty"`
 }
 
 // SignRequest is the request for the sign endpoint

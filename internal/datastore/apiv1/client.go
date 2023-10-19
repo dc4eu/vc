@@ -7,6 +7,10 @@ import (
 	"vc/pkg/model"
 )
 
+//	@title		Datastore API
+//	@version	0.1.0
+//	@BasePath	/datastore/api/v1
+
 // Client holds the public api object
 type Client struct {
 	cfg    *model.Cfg

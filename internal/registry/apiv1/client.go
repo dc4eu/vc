@@ -14,6 +14,10 @@ type Client struct {
 	tree   *tree.Service
 }
 
+//	@title		Registry API
+//	@version	0.1.0
+//	@BasePath	/registry/api/v1
+
 // New creates a new instance of the public api
 func New(ctx context.Context, cfg *model.Cfg, tree *tree.Service, logger *logger.Log) (*Client, error) {
 	c := &Client{

@@ -11,7 +11,9 @@ import (
 
 // GenericUploadReply is the reply for a generic upload
 type GenericUploadReply struct {
-	Status string `json:"status"`
+	Data struct {
+		Status string `json:"status"`
+	} `json:"data"`
 }
 
 // GenericUpload uploads a generic document with a set of attributes
@@ -22,16 +24,28 @@ type GenericUploadReply struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	model.Response{data=GenericUploadReply}	"Success"
-//	@Failure		400	{object}	model.Response{error=helpers.Error}		"Bad Request"
-//	@Param			req	body		model.GenericUpload						true	" "
+//	@Success		200	{object}	GenericUploadReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		model.GenericUpload		true	" "
 //	@Router			/upload [post]
 func (c *Client) GenericUpload(ctx context.Context, req *model.GenericUpload) (*GenericUploadReply, error) {
 	//helpers.Check(req, c.logger.New("validate"))
 	if err := c.db.GenericColl.Save(ctx, req); err != nil {
 		return nil, err
 	}
-	return &GenericUploadReply{Status: "OK"}, nil
+	reply := &GenericUploadReply{
+		Data: struct {
+			Status string `json:"status"`
+		}{
+			Status: "OK",
+		},
+	}
+	return reply, nil
+}
+
+// GenericListReply is the reply for a generic list of documents
+type GenericListReply struct {
+	Data []model.GenericUpload `json:"data"`
 }
 
 // GenericList return a list of generic documents
@@ -42,16 +56,25 @@ func (c *Client) GenericUpload(ctx context.Context, req *model.GenericUpload) (*
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	model.Response{data=[]model.GenericUpload}	"Success"
-//	@Failure		400	{object}	model.Response{error=helpers.Error}			"Bad Request"
-//	@Param			req	body		model.GenericAttributes						true	" "
+//	@Success		200	{object}	GenericListReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		model.GenericAttributes	true	" "
 //	@Router			/list [post]
-func (c *Client) GenericList(ctx context.Context, req *model.GenericAttributes) ([]model.GenericUpload, error) {
-	list, err := c.db.GenericColl.List(ctx, req)
+func (c *Client) GenericList(ctx context.Context, req *model.GenericAttributes) (*GenericListReply, error) {
+	docs, err := c.db.GenericColl.List(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return list, nil
+	reply := &GenericListReply{
+		Data: docs,
+	}
+
+	return reply, nil
+}
+
+// GenericDocumentReply is the reply for a generic document
+type GenericDocumentReply struct {
+	Data *model.GenericUpload `json:"data"`
 }
 
 // GenericDocument return a specific generic document
@@ -62,21 +85,26 @@ func (c *Client) GenericList(ctx context.Context, req *model.GenericAttributes) 
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	model.Response{data=model.GenericUpload}	"Success"
-//	@Failure		400	{object}	model.Response{error=helpers.Error}		"Bad Request"
-//	@Param			req	body		model.GenericAttributes					true	" "
+//	@Success		200	{object}	GenericDocumentReply	"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		model.GenericAttributes	true	" "
 //	@Router			/document [post]
-func (c *Client) GenericDocument(ctx context.Context, req *model.GenericAttributes) (*model.GenericUpload, error) {
+func (c *Client) GenericDocument(ctx context.Context, req *model.GenericAttributes) (*GenericDocumentReply, error) {
 	doc, err := c.db.GenericColl.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return doc, nil
+	reply := &GenericDocumentReply{
+		Data: doc,
+	}
+	return reply, nil
 }
 
 // GenericQRReply is the reply for a generic QR code
 type GenericQRReply struct {
-	Base64Image string `json:"base64_image"`
+	Data struct {
+		Base64Image string `json:"base64_image"`
+	} `json:"data"`
 }
 
 // GenericQR returns a QR code for a specific generic document
@@ -87,9 +115,9 @@ type GenericQRReply struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	model.Response{data=GenericQRReply}	"Success"
-//	@Failure		400	{object}	model.Response{error=helpers.Error}		"Bad Request"
-//	@Param			req	body		model.GenericAttributes					true	" "
+//	@Success		200	{object}	GenericQRReply			"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		model.GenericAttributes	true	" "
 //	@Router			/qr [post]
 func (c *Client) GenericQR(ctx context.Context, req *model.GenericAttributes) (*GenericQRReply, error) {
 	collectID := "generic"
@@ -103,7 +131,11 @@ func (c *Client) GenericQR(ctx context.Context, req *model.GenericAttributes) (*
 	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
 
 	reply := &GenericQRReply{
-		Base64Image: qrBase64,
+		Data: struct {
+			Base64Image string `json:"base64_image"`
+		}{
+			Base64Image: qrBase64,
+		},
 	}
 
 	return reply, nil

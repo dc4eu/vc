@@ -19,8 +19,8 @@ type Apiv1 interface {
 	PDA1Search(ctx context.Context, req *apiv1.PDA1SearchRequest) (*pda1.Document, error)
 
 	GenericUpload(ctx context.Context, req *model.GenericUpload) (*apiv1.GenericUploadReply, error)
-	GenericList(ctx context.Context, req *model.GenericAttributes) ([]model.GenericUpload, error)
-	GenericDocument(ctx context.Context, req *model.GenericAttributes) (*model.GenericUpload, error)
+	GenericList(ctx context.Context, req *model.GenericAttributes) (*apiv1.GenericListReply, error)
+	GenericDocument(ctx context.Context, req *model.GenericAttributes) (*apiv1.GenericDocumentReply, error)
 	GenericQR(ctx context.Context, req *model.GenericAttributes) (*apiv1.GenericQRReply, error)
 
 	LadokUpload(ctx context.Context, req *apiv1.LadokUploadRequest) (*apiv1.LadokUploadReply, error)

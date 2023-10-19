@@ -22,15 +22,6 @@ func (c *Client) Add(ctx context.Context, req *apiv1_registry.AddRequest) (*apiv
 	return nil, nil
 }
 
-// RevokeRequest is the request for verify pdf
-type RevokeRequest struct {
-	Entity string `json:"entity" validate:"required"`
-}
-
-// RevokeReply is the reply for verify pdf
-type RevokeReply struct {
-}
-
 // Revoke revokes an entity in the registry
 func (c *Client) Revoke(ctx context.Context, req *apiv1_registry.RevokeRequest) (*apiv1_registry.RevokeReply, error) {
 	if err := c.tree.Remove(req.Entity); err != nil {
@@ -41,24 +32,35 @@ func (c *Client) Revoke(ctx context.Context, req *apiv1_registry.RevokeRequest) 
 	return nil, nil
 }
 
-// ValidateRequest validates an entity in the registry
-type ValidateRequest struct {
-	Entity string `json:"entity" validate:"required"`
-}
-
 // ValidateReply is the reply for registry
 type ValidateReply struct {
-	Valid bool `json:"valid"`
+	Data *apiv1_registry.ValidateReply `json:"data"`
 }
 
 // Validate validates an entity in the registry
-func (c *Client) Validate(ctx context.Context, req *apiv1_registry.ValidateRequest) (*apiv1_registry.ValidateReply, error) {
+//
+//	@Summary		Validate entity
+//	@ID				registry-validate
+//	@Description	validates an entity in the registry
+//	@Tags			registry
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	PDFSignReply			"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		PDFSignRequest			true	" "
+//	@Router			/ladok/pdf/sign [post]
+func (c *Client) Validate(ctx context.Context, req *apiv1_registry.ValidateRequest) (*ValidateReply, error) {
 	valid, err := c.tree.Validate(req.Entity)
 	if err != nil {
 		return nil, err
 	}
+	reply := &ValidateReply{
+		Data: &apiv1_registry.ValidateReply{
+			Valid: valid,
+		},
+	}
 
-	return &apiv1_registry.ValidateReply{Valid: valid}, nil
+	return reply, nil
 }
 
 // Status return status for each ladok instance

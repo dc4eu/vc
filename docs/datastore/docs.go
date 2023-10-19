@@ -44,37 +44,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/model.GenericUpload"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.GenericDocumentReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -82,7 +58,7 @@ const docTemplate = `{
         },
         "/list": {
             "post": {
-                "description": "List endpoint",
+                "description": "List documents endpoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -109,40 +85,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/model.GenericUpload"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.GenericListReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -177,37 +126,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiv1.GenericQRReply"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.GenericQRReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -242,37 +167,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiv1.GenericUploadReply"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.GenericUploadReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -280,19 +181,48 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "apiv1.GenericDocumentReply": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.GenericUpload"
+                }
+            }
+        },
+        "apiv1.GenericListReply": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.GenericUpload"
+                    }
+                }
+            }
+        },
         "apiv1.GenericQRReply": {
             "type": "object",
             "properties": {
-                "base64_image": {
-                    "type": "string"
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "base64_image": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "apiv1.GenericUploadReply": {
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "string"
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -450,6 +380,14 @@ const docTemplate = `{
                 }
             }
         },
+        "helpers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/helpers.Error"
+                }
+            }
+        },
         "model.Collect": {
             "type": "object",
             "properties": {
@@ -559,13 +497,6 @@ const docTemplate = `{
                 "revoke": {
                     "$ref": "#/definitions/model.Revoke"
                 }
-            }
-        },
-        "model.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error": {}
             }
         },
         "model.Revoke": {

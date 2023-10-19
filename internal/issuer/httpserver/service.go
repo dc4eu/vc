@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
+	"reflect"
+	"strings"
 	"time"
 	"vc/internal/issuer/apiv1"
 	"vc/pkg/helpers"
@@ -47,6 +49,15 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	}
 
 	apiValidator := validator.New()
+	apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+
+		if name == "-" {
+			return ""
+		}
+
+		return name
+	})
 	binding.Validator = &defaultValidator{
 		Validate: apiValidator,
 	}
@@ -63,11 +74,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))
 	s.gin.Use(s.middlewareCrash(ctx))
-	s.gin.NoRoute(func(c *gin.Context) {
-		//status := http.StatusNotFound
-		//c.JSON(status, gin.H{"error": helpers.Problem404(), "data": nil})
-		c.JSON(http.StatusNotFound, helpers.Problem404())
-	})
+	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, helpers.Problem404()) })
+
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
@@ -107,19 +115,7 @@ func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, method, 
 			return
 		}
 
-		status := 200
-
-		if err != nil {
-			status = 400
-		}
-
-		//	r := model.Response{
-		//		Data:  res,
-		//		Error: helpers.NewErrorFromError(err),
-		//	}
-
-		renderContent(c, status, res)
-		//renderContent(c, status, gin.H{"data": res, "error": helpers.NewErrorFromError(err)})
+		renderContent(c, 200, res)
 	})
 }
 

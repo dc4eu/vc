@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"errors"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
@@ -30,9 +31,9 @@ type PDFSignReply struct {
 //	@Tags			ladok
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	PDFSignReply	"Success"
-//	@Failure		400	{object}	helpers.Error	"Bad Request"
-//	@Param			req	body		PDFSignRequest	true	" "
+//	@Success		200	{object}	PDFSignReply			"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		PDFSignRequest			true	" "
 //	@Router			/ladok/pdf/sign [post]
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
 	if err := helpers.Check(req, c.log); err != nil {
@@ -78,7 +79,8 @@ type PDFValidateRequest struct {
 // PDFValidateReply is the reply for verify pdf
 type PDFValidateReply struct {
 	Data struct {
-		MSG string `json:"msg"`
+		Message string `json:"message"`
+		Valid   bool   `json:"valid"`
 	} `json:"data"`
 }
 
@@ -90,11 +92,11 @@ type PDFValidateReply struct {
 //	@Tags			ladok
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	model.Response{data=PDFValidateReply}	"Success"
-//	@Failure		400	{object}	model.Response{error=helpers.Error}		"Bad Request"
-//	@Param			req	body		PDFValidateRequest						true	" "
+//	@Success		200	{object}	PDFValidateReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		PDFValidateRequest		true	" "
 //	@Router			/ladok/pdf/validate [post]
-func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*types.Validation, error) {
+func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*PDFValidateReply, error) {
 	validateCandidate := &types.Document{
 		Data: req.PDF,
 	}
@@ -102,7 +104,20 @@ func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*typ
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	if res.Error != "" {
+		return nil, helpers.NewErrorFromError(errors.New(res.Error))
+	}
+
+	reply := &PDFValidateReply{
+		Data: struct {
+			Message string `json:"message"`
+			Valid   bool   `json:"valid"`
+		}{
+			Message: res.Message,
+			Valid:   res.Valid,
+		},
+	}
+	return reply, nil
 }
 
 // PDFGetSignedRequest is the request for get signed pdf
@@ -112,8 +127,10 @@ type PDFGetSignedRequest struct {
 
 // PDFGetSignedReply is the reply for the signed pdf
 type PDFGetSignedReply struct {
-	Document *types.Document `json:"document,omitempty"`
-	Message  string          `json:"message,omitempty"`
+	Data struct {
+		Document *types.Document `json:"document,omitempty"`
+		Message  string          `json:"message,omitempty"`
+	} `json:"data"`
 }
 
 // PDFGetSigned is the request to get signed pdfs
@@ -124,13 +141,20 @@ type PDFGetSignedReply struct {
 //	@Tags			ladok
 //	@Accept			json
 //	@Produce		json
-//	@Success		200				{object}	model.Response{data=PDFGetSignedReply}	"Success"
-//	@Failure		400				{object}	model.Response{error=helpers.Error}		"Bad Request"
-//	@Param			transaction_id	path		string									true	"transaction_id"
+//	@Success		200				{object}	PDFGetSignedReply		"Success"
+//	@Failure		400				{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/{transaction_id} [get]
 func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*PDFGetSignedReply, error) {
 	if !c.kv.Doc.ExistsSigned(ctx, req.TransactionID) {
-		return &PDFGetSignedReply{Message: "Document does not exist, please try again later"}, nil
+		return &PDFGetSignedReply{
+			Data: struct {
+				Document *types.Document `json:"document,omitempty"`
+				Message  string          `json:"message,omitempty"`
+			}{
+				Message: "Document does not exist, please try again later",
+			},
+		}, nil
 	}
 
 	signedDoc, err := c.kv.Doc.GetSigned(ctx, req.TransactionID)
@@ -140,13 +164,23 @@ func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*P
 
 	if signedDoc.Error != "" {
 		resp := &PDFGetSignedReply{
-			Message: signedDoc.Error,
+			Data: struct {
+				Document *types.Document `json:"document,omitempty"`
+				Message  string          `json:"message,omitempty"`
+			}{
+				Message: signedDoc.Error,
+			},
 		}
 		return resp, nil
 	}
 
 	return &PDFGetSignedReply{
-		Document: signedDoc,
+		Data: struct {
+			Document *types.Document `json:"document,omitempty"`
+			Message  string          `json:"message,omitempty"`
+		}{
+			Document: signedDoc,
+		},
 	}, nil
 }
 
@@ -157,7 +191,9 @@ type PDFRevokeRequest struct {
 
 // PDFRevokeReply is the reply for revoke pdf
 type PDFRevokeReply struct {
-	Status bool `json:"status"`
+	Data struct {
+		Status bool `json:"status"`
+	} `json:"data"`
 }
 
 // PDFRevoke is the request to revoke pdf
@@ -168,15 +204,22 @@ type PDFRevokeReply struct {
 //	@Tags			ladok
 //	@Accept			json
 //	@Produce		json
-//	@Success		200				{object}	model.Response{data=PDFRevokeReply}	"Success"
-//	@Failure		400				{object}	model.Response{error=helpers.Error}	"Bad Request"
-//	@Param			transaction_id	path		string								true	"transaction_id"
+//	@Success		200				{object}	PDFRevokeReply			"Success"
+//	@Failure		400				{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/revoke/{transaction_id} [put]
 func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevokeReply, error) {
 	if err := c.kv.Doc.SaveRevoked(ctx, req.TransactionID); err != nil {
-		return &PDFRevokeReply{Status: false}, err
+		return nil, err
 	}
-	return &PDFRevokeReply{Status: true}, nil
+	reply := &PDFRevokeReply{
+		Data: struct {
+			Status bool `json:"status"`
+		}{
+			Status: true,
+		},
+	}
+	return reply, nil
 }
 
 // Status return status for each ladok instance

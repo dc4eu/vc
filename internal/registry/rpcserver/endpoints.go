@@ -22,6 +22,7 @@ func (s *Service) Validate(ctx context.Context, req *apiv1_registry.ValidateRequ
 	return s.apiv1.Validate(ctx, req)
 }
 
+// Status returns the status of the registry
 func (s *Service) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	return s.apiv1.Status(ctx, req)
 }

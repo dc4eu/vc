@@ -1,14 +1,32 @@
 basePath: /datastore/api/v1
 definitions:
+  apiv1.GenericDocumentReply:
+    properties:
+      data:
+        $ref: '#/definitions/model.GenericUpload'
+    type: object
+  apiv1.GenericListReply:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.GenericUpload'
+        type: array
+    type: object
   apiv1.GenericQRReply:
     properties:
-      base64_image:
-        type: string
+      data:
+        properties:
+          base64_image:
+            type: string
+        type: object
     type: object
   apiv1.GenericUploadReply:
     properties:
-      status:
-        type: string
+      data:
+        properties:
+          status:
+            type: string
+        type: object
     type: object
   ehic.CardHolder:
     properties:
@@ -117,6 +135,11 @@ definitions:
       title:
         type: string
     type: object
+  helpers.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/helpers.Error'
+    type: object
   model.Collect:
     properties:
       token:
@@ -192,11 +215,6 @@ definitions:
     required:
     - attributes
     - document
-    type: object
-  model.Response:
-    properties:
-      data: {}
-      error: {}
     type: object
   model.Revoke:
     properties:
@@ -762,21 +780,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/model.GenericUpload'
-              type: object
+            $ref: '#/definitions/apiv1.GenericDocumentReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: Generic get one document
       tags:
       - dc4eu
@@ -784,7 +792,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: List endpoint
+      description: List documents endpoint
       operationId: generic-list
       parameters:
       - description: ' '
@@ -799,23 +807,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/model.GenericUpload'
-                  type: array
-              type: object
+            $ref: '#/definitions/apiv1.GenericListReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: Generic list documents
       tags:
       - dc4eu
@@ -838,21 +834,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiv1.GenericQRReply'
-              type: object
+            $ref: '#/definitions/apiv1.GenericQRReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: Generic QR code generator
       tags:
       - dc4eu
@@ -875,21 +861,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiv1.GenericUploadReply'
-              type: object
+            $ref: '#/definitions/apiv1.GenericUploadReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: Generic upload
       tags:
       - dc4eu

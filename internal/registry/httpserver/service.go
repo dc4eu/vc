@@ -66,8 +66,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	rgAPIv1 := rgRoot.Group("api/v1", gin.BasicAuth(s.config.Common.BasicAuth))
 	rgAPIv1.Use(s.middlewareAuthLog(ctx))
 
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/add", s.endpointAdd)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/revoke", s.endpointRevoke)
+	//s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/add", s.endpointAdd)
+	//s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/revoke", s.endpointRevoke)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/validate", s.endpointValidate)
 
 	// Run http server

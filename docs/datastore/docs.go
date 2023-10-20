@@ -27,8 +27,8 @@ const docTemplate = `{
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "Generic get one document",
-                "operationId": "generic-get",
+                "summary": "GetDocument",
+                "operationId": "get-document",
                 "parameters": [
                     {
                         "description": " ",
@@ -36,7 +36,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.GenericAttributes"
+                            "$ref": "#/definitions/apiv1.GetDocumentRequest"
                         }
                     }
                 ],
@@ -44,7 +44,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/apiv1.GenericDocumentReply"
+                            "$ref": "#/definitions/apiv1.GetDocumentReply"
                         }
                     },
                     "400": {
@@ -56,9 +56,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/list": {
+        "/document/collection_code": {
             "post": {
-                "description": "List documents endpoint",
+                "description": "Get document by collection code endpoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -68,8 +68,8 @@ const docTemplate = `{
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "Generic list documents",
-                "operationId": "generic-list",
+                "summary": "GetDocumentByCollectionCode",
+                "operationId": "get-document-collection-code",
                 "parameters": [
                     {
                         "description": " ",
@@ -77,7 +77,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.GenericAttributes"
+                            "$ref": "#/definitions/model.MetaData"
                         }
                     }
                 ],
@@ -85,7 +85,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/apiv1.GenericListReply"
+                            "$ref": "#/definitions/apiv1.GetDocumentReply"
                         }
                     },
                     "400": {
@@ -97,9 +97,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/qr": {
+        "/id_mapping": {
             "post": {
-                "description": "QR code generator endpoint",
+                "description": "ID mapping endpoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -109,8 +109,8 @@ const docTemplate = `{
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "Generic QR code generator",
-                "operationId": "generic-qr",
+                "summary": "IDMapping",
+                "operationId": "id-mapping",
                 "parameters": [
                     {
                         "description": " ",
@@ -118,7 +118,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.GenericAttributes"
+                            "$ref": "#/definitions/model.MetaData"
                         }
                     }
                 ],
@@ -126,7 +126,89 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/apiv1.GenericQRReply"
+                            "$ref": "#/definitions/apiv1.IDMappingReply"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/metadata": {
+            "post": {
+                "description": "List metadata endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "ListMetadata",
+                "operationId": "list-metadata",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.ListMetadataRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.ListMetadataReply"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/portal": {
+            "post": {
+                "description": "Get document by collection code endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "ListMetadata",
+                "operationId": "portal",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.PortalRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.PortalReply"
                         }
                     },
                     "400": {
@@ -150,7 +232,7 @@ const docTemplate = `{
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "Generic upload",
+                "summary": "Upload",
                 "operationId": "generic-upload",
                 "parameters": [
                     {
@@ -159,7 +241,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.GenericUpload"
+                            "$ref": "#/definitions/model.Upload"
                         }
                     }
                 ],
@@ -167,7 +249,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/apiv1.GenericUploadReply"
+                            "$ref": "#/definitions/apiv1.UploadReply"
                         }
                     },
                     "400": {
@@ -181,39 +263,86 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "apiv1.GenericDocumentReply": {
+        "apiv1.GetDocumentReply": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/model.GenericUpload"
+                    "$ref": "#/definitions/model.Upload"
                 }
             }
         },
-        "apiv1.GenericListReply": {
+        "apiv1.GetDocumentRequest": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.GenericUpload"
-                    }
+                "authentic_source": {
+                    "type": "string"
+                },
+                "document_id": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
                 }
             }
         },
-        "apiv1.GenericQRReply": {
+        "apiv1.IDMappingReply": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "object",
                     "properties": {
-                        "base64_image": {
+                        "authentic_source_person_id": {
                             "type": "string"
                         }
                     }
                 }
             }
         },
-        "apiv1.GenericUploadReply": {
+        "apiv1.ListMetadataReply": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.MetaData"
+                    }
+                }
+            }
+        },
+        "apiv1.ListMetadataRequest": {
+            "type": "object",
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "authentic_source_person_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.PortalReply": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.MetaData"
+                    }
+                }
+            }
+        },
+        "apiv1.PortalRequest": {
+            "type": "object",
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "authentic_source_person_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.UploadReply": {
             "type": "object",
             "properties": {
                 "data": {
@@ -222,151 +351,6 @@ const docTemplate = `{
                         "status": {
                             "type": "string"
                         }
-                    }
-                }
-            }
-        },
-        "ehic.CardHolder": {
-            "type": "object",
-            "required": [
-                "birthDate",
-                "cardholderStatus",
-                "familyName",
-                "givenName",
-                "id"
-            ],
-            "properties": {
-                "birthDate": {
-                    "type": "string"
-                },
-                "cardholderStatus": {
-                    "type": "string"
-                },
-                "familyName": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                }
-            }
-        },
-        "ehic.CardInformation": {
-            "type": "object",
-            "required": [
-                "expiryDate",
-                "id",
-                "invalidSince",
-                "issuanceDate",
-                "signature",
-                "validSince"
-            ],
-            "properties": {
-                "expiryDate": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "invalidSince": {
-                    "type": "string"
-                },
-                "issuanceDate": {
-                    "type": "string"
-                },
-                "signature": {
-                    "$ref": "#/definitions/ehic.Signature"
-                },
-                "validSince": {
-                    "type": "string"
-                }
-            }
-        },
-        "ehic.CompetentInstitution": {
-            "type": "object",
-            "required": [
-                "id",
-                "institutionName"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "institutionName": {
-                    "type": "string"
-                }
-            }
-        },
-        "ehic.Document": {
-            "type": "object",
-            "required": [
-                "cardHolder",
-                "cardInformation",
-                "competentInstitution",
-                "pid",
-                "signature"
-            ],
-            "properties": {
-                "cardHolder": {
-                    "$ref": "#/definitions/ehic.CardHolder"
-                },
-                "cardInformation": {
-                    "$ref": "#/definitions/ehic.CardInformation"
-                },
-                "competentInstitution": {
-                    "$ref": "#/definitions/ehic.CompetentInstitution"
-                },
-                "pid": {
-                    "$ref": "#/definitions/eidas.Identification"
-                },
-                "signature": {
-                    "$ref": "#/definitions/ehic.Signature"
-                }
-            }
-        },
-        "ehic.Signature": {
-            "type": "object",
-            "required": [
-                "issuer",
-                "seal"
-            ],
-            "properties": {
-                "issuer": {
-                    "type": "string"
-                },
-                "seal": {
-                    "type": "string"
-                }
-            }
-        },
-        "eidas.Identification": {
-            "type": "object",
-            "required": [
-                "exhibitorID",
-                "firstName",
-                "gender",
-                "lastName",
-                "pins"
-            ],
-            "properties": {
-                "exhibitorID": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "pins": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
                     }
                 }
             }
@@ -388,25 +372,12 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Collect": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "used_ts": {
-                    "type": "string"
-                },
-                "valid_until_ts": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.GenericAttributes": {
+        "model.MetaData": {
             "type": "object",
             "required": [
                 "authentic_source",
                 "authentic_source_person_id",
+                "collect_id",
                 "date_of_birth",
                 "document_id",
                 "document_type",
@@ -422,7 +393,7 @@ const docTemplate = `{
                 "authentic_source_person_id": {
                     "type": "string"
                 },
-                "current_address": {
+                "collect_id": {
                     "type": "string"
                 },
                 "date_of_birth": {
@@ -441,20 +412,11 @@ const docTemplate = `{
                 "first_name": {
                     "type": "string"
                 },
-                "first_name_at_birth": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "string"
-                },
                 "last_name": {
                     "type": "string"
                 },
-                "last_name_at_birth": {
-                    "type": "string"
-                },
-                "place_of_birth": {
-                    "type": "string"
+                "qr": {
+                    "$ref": "#/definitions/model.QR"
                 },
                 "revocation_id": {
                     "type": "string"
@@ -464,698 +426,27 @@ const docTemplate = `{
                 }
             }
         },
-        "model.GenericDocument": {
-            "type": "object",
-            "properties": {
-                "ehic": {
-                    "$ref": "#/definitions/ehic.Document"
-                },
-                "pda1": {
-                    "$ref": "#/definitions/pda1.Document"
-                },
-                "testv1": {
-                    "$ref": "#/definitions/testv1.Document"
-                }
-            }
-        },
-        "model.GenericUpload": {
+        "model.QR": {
             "type": "object",
             "required": [
-                "attributes",
-                "document"
+                "base64_image"
             ],
             "properties": {
-                "attributes": {
-                    "$ref": "#/definitions/model.GenericAttributes"
-                },
-                "collect": {
-                    "$ref": "#/definitions/model.Collect"
-                },
-                "document": {
-                    "$ref": "#/definitions/model.GenericDocument"
-                },
-                "revoke": {
-                    "$ref": "#/definitions/model.Revoke"
-                }
-            }
-        },
-        "model.Revoke": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "ts": {
+                "base64_image": {
                     "type": "string"
                 }
             }
         },
-        "pda1.AddressType": {
-            "type": "object",
-            "properties": {
-                "buildingName": {
-                    "type": "string"
-                },
-                "countryCode": {
-                    "type": "string",
-                    "enum": [
-                        "AT",
-                        "BE",
-                        "BG",
-                        "CY",
-                        "CZ",
-                        "DE",
-                        "DK",
-                        "EE",
-                        "EL",
-                        "ES",
-                        "FI",
-                        "FR",
-                        "HR",
-                        "HU",
-                        "IE",
-                        "IT",
-                        "LT",
-                        "LU",
-                        "LV",
-                        "MT",
-                        "NL",
-                        "PL",
-                        "PT",
-                        "RO",
-                        "SE",
-                        "SI",
-                        "SK",
-                        "UK"
-                    ]
-                },
-                "postCode": {
-                    "type": "string"
-                },
-                "region": {
-                    "type": "string"
-                },
-                "streetNo": {
-                    "type": "string"
-                },
-                "town": {
-                    "type": "string"
-                }
-            }
-        },
-        "pda1.BirthPlaceType": {
-            "type": "object",
-            "properties": {
-                "countryCode": {
-                    "type": "string",
-                    "enum": [
-                        "AT",
-                        "BE",
-                        "BG",
-                        "CY",
-                        "CZ",
-                        "DE",
-                        "DK",
-                        "EE",
-                        "EL",
-                        "ES",
-                        "FI",
-                        "FR",
-                        "HR",
-                        "HU",
-                        "IE",
-                        "IT",
-                        "LT",
-                        "LU",
-                        "LV",
-                        "MT",
-                        "NL",
-                        "PL",
-                        "PT",
-                        "RO",
-                        "SE",
-                        "SI",
-                        "SK",
-                        "UK"
-                    ]
-                },
-                "region": {
-                    "type": "string"
-                },
-                "town": {
-                    "type": "string"
-                }
-            }
-        },
-        "pda1.Document": {
+        "model.Upload": {
             "type": "object",
             "required": [
-                "personalDetails"
+                "document_data",
+                "meta"
             ],
             "properties": {
-                "activityEmploymentDetails": {
-                    "$ref": "#/definitions/pda1.Section5"
-                },
-                "completingInstitution": {
-                    "$ref": "#/definitions/pda1.Section6"
-                },
-                "employmentDetails": {
-                    "$ref": "#/definitions/pda1.Section4"
-                },
-                "memberStateLegislation": {
-                    "$ref": "#/definitions/pda1.Section2"
-                },
-                "personalDetails": {
-                    "$ref": "#/definitions/pda1.Section1"
-                },
-                "statusConfirmation": {
-                    "$ref": "#/definitions/pda1.Section3"
-                }
-            }
-        },
-        "pda1.Section1": {
-            "type": "object",
-            "properties": {
-                "dateBirth": {
-                    "type": "string"
-                },
-                "forenames": {
-                    "type": "string"
-                },
-                "nationality": {
-                    "type": "string",
-                    "enum": [
-                        "AT",
-                        "BE",
-                        "BG",
-                        "HR",
-                        "CY",
-                        "CZ",
-                        "DK",
-                        "EE",
-                        "FI",
-                        "FR",
-                        "DE",
-                        "EL",
-                        "HU",
-                        "IS",
-                        "IE",
-                        "IT",
-                        "LV",
-                        "LI",
-                        "LT",
-                        "LU",
-                        "MT",
-                        "NL",
-                        "NO",
-                        "PL",
-                        "PT",
-                        "RO",
-                        "SK",
-                        "SI",
-                        "ES",
-                        "SE",
-                        "CH",
-                        "UK",
-                        "XR",
-                        "XS",
-                        "XU",
-                        "AF",
-                        "AL",
-                        "DZ",
-                        "AD",
-                        "AO",
-                        "AG",
-                        "AR",
-                        "AM",
-                        "AU",
-                        "AZ",
-                        "BS",
-                        "BH",
-                        "BD",
-                        "BB",
-                        "BY",
-                        "BZ",
-                        "BJ",
-                        "BT",
-                        "BO",
-                        "BA",
-                        "BW",
-                        "BR",
-                        "BN",
-                        "BF",
-                        "BI",
-                        "KH",
-                        "CM",
-                        "CA",
-                        "CV",
-                        "CF",
-                        "TD",
-                        "CL",
-                        "CN",
-                        "CO",
-                        "KM",
-                        "CG",
-                        "CD",
-                        "CR",
-                        "CI",
-                        "CU",
-                        "DJ",
-                        "DM",
-                        "DO",
-                        "EC",
-                        "EG",
-                        "SV",
-                        "GQ",
-                        "ER",
-                        "ET",
-                        "FJ",
-                        "GA",
-                        "GM",
-                        "GE",
-                        "GH",
-                        "GD",
-                        "GT",
-                        "GN",
-                        "GW",
-                        "GY",
-                        "HT",
-                        "VA",
-                        "HN",
-                        "IN",
-                        "ID",
-                        "IR",
-                        "IQ",
-                        "IL",
-                        "JM",
-                        "JP",
-                        "JO",
-                        "KZ",
-                        "KE",
-                        "KI",
-                        "KP",
-                        "KR",
-                        "KW",
-                        "KG",
-                        "LA",
-                        "LB",
-                        "LS",
-                        "LR",
-                        "LY",
-                        "MK",
-                        "MG",
-                        "MW",
-                        "MY",
-                        "MV",
-                        "ML",
-                        "MH",
-                        "MR",
-                        "MU",
-                        "MX",
-                        "FM",
-                        "MD",
-                        "MC",
-                        "MN",
-                        "ME",
-                        "MA",
-                        "MZ",
-                        "MM",
-                        "NA",
-                        "NR",
-                        "NP",
-                        "NZ",
-                        "NI",
-                        "NE",
-                        "NG",
-                        "OM",
-                        "PK",
-                        "PW",
-                        "PS",
-                        "PA",
-                        "PG",
-                        "PY",
-                        "PE",
-                        "PH",
-                        "QA",
-                        "RU",
-                        "RW",
-                        "KN",
-                        "LC",
-                        "VC",
-                        "WS",
-                        "SM",
-                        "ST",
-                        "SA",
-                        "SN",
-                        "RS",
-                        "SC",
-                        "SL",
-                        "SG",
-                        "SB",
-                        "SO",
-                        "ZA",
-                        "SS",
-                        "LK",
-                        "SD",
-                        "SR",
-                        "SZ",
-                        "SY",
-                        "TJ",
-                        "TZ",
-                        "TH",
-                        "TL",
-                        "TG",
-                        "TO",
-                        "TT",
-                        "TN",
-                        "TR",
-                        "TM",
-                        "TV",
-                        "UG",
-                        "UA",
-                        "AE",
-                        "US",
-                        "UY",
-                        "UZ",
-                        "VU",
-                        "VE",
-                        "VN",
-                        "YE",
-                        "ZM",
-                        "ZW",
-                        "BQAQ",
-                        "BUMM",
-                        "BYAA",
-                        "CTKI",
-                        "CSHH",
-                        "DYBJ",
-                        "NQAQ",
-                        "TPTL",
-                        "FXFR",
-                        "AIDJ",
-                        "FQHH",
-                        "DDDE",
-                        "GEHH",
-                        "JTUM",
-                        "MIUM",
-                        "ANHH",
-                        "NTHH",
-                        "NHVU",
-                        "PCHH",
-                        "PZPA",
-                        "CSXX",
-                        "SKIN",
-                        "RHZW",
-                        "HVBF",
-                        "PUUM",
-                        "SUHH",
-                        "VDVN",
-                        "WKUM",
-                        "YDYE",
-                        "YUCS",
-                        "ZRCD"
-                    ]
-                },
-                "personalIdentificationNumber": {
-                    "type": "string"
-                },
-                "placeBirth": {
-                    "$ref": "#/definitions/pda1.BirthPlaceType"
-                },
-                "sex": {
-                    "type": "string",
-                    "enum": [
-                        "01",
-                        "02",
-                        "98",
-                        "99"
-                    ]
-                },
-                "stateOfResidenceAddress": {
-                    "$ref": "#/definitions/pda1.AddressType"
-                },
-                "stateOfStayAddress": {
-                    "$ref": "#/definitions/pda1.AddressType"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "surnameAtBirth": {
-                    "type": "string"
-                }
-            }
-        },
-        "pda1.Section2": {
-            "type": "object",
-            "properties": {
-                "certificateForDurationActivity": {
-                    "type": "boolean"
-                },
-                "determinationProvisional": {
-                    "type": "boolean"
-                },
-                "endingDate": {
-                    "type": "string"
-                },
-                "memberStateWhichLegislationApplies": {
-                    "type": "string",
-                    "enum": [
-                        "AT",
-                        "BE",
-                        "BG",
-                        "CY",
-                        "CZ",
-                        "DE",
-                        "DK",
-                        "EE",
-                        "EL",
-                        "ES",
-                        "FI",
-                        "FR",
-                        "HR",
-                        "HU",
-                        "IE",
-                        "IT",
-                        "LT",
-                        "LU",
-                        "LV",
-                        "MT",
-                        "NL",
-                        "PL",
-                        "PT",
-                        "RO",
-                        "SE",
-                        "SI",
-                        "SK",
-                        "UK"
-                    ]
-                },
-                "startingDate": {
-                    "type": "string"
-                },
-                "transitionRulesApplyAsEC8832004": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "pda1.Section3": {
-            "type": "object",
-            "properties": {
-                "civilAndEmployedSelfEmployed": {
-                    "type": "boolean"
-                },
-                "civilServant": {
-                    "type": "boolean"
-                },
-                "contractStaff": {
-                    "type": "boolean"
-                },
-                "employedAndSelfEmployed": {
-                    "type": "boolean"
-                },
-                "employedTwoOrMoreStates": {
-                    "type": "boolean"
-                },
-                "exception": {
-                    "type": "boolean"
-                },
-                "exceptionDescription": {
-                    "type": "string"
-                },
-                "flightCrewMember": {
-                    "type": "boolean"
-                },
-                "mariner": {
-                    "type": "boolean"
-                },
-                "postedEmployedPerson": {
-                    "type": "boolean"
-                },
-                "postedSelfEmployedPerson": {
-                    "type": "boolean"
-                },
-                "selfEmployedTwoOrMoreStates": {
-                    "type": "boolean"
-                },
-                "workingInStateUnder21": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "pda1.Section4": {
-            "type": "object",
-            "properties": {
-                "employee": {
-                    "type": "boolean"
-                },
-                "employerSelfEmployedActivityCodes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "nameBusinessName": {
-                    "type": "string"
-                },
-                "registeredAddress": {
-                    "$ref": "#/definitions/pda1.AddressType"
-                },
-                "selfEmployedActivity": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "pda1.Section5": {
-            "type": "object",
-            "properties": {
-                "noFixedAddress": {
-                    "type": "boolean"
-                },
-                "noFixedAddressDescription": {
-                    "type": "string"
-                },
-                "workPlaceAddresses": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/pda1.WorkPlaceAddressType"
-                    }
-                },
-                "workPlaceAddressesBlob": {
-                    "type": "string"
-                },
-                "workPlaceNames": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/pda1.WorkPlaceNameType"
-                    }
-                },
-                "workPlaceNamesBlob": {
-                    "type": "string"
-                }
-            }
-        },
-        "pda1.Section6": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "$ref": "#/definitions/pda1.AddressType"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "institutionID": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "officeFaxNo": {
-                    "type": "string"
-                },
-                "officePhoneNo": {
-                    "type": "string"
-                },
-                "signature": {
-                    "type": "string"
-                }
-            }
-        },
-        "pda1.WorkPlaceAddressType": {
-            "type": "object",
-            "properties": {
-                "addresses": {
-                    "type": "string"
-                },
-                "homeBases": {
-                    "type": "string"
-                },
-                "hostStates": {
-                    "type": "string"
-                },
-                "nameOfShips": {
-                    "type": "string"
-                }
-            }
-        },
-        "pda1.WorkPlaceNameType": {
-            "type": "object",
-            "properties": {
-                "companyNameVesselName": {
-                    "type": "string"
-                },
-                "flagStatehomeBase": {
-                    "type": "string"
-                },
-                "seqno": {
-                    "type": "integer"
-                }
-            }
-        },
-        "testv1.Address": {
-            "type": "object",
-            "required": [
-                "country",
-                "street"
-            ],
-            "properties": {
-                "country": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                }
-            }
-        },
-        "testv1.Document": {
-            "type": "object",
-            "required": [
-                "address",
-                "name"
-            ],
-            "properties": {
-                "address": {
-                    "$ref": "#/definitions/testv1.Address"
-                },
-                "name": {
-                    "$ref": "#/definitions/testv1.Name"
-                }
-            }
-        },
-        "testv1.Name": {
-            "type": "object",
-            "required": [
-                "family_name",
-                "given_name"
-            ],
-            "properties": {
-                "family_name": {
-                    "type": "string"
-                },
-                "given_name": {
-                    "type": "string"
+                "document_data": {},
+                "meta": {
+                    "$ref": "#/definitions/model.MetaData"
                 }
             }
         }

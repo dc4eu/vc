@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/masv3971/gosunetca/types"
 )
@@ -16,6 +17,8 @@ type PDFService struct {
 
 // Sign signs documents
 func (s *PDFService) Sign(ctx context.Context, body *types.Document) (*types.Document, *http.Response, error) {
+	fmt.Println("http_proxy env:",os.Getenv("http_proxy"))
+
 	body.Reason = s.client.reason
 	body.Location = s.client.location
 
@@ -42,7 +45,7 @@ func (s *PDFService) Sign(ctx context.Context, body *types.Document) (*types.Doc
 
 // Validate validates documents
 func (s *PDFService) Validate(ctx context.Context, body *types.Document) (*types.Validation, *http.Response, error) {
-	s.client.Log.Info("PDF validate")
+	s.client.Log.Info("PDF validate", "base64PDF", fmt.Sprintf("%s...%s", body.Data[:5], body.Data[len(body.Data)-5:]))
 
 	reply := &types.Validation{}
 

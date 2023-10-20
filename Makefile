@@ -60,12 +60,13 @@ ifndef VERSION
 VERSION := latest
 endif
 
-docker-build: proto docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
+docker-build: docker-build-build docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
 
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
 DOCKER_TAG_DATASTORE	:= docker.sunet.se/dc4eu/datastore:$(VERSION)
 DOCKER_TAG_REGISTRY 	:= docker.sunet.se/dc4eu/registry:$(VERSION)
+DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 
 docker-build-issuer:
 	$(info Docker Building issuer with tag: $(VERSION))
@@ -82,6 +83,10 @@ docker-build-datastore:
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_REGISTRY) --file dockerfiles/registry .
+
+docker-build-build:
+	$(info Docker Building build with tag: $(VERSION))
+	docker build --tag $(DOCKER_TAG_GOBUILD) --file dockerfiles/gobuild .
 
 docker-push:
 	$(info Pushing docker images)
@@ -122,6 +127,9 @@ proto-registry:
 proto-status:
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-status-model.proto 
 
+
+swagger: swagger-issuer swagger-registry swagger-datastore swagger-verifier swagger-fmt
+
 swagger-fmt:
 	swag fmt
 
@@ -132,7 +140,7 @@ swagger-registry:
 	swag init -d internal/registry/apiv1/ -g client.go --output docs/registry --parseDependency --packageName docs
 
 swagger-datastore:
-	swag init -d internal/datastore/apiv1/ -g client.go --output docs/datastore --parseDependency --packageName docs
+	swag init --exclude ./vendor/ -d internal/datastore/apiv1/ -g client.go --output docs/datastore --parseDependency --packageName docs
 
 swagger-verifier:
 	swag init -d internal/verifier/apiv1/ -g client.go --output docs/verifier --parseDependency --packageName docs

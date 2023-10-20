@@ -1,10 +1,9 @@
 # Compile
-FROM golang:latest AS builder
-
-WORKDIR /go/src/app
+FROM docker.sunet.se/dc4eu/gobuild:latest AS builder
 
 COPY . .
-
+RUN make swagger
+RUN make proto
 RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_registry -ldflags "-w -s --extldflags '-static'" ./cmd/registry/main.go
 
 # Deploy

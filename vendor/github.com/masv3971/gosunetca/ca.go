@@ -22,17 +22,18 @@ type Config struct {
 	Location  string `validate:"required"`
 	Reason    string `validate:"required"`
 	UserAgent string
+	ProxyURL  string
 	//Logger    logr.Logger
 }
 
 // Client is the client for the SUNET CA API
 type Client struct {
-	client    *http.Client
-	token     string
-	serverURL string
-	userAgent string
-	location  string
-	reason    string
+	httpClient *http.Client
+	token      string
+	serverURL  string
+	userAgent  string
+	location   string
+	reason     string
 	Log
 
 	PDF *PDFService
@@ -45,26 +46,32 @@ func New(ctx context.Context, config Config) (*Client, error) {
 	}
 
 	c := &Client{
-		client:    &http.Client{},
-		token:     config.Token,
-		serverURL: config.ServerURL,
-		userAgent: config.UserAgent,
-		location:  config.Location,
-		reason:    config.Reason,
-		Log:       Log{},
-		PDF:       &PDFService{},
+		httpClient: &http.Client{},
+		token:      config.Token,
+		serverURL:  config.ServerURL,
+		userAgent:  config.UserAgent,
+		location:   config.Location,
+		reason:     config.Reason,
+		Log:        Log{},
+		PDF:        &PDFService{},
 	}
 	c.Logger = logr.FromContextOrDiscard(ctx)
 
-	c.PDF = &PDFService{client: c, baseURL: "/pdf"}
+	proxyURL, err := url.Parse(config.ProxyURL)
+	if err != nil {
+		return nil, err
+	}
 
+	c.httpClient.Transport = &http.Transport{
+		Proxy: http.ProxyURL(proxyURL),
+	}
+
+	c.PDF = &PDFService{client: c, baseURL: "/pdf"}
 	return c, nil
 }
 
 // NewRequest make a new request
-func (c *Client) newRequest(ctx context.Context, method, path string, body interface{}) (*http.Request, error) {
-	c.Log.Debug("newRequest", "method", method, "path", path, "body", body)
-
+func (c *Client) newRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, err
@@ -100,9 +107,9 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body inter
 }
 
 // Do does the new request
-func (c *Client) do(ctx context.Context, req *http.Request, value interface{}) (*http.Response, error) {
+func (c *Client) do(ctx context.Context, req *http.Request, value any) (*http.Response, error) {
 	c.Log.Debug("do", "method", req.Method, "path", req.URL.Path)
-	resp, err := c.client.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +146,7 @@ func checkResponse(r *http.Response) error {
 	return errors.New("Invalid request")
 }
 
-func (c *Client) call(ctx context.Context, method, path string, body, reply interface{}) (*http.Response, error) {
+func (c *Client) call(ctx context.Context, method, path string, body, reply any) (*http.Response, error) {
 	request, err := c.newRequest(
 		ctx,
 		method,

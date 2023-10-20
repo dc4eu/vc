@@ -5,7 +5,7 @@ import (
 )
 
 // check checks for validation error
-func check(s interface{}) error {
+func check(s any) error {
 	validate := validator.New()
 
 	err := validate.Struct(s)

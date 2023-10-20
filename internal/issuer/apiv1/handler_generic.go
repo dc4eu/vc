@@ -53,3 +53,25 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 	}
 	return reply, nil
 }
+
+// RevokeRequest is the request for GenericRevoke
+type RevokeRequest struct {
+	AuthenticSource string `json:"authentic_source"`
+	DocumentType    string `json:"document_type"`
+	DocumentID      string `json:"document_id"`
+	RevocationID    string `json:"revocation_id"`
+}
+
+// RevokeReply is the reply for GenericRevoke
+type RevokeReply struct {
+	Status string `json:"status"`
+}
+
+// Revoke revokes a document
+func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
+
+	reply := &RevokeReply{
+		Status: "OK",
+	}
+	return reply, nil
+}

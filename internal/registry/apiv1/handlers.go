@@ -45,9 +45,9 @@ type ValidateReply struct {
 //	@Tags			registry
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	PDFSignReply			"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		PDFSignRequest			true	" "
+//	@Success		200	{object}	ValidateReply					"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse			"Bad Request"
+//	@Param			req	body		apiv1_registry.ValidateRequest	true	" "
 //	@Router			/ladok/pdf/sign [post]
 func (c *Client) Validate(ctx context.Context, req *apiv1_registry.ValidateRequest) (*ValidateReply, error) {
 	valid, err := c.tree.Validate(req.Entity)

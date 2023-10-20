@@ -9,130 +9,73 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Service) endpointEHICUpload(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.EHICUploadRequest{}
-	if err := s.bindRequest(c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.EHICUpload(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointPDA1Upload(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.PDA1UploadRequest{}
-	if err := s.bindRequest(c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.PDA1Upload(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-func (s *Service) endpointPDA1Search(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.PDA1SearchRequest{}
-	if err := s.bindRequest(c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.PDA1Search(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointEHICID(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.EHICIDRequest{}
-	if err := s.bindRequest(c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.EHICID(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-func (s *Service) endpointPDA1ID(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.PDA1IDRequest{}
-	if err := s.bindRequest(c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.PDA1ID(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-func (s *Service) endpointLadokUpload(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.LadokUploadRequest{}
-	if err := s.bindRequest(c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.LadokUpload(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointLadokID(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.LadokIDRequest{}
-	if err := s.bindRequest(c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.LadokID(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointGenericUpload(ctx context.Context, c *gin.Context) (any, error) {
-	request := &model.GenericUpload{}
+func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, error) {
+	request := &model.Upload{}
 	if err := s.bindRequest(c, request); err != nil {
 		s.logger.Info("endpointGenericUpload", "error", err)
 		return nil, err
 	}
-	reply, err := s.apiv1.GenericUpload(ctx, request)
+	reply, err := s.apiv1.Upload(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 	return reply, nil
 }
 
-func (s *Service) endpointGenericList(ctx context.Context, c *gin.Context) (any, error) {
-	request := &model.GenericAttributes{}
+func (s *Service) endpointIDMapping(ctx context.Context, c *gin.Context) (any, error) {
+	request := &model.MetaData{}
 	if err := s.bindRequest(c, request); err != nil {
+		s.logger.Info("endpointGenericUpload", "error", err)
 		return nil, err
 	}
-	reply, err := s.apiv1.GenericList(ctx, request)
+	reply, err := s.apiv1.IDMapping(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 	return reply, nil
 }
 
-func (s *Service) endpointGenericDocument(ctx context.Context, c *gin.Context) (any, error) {
-	request := &model.GenericAttributes{}
+func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.GetDocumentRequest{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.GenericDocument(ctx, request)
+	reply, err := s.apiv1.GetDocument(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 	return reply, nil
 }
 
-func (s *Service) endpointGenericQR(ctx context.Context, c *gin.Context) (any, error) {
-	request := &model.GenericAttributes{}
+func (s *Service) endpointGetDocumentByCollectionCode(ctx context.Context, c *gin.Context) (any, error) {
+	request := &model.MetaData{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.GenericQR(ctx, request)
+	reply, err := s.apiv1.GetDocumentByCollectionCode(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointListMetadata(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.ListMetadataRequest{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.ListMetadata(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.PortalRequest{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.Portal(ctx, request)
 	if err != nil {
 		return nil, err
 	}

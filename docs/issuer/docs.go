@@ -42,37 +42,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiv1.PDFRevokeReply"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.PDFRevokeReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -107,37 +83,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiv1.PDFSignReply"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.PDFSignReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -172,37 +124,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiv1.PDFValidateReply"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.PDFValidateReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -235,37 +163,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiv1.PDFGetSignedReply"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/apiv1.PDFGetSignedReply"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/model.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "error": {
-                                            "$ref": "#/definitions/helpers.Error"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/helpers.ErrorResponse"
                         }
                     }
                 }
@@ -276,30 +180,45 @@ const docTemplate = `{
         "apiv1.PDFGetSignedReply": {
             "type": "object",
             "properties": {
-                "document": {
-                    "$ref": "#/definitions/types.Document"
-                },
-                "message": {
-                    "type": "string"
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "document": {
+                            "$ref": "#/definitions/types.Document"
+                        },
+                        "message": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "apiv1.PDFRevokeReply": {
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "boolean"
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             }
         },
         "apiv1.PDFSignReply": {
             "type": "object",
-            "required": [
-                "transaction_id"
-            ],
             "properties": {
-                "transaction_id": {
-                    "type": "string"
+                "data": {
+                    "type": "object",
+                    "required": [
+                        "transaction_id"
+                    ],
+                    "properties": {
+                        "transaction_id": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -317,8 +236,16 @@ const docTemplate = `{
         "apiv1.PDFValidateReply": {
             "type": "object",
             "properties": {
-                "msg": {
-                    "type": "string"
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string"
+                        },
+                        "valid": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             }
         },
@@ -339,11 +266,12 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Response": {
+        "helpers.ErrorResponse": {
             "type": "object",
             "properties": {
-                "data": {},
-                "error": {}
+                "error": {
+                    "$ref": "#/definitions/helpers.Error"
+                }
             }
         },
         "types.Document": {

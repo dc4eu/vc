@@ -2,22 +2,31 @@ basePath: /issuer/api/v1
 definitions:
   apiv1.PDFGetSignedReply:
     properties:
-      document:
-        $ref: '#/definitions/types.Document'
-      message:
-        type: string
+      data:
+        properties:
+          document:
+            $ref: '#/definitions/types.Document'
+          message:
+            type: string
+        type: object
     type: object
   apiv1.PDFRevokeReply:
     properties:
-      status:
-        type: boolean
+      data:
+        properties:
+          status:
+            type: boolean
+        type: object
     type: object
   apiv1.PDFSignReply:
     properties:
-      transaction_id:
-        type: string
-    required:
-    - transaction_id
+      data:
+        properties:
+          transaction_id:
+            type: string
+        required:
+        - transaction_id
+        type: object
     type: object
   apiv1.PDFSignRequest:
     properties:
@@ -28,8 +37,13 @@ definitions:
     type: object
   apiv1.PDFValidateReply:
     properties:
-      msg:
-        type: string
+      data:
+        properties:
+          message:
+            type: string
+          valid:
+            type: boolean
+        type: object
     type: object
   apiv1.PDFValidateRequest:
     properties:
@@ -42,10 +56,10 @@ definitions:
       title:
         type: string
     type: object
-  model.Response:
+  helpers.ErrorResponse:
     properties:
-      data: {}
-      error: {}
+      error:
+        $ref: '#/definitions/helpers.Error'
     type: object
   types.Document:
     properties:
@@ -91,21 +105,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiv1.PDFGetSignedReply'
-              type: object
+            $ref: '#/definitions/apiv1.PDFGetSignedReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: fetch singed pdf
       tags:
       - ladok
@@ -127,21 +131,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiv1.PDFRevokeReply'
-              type: object
+            $ref: '#/definitions/apiv1.PDFRevokeReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: revoke signed pdf
       tags:
       - ladok
@@ -164,21 +158,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiv1.PDFSignReply'
-              type: object
+            $ref: '#/definitions/apiv1.PDFSignReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: Sign pdf
       tags:
       - ladok
@@ -201,21 +185,11 @@ paths:
         "200":
           description: Success
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiv1.PDFValidateReply'
-              type: object
+            $ref: '#/definitions/apiv1.PDFValidateReply'
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/model.Response'
-            - properties:
-                error:
-                  $ref: '#/definitions/helpers.Error'
-              type: object
+            $ref: '#/definitions/helpers.ErrorResponse'
       summary: Validate pdf
       tags:
       - ladok

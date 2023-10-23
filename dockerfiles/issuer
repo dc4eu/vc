@@ -2,6 +2,7 @@
 FROM docker.sunet.se/dc4eu/gobuild:latest AS builder
 
 COPY . .
+
 RUN make swagger
 RUN make proto
 

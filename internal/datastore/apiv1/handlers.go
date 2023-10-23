@@ -157,11 +157,11 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 	return reply, nil
 }
 
-// GetDocumentByCollectionCode return a specific document by collection id
+// GetDocumentByCollectCode return a specific document by collect code
 //
-//	@Summary		GetDocumentByCollectionCode
-//	@ID				get-document-collection-code
-//	@Description	Get document by collection code endpoint
+//	@Summary		GetDocumentByCollectCode
+//	@ID				get-document-collect-code
+//	@Description	Get document by collect code endpoint
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
@@ -169,8 +169,8 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		model.MetaData			true	" "
 //	@Router			/document/collection_code [post]
-func (c *Client) GetDocumentByCollectionCode(ctx context.Context, req *model.MetaData) (*GetDocumentReply, error) {
-	doc, err := c.db.Coll.GetDocumentByCollectID(ctx, req)
+func (c *Client) GetDocumentByCollectCode(ctx context.Context, req *model.MetaData) (*GetDocumentReply, error) {
+	doc, err := c.db.Coll.GetDocumentByCollectCode(ctx, req)
 	if err != nil {
 		return nil, err
 	}

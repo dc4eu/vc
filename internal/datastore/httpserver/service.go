@@ -82,7 +82,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 
 	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointUpload)
 	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGetDocument)
-	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document/collect_code", s.endpointGetDocumentByCollectionCode)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document/collect_code", s.endpointGetDocumentByCollectCode)
 	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/id_mapping", s.endpointIDMapping)
 	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/metadata", s.endpointListMetadata)
 	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/portal", s.endpointPortal)

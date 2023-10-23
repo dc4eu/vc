@@ -68,6 +68,17 @@ type RevokeReply struct {
 }
 
 // Revoke revokes a document
+//
+//	@Summary		Revoke
+//	@ID				generic-revoke
+//	@Description	Revoke endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	RevokeReply				"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		RevokeRequest			true	" "
+//	@Router			/revoke [post]
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
 
 	reply := &RevokeReply{

@@ -5,20 +5,18 @@ services:
   issuer:
     container_name: "vc_issuer"
     image: docker.sunet.se/dc4eu/issuer:latest
-    healthcheck:
-      test: curl --fail http://issuer:8080/health || exit 1
-      interval: 20s
-      retries: 5
-      timeout: 10s
     restart: always
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
+    links:                                                                                                                                                                                                                                     
+      - haproxy
     depends_on:
       - redis
       - mongo
       - datastore
       - registry
+      - haproxy
     networks:
       - vc-net
     environment:
@@ -27,18 +25,16 @@ services:
   verifier:
     container_name: "vc_verifier"
     image: docker.sunet.se/dc4eu/verifier:latest
-    healthcheck:
-      test: curl --fail http://verifier:8080/health || exit 1
-      interval: 20s
-      retries: 5
-      timeout: 10s
     restart: always
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
+    links:                                                                                                                                                                                                                                     
+      - haproxy
     depends_on:
       - redis
       - mongo
+      - haproxy
     networks:
       - vc-net
     environment:
@@ -47,18 +43,16 @@ services:
   datastore:
     container_name: "vc_datastore"
     image: docker.sunet.se/dc4eu/datastore:latest
-    healthcheck:
-      test: curl --fail http://datastore:8080/health || exit 1
-      interval: 20s
-      retries: 5
-      timeout: 10s
     restart: always
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
+    links:                                                                                                                                                                                                                                     
+      - haproxy
     depends_on:
       - redis
       - mongo
+      - haproxy
     networks:
       - vc-net
     environment:
@@ -67,18 +61,16 @@ services:
   registry:
     container_name: "vc_registry"
     image: docker.sunet.se/dc4eu/registry:latest
-    healthcheck:
-      test: curl --fail http://registry:8080/health || exit 1
-      interval: 20s
-      retries: 5
-      timeout: 10s
     restart: always
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
+    links:                                                                                                                                                                                                                                     
+      - haproxy
     depends_on:
       - redis
       - mongo
+      - haproxy
     networks:
       - vc-net
     environment:

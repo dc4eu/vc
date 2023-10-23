@@ -80,23 +80,12 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 
 	rgAPIV1 := rgRoot.Group("api/v1")
 
-	rgEHIC := rgAPIV1.Group("/ehic")
-	s.regEndpoint(ctx, rgEHIC, http.MethodPost, "/upload", s.endpointEHICUpload)
-	s.regEndpoint(ctx, rgEHIC, http.MethodGet, "/:upload_id", s.endpointEHICID)
-
-	rgPDA1 := rgAPIV1.Group("/pda1")
-	s.regEndpoint(ctx, rgPDA1, http.MethodPost, "/upload", s.endpointPDA1Upload)
-	s.regEndpoint(ctx, rgPDA1, http.MethodGet, "/:upload_id", s.endpointPDA1ID)
-	s.regEndpoint(ctx, rgPDA1, http.MethodPost, "/", s.endpointPDA1Search)
-
-	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointGenericUpload)
-	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/list", s.endpointGenericList)
-	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGenericDocument)
-	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/qr", s.endpointGenericQR)
-
-	rgLadok := rgAPIV1.Group("/ladok")
-	s.regEndpoint(ctx, rgLadok, http.MethodPost, "/upload", s.endpointLadokUpload)
-	s.regEndpoint(ctx, rgLadok, http.MethodGet, "/:upload_id", s.endpointLadokID)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointUpload)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGetDocument)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document/collect_code", s.endpointGetDocumentByCollectCode)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/id_mapping", s.endpointIDMapping)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/metadata", s.endpointListMetadata)
+	s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/portal", s.endpointPortal)
 
 	// Run http server
 	go func() {

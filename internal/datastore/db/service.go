@@ -30,11 +30,7 @@ type Service struct {
 	cfg      *model.Cfg
 	log      *logger.Log
 
-	PDA1Coll      *PDA1Coll
-	EHICColl      *EHICColl
-	EducationColl *EducationColl
-	LadokColl     *LadokColl
-	GenericColl   *GenericColl
+	Coll *Coll
 }
 
 // New creates a new database service
@@ -51,24 +47,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 		return nil, err
 	}
 
-	service.PDA1Coll = &PDA1Coll{
-		Service: service,
-		Coll:    service.DBClient.Database("datastore").Collection("pda1"),
-	}
-	service.PDA1Coll.createIndex(ctx)
-
-	service.EHICColl = &EHICColl{
-		Service: service,
-		Coll:    service.DBClient.Database("datastore").Collection("ehic"),
-	}
-	service.EHICColl.createIndex(ctx)
-
-	service.LadokColl = &LadokColl{
-		Service: service,
-		Coll:    service.DBClient.Database("datastore").Collection("ladok"),
-	}
-
-	service.GenericColl = &GenericColl{
+	service.Coll = &Coll{
 		Service: service,
 		Coll:    service.DBClient.Database("datastore").Collection("generic"),
 	}

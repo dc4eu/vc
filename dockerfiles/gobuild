@@ -1,0 +1,6 @@
+FROM golang:latest
+
+WORKDIR /go/src/app
+
+COPY Makefile .
+RUN make install-tools

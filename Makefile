@@ -60,7 +60,7 @@ ifndef VERSION
 VERSION := latest
 endif
 
-docker-build: docker-build-build docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
+docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
 
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
@@ -84,7 +84,7 @@ docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_REGISTRY) --file dockerfiles/registry .
 
-docker-build-build:
+docker-build-gobuild:
 	$(info Docker Building build with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_GOBUILD) --file dockerfiles/gobuild .
 
@@ -144,3 +144,13 @@ swagger-datastore:
 
 swagger-verifier:
 	swag init -d internal/verifier/apiv1/ -g client.go --output docs/verifier --parseDependency --packageName docs
+
+install-tools:
+	$(info Install from apt)
+	sudo apt-get update && sudo apt-get install -y protobuf-compiler
+	$(info Install from go)
+	go install github.com/swaggo/swag/cmd/swag@latest && \
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+vscode: install-tools

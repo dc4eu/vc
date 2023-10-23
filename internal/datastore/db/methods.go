@@ -74,8 +74,8 @@ func (c *Coll) GetDocument(ctx context.Context, attr *model.MetaData) (*model.Up
 	return res, nil
 }
 
-// GetDocumentByCollectID return matching document if any, or error
-func (c *Coll) GetDocumentByCollectID(ctx context.Context, query *model.MetaData) (*model.Upload, error) {
+// GetDocumentByCollectCode return matching document if any, or error
+func (c *Coll) GetDocumentByCollectCode(ctx context.Context, query *model.MetaData) (*model.Upload, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
 		"meta.collect_id":       bson.M{"$eq": query.CollectID},

@@ -47,12 +47,12 @@ func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any,
 	return reply, nil
 }
 
-func (s *Service) endpointGetDocumentByCollectionCode(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointGetDocumentByCollectCode(ctx context.Context, c *gin.Context) (any, error) {
 	request := &model.MetaData{}
 	if err := s.bindRequest(c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.GetDocumentByCollectionCode(ctx, request)
+	reply, err := s.apiv1.GetDocumentByCollectCode(ctx, request)
 	if err != nil {
 		return nil, err
 	}

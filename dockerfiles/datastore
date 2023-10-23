@@ -2,15 +2,16 @@
 FROM docker.sunet.se/dc4eu/gobuild:latest AS builder
 
 COPY . .
+
 RUN make swagger
 RUN make proto
+
 RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_datastore -ldflags "-w -s --extldflags '-static'" ./cmd/datastore/main.go
 
 # Deploy
 FROM debian:bookworm-slim
 
 WORKDIR /
-
 
 RUN apt-get update && apt-get install -y curl procps iputils-ping less
 RUN rm -rf /var/lib/apt/lists/*

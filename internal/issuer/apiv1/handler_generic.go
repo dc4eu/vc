@@ -64,7 +64,9 @@ type RevokeRequest struct {
 
 // RevokeReply is the reply for GenericRevoke
 type RevokeReply struct {
-	Status string `json:"status"`
+	Data struct {
+		Status string `json:"status"`
+	}
 }
 
 // Revoke revokes a document
@@ -82,7 +84,11 @@ type RevokeReply struct {
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
 
 	reply := &RevokeReply{
-		Status: "OK",
+		Data: struct {
+			Status string `json:"status"`
+		}{
+			Status: "OK",
+		},
 	}
 	return reply, nil
 }

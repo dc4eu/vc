@@ -14,6 +14,7 @@ type Apiv1 interface {
 	PDFRevoke(ctx context.Context, req *apiv1.PDFRevokeRequest) (*apiv1.PDFRevokeReply, error)
 
 	Get(ctx context.Context, indata *apiv1.GetRequest) (*apiv1.GetReply, error)
+	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 
 	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 }

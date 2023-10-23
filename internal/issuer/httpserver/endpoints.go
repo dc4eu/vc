@@ -68,6 +68,18 @@ func (s *Service) endpointGenericGet(ctx context.Context, c *gin.Context) (any, 
 	return reply, nil
 }
 
+func (s *Service) endpointGenericRevoke(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.RevokeRequest{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.Revoke(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (interface{}, error) {
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.Status(ctx, request)

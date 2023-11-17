@@ -6,6 +6,7 @@ import (
 	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/trace"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -18,16 +19,18 @@ type Service struct {
 	cfg         *model.Cfg
 	log         *logger.Log
 	probeStore  *apiv1_status.StatusProbeStore
+	tp          *trace.Tracer
 
 	Doc *Doc
 }
 
 // New creates a new instance of kv
-func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
 	c := &Service{
 		cfg:        cfg,
 		log:        log,
 		probeStore: &apiv1_status.StatusProbeStore{},
+		tp:         tracer,
 	}
 
 	c.redisClient = redis.NewClient(&redis.Options{

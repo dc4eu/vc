@@ -7,6 +7,8 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
+	"go.opentelemetry.io/otel/codes"
+
 	"github.com/google/uuid"
 	"github.com/masv3971/gosunetca/types"
 )
@@ -36,7 +38,10 @@ type PDFSignReply struct {
 //	@Param			req	body		PDFSignRequest			true	" "
 //	@Router			/ladok/pdf/sign [post]
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
-	if err := helpers.Check(req, c.log); err != nil {
+	ctx, span := c.tp.Start(ctx, "apiv1")
+	defer span.End()
+
+	if err := helpers.Check(ctx, req, c.log); err != nil {
 		return nil, err
 	}
 	transactionID := uuid.New().String()
@@ -48,17 +53,9 @@ func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignRepl
 		Data:          req.PDF,
 	}
 
-	if err := c.kv.Doc.SaveUnsigned(ctx, unsignedDocument); err != nil {
-		return nil, err
-	}
-
-	go func() error {
-		c.log.Debug("sending document to CA")
-		if err := c.ca.SignDocument(ctx, unsignedDocument); err != nil {
-			c.log.Error(err, "failed to send document to CA")
-			return err
-		}
-		return nil
+	go func() {
+		c.log.Debug("sending unsigned document to CA")
+		c.ca.SignDocument(ctx, unsignedDocument)
 	}()
 
 	reply := &PDFSignReply{
@@ -79,10 +76,7 @@ type PDFValidateRequest struct {
 
 // PDFValidateReply is the reply for verify pdf
 type PDFValidateReply struct {
-	Data struct {
-		Message string `json:"message"`
-		Valid   bool   `json:"valid"`
-	} `json:"data"`
+	Data *types.Validation `json:"data"`
 }
 
 // PDFValidate is the handler for verify pdf
@@ -98,26 +92,29 @@ type PDFValidateReply struct {
 //	@Param			req	body		PDFValidateRequest		true	" "
 //	@Router			/ladok/pdf/validate [post]
 func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*PDFValidateReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1")
+	defer span.End()
+
 	validateCandidate := &types.Document{
 		Data: req.PDF,
 	}
+
 	res, err := c.ca.ValidateDocument(ctx, validateCandidate)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	if res.Error != "" {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, helpers.NewErrorFromError(errors.New(res.Error))
 	}
 
+	res.IsRevoked = c.db.DocumentsColl.IsRevoked(ctx, res.TransactionID)
+
 	reply := &PDFValidateReply{
-		Data: struct {
-			Message string `json:"message"`
-			Valid   bool   `json:"valid"`
-		}{
-			Message: res.Message,
-			Valid:   res.Valid,
-		},
+		Data: res,
 	}
+
 	return reply, nil
 }
 
@@ -147,6 +144,9 @@ type PDFGetSignedReply struct {
 //	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/{transaction_id} [get]
 func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*PDFGetSignedReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1")
+	defer span.End()
+
 	if !c.kv.Doc.ExistsSigned(ctx, req.TransactionID) {
 		return &PDFGetSignedReply{
 			Data: struct {
@@ -158,8 +158,19 @@ func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*P
 		}, nil
 	}
 
+	if c.db.DocumentsColl.IsRevoked(ctx, req.TransactionID) {
+		span.SetStatus(codes.Error, helpers.ErrDocumentIsRevoked.Error())
+		return nil, helpers.ErrDocumentIsRevoked
+	}
+
 	signedDoc, err := c.kv.Doc.GetSigned(ctx, req.TransactionID)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	if err := c.kv.Doc.DelSigned(ctx, req.TransactionID); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
@@ -210,7 +221,10 @@ type PDFRevokeReply struct {
 //	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/revoke/{transaction_id} [put]
 func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevokeReply, error) {
-	if err := c.kv.Doc.SaveRevoked(ctx, req.TransactionID); err != nil {
+	ctx, span := c.tp.Start(ctx, "apiv1")
+	defer span.End()
+
+	if err := c.db.DocumentsColl.Revoke(ctx, req.TransactionID); err != nil {
 		return nil, err
 	}
 	reply := &PDFRevokeReply{
@@ -225,6 +239,9 @@ func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevo
 
 // Status return status for each ladok instance
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1")
+	defer span.End()
+
 	probes := model.Probes{}
 	probes = append(probes, c.kv.Status(ctx))
 

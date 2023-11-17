@@ -5,7 +5,9 @@ import (
 	"testing"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/trace"
 
+	"github.com/masv3971/gosunetca/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
@@ -33,21 +35,28 @@ func TestSaveTransaction(t *testing.T) {
 	defer mt.Close()
 	for _, tt := range tts {
 		mt.Run(tt.name, func(mt *mtest.T) {
-			mt.AddMockResponses(tt.resp)
+			ctx := context.Background()
 
-			//mongo := NewMongo(testMongoURI, testDbName, nil)
-			s, err := New(context.Background(), &model.Cfg{
+			cfg := &model.Cfg{
 				Common: model.Common{},
 				Issuer: model.Issuer{
 					APIServer: model.APIServer{},
 					CA:        model.CA{},
 				},
 				Verifier: model.Verifier{},
-			}, logger.NewSimple("test-db"))
+			}
+
+			tracer, err := trace.New(ctx, cfg, logger.NewSimple("test-tracer"), "vc", "issuer")
+			assert.NoError(t, err)
+
+			mt.AddMockResponses(tt.resp)
+
+			//mongo := NewMongo(testMongoURI, testDbName, nil)
+			s, err := New(ctx, cfg, tracer, logger.NewSimple("test-db"))
 			//mongo.db = mt.DB
 
 			// Test function
-			err = s.DocumentsColl.Save(context.Background(), &model.Document{})
+			err = s.DocumentsColl.Save(context.Background(), &types.Document{})
 			assert.NoError(t, err)
 			//assert.Equal(t, tt.want, got)
 		})

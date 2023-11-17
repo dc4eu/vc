@@ -41,6 +41,7 @@ type Common struct {
 	Log        Log               `yaml:"log"`
 	Mongo      Mongo             `yaml:"mongo" validate:"required"`
 	BasicAuth  map[string]string `yaml:"basic_auth" validate:"required"`
+	Tracing    OTEL              `yaml:"tracing" validate:"required"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -86,6 +87,12 @@ type Verifier struct {
 type Datastore struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
 	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+}
+
+// OTEL holds the opentelemetry configuration
+type OTEL struct {
+	Addr string `yaml:"addr" validate:"required"`
+	Type string `yaml:"type" validate:"required"`
 }
 
 // Cfg is the main configuration structure for this application

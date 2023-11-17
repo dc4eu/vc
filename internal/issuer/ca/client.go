@@ -7,6 +7,7 @@ import (
 	"vc/internal/issuer/kv"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/trace"
 
 	"github.com/go-logr/logr"
 	"github.com/masv3971/gosunetca"
@@ -19,15 +20,17 @@ type Client struct {
 	kv       *kv.Service
 	log      *logger.Log
 	cfg      *model.Cfg
+	tp       *trace.Tracer
 }
 
 // New creates a new client
-func New(ctx context.Context, kvService *kv.Service, dbService *db.Service, cfg *model.Cfg, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, kvService *kv.Service, dbService *db.Service, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Client, error) {
 	c := &Client{
 		db:  dbService,
 		kv:  kvService,
 		cfg: cfg,
 		log: log,
+		tp:  tracer,
 	}
 
 	ctx = logr.NewContext(ctx, log.Logger.WithName("gosunetca"))

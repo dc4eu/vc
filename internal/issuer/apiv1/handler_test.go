@@ -13,6 +13,7 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/rpcclient"
+	"vc/pkg/trace"
 
 	"github.com/google/uuid"
 	"github.com/masv3971/gosunetca/mocks"
@@ -68,16 +69,19 @@ func mockClient(t *testing.T, caURL string) *Client {
 	pda1, err := pda1.New(ctx, cfg, log)
 	assert.NoError(t, err)
 
-	db, err := db.New(ctx, cfg, log)
+	tracer, err := trace.New(ctx, cfg, log, "vc", "issuer")
 	assert.NoError(t, err)
 
-	kv, err := kv.New(ctx, cfg, log)
+	db, err := db.New(ctx, cfg, tracer, log)
 	assert.NoError(t, err)
 
-	ca, err := ca.New(ctx, kv, db, cfg, log)
+	kv, err := kv.New(ctx, cfg, tracer, log)
 	assert.NoError(t, err)
 
-	c, err := New(ctx, rpcClient, pda1, ca, kv, db, cfg, log)
+	ca, err := ca.New(ctx, kv, db, cfg, tracer, log)
+	assert.NoError(t, err)
+
+	c, err := New(ctx, rpcClient, pda1, ca, kv, db, cfg, tracer, log)
 	assert.NoError(t, err)
 
 	return c

@@ -11,16 +11,23 @@ services:
       - ./dev_config_docker.yaml:/config.yaml:ro
     links:                                                                                                                                                                                                                                     
       - haproxy
+      - jaeger
     depends_on:
       - redis
       - mongo
       - datastore
       - registry
       - haproxy
+      - jaeger
     networks:
       - vc-net
     environment:
       - "VC_CONFIG_YAML=config.yaml"
+      - "HTTP_PROXY=172.16.50.200"
+      - "http_proxy=172.16.50.200"
+      - "HTTPS_PROXY=172.16.50.200"
+      - "https_proxy=172.16.50.200"
+      - "no_proxy=localhost,127.0.0.0/8,ca,jaeger"
 
   verifier:
     container_name: "vc_verifier"
@@ -111,6 +118,29 @@ services:
       - mongo_data:/data
     networks:
       - vc-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: vc_jaeger
+    restart: always
+    links:
+      - haproxy
+    depends_on:
+      - haproxy
+    expose:
+      - 16686
+      - 4317
+      - 4318
+    networks:
+      - vc-net
+    environment:
+      - "COLLECTOR_OTLP_ENABLED=true"
+      - "HTTP_PROXY=172.16.50.200"
+      - "http_proxy=172.16.50.200"
+      - "HTTPS_PROXY=172.16.50.200"
+      - "https_proxy=172.16.50.200"
+      - "no_proxy=localhost,127.0.0.0/8"
+
 
   postgres:
     image: postgres:13-bookworm

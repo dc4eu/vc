@@ -39,7 +39,7 @@ test-datastore:
 
 start:
 	$(info Run!)
-	docker-compose -f docker-compose.yaml up -d
+	docker-compose -f docker-compose.yaml up -d --remove-orphans
 
 stop:
 	$(info stopping VC)
@@ -95,6 +95,10 @@ docker-push:
 	docker push $(DOCKER_TAG_DATASTORE)
 	docker push $(DOCKER_TAG_REGISTRY)
 
+docker-push-gobuild:
+	$(info Pushing docker images)
+	docker push $(DOCKER_TAG_GOBUILD)
+
 clean_redis:
 	$(info Cleaning redis volume)
 	docker volume rm vc_redis_data 
@@ -147,7 +151,7 @@ swagger-verifier:
 
 install-tools:
 	$(info Install from apt)
-	sudo apt-get update && sudo apt-get install -y protobuf-compiler
+	apt-get update && apt-get install -y protobuf-compiler netcat-openbsd
 	$(info Install from go)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \

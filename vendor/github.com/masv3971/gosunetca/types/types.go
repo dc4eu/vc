@@ -19,24 +19,17 @@ type Document struct {
 
 // Validation is the reply for the validate endpoint
 type Validation struct {
-	Valid   bool   `json:"valid"`
-	Message string `json:"message"`
-	Error   string `json:"error,omitempty"`
+	ValidSignature bool   `json:"valid_signature"`
+	TransactionID  string `json:"transaction_id"`
+	Message        string `json:"message"`
+	IsRevoked      bool   `json:"is_revoked"`
+	Error          string `json:"error,omitempty"`
 }
 
 // SignRequest is the request for the sign endpoint
 type SignRequest struct {
 	*Document
-	// TransactionID string `json:"transaction_id"`
-	// PDFB64Data    string `json:"pdf_b64_data,omitempty" redis:"data"` //base64 encoded
 }
-
-// SignReply is the reply for the sign endpoint
-//type SignReply struct {
-//	*Document
-////	TransactionID    string `json:"transaction_id"`
-////	SignedPDFB64Data string `json:" signed_pdf_b64_data" redis:"data"`
-//}
 
 // MissingTokenReply is the reply when the token is missing
 type MissingTokenReply struct {

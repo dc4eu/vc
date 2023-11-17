@@ -57,13 +57,8 @@ func New(ctx context.Context, config Config) (*Client, error) {
 	}
 	c.Logger = logr.FromContextOrDiscard(ctx)
 
-	proxyURL, err := url.Parse(config.ProxyURL)
-	if err != nil {
-		return nil, err
-	}
-
 	c.httpClient.Transport = &http.Transport{
-		Proxy: http.ProxyURL(proxyURL),
+		Proxy: http.ProxyFromEnvironment,
 	}
 
 	c.PDF = &PDFService{client: c, baseURL: "/pdf"}

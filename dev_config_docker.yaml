@@ -5,12 +5,15 @@ common:
   production: false
   basic_auth:
     ladok: xyz
+  tracing:
+    addr: jaeger:4318
+    type: jaeger
 
 issuer:
   api_server:
-    addr: issuer:8080
-    public_keys:
-      ladok: cert/ladok_utv_dev.crt
+    addr: :8080
+  rpc_server:
+    addr: :8090
   http_proxy:
   log:
     level:
@@ -27,8 +30,6 @@ issuer:
     pdf:
       keep_signed_duration: 3600
       keep_unsigned_duration: 3600
-  rpc_server:
-    addr: issuer:8090
   rpc_client:
     default_config:
       methodConfig:
@@ -45,19 +46,19 @@ issuer:
   
 datastore:
   api_server:
-    addr: datastore:8080
+    addr: :8080
   rpc_server: 
     addr: datastore:8090
   
 verifier:
   api_server:
-    addr: verifier:8080
+    addr: :8080
   rpc_server:
     addr: verifier:8090
 
 registry:
   api_server:
-    addr: registry:8080
+    addr: :8080
   smt:
     update_periodicity: 5
     init_leaf: 575cea4a-5725-11ee-8287-2b486b7ace28

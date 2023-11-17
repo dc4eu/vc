@@ -10,7 +10,7 @@ import (
 
 // Add adds a new entity into the registry
 func (c *Client) Add(ctx context.Context, req *apiv1_registry.AddRequest) (*apiv1_registry.AddReply, error) {
-	if err := helpers.Check(req, c.logger); err != nil {
+	if err := helpers.Check(ctx, req, c.logger); err != nil {
 		return nil, err
 	}
 

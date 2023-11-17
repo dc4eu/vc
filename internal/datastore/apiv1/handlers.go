@@ -27,7 +27,7 @@ type UploadReply struct {
 //	@Param			req	body		model.Upload			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *model.Upload) (*UploadReply, error) {
-	if err := helpers.Check(req, c.log); err != nil {
+	if err := helpers.Check(ctx, req, c.log); err != nil {
 		return nil, err
 	}
 	if err := c.db.Coll.Save(ctx, req); err != nil {

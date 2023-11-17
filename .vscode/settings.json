@@ -21,6 +21,9 @@
         "mtest",
         "OIDC",
         "oneof",
+        "opentelemetry",
+        "OTEL",
+        "otelgin",
         "pdfapi",
         "pdfcpu",
         "qrcode",
@@ -32,6 +35,7 @@
         "Statehome",
         "stretchr",
         "sunetca",
+        "swaggo",
         "testv",
         "transation",
         "UIDPID"

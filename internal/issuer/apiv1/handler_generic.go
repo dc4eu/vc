@@ -65,7 +65,7 @@ type RevokeRequest struct {
 // RevokeReply is the reply for GenericRevoke
 type RevokeReply struct {
 	Data struct {
-		Status string `json:"status"`
+		Status bool `json:"status"`
 	}
 }
 
@@ -82,12 +82,27 @@ type RevokeReply struct {
 //	@Param			req	body		RevokeRequest			true	" "
 //	@Router			/revoke [post]
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
+	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
+
+	conn, err := grpc.Dial(c.cfg.Registry.RPCServer.Addr, optInsecure)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := apiv1_registry.NewRegistryServiceClient(conn)
+	resp, err := client.Revoke(ctx, &apiv1_registry.RevokeRequest{
+		Entity: "mura",
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	reply := &RevokeReply{
 		Data: struct {
-			Status string `json:"status"`
+			Status bool `json:"status"`
 		}{
-			Status: "OK",
+			Status: resp.Status,
 		},
 	}
 	return reply, nil

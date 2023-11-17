@@ -9,6 +9,13 @@ import (
 	"github.com/moogar0880/problems"
 )
 
+var (
+	// ErrDocumentIsRevoked is returned when a document is revoked
+	ErrDocumentIsRevoked = NewError("document_is_revoked")
+	// ErrNoTrasactionID is returned when transactionID is not present
+	ErrNoTrasactionID = NewError("no_transaction_id")
+)
+
 type Error struct {
 	Title   string      `json:"title" `
 	Details interface{} `json:"details" xml:"details"`

@@ -23,7 +23,7 @@ func main() {
 
 	services := make(map[string]service)
 
-	cfg, err := configuration.Parse(logger.NewSimple("Configuration"))
+	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
 	if err != nil {
 		panic(err)
 	}

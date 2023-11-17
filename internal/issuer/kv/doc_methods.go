@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"vc/pkg/helpers"
 
 	"github.com/masv3971/gosunetca/types"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // Doc holds the document kv object
@@ -14,53 +16,25 @@ type Doc struct {
 	key    string
 }
 
-// SaveUnsigned saves the unsigned document and the timestamp when it was created
-func (d *Doc) SaveUnsigned(ctx context.Context, doc *types.Document) error {
-	d.client.log.Debug("SaveUnsigned", "transaction_id", doc.TransactionID)
-	key := fmt.Sprintf(d.key, doc.TransactionID, "unsigned")
-	if err := d.client.redisClient.HSet(ctx, key, doc).Err(); err != nil {
-		d.client.log.Debug("SaveUnsigned", "error", err)
-		return err
-	}
-	return nil
+func (d Doc) mkKey(transactionID, docType string) string {
+	return fmt.Sprintf(d.key, transactionID, docType)
 }
 
-// GetUnsigned gets the unsigned document and the timestamp when it was created
-func (d *Doc) GetUnsigned(ctx context.Context, transactionID string) (*types.Document, error) {
-	if d.IsRevoked(ctx, transactionID) {
-		return nil, fmt.Errorf("document is revoked")
-	}
-
-	key := fmt.Sprintf(d.key, transactionID, "unsigned")
-	dest := &types.Document{}
-	if err := d.client.redisClient.HGetAll(ctx, key).Scan(dest); err != nil {
-		return nil, err
-	}
-	return dest, nil
-}
-
-// DelUnsigned deletes the unsigned document
-func (d *Doc) DelUnsigned(ctx context.Context, transactionID string) error {
-	key := fmt.Sprintf(d.key, transactionID, "unsigned")
-	return d.client.redisClient.HDel(ctx, key, "data", "ts").Err()
-}
-
-// AddTTLUnsigned marks the unsigned document for deletion
-func (d *Doc) AddTTLUnsigned(ctx context.Context, transactionID string) error {
-	// Add modifyTS to the document
-	key := fmt.Sprintf(d.key, transactionID, "unsigned")
-	expTime := time.Duration(d.client.cfg.Issuer.KeyValue.PDF.KeepUnsignedDuration)
-	return d.client.redisClient.Expire(ctx, key, expTime*time.Second).Err()
+func (d Doc) signedKey(transactionID string) string {
+	return d.mkKey(transactionID, "signed")
 }
 
 // SaveSigned saves the signed document and the timestamp when it was signed
 func (d *Doc) SaveSigned(ctx context.Context, doc *types.Document) error {
+	ctx, span := d.client.tp.Start(ctx, "kv:SaveSigned")
+	defer span.End()
+
 	if doc.TransactionID == "" {
-		return fmt.Errorf("transaction_id is empty")
+		span.SetStatus(codes.Error, helpers.ErrNoTrasactionID.Error())
+		return helpers.ErrNoTrasactionID
 	}
-	key := fmt.Sprintf(d.key, doc.TransactionID, "signed")
-	d.client.log.Debug("SaveSigned", "key", key)
-	if err := d.client.redisClient.HSet(ctx, key, doc).Err(); err != nil {
+	if err := d.client.redisClient.HSet(ctx, d.signedKey(doc.TransactionID), doc).Err(); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	return nil
@@ -68,13 +42,12 @@ func (d *Doc) SaveSigned(ctx context.Context, doc *types.Document) error {
 
 // GetSigned returns the signed document and the timestamp when it was signed
 func (d *Doc) GetSigned(ctx context.Context, transactionID string) (*types.Document, error) {
-	if d.IsRevoked(ctx, transactionID) {
-		return nil, fmt.Errorf("document is revoked")
-	}
+	ctx, span := d.client.tp.Start(ctx, "kv:GetSigned")
+	defer span.End()
 
-	key := fmt.Sprintf(d.key, transactionID, "signed")
 	dest := &types.Document{}
-	if err := d.client.redisClient.HGetAll(ctx, key).Scan(dest); err != nil {
+	if err := d.client.redisClient.HGetAll(ctx, d.signedKey(transactionID)).Scan(dest); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return dest, nil
@@ -82,40 +55,25 @@ func (d *Doc) GetSigned(ctx context.Context, transactionID string) (*types.Docum
 
 // ExistsSigned returns true if the signed document exists
 func (d *Doc) ExistsSigned(ctx context.Context, transactionID string) bool {
-	key := fmt.Sprintf(d.key, transactionID, "signed")
-	return d.client.redisClient.Exists(ctx, key).Val() == 1
+	ctx, span := d.client.tp.Start(ctx, "kv:ExistsSigned")
+	defer span.End()
+
+	return d.client.redisClient.Exists(ctx, d.signedKey(transactionID)).Val() == 1
 }
 
 // DelSigned deletes the signed document
 func (d *Doc) DelSigned(ctx context.Context, transactionID string) error {
-	key := fmt.Sprintf(d.key, transactionID, "signed")
-	return d.client.redisClient.HDel(ctx, key, "data", "ts").Err()
+	ctx, span := d.client.tp.Start(ctx, "kv:DelSigned")
+	defer span.End()
+
+	return d.client.redisClient.HDel(ctx, d.signedKey(transactionID), "data", "ts").Err()
 }
 
 // AddTTLSigned marks the signed document for deletion
 func (d *Doc) AddTTLSigned(ctx context.Context, transactionID string) error {
-	key := fmt.Sprintf(d.key, transactionID, "signed")
+	ctx, span := d.client.tp.Start(ctx, "kv:AddTTLSigned")
+	defer span.End()
+
 	expTime := time.Duration(d.client.cfg.Issuer.KeyValue.PDF.KeepSignedDuration)
-	return d.client.redisClient.Expire(ctx, key, expTime*time.Second).Err()
-}
-
-// SaveRevoked saves the timestamp when the document was revoked
-func (d *Doc) SaveRevoked(ctx context.Context, transactionID string) error {
-	key := fmt.Sprintf(d.key, transactionID, "revoked")
-	if err := d.client.redisClient.HSet(ctx, key, "ts", time.Now().Unix()).Err(); err != nil {
-		return err
-	}
-	return nil
-}
-
-// GetRevoked returns the timestamp when the document was revoked
-func (d *Doc) GetRevoked(ctx context.Context, transactionID string) (int64, error) {
-	key := fmt.Sprintf(d.key, transactionID, "revoked")
-	return d.client.redisClient.HGet(ctx, key, "ts").Int64()
-}
-
-// IsRevoked returns true if the document is revoked
-func (d *Doc) IsRevoked(ctx context.Context, transactionID string) bool {
-	key := fmt.Sprintf(d.key, transactionID, "revoked")
-	return d.client.redisClient.HExists(ctx, key, "ts").Val()
+	return d.client.redisClient.Expire(ctx, d.signedKey(transactionID), expTime*time.Second).Err()
 }

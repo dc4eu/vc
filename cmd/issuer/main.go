@@ -16,6 +16,7 @@ import (
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/rpcclient"
+	"vc/pkg/trace"
 )
 
 type service interface {
@@ -28,7 +29,7 @@ func main() {
 
 	services := make(map[string]service)
 
-	cfg, err := configuration.Parse(logger.NewSimple("Configuration"))
+	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
 	if err != nil {
 		panic(err)
 	}
@@ -37,22 +38,26 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	tracer, err := trace.New(ctx, cfg, log, "vc", "issuer")
+	if err != nil {
+		panic(err)
+	}
 
 	rpcClients, err := rpcclient.New(cfg, log.New("rpc"))
 	if err != nil {
 		panic(err)
 	}
-	dbService, err := db.New(ctx, cfg, log.New("db"))
+	dbService, err := db.New(ctx, cfg, tracer, log.New("db"))
 	services["dbService"] = dbService
 	if err != nil {
 		panic(err)
 	}
-	kvService, err := kv.New(ctx, cfg, log.New("keyvalue"))
+	kvService, err := kv.New(ctx, cfg, tracer, log.New("keyvalue"))
 	services["kvService"] = kvService
 	if err != nil {
 		panic(err)
 	}
-	caClient, err := ca.New(ctx, kvService, dbService, cfg, log.New("ca"))
+	caClient, err := ca.New(ctx, kvService, dbService, cfg, tracer, log.New("ca"))
 	if err != nil {
 		panic(err)
 	}
@@ -66,11 +71,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	apiv1Client, err := apiv1.New(ctx, rpcClients, pda1Service, caClient, kvService, dbService, cfg, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, rpcClients, pda1Service, caClient, kvService, dbService, cfg, tracer, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
@@ -90,6 +95,8 @@ func main() {
 			mainLog.Trace("serviceName", serviceName, "error", err)
 		}
 	}
+
+	tracer.Shutdown(ctx)
 
 	wg.Wait() // Block here until are workers are done
 

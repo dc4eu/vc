@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"context"
 	"errors"
 	"os"
 	"vc/pkg/helpers"
@@ -16,7 +17,7 @@ type envVars struct {
 }
 
 // Parse parses config file from VC_CONFIG_YAML environment variable
-func Parse(logger *logger.Log) (*model.Cfg, error) {
+func Parse(ctx context.Context, logger *logger.Log) (*model.Cfg, error) {
 	logger.Info("Read environmental variable")
 	env := envVars{}
 	if err := envconfig.Process("", &env); err != nil {
@@ -45,7 +46,7 @@ func Parse(logger *logger.Log) (*model.Cfg, error) {
 		return nil, err
 	}
 
-	if err := helpers.Check(cfg, logger); err != nil {
+	if err := helpers.Check(ctx, cfg, logger); err != nil {
 		return nil, err
 	}
 

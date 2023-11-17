@@ -2,40 +2,33 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/trace"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel/codes"
 )
-
-// DB is the interface for the database
-type DB interface {
-	//connect(ctx context.Context) error
-	Save(ctx context.Context, doc *model.Document) error
-	Get(ctx context.Context, transactionID string) (*model.Document, error)
-}
 
 // Service is the database service
 type Service struct {
 	dbClient *mongo.Client
 	cfg      *model.Cfg
 	log      *logger.Log
+	tp       *trace.Tracer
 
 	DocumentsColl PDFColl
 }
 
 // New creates a new database service
-func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log) (*Service, error) {
 	service := &Service{
 		log: log,
 		cfg: cfg,
+		tp:  tp,
 	}
-
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
 
 	if err := service.connect(ctx); err != nil {
 		return nil, err
@@ -53,8 +46,12 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 
 // connect connects to the database
 func (s *Service) connect(ctx context.Context) error {
+	ctx, span := s.tp.Start(ctx, "db:connect")
+	defer span.End()
+
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	s.dbClient = client

@@ -9,6 +9,7 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/rpcclient"
+	"vc/pkg/trace"
 )
 
 //	@title		Issuer API
@@ -24,10 +25,11 @@ type Client struct {
 	db        *db.Service
 	kv        *kv.Service
 	log       *logger.Log
+	tp        *trace.Tracer
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, rpcClient *rpcclient.Client, pda1 *pda1.Service, ca *ca.Client, kvService *kv.Service, db *db.Service, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, rpcClient *rpcclient.Client, pda1 *pda1.Service, ca *ca.Client, kvService *kv.Service, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
 	c := &Client{
 		pda1:      pda1,
 		cfg:       cfg,
@@ -36,6 +38,7 @@ func New(ctx context.Context, rpcClient *rpcclient.Client, pda1 *pda1.Service, c
 		log:       logger,
 		ca:        ca,
 		rpcClient: rpcClient,
+		tp:        tracer,
 	}
 
 	c.log.Info("Started")

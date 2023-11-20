@@ -56,6 +56,7 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 	return reply, nil
 }
 
+// CredentialRequest is the request for Credential
 type CredentialRequest struct {
 	AuthenticSource string `json:"authentic_source" binding:"required"`
 	DocumentID      string `json:"document_id" binding:"required"`
@@ -67,11 +68,14 @@ type CredentialRequest struct {
 	UID             string `json:"uid" binding:"required"`
 }
 
+// CredentialReply is the reply for Credential
 type CredentialReply struct {
 	SDJWT string `json:"sdjwt"`
 }
 
+// Credential is the credential endpoint
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*CredentialReply, error) {
+	c.log.Info("Credential", "req", req)
 	// IDMapping
 
 	// GetDocument

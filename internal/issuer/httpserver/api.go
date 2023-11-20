@@ -15,6 +15,9 @@ type Apiv1 interface {
 
 	Get(ctx context.Context, indata *apiv1.GetRequest) (*apiv1.GetReply, error)
 	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
+	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1.CredentialReply, error)
+
+	SatosaCredential(ctx context.Context, reg *apiv1.SatosaCredentialRequest) (*apiv1.SatosaCredentialReply, error)
 
 	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 }

@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// GetRequest holds the request
 type GetRequest struct {
 	FirstName       string `json:"first_name"`
 	LastName        string `json:"last_name"`
@@ -21,6 +22,7 @@ type GetReply struct {
 	JWT string `json:"jwt"`
 }
 
+// Get gets a credential
 func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error) {
 	doc := &pda1.Document{}
 	jwt, err := c.pda1.Build(doc, "mura")
@@ -52,6 +54,30 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 		JWT: jwt,
 	}
 	return reply, nil
+}
+
+type CredentialRequest struct {
+	AuthenticSource string `json:"authentic_source" binding:"required"`
+	DocumentID      string `json:"document_id" binding:"required"`
+	DocumentType    string `json:"document_type" binding:"required"`
+	CollectID       string `json:"collect_id" binding:"required"`
+	DateOfBirth     string `json:"date_of_birth" binding:"required"`
+	LastName        string `json:"last_name" binding:"required"`
+	FirstName       string `json:"first_name" binding:"required"`
+	UID             string `json:"uid" binding:"required"`
+}
+
+type CredentialReply struct {
+	SDJWT string `json:"sdjwt"`
+}
+
+func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*CredentialReply, error) {
+	// IDMapping
+
+	// GetDocument
+
+	// Build SDJWT
+	return nil, nil
 }
 
 // RevokeRequest is the request for GenericRevoke

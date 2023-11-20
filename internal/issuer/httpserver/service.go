@@ -86,9 +86,13 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	rgSatosa := rgRoot.Group("/satosa")
+	s.regEndpoint(ctx, rgSatosa, http.MethodGet, "/credential", s.endpointSatosaCredential)
+
 	rgAPIv1 := rgRoot.Group("api/v1", gin.BasicAuth(s.config.Common.BasicAuth))
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/revoke", s.endpointGenericRevoke)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/get", s.endpointGenericGet)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCredential)
 
 	rgLadokPDFv1 := rgAPIv1.Group("/ladok/pdf")
 	rgLadokPDFv1.Use(s.middlewareAuthLog(ctx))

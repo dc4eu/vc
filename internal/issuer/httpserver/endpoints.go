@@ -80,6 +80,30 @@ func (s *Service) endpointGenericRevoke(ctx context.Context, c *gin.Context) (an
 	return reply, nil
 }
 
+func (s *Service) endpointSatosaCredential(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.SatosaCredentialRequest{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.SatosaCredential(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.CredentialRequest{}
+	if err := s.bindRequest(c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.Credential(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (interface{}, error) {
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.Status(ctx, request)

@@ -131,7 +131,6 @@ proto-registry:
 proto-status:
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-status-model.proto 
 
-
 swagger: swagger-issuer swagger-registry swagger-datastore swagger-verifier swagger-fmt
 
 swagger-fmt:
@@ -151,10 +150,16 @@ swagger-verifier:
 
 install-tools:
 	$(info Install from apt)
-	apt-get update && apt-get install -y protobuf-compiler netcat-openbsd
+	apt-get update && apt-get install -y \
+		protobuf-compiler \
+		netcat-openbsd
 	$(info Install from go)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+clean-apt-cache:
+	$(info Cleaning apt cache)
+	rm -rf /var/lib/apt/lists/*
 
 vscode: install-tools

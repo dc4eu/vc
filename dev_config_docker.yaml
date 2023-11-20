@@ -17,6 +17,8 @@ issuer:
   http_proxy:
   log:
     level:
+  datastore:
+    addr: datastore:8080
   ca:
     addr: "http://ca:8080/"
     token: 99b900ea-b8e2-11ed-a633-bf231b1f0412

@@ -85,7 +85,7 @@ services:
 
   haproxy:
     container_name: "vc_haproxy"
-    image: "haproxytech/haproxy-alpine:2.4"
+    image: "haproxy:alpine"
     ports:
       - 80:80
       - 8404:8404

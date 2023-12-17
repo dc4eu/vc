@@ -81,7 +81,10 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*Crede
 	// GetDocument
 
 	// Build SDJWT
-	return nil, nil
+	reply := &CredentialReply{
+		SDJWT: "mock sd-jwt",
+	}
+	return reply, nil
 }
 
 // RevokeRequest is the request for GenericRevoke

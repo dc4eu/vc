@@ -6,7 +6,7 @@ COPY . .
 RUN make swagger
 RUN make proto
 
-RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_datastore -ldflags "-w -s --extldflags '-static'" ./cmd/datastore/main.go
+RUN --mount=type=cache,target=/root/.cache/go-build-datastore GOOS=linux GOARCH=amd64 go build -v -o bin/vc_datastore -ldflags "-w -s --extldflags '-static'" ./cmd/datastore/main.go
 
 # Deploy
 FROM debian:bookworm-slim

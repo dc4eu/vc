@@ -8,19 +8,15 @@ import (
 	"reflect"
 	"strings"
 	"time"
-	"vc/internal/issuer/apiv1"
+	"vc/internal/mock_as/apiv1"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
 
-	_ "vc/docs/issuer"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Service is the service object for httpserver
@@ -79,25 +75,10 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, helpers.Problem404()) })
 
 	rgRoot := s.gin.Group("/")
-	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
-
-	rgDocs := rgRoot.Group("/swagger")
-	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	rgSatosa := rgRoot.Group("/satosa")
-	s.regEndpoint(ctx, rgSatosa, http.MethodGet, "/credential", s.endpointSatosaCredential)
 
 	rgAPIv1 := rgRoot.Group("api/v1")
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/revoke", s.endpointGenericRevoke)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/get", s.endpointGenericGet)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCredential)
-
-	rgLadokPDFv1 := rgAPIv1.Group("/ladok/pdf", s.middlewareClientCertAuth(ctx))
-	rgLadokPDFv1.Use(s.middlewareAuthLog(ctx))
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/sign", s.endpointSignPDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/validate", s.endpointValidatePDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodGet, "/:transaction_id", s.endpointGetSignedPDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPut, "/revoke/:transaction_id", s.endpointPDFRevoke)
+	rgMock := rgAPIv1.Group("/mock")
+	s.regEndpoint(ctx, rgMock, http.MethodPost, "/next", s.endpointMockNext)
 
 	// Run http server
 	go func() {

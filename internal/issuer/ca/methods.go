@@ -11,19 +11,20 @@ import (
 
 // SignDocument sends documents to the CA to be signed
 func (c *Client) SignDocument(ctx context.Context, document *types.Document) {
-	ctx, span := c.tp.Start(ctx, "SignDocument")
+	ctx, span := c.tp.Start(ctx, "ca:SignDocument")
 	defer span.End()
 
 	c.log.Debug("SignDocuments", "transactionID", document.TransactionID)
 
-	signDocument, _, err := c.caClient.PDF.Sign(ctx, document)
+	signDocument, _, err := c.caClient.Document.PDFSign(ctx, document)
+	span.AddEvent("signDocument")
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		c.log.Error(err, "caClient.sign", "transactionID", document.TransactionID)
 		return
 	}
 	if signDocument == nil {
-		span.SetStatus(codes.Error, err.Error())
+		span.SetStatus(codes.Error, "signDocument is nil")
 		c.log.Error(errors.New("signDocument is nil"), "caClient.sign", "transactionID", document.TransactionID)
 		return
 	}
@@ -61,7 +62,7 @@ func (c *Client) ValidateDocument(ctx context.Context, document *types.Document)
 		span.SetStatus(codes.Error, helpers.ErrDocumentIsRevoked.Error())
 		return nil, helpers.ErrDocumentIsRevoked
 	}
-	verifyDocument, _, err := c.caClient.PDF.Validate(ctx, document)
+	verifyDocument, _, err := c.caClient.Document.PDFValidate(ctx, document)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

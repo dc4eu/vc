@@ -42,6 +42,7 @@ func (c *PDFColl) Save(ctx context.Context, doc *types.Document) error {
 		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+	c.service.log.Info("saved document", "transaction_id", doc.TransactionID)
 	return nil
 }
 
@@ -55,7 +56,7 @@ func (c *PDFColl) Revoke(ctx context.Context, transactionID string) error {
 	}
 	update := bson.M{
 		"$set": bson.M{
-			"revoke_ts": time.Now().Unix(),
+			"revoked_ts": time.Now().Unix(),
 		},
 	}
 	_, err := c.coll.UpdateOne(ctx, filter, update)

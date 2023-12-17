@@ -38,16 +38,30 @@ definitions:
   apiv1.PDFValidateReply:
     properties:
       data:
-        properties:
-          message:
-            type: string
-          valid:
-            type: boolean
-        type: object
+        $ref: '#/definitions/types.Validation'
     type: object
   apiv1.PDFValidateRequest:
     properties:
       pdf:
+        type: string
+    type: object
+  apiv1.RevokeReply:
+    properties:
+      data:
+        properties:
+          status:
+            type: boolean
+        type: object
+    type: object
+  apiv1.RevokeRequest:
+    properties:
+      authentic_source:
+        type: string
+      document_id:
+        type: string
+      document_type:
+        type: string
+      revocation_id:
         type: string
     type: object
   helpers.Error:
@@ -63,6 +77,8 @@ definitions:
     type: object
   types.Document:
     properties:
+      contact_info:
+        type: string
       create_ts:
         type: integer
       data:
@@ -75,12 +91,27 @@ definitions:
         type: string
       modify_ts:
         type: integer
+      name:
+        type: string
       reason:
         type: string
       revoked_ts:
         type: integer
       transaction_id:
         type: string
+    type: object
+  types.Validation:
+    properties:
+      error:
+        type: string
+      is_revoked:
+        type: boolean
+      message:
+        type: string
+      transaction_id:
+        type: string
+      valid_signature:
+        type: boolean
     type: object
 info:
   contact: {}
@@ -193,4 +224,31 @@ paths:
       summary: Validate pdf
       tags:
       - ladok
+  /revoke:
+    post:
+      consumes:
+      - application/json
+      description: Revoke endpoint
+      operationId: generic-revoke
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.RevokeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/apiv1.RevokeReply'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: Revoke
+      tags:
+      - dc4eu
 swagger: "2.0"

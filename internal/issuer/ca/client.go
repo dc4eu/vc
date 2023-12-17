@@ -37,12 +37,14 @@ func New(ctx context.Context, kvService *kv.Service, dbService *db.Service, cfg 
 
 	var err error
 	c.caClient, err = gosunetca.New(ctx, gosunetca.Config{
-		ServerURL: cfg.Issuer.CA.Addr,
-		Token:     cfg.Issuer.CA.Token,
-		Location:  cfg.Issuer.CA.Location,
-		Reason:    cfg.Issuer.CA.Reason,
-		UserAgent: "vc",
-		ProxyURL:  os.Getenv("HTTP_PROXY"),
+		ServerURL:   cfg.Issuer.CA.Addr,
+		Token:       cfg.Issuer.CA.Token,
+		Location:    cfg.Issuer.CA.Location,
+		Reason:      cfg.Issuer.CA.Reason,
+		ContactInfo: cfg.Issuer.CA.ContactInfo,
+		Name:        cfg.Issuer.CA.Name,
+		UserAgent:   "vc",
+		ProxyURL:    os.Getenv("HTTP_PROXY"),
 	})
 	if err != nil {
 		return nil, err

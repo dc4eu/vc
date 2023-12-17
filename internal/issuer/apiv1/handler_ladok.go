@@ -38,10 +38,12 @@ type PDFSignReply struct {
 //	@Param			req	body		PDFSignRequest			true	" "
 //	@Router			/ladok/pdf/sign [post]
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFSign")
 	defer span.End()
+	span.AddEvent("PDFSign")
 
-	if err := helpers.Check(ctx, req, c.log); err != nil {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	transactionID := uuid.New().String()
@@ -54,6 +56,7 @@ func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignRepl
 	}
 
 	go func() {
+		span.AddEvent("PDFSign")
 		c.log.Debug("sending unsigned document to CA")
 		c.ca.SignDocument(ctx, unsignedDocument)
 	}()
@@ -92,7 +95,7 @@ type PDFValidateReply struct {
 //	@Param			req	body		PDFValidateRequest		true	" "
 //	@Router			/ladok/pdf/validate [post]
 func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*PDFValidateReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFValidate")
 	defer span.End()
 
 	validateCandidate := &types.Document{
@@ -144,7 +147,7 @@ type PDFGetSignedReply struct {
 //	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/{transaction_id} [get]
 func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*PDFGetSignedReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFGetSigned")
 	defer span.End()
 
 	if !c.kv.Doc.ExistsSigned(ctx, req.TransactionID) {
@@ -221,7 +224,7 @@ type PDFRevokeReply struct {
 //	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/revoke/{transaction_id} [put]
 func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevokeReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFRevoke")
 	defer span.End()
 
 	if err := c.db.DocumentsColl.Revoke(ctx, req.TransactionID); err != nil {
@@ -239,7 +242,7 @@ func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevo
 
 // Status return status for each ladok instance
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:Status")
 	defer span.End()
 
 	probes := model.Probes{}

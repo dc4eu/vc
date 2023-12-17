@@ -95,6 +95,9 @@ docker-push:
 	docker push $(DOCKER_TAG_DATASTORE)
 	docker push $(DOCKER_TAG_REGISTRY)
 
+docker-archive:
+	docker save --output docker_archives/vc_$(VERSION).tar $(DOCKER_TAG_ISSUER) $(DOCKER_TAG_VERIFIER) $(DOCKER_TAG_DATASTORE) $(DOCKER_TAG_REGISTRY)
+
 docker-push-gobuild:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_GOBUILD)
@@ -158,8 +161,17 @@ install-tools:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
+
 clean-apt-cache:
 	$(info Cleaning apt cache)
 	rm -rf /var/lib/apt/lists/*
 
-vscode: install-tools
+vscode:
+	$(info Install from apt)
+	sudo apt-get update && sudo apt-get install -y \
+		protobuf-compiler \
+		netcat-openbsd
+	$(info Install from go)
+	go install github.com/swaggo/swag/cmd/swag@latest && \
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest

@@ -50,7 +50,7 @@
         },
         "/document/collection_code": {
             "post": {
-                "description": "Get document by collection code endpoint",
+                "description": "Get document by collect code endpoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -60,8 +60,8 @@
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "GetDocumentByCollectionCode",
-                "operationId": "get-document-collection-code",
+                "summary": "GetDocumentByCollectCode",
+                "operationId": "get-document-collect-code",
                 "parameters": [
                     {
                         "description": " ",
@@ -173,7 +173,7 @@
         },
         "/portal": {
             "post": {
-                "description": "Get document by collection code endpoint",
+                "description": "Get portal data endpoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -183,7 +183,7 @@
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "ListMetadata",
+                "summary": "Portal",
                 "operationId": "portal",
                 "parameters": [
                     {
@@ -375,6 +375,7 @@
                 "document_type",
                 "first_name",
                 "last_name",
+                "qr",
                 "revocation_id",
                 "uid"
             ],
@@ -432,7 +433,6 @@
         "model.Upload": {
             "type": "object",
             "required": [
-                "document_data",
                 "meta"
             ],
             "properties": {

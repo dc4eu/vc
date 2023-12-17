@@ -20,12 +20,14 @@ type KeyValue struct {
 
 // CA holds the ca configuration
 type CA struct {
-	Addr     string `yaml:"addr" validate:"required"`
-	Token    string `yaml:"token" validate:"required"`
-	KeyLabel string `yaml:"key_label" validate:"required"`
-	KeyType  string `yaml:"key_type" validate:"required"`
-	Location string `yaml:"location" validate:"required"`
-	Reason   string `yaml:"reason" validate:"required"`
+	Addr        string `yaml:"addr" validate:"required"`
+	Token       string `yaml:"token" validate:"required"`
+	KeyLabel    string `yaml:"key_label" validate:"required"`
+	KeyType     string `yaml:"key_type" validate:"required"`
+	Location    string `yaml:"location" validate:"required"`
+	Reason      string `yaml:"reason" validate:"required"`
+	Name        string `yaml:"name" validate:"required"`
+	ContactInfo string `yaml:"contact_info" validate:"required"`
 }
 
 // Log holds the log configuration

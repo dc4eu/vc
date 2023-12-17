@@ -32,7 +32,7 @@ func TestSaveTransaction(t *testing.T) {
 	}
 	opts := mtest.NewOptions().DatabaseName("wallet").ClientType(mtest.Mock)
 	mt := mtest.New(t, opts)
-	defer mt.Close()
+	//defer mt.Close()
 	for _, tt := range tts {
 		mt.Run(tt.name, func(mt *mtest.T) {
 			ctx := context.Background()

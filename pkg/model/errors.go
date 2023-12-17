@@ -23,4 +23,7 @@ var (
 
 	// ErrInvalidDocumentType error for invalid document type
 	ErrInvalidDocumentType = errors.New("ERR_INVALID_DOCUMENT_TYPE")
+
+	// ErrNoKnownDocumentType error for no known document type
+	ErrNoKnownDocumentType = errors.New("ERR_NO_KNOWN_DOCUMENT_TYPE")
 )

@@ -17,8 +17,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/event"
-	"go.mongodb.org/mongo-driver/internal"
 	"go.mongodb.org/mongo-driver/internal/assert"
+	"go.mongodb.org/mongo-driver/internal/csfle"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
@@ -180,11 +180,14 @@ func New(wrapped *testing.T, opts ...*Options) *T {
 		t.createTestClient()
 	}
 
+	wrapped.Cleanup(t.cleanup)
+
 	return t
 }
 
-// Close cleans up any resources associated with a T. There should be one Close corresponding to every New.
-func (t *T) Close() {
+// cleanup cleans up any resources associated with a T. It is intended to be
+// called by [testing.T.Cleanup].
+func (t *T) cleanup() {
 	if t.Client == nil {
 		return
 	}
@@ -492,13 +495,13 @@ func DropEncryptedCollection(t *T, coll *mongo.Collection, encryptedFields inter
 
 	// Drop the two encryption-related, associated collections: `escCollection` and `ecocCollection`.
 	// Drop ESCCollection.
-	escCollection, err := internal.GetEncryptedStateCollectionName(efBSON, coll.Name(), internal.EncryptedStateCollection)
+	escCollection, err := csfle.GetEncryptedStateCollectionName(efBSON, coll.Name(), csfle.EncryptedStateCollection)
 	assert.Nil(t, err, "error in getEncryptedStateCollectionName: %v", err)
 	err = coll.Database().Collection(escCollection).Drop(context.Background())
 	assert.Nil(t, err, "error in Drop: %v", err)
 
 	// Drop ECOCCollection.
-	ecocCollection, err := internal.GetEncryptedStateCollectionName(efBSON, coll.Name(), internal.EncryptedCompactionCollection)
+	ecocCollection, err := csfle.GetEncryptedStateCollectionName(efBSON, coll.Name(), csfle.EncryptedCompactionCollection)
 	assert.Nil(t, err, "error in getEncryptedStateCollectionName: %v", err)
 	err = coll.Database().Collection(ecocCollection).Drop(context.Background())
 	assert.Nil(t, err, "error in Drop: %v", err)

@@ -17,26 +17,30 @@ import (
 
 // Config is the configuration for the client
 type Config struct {
-	ServerURL string `validate:"required"`
-	Token     string `validate:"required"`
-	Location  string `validate:"required"`
-	Reason    string `validate:"required"`
-	UserAgent string
-	ProxyURL  string
+	ServerURL   string `validate:"required"`
+	Token       string `validate:"required"`
+	Location    string `validate:"required"`
+	Reason      string `validate:"required"`
+	ContactInfo string `validate:"required"`
+	Name        string `validate:"required"`
+	UserAgent   string
+	ProxyURL    string
 	//Logger    logr.Logger
 }
 
 // Client is the client for the SUNET CA API
 type Client struct {
-	httpClient *http.Client
-	token      string
-	serverURL  string
-	userAgent  string
-	location   string
-	reason     string
+	httpClient  *http.Client
+	token       string
+	serverURL   string
+	userAgent   string
+	location    string
+	reason      string
+	name        string
+	contactInfo string
 	Log
 
-	PDF *PDFService
+	Document *DocumentService
 }
 
 // New create a new client
@@ -46,14 +50,16 @@ func New(ctx context.Context, config Config) (*Client, error) {
 	}
 
 	c := &Client{
-		httpClient: &http.Client{},
-		token:      config.Token,
-		serverURL:  config.ServerURL,
-		userAgent:  config.UserAgent,
-		location:   config.Location,
-		reason:     config.Reason,
-		Log:        Log{},
-		PDF:        &PDFService{},
+		httpClient:  &http.Client{},
+		token:       config.Token,
+		serverURL:   config.ServerURL,
+		userAgent:   config.UserAgent,
+		location:    config.Location,
+		reason:      config.Reason,
+		name:        config.Name,
+		contactInfo: config.ContactInfo,
+		Log:         Log{},
+		Document:    &DocumentService{},
 	}
 	c.Logger = logr.FromContextOrDiscard(ctx)
 
@@ -61,7 +67,7 @@ func New(ctx context.Context, config Config) (*Client, error) {
 		Proxy: http.ProxyFromEnvironment,
 	}
 
-	c.PDF = &PDFService{client: c, baseURL: "/pdf"}
+	c.Document = &DocumentService{client: c, baseURL: "/document"}
 	return c, nil
 }
 

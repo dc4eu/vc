@@ -15,6 +15,8 @@ type Document struct {
 	CreateTS      int64  `json:"create_ts,omitempty" mongo:"create_ts" redis:"create_ts"`
 	Reason        string `json:"reason,omitempty"`
 	Location      string `json:"location,omitempty"`
+	Name          string `json:"name,omitempty"`
+	ContactInfo   string `json:"contact_info"`
 }
 
 // Validation is the reply for the validate endpoint

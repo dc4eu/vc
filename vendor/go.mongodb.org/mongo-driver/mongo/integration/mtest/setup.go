@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/internal/testutil"
+	"go.mongodb.org/mongo-driver/internal/integtest"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/description"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -81,7 +81,7 @@ func Setup(setupOpts ...*SetupOptions) error {
 		uri = *opts.URI
 	default:
 		var err error
-		uri, err = testutil.MongoDBURI()
+		uri, err = integtest.MongoDBURI()
 		if err != nil {
 			return fmt.Errorf("error getting uri: %v", err)
 		}
@@ -96,7 +96,7 @@ func Setup(setupOpts ...*SetupOptions) error {
 	testContext.requireAPIVersion = os.Getenv("REQUIRE_API_VERSION") == "true"
 
 	clientOpts := options.Client().ApplyURI(uri)
-	testutil.AddTestServerAPIVersion(clientOpts)
+	integtest.AddTestServerAPIVersion(clientOpts)
 
 	cfg, err := topology.NewConfig(clientOpts, nil)
 	if err != nil {
@@ -196,7 +196,7 @@ func Setup(setupOpts ...*SetupOptions) error {
 
 	testContext.authEnabled = os.Getenv("AUTH") == "auth"
 	testContext.sslEnabled = os.Getenv("SSL") == "ssl"
-	biRes, err := testContext.client.Database("admin").RunCommand(context.Background(), bson.D{{"buildInfo", 1}}).DecodeBytes()
+	biRes, err := testContext.client.Database("admin").RunCommand(context.Background(), bson.D{{"buildInfo", 1}}).Raw()
 	if err != nil {
 		return fmt.Errorf("buildInfo error: %v", err)
 	}
@@ -215,7 +215,7 @@ func Setup(setupOpts ...*SetupOptions) error {
 	// Get server parameters if test is not running against ADL; ADL does not have "getParameter" command.
 	if !testContext.dataLake {
 		db := testContext.client.Database("admin")
-		testContext.serverParameters, err = db.RunCommand(context.Background(), bson.D{{"getParameter", "*"}}).DecodeBytes()
+		testContext.serverParameters, err = db.RunCommand(context.Background(), bson.D{{"getParameter", "*"}}).Raw()
 		if err != nil {
 			return fmt.Errorf("error getting serverParameters: %v", err)
 		}
@@ -323,7 +323,7 @@ func addServerlessAuthCredentials(uri string) (string, error) {
 	} else if strings.HasPrefix(uri, "mongodb://") {
 		scheme = "mongodb://"
 	} else {
-		return "", fmt.Errorf("scheme must be \"mongodb\" or \"mongodb+srv\"")
+		return "", errors.New(`scheme must be "mongodb" or "mongodb+srv"`)
 	}
 
 	uri = scheme + user + ":" + password + "@" + uri[len(scheme):]

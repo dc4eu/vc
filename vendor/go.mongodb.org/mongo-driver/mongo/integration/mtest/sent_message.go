@@ -48,28 +48,6 @@ func getSentMessageParser(opcode wiremessage.OpCode) (sentMsgParseFn, bool) {
 	}
 }
 
-func parseSentMessage(wm []byte) (*SentMessage, error) {
-	// Re-assign the wire message to "remaining" so "wm" continues to point to the entire message after parsing.
-	_, requestID, _, opcode, remaining, ok := wiremessage.ReadHeader(wm)
-	if !ok {
-		return nil, errors.New("failed to read wiremessage header")
-	}
-
-	parseFn, ok := getSentMessageParser(opcode)
-	if !ok {
-		return nil, fmt.Errorf("unknown opcode: %v", opcode)
-	}
-	sent, err := parseFn(remaining)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing wiremessage with opcode %s: %v", opcode, err)
-	}
-
-	sent.RequestID = requestID
-	sent.RawMessage = wm
-	sent.OpCode = opcode
-	return sent, nil
-}
-
 func parseOpQuery(wm []byte) (*SentMessage, error) {
 	var ok bool
 
@@ -131,6 +109,28 @@ func parseOpQuery(wm []byte) (*SentMessage, error) {
 		DocumentSequence: docSequence,
 	}
 	return sm, nil
+}
+
+func parseSentMessage(wm []byte) (*SentMessage, error) {
+	// Re-assign the wire message to "remaining" so "wm" continues to point to the entire message after parsing.
+	_, requestID, _, opcode, remaining, ok := wiremessage.ReadHeader(wm)
+	if !ok {
+		return nil, errors.New("failed to read wiremessage header")
+	}
+
+	parseFn, ok := getSentMessageParser(opcode)
+	if !ok {
+		return nil, fmt.Errorf("unknown opcode: %v", opcode)
+	}
+	sent, err := parseFn(remaining)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing wiremessage with opcode %s: %v", opcode, err)
+	}
+
+	sent.RequestID = requestID
+	sent.RawMessage = wm
+	sent.OpCode = opcode
+	return sent, nil
 }
 
 func parseSentOpMsg(wm []byte) (*SentMessage, error) {

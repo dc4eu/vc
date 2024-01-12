@@ -22,7 +22,7 @@ var JSONSignDocumentRequest200 = []byte(`{
 var MockRequestSign = &types.SignRequest{
 	Document: &types.Document{
 		TransactionID: "",
-		Data:          "0c91fecff72ca85921e655c52d2bed0e39c9111eff1d8b140be96a49eaec9149",
+		Base64Data:    "0c91fecff72ca85921e655c52d2bed0e39c9111eff1d8b140be96a49eaec9149",
 	},
 }
 

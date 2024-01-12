@@ -10,9 +10,9 @@ require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/google/uuid v1.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/masv3971/goretask v0.0.0-00010101000000-000000000000
 	github.com/masv3971/gosdjwt v0.0.0-20230916095919-ba85f898968f
 	github.com/masv3971/gosunetca v0.0.4
-	github.com/miekg/pkcs11 v1.1.1
 	github.com/moogar0880/problems v0.1.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.8.4
@@ -71,7 +71,6 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/goccy/go-json v0.10.2
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -85,7 +84,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/redis/go-redis/v9 v9.3.0
+	github.com/redis/go-redis/v9 v9.3.1
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -109,3 +108,5 @@ replace github.com/masv3971/gosdjwt => ../gosdjwt
 replace github.com/masv3971/gosunetca => ../gosunetca
 
 replace github.com/masv3971/godc4eu => ../godc4eu
+
+replace github.com/masv3971/goretask => ../goretask

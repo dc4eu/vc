@@ -1,6 +1,6 @@
 .PHONY: update clean build build-all run package deploy test authors dist check-tag
 
-NAME 					:= gosunetca
+NAME 					:= goretask
 TAGS					:= $(shell git tag)
 VERSION					:= $(shell tail -1 RELEASE.txt|awk -F" : " '{print $$1}')
 COMMIT_MSG				:= $(shell tail -1 RELEASE.txt|awk -F" : " '{print $$2}')

@@ -2,7 +2,9 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"time"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
@@ -38,10 +40,12 @@ type PDFSignReply struct {
 //	@Param			req	body		PDFSignRequest			true	" "
 //	@Router			/ladok/pdf/sign [post]
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFSign")
 	defer span.End()
+	span.AddEvent("PDFSign")
 
-	if err := helpers.Check(ctx, req, c.log); err != nil {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	transactionID := uuid.New().String()
@@ -50,13 +54,23 @@ func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignRepl
 
 	unsignedDocument := &types.Document{
 		TransactionID: transactionID,
-		Data:          req.PDF,
+		Base64Data:    req.PDF,
 	}
 
-	go func() {
-		c.log.Debug("sending unsigned document to CA")
-		c.ca.SignDocument(ctx, unsignedDocument)
-	}()
+	_, err := c.simpleQueue.LadokSign.Enqueue(ctx, unsignedDocument)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	persistentDocument := &types.Document{
+		TransactionID: transactionID,
+	}
+	_, err = c.simpleQueue.LadokPersistentSave.Enqueue(ctx, persistentDocument)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
 
 	reply := &PDFSignReply{
 		Data: struct {
@@ -92,30 +106,68 @@ type PDFValidateReply struct {
 //	@Param			req	body		PDFValidateRequest		true	" "
 //	@Router			/ladok/pdf/validate [post]
 func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*PDFValidateReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFValidate")
 	defer span.End()
 
 	validateCandidate := &types.Document{
-		Data: req.PDF,
+		Base64Data: req.PDF,
 	}
 
-	res, err := c.ca.ValidateDocument(ctx, validateCandidate)
+	job, err := c.simpleQueue.LadokValidate.Enqueue(ctx, validateCandidate)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	if res.Error != "" {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, helpers.NewErrorFromError(errors.New(res.Error))
+
+	var (
+		gotChan = make(chan bool)
+		errChan = make(chan error)
+	)
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	go func() {
+		for {
+			got, err := job.Wait(ctx)
+			if err != nil {
+				errChan <- err
+			}
+			c.log.Info("PDFValidate", "wait", got)
+			gotChan <- got
+		}
+	}()
+
+	for {
+		select {
+		case err := <-errChan:
+			return nil, err
+
+		case got := <-gotChan:
+			if got {
+				c.log.Info("PDFValidate", "job.Result", job.Result)
+				validationReply := &types.Validation{}
+				if err := json.Unmarshal([]byte(job.Result.Data), validationReply); err != nil {
+					span.SetStatus(codes.Error, err.Error())
+					return nil, err
+				}
+				if validationReply.Error != "" {
+					span.SetStatus(codes.Error, err.Error())
+					return nil, helpers.NewErrorFromError(errors.New(validationReply.Error))
+				}
+
+				validationReply.IsRevoked = c.db.DocumentsColl.IsRevoked(ctx, validationReply.TransactionID)
+
+				reply := &PDFValidateReply{
+					Data: validationReply,
+				}
+				return reply, nil
+			}
+
+		case <-ctx.Done():
+			return nil, errors.New("timeout")
+		}
 	}
-
-	res.IsRevoked = c.db.DocumentsColl.IsRevoked(ctx, res.TransactionID)
-
-	reply := &PDFValidateReply{
-		Data: res,
-	}
-
-	return reply, nil
 }
 
 // PDFGetSignedRequest is the request for get signed pdf
@@ -144,7 +196,7 @@ type PDFGetSignedReply struct {
 //	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/{transaction_id} [get]
 func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*PDFGetSignedReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFGetSigned")
 	defer span.End()
 
 	if !c.kv.Doc.ExistsSigned(ctx, req.TransactionID) {
@@ -169,7 +221,12 @@ func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*P
 		return nil, err
 	}
 
-	if err := c.kv.Doc.DelSigned(ctx, req.TransactionID); err != nil {
+	delReq := &types.Document{
+		TransactionID: req.TransactionID,
+	}
+
+	if _, err := c.simpleQueue.LadokDelSigned.Enqueue(ctx, delReq); err != nil {
+		c.log.Info("PDFGetSigned", "Enqueue", err)
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -221,7 +278,7 @@ type PDFRevokeReply struct {
 //	@Param			transaction_id	path		string					true	"transaction_id"
 //	@Router			/ladok/pdf/revoke/{transaction_id} [put]
 func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevokeReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:PDFRevoke")
 	defer span.End()
 
 	if err := c.db.DocumentsColl.Revoke(ctx, req.TransactionID); err != nil {
@@ -239,11 +296,12 @@ func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevo
 
 // Status return status for each ladok instance
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1")
+	ctx, span := c.tp.Start(ctx, "apiv1:Status")
 	defer span.End()
 
 	probes := model.Probes{}
 	probes = append(probes, c.kv.Status(ctx))
+	probes = append(probes, c.db.Status(ctx))
 
 	status := probes.Check("issuer")
 

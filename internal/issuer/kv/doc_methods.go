@@ -33,7 +33,7 @@ func (d *Doc) SaveSigned(ctx context.Context, doc *types.Document) error {
 		span.SetStatus(codes.Error, helpers.ErrNoTrasactionID.Error())
 		return helpers.ErrNoTrasactionID
 	}
-	if err := d.client.redisClient.HSet(ctx, d.signedKey(doc.TransactionID), doc).Err(); err != nil {
+	if err := d.client.RedisClient.HSet(ctx, d.signedKey(doc.TransactionID), doc).Err(); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
@@ -46,7 +46,7 @@ func (d *Doc) GetSigned(ctx context.Context, transactionID string) (*types.Docum
 	defer span.End()
 
 	dest := &types.Document{}
-	if err := d.client.redisClient.HGetAll(ctx, d.signedKey(transactionID)).Scan(dest); err != nil {
+	if err := d.client.RedisClient.HGetAll(ctx, d.signedKey(transactionID)).Scan(dest); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (d *Doc) ExistsSigned(ctx context.Context, transactionID string) bool {
 	ctx, span := d.client.tp.Start(ctx, "kv:ExistsSigned")
 	defer span.End()
 
-	return d.client.redisClient.Exists(ctx, d.signedKey(transactionID)).Val() == 1
+	return d.client.RedisClient.Exists(ctx, d.signedKey(transactionID)).Val() == 1
 }
 
 // DelSigned deletes the signed document
@@ -66,7 +66,7 @@ func (d *Doc) DelSigned(ctx context.Context, transactionID string) error {
 	ctx, span := d.client.tp.Start(ctx, "kv:DelSigned")
 	defer span.End()
 
-	return d.client.redisClient.HDel(ctx, d.signedKey(transactionID), "data", "ts").Err()
+	return d.client.RedisClient.HDel(ctx, d.signedKey(transactionID), "base64_data", "ts").Err()
 }
 
 // AddTTLSigned marks the signed document for deletion
@@ -74,6 +74,6 @@ func (d *Doc) AddTTLSigned(ctx context.Context, transactionID string) error {
 	ctx, span := d.client.tp.Start(ctx, "kv:AddTTLSigned")
 	defer span.End()
 
-	expTime := time.Duration(d.client.cfg.Issuer.KeyValue.PDF.KeepSignedDuration)
-	return d.client.redisClient.Expire(ctx, d.signedKey(transactionID), expTime*time.Second).Err()
+	expTime := time.Duration(d.client.cfg.Common.KeyValue.PDF.KeepSignedDuration)
+	return d.client.RedisClient.Expire(ctx, d.signedKey(transactionID), expTime*time.Second).Err()
 }

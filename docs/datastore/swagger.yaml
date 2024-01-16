@@ -105,6 +105,7 @@ definitions:
     - document_type
     - first_name
     - last_name
+    - qr
     - revocation_id
     - uid
     type: object
@@ -121,7 +122,6 @@ definitions:
       meta:
         $ref: '#/definitions/model.MetaData'
     required:
-    - document_data
     - meta
     type: object
 info:
@@ -160,8 +160,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Get document by collection code endpoint
-      operationId: get-document-collection-code
+      description: Get document by collect code endpoint
+      operationId: get-document-collect-code
       parameters:
       - description: ' '
         in: body
@@ -180,7 +180,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/helpers.ErrorResponse'
-      summary: GetDocumentByCollectionCode
+      summary: GetDocumentByCollectCode
       tags:
       - dc4eu
   /id_mapping:
@@ -241,7 +241,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Get document by collection code endpoint
+      description: Get portal data endpoint
       operationId: portal
       parameters:
       - description: ' '
@@ -261,7 +261,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/helpers.ErrorResponse'
-      summary: ListMetadata
+      summary: Portal
       tags:
       - dc4eu
   /upload:

@@ -174,6 +174,47 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/revoke": {
+            "post": {
+                "description": "Revoke endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "Revoke",
+                "operationId": "generic-revoke",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.RevokeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.RevokeReply"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -237,15 +278,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "properties": {
-                        "message": {
-                            "type": "string"
-                        },
-                        "valid": {
-                            "type": "boolean"
-                        }
-                    }
+                    "$ref": "#/definitions/types.Validation"
                 }
             }
         },
@@ -253,6 +286,36 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "pdf": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.RevokeReply": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "apiv1.RevokeRequest": {
+            "type": "object",
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "document_id": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
+                },
+                "revocation_id": {
                     "type": "string"
                 }
             }
@@ -277,6 +340,9 @@ const docTemplate = `{
         "types.Document": {
             "type": "object",
             "properties": {
+                "contact_info": {
+                    "type": "string"
+                },
                 "create_ts": {
                     "type": "integer"
                 },
@@ -295,6 +361,9 @@ const docTemplate = `{
                 "modify_ts": {
                     "type": "integer"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "reason": {
                     "type": "string"
                 },
@@ -303,6 +372,26 @@ const docTemplate = `{
                 },
                 "transaction_id": {
                     "type": "string"
+                }
+            }
+        },
+        "types.Validation": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "is_revoked": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "valid_signature": {
+                    "type": "boolean"
                 }
             }
         }

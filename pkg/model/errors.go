@@ -23,4 +23,13 @@ var (
 
 	// ErrInvalidDocumentType error for invalid document type
 	ErrInvalidDocumentType = errors.New("ERR_INVALID_DOCUMENT_TYPE")
+
+	// ErrNoKnownDocumentType error for no known document type
+	ErrNoKnownDocumentType = errors.New("ERR_NO_KNOWN_DOCUMENT_TYPE")
+
+	// ErrInvalidChannelName error for invalid channel name
+	ErrInvalidChannelName = errors.New("ERR_INVALID_CHANNEL_NAME")
+
+	// ErrInvalidTopicName error for invalid topic name
+	ErrInvalidTopicName = errors.New("ERR_INVALID_TOPIC_NAME")
 )

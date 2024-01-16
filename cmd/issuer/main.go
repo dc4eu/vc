@@ -7,12 +7,12 @@ import (
 	"sync"
 	"syscall"
 	"vc/internal/issuer/apiv1"
-	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/ehic"
 	"vc/internal/issuer/httpserver"
 	"vc/internal/issuer/kv"
 	"vc/internal/issuer/pda1"
+	"vc/internal/issuer/simplequeue"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/rpcclient"
@@ -57,10 +57,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	caClient, err := ca.New(ctx, kvService, dbService, cfg, tracer, log.New("ca"))
+
+	simpleQueueService, err := simplequeue.New(ctx, kvService, tracer, cfg, log.New("queue"))
+	services["queueService"] = simpleQueueService
 	if err != nil {
 		panic(err)
 	}
+
 	ehicService, err := ehic.New(ctx, cfg, log.New("ehic"))
 	services["ehicService"] = ehicService
 	if err != nil {
@@ -71,7 +74,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	apiv1Client, err := apiv1.New(ctx, rpcClients, pda1Service, caClient, kvService, dbService, cfg, tracer, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, pda1Service, kvService, dbService, cfg, tracer, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}

@@ -142,5 +142,8 @@ func (s *Service) Build(document *pda1.Document, signingKey string) (string, err
 		},
 	}
 
-	return s.sdJWTClient.SDJWT(instructions, signingKey)
+	s.log.Info("Building PDA1 document", "instructions", instructions)
+
+	//return s.sdJWTClient.SDJWT(instructions, signingKey)
+	return "", nil
 }

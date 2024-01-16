@@ -6,7 +6,6 @@ import (
 	"vc/pkg/model"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -14,6 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// Tracer is a wrapper for opentelemetry tracer
 type Tracer struct {
 	TP *sdktrace.TracerProvider
 	trace.Tracer
@@ -33,7 +33,6 @@ func newTraceProvider(exp sdktrace.SpanExporter, serviceName string) *sdktrace.T
 		sdktrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceName(serviceName),
-			attribute.String("mura", "mura"),
 		)),
 	)
 }

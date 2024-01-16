@@ -72,12 +72,10 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.server.IdleTimeout = time.Second * 90
 
 	// Middlewares
-	//s.gin.Use(cors.Default())
 	s.gin.Use(s.middlewareTraceID(ctx))
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))
 	s.gin.Use(s.middlewareCrash(ctx))
-	//s.gin.Use(otelgin.Middleware("vc-issuer"))
 	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, helpers.Problem404()) })
 
 	rgRoot := s.gin.Group("/")
@@ -89,12 +87,12 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	rgSatosa := rgRoot.Group("/satosa")
 	s.regEndpoint(ctx, rgSatosa, http.MethodGet, "/credential", s.endpointSatosaCredential)
 
-	rgAPIv1 := rgRoot.Group("api/v1", gin.BasicAuth(s.config.Common.BasicAuth))
+	rgAPIv1 := rgRoot.Group("api/v1")
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/revoke", s.endpointGenericRevoke)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/get", s.endpointGenericGet)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCredential)
 
-	rgLadokPDFv1 := rgAPIv1.Group("/ladok/pdf")
+	rgLadokPDFv1 := rgAPIv1.Group("/ladok/pdf", s.middlewareClientCertAuth(ctx))
 	rgLadokPDFv1.Use(s.middlewareAuthLog(ctx))
 	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/sign", s.endpointSignPDF)
 	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/validate", s.endpointValidatePDF)
@@ -122,15 +120,18 @@ func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, method, 
 
 		res, err := handler(ctx, c)
 		if err != nil {
-			renderContent(c, 400, gin.H{"error": helpers.NewErrorFromError(err)})
+			s.renderContent(ctx, c, 400, gin.H{"error": helpers.NewErrorFromError(err)})
 			return
 		}
 
-		renderContent(c, 200, res)
+		s.renderContent(ctx, c, 200, res)
 	})
 }
 
-func renderContent(c *gin.Context, code int, data any) {
+func (s *Service) renderContent(ctx context.Context, c *gin.Context, code int, data any) {
+	ctx, span := s.tp.Start(ctx, "httpserver:renderContent")
+	defer span.End()
+
 	switch c.NegotiateFormat(gin.MIMEJSON, "*/*") {
 	case gin.MIMEJSON:
 		c.JSON(code, data)

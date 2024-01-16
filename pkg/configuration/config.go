@@ -46,7 +46,7 @@ func Parse(ctx context.Context, logger *logger.Log) (*model.Cfg, error) {
 		return nil, err
 	}
 
-	if err := helpers.Check(ctx, cfg, logger); err != nil {
+	if err := helpers.Check(ctx, cfg, cfg, logger); err != nil {
 		return nil, err
 	}
 

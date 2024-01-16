@@ -42,11 +42,20 @@ type Disclosure struct {
 // Disclosures is a map of disclosures
 type Disclosures map[string]*Disclosure
 
+// ArrayHashes returns a string array of disclosure hashes
+func (d Disclosures) ArrayHashes() []string {
+	a := []string{}
+	for _, v := range d {
+		a = append(a, v.disclosureHash)
+	}
+	return a
+}
+
 // SDJWT is a sd-jwt
 type SDJWT struct {
-	JWT        string
-	Disclosure Disclosures
-	KeyBinding string
+	JWT         string
+	Disclosures Disclosures
+	KeyBinding  string
 }
 
 var (
@@ -337,10 +346,10 @@ func MergeInstructions(a, b Instructions) Instructions {
 	return append(a, b...)
 }
 
-func (c *Client) sign(claims jwt.MapClaims, signingKey string) (string, error) {
-	if c.config.SigningMethod == nil {
-		c.config.SigningMethod = jwt.SigningMethodHS256
-	}
+func (c *Client) sign(claims jwt.MapClaims, signingKey any) (string, error) {
+	//if c.config.SigningMethod == nil {
+	//	c.config.SigningMethod = jwt.SigningMethodHS256
+	//}
 	token := jwt.NewWithClaims(c.config.SigningMethod, claims)
 
 	if c.config.JWTType == "" {
@@ -349,21 +358,26 @@ func (c *Client) sign(claims jwt.MapClaims, signingKey string) (string, error) {
 		token.Header["typ"] = c.config.JWTType
 	}
 
-	return token.SignedString([]byte(signingKey))
+	return token.SignedString(signingKey)
 }
 
 // SDJWT returns a signed SD-JWT with disclosures
 // Maybe this should return a more structured return of jwt and disclosures
-func (c *Client) SDJWT(i Instructions, signingKey string) (string, error) {
+func (c *Client) SDJWT(i Instructions, signingKey string) (*SDJWT, error) {
 	rawSDJWT, disclosures, err := i.sdJWT()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	signedJWT, err := c.sign(rawSDJWT, signingKey)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	sdjwt := fmt.Sprintf("%s%s", signedJWT, disclosures.string())
+	sdjwt := &SDJWT{
+		JWT:         signedJWT,
+		Disclosures: disclosures,
+	}
+
+	//sdjwt := fmt.Sprintf("%s%s", signedJWT, disclosures.string())
 	return sdjwt, nil
 }

@@ -15,7 +15,7 @@ import (
 
 // Service holds the kv object
 type Service struct {
-	redisClient *redis.Client
+	RedisClient *redis.Client
 	cfg         *model.Cfg
 	log         *logger.Log
 	probeStore  *apiv1_status.StatusProbeStore
@@ -33,10 +33,10 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		tp:         tracer,
 	}
 
-	c.redisClient = redis.NewClient(&redis.Options{
-		Addr:     cfg.Issuer.KeyValue.Addr,
+	c.RedisClient = redis.NewClient(&redis.Options{
+		Addr:     cfg.Common.KeyValue.Addr,
 		Password: "",
-		DB:       cfg.Issuer.KeyValue.DB,
+		DB:       cfg.Common.KeyValue.DB,
 	})
 
 	c.Doc = &Doc{
@@ -61,18 +61,18 @@ func (c *Service) Status(ctx context.Context) *apiv1_status.StatusProbe {
 		LastCheckedTS: timestamppb.Now(),
 	}
 
-	_, err := c.redisClient.Ping(ctx).Result()
+	_, err := c.RedisClient.Ping(ctx).Result()
 	if err != nil {
 		probe.Message = err.Error()
 		probe.Healthy = false
 	}
 	c.probeStore.PreviousResult = probe
-	c.probeStore.NextCheck = timestamppb.New(time.Now().Add(time.Second * 10))
+	c.probeStore.NextCheck = timestamppb.New(time.Now().Add(10 * time.Second))
 
 	return probe
 }
 
 // Close closes the connection to the database
 func (c *Service) Close(ctx context.Context) error {
-	return c.redisClient.Close()
+	return c.RedisClient.Close()
 }

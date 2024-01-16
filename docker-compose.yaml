@@ -7,9 +7,8 @@ services:
     image: docker.sunet.se/dc4eu/issuer:latest
     restart: always
     volumes:
-      - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:                                                                                                                                                                                                                                     
+    links:
       - haproxy
       - jaeger
     depends_on:
@@ -27,7 +26,7 @@ services:
       - "http_proxy=172.16.50.200"
       - "HTTPS_PROXY=172.16.50.200"
       - "https_proxy=172.16.50.200"
-      - "no_proxy=localhost,127.0.0.0/8,ca,jaeger"
+      - "no_proxy=localhost,127.0.0.0/8,nsqd,nsqlookupd,jaeger"
 
   verifier:
     container_name: "vc_verifier"
@@ -36,7 +35,7 @@ services:
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:                                                                                                                                                                                                                                     
+    links:
       - haproxy
     depends_on:
       - redis
@@ -52,9 +51,8 @@ services:
     image: docker.sunet.se/dc4eu/datastore:latest
     restart: always
     volumes:
-      - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:                                                                                                                                                                                                                                     
+    links:
       - haproxy
     depends_on:
       - redis
@@ -64,15 +62,14 @@ services:
       - vc-net
     environment:
       - "VC_CONFIG_YAML=config.yaml"
- 
+
   registry:
     container_name: "vc_registry"
     image: docker.sunet.se/dc4eu/registry:latest
     restart: always
     volumes:
-      - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:                                                                                                                                                                                                                                     
+    links:
       - haproxy
     depends_on:
       - redis
@@ -82,6 +79,67 @@ services:
       - vc-net
     environment:
       - "VC_CONFIG_YAML=config.yaml"
+
+  cache:
+    container_name: "vc_cache"
+    image: docker.sunet.se/dc4eu/cache:latest
+    restart: always
+    volumes:
+      - ./dev_config_docker.yaml:/config.yaml:ro
+    links:
+      - haproxy
+    depends_on:
+      - redis
+    networks:
+      - vc-net
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
+  persistent:
+    container_name: "vc_persistent"
+    image: docker.sunet.se/dc4eu/persistent:latest
+    restart: always
+    volumes:
+      - ./dev_config_docker.yaml:/config.yaml:ro
+    links:
+      - haproxy
+    depends_on:
+      - redis
+      - mongo
+    networks:
+      - vc-net
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
+  pdfsigner:
+    container_name: "vc_pdfsigner"
+    image: docker.sunet.se/dc4eu/py_pdfsigner_dev:latest
+    restart: always
+    volumes:
+      - ./dev_config_docker.yaml:/config.yaml:ro
+      - /var/log/sunet:/var/log/sunet
+    depends_on:
+      - redis
+    networks:
+      - vc-net
+    environment:
+      - "CONFIG_YAML=config.yaml"
+
+  pdfvalidator:
+    container_name: "vc_pdfvalidator"
+    image: docker.sunet.se/dc4eu/py_pdfvalidator_dev:latest
+    restart: always
+    volumes:
+      - ./dev_config_docker.yaml:/config.yaml:ro
+      - /var/log/sunet:/var/log/sunet
+    # - ./certs/SectigoRSADocumentSigningCA.crt:/app/SectigoRSADocumentSigningCA.crt:ro
+    # - ./certs/USERTrustRSAAddTrustCA.crt:/app/USERTrustRSAAddTrustCA.crt:ro
+    depends_on:
+      - redis
+    networks:
+      - vc-net
+    environment:
+      - "CONFIG_YAML=config.yaml"
 
   haproxy:
     container_name: "vc_haproxy"
@@ -141,36 +199,38 @@ services:
       - "https_proxy=172.16.50.200"
       - "no_proxy=localhost,127.0.0.0/8"
 
-
-  postgres:
-    image: postgres:13-bookworm
-    container_name: "vc_postgres"
-    restart: always
-    expose:
-      - 5432
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  nsqlookupd:
+    image: nsqio/nsq:v1.2.1
+    container_name: vc_nsqlookupd
+    command: /nsqlookupd
     networks:
       - vc-net
-    environment:
-      - "POSTGRES_PASSWORD=example"
-      - "POSTGRES_DB=vc"
-      - "POSTGRES_USER=pguser"
+    ports:
+      - "4160"
+      - "4161"
 
-  ca:
-    container_name: "vc_ca"
-    image: docker.sunet.se/dc4eu/mockca:latest
-    restart: always
+  nsqd:
+    image: nsqio/nsq:v1.2.1
+    container_name: vc_nsqd
+    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=vc_nsqlookupd:4160
     depends_on:
-      - redis
-      - mongo
-      - issuer
-      - verifier
+      - nsqlookupd
     networks:
       - vc-net
-    environment:
-      - "CA_SLEEP=2"
-      - "CA_ADDR=vc_ca:8080"
+    ports:
+      - "4150"
+      - "4151"
+
+  nsqadmin:
+    image: nsqio/nsq:v1.2.1
+    container_name: vc_nsqadmin
+    command: /nsqadmin --lookupd-http-address=vc_nsqlookupd:4161
+    depends_on:
+      - nsqlookupd
+    networks:
+      - vc-net
+    ports:
+      - "4171"
 
 networks:
   vc-net:

@@ -18,16 +18,6 @@ type KeyValue struct {
 	PDF  PDF    `yaml:"pdf" validate:"required"`
 }
 
-// CA holds the ca configuration
-type CA struct {
-	Addr     string `yaml:"addr" validate:"required"`
-	Token    string `yaml:"token" validate:"required"`
-	KeyLabel string `yaml:"key_label" validate:"required"`
-	KeyType  string `yaml:"key_type" validate:"required"`
-	Location string `yaml:"location" validate:"required"`
-	Reason   string `yaml:"reason" validate:"required"`
-}
-
 // Log holds the log configuration
 type Log struct {
 	Level      string `yaml:"level"`
@@ -42,6 +32,8 @@ type Common struct {
 	Mongo      Mongo             `yaml:"mongo" validate:"required"`
 	BasicAuth  map[string]string `yaml:"basic_auth" validate:"required"`
 	Tracing    OTEL              `yaml:"tracing" validate:"required"`
+	Queues     Queues            `yaml:"queues" validate:"required"`
+	KeyValue   KeyValue          `yaml:"key_value" validate:"required"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -62,11 +54,30 @@ type PDF struct {
 	KeepUnsignedDuration int `yaml:"keep_unsigned_duration"`
 }
 
+// Queues have the queue configuration
+type Queues struct {
+	SimpleQueue struct {
+		LadokSign struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"ladok_sign" validate:"required"`
+		LadokValidate struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"ladok_validate" validate:"required"`
+		LadokAddSigned struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"ladok_add_signed" validate:"required"`
+		LadokDelSigned struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"ladok_del_signed" validate:"required"`
+		LadokPersistentSave struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"ladok_persistent_save" validate:"required"`
+	} `yaml:"simple_queue" validate:"required"`
+}
+
 // Issuer holds the issuer configuration
 type Issuer struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
-	CA        CA        `yaml:"ca" validate:"required"`
-	KeyValue  KeyValue  `yaml:"key_value" validate:"required"`
 	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
 }
 
@@ -75,6 +86,16 @@ type Registry struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
 	SMT       SMT       `yaml:"smt" validate:"required"`
 	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+}
+
+// Cache holds the cache storage configuration
+type Cache struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+}
+
+// Persistent holds the persistent storage configuration
+type Persistent struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
 }
 
 // Verifier holds the verifier configuration
@@ -97,9 +118,11 @@ type OTEL struct {
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common    Common    `yaml:"common"`
-	Issuer    Issuer    `yaml:"issuer"`
-	Verifier  Verifier  `yaml:"verifier"`
-	Datastore Datastore `yaml:"datastore"`
-	Registry  Registry  `yaml:"registry"`
+	Common     Common     `yaml:"common"`
+	Issuer     Issuer     `yaml:"issuer"`
+	Verifier   Verifier   `yaml:"verifier"`
+	Datastore  Datastore  `yaml:"datastore"`
+	Registry   Registry   `yaml:"registry"`
+	Cache      Cache      `yaml:"cache"`
+	Persistent Persistent `yaml:"persistent"`
 }

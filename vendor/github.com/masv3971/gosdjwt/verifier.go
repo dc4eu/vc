@@ -14,9 +14,9 @@ const (
 	SignaturePolicyFailed = "failed"
 )
 
-func splitSDJWT(sdjwt string) StandardPresentation {
+func splitSDJWT(sdjwt string) PresentationFlat {
 	split := strings.Split(sdjwt, "~")
-	presentation := StandardPresentation{}
+	presentation := PresentationFlat{}
 	if len(split) >= 1 {
 		presentation.JWT = split[0]
 	}

@@ -13,6 +13,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// Tracer is a wrapper for opentelemetry tracer
 type Tracer struct {
 	TP *sdktrace.TracerProvider
 	trace.Tracer

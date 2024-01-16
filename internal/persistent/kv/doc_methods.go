@@ -66,6 +66,8 @@ func (d *Doc) DelSigned(ctx context.Context, transactionID string) error {
 	ctx, span := d.client.tp.Start(ctx, "kv:DelSigned")
 	defer span.End()
 
+	d.client.log.Debug("Deleting signed document", "transactionID", transactionID)
+
 	return d.client.RedisClient.HDel(ctx, d.signedKey(transactionID), "base64_data", "ts").Err()
 }
 

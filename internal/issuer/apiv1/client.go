@@ -2,10 +2,10 @@ package apiv1
 
 import (
 	"context"
-	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/kv"
 	"vc/internal/issuer/pda1"
+	"vc/internal/issuer/simplequeue"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/rpcclient"
@@ -18,27 +18,27 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	pda1      *pda1.Service
-	rpcClient *rpcclient.Client
-	ca        *ca.Client
-	cfg       *model.Cfg
-	db        *db.Service
-	kv        *kv.Service
-	log       *logger.Log
-	tp        *trace.Tracer
+	simpleQueue *simplequeue.Service
+	pda1        *pda1.Service
+	rpcClient   *rpcclient.Client
+	cfg         *model.Cfg
+	db          *db.Service
+	kv          *kv.Service
+	log         *logger.Log
+	tp          *trace.Tracer
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, rpcClient *rpcclient.Client, pda1 *pda1.Service, ca *ca.Client, kvService *kv.Service, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient *rpcclient.Client, pda1 *pda1.Service, kvService *kv.Service, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
 	c := &Client{
-		pda1:      pda1,
-		cfg:       cfg,
-		db:        db,
-		kv:        kvService,
-		log:       logger,
-		ca:        ca,
-		rpcClient: rpcClient,
-		tp:        tracer,
+		simpleQueue: simpleQueueService,
+		pda1:        pda1,
+		cfg:         cfg,
+		db:          db,
+		kv:          kvService,
+		log:         logger,
+		rpcClient:   rpcClient,
+		tp:          tracer,
 	}
 
 	c.log.Info("Started")

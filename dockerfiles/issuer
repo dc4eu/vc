@@ -6,7 +6,7 @@ COPY . .
 RUN make swagger
 RUN make proto
 
-RUN --mount=type=cache,target=/root/.cache/go-build-issuer GOOS=linux GOARCH=amd64 go build -v -o bin/vc_issuer -ldflags "-w -s --extldflags '-static'" ./cmd/issuer/main.go
+RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_issuer -ldflags "-w -s --extldflags '-static'" ./cmd/issuer/main.go
 
 # Deploy
 FROM debian:bookworm-slim

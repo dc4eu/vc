@@ -23,6 +23,10 @@ build-registry:
 	$(info Building registry)
 	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_registry ${LDFLAGS_DYNAMIC} ./cmd/registry/main.go
 
+build-cache:
+	$(info Building cache)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_cache ${LDFLAGS} ./cmd/cache/main.go
+
 test: test-issuer test-verifier test-datastore
 
 test-issuer:
@@ -52,6 +56,7 @@ restart:
 	docker restart vc_verifier
 	docker restart vc_datastore
 	docker restart vc_registry
+	docker restart vc_cache
 
 get_release-tag:
 	@date +'%Y%m%d%H%M%S%9N'
@@ -60,12 +65,14 @@ ifndef VERSION
 VERSION := latest
 endif
 
-docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry
+docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent
 
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
 DOCKER_TAG_DATASTORE	:= docker.sunet.se/dc4eu/datastore:$(VERSION)
 DOCKER_TAG_REGISTRY 	:= docker.sunet.se/dc4eu/registry:$(VERSION)
+DOCKER_TAG_CACHE 		:= docker.sunet.se/dc4eu/cache:$(VERSION)
+DOCKER_TAG_PERSISTENT 	:= docker.sunet.se/dc4eu/persistent:$(VERSION)
 DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 
 docker-build-issuer:
@@ -84,6 +91,14 @@ docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_REGISTRY) --file dockerfiles/registry .
 
+docker-build-cache:
+	$(info Docker Building cache with tag: $(VERSION))
+	docker build --tag $(DOCKER_TAG_CACHE) --file dockerfiles/cache .
+
+docker-build-persistent:
+	$(info Docker Building persistent with tag: $(VERSION))
+	docker build --tag $(DOCKER_TAG_PERSISTENT) --file dockerfiles/persistent .
+
 docker-build-gobuild:
 	$(info Docker Building build with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_GOBUILD) --file dockerfiles/gobuild .
@@ -94,6 +109,8 @@ docker-push:
 	docker push $(DOCKER_TAG_VERIFIER)
 	docker push $(DOCKER_TAG_DATASTORE)
 	docker push $(DOCKER_TAG_REGISTRY)
+	docker push $(DOCKER_TAG_CACHE)
+	docker push $(DOCKER_TAG_PERSISTENT)
 
 docker-archive:
 	docker save --output docker_archives/vc_$(VERSION).tar $(DOCKER_TAG_ISSUER) $(DOCKER_TAG_VERIFIER) $(DOCKER_TAG_DATASTORE) $(DOCKER_TAG_REGISTRY)

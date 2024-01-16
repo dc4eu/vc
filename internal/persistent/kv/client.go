@@ -67,7 +67,7 @@ func (c *Service) Status(ctx context.Context) *apiv1_status.StatusProbe {
 		probe.Healthy = false
 	}
 	c.probeStore.PreviousResult = probe
-	c.probeStore.NextCheck = timestamppb.New(time.Now().Add(10 * time.Second))
+	c.probeStore.NextCheck = timestamppb.New(time.Now().Add(time.Second * 10))
 
 	return probe
 }

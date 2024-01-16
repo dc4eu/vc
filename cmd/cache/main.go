@@ -6,16 +6,12 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"vc/internal/issuer/apiv1"
-	"vc/internal/issuer/db"
-	"vc/internal/issuer/ehic"
-	"vc/internal/issuer/httpserver"
-	"vc/internal/issuer/kv"
-	"vc/internal/issuer/pda1"
-	"vc/internal/issuer/simplequeue"
+	"vc/internal/cache/apiv1"
+	"vc/internal/cache/httpserver"
+	"vc/internal/cache/kv"
+	"vc/internal/cache/simplequeue"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
-	"vc/pkg/rpcclient"
 	"vc/pkg/trace"
 )
 
@@ -34,47 +30,28 @@ func main() {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_issuer", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	log, err := logger.New("vc_cache", cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
-	tracer, err := trace.New(ctx, cfg, log, "vc", "issuer")
+	tracer, err := trace.New(ctx, cfg, log, "vc_cache", "cache")
 	if err != nil {
 		panic(err)
 	}
 
-	rpcClients, err := rpcclient.New(cfg, log.New("rpc"))
-	if err != nil {
-		panic(err)
-	}
-	dbService, err := db.New(ctx, cfg, tracer, log.New("db"))
-	services["dbService"] = dbService
-	if err != nil {
-		panic(err)
-	}
 	kvService, err := kv.New(ctx, cfg, tracer, log.New("keyvalue"))
 	services["kvService"] = kvService
 	if err != nil {
 		panic(err)
 	}
 
-	simpleQueueService, err := simplequeue.New(ctx, kvService, tracer, cfg, log.New("queue"))
-	services["queueService"] = simpleQueueService
+	queueService, err := simplequeue.New(ctx, kvService, tracer, cfg, log.New("queue"))
+	services["queueService"] = queueService
 	if err != nil {
 		panic(err)
 	}
 
-	ehicService, err := ehic.New(ctx, cfg, log.New("ehic"))
-	services["ehicService"] = ehicService
-	if err != nil {
-		panic(err)
-	}
-	pda1Service, err := pda1.New(ctx, cfg, log.New("pda1"))
-	services["pda1Service"] = pda1Service
-	if err != nil {
-		panic(err)
-	}
-	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, pda1Service, kvService, dbService, cfg, tracer, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, kvService, tracer, cfg, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}

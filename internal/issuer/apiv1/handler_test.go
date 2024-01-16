@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"vc/internal/issuer/ca"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/kv"
 	"vc/internal/issuer/pda1"
+	"vc/internal/issuer/simplequeue"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/rpcclient"
@@ -54,14 +54,7 @@ func mockClient(t *testing.T, caURL string) *Client {
 	ctx := context.Background()
 	log := logger.NewSimple("testing")
 	cfg := &model.Cfg{
-		Issuer: model.Issuer{
-			CA: model.CA{
-				Addr:     caURL,
-				Token:    "test-token",
-				KeyLabel: "test-key-label",
-				KeyType:  "secp256r1",
-			},
-		},
+		Issuer: model.Issuer{},
 	}
 	rpcClient, err := rpcclient.New(cfg, log)
 	assert.NoError(t, err)
@@ -78,16 +71,16 @@ func mockClient(t *testing.T, caURL string) *Client {
 	kv, err := kv.New(ctx, cfg, tracer, log)
 	assert.NoError(t, err)
 
-	ca, err := ca.New(ctx, kv, db, cfg, tracer, log)
+	queue, err := simplequeue.New(ctx, kv, tracer, cfg, log)
 	assert.NoError(t, err)
 
-	c, err := New(ctx, rpcClient, pda1, ca, kv, db, cfg, tracer, log)
+	c, err := New(ctx, queue, rpcClient, pda1, kv, db, cfg, tracer, log)
 	assert.NoError(t, err)
 
 	return c
 }
 
-func mockGenericEndpointServer(t *testing.T, mux *http.ServeMux, token, method, url string, reply []byte, statusCode int) {
+func mockGenericEndpointServer(t *testing.T, mux *http.ServeMux, method, url string, reply []byte, statusCode int) {
 	mux.HandleFunc(url,
 		func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "Application/json")
@@ -152,7 +145,7 @@ func TestSignPDF(t *testing.T) {
 			mux, server, client := mockSetup(t)
 			defer server.Close()
 
-			mockGenericEndpointServer(t, mux, client.cfg.Issuer.CA.Token, http.MethodPost, "/pkcs11_sign", mocks.JSONSignDocumentReply200, http.StatusOK)
+			mockGenericEndpointServer(t, mux, http.MethodPost, "/pkcs11_sign", mocks.JSONSignDocumentReply200, http.StatusOK)
 
 			got, err := client.PDFSign(context.Background(), tt.have)
 			assert.NoError(t, err)

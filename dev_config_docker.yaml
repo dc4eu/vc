@@ -8,6 +8,24 @@ common:
   tracing:
     addr: jaeger:4318
     type: jaeger
+  queues:
+    simple_queue:
+      ladok_sign:
+        name: sign
+      ladok_add_signed:
+        name: add_signed
+      ladok_del_signed:
+        name: del_signed
+      ladok_validate:
+        name: validate
+      ladok_persistent_save:
+        name: persistent_save
+  key_value:
+    db: 3
+    addr: redis:6379
+    pdf:
+      keep_signed_duration: 3600
+      keep_unsigned_duration: 3600
 
 issuer:
   api_server:
@@ -19,32 +37,6 @@ issuer:
     level:
   datastore:
     addr: datastore:8080
-  ca:
-    addr: "http://ca:8080/"
-    token: 99b900ea-b8e2-11ed-a633-bf231b1f0412
-    key_label: Ladok-sign-v1
-    key_type: secp256r1
-    location: "Umeå"
-    reason: "Ladok"
-  key_value:
-    db: 3
-    addr: redis:6379
-    pdf:
-      keep_signed_duration: 3600
-      keep_unsigned_duration: 3600
-  rpc_client:
-    default_config:
-      methodConfig:
-      - name:
-        - service: grpc.examples.echo.Echo
-        waitForReady: true
-        retryPolicy:
-          MaxAttempts: 4
-          InitialBackoff: ".01s"
-          MaxBackoff: ".01s"
-          BackoffMultiplier: 1
-          RetryableStatusCodes:
-            - UNAVAILABLE
   
 datastore:
   api_server:
@@ -67,3 +59,39 @@ registry:
   rpc_server:
     addr: registry:8090
 
+cache:
+  api_server:
+    addr: :8080
+
+persistent:
+  api_server:
+    addr: :8080
+
+py_pdfsigner:
+  sign_queue_name: sign
+  add_signed_queue_name: add_signed
+  pkcs11:
+    pin: "1234"
+    module: /usr/lib/softhsm/libsofthsm2.so
+    label: test_label
+    key_label: test_key_label
+    cert_label: test_cert_label
+    #slot: 0
+  redis:
+    host: "redis"
+    port: 6379
+    db: 3
+  metadata:
+    location: "Stockholm"
+    reason: "Future validation"
+    name: "SUNET/Vetenskapsrådet"
+    contact_info: "info@sunet.se"
+    field_name: "Signature1"
+
+py_pdfvalidator:
+  validate_queue_name: validate
+  trust_root_folder: "/opt/sunet/pki"
+  redis:
+    host: "redis"
+    port: 6379
+    db: 3

@@ -75,7 +75,7 @@ func addCarLookup() {
 	AddFuncLookup("car", Info{
 		Display:     "Car",
 		Category:    "car",
-		Description: "Random car set of data",
+		Description: "Wheeled motor vehicle used for transportation",
 		Example: `{
 	"type": "Passenger car mini",
 	"fuel": "Gasoline",
@@ -94,7 +94,7 @@ func addCarLookup() {
 	AddFuncLookup("cartype", Info{
 		Display:     "Car Type",
 		Category:    "car",
-		Description: "Random car type",
+		Description: "Classification of cars based on size, use, or body style",
 		Example:     "Passenger car mini",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -105,7 +105,7 @@ func addCarLookup() {
 	AddFuncLookup("carfueltype", Info{
 		Display:     "Car Fuel Type",
 		Category:    "car",
-		Description: "Random car fuel type",
+		Description: "Type of energy source a car uses",
 		Example:     "CNG",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -116,7 +116,7 @@ func addCarLookup() {
 	AddFuncLookup("cartransmissiontype", Info{
 		Display:     "Car Transmission Type",
 		Category:    "car",
-		Description: "Random car transmission type",
+		Description: "Mechanism a car uses to transmit power from the engine to the wheels",
 		Example:     "Manual",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -127,7 +127,7 @@ func addCarLookup() {
 	AddFuncLookup("carmaker", Info{
 		Display:     "Car Maker",
 		Category:    "car",
-		Description: "Random car maker",
+		Description: "Company or brand that manufactures and designs cars",
 		Example:     "Nissan",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -138,7 +138,7 @@ func addCarLookup() {
 	AddFuncLookup("carmodel", Info{
 		Display:     "Car Model",
 		Category:    "car",
-		Description: "Random car model",
+		Description: "Specific design or version of a car produced by a manufacturer",
 		Example:     "Aveo",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {

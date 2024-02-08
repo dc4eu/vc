@@ -2,9 +2,11 @@ package trace
 
 import (
 	"context"
+	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
+	jaegerPropagator "go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -24,6 +26,7 @@ func newExporter(ctx context.Context, cfg *model.Cfg) (sdktrace.SpanExporter, er
 	return otlptracehttp.New(ctx,
 		otlptracehttp.WithEndpoint(cfg.Common.Tracing.Addr),
 		otlptracehttp.WithInsecure(),
+		otlptracehttp.WithTimeout(10*time.Second),
 	)
 }
 
@@ -50,6 +53,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, projectName, serv
 	}
 
 	otel.SetTracerProvider(tracer.TP)
+	otel.SetTextMapPropagator(jaegerPropagator.Jaeger{})
 
 	tracer.Tracer = otel.Tracer("")
 

@@ -29,7 +29,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 		config: config,
 		logger: logger,
 		apiv1:  api,
-		server: &http.Server{Addr: config.Registry.APIServer.Addr},
+		server: &http.Server{Addr: config.Registry.APIServer.Addr, ReadHeaderTimeout: 2 * time.Second},
 	}
 
 	switch s.config.Common.Production {
@@ -55,11 +55,12 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))
 	s.gin.Use(s.middlewareCrash(ctx))
-	s.gin.NoRoute(func(c *gin.Context) {
-		status := http.StatusNotFound
-		p := helpers.Problem404()
-		c.JSON(status, gin.H{"error": p, "data": nil})
-	})
+	problem404, err := helpers.Problem404()
+	if err != nil {
+		return nil, err
+	}
+	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, problem404) })
+
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 

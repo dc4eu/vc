@@ -52,6 +52,10 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 		Coll:    service.DBClient.Database("datastore").Collection("generic"),
 	}
 
+	if err := service.Coll.createIndex(ctx); err != nil {
+		return nil, err
+	}
+
 	service.log.Info("Started")
 
 	return service, nil

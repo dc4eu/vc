@@ -3,9 +3,9 @@ package apiv1
 import (
 	"context"
 	"vc/internal/issuer/db"
-	"vc/internal/issuer/kv"
 	"vc/internal/issuer/pda1"
 	"vc/internal/issuer/simplequeue"
+	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/rpcclient"
@@ -23,19 +23,19 @@ type Client struct {
 	rpcClient   *rpcclient.Client
 	cfg         *model.Cfg
 	db          *db.Service
-	kv          *kv.Service
+	kv          *kvclient.Client
 	log         *logger.Log
 	tp          *trace.Tracer
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient *rpcclient.Client, pda1 *pda1.Service, kvService *kv.Service, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient *rpcclient.Client, pda1 *pda1.Service, kv *kvclient.Client, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
 	c := &Client{
 		simpleQueue: simpleQueueService,
 		pda1:        pda1,
 		cfg:         cfg,
 		db:          db,
-		kv:          kvService,
+		kv:          kv,
 		log:         logger,
 		rpcClient:   rpcClient,
 		tp:          tracer,

@@ -1,7 +1,7 @@
 ---
 common:
   mongo:
-    uri: mongodb://mongo:27017
+    uri: mongodb://user:pw@mongo:27017
   production: false
   basic_auth:
     ladok: xyz
@@ -23,9 +23,7 @@ common:
   key_value:
     db: 3
     addr: redis:6379
-    pdf:
-      keep_signed_duration: 3600
-      keep_unsigned_duration: 3600
+    password: test-password
 
 issuer:
   api_server:
@@ -64,6 +62,10 @@ cache:
     addr: :8080
 
 persistent:
+  api_server:
+    addr: :8080
+
+apigw:
   api_server:
     addr: :8080
 

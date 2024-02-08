@@ -11,6 +11,7 @@ import (
 	"vc/internal/datastore/httpserver"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
+	"vc/pkg/trace"
 )
 
 type service interface {
@@ -29,6 +30,11 @@ func main() {
 	}
 
 	log, err := logger.New("vc_datastore", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	if err != nil {
+		panic(err)
+	}
+
+	tracer, err := trace.New(ctx, cfg, log, "vc_cache", "cache")
 	if err != nil {
 		panic(err)
 	}
@@ -61,6 +67,10 @@ func main() {
 		if err := service.Close(ctx); err != nil {
 			mainLog.Trace("serviceName", serviceName, "error", err)
 		}
+	}
+
+	if err := tracer.Shutdown(ctx); err != nil {
+		mainLog.Error(err, "Tracer shutdown")
 	}
 
 	wg.Wait() // Block here until are workers are done

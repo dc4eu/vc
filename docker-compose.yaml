@@ -55,7 +55,6 @@ services:
     links:
       - haproxy
     depends_on:
-      - redis
       - mongo
       - haproxy
     networks:
@@ -101,6 +100,23 @@ services:
     restart: always
     volumes:
       - ./dev_config_docker.yaml:/config.yaml:ro
+    links:
+      - haproxy
+    depends_on:
+      - redis
+      - mongo
+    networks:
+      - vc-net
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
+  apigw:
+    container_name: "vc_apigw"
+    image: docker.sunet.se/dc4eu/apigw:latest
+    restart: always
+    volumes:
+      - ./dev_config_docker.yaml:/config.yaml:ro
+      - /var/log/sunet:/var/log/sunet
     links:
       - haproxy
     depends_on:
@@ -159,7 +175,7 @@ services:
     container_name: "vc_redis"
     restart: always
     expose:
-      - 6379
+      - 6373
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -243,5 +259,4 @@ networks:
         - subnet: 172.16.50.0/24
 volumes:
   redis_data:
-  postgres_data:
   mongo_data:

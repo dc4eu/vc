@@ -17,7 +17,7 @@ type UploadReply struct {
 // Upload uploads a document with a set of attributes
 //
 //	@Summary		Upload
-//	@ID				generic-upload
+//	@ID				upload
 //	@Description	Upload endpoint
 //	@Tags			dc4eu
 //	@Accept			json
@@ -27,6 +27,8 @@ type UploadReply struct {
 //	@Param			req	body		model.Upload			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *model.Upload) (*UploadReply, error) {
+	c.log.Info("Upload", "document_id", req.Meta.DocumentID)
+
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return nil, err
 	}

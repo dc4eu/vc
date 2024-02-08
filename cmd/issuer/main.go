@@ -10,10 +10,10 @@ import (
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/ehic"
 	"vc/internal/issuer/httpserver"
-	"vc/internal/issuer/kv"
 	"vc/internal/issuer/pda1"
 	"vc/internal/issuer/simplequeue"
 	"vc/pkg/configuration"
+	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/rpcclient"
 	"vc/pkg/trace"
@@ -52,13 +52,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	kvService, err := kv.New(ctx, cfg, tracer, log.New("keyvalue"))
-	services["kvService"] = kvService
+	kvClient, err := kvclient.New(ctx, cfg, tracer, log.New("kvClient"))
+	services["kvClient"] = kvClient
 	if err != nil {
 		panic(err)
 	}
 
-	simpleQueueService, err := simplequeue.New(ctx, kvService, tracer, cfg, log.New("queue"))
+	simpleQueueService, err := simplequeue.New(ctx, kvClient, tracer, cfg, log.New("queue"))
 	services["queueService"] = simpleQueueService
 	if err != nil {
 		panic(err)
@@ -74,7 +74,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, pda1Service, kvService, dbService, cfg, tracer, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, pda1Service, kvClient, dbService, cfg, tracer, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
@@ -99,7 +99,9 @@ func main() {
 		}
 	}
 
-	tracer.Shutdown(ctx)
+	if err := tracer.Shutdown(ctx); err != nil {
+		mainLog.Error(err, "Tracer shutdown")
+	}
 
 	wg.Wait() // Block here until are workers are done
 

@@ -3,7 +3,7 @@ package apiv1
 import (
 	"context"
 	"vc/internal/persistent/db"
-	"vc/internal/persistent/kv"
+	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -18,12 +18,12 @@ type Client struct {
 	cfg *model.Cfg
 	log *logger.Log
 	tp  *trace.Tracer
-	kv  *kv.Service
+	kv  *kvclient.Client
 	db  *db.Service
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, kv *kv.Service, db *db.Service, tp *trace.Tracer, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, kv *kvclient.Client, db *db.Service, tp *trace.Tracer, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg: cfg,
 		kv:  kv,

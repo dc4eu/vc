@@ -17,9 +17,7 @@ type Coll struct {
 
 func (c *Coll) createIndex(ctx context.Context) error {
 	indexModel := mongo.IndexModel{
-		Keys: bson.M{
-			"document_id": bson.M{"$eq": 1},
-		},
+		Keys: bson.M{"document_id": 1},
 	}
 	_, err := c.Coll.Indexes().CreateOne(ctx, indexModel)
 	if err != nil {
@@ -30,6 +28,8 @@ func (c *Coll) createIndex(ctx context.Context) error {
 
 // Save saves one document to the generic collection
 func (c *Coll) Save(ctx context.Context, doc *model.Upload) error {
+	c.Service.log.Info("Saving document to generic collection")
+
 	_, err := c.Coll.InsertOne(ctx, doc)
 	return err
 }
@@ -102,7 +102,7 @@ func (c *Coll) GetDocumentByCollectCode(ctx context.Context, query *model.MetaDa
 	return res, nil
 }
 
-// ListMetadata returns a list of information to be used for geting documents
+// ListMetadata returns a list of information to be used for getting documents
 func (c *Coll) ListMetadata(ctx context.Context, query *model.MetaData) ([]model.MetaData, error) {
 	filter := bson.M{
 		"meta.authentic_source":           bson.M{"$eq": query.AuthenticSource},

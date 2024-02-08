@@ -12,8 +12,8 @@ import (
 var (
 	// ErrDocumentIsRevoked is returned when a document is revoked
 	ErrDocumentIsRevoked = NewError("document_is_revoked")
-	// ErrNoTrasactionID is returned when transactionID is not present
-	ErrNoTrasactionID = NewError("no_transaction_id")
+	// ErrNoTransactionID is returned when transactionID is not present
+	ErrNoTransactionID = NewError("no_transaction_id")
 )
 
 type Error struct {
@@ -90,9 +90,11 @@ func formatJSONUnmarshalTypeError(err *json.UnmarshalTypeError) []map[string]any
 	}
 }
 
-func Problem404() *problems.DefaultProblem {
+func Problem404() (*problems.DefaultProblem, error) {
 	notFound := problems.NewDetailedProblem(404, "Not a valid endpoint")
-	problems.ValidateProblem(notFound)
+	if err := problems.ValidateProblem(notFound); err != nil {
+		return nil, err
+	}
 
-	return notFound
+	return notFound, nil
 }

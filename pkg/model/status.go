@@ -38,13 +38,33 @@ type ProbeStore struct {
 // Probes contains probes
 type Probes []*apiv1_status.StatusProbe
 
+var (
+	// BuildVariableGitCommit contains ldflags -X variable git commit hash
+	BuildVariableGitCommit string = "undef"
+
+	// BuildVariableTimestamp contains ldsflags -X variable build time
+	BuildVariableTimestamp string = "undef"
+
+	// BuildVariableGoVersion contains ldsflags -X variable go build version
+	BuildVariableGoVersion string = "undef"
+
+	// BuildVariableGoArch contains ldsflags -X variable go arch build
+	BuildVariableGoArch string = "undef"
+)
+
 // Check checks the status of each status, return the first that does not pass.
 func (probes Probes) Check(serviceName string) *apiv1_status.StatusReply {
 	health := &apiv1_status.StatusReply{
 		Data: &apiv1_status.StatusReply_Data{
 			ServiceName: serviceName,
-			Probes:      []*apiv1_status.StatusProbe{},
-			Status:      fmt.Sprintf(StatusOK, serviceName),
+			BuildVariables: &apiv1_status.BuildVariables{
+				GitCommit: BuildVariableGitCommit,
+				Timestamp: BuildVariableTimestamp,
+				GoVersion: BuildVariableGoVersion,
+				GoArch:    BuildVariableGoArch,
+			},
+			Probes: []*apiv1_status.StatusProbe{},
+			Status: fmt.Sprintf(StatusOK, serviceName),
 		},
 	}
 

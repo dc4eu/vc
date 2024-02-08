@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 	"vc/internal/issuer/db"
-	"vc/internal/issuer/kv"
 	"vc/internal/issuer/pda1"
 	"vc/internal/issuer/simplequeue"
+	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/rpcclient"
@@ -68,7 +68,7 @@ func mockClient(t *testing.T, caURL string) *Client {
 	db, err := db.New(ctx, cfg, tracer, log)
 	assert.NoError(t, err)
 
-	kv, err := kv.New(ctx, cfg, tracer, log)
+	kv, err := kvclient.New(ctx, cfg, tracer, log)
 	assert.NoError(t, err)
 
 	queue, err := simplequeue.New(ctx, kv, tracer, cfg, log)
@@ -87,7 +87,10 @@ func mockGenericEndpointServer(t *testing.T, mux *http.ServeMux, method, url str
 			w.WriteHeader(statusCode)
 			testMethod(t, r, method)
 			testURL(t, r, url)
-			w.Write(reply)
+			_, err := w.Write(reply)
+			if err != nil {
+				t.Error("write", "error", err)
+			}
 		},
 	)
 }

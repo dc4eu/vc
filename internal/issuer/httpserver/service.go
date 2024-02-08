@@ -40,7 +40,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 		config: config,
 		logger: logger,
 		apiv1:  api,
-		server: &http.Server{Addr: config.Issuer.APIServer.Addr},
+		server: &http.Server{Addr: config.Issuer.APIServer.Addr, ReadHeaderTimeout: 2 * time.Second},
 		tp:     tracer,
 	}
 
@@ -76,7 +76,11 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))
 	s.gin.Use(s.middlewareCrash(ctx))
-	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, helpers.Problem404()) })
+	problem404, err := helpers.Problem404()
+	if err != nil {
+		return nil, err
+	}
+	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, problem404) })
 
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)

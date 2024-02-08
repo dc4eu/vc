@@ -105,6 +105,8 @@ func initLookup() {
 	addWordPronounLookup()
 	addWordSentenceLookup()
 	addWordVerbLookup()
+	addWordCommentLookup()
+	addWordMiscLookup()
 }
 
 // internalFuncLookups is the internal map array with mapping to all available data
@@ -287,11 +289,6 @@ func (i *Info) GetAny(m *MapParams, field string) (any, error) {
 	}
 
 	return value[0], nil
-	/*if err != nil {
-		return nil, fmt.Errorf("%s field could not parse to any", field)
-	}*/
-
-	//return anyValue, nil
 }
 
 // GetMap will retrieve map[string]any field from data

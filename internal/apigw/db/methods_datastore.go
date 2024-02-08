@@ -49,7 +49,7 @@ func (c *DatastoreColl) IDMapping(ctx context.Context, query *model.MetaData) (s
 		"meta.last_name":        bson.M{"$eq": query.LastName},
 		"meta.first_name":       bson.M{"$eq": query.FirstName},
 	}
-	opts := options.FindOne().SetProjection(bson.M{"meta.authentic_source_person_id": 1})
+	opts := options.FindOne().SetProjection(bson.M{"meta.authentic_source_person_id": bson.M{"$eq": 1}})
 	var res string
 	if err := c.Coll.FindOne(ctx, filter, opts).Decode(res); err != nil {
 		return "", err

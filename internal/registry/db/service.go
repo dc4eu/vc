@@ -35,7 +35,9 @@ func (s *Service) startDB() error {
 	if err != nil {
 		return err
 	}
-	s.db.AutoMigrate(&model.Leaf{})
+	if err := s.db.AutoMigrate(&model.Leaf{}); err != nil {
+		return err
+	}
 
 	return nil
 }

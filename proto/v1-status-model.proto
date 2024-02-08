@@ -12,8 +12,9 @@ message StatusRequest {}
 message StatusReply {
     message Data {
         string serviceName = 1;
-        repeated StatusProbe probes = 2;
-        string status = 3;
+        BuildVariables build_variables = 2;
+        repeated StatusProbe probes = 3;
+        string status = 4;
     }
     Data data = 10;
 }
@@ -23,6 +24,13 @@ message StatusProbe {
     bool healthy = 2;
     string message = 3;
     google.protobuf.Timestamp lastCheckedTS = 4;
+}
+
+message BuildVariables {
+    string git_commit = 1;
+    string timestamp = 2;
+    string go_version = 3;
+    string go_arch = 4;
 }
 
 message StatusProbeStore {

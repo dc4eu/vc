@@ -13,9 +13,10 @@ type Mongo struct {
 
 // KeyValue holds the key/value configuration
 type KeyValue struct {
-	Addr string `yaml:"addr" validate:"required"`
-	DB   int    `yaml:"db" validate:"required"`
-	PDF  PDF    `yaml:"pdf" validate:"required"`
+	Addr     string `yaml:"addr" validate:"required"`
+	DB       int    `yaml:"db" validate:"required"`
+	Password string `yaml:"password" validate:"required"`
+	PDF      PDF    `yaml:"pdf" validate:"required"`
 }
 
 // Log holds the log configuration
@@ -30,10 +31,10 @@ type Common struct {
 	Production bool              `yaml:"production"`
 	Log        Log               `yaml:"log"`
 	Mongo      Mongo             `yaml:"mongo" validate:"required"`
-	BasicAuth  map[string]string `yaml:"basic_auth" validate:"required"`
+	BasicAuth  map[string]string `yaml:"basic_auth"`
 	Tracing    OTEL              `yaml:"tracing" validate:"required"`
-	Queues     Queues            `yaml:"queues" validate:"required"`
-	KeyValue   KeyValue          `yaml:"key_value" validate:"required"`
+	Queues     Queues            `yaml:"queues" validate:"omitempty"`
+	KeyValue   KeyValue          `yaml:"key_value" validate:"omitempty"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -98,6 +99,12 @@ type Persistent struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
 }
 
+// MockAS holds the mock as configuration
+type MockAS struct {
+	APIServer    APIServer `yaml:"api_server" validate:"required"`
+	DatastoreURL string    `yaml:"datastore_url" validate:"required"`
+}
+
 // Verifier holds the verifier configuration
 type Verifier struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
@@ -110,6 +117,11 @@ type Datastore struct {
 	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
 }
 
+// APIGW holds the datastore configuration
+type APIGW struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+}
+
 // OTEL holds the opentelemetry configuration
 type OTEL struct {
 	Addr string `yaml:"addr" validate:"required"`
@@ -119,10 +131,12 @@ type OTEL struct {
 // Cfg is the main configuration structure for this application
 type Cfg struct {
 	Common     Common     `yaml:"common"`
-	Issuer     Issuer     `yaml:"issuer"`
-	Verifier   Verifier   `yaml:"verifier"`
-	Datastore  Datastore  `yaml:"datastore"`
-	Registry   Registry   `yaml:"registry"`
-	Cache      Cache      `yaml:"cache"`
-	Persistent Persistent `yaml:"persistent"`
+	APIGW      APIGW      `yaml:"apigw" validate:"omitempty"`
+	Issuer     Issuer     `yaml:"issuer" validate:"omitempty"`
+	Verifier   Verifier   `yaml:"verifier" validate:"omitempty"`
+	Datastore  Datastore  `yaml:"datastore" validate:"omitempty"`
+	Registry   Registry   `yaml:"registry" validate:"omitempty"`
+	Cache      Cache      `yaml:"cache" validate:"omitempty"`
+	Persistent Persistent `yaml:"persistent" validate:"omitempty"`
+	MockAS     MockAS     `yaml:"mock_as" validate:"omitempty"`
 }

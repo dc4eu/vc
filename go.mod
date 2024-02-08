@@ -5,7 +5,7 @@ go 1.21.5
 require (
 	github.com/brianvoe/gofakeit/v6 v6.26.3
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-logr/logr v1.3.0
+	github.com/go-logr/logr v1.4.1
 	github.com/go-logr/zapr v1.3.0
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/google/uuid v1.5.0
@@ -21,10 +21,11 @@ require (
 	github.com/swaggo/swag v1.16.2
 	github.com/wealdtech/go-merkletree v1.0.0
 	go.mongodb.org/mongo-driver v1.13.1
-	go.opentelemetry.io/otel v1.21.0
+	go.opentelemetry.io/contrib/propagators/jaeger v1.22.0
+	go.opentelemetry.io/otel v1.22.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.21.0
 	go.opentelemetry.io/otel/sdk v1.21.0
-	go.opentelemetry.io/otel/trace v1.21.0
+	go.opentelemetry.io/otel/trace v1.22.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.60.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -54,7 +55,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.18 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.21.0 // indirect
-	go.opentelemetry.io/otel/metric v1.21.0 // indirect
+	go.opentelemetry.io/otel/metric v1.22.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	go.step.sm/crypto v0.40.0 // indirect
 	go.uber.org/goleak v1.3.0 // indirect

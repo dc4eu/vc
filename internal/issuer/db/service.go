@@ -44,7 +44,9 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 		service: service,
 		coll:    service.dbClient.Database("issuer").Collection("documents"),
 	}
-	service.DocumentsColl.createIndex(ctx)
+	if err := service.DocumentsColl.createIndex(ctx); err != nil {
+		return nil, err
+	}
 
 	service.log.Info("Started")
 	return service, nil

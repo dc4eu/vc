@@ -2,7 +2,7 @@ package simplequeue
 
 import (
 	"context"
-	"vc/internal/issuer/kv"
+	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -32,7 +32,7 @@ type Service struct {
 }
 
 // New creates a new queue service
-func New(ctx context.Context, kv *kv.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, kv *kvclient.Client, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	service := &Service{
 		redisClient: kv.RedisClient,
 		tp:          tracer,

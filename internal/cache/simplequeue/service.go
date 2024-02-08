@@ -2,7 +2,7 @@ package simplequeue
 
 import (
 	"context"
-	"vc/internal/cache/kv"
+	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -22,7 +22,7 @@ type queue interface {
 type Service struct {
 	queueClient *retask.Client
 	redisClient *redis.Client
-	kv          *kv.Service
+	kv          *kvclient.Client
 	tp          *trace.Tracer
 	log         *logger.Log
 	cfg         *model.Cfg
@@ -32,7 +32,7 @@ type Service struct {
 }
 
 // New creates a new queue service
-func New(ctx context.Context, kv *kv.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, kv *kvclient.Client, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	service := &Service{
 		redisClient: kv.RedisClient,
 		kv:          kv,

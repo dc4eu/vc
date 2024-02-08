@@ -35,6 +35,7 @@ func NewLadokAddSigned(ctx context.Context, service *Service, queueName string, 
 func (s *LadokAddSigned) Enqueue(ctx context.Context, message any) (*retask.Job, error) {
 	ctx, span := s.service.tp.Start(ctx, "simplequeue:LadokAddSigned:Enqueue")
 	defer span.End()
+
 	s.log.Debug("Enqueue add signed pdf")
 
 	data, err := json.Marshal(message)

@@ -63,35 +63,35 @@ func productName(r *rand.Rand) string {
 	switch number(r, 0, 9) {
 	case 1:
 		// Name + Adjective + Feature
-		return fmt.Sprintf("%s %s %s", name, getRandValue(r, []string{"product", "adjective"}), productFeature(r))
+		return title(fmt.Sprintf("%s %s %s", name, getRandValue(r, []string{"product", "adjective"}), productFeature(r)))
 	case 2:
 		// Adjective + Material + Name
-		return fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "adjective"}), productMaterial(r), name)
+		return title(fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "adjective"}), productMaterial(r), name))
 	case 3:
 		// Color + Name + Suffix
-		return fmt.Sprintf("%s %s %s", safeColor(r), name, getRandValue(r, []string{"product", "suffix"}))
+		return title(fmt.Sprintf("%s %s %s", safeColor(r), name, getRandValue(r, []string{"product", "suffix"})))
 	case 4:
 		// Feature + Name + Adjective
-		return fmt.Sprintf("%s %s %s", productFeature(r), name, getRandValue(r, []string{"product", "adjective"}))
+		return title(fmt.Sprintf("%s %s %s", productFeature(r), name, getRandValue(r, []string{"product", "adjective"})))
 	case 5:
 		// Material + Color + Name
-		return fmt.Sprintf("%s %s %s", productMaterial(r), safeColor(r), name)
+		return title(fmt.Sprintf("%s %s %s", productMaterial(r), safeColor(r), name))
 	case 6:
 		// Name + Suffix + Material
-		return fmt.Sprintf("%s %s %s", name, getRandValue(r, []string{"product", "suffix"}), productMaterial(r))
+		return title(fmt.Sprintf("%s %s %s", name, getRandValue(r, []string{"product", "suffix"}), productMaterial(r)))
 	case 7:
 		// Adjective + Feature + Name
-		return fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "adjective"}), productFeature(r), name)
+		return title(fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "adjective"}), productFeature(r), name))
 	case 8:
 		// Color + Material + Name
-		return fmt.Sprintf("%s %s %s", safeColor(r), productMaterial(r), name)
+		return title(fmt.Sprintf("%s %s %s", safeColor(r), productMaterial(r), name))
 	case 9:
 		// Suffix + Adjective + Name
-		return fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "suffix"}), getRandValue(r, []string{"product", "adjective"}), name)
+		return title(fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "suffix"}), getRandValue(r, []string{"product", "adjective"}), name))
 	}
 
 	// case: 0 - Adjective + Name + Suffix
-	return fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "adjective"}), name, getRandValue(r, []string{"product", "suffix"}))
+	return title(fmt.Sprintf("%s %s %s", getRandValue(r, []string{"product", "adjective"}), name, getRandValue(r, []string{"product", "suffix"})))
 }
 
 // ProductDescription will generate a random product description
@@ -162,7 +162,7 @@ func addProductLookup() {
 	AddFuncLookup("product", Info{
 		Display:     "Product",
 		Category:    "product",
-		Description: "Random product info",
+		Description: "An item created for sale or use",
 		Example: `{
 	"name": "olive copper monitor",
 	"description": "Backwards caused quarterly without week it hungry thing someone him regularly. Whomever this revolt hence from his timing as quantity us these yours.",
@@ -188,7 +188,7 @@ func addProductLookup() {
 	AddFuncLookup("productname", Info{
 		Display:     "Product Name",
 		Category:    "product",
-		Description: "Random product name",
+		Description: "Distinctive title or label assigned to a product for identification and marketing",
 		Example:     "olive copper monitor",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -199,7 +199,7 @@ func addProductLookup() {
 	AddFuncLookup("productdescription", Info{
 		Display:     "Product Description",
 		Category:    "product",
-		Description: "Random product description",
+		Description: "Explanation detailing the features and characteristics of a product",
 		Example:     "Backwards caused quarterly without week it hungry thing someone him regularly. Whomever this revolt hence from his timing as quantity us these yours.",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -210,7 +210,7 @@ func addProductLookup() {
 	AddFuncLookup("productcategory", Info{
 		Display:     "Product Category",
 		Category:    "product",
-		Description: "Random product category",
+		Description: "Classification grouping similar products based on shared characteristics or functions",
 		Example:     "clothing",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -221,7 +221,7 @@ func addProductLookup() {
 	AddFuncLookup("productfeature", Info{
 		Display:     "Product Feature",
 		Category:    "product",
-		Description: "Random product feature",
+		Description: "Specific characteristic of a product that distinguishes it from others products",
 		Example:     "ultra-lightweight",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -232,7 +232,7 @@ func addProductLookup() {
 	AddFuncLookup("productmaterial", Info{
 		Display:     "Product Material",
 		Category:    "product",
-		Description: "Random product material",
+		Description: "The substance from which a product is made, influencing its appearance, durability, and properties",
 		Example:     "brass",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {
@@ -243,7 +243,7 @@ func addProductLookup() {
 	AddFuncLookup("productupc", Info{
 		Display:     "Product UPC",
 		Category:    "product",
-		Description: "Random product UPC",
+		Description: "Standardized barcode used for product identification and tracking in retail and commerce",
 		Example:     "012780949980",
 		Output:      "string",
 		Generate: func(r *rand.Rand, m *MapParams, info *Info) (any, error) {

@@ -301,6 +301,13 @@ func templateFuncMap(r *rand.Rand, fm *template.FuncMap) *template.FuncMap {
 		return args
 	}
 
+	// Add passed in function map to the function map
+	if fm != nil {
+		for k, v := range *fm {
+			funcMap[k] = v
+		}
+	}
+
 	return &funcMap
 }
 
@@ -366,7 +373,7 @@ Markus Moen`,
 	AddFuncLookup("markdown", Info{
 		Display:     "Random markdown document",
 		Category:    "template",
-		Description: "Generates random markdown document",
+		Description: "Lightweight markup language used for formatting plain text",
 		Example: `# PurpleSheep5
 
 *Author: Amie Feil*
@@ -403,7 +410,7 @@ MIT`,
 	AddFuncLookup("email_text", Info{
 		Display:     "Random text email Document",
 		Category:    "template",
-		Description: "Generates random email document.",
+		Description: "Written content of an email message, including the sender's message to the recipient",
 		Example: `Subject: Greetings from Marcel!
 
 Dear Pagac,

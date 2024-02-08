@@ -44,7 +44,9 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 		service: service,
 		coll:    service.dbClient.Database("issuer").Collection("documents"),
 	}
-	service.DocumentsColl.createIndex(ctx)
+	if err := service.DocumentsColl.createIndex(ctx); err != nil {
+		return nil, err
+	}
 
 	service.log.Info("Started")
 	return service, nil
@@ -76,12 +78,29 @@ func (s *Service) Status(ctx context.Context) *apiv1_status.StatusProbe {
 	return probe
 }
 
+//credential := options.Credential{
+//	AuthSource: "<authenticationDb>",
+//	Username: "<username>",
+//	Password: "<password>",
+// }
+// clientOpts := options.Client().ApplyURI("mongodb://<hostname>:<port>").
+//	SetAuth(credential)
+// client, err := mongo.Connect(context.TODO(), clientOpts)
+
 // connect connects to the database
 func (s *Service) connect(ctx context.Context) error {
 	ctx, span := s.tp.Start(ctx, "db:connect")
 	defer span.End()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
+	credentialOption := options.Credential{
+		AuthSource: "<authenticationDb>",
+		Username:   "<username>",
+		Password:   "<password>",
+	}
+
+	clientOpts := options.Client().ApplyURI(s.cfg.Common.Mongo.URI).SetAuth(credentialOption)
+
+	client, err := mongo.Connect(ctx, clientOpts)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return err

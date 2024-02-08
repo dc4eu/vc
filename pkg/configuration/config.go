@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -28,7 +29,7 @@ func Parse(ctx context.Context, logger *logger.Log) (*model.Cfg, error) {
 
 	cfg := &model.Cfg{}
 
-	configFile, err := os.ReadFile(configPath)
+	configFile, err := os.ReadFile(filepath.Clean(configPath))
 	if err != nil {
 		return nil, err
 	}

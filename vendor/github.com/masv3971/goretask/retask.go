@@ -70,9 +70,6 @@ func makeTaskFromWait(ctx context.Context, data []string) (*Task, error) {
 		URN:  data[0],
 		Data: data[1],
 	}
-	//	if err := json.Unmarshal([]byte(data[1]), task); err != nil {
-	//		return nil, err
-	//	}
 	return task, nil
 }
 

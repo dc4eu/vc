@@ -13,6 +13,7 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/trace"
 
+	// Swagger
 	_ "vc/docs/apigw"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 		logger: logger,
 		apiv1:  api,
 		tp:     tp,
-		server: &http.Server{Addr: config.APIGW.APIServer.Addr, ReadHeaderTimeout: 2 * time.Second},
+		server: &http.Server{},
 	}
 
 	switch s.config.Common.Production {
@@ -53,7 +54,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	apiValidator := validator.New()
 	apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-
 		if name == "-" {
 			return ""
 		}
@@ -66,9 +66,11 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 
 	s.gin = gin.New()
 	s.server.Handler = s.gin
-	s.server.ReadTimeout = time.Second * 5
-	s.server.WriteTimeout = time.Second * 30
-	s.server.IdleTimeout = time.Second * 90
+	s.server.Addr = config.APIGW.APIServer.Addr
+	s.server.ReadTimeout = 5 * time.Second
+	s.server.WriteTimeout = 30 * time.Second
+	s.server.IdleTimeout = 90 * time.Second
+	s.server.ReadHeaderTimeout = 2 * time.Second
 
 	// Middlewares
 	s.gin.Use(s.middlewareTraceID(ctx))
@@ -103,14 +105,23 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodGet, "/:transaction_id", s.endpointGetSignedPDF)
 	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPut, "/revoke/:transaction_id", s.endpointPDFRevoke)
 
-	rgSatosa := rgAPIv1.Group("/satosa")
-	s.regEndpoint(ctx, rgSatosa, http.MethodGet, "/credential", s.endpointSatosaCredential)
+	rgSATOSAV1 := rgAPIv1.Group("/satosa")
+	s.regEndpoint(ctx, rgSATOSAV1, http.MethodGet, "/credential", s.endpointSatosaCredential)
 
 	// Run http server
 	go func() {
-		err := s.server.ListenAndServe()
-		if err != nil {
-			s.logger.New("http").Trace("listen_error", "error", err)
+		if s.config.APIGW.APIServer.TLS.Enabled {
+			s.applyTLSConfig(ctx)
+
+			err := s.server.ListenAndServeTLS(s.config.APIGW.APIServer.TLS.CertFilePath, s.config.APIGW.APIServer.TLS.KeyFilePath)
+			if err != nil {
+				s.logger.Error(err, "listen_and_server_tls")
+			}
+		} else {
+			err = s.server.ListenAndServe()
+			if err != nil {
+				s.logger.Error(err, "listen_and_server")
+			}
 		}
 	}()
 

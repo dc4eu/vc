@@ -4,6 +4,14 @@ package model
 type APIServer struct {
 	Addr       string            `yaml:"addr" validate:"required"`
 	PublicKeys map[string]string `yaml:"public_keys"`
+	TLS        TLS               `yaml:"tls" validate:"omitempty"`
+}
+
+// TLS holds the tls configuration
+type TLS struct {
+	Enabled      bool   `yaml:"enabled"`
+	CertFilePath string `yaml:"cert_file_path" validate:"required"`
+	KeyFilePath  string `yaml:"key_file_path" validate:"required"`
 }
 
 // Mongo holds the database configuration

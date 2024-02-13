@@ -24,10 +24,13 @@
         "otlptracehttp",
         "protobuf",
         "rpcclient",
+        "Satosa",
+        "SATOSAV",
         "sdktrace",
         "semconv",
         "simplequeue",
         "stretchr",
+        "swaggo",
         "timestamppb"
     ]
 }

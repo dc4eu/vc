@@ -344,9 +344,14 @@ unspecified json object, used to include any document type from authentic source
 
 ## Error response
 
+<<<<<<< HEAD
 ```json
 {
     "title":"",
     "details": {}
 }
 ```
+=======
+http status code 200, else 400
+[//]: TODO(masv): add json error response
+>>>>>>> 671ed46 (Add comment.)

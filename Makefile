@@ -54,6 +54,43 @@ DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_APIGW 		:= docker.sunet.se/dc4eu/apigw:$(VERSION)
 
+
+build: proto build-issuer build-verifier build-datastore build-registry build-cache build-persistent build-mockas build-apigw
+
+
+build-issuer:
+	$(info Building issuer)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_issuer ${LDFLAGS} ./cmd/issuer/main.go
+
+build-verifier:
+	$(info Building verifier)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier ${LDFLAGS} ./cmd/verifier/main.go
+
+build-datastore:
+	$(info Building datastore)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_datastore ${LDFLAGS} ./cmd/datastore/main.go
+
+build-registry:
+	$(info Building registry)
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_registry ${LDFLAGS_DYNAMIC} ./cmd/registry/main.go
+
+build-cache:
+	$(info Building cache)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_cache ${LDFLAGS} ./cmd/cache/main.go
+
+build-persistent:
+	$(info Building persistent)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_persistent ${LDFLAGS} ./cmd/persistent/main.go
+
+build-mockas:
+	$(info Building mockas)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_mockas ${LDFLAGS} ./cmd/mockas/main.go
+
+build-apigw:
+	$(info Building apigw)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_apigw ${LDFLAGS} ./cmd/apigw/main.go
+
+
 docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent docker-build-mockas docker-build-apigw
 
 docker-build-gobuild:

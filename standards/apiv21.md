@@ -108,4 +108,4 @@ unspecified json object, used to include any document type from authentic source
 ### Return
 
 http status code 200, else 400
-TODO(masv): add json error response
+[//]: TODO(masv): add json error response

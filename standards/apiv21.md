@@ -18,7 +18,7 @@
         "document_version": 0,
     },
     "identity": {
-        "identity_data_version": "",
+        "identity_version": "",
         "family_name": "",
         "given_name":"",
         "birth_date":"",
@@ -65,7 +65,7 @@
 
 |type| Attribute | required | description |
 |-|-|-|-|
-| integer | identity_data_version |true | Identity data version|
+| integer | identity_version |true | Identity data version|
 | string | family_name |true | As in current PID namespace |
 | string | given_name | true | As in current PID namespace |
 | string | birth_date |true | As in current PID namespace |

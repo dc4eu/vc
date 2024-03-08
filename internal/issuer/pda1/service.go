@@ -23,14 +23,6 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 		cfg: cfg,
 	}
 
-	//var err error
-	//s.sdJWTClient, err = gosdjwt.New(ctx, gosdjwt.Config{
-	//	JWTType: "sd-jwt",
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	s.log.Info("Started")
 
 	return s, nil

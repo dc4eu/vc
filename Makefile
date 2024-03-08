@@ -243,7 +243,7 @@ vscode:
 	$(info Install go packages)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
-    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-	go install golang.org/x/tools/cmd/deadcode@latest
-	go install github.com/securego/gosec/v2/cmd/gosec@latest
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
+	go install golang.org/x/tools/cmd/deadcode@latest && \
+	go install github.com/securego/gosec/v2/cmd/gosec@latest && \
 	go install honnef.co/go/tools/cmd/staticcheck@latest

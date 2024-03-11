@@ -29,6 +29,7 @@
         "sdktrace",
         "semconv",
         "simplequeue",
+        "skatteverket",
         "stretchr",
         "swaggo",
         "timestamppb"

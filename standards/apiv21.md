@@ -2,7 +2,7 @@
 
 ## Version
 
-    APIv2.1
+    APIv2.1 - Proposal
 
 ## POST /upload
 
@@ -283,9 +283,9 @@ Authentic source --> Issuer
 
 http status code 200, else 400 and error body
 
-## types
+## Types
 
-### meta
+### meta{}
 
 |type| Attribute | required | description |
 |-|-|-|-|
@@ -298,7 +298,7 @@ http status code 200, else 400 and error body
 | string | authentic_source_person_id |true | Institutional identifier of the person/subject|
 | integer | document_data_version | true | JSON object document data version |
 
-### identity
+### identity{}
 
 |type| Attribute | required | description |
 |-|-|-|-|
@@ -327,7 +327,7 @@ http status code 200, else 400 and error body
 | string | resident_house_number | false | As in current PID namespace |
 | string | nationality | false | As in current PID namespace |
 
-### attestation
+### attestation{}
 
 |type| Attribute | required | description |
 |-|-|-|-|
@@ -338,6 +338,15 @@ http status code 200, else 400 and error body
 | string | valid_from | true | Validity information of the attestation, iso8601/epoche |
 | string | valid_to | true | Validity information of the attestation, iso8601/epoche |
 
-### document_data
+### document_data{}
 
 unspecified json object, used to include any document type from authentic source
+
+## Error response
+
+```json
+{
+    "title":"",
+    "details": {}
+}
+```

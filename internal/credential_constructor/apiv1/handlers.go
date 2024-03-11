@@ -3,6 +3,8 @@ package apiv1
 import (
 	"context"
 	"vc/pkg/model"
+
+	"github.com/masv3971/gosdjwt"
 )
 
 // SDJWTRequest holds the request
@@ -35,4 +37,21 @@ func (c *Client) SDJWT(ctx context.Context, req *SDJWTRequest) (*SDJWTReply, err
 	}
 
 	return reply, nil
+}
+
+type CredentialRequest struct{}
+
+type CredentialReply struct {
+	Token *gosdjwt.SDJWT
+}
+
+// Credential gets a credential
+func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*CredentialReply, error) {
+	token, err := c.EHIC.randomV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &CredentialReply{
+		Token: token,
+	}, nil
 }

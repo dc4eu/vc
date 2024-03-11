@@ -6,6 +6,8 @@ import (
 	"vc/pkg/eidas"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/masv3971/gosdjwt"
 )
 
 // EHICService holds the EHIC document type
@@ -33,6 +35,26 @@ func (s *EHICService) random(ctx context.Context) any {
 		CardInformation:      ehic.CardInformation{},
 		Signature:            ehic.Signature{},
 	}
-
 	return doc
+}
+
+func (s *EHICService) randomV2(ctx context.Context) (*gosdjwt.SDJWT, error) {
+	claims := gosdjwt.InstructionsV2{
+		&gosdjwt.ParentInstructionV2{
+			Name: "Address",
+			Children: gosdjwt.InstructionsV2{
+				&gosdjwt.ChildInstructionV2{
+					Name:  "Street",
+					Value: gofakeit.Street(),
+				},
+			},
+		},
+	}
+
+	token, err := claims.SDJWT(jwt.SigningMethodES256, "key")
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
 }

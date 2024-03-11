@@ -42,6 +42,28 @@ func (c *Client) Upload(ctx context.Context, req *model.Upload) (*UploadReply, e
 	return reply, nil
 }
 
+// NotificationRequest is the request for Notification
+type NotificationRequest struct {
+	AuthenticSource string `json:"authentic_source" required:"true"`
+	DocumentType    string `json:"document_type" required:"true"`
+	DocumentID      string `json:"document_id" required:"true"`
+}
+
+// NotificationReply is the reply for a Notification
+type NotificationReply struct {
+	// TODO(masv): string as base64 instead of bitmap
+	QR       *model.QR `json:"qr" required:"true"`
+	DeepLink string    `json:"deep_link" required:"true"`
+
+	// TODO(masv): http status code should be used instead, or error
+	//Status int `json:"status" required:"true"`
+}
+
+// Notification return QR code and DeepLink for a document
+func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
+	return nil, nil
+}
+
 // IDMappingReply is the reply for a IDMapping
 type IDMappingReply struct {
 	Data struct {
@@ -153,6 +175,41 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 	reply := &GetDocumentReply{
 		Data: doc,
 	}
+	return reply, nil
+}
+
+// DeleteDocumentRequest is the request for DeleteDocument
+type DeleteDocumentRequest struct {
+	// required: true
+	// example: skatteverket
+	AuthenticSource string `json:"authentic_source" required:"true"`
+
+	// required: true
+	// example: PDA1
+	DocumentType string `json:"document_type" required:"true"`
+
+	// required: true
+	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
+	DocumentID string `json:"document_id" required:"true"`
+}
+
+// DeleteDocumentReply is the reply for delete document
+type DeleteDocumentReply struct{} // TODO(masv): should be a http status code, not this thing
+
+// DeleteDocument deletes a specific document
+//
+//	@Summary		DeleteDocument
+//	@ID				delete-document
+//	@Description	delete one document endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	DeleteDocumentReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		DeleteDocumentRequest		true	" "
+//	@Router			/document [delete]
+func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) (*DeleteDocumentReply, error) {
+	reply := &DeleteDocumentReply{}
 	return reply, nil
 }
 

@@ -24,6 +24,19 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	return reply, nil
 }
 
+func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.NotificationRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		s.logger.Info("endpointGenericNotification", "error", err)
+		return nil, err
+	}
+	reply, err := s.apiv1.Notification(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointIDMapping(ctx context.Context, c *gin.Context) (any, error) {
 	request := &model.MetaData{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
@@ -43,6 +56,18 @@ func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any,
 		return nil, err
 	}
 	reply, err := s.apiv1.GetDocument(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.DeleteDocumentRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.DeleteDocument(ctx, request)
 	if err != nil {
 		return nil, err
 	}

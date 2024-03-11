@@ -21,9 +21,6 @@ func (c *Client) mockOne(ctx context.Context, authenticSource, documentType stri
 		UID:                     gofakeit.UUID(),
 		RevocationID:            gofakeit.UUID(),
 		CollectID:               gofakeit.UUID(),
-		QR: model.QR{
-			Base64Image: "asdasdasd",
-		},
 	}
 	mockUpload := &model.Upload{
 		Meta: meta,

@@ -92,6 +92,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	rgAPIv1 := rgRoot.Group("api/v1")
 
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/upload", s.endpointUpload)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/notification", s.endpointNotification)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument) // TODO(masv): use DELETE /document instead of /delete_document
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document", s.endpointGetDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/collect_code", s.endpointGetDocumentByCollectCode)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id_mapping", s.endpointIDMapping)

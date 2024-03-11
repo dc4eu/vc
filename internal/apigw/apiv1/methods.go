@@ -11,14 +11,15 @@ import (
 
 // QRReply is the reply for a generic QR code
 type QRReply struct {
-	Data *model.QR `json:"data"`
+	Data     *model.QR `json:"data"`
+	DeepLink string    `json:"deep_link"`
 }
 
 func (c *Client) qrGenerator(ctx context.Context, req *model.MetaData) (*QRReply, error) {
 	collectID := "generic"
-	url := fmt.Sprintf("https://example.org/issuer/api/v1/?document_id=%s&collect_id=%s", req.DocumentID, collectID)
+	deepLink := fmt.Sprintf("https://example.org/issuer/api/v1/?document_id=%s&collect_id=%s", req.DocumentID, collectID)
 
-	qrPNG, err := qrcode.Encode(url, qrcode.Medium, 256)
+	qrPNG, err := qrcode.Encode(deepLink, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}

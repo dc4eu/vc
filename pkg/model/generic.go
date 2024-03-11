@@ -198,4 +198,5 @@ type Attestation struct {
 // QR is a collection of fields representing a QR code
 type QR struct {
 	Base64Image string `json:"base64_image" bson:"base64_image" validate:"required"`
+	DeepLink    string `json:"deep_link" bson:"deep_link" validate:"required"`
 }

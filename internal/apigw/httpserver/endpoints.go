@@ -67,11 +67,11 @@ func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (a
 	if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.DeleteDocument(ctx, request)
+	err := s.apiv1.DeleteDocument(ctx, request)
 	if err != nil {
 		return nil, err
 	}
-	return reply, nil
+	return nil, nil
 }
 
 func (s *Service) endpointGetDocumentByCollectCode(ctx context.Context, c *gin.Context) (any, error) {

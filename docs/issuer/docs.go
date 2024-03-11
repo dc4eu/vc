@@ -340,14 +340,14 @@ const docTemplate = `{
         "types.Document": {
             "type": "object",
             "properties": {
+                "base64_data": {
+                    "type": "string"
+                },
                 "contact_info": {
                     "type": "string"
                 },
                 "create_ts": {
                     "type": "integer"
-                },
-                "data": {
-                    "type": "string"
                 },
                 "error": {
                     "type": "string"

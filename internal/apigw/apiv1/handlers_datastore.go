@@ -51,15 +51,21 @@ type NotificationRequest struct {
 
 // NotificationReply is the reply for a Notification
 type NotificationReply struct {
-	// TODO(masv): string as base64 instead of bitmap
-	QR       *model.QR `json:"qr" required:"true"`
-	DeepLink string    `json:"deep_link" required:"true"`
-
-	// TODO(masv): http status code should be used instead, or error
-	//Status int `json:"status" required:"true"`
+	Data *model.QR `json:"data"`
 }
 
 // Notification return QR code and DeepLink for a document
+//
+//	@Summary		Notification
+//	@ID				generic-notification
+//	@Description	notification endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	NotificationReply				"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		NotificationRequest			true	" "
+//	@Router			/notification [post]
 func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
 	return nil, nil
 }
@@ -193,9 +199,6 @@ type DeleteDocumentRequest struct {
 	DocumentID string `json:"document_id" required:"true"`
 }
 
-// DeleteDocumentReply is the reply for delete document
-type DeleteDocumentReply struct{} // TODO(masv): should be a http status code, not this thing
-
 // DeleteDocument deletes a specific document
 //
 //	@Summary		DeleteDocument
@@ -208,9 +211,8 @@ type DeleteDocumentReply struct{} // TODO(masv): should be a http status code, n
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		DeleteDocumentRequest		true	" "
 //	@Router			/document [delete]
-func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) (*DeleteDocumentReply, error) {
-	reply := &DeleteDocumentReply{}
-	return reply, nil
+func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
+	return nil
 }
 
 // GetDocumentByCollectCode return a specific document by collect code

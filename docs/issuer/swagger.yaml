@@ -77,12 +77,12 @@ definitions:
     type: object
   types.Document:
     properties:
+      base64_data:
+        type: string
       contact_info:
         type: string
       create_ts:
         type: integer
-      data:
-        type: string
       error:
         type: string
       location:

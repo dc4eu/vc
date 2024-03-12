@@ -2,7 +2,7 @@
 
 ## Version
 
-    APIv2.1 - Proposal
+    APIv2.1 - revision 1 
 
 ## POST /upload
 
@@ -43,14 +43,14 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
 ```json
 {
     "meta": {
-        "authentic_source": "", // required
-        "document_id": "", // required
-        "document_type": "", //required
+        "authentic_source": "",
+        "document_id": "",
+        "document_type": "",
+        "authentic_source_person_id": "",
         "uuid": "", 
         "revocation_id": "",
         "document_id": "",
         "collect_id": "",
-        "authentic_source_person_id": "", // required
         "document_version": 0,
     },
     "identity": {
@@ -101,7 +101,8 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Authentic-source->>Datastore: POST;
+    Authentic source->>Datastore: POST;
+    Datastore->>Authentic source: ; 
 ```
 
 ### Description

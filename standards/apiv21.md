@@ -6,6 +6,13 @@
 
 ## POST /upload
 
+### Flowchart
+
+```mermaid
+sequenceDiagram;
+    Authentic-source->>Datastore: upload attestation data;
+```
+
 ### Description
 
 The Process starts with the authentic source which is uploading all relevant data to the Datastore. All steps regarding the general application of an attestation are out of scope and reside to the internal processes of the authentic source.
@@ -90,6 +97,13 @@ http status code 200, else 400 and error body
 
 ## POST /notification
 
+### Flowchart
+
+```mermaid
+sequenceDiagram;
+    Authentic-source->>Datastore: receive qr-code and deep_link;
+```
+
 ### Description
 
 After the upload was successful the authentic source can call the get notification endpoint, to receive QR code and `deep_link` to include them in existing notification means. This is split from the upload endpoint to allow fast mass uploads of documents and to allow openness for different system architectures as this information request may be done by a different authentic source component as the upload.
@@ -126,6 +140,13 @@ After the QR code and link are received the authentic source may follow existing
 http OK 200, else 400 and error body
 
 ## DELETE /document
+
+### Flowchart
+
+```mermaid
+sequenceDiagram;
+    Authentic-source->>Datastore: DELETE ;
+```
 
 ### Description
 

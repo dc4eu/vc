@@ -10,10 +10,8 @@
 
 ```mermaid
 sequenceDiagram;
-    participant a authentic source
-    participant d datastore
-    a->>d: POST;
-    d->>a: 200/400;
+    authentic source->>datastore: POST;
+    datastore->>authentic source: 200/400;
 ```
 
 ### Description
@@ -151,10 +149,8 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    participant a authentic source;
-    participant d datastore;
-    a->>d: DELETE;
-    d->>a: 200/400;
+    authentic source->>datastore: DELETE;
+    datastore->>authentic source: 200/400;
 ```
 
 ### Description
@@ -256,10 +252,8 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    participant p portal;
-    participant d datastore/authentic source;
-    p->>d: POST;
-    d->>p: 200/400;
+    portal->>datastore/authentic source: POST;
+    datastore/authentic source->>portal: 200/400;
 ```
 
 ### Description
@@ -317,10 +311,8 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    participant i issuer;
-    participant d datastore/authentic source;
-    i->>d: POST;
-    d->>i: 200/400;
+    issuer->>datastore/authentic source: POST;
+    datastore/authentic source->>issuer: 200/400;
 ```
 
 ### Request
@@ -363,10 +355,8 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    participant i issuer;
-    participant d datastore/authentic source;
-    i->>d: POST;
-    d->>i: 200/400;
+    issuer->>datastore/authentic source: POST;
+    datastore/authentic source->>issuer: 200/400;
 ```
 
 ### Description
@@ -427,10 +417,8 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    participant a authentic source;
-    participant i issuer;
-    a->>i: POST;
-    i->>a: 200/400;
+    authentic source->>issuer: POST;
+    issuer->>authentic source: 200/400;
 ```
 
 ### Description

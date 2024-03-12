@@ -383,7 +383,7 @@ Revocation status allows flexibility for future decisions and flows. One possibi
 
 ```mermaid
 sequenceDiagram;
-    Authentic source->> Issuer;
+    Authentic source->>Issuer;
 ```
 
 ### Request

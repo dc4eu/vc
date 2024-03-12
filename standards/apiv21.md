@@ -8,16 +8,11 @@
 
 ### Description
 
-The Process starts with the authentic source which is uploading all relevant data to the Datastore.
-All steps regarding the general application of an attestation are out of scope and reside to the internal processes of the authentic source.
+The Process starts with the authentic source which is uploading all relevant data to the Datastore. All steps regarding the general application of an attestation are out of scope and reside to the internal processes of the authentic source.
 
-The data upload (/upload) consist of four objects used as input for the call. These are meta, identity_data, attestation_data and document_data.
+The data upload consist of four objects used as input for the call. These are `meta`, `identity`, `attestation` and `document_data`.
 
-First, the meta object consists of the authentic source ID, document type and document ID. These act
-as the main identifier in the Datastore. One document ID is valid and unique per document type and
-authentic source ID. Another required input is the institutional identifier of the person to ensure
-flexibility in identification and reduce susceptibility to errors. Again, this may also be valid and unique
-only in the domain of the authentic source. Therefore, in order to match an institutional person ID
+First, the meta object consists of the authentic source ID, document type and document ID. These act as the main identifier in the Datastore. One document ID is valid and unique per document type and authentic source ID. Another required input is the institutional identifier of the person to ensure flexibility in identification and reduce susceptibility to errors. Again, this may also be valid and unique only in the domain of the authentic source. Therefore, in order to match an institutional person ID
 (authentic_source_person_id) a filter by authentic source ID needs to be applied before a selection
 operation is done. Finally, the meta object has defined revocation and collect ID as optional
 parameters. They may be set by the authentic source for special use cases and preferences. If not
@@ -34,24 +29,21 @@ to display may differ, it was decided to define this as a generic object contain
 which can be filled by choice of the authentic source with relevant display information. In addition,
 valid from and valid to information of the attestation, shall be provided by default.
 
-Finally, the document data object needs to be submitted. We expect a JSON electronic document
-containing all business decision data matching to the document type and schema definitions.
-
-The Datastore responds to this upload with status codes which shall be technical with error logs if occurring.
+Finally, the document data object needs to be submitted. We expect a JSON electronic document containing all business decision data matching to the document type and schema definitions.
 
 ### Request
 
 ```json
 {
     "meta": {
-        "authentic_source": "",
-        "document_id": "",
-        "document_type": "",
-        "uuid": "",
+        "authentic_source": "", // required
+        "document_id": "", // required
+        "document_type": "", //required
+        "uuid": "", 
         "revocation_id": "",
         "document_id": "",
         "collect_id": "",
-        "authentic_source_person_id": "",
+        "authentic_source_person_id": "", // required
         "document_version": 0,
     },
     "identity": {
@@ -98,6 +90,18 @@ http status code 200, else 400 and error body
 
 ## POST /notification
 
+### Description
+
+After the upload was successful the authentic source can call the get notification endpoint, to receive QR code and `deep_link` to include them in existing notification means. This is split from the upload endpoint to allow fast mass uploads of documents and to allow openness for different system architectures as this information request may be done by a different authentic source component as the upload.
+
+As explained before the three attributes used for unequivocal selection of an entry are required as input. These are authentic source ID, document type and document ID. A selection/ filter in the Datastore must be executed in this order.
+
+After identifying the respective entry in the Data Store database, the data store must generate a pickup link based on the collection ID. Note that this may be equal to the document ID if not further defined. The link should ultimately be formatted as a QR code, and both the link and QR code should be returned to the Authentic Source.
+
+Link and QR code can be encoded according to the OID4VCI protocol with collection/document ID reference. However, as sharing of the PID by the EUDIW user is expected, it may be more practical to encode the link and QR code according to the OID4VP protocol and initiate it directly with the request for the credential. It is anticipated that both protocols may be utilized for functionality in presentation and subsequent issuance, and an efficient technical implementation for this purpose is yet to be devised. For the link to be created a specific endpoint needs to be known to the data store which points to the Issuer System and can serve issuance requests by the EUDIW. It shall be possible to define this in a Data Store config file/ properties.
+
+After the QR code and link are received the authentic source may follow existing protocols and channels to notify the subject of the credential.
+
 ### Request
 
 ```json
@@ -113,15 +117,19 @@ http status code 200, else 400 and error body
 ```json
 {
     "data": {
-        "qr": "",
-        "deeplink": ""
+        "base64_image": "",
+        "deep_link": ""
     }
 }
 ```
 
-http status code 200, else 400 and error body
+http OK 200, else 400 and error body
 
 ## DELETE /document
+
+### Description
+
+Delete one document
 
 ### Request
 
@@ -134,9 +142,19 @@ http status code 200, else 400 and error body
 
 ### Response
 
-http status code 200, else 400 and error body
+http OK 200, else 400 and error body
 
 ## POST /document/attestation
+
+### Description
+
+The Data Store should now have an endpoint with these parameters as input to return the
+corresponding attestation data to the Issuer System.
+
+This endpoint should only return the attestation data if there is a unique match for the institutional identity; otherwise, an error message should be reported. Again, mapping is done by matching the `identity` information provided by the
+authentic source and included in the Datastore database against the information provided in the PID.
+
+The `collect_id` is used to identify the correct attestation. The attestation data gets returned after a single match was found, which can now be processed by the Generic Issuer System to create a VC.
 
 ### Direction
 
@@ -194,9 +212,17 @@ Issuer --> Datastore/authentic source
 
 ```
 
-http status code 200, else 400 and error body
+http OK 200, else 400 and error body
 
 ## POST /portal
+
+### Description
+
+This endpoint shall be used to get all available attestations (-data) that are stored in the Datastore for a specific person identified by domain specific ID e.g., Social Security Number. The Response Data includes all document information relevant for display in the national portal including `base64_image` and `deep_link`.
+
+Additional to the `authentic_source_id` and `authentic_source_person_id` the optional `validityt_before` and `validity_after` parameter is envisioned as additional input. It can be used by the portal request to limit the response of attestations to such that are valid after or during a specific date. In the response are expected relevant metadata per attestation such as `document_type` and `document_id` as well as the `attestation_data`, which is to be used for display information.
+Finally, QR-code and Deeplink are also included in the response per attestation in order for the
+citizen to initiate the pickup with his/her EUDIW.
 
 ### Direction
 
@@ -206,37 +232,39 @@ Portal --> Datastore
 
 ```json
 {
-    "authentic_source":"", 
+    "authentic_source_id":"", 
     "authentic_source_person_id":"",
-    "valid_after": "",
+    "validity_before": "",
+    "validity_after": "",
 }
 ```
 
 ### Response
 
 ```json
-{ 
-"data": {
-    "attestations": [
-        {
-        "document_type": "",
-        "document_id": "",
-        "collect_id":""
-        }
-    ],
-    "attestation": {
-        "attestation_version": 0,
-        "attestation_type": "",
-        "description_short":"",
-        "description_long":"",
-        "valid_from":"",
-        "valid_to": ""
-    },
-    "deeplink":"",
-    "qr": ""
+{
+    "data": {
+        "attestations": [
+            {
+                "document_type": "",
+                "document_id": "",
+                "collect_id": "",
+                "attestation_data": {
+                    "version": 0,
+                    "type": "",
+                    "description_short": "",
+                    "description_long": "",
+                    "valid_from": "",
+                    "valid_to": ""
+                },
+                "qr": {
+                    "base64_image": "",
+                    "deep_link": ""
+                }
+            }
+        ]
     }
 }
-
 ```
 
 http status code 200, else 400 and error body
@@ -272,7 +300,7 @@ Issuer --> Datastore/authentic source
             "document_id": "",
             "collect_id": "",
             "authentic_source_person_id": "",
-            "document_version": 0,
+            "document_version": 0
         },
     }
 }
@@ -283,6 +311,10 @@ http status code 200, else 400 and error body
 
 ## POST /id_mapping
 
+### Description
+
+Input consists of `authentic_source_id` and `identity` object with the information of the received PID. It shall return `authentic_source_person_id` if an uniq match was found.
+
 ### Direction
 
 Issuer --> Datastore
@@ -291,7 +323,7 @@ Issuer --> Datastore
 
 ```json
 {
-    "authentic_source":"",
+    "authentic_source_id":"",
     "identity": {
         "identity_version": "",
         "family_name": "",
@@ -326,7 +358,9 @@ Issuer --> Datastore
 
 ```json
 {
-    "authentic_source_person_id":""
+    "data": {
+        "authentic_source_person_id":""
+    }
 }
 
 ```
@@ -335,7 +369,25 @@ http status code 200, else 400 and error body
 
 ## POST /revoke
 
+### Description
+
+To clarify the revocation system, it should be known that the `uid` is set by the authentic
+source. Usually this will be the same as the document ID, but depending on the use case and the
+intention of the authentic source it is possible that two credentials point to the same `uid`.
+
+In order for the Issuer System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `uid` must be submitted as input from the authentic source. The Issuer system should have internally set the endpoint for the revocation registry. It must be able to configure this in the config/ properties. Additional inputs are revocation status and datetime.
+
+Revocation status allows flexibility for future decisions and flows. One possibility could be to include the `collect_code` for a follow up credential, which may be interpreted by the EUDIW to automatically establish a new pickup flow to get the new credential version. This is to be further decided. Datetime input can be set to define a specific date and time in the future to which the credential shall be defined as revoked. The endpoint responds with a simple status code with information about the operation status and error log if occurring.
+
 ### Direction
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
 
 Authentic source --> Issuer
 
@@ -345,9 +397,9 @@ Authentic source --> Issuer
 {
     "authentic_source":"",
     "document_type":"",
-    "revocation_id":"" ,
-    "revocation_reference":"",
-    "revocation_datetime":"", 
+    "uid":"" ,
+    "reference":"",
+    "datetime":""
 }
 ```
 
@@ -418,7 +470,9 @@ unspecified json object, used to include any document type from authentic source
 
 ```json
 {
-    "title":"",
-    "details": {}
+    "error": {
+        "title":"",
+        "details": {}
+    }
 }
 ```

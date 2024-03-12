@@ -10,8 +10,8 @@
 
 ```mermaid
 sequenceDiagram;
-    authentic source->>datastore: POST;
-    datastore->>authentic source: 200/400;
+    authentic source->>datastore: POST /upload;
+    datastore->>authentic source: null 200/json 400;
 ```
 
 ### Description
@@ -55,7 +55,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
         "document_version": 0,
     },
     "identity": {
-        "identity_version": "",
+        "version": "",
         "family_name": "",
         "given_name":"",
         "birth_date":"",
@@ -102,7 +102,7 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    authentic source->>datastore: POST;
+    authentic source->>datastore: POST /notification;
     datastore->>authentic source: 200/400 ; 
 ```
 
@@ -147,7 +147,7 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    authentic source->>datastore: DELETE;
+    authentic source->>datastore: DELETE /document;
     datastore->>authentic source: 200/400;
 ```
 
@@ -174,7 +174,7 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    issuer->>datastore/authentic source: POST;
+    issuer->>datastore/authentic source: POST document/attestation;
     datastore/authentic source->>issuer: 200/400;
 ```
 
@@ -248,7 +248,7 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    portal->>datastore/authentic source: POST;
+    portal->>datastore/authentic source: POST /portal;
     datastore/authentic source->>portal: 200/400;
 ```
 
@@ -307,7 +307,7 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    issuer->>datastore/authentic source: POST;
+    issuer->>datastore/authentic source: POST /document;
     datastore/authentic source->>issuer: 200/400;
 ```
 
@@ -351,7 +351,7 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    issuer->>datastore/authentic source: POST;
+    issuer->>datastore/authentic source: POST /id/mapping;
     datastore/authentic source->>issuer: 200/400;
 ```
 
@@ -365,7 +365,7 @@ Input consists of `authentic_source_id` and `identity` object with the informati
 {
     "authentic_source_id":"",
     "identity": {
-        "identity_version": "",
+        "version": "",
         "family_name": "",
         "given_name":"",
         "birth_date":"",
@@ -407,25 +407,23 @@ Input consists of `authentic_source_id` and `identity` object with the informati
 
 http OK 200, else 400 and error body
 
-## POST /revoke
+## DELETE /credential
 
 ### Flowchart
 
 ```mermaid
 sequenceDiagram;
-    authentic source->>issuer: POST;
+    authentic source->>issuer: DELETE /credential;
     issuer->>authentic source: 200/400;
 ```
 
 ### Description
 
-To clarify the revocation system, it should be known that the `uid` is set by the authentic
-source. Usually this will be the same as the document ID, but depending on the use case and the
-intention of the authentic source it is possible that two credentials point to the same `uid`.
+To clarify the revocation system, it should be known that the `uid` is set by the authentic source. Usually this will be the same as the `document_id`, but depending on the use case and the intention of the authentic source it is possible that two credentials point to the same `uid`.
 
-In order for the Issuer System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `uid` must be submitted as input from the authentic source. The Issuer system should have internally set the endpoint for the revocation registry. It must be able to configure this in the config/ properties. Additional inputs are revocation status and datetime.
+In order for the Issuer System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `uid` must be submitted as input from the authentic source. The Issuer system should have internally set the endpoint for the revocation registry. It must be able to configure this in the config/ properties.
 
-Revocation status allows flexibility for future decisions and flows. One possibility could be to include the `collect_code` for a follow up credential, which may be interpreted by the EUDIW to automatically establish a new pickup flow to get the new credential version. This is to be further decided. Datetime input can be set to define a specific date and time in the future to which the credential shall be defined as revoked. The endpoint responds with a simple status code with information about the operation status and error log if occurring.
+Revocation status allows flexibility for future decisions and flows. One possibility could be to include the `collect_code` for a follow up credential, which may be interpreted by the EUDIW to automatically establish a new pickup flow to get the new credential version. This is to be further decided. `revoke_at` defines a specific point in time to which the credential shall be defined as revoked.
 
 ### Request
 
@@ -435,7 +433,8 @@ Revocation status allows flexibility for future decisions and flows. One possibi
     "document_type":"",
     "uid":"" ,
     "reference":"",
-    "datetime":""
+    "revoke_at":"",
+    "reason":""
 }
 ```
 
@@ -449,7 +448,7 @@ http OK 200, else 400 and error body
 
 |type| Attribute | required | description |
 |-|-|-|-|
-| string | authentic_source             | true | the issuer agency or institution |
+| string | authentic_source             | true | globally uniq name of the issuing entity (agency or institution) |
 | string | document_id                  | true | uniq identifier within `authentic_source` namespace |
 | string | document_type                | true | Type of Document, for example “EHIC” or “PDA1” |
 | string | uuid                         | true | uniq identifier within `authentic_source` and `document_type`, generated in authentic source|
@@ -463,7 +462,7 @@ http OK 200, else 400 and error body
 |type| Attribute | required | description |
 |-|-|-|-|
 | integer | version                 | true  | Version of this identity    |
-| string | family_name              | true  | As in current PID namespace  |
+| string | family_name              | true  | As in current PID namespace |
 | string | given_name               | true  | As in current PID namespace |
 | string | birth_date               | true  | As in current PID namespace |
 | string | uuid                     | true  | As in current PID namespace |

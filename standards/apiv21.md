@@ -10,7 +10,10 @@
 
 ```mermaid
 sequenceDiagram;
-    Authentic-source->>Datastore: POST;
+    participant a authentic source
+    participant d datastore
+    a->>d: POST;
+    d->>a: 200/400;
 ```
 
 ### Description
@@ -101,8 +104,10 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Authentic source->>Datastore: POST;
-    Datastore->>Authentic source: ; 
+    participant a authentic source
+    participant d datastore
+    a->>d: POST;
+    d->>a: 200/400 ; 
 ```
 
 ### Description
@@ -146,7 +151,10 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Authentic-source->>Datastore: DELETE ;
+    participant a authentic source;
+    participant d datastore;
+    a->>d: DELETE;
+    d->>a: 200/400;
 ```
 
 ### Description
@@ -172,7 +180,10 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Issuer->>Datastore/authentic_source: POST ;
+    participant i issuer;
+    participant d datastore/authentic source;
+    i->>d: POST;
+    d->>i: 200/400;
 ```
 
 ### Description
@@ -245,7 +256,10 @@ http OK 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Portal->>Datastore/authentic_source: POST ;
+    participant p portal;
+    participant d datastore/authentic source;
+    p->>d: POST;
+    d->>p: 200/400;
 ```
 
 ### Description
@@ -303,7 +317,10 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Issuer->>Datastore/authentic_source: POST ;
+    participant i issuer;
+    participant d datastore/authentic source;
+    i->>d: POST;
+    d->>i: 200/400;
 ```
 
 ### Request
@@ -346,7 +363,10 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Issuer->>Datastore/authentic_source: POST ;
+    participant i issuer;
+    participant d datastore/authentic source;
+    i->>d: POST;
+    d->>i: 200/400;
 ```
 
 ### Description
@@ -407,7 +427,10 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Authentic_source->>Issuer: POST ;
+    participant a authentic source;
+    participant i issuer;
+    a->>i: POST;
+    i->>a: 200/400;
 ```
 
 ### Description
@@ -434,7 +457,7 @@ Revocation status allows flexibility for future decisions and flows. One possibi
 
 ### Response
 
-http status code 200, else 400 and error body
+http OK 200, else 400 and error body
 
 ## Types
 

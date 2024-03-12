@@ -10,7 +10,7 @@
 
 ```mermaid
 sequenceDiagram;
-    Authentic-source->>Datastore: upload attestation data;
+    Authentic-source->>Datastore: POST;
 ```
 
 ### Description
@@ -101,7 +101,7 @@ http status code 200, else 400 and error body
 
 ```mermaid
 sequenceDiagram;
-    Authentic-source->>Datastore: receive qr-code and deep_link;
+    Authentic-source->>Datastore: POST;
 ```
 
 ### Description
@@ -167,6 +167,13 @@ http OK 200, else 400 and error body
 
 ## POST /document/attestation
 
+### Flowchart
+
+```mermaid
+sequenceDiagram;
+    Issuer->>Datastore/authentic_source: POST ;
+```
+
 ### Description
 
 The Data Store should now have an endpoint with these parameters as input to return the
@@ -176,10 +183,6 @@ This endpoint should only return the attestation data if there is a unique match
 authentic source and included in the Datastore database against the information provided in the PID.
 
 The `collect_id` is used to identify the correct attestation. The attestation data gets returned after a single match was found, which can now be processed by the Generic Issuer System to create a VC.
-
-### Direction
-
-Issuer --> Datastore/authentic source
 
 ### Request
 
@@ -237,6 +240,13 @@ http OK 200, else 400 and error body
 
 ## POST /portal
 
+### Flowchart
+
+```mermaid
+sequenceDiagram;
+    Portal->>Datastore/authentic_source: POST ;
+```
+
 ### Description
 
 This endpoint shall be used to get all available attestations (-data) that are stored in the Datastore for a specific person identified by domain specific ID e.g., Social Security Number. The Response Data includes all document information relevant for display in the national portal including `base64_image` and `deep_link`.
@@ -244,10 +254,6 @@ This endpoint shall be used to get all available attestations (-data) that are s
 Additional to the `authentic_source_id` and `authentic_source_person_id` the optional `validityt_before` and `validity_after` parameter is envisioned as additional input. It can be used by the portal request to limit the response of attestations to such that are valid after or during a specific date. In the response are expected relevant metadata per attestation such as `document_type` and `document_id` as well as the `attestation_data`, which is to be used for display information.
 Finally, QR-code and Deeplink are also included in the response per attestation in order for the
 citizen to initiate the pickup with his/her EUDIW.
-
-### Direction
-
-Portal --> Datastore
 
 ### Request
 
@@ -292,9 +298,12 @@ http status code 200, else 400 and error body
 
 ## POST /document
 
-### Direction
+### Flowchart
 
-Issuer --> Datastore/authentic source
+```mermaid
+sequenceDiagram;
+    Issuer->>Datastore/authentic_source: POST ;
+```
 
 ### Request
 
@@ -332,13 +341,16 @@ http status code 200, else 400 and error body
 
 ## POST /id_mapping
 
+### Flowchart
+
+```mermaid
+sequenceDiagram;
+    Issuer->>Datastore/authentic_source: POST ;
+```
+
 ### Description
 
 Input consists of `authentic_source_id` and `identity` object with the information of the received PID. It shall return `authentic_source_person_id` if an uniq match was found.
-
-### Direction
-
-Issuer --> Datastore
 
 ### Request
 
@@ -390,6 +402,13 @@ http status code 200, else 400 and error body
 
 ## POST /revoke
 
+### Flowchart
+
+```mermaid
+sequenceDiagram;
+    Authentic_source->>Issuer: POST ;
+```
+
 ### Description
 
 To clarify the revocation system, it should be known that the `uid` is set by the authentic
@@ -399,13 +418,6 @@ intention of the authentic source it is possible that two credentials point to t
 In order for the Issuer System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `uid` must be submitted as input from the authentic source. The Issuer system should have internally set the endpoint for the revocation registry. It must be able to configure this in the config/ properties. Additional inputs are revocation status and datetime.
 
 Revocation status allows flexibility for future decisions and flows. One possibility could be to include the `collect_code` for a follow up credential, which may be interpreted by the EUDIW to automatically establish a new pickup flow to get the new credential version. This is to be further decided. Datetime input can be set to define a specific date and time in the future to which the credential shall be defined as revoked. The endpoint responds with a simple status code with information about the operation status and error log if occurring.
-
-### Direction
-
-```mermaid
-sequenceDiagram;
-    Authentic-source->>Issuer: hello;
-```
 
 ### Request
 

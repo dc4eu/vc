@@ -382,14 +382,9 @@ Revocation status allows flexibility for future decisions and flows. One possibi
 ### Direction
 
 ```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+sequenceDiagram;
+    Authentic source->> Issuer;
 ```
-
-Authentic source --> Issuer
 
 ### Request
 

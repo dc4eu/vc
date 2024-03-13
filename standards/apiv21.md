@@ -4,6 +4,17 @@
 
     APIv2.1 - revision 1 
 
+## Endpoint summery
+
+- POST /upload
+- POST /notification
+- POST /document
+- DELETE /document
+- POST /document/attestation
+- POST /portal
+- POST /id/mapping
+- DELETE /credential
+
 ## POST /upload
 
 ### Flowchart
@@ -48,7 +59,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
         "document_id": "",
         "document_type": "",
         "authentic_source_person_id": "",
-        "uuid": "", 
+        "uid": "", 
         "revocation_id": "",
         "document_id": "",
         "collect_id": "",
@@ -59,7 +70,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
         "family_name": "",
         "given_name":"",
         "birth_date":"",
-        "uuid": "",
+        "uid": "",
         "family_name_birth":"",
         "given_name_birth":"", 
         "birth_place":"",
@@ -125,6 +136,7 @@ After the QR code and link are received the authentic source may follow existing
     "authentic_source": "",
     "document_type": "",
     "document_id": "",
+    "member_state": ""
 }
 ```
 
@@ -180,7 +192,7 @@ sequenceDiagram;
 
 ### Description
 
-The Data Store should now have an endpoint with these parameters as input to return the
+The Datastore should now have an endpoint with these parameters as input to return the
 corresponding attestation data to the Issuer System.
 
 This endpoint should only return the attestation data if there is a unique match for the institutional identity; otherwise, an error message should be reported. Again, mapping is done by matching the `identity` information provided by the
@@ -199,7 +211,7 @@ The `collect_id` is used to identify the correct attestation. The attestation da
         "family_name": "",
         "given_name":"",
         "birth_date":"",
-        "uuid": "",
+        "uid": "",
         "family_name_birth":"",
         "given_name_birth":"", 
         "birth_place":"",
@@ -331,7 +343,7 @@ sequenceDiagram;
             "authentic_source": "",
             "document_id": "",
             "document_type": "",
-            "uuid": "",
+            "uid": "",
             "revocation_id": "",
             "document_id": "",
             "collect_id": "",
@@ -369,7 +381,7 @@ Input consists of `authentic_source_id` and `identity` object with the informati
         "family_name": "",
         "given_name":"",
         "birth_date":"",
-        "uuid": "",
+        "uid": "",
         "family_name_birth":"",
         "given_name_birth":"", 
         "birth_place":"",
@@ -451,7 +463,7 @@ http OK 200, else 400 and error body
 | string | authentic_source             | true | globally uniq name of the issuing entity (agency or institution) |
 | string | document_id                  | true | uniq identifier within `authentic_source` namespace |
 | string | document_type                | true | Type of Document, for example “EHIC” or “PDA1” |
-| string | uuid                         | true | uniq identifier within `authentic_source` and `document_type`, generated in authentic source|
+| string | uid                         | true | uniq identifier within `authentic_source` and `document_type`, generated in authentic source|
 | string | revocation_id                | true | uniq identifier within `authentic_source` namespace OR equal to `document_id`|
 | string | collect_id                   | false | uniq identifier within `authentic_source` namespace OR equal to `document_id`|
 | string | authentic_source_person_id   | true | uniq identifier within `authentic_source` namespace AND globally uniq within authentic source.|
@@ -461,11 +473,11 @@ http OK 200, else 400 and error body
 
 |type| Attribute | required | description |
 |-|-|-|-|
-| integer | version                 | true  | must be > 0 | |
+| integer | version                 | true  | must be > 0 |
 | string | family_name              | true  | As in current PID namespace |
 | string | given_name               | true  | As in current PID namespace |
 | string | birth_date               | true  | As in current PID namespace |
-| string | uuid                     | true  | As in current PID namespace |
+| string | uid                     | true  | As in current PID namespace |
 | string | family_name_birth        | false | As in current PID namespace |
 | string | given_name_birth         | false | As in current PID namespace |
 | string | birth_place              | false | As in current PID namespace |

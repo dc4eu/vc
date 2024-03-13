@@ -492,7 +492,7 @@ http OK 200, else 400 and error body
 
 |type| Attribute | required | description |
 |-|-|-|-|
-| string | authentic_source             | true | globally uniq name of the issuing entity (agency or institution) |
+| string | authentic_source             | true | globally unambiguous name of the issuing entity (agency or institution) |
 | string | document_id                  | true | uniq identifier within `authentic_source` namespace |
 | string | document_type                | true | Type of Document, for example “EHIC” or “PDA1” |
 | string | uid                         | true | uniq identifier within `authentic_source` and `document_type`, generated in authentic source|
@@ -509,7 +509,7 @@ http OK 200, else 400 and error body
 | string | family_name              | true  | As in current PID namespace |
 | string | given_name               | true  | As in current PID namespace |
 | string | birth_date               | true  | As in current PID namespace |
-| string | uid                     | true  | As in current PID namespace |
+| string | uid                      | true  | As in current PID namespace |
 | string | family_name_birth        | false | As in current PID namespace |
 | string | given_name_birth         | false | As in current PID namespace |
 | string | birth_place              | false | As in current PID namespace |

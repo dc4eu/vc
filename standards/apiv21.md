@@ -8,7 +8,7 @@
 
 - POST /upload
 - POST /notification
-- POST /document
+- POST /document/collect_id
 - DELETE /document
 - POST /document/attestation
 - POST /portal
@@ -72,7 +72,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
         "birth_date":"",
         "uid": "",
         "family_name_birth":"",
-        "given_name_birth":"", 
+        "given_name_birth":"",
         "birth_place":"",
         "gender":"",
         "age_over_18":"",
@@ -86,7 +86,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
         "resident_country":"",
         "resident_state":"",
         "resident_city":"",
-        "resident_postal_code":"", 
+        "resident_postal_code":"",
         "resident_street":"",
         "resident_house_number":"",
         "nationality":""
@@ -213,7 +213,7 @@ The `collect_id` is used to identify the correct attestation. The attestation da
         "birth_date":"",
         "uid": "",
         "family_name_birth":"",
-        "given_name_birth":"", 
+        "given_name_birth":"",
         "birth_place":"",
         "gender":"",
         "age_over_18":"",
@@ -227,7 +227,7 @@ The `collect_id` is used to identify the correct attestation. The attestation da
         "resident_country":"",
         "resident_state":"",
         "resident_city":"",
-        "resident_postal_code":"", 
+        "resident_postal_code":"",
         "resident_street":"",
         "resident_house_number":"",
         "nationality":""
@@ -313,7 +313,7 @@ citizen to initiate the pickup with his/her EUDIW.
 
 http OK 200, else 400 and error body
 
-## POST /document
+## POST /document/collect_id
 
 ### Flowchart
 
@@ -323,13 +323,45 @@ sequenceDiagram;
     datastore/authentic source->>issuer: 200/400;
 ```
 
+### Description
+
+The Datastore should now have an endpoint with these parameters as input to return the
+corresponding attestation data to the Issuer System. This endpoint should only return the attestation data if there is a unique match for the institutional identity; otherwise, an error message should be reported. Again, mapping is done by matching the identity_data information provided by the authentic source and included in the Datastore database against the information provided in the PID.
+
+The collection ID is used to identify the correct attestation. The attestation data gets returned after a single match was found, which can now be processed by the Generic Issuer System to create the VC.
+
 ### Request
 
 ```json
 {
-"authentic_source": "",
-"document_type": "",
-"document_id": ""
+    "authentic_source": "",
+    "collect_id":"",
+    "identity": {
+        "version": "",
+        "family_name": "",
+        "given_name":"",
+        "birth_date":"",
+        "uid": "",
+        "family_name_birth":"",
+        "given_name_birth":"",
+        "birth_place":"",
+        "gender":"",
+        "age_over_18":"",
+        "age_over_NN":"",
+        "age_in_years":"",
+        "age_birth_year":"",
+        "birth_country":"",
+        "birth_state":"",
+        "birth_city":"",
+        "resident_address":"",
+        "resident_country":"",
+        "resident_state":"",
+        "resident_city":"",
+        "resident_postal_code":"",
+        "resident_street":"",
+        "resident_house_number":"",
+        "nationality":""
+    },
 }
 ```
 
@@ -383,7 +415,7 @@ Input consists of `authentic_source_id` and `identity` object with the informati
         "birth_date":"",
         "uid": "",
         "family_name_birth":"",
-        "given_name_birth":"", 
+        "given_name_birth":"",
         "birth_place":"",
         "gender":"",
         "age_over_18":"",
@@ -397,7 +429,7 @@ Input consists of `authentic_source_id` and `identity` object with the informati
         "resident_country":"",
         "resident_state":"",
         "resident_city":"",
-        "resident_postal_code":"", 
+        "resident_postal_code":"",
         "resident_street":"",
         "resident_house_number":"",
         "nationality":""

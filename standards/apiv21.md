@@ -81,8 +81,8 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
         "nationality":""
     },
     "attestation": {
-        "attestation_version": 0,
-        "attestation_type": "",
+        "version": 0,
+        "type": "",
         "description_short": "",
         "description_long": "",
         "valid_from": "",
@@ -195,7 +195,7 @@ The `collect_id` is used to identify the correct attestation. The attestation da
     "authentic_source": "",
     "collect_id":"",
     "identity": {
-        "identity_version": "",
+        "version": "",
         "family_name": "",
         "given_name":"",
         "birth_date":"",
@@ -461,7 +461,7 @@ http OK 200, else 400 and error body
 
 |type| Attribute | required | description |
 |-|-|-|-|
-| integer | version                 | true  | Version of this identity    |
+| integer | version                 | true  | must be > 0 | |
 | string | family_name              | true  | As in current PID namespace |
 | string | given_name               | true  | As in current PID namespace |
 | string | birth_date               | true  | As in current PID namespace |
@@ -494,8 +494,8 @@ http OK 200, else 400 and error body
 | string | type                 | true | For internal display interpretation/differentiation |
 | string | description_short    | true | To display in the portal |
 | string | description_long     | true | To display in the portal |
-| string | valid_from           | true | iso8601 UTC |
-| string | valid_to             | true | iso8601 UTC |
+| string | valid_from           | true | iso8601 |
+| string | valid_to             | true | iso8601 |
 
 ### document_data{}
 

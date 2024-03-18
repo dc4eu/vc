@@ -62,7 +62,6 @@ func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any,
 	return reply, nil
 }
 
-
 func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointDeleteDocument")
 	defer span.End()
@@ -101,30 +100,12 @@ func (s *Service) endpointIDMapping(ctx context.Context, c *gin.Context) (any, e
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointIDMapping")
 	defer span.End()
 
-	request := &model.MetaData{}
+	request := &apiv1.IDMappingRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	reply, err := s.apiv1.IDMapping(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
-// TODO(masv): Remove this endpoint
-func (s *Service) endpointListMetadata(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointListMetadata")
-	defer span.End()
-
-	request := &apiv1.ListMetadataRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.ListMetadata(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

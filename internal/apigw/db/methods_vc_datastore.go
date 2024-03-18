@@ -37,24 +37,30 @@ func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.Upload) error {
 	return err
 }
 
+// IDMappingQuery is the query to get authentic source person id
+type IDMappingQuery struct {
+	AuthenticSource string
+	Identity        *model.Identity
+}
+
 // IDMapping return authentic source person id if any
-func (c *VCDatastoreColl) IDMapping(ctx context.Context, query *model.MetaData) (string, error) {
+func (c *VCDatastoreColl) IDMapping(ctx context.Context, query *IDMappingQuery) (string, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
-		"meta.collect_id":       bson.M{"$eq": query.CollectID},
-		"meta.document_type":    bson.M{"$eq": query.DocumentType},
-		"meta.document_id":      bson.M{"$eq": query.DocumentID},
-		"meta.uid":              bson.M{"$eq": query.UID},
-		"meta.date_of_birth":    bson.M{"$eq": query.DateOfBirth},
-		"meta.last_name":        bson.M{"$eq": query.LastName},
-		"meta.first_name":       bson.M{"$eq": query.FirstName},
+		"identity.version":      bson.M{"$eq": query.Identity.Version},
+		"identity.family_name":  bson.M{"$eq": query.Identity.FamilyName},
+		"identity.given_name":   bson.M{"$eq": query.Identity.GivenName},
+		"identity.uid":          bson.M{"$eq": query.Identity.UID},
 	}
-	opts := options.FindOne().SetProjection(bson.M{"meta.authentic_source_person_id": bson.M{"$eq": 1}})
-	var res string
-	if err := c.Coll.FindOne(ctx, filter, opts).Decode(res); err != nil {
+	opts := options.FindOne().SetProjection(bson.M{
+		"meta.authentic_source_person_id": 1,
+	})
+	res := &model.Upload{}
+	if err := c.Coll.FindOne(ctx, filter, opts).Decode(&res); err != nil {
 		return "", err
 	}
-	return res, nil
+
+	return res.Meta.AuthenticSourcePersonID, nil
 }
 
 // GetDocument return matching document if any, or error
@@ -78,7 +84,7 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, attr *model.MetaData)
 }
 
 // GetQR return matching document and return its QR code, else error
-func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*model.Upload, error) {
+func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*model.QR, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": attr.AuthenticSource},
 		"meta.document_type":    bson.M{"$eq": attr.DocumentType},
@@ -92,7 +98,7 @@ func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*mod
 	if err := c.Coll.FindOne(ctx, filter, opt).Decode(res); err != nil {
 		return nil, err
 	}
-	return res, nil
+	return res.QR, nil
 }
 
 // GetDocumentAttestationQuery is the query to get document attestation
@@ -124,33 +130,6 @@ func (c *VCDatastoreColl) GetDocumentAttestation(ctx context.Context, query *Get
 
 	res := &model.Upload{}
 	if err := c.Coll.FindOne(ctx, filter, opt).Decode(res); err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-// ListMetadata returns a list of information to be used for geting documents
-func (c *VCDatastoreColl) ListMetadata(ctx context.Context, query *model.MetaData) ([]model.MetaData, error) {
-	filter := bson.M{
-		"meta.authentic_source":           bson.M{"$eq": query.AuthenticSource},
-		"meta.authentic_source_person_id": bson.M{"$eq": query.AuthenticSourcePersonID},
-	}
-	opt := options.Find().SetProjection(
-		bson.M{
-			"meta.document_type": 1,
-			"meta.document_id":   1,
-			"meta.revocation_id": 1,
-			"meta.collection_id": 1,
-		},
-	)
-
-	cursor, err := c.Coll.Find(ctx, filter, opt)
-	if err != nil {
-		return nil, err
-	}
-
-	res := []model.MetaData{}
-	if err := cursor.All(ctx, &res); err != nil {
 		return nil, err
 	}
 	return res, nil

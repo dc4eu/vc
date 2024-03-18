@@ -61,7 +61,7 @@ type MetaData struct {
 
 	// required: true
 	// example: 1
-	DocumentVersion int `json:"document_version,omitempty" bson:"document_data_version" validate:"required,min=1"`
+	DocumentVersion int `json:"document_version,omitempty" bson:"document_version" validate:"required,min=1"`
 
 	// required: true
 	// example: PDA1
@@ -118,7 +118,7 @@ type MetaData struct {
 type Identity struct {
 	// required: true
 	// example: 1.0.0
-	Version string `json:"version,omitempty" bson:"identity_data_version" validate:"required"`
+	Version string `json:"version,omitempty" bson:"version" validate:"required"`
 
 	// required: true
 	// example: Svensson
@@ -216,7 +216,7 @@ type Identity struct {
 
 	// required: false
 	// example: swedish
-	Nationality string `json:"nationality,omitempty" bson:"national"`
+	Nationality string `json:"nationality,omitempty" bson:"nationality"`
 }
 
 // Attestation is a collection of fields representing an attestation
@@ -225,16 +225,16 @@ type Attestation struct {
 	// TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant
 	// required: true
 	// example: 1.0.0
-	Version int `json:"version,omitempty" bson:"attestation_version" validate:"required"`
+	Version int `json:"version,omitempty" bson:"version" validate:"required"`
 
 	// required: true
 	// example: secure
-	Type string `json:"type,omitempty" bson:"attestation_type" validate:"required"`
+	Type string `json:"type,omitempty" bson:"type" validate:"required"`
 
 	// TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended
 	// required: true
 	// example: EHIC
-	DescriptionShort string `json:"description_short,omitempty" bson:"short_text" validate:"required"`
+	DescriptionShort string `json:"description_short,omitempty" bson:"description_short" validate:"required"`
 
 	// TODO(masv): change TextLong to DescriptionLong
 	// required: true

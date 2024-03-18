@@ -70,7 +70,7 @@ type NotificationReply struct {
 //	@Param			req	body		NotificationRequest			true	" "
 //	@Router			/notification [post]
 func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
-	res, err := c.db.VCDatastoreColl.GetQR(ctx, &model.MetaData{
+	qrCode, err := c.db.VCDatastoreColl.GetQR(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,
 		DocumentID:      req.DocumentID,
@@ -79,12 +79,16 @@ func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*N
 		return nil, err
 	}
 
-	c.log.Info("Got QR", "res", res)
-
 	reply := &NotificationReply{
-		Data: res.QR,
+		Data: qrCode,
 	}
 	return reply, nil
+}
+
+// IDMappingRequest is the request for IDMapping
+type IDMappingRequest struct {
+	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	Identity        *model.Identity `json:"identity" validate:"required"`
 }
 
 // IDMappingReply is the reply for a IDMapping
@@ -106,8 +110,14 @@ type IDMappingReply struct {
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		model.MetaData			true	" "
 //	@Router			/id_mapping [post]
-func (c *Client) IDMapping(ctx context.Context, reg *model.MetaData) (*IDMappingReply, error) {
-	mapping, err := c.db.VCDatastoreColl.IDMapping(ctx, reg)
+func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappingReply, error) {
+	if err := helpers.Check(ctx, c.cfg, reg, c.log); err != nil {
+		return nil, err
+	}
+	authenticSourcePersonID, err := c.db.VCDatastoreColl.IDMapping(ctx, &db.IDMappingQuery{
+		AuthenticSource: reg.AuthenticSource,
+		Identity:        reg.Identity,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -115,50 +125,11 @@ func (c *Client) IDMapping(ctx context.Context, reg *model.MetaData) (*IDMapping
 		Data: struct {
 			AuthenticSourcePersonID string `json:"authentic_source_person_id"`
 		}{
-			AuthenticSourcePersonID: mapping,
+			AuthenticSourcePersonID: authenticSourcePersonID,
 		},
 	}
 	return reply, nil
 
-}
-
-// ListMetadataRequest is the request for ListMetadata
-type ListMetadataRequest struct {
-	AuthenticSource         string `json:"authentic_source"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
-}
-
-// ListMetadataReply is the reply for a document query
-type ListMetadataReply struct {
-	Data []model.MetaData `json:"data"`
-}
-
-// ListMetadata return a list of metadata for a person
-//
-//	@Summary		ListMetadata
-//	@ID				list-metadata
-//	@Description	List metadata endpoint
-//	@Tags			dc4eu
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	ListMetadataReply		"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		ListMetadataRequest		true	" "
-//	@Router			/metadata [post]
-func (c *Client) ListMetadata(ctx context.Context, req *ListMetadataRequest) (*ListMetadataReply, error) {
-	query := &model.MetaData{
-		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-	}
-	docs, err := c.db.VCDatastoreColl.ListMetadata(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	reply := &ListMetadataReply{
-		Data: docs,
-	}
-
-	return reply, nil
 }
 
 // GetDocumentRequest is the request for GetDocument

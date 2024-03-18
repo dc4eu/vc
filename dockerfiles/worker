@@ -11,6 +11,7 @@ RUN make proto
 
 RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_$SERVICE_NAME -ldflags \
     "-X vc/pkg/model.BuildVariableGitCommit=$(git rev-list -1 HEAD) \
+    -X vc/pkg/model.BuildVariableGitBranch=$(git rev-parse --abbrev-ref HEAD) \
     -X vc/pkg/model.BuildVariableTimestamp=$(date +'%F:T%TZ') \
     -X vc/pkg/model.BuildVariableGoVersion=$(go version|awk '{print $3}') \
     -X vc/pkg/model.BuildVariableGoArch=$(go version|awk '{print $4}') \

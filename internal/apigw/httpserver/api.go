@@ -9,12 +9,12 @@ import (
 
 // Apiv1 interface
 type Apiv1 interface {
-	Upload(ctx context.Context, req *model.Upload) (*apiv1.UploadReply, error)
+	Upload(ctx context.Context, req *model.Upload) error
 	Notification(ctx context.Context, req *apiv1.NotificationRequest) (*apiv1.NotificationReply, error)
 	IDMapping(ctx context.Context, reg *model.MetaData) (*apiv1.IDMappingReply, error)
 	GetDocument(ctx context.Context, req *apiv1.GetDocumentRequest) (*apiv1.GetDocumentReply, error)
 	DeleteDocument(ctx context.Context, req *apiv1.DeleteDocumentRequest) error
-	GetDocumentByCollectCode(ctx context.Context, req *model.MetaData) (*apiv1.GetDocumentReply, error)
+	GetDocumentAttestation(ctx context.Context, req *apiv1.GetDocumentAttestationRequest) (*apiv1.GetDocumentAttestationReply, error)
 	ListMetadata(ctx context.Context, req *apiv1.ListMetadataRequest) (*apiv1.ListMetadataReply, error)
 	Portal(ctx context.Context, req *apiv1.PortalRequest) (*apiv1.PortalReply, error)
 

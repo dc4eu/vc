@@ -11,13 +11,13 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-// PDFColl is the collection of documents
-type PDFColl struct {
+// EduSealDocColl is the collection of documents
+type EduSealDocColl struct {
 	service *Service
 	coll    *mongo.Collection
 }
 
-func (c *PDFColl) createIndex(ctx context.Context) error {
+func (c *EduSealDocColl) createIndex(ctx context.Context) error {
 	ctx, span := c.service.tp.Start(ctx, "db:doc:createIndex")
 	defer span.End()
 
@@ -34,8 +34,8 @@ func (c *PDFColl) createIndex(ctx context.Context) error {
 }
 
 // Save saves one document
-func (c *PDFColl) Save(ctx context.Context, doc *types.Document) error {
-	ctx, span := c.service.tp.Start(ctx, "db:doc:save")
+func (c *EduSealDocColl) Save(ctx context.Context, doc *types.Document) error {
+	ctx, span := c.service.tp.Start(ctx, "db:eduseal:doc:save")
 	defer span.End()
 
 	_, err := c.coll.InsertOne(ctx, doc)
@@ -48,8 +48,8 @@ func (c *PDFColl) Save(ctx context.Context, doc *types.Document) error {
 }
 
 // Revoke revokes a document
-func (c *PDFColl) Revoke(ctx context.Context, transactionID string) error {
-	ctx, span := c.service.tp.Start(ctx, "db:doc:revoke")
+func (c *EduSealDocColl) Revoke(ctx context.Context, transactionID string) error {
+	ctx, span := c.service.tp.Start(ctx, "db:eduseal:doc:revoke")
 	defer span.End()
 
 	filter := bson.M{
@@ -69,8 +69,8 @@ func (c *PDFColl) Revoke(ctx context.Context, transactionID string) error {
 }
 
 // IsRevoked checks if a document is revoked
-func (c *PDFColl) IsRevoked(ctx context.Context, transactionID string) bool {
-	ctx, span := c.service.tp.Start(ctx, "db:doc:isRevoked")
+func (c *EduSealDocColl) IsRevoked(ctx context.Context, transactionID string) bool {
+	ctx, span := c.service.tp.Start(ctx, "db:eduseal:doc:isRevoked")
 	defer span.End()
 
 	doc, err := c.Get(ctx, transactionID)
@@ -86,8 +86,8 @@ func (c *PDFColl) IsRevoked(ctx context.Context, transactionID string) bool {
 }
 
 // Get gets one document
-func (c *PDFColl) Get(ctx context.Context, transactionID string) (*types.Document, error) {
-	ctx, span := c.service.tp.Start(ctx, "db:doc:get")
+func (c *EduSealDocColl) Get(ctx context.Context, transactionID string) (*types.Document, error) {
+	ctx, span := c.service.tp.Start(ctx, "db:eduseal:doc:get")
 	defer span.End()
 
 	reply := &types.Document{}

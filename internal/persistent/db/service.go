@@ -13,7 +13,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.opentelemetry.io/otel/codes"
 )
 
 // Service is the database service
@@ -24,7 +23,8 @@ type Service struct {
 	tp         *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	DocumentsColl PDFColl
+	EduSealDocumentColl *EduSealDocColl
+	VCDatastoreColl     *VCDatastoreColl
 }
 
 // New creates a new database service
@@ -36,15 +36,26 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 		probeStore: &apiv1_status.StatusProbeStore{},
 	}
 
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+
 	if err := service.connect(ctx); err != nil {
 		return nil, err
 	}
 
-	service.DocumentsColl = PDFColl{
+	service.EduSealDocumentColl = &EduSealDocColl{
 		service: service,
-		coll:    service.dbClient.Database("issuer").Collection("documents"),
+		coll:    service.dbClient.Database("eduseal").Collection("documents"),
 	}
-	if err := service.DocumentsColl.createIndex(ctx); err != nil {
+	if err := service.EduSealDocumentColl.createIndex(ctx); err != nil {
+		return nil, err
+	}
+
+	service.VCDatastoreColl = &VCDatastoreColl{
+		service: service,
+		coll:    service.dbClient.Database("vc").Collection("datastore"),
+	}
+	if err := service.VCDatastoreColl.createIndex(ctx); err != nil {
 		return nil, err
 	}
 
@@ -92,17 +103,22 @@ func (s *Service) connect(ctx context.Context) error {
 	ctx, span := s.tp.Start(ctx, "db:connect")
 	defer span.End()
 
-	credentialOption := options.Credential{
-		AuthSource: "<authenticationDb>",
-		Username:   "<username>",
-		Password:   "<password>",
-	}
+	//credentialOption := options.Credential{
+	//	AuthSource: "<authenticationDb>",
+	//	Username:   "<username>",
+	//	Password:   "<password>",
+	//}
 
-	clientOpts := options.Client().ApplyURI(s.cfg.Common.Mongo.URI).SetAuth(credentialOption)
+	//clientOpts := options.Client().ApplyURI(s.cfg.Common.Mongo.URI).SetAuth(credentialOption)
 
-	client, err := mongo.Connect(ctx, clientOpts)
+	//	client, err := mongo.Connect(ctx, clientOpts)
+	//	if err != nil {
+	//		span.SetStatus(codes.Error, err.Error())
+	//		return err
+	//	}
+
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
 	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	s.dbClient = client

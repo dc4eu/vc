@@ -2,6 +2,8 @@ package apiv1
 
 import (
 	"context"
+	"time"
+	"vc/internal/apigw/db"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 )
@@ -25,21 +27,22 @@ type UploadReply struct {
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		model.Upload			true	" "
 //	@Router			/upload [post]
-func (c *Client) Upload(ctx context.Context, req *model.Upload) (*UploadReply, error) {
+func (c *Client) Upload(ctx context.Context, req *model.Upload) error {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
+		return err
 	}
-	if err := c.db.DatastoreColl.Save(ctx, req); err != nil {
-		return nil, err
+
+	if err := req.QRGenerator(ctx, c.cfg.Common.QR.BaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size); err != nil {
+		return err
 	}
-	reply := &UploadReply{
-		Data: struct {
-			Status string `json:"status"`
-		}{
-			Status: "OK",
-		},
+
+	req.Meta.CreatedAt = time.Now().UTC()
+
+	_, err := c.simpleQueue.VCPersistentSave.Enqueue(ctx, req)
+	if err != nil {
+		return err
 	}
-	return reply, nil
+	return nil
 }
 
 // NotificationRequest is the request for Notification
@@ -67,7 +70,21 @@ type NotificationReply struct {
 //	@Param			req	body		NotificationRequest			true	" "
 //	@Router			/notification [post]
 func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
-	return nil, nil
+	res, err := c.db.VCDatastoreColl.GetQR(ctx, &model.MetaData{
+		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.DocumentType,
+		DocumentID:      req.DocumentID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	c.log.Info("Got QR", "res", res)
+
+	reply := &NotificationReply{
+		Data: res.QR,
+	}
+	return reply, nil
 }
 
 // IDMappingReply is the reply for a IDMapping
@@ -90,7 +107,7 @@ type IDMappingReply struct {
 //	@Param			req	body		model.MetaData			true	" "
 //	@Router			/id_mapping [post]
 func (c *Client) IDMapping(ctx context.Context, reg *model.MetaData) (*IDMappingReply, error) {
-	mapping, err := c.db.DatastoreColl.IDMapping(ctx, reg)
+	mapping, err := c.db.VCDatastoreColl.IDMapping(ctx, reg)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +150,7 @@ func (c *Client) ListMetadata(ctx context.Context, req *ListMetadataRequest) (*L
 		AuthenticSource:         req.AuthenticSource,
 		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
 	}
-	docs, err := c.db.DatastoreColl.ListMetadata(ctx, query)
+	docs, err := c.db.VCDatastoreColl.ListMetadata(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +191,7 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 		DocumentType:    req.DocumentType,
 		AuthenticSource: req.AuthenticSource,
 	}
-	doc, err := c.db.DatastoreColl.GetDocument(ctx, query)
+	doc, err := c.db.VCDatastoreColl.GetDocument(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -191,10 +208,6 @@ type DeleteDocumentRequest struct {
 	AuthenticSource string `json:"authentic_source" required:"true"`
 
 	// required: true
-	// example: PDA1
-	DocumentType string `json:"document_type" required:"true"`
-
-	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
 	DocumentID string `json:"document_id" required:"true"`
 }
@@ -207,15 +220,35 @@ type DeleteDocumentRequest struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	DeleteDocumentReply		"Success"
+//	@Success		200				"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		DeleteDocumentRequest		true	" "
 //	@Router			/document [delete]
 func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return err
+	}
+
+	_, err := c.simpleQueue.VCPersistentDelete.Enqueue(ctx, req)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// GetDocumentByCollectCode return a specific document by collect code
+// GetDocumentAttestationRequest is the request for GetDocumentAttestation
+type GetDocumentAttestationRequest struct {
+	Identity *model.Identity `json:"identity"`
+	Meta     *model.MetaData `json:"meta"`
+}
+
+// GetDocumentAttestationReply is the reply for a generic document
+type GetDocumentAttestationReply struct {
+	Data *model.Upload `json:"data"`
+}
+
+// GetDocumentAttestation return a specific document ??
 //
 //	@Summary		GetDocumentByCollectCode
 //	@ID				get-document-collect-code
@@ -227,13 +260,22 @@ func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest)
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		model.MetaData			true	" "
 //	@Router			/document/collection_code [post]
-func (c *Client) GetDocumentByCollectCode(ctx context.Context, req *model.MetaData) (*GetDocumentReply, error) {
-	doc, err := c.db.DatastoreColl.GetDocumentByCollectCode(ctx, req)
+func (c *Client) GetDocumentAttestation(ctx context.Context, req *GetDocumentAttestationRequest) (*GetDocumentAttestationReply, error) {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return nil, err
+	}
+
+	query := &db.GetDocumentAttestationQuery{
+		Identity: req.Identity,
+		Meta:     req.Meta,
+	}
+
+	doc, err := c.db.VCDatastoreColl.GetDocumentAttestation(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	reply := &GetDocumentReply{
+	reply := &GetDocumentAttestationReply{
 		Data: doc,
 	}
 	return reply, nil
@@ -241,13 +283,15 @@ func (c *Client) GetDocumentByCollectCode(ctx context.Context, req *model.MetaDa
 
 // PortalRequest is the request for PortalData
 type PortalRequest struct {
-	AuthenticSource         string `json:"authentic_source"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
+	AuthenticSource         string `json:"authentic_source" validate:"required"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
+	ValidFrom               string `json:"validity_from"`
+	ValidTo                 string `json:"validity_to"`
 }
 
 // PortalReply is the reply for PortalData
 type PortalReply struct {
-	Data []*model.MetaData `json:"data"`
+	Data []model.Upload `json:"data"`
 }
 
 // Portal return a list of metadata for a specific person
@@ -263,11 +307,17 @@ type PortalReply struct {
 //	@Param			req	body		PortalRequest			true	" "
 //	@Router			/portal [post]
 func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*PortalReply, error) {
-	query := &model.MetaData{
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return nil, err
+	}
+
+	query := &db.PortalQuery{
 		AuthenticSource:         req.AuthenticSource,
 		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+		ValidTo:                 req.ValidTo,
+		ValidFrom:               req.ValidFrom,
 	}
-	portalData, err := c.db.DatastoreColl.PortalData(ctx, query)
+	portalData, err := c.db.VCDatastoreColl.PortalData(ctx, query)
 	if err != nil {
 		return nil, err
 	}

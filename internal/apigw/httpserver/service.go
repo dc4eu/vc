@@ -41,7 +41,9 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 		logger: logger,
 		apiv1:  api,
 		tp:     tp,
-		server: &http.Server{},
+		server: &http.Server{
+			ReadHeaderTimeout: 2 * time.Second,
+		},
 	}
 
 	switch s.config.Common.Production {
@@ -70,7 +72,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	s.server.ReadTimeout = 5 * time.Second
 	s.server.WriteTimeout = 30 * time.Second
 	s.server.IdleTimeout = 90 * time.Second
-	s.server.ReadHeaderTimeout = 2 * time.Second
 
 	// Middlewares
 	s.gin.Use(s.middlewareTraceID(ctx))
@@ -93,19 +94,19 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/upload", s.endpointUpload)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/notification", s.endpointNotification)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument) // TODO(masv): use DELETE /document instead of /delete_document
+	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document", s.endpointGetDocument)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/collect_code", s.endpointGetDocumentByCollectCode)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id_mapping", s.endpointIDMapping)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/attestation", s.endpointGetDocumentAttestation)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id/mapping", s.endpointIDMapping)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/metadata", s.endpointListMetadata)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/portal", s.endpointPortal)
 
-	rgLadokPDFv1 := rgAPIv1.Group("/ladok/pdf", s.middlewareClientCertAuth(ctx))
-	rgLadokPDFv1.Use(s.middlewareAuthLog(ctx))
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/sign", s.endpointSignPDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/validate", s.endpointValidatePDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodGet, "/:transaction_id", s.endpointGetSignedPDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPut, "/revoke/:transaction_id", s.endpointPDFRevoke)
+	rgEduSealV1 := rgAPIv1.Group("/ladok/pdf", s.middlewareClientCertAuth(ctx))
+	rgEduSealV1.Use(s.middlewareAuthLog(ctx))
+	s.regEndpoint(ctx, rgEduSealV1, http.MethodPost, "/sign", s.endpointSignPDF)
+	s.regEndpoint(ctx, rgEduSealV1, http.MethodPost, "/validate", s.endpointValidatePDF)
+	s.regEndpoint(ctx, rgEduSealV1, http.MethodGet, "/:transaction_id", s.endpointGetSignedPDF)
+	s.regEndpoint(ctx, rgEduSealV1, http.MethodPut, "/revoke/:transaction_id", s.endpointPDFRevoke)
 
 	rgSATOSAV1 := rgAPIv1.Group("/satosa")
 	s.regEndpoint(ctx, rgSATOSAV1, http.MethodGet, "/credential", s.endpointSatosaCredential)

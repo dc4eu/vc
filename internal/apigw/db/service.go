@@ -35,8 +35,8 @@ type Service struct {
 	tp         *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	PDFSigningColl *PDFSigningColl
-	DatastoreColl  *DatastoreColl
+	EduSealSigningColl *EduSealSigningColl
+	VCDatastoreColl    *VCDatastoreColl
 }
 
 // New creates a new database service
@@ -55,19 +55,19 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 		return nil, err
 	}
 
-	service.PDFSigningColl = &PDFSigningColl{
+	service.EduSealSigningColl = &EduSealSigningColl{
 		service: service,
-		coll:    service.dbClient.Database("apigw").Collection("generic"),
+		coll:    service.dbClient.Database("eduseal").Collection("documents"),
 	}
-	if err := service.PDFSigningColl.createIndex(ctx); err != nil {
+	if err := service.EduSealSigningColl.createIndex(ctx); err != nil {
 		return nil, err
 	}
 
-	service.DatastoreColl = &DatastoreColl{
+	service.VCDatastoreColl = &VCDatastoreColl{
 		Service: service,
-		Coll:    service.dbClient.Database("apigw").Collection("datastore"),
+		Coll:    service.dbClient.Database("vc").Collection("datastore"),
 	}
-	if err := service.DatastoreColl.createIndex(ctx); err != nil {
+	if err := service.VCDatastoreColl.createIndex(ctx); err != nil {
 		return nil, err
 	}
 

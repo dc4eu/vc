@@ -12,104 +12,147 @@ import (
 )
 
 func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointUpload")
+	defer span.End()
+
 	request := &model.Upload{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
-		s.logger.Info("endpointGenericUpload", "error", err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.Upload(ctx, request)
+	err := s.apiv1.Upload(ctx, request)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	return reply, nil
+	return nil, nil
 }
 
 func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointNotification")
+	defer span.End()
+
 	request := &apiv1.NotificationRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
-		s.logger.Info("endpointGenericNotification", "error", err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	reply, err := s.apiv1.Notification(ctx, request)
 	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointIDMapping(ctx context.Context, c *gin.Context) (any, error) {
-	request := &model.MetaData{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
-		s.logger.Info("endpointGenericUpload", "error", err)
-		return nil, err
-	}
-	reply, err := s.apiv1.IDMapping(ctx, request)
-	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return reply, nil
 }
 
 func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointGetDocument")
+	defer span.End()
+
 	request := &apiv1.GetDocumentRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	reply, err := s.apiv1.GetDocument(ctx, request)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return reply, nil
 }
 
+
 func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointDeleteDocument")
+	defer span.End()
+
 	request := &apiv1.DeleteDocumentRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	err := s.apiv1.DeleteDocument(ctx, request)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return nil, nil
 }
 
-func (s *Service) endpointGetDocumentByCollectCode(ctx context.Context, c *gin.Context) (any, error) {
-	request := &model.MetaData{}
+func (s *Service) endpointGetDocumentAttestation(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointGetDocumentAttestation")
+	defer span.End()
+
+	request := &apiv1.GetDocumentAttestationRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.GetDocumentByCollectCode(ctx, request)
+	reply, err := s.apiv1.GetDocumentAttestation(ctx, request)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return reply, nil
 }
 
-func (s *Service) endpointListMetadata(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.ListMetadataRequest{}
+func (s *Service) endpointIDMapping(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointIDMapping")
+	defer span.End()
+
+	request := &model.MetaData{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.ListMetadata(ctx, request)
+	reply, err := s.apiv1.IDMapping(ctx, request)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return reply, nil
 }
+
+// TODO(masv): Remove this endpoint
+func (s *Service) endpointListMetadata(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointListMetadata")
+	defer span.End()
+
+	request := &apiv1.ListMetadataRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.ListMetadata(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointPortal")
+	defer span.End()
+
 	request := &apiv1.PortalRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	reply, err := s.apiv1.Portal(ctx, request)
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return reply, nil
 }
 
 func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointHealth")
+	defer span.End()
+
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.Health(ctx, request)
 	if err != nil {
@@ -118,6 +161,7 @@ func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, erro
 	return reply, nil
 }
 
+// endpointSignPDF signs a PDF EduSeal
 func (s *Service) endpointSignPDF(ctx context.Context, c *gin.Context) (interface{}, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointSignPDF")
 	defer span.End()
@@ -135,6 +179,7 @@ func (s *Service) endpointSignPDF(ctx context.Context, c *gin.Context) (interfac
 	return reply, nil
 }
 
+// endpointValidatePDF validates a signed PDF EduSeal
 func (s *Service) endpointValidatePDF(ctx context.Context, c *gin.Context) (interface{}, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointValidatePDF")
 	defer span.End()
@@ -152,6 +197,7 @@ func (s *Service) endpointValidatePDF(ctx context.Context, c *gin.Context) (inte
 	return reply, nil
 }
 
+// endpointGetSignedPDF returns a signed PDF EduSeal
 func (s *Service) endpointGetSignedPDF(ctx context.Context, c *gin.Context) (interface{}, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointGetSignedPDF")
 	defer span.End()
@@ -169,6 +215,7 @@ func (s *Service) endpointGetSignedPDF(ctx context.Context, c *gin.Context) (int
 	return reply, nil
 }
 
+// endpointPDFRevoke revokes a signed PDF EduSeal
 func (s *Service) endpointPDFRevoke(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointPDFRevoke")
 	defer span.End()
@@ -179,40 +226,6 @@ func (s *Service) endpointPDFRevoke(ctx context.Context, c *gin.Context) (any, e
 		return nil, err
 	}
 	reply, err := s.apiv1.PDFRevoke(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointGenericGet(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointGet")
-	defer span.End()
-
-	request := &apiv1.GetRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.Get(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointGenericRevoke(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointRevoke")
-	defer span.End()
-
-	request := &apiv1.RevokeRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.Revoke(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

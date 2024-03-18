@@ -1,17 +1,58 @@
 package model
 
+import (
+	"context"
+	"encoding/base64"
+	"net/url"
+	"time"
+
+	"github.com/skip2/go-qrcode"
+)
+
 // Upload is a generic type for upload
 type Upload struct {
 	Meta         *MetaData    `json:"meta" bson:"meta" validate:"required"`
-	Identity     *Identity    `json:"identity,omitempty" bson:"identity"`
-	Attestation  *Attestation `json:"attestation,omitempty" bson:"attestation"`
-	DocumentData any          `json:"document_data" bson:"document_data"`
+	Identity     *Identity    `json:"identity,omitempty" bson:"identity" validate:"required"`
+	Attestation  *Attestation `json:"attestation,omitempty" bson:"attestation" validate:"required"`
+	DocumentData any          `json:"document_data" bson:"document_data" validate:"required"`
+	QR           *QR          `json:"qr" bson:"qr"`
+}
+
+// QRGenerator generates a QR code
+func (u *Upload) QRGenerator(ctx context.Context, baseURL string, recoveryLevel, size int) error {
+	deepLink, err := url.Parse(baseURL)
+	if err != nil {
+		return err
+	}
+
+	q := deepLink.Query()
+
+	q.Add("member_state", u.Meta.MemberState)
+	q.Add("document_type", u.Meta.DocumentType)
+	q.Add("authentic_source", u.Meta.AuthenticSource)
+	q.Add("document_id", u.Meta.DocumentID)
+
+	deepLink.RawQuery = q.Encode()
+
+	qrPNG, err := qrcode.Encode(deepLink.String(), qrcode.RecoveryLevel(recoveryLevel), size)
+	if err != nil {
+		return err
+	}
+
+	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
+
+	u.QR = &QR{
+		DeepLink:      deepLink.String(),
+		QRBase64Image: qrBase64,
+	}
+
+	return nil
 }
 
 // MetaData is a generic type for metadata
 type MetaData struct {
 	// required: true
-	// example: Sunet
+	// example: SUNET
 	AuthenticSource string `json:"authentic_source,omitempty" bson:"authentic_source" validate:"required"`
 
 	// required: true
@@ -19,8 +60,8 @@ type MetaData struct {
 	AuthenticSourcePersonID string `json:"authentic_source_person_id,omitempty" bson:"authentic_source_person_id" validate:"required"`
 
 	// required: true
-	// example: 1.0.0
-	DocumentDataVersion string `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required"`
+	// example: 1
+	DocumentVersion int `json:"document_version,omitempty" bson:"document_data_version" validate:"required,min=1"`
 
 	// required: true
 	// example: PDA1
@@ -48,18 +89,36 @@ type MetaData struct {
 
 	// required: false
 	// example: 8dbd2680-c03f-11ee-a21b-034aafe41222
-	RevocationID string `json:"revocation_id,omitempty" bson:"revocation_id "`
+	RevocationID string `json:"revocation_id,omitempty" bson:"revocation_id" validate:"required"`
 
 	// required: false
 	// example: 98fe67fc-c03f-11ee-bbee-4345224d414f
-	CollectID string `json:"collect_id,omitempty" bson:"collect_id"`
+	CollectID string `json:"collect_id,omitempty" bson:"collect_id" validate:"required"`
+
+	// required: true
+	// example: "DE"
+	MemberState string `json:"member_state,omitempty" bson:"member_state" validate:"required,iso3166_1_alpha2"`
+
+	// TODO(masv): ISO8601?
+	// required: true
+	// example: 2024-01-01
+	ValidFrom string `json:"valid_from,omitempty" bson:"valid_from" validate:"required"`
+
+	// TODO(masv): ISO8601?
+	// required: true
+	// example: 2024-12-31
+	ValidTo string `json:"valid_to,omitempty" bson:"valid_to" validate:"required"`
+
+	// required: false
+	// example: 2024-03-15T10:00:00Z+01:00
+	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at"`
 }
 
 // Identity identifies a person
 type Identity struct {
 	// required: true
 	// example: 1.0.0
-	IdentityDataVersion string `json:"identity_data_version,omitempty" bson:"identity_data_version" validate:"required"`
+	Version string `json:"version,omitempty" bson:"identity_data_version" validate:"required"`
 
 	// required: true
 	// example: Svensson
@@ -73,10 +132,9 @@ type Identity struct {
 	// example: 1970-01-01
 	BirthDate string `json:"birth_date,omitempty" bson:"birth_date" validate:"required"`
 
-	// TODO(masv): change to UUID from "unique_id"
 	// required: true
 	// example: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e
-	UUID string `json:"uuid,omitempty" bson:"uuid" validate:"required"`
+	UID string `json:"uid,omitempty" bson:"uid" validate:"required"`
 
 	// required: false
 	// example: Karlsson
@@ -90,7 +148,6 @@ type Identity struct {
 	// example: Stockholm
 	BirthPlace string `json:"birth_place,omitempty" bson:"birth_place"`
 
-	// TODO(masv): male,female,other,unknown? should this be a string?
 	// required: false
 	// example: male
 	Gender string `json:"gender,omitempty" bson:"gender"`
@@ -168,35 +225,25 @@ type Attestation struct {
 	// TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant
 	// required: true
 	// example: 1.0.0
-	AttestationVersion int `json:"attestation_version,omitempty" bson:"attestation_version" validate:"required"`
+	Version int `json:"version,omitempty" bson:"attestation_version" validate:"required"`
 
 	// required: true
 	// example: secure
-	AttestationType string `json:"attestation_type,omitempty" bson:"attestation_type" validate:"required"`
+	Type string `json:"type,omitempty" bson:"attestation_type" validate:"required"`
 
 	// TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended
 	// required: true
 	// example: EHIC
-	ShortText string `json:"short_text,omitempty" bson:"short_text" validate:"required"`
+	DescriptionShort string `json:"description_short,omitempty" bson:"short_text" validate:"required"`
 
 	// TODO(masv): change TextLong to DescriptionLong
 	// required: true
 	// example: European Health Insurance Card
 	DescriptionLong string `json:"description_long,omitempty" bson:"description_long" validate:"required"`
-
-	// TODO(masv): ISO8601?
-	// required: true
-	// example: 2024-01-01
-	ValidFrom string `json:"valid_from,omitempty" bson:"valid_from" validate:"required"`
-
-	// TODO(masv): ISO8601?
-	// required: true
-	// example: 2024-12-31
-	ValidTo string `json:"valid_to,omitempty" bson:"valid_to" validate:"required"`
 }
 
 // QR is a collection of fields representing a QR code
 type QR struct {
-	Base64Image string `json:"base64_image" bson:"base64_image" validate:"required"`
-	DeepLink    string `json:"deep_link" bson:"deep_link" validate:"required"`
+	QRBase64Image string `json:"base64_image" bson:"base64_image" validate:"required"`
+	DeepLink      string `json:"deep_link" bson:"deep_link" validate:"required"`
 }

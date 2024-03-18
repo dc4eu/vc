@@ -5,7 +5,7 @@
         "contact": {},
         "version": "0.1.0"
     },
-    "basePath": "/datastore/api/v1",
+    "basePath": "/api/v1",
     "paths": {
         "/document": {
             "post": {
@@ -225,7 +225,7 @@
                     "dc4eu"
                 ],
                 "summary": "Upload",
-                "operationId": "generic-upload",
+                "operationId": "upload",
                 "parameters": [
                     {
                         "description": " ",
@@ -364,38 +364,191 @@
                 }
             }
         },
+        "model.Attestation": {
+            "type": "object",
+            "required": [
+                "attestation_type",
+                "attestation_version",
+                "description_long",
+                "short_text",
+                "valid_from",
+                "valid_to"
+            ],
+            "properties": {
+                "attestation_type": {
+                    "description": "required: true\nexample: secure",
+                    "type": "string"
+                },
+                "attestation_version": {
+                    "description": "TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant\nrequired: true\nexample: 1.0.0",
+                    "type": "integer"
+                },
+                "description_long": {
+                    "description": "TODO(masv): change TextLong to DescriptionLong\nrequired: true\nexample: European Health Insurance Card",
+                    "type": "string"
+                },
+                "short_text": {
+                    "description": "TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended\nrequired: true\nexample: EHIC",
+                    "type": "string"
+                },
+                "valid_from": {
+                    "description": "TODO(masv): ISO8601?\nrequired: true\nexample: 2024-01-01",
+                    "type": "string"
+                },
+                "valid_to": {
+                    "description": "TODO(masv): ISO8601?\nrequired: true\nexample: 2024-12-31",
+                    "type": "string"
+                }
+            }
+        },
+        "model.Identity": {
+            "type": "object",
+            "required": [
+                "birth_date",
+                "family_name",
+                "given_name",
+                "identity_data_version",
+                "uuid"
+            ],
+            "properties": {
+                "age_birth_year": {
+                    "description": "TODO(masv): int instead of string?\nrequired: false\nexample: 1970",
+                    "type": "string"
+                },
+                "age_in_years": {
+                    "description": "TODO(masv): int instead of string?\nrequired: false\nexample: 19",
+                    "type": "string"
+                },
+                "age_over_18": {
+                    "description": "TODO(masv): int instead of string?\nrequired: false\nexample: 19",
+                    "type": "string"
+                },
+                "age_over_nn": {
+                    "description": "TODO(masv): int instead of string? How is supposed to work, query NN?\nrequired: false\nexample: 19",
+                    "type": "string"
+                },
+                "birth_city": {
+                    "description": "required: false\nexample: Stockholm",
+                    "type": "string"
+                },
+                "birth_country": {
+                    "description": "TODO(masv): full name or just country code?\nrequired: false\nexample: sweden",
+                    "type": "string"
+                },
+                "birth_date": {
+                    "description": "required: true\nexample: 1970-01-01",
+                    "type": "string"
+                },
+                "birth_place": {
+                    "description": "required: false\nexample: Stockholm",
+                    "type": "string"
+                },
+                "birth_state": {
+                    "description": "required: false\nexample: Stockholm",
+                    "type": "string"
+                },
+                "family_name": {
+                    "description": "required: true\nexample: Svensson",
+                    "type": "string"
+                },
+                "family_name_at_birth": {
+                    "description": "required: false\nexample: Karlsson",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "TODO(masv): male,female,other,unknown? should this be a string?\nrequired: false\nexample: male",
+                    "type": "string"
+                },
+                "given_name": {
+                    "description": "required: true\nexample: Magnus",
+                    "type": "string"
+                },
+                "given_name_at_birth": {
+                    "description": "required: false\nexample: Magnus",
+                    "type": "string"
+                },
+                "identity_data_version": {
+                    "description": "required: true\nexample: 1.0.0",
+                    "type": "string"
+                },
+                "nationality": {
+                    "description": "required: false\nexample: swedish",
+                    "type": "string"
+                },
+                "resident_address": {
+                    "description": "required: false\nexample: 221b baker street",
+                    "type": "string"
+                },
+                "resident_city": {
+                    "description": "required: false\nexample: london",
+                    "type": "string"
+                },
+                "resident_country": {
+                    "description": "required: false\nexample: england",
+                    "type": "string"
+                },
+                "resident_house_number": {
+                    "description": "required: false\nexample: 221b",
+                    "type": "string"
+                },
+                "resident_postal_code": {
+                    "description": "required: false\nexample: W1U 6SG",
+                    "type": "string"
+                },
+                "resident_state": {
+                    "description": "required: false\nexample: england",
+                    "type": "string"
+                },
+                "resident_street": {
+                    "description": "required: false\nexample: baker street",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "TODO(masv): change to UUID from \"unique_id\"\nrequired: true\nexample: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e",
+                    "type": "string"
+                }
+            }
+        },
         "model.MetaData": {
             "type": "object",
             "required": [
                 "authentic_source",
                 "authentic_source_person_id",
-                "collect_id",
                 "date_of_birth",
+                "document_data_version",
                 "document_id",
                 "document_type",
                 "first_name",
                 "last_name",
-                "qr",
-                "revocation_id",
                 "uid"
             ],
             "properties": {
                 "authentic_source": {
+                    "description": "required: true\nexample: Sunet",
                     "type": "string"
                 },
                 "authentic_source_person_id": {
+                    "description": "required: true\nexample: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a",
                     "type": "string"
                 },
                 "collect_id": {
+                    "description": "required: false\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
                     "type": "string"
                 },
                 "date_of_birth": {
+                    "description": "required: true\nexample: 1970-01-01",
+                    "type": "string"
+                },
+                "document_data_version": {
+                    "description": "required: true\nexample: 1.0.0",
                     "type": "string"
                 },
                 "document_id": {
+                    "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
                     "type": "string"
                 },
                 "document_type": {
+                    "description": "required: true\nexample: PDA1",
                     "type": "string",
                     "enum": [
                         "PDA1",
@@ -403,29 +556,19 @@
                     ]
                 },
                 "first_name": {
+                    "description": "required: true\nexample: John",
                     "type": "string"
                 },
                 "last_name": {
+                    "description": "required: true\nexample: Doe",
                     "type": "string"
                 },
-                "qr": {
-                    "$ref": "#/definitions/model.QR"
-                },
                 "revocation_id": {
+                    "description": "required: false\nexample: 8dbd2680-c03f-11ee-a21b-034aafe41222",
                     "type": "string"
                 },
                 "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.QR": {
-            "type": "object",
-            "required": [
-                "base64_image"
-            ],
-            "properties": {
-                "base64_image": {
+                    "description": "required: true\nexample: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e",
                     "type": "string"
                 }
             }
@@ -436,7 +579,13 @@
                 "meta"
             ],
             "properties": {
+                "attestation": {
+                    "$ref": "#/definitions/model.Attestation"
+                },
                 "document_data": {},
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
+                },
                 "meta": {
                     "$ref": "#/definitions/model.MetaData"
                 }

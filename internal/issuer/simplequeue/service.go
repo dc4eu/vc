@@ -45,22 +45,22 @@ func New(ctx context.Context, kv *kvclient.Client, tracer *trace.Tracer, cfg *mo
 		return nil, err
 	}
 
-	service.LadokSign, err = NewLadokSign(ctx, service, cfg.Common.Queues.SimpleQueue.LadokSign.Name, service.log.New("LadokSign"))
+	service.LadokSign, err = NewLadokSign(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealSign.Name, service.log.New("LadokSign"))
 	if err != nil {
 		return nil, err
 	}
 
-	service.LadokValidate, err = NewLadokValidate(ctx, service, cfg.Common.Queues.SimpleQueue.LadokValidate.Name, service.log.New("LadokValidate"))
+	service.LadokValidate, err = NewLadokValidate(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealValidate.Name, service.log.New("LadokValidate"))
 	if err != nil {
 		return nil, err
 	}
 
-	service.LadokDelSigned, err = NewLadokDelSigned(ctx, service, cfg.Common.Queues.SimpleQueue.LadokDelSigned.Name, service.log.New("LadokDelSigned"))
+	service.LadokDelSigned, err = NewLadokDelSigned(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealDelSigned.Name, service.log.New("LadokDelSigned"))
 	if err != nil {
 		return nil, err
 	}
 
-	service.LadokPersistentSave, err = NewLadokPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.LadokPersistentSave.Name, service.log.New("LadokPersistentSave"))
+	service.LadokPersistentSave, err = NewLadokPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealPersistentSave.Name, service.log.New("LadokPersistentSave"))
 	if err != nil {
 		return nil, err
 	}

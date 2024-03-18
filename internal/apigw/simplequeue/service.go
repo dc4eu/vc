@@ -29,6 +29,9 @@ type Service struct {
 	LadokValidate       queue
 	LadokDelSigned      queue
 	LadokPersistentSave queue
+	VCPersistentSave    queue
+	VCPersistentGet     queue
+	VCPersistentDelete  queue
 }
 
 // New creates a new queue service
@@ -45,22 +48,37 @@ func New(ctx context.Context, kv *kvclient.Client, tracer *trace.Tracer, cfg *mo
 		return nil, err
 	}
 
-	service.LadokSign, err = NewLadokSign(ctx, service, cfg.Common.Queues.SimpleQueue.LadokSign.Name, service.log.New("LadokSign"))
+	service.LadokSign, err = NewEduSealSign(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealSign.Name, service.log.New("LadokSign"))
 	if err != nil {
 		return nil, err
 	}
 
-	service.LadokValidate, err = NewLadokValidate(ctx, service, cfg.Common.Queues.SimpleQueue.LadokValidate.Name, service.log.New("LadokValidate"))
+	service.LadokValidate, err = NewEduSealValidate(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealValidate.Name, service.log.New("LadokValidate"))
 	if err != nil {
 		return nil, err
 	}
 
-	service.LadokDelSigned, err = NewLadokDelSigned(ctx, service, cfg.Common.Queues.SimpleQueue.LadokDelSigned.Name, service.log.New("LadokDelSigned"))
+	service.LadokDelSigned, err = NewEduSealDelSigned(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealDelSigned.Name, service.log.New("LadokDelSigned"))
 	if err != nil {
 		return nil, err
 	}
 
-	service.LadokPersistentSave, err = NewLadokPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.LadokPersistentSave.Name, service.log.New("LadokPersistentSave"))
+	service.LadokPersistentSave, err = NewEduSealPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealPersistentSave.Name, service.log.New("LadokPersistentSave"))
+	if err != nil {
+		return nil, err
+	}
+
+	service.VCPersistentSave, err = NewVCPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentSave.Name, service.log.New("VCPersistentSave"))
+	if err != nil {
+		return nil, err
+	}
+
+	service.VCPersistentGet, err = NewVCPersistentGet(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentGet.Name, service.log.New("VCPersistentGet"))
+	if err != nil {
+		return nil, err
+	}
+
+	service.VCPersistentDelete, err = NewVCPersistentDelete(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentDelete.Name, service.log.New("VCPersistentDelete"))
 	if err != nil {
 		return nil, err
 	}

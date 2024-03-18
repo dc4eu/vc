@@ -3,7 +3,6 @@ package apiv1
 import (
 	"context"
 	"vc/pkg/helpers"
-	_ "vc/pkg/helpers"
 	"vc/pkg/model"
 )
 

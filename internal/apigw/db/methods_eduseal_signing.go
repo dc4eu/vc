@@ -11,13 +11,13 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-// PDFSigningColl is the generic collection
-type PDFSigningColl struct {
+// EduSealSigningColl is the generic collection
+type EduSealSigningColl struct {
 	service *Service
 	coll    *mongo.Collection
 }
 
-func (c *PDFSigningColl) createIndex(ctx context.Context) error {
+func (c *EduSealSigningColl) createIndex(ctx context.Context) error {
 	ctx, span := c.service.tp.Start(ctx, "db:doc:createIndex")
 	defer span.End()
 
@@ -34,7 +34,7 @@ func (c *PDFSigningColl) createIndex(ctx context.Context) error {
 }
 
 // Save saves one document
-func (c *PDFSigningColl) Save(ctx context.Context, doc *types.Document) error {
+func (c *EduSealSigningColl) Save(ctx context.Context, doc *types.Document) error {
 	ctx, span := c.service.tp.Start(ctx, "db:doc:save")
 	defer span.End()
 
@@ -48,7 +48,7 @@ func (c *PDFSigningColl) Save(ctx context.Context, doc *types.Document) error {
 }
 
 // Revoke revokes a document
-func (c *PDFSigningColl) Revoke(ctx context.Context, transactionID string) error {
+func (c *EduSealSigningColl) Revoke(ctx context.Context, transactionID string) error {
 	ctx, span := c.service.tp.Start(ctx, "db:doc:revoke")
 	defer span.End()
 
@@ -69,7 +69,7 @@ func (c *PDFSigningColl) Revoke(ctx context.Context, transactionID string) error
 }
 
 // IsRevoked checks if a document is revoked
-func (c *PDFSigningColl) IsRevoked(ctx context.Context, transactionID string) bool {
+func (c *EduSealSigningColl) IsRevoked(ctx context.Context, transactionID string) bool {
 	ctx, span := c.service.tp.Start(ctx, "db:doc:isRevoked")
 	defer span.End()
 
@@ -86,7 +86,7 @@ func (c *PDFSigningColl) IsRevoked(ctx context.Context, transactionID string) bo
 }
 
 // Get gets one document
-func (c *PDFSigningColl) Get(ctx context.Context, transactionID string) (*types.Document, error) {
+func (c *EduSealSigningColl) Get(ctx context.Context, transactionID string) (*types.Document, error) {
 	ctx, span := c.service.tp.Start(ctx, "db:doc:get")
 	defer span.End()
 

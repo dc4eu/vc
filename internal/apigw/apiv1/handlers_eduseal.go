@@ -154,7 +154,7 @@ func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*PDF
 					return nil, helpers.NewErrorFromError(errors.New(validationReply.Error))
 				}
 
-				validationReply.IsRevoked = c.db.PDFSigningColl.IsRevoked(ctx, validationReply.TransactionID)
+				validationReply.IsRevoked = c.db.EduSealSigningColl.IsRevoked(ctx, validationReply.TransactionID)
 
 				reply := &PDFValidateReply{
 					Data: validationReply,
@@ -208,7 +208,7 @@ func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*P
 		}, nil
 	}
 
-	if c.db.PDFSigningColl.IsRevoked(ctx, req.TransactionID) {
+	if c.db.EduSealSigningColl.IsRevoked(ctx, req.TransactionID) {
 		span.SetStatus(codes.Error, helpers.ErrDocumentIsRevoked.Error())
 		return nil, helpers.ErrDocumentIsRevoked
 	}
@@ -279,7 +279,7 @@ func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevo
 	ctx, span := c.tp.Start(ctx, "apiv1:PDFRevoke")
 	defer span.End()
 
-	if err := c.db.PDFSigningColl.Revoke(ctx, req.TransactionID); err != nil {
+	if err := c.db.EduSealSigningColl.Revoke(ctx, req.TransactionID); err != nil {
 		return nil, err
 	}
 	reply := &PDFRevokeReply{

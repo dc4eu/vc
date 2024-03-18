@@ -47,11 +47,11 @@ func New(ctx context.Context, kv *kvclient.Client, tracer *trace.Tracer, cfg *mo
 		return nil, err
 	}
 
-	service.LadokAddSigned, err = NewLadokAddSigned(ctx, service, cfg.Common.Queues.SimpleQueue.LadokAddSigned.Name, service.log.New("LadokAddSigned"))
+	service.LadokAddSigned, err = NewLadokAddSigned(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealAddSigned.Name, service.log.New("LadokAddSigned"))
 	if err != nil {
 		return nil, err
 	}
-	service.LadokDelSigned, err = NewLadokDelSigned(ctx, service, cfg.Common.Queues.SimpleQueue.LadokDelSigned.Name, service.log.New("LadokDelSigned"))
+	service.LadokDelSigned, err = NewLadokDelSigned(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealDelSigned.Name, service.log.New("LadokDelSigned"))
 	if err != nil {
 		return nil, err
 	}

@@ -10,31 +10,31 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-// LadokPersistentSave holds the ladok delete signed queue
-type LadokPersistentSave struct {
+// EduSealPersistentSave holds the ladok delete signed queue
+type EduSealPersistentSave struct {
 	service *Service
 	log     *logger.Log
 	*retask.Queue
 }
 
-// NewLadokPersistentSave creates a new ladok delete signed queue
-func NewLadokPersistentSave(ctx context.Context, service *Service, queueName string, log *logger.Log) (*LadokPersistentSave, error) {
-	ladokPersistentSave := &LadokPersistentSave{
+// NewEduSealPersistentSave creates a new ladok delete signed queue
+func NewEduSealPersistentSave(ctx context.Context, service *Service, queueName string, log *logger.Log) (*EduSealPersistentSave, error) {
+	eduSealPersistentSave := &EduSealPersistentSave{
 		service: service,
 		log:     log,
 	}
 
-	ladokPersistentSave.Queue = ladokPersistentSave.service.queueClient.NewQueue(ctx, queueName)
+	eduSealPersistentSave.Queue = eduSealPersistentSave.service.queueClient.NewQueue(ctx, queueName)
 
-	ladokPersistentSave.log.Info("Started")
+	eduSealPersistentSave.log.Info("Started")
 
-	return ladokPersistentSave, nil
+	return eduSealPersistentSave, nil
 }
 
 // Enqueue publishes a document to the queue
-func (s *LadokPersistentSave) Enqueue(ctx context.Context, message any) (*retask.Job, error) {
+func (s *EduSealPersistentSave) Enqueue(ctx context.Context, message any) (*retask.Job, error) {
 	s.log.Info("Enqueue delete signed pdf")
-	ctx, span := s.service.tp.Start(ctx, "simplequeue:LadokPersistentSave:Enqueue")
+	ctx, span := s.service.tp.Start(ctx, "simplequeue:EduSealPersistentSave:Enqueue")
 	defer span.End()
 
 	data, err := json.Marshal(message)
@@ -47,15 +47,15 @@ func (s *LadokPersistentSave) Enqueue(ctx context.Context, message any) (*retask
 }
 
 // Dequeue dequeues a document from the queue
-func (s *LadokPersistentSave) Dequeue(ctx context.Context) error {
-	ctx, span := s.service.tp.Start(ctx, "simplequeue:LadokPersistentSave:Dequeue")
+func (s *EduSealPersistentSave) Dequeue(ctx context.Context) error {
+	ctx, span := s.service.tp.Start(ctx, "simplequeue:EduSealPersistentSave:Dequeue")
 	defer span.End()
 	return nil
 }
 
 // Wait waits for the next message
-func (s *LadokPersistentSave) Wait(ctx context.Context) (*retask.Task, error) {
-	ctx, span := s.service.tp.Start(ctx, "simplequeue:LadokPersistentSave:Wait")
+func (s *EduSealPersistentSave) Wait(ctx context.Context) (*retask.Task, error) {
+	ctx, span := s.service.tp.Start(ctx, "simplequeue:EduSealPersistentSave:Wait")
 	defer span.End()
 
 	task, err := s.Queue.Wait(ctx)
@@ -68,8 +68,8 @@ func (s *LadokPersistentSave) Wait(ctx context.Context) (*retask.Task, error) {
 }
 
 // Worker is the worker
-func (s *LadokPersistentSave) Worker(ctx context.Context) error {
-	ctx, span := s.service.tp.Start(ctx, "simplequeue:LadokPersistentSave:Worker")
+func (s *EduSealPersistentSave) Worker(ctx context.Context) error {
+	ctx, span := s.service.tp.Start(ctx, "simplequeue:EduSealPersistentSave:Worker")
 	defer span.End()
 
 	var (
@@ -99,7 +99,7 @@ func (s *LadokPersistentSave) Worker(ctx context.Context) error {
 				span.SetStatus(codes.Error, err.Error())
 				s.log.Error(err, "Unmarshal failed")
 			}
-			if err := s.service.db.DocumentsColl.Save(ctx, document); err != nil {
+			if err := s.service.db.EduSealDocumentColl.Save(ctx, document); err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				s.log.Error(err, "SaveSigned failed")
 			}

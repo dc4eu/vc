@@ -29,7 +29,9 @@ type Service struct {
 	log         *logger.Log
 	cfg         *model.Cfg
 
-	LadokPersistentSave queue
+	EduSealPersistentSave queue
+	VCPersistentSave      queue
+	VCPersistentDelete    queue
 }
 
 // New creates a new queue service
@@ -49,12 +51,26 @@ func New(ctx context.Context, kv *kvclient.Client, db *db.Service, tracer *trace
 		return nil, err
 	}
 
-	service.LadokPersistentSave, err = NewLadokPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.LadokPersistentSave.Name, service.log.New("LadokPersistentSave"))
+	service.EduSealPersistentSave, err = NewEduSealPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealPersistentSave.Name, service.log.New("EduSealPersistentSave"))
 	if err != nil {
 		return nil, err
 	}
 
-	go service.LadokPersistentSave.Worker(ctx)
+	go service.EduSealPersistentSave.Worker(ctx)
+
+	service.VCPersistentSave, err = NewVCPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentSave.Name, service.log.New("VCPersistentSave"))
+	if err != nil {
+		return nil, err
+	}
+
+	go service.VCPersistentSave.Worker(ctx)
+
+	service.VCPersistentDelete, err = NewVCPersistentDelete(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentDelete.Name, service.log.New("VCPersistentDelete"))
+	if err != nil {
+		return nil, err
+	}
+
+	go service.VCPersistentDelete.Worker(ctx)
 
 	return service, nil
 }

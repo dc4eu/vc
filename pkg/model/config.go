@@ -43,6 +43,7 @@ type Common struct {
 	Tracing    OTEL              `yaml:"tracing" validate:"required"`
 	Queues     Queues            `yaml:"queues" validate:"omitempty"`
 	KeyValue   KeyValue          `yaml:"key_value" validate:"omitempty"`
+	QR         QRCfg             `yaml:"qr" validate:"omitempty"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -63,24 +64,40 @@ type PDF struct {
 	KeepUnsignedDuration int `yaml:"keep_unsigned_duration"`
 }
 
+// QRCfg holds the qr configuration
+type QRCfg struct {
+	BaseURL       string `yaml:"base_url" validate:"required"`
+	RecoveryLevel int    `yaml:"recovery_level" validate:"required,min=0,max=3"`
+	Size          int    `yaml:"size" validate:"required"`
+}
+
 // Queues have the queue configuration
 type Queues struct {
 	SimpleQueue struct {
-		LadokSign struct {
+		EduSealSign struct {
 			Name string `yaml:"name" validate:"required"`
-		} `yaml:"ladok_sign" validate:"required"`
-		LadokValidate struct {
+		} `yaml:"eduseal_sign" validate:"required"`
+		EduSealValidate struct {
 			Name string `yaml:"name" validate:"required"`
-		} `yaml:"ladok_validate" validate:"required"`
-		LadokAddSigned struct {
+		} `yaml:"eduseal_validate" validate:"required"`
+		EduSealAddSigned struct {
 			Name string `yaml:"name" validate:"required"`
-		} `yaml:"ladok_add_signed" validate:"required"`
-		LadokDelSigned struct {
+		} `yaml:"eduseal_add_signed" validate:"required"`
+		EduSealDelSigned struct {
 			Name string `yaml:"name" validate:"required"`
-		} `yaml:"ladok_del_signed" validate:"required"`
-		LadokPersistentSave struct {
+		} `yaml:"eduseal_del_signed" validate:"required"`
+		EduSealPersistentSave struct {
 			Name string `yaml:"name" validate:"required"`
-		} `yaml:"ladok_persistent_save" validate:"required"`
+		} `yaml:"eduseal_persistent_save" validate:"required"`
+		VCPersistentSave struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"vc_persistent_save" validate:"required"`
+		VCPersistentGet struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"vc_persistent_get" validate:"required"`
+		VCPersistentDelete struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"vc_persistent_delete" validate:"required"`
 	} `yaml:"simple_queue" validate:"required"`
 }
 

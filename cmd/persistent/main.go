@@ -43,22 +43,26 @@ func main() {
 	kvClient, err := kvclient.New(ctx, cfg, tracer, log.New("kvClient"))
 	services["kvClient"] = kvClient
 	if err != nil {
+		log.Error(err, "kvClient")
 		panic(err)
 	}
 	dbService, err := db.New(ctx, cfg, tracer, log.New("db"))
 	services["dbService"] = dbService
 	if err != nil {
+		log.Error(err, "dbService")
 		panic(err)
 	}
 
 	queueService, err := simplequeue.New(ctx, kvClient, dbService, tracer, cfg, log.New("queue"))
 	services["queueService"] = queueService
 	if err != nil {
+		log.Error(err, "queueService")
 		panic(err)
 	}
 
 	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, tracer, cfg, log.New("apiv1"))
 	if err != nil {
+		log.Error(err, "apiv1Client")
 		panic(err)
 	}
 	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))

@@ -27,7 +27,7 @@ func (c *Client) qrGenerator(ctx context.Context, req *model.MetaData) (*QRReply
 
 	reply := &QRReply{
 		Data: &model.QR{
-			Base64Image: qrBase64,
+			QRBase64Image: qrBase64,
 		},
 	}
 

@@ -18,11 +18,11 @@
 
 ### Flowchart
 
-    ```mermaid
+```mermaid
     sequenceDiagram;
     authentic source->>datastore: POST /upload;
     datastore->>authentic source: null 200/json 400;
-    ```
+```
 
 ### Description
 

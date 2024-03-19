@@ -19,9 +19,9 @@
 ### Flowchart
 
     ```mermaid
-        sequenceDiagram;
-            authentic source->>datastore: POST /upload;
-            datastore->>authentic source: null 200/json 400;
+    sequenceDiagram;
+    authentic source->>datastore: POST /upload;
+    datastore->>authentic source: null 200/json 400;
     ```
 
 ### Description

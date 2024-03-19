@@ -513,14 +513,14 @@ unspecified json object, used to include any document type from authentic source
 
 ## Error response
 
-    ```json
+```json
     {
         "error": {
             "title":"",
             "details": {}
         }
     }
-    ```
+```
 
 ### Known error titles
 

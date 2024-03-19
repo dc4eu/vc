@@ -18,11 +18,11 @@
 
 ### Flowchart
 
-    ```mermaid
-        sequenceDiagram;
-            authentic source->>datastore: POST /upload;
-            datastore->>authentic source: null 200/json 400;
-    ```
+```mermaid
+    sequenceDiagram;
+    authentic source->>datastore: POST /upload;
+    datastore->>authentic source: null 200/json 400;
+```
 
 ### Description
 
@@ -44,7 +44,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
 
 ### Request
 
-    ```json
+```json
     {
         "meta": {
             "authentic_source": "",
@@ -93,7 +93,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
             },  
         "document_data": {}
     }
-    ```
+```
 
 #### schematic
 
@@ -112,11 +112,11 @@ http OK 200, else 400 and error body
 
 ### Flowchart
 
-    ```mermaid
-        sequenceDiagram;
-            authentic source->>datastore: POST /notification;
-            datastore->>authentic source: 200/400 ;
-    ```
+```mermaid
+    sequenceDiagram;
+    authentic source->>datastore: POST /notification;
+    datastore->>authentic source: 200/400 ;
+```
 
 ### Description
 
@@ -132,24 +132,24 @@ After the QR code and link are received the authentic source may follow existing
 
 ### Request
 
-    ```json
+```json
     {
         "authentic_source": "",
         "document_type": "",
         "document_id": ""
     }
-    ```
+```
 
 ### Response
 
-    ```json
+```json
     {
         "data": {
             "qr_base64_image": "",
             "deep_link": ""
         }
     }
-    ```
+```
 
 http OK 200, else 400 and error body
 
@@ -157,11 +157,11 @@ http OK 200, else 400 and error body
 
 ### Flowchart
 
-    ```mermaid
-        sequenceDiagram;
-            authentic source->>datastore: DELETE /document;
-            datastore->>authentic source: 200/400;
-    ```
+```mermaid
+    sequenceDiagram;
+    authentic source->>datastore: DELETE /document;
+    datastore->>authentic source: 200/400;
+```
 
 ### Description
 
@@ -169,12 +169,12 @@ Delete one document
 
 ### Request
 
-    ```json
+```json
     {
         "authentic_source": "",
         "document_id": ""
     }
-    ```
+```
 
 ### Response
 
@@ -184,11 +184,11 @@ http OK 200, else 400 and error body
 
 ### Flowchart
 
-    ```mermaid
-        sequenceDiagram;
-            issuer->>datastore/authentic source: POST document/attestation;
-            datastore/authentic source->>issuer: 200/400;
-    ```
+```mermaid
+    sequenceDiagram;
+    issuer->>datastore/authentic source: POST document/attestation;
+    datastore/authentic source->>issuer: 200/400;
+```
 
 ### Description
 
@@ -202,7 +202,7 @@ The `collect_id` is used to identify the correct attestation. The attestation da
 
 ### Request
 
-    ```json
+```json
     {
         "authentic_source": "",
         "collect_id":"",
@@ -233,11 +233,11 @@ The `collect_id` is used to identify the correct attestation. The attestation da
             "nationality":""
         },
     }
-    ```
+```
 
 ### Response
 
-    ```json
+```json
     {
         "document_data":"",
         "meta": {
@@ -250,7 +250,7 @@ The `collect_id` is used to identify the correct attestation. The attestation da
         },
     }
 
-    ```
+```
 
 http OK 200, else 400 and error body
 
@@ -258,11 +258,11 @@ http OK 200, else 400 and error body
 
 ### Flowchart
 
-    ```mermaid
-        sequenceDiagram;
-            portal->>datastore/authentic source: POST /portal;
-            datastore/authentic source->>portal: 200/400;
-    ```
+```mermaid
+    sequenceDiagram;
+    portal->>datastore/authentic source: POST /portal;
+    datastore/authentic source->>portal: 200/400;
+```
 
 ### Description
 
@@ -274,18 +274,18 @@ citizen to initiate the pickup with his/her EUDIW.
 
 ### Request
 
-    ```json
+```json
     {
     "authentic_source":"",
     "authentic_source_person_id":"",
     "valid_from": "",
     "valid_to": ""
     }
-    ```
+```
 
 ### Response
 
-    ```json
+```json
     {
         "data": [
             {
@@ -342,7 +342,7 @@ citizen to initiate the pickup with his/her EUDIW.
             }
         ]
     }
-    ```
+```
 
 http OK 200, else 400 and error body
 
@@ -350,11 +350,11 @@ http OK 200, else 400 and error body
 
 ### Flowchart
 
-    ```mermaid
+```mermaid
     sequenceDiagram;
-        issuer->>datastore/authentic source: POST /id/mapping;
-        datastore/authentic source->>issuer: 200/400;
-    ```
+    issuer->>datastore/authentic source: POST /id/mapping;
+    datastore/authentic source->>issuer: 200/400;
+```
 
 ### Description
 
@@ -362,7 +362,7 @@ Input consists of `authentic_source_id` and `identity` object with the informati
 
 ### Request
 
-    ```json
+```json
     {
         "authentic_source_id":"",
         "identity": {
@@ -393,18 +393,18 @@ Input consists of `authentic_source_id` and `identity` object with the informati
         },
     }
 
-    ```
+```
 
 ### Response
 
-    ```json
+```json
     {
         "data": {
             "authentic_source_person_id":""
         }
     }
 
-    ```
+```
 
 http OK 200, else 400 and error body
 
@@ -412,11 +412,11 @@ http OK 200, else 400 and error body
 
 ### Flowchart
 
-    ```mermaid
-        sequenceDiagram;
-            authentic source->>issuer: DELETE /credential;
-            issuer->>authentic source: 200/400;
-    ```
+```mermaid
+    sequenceDiagram;
+    authentic source->>issuer: DELETE /credential;
+    issuer->>authentic source: 200/400;
+```
 
 ### Description
 
@@ -428,7 +428,7 @@ Revocation status allows flexibility for future decisions and flows. One possibi
 
 ### Request
 
-    ```json
+```json
     {
         "authentic_source":"",
         "document_type":"",
@@ -437,7 +437,7 @@ Revocation status allows flexibility for future decisions and flows. One possibi
         "revoke_at":"",
         "reason":""
     }
-    ```
+```
 
 ### Response
 
@@ -513,14 +513,14 @@ unspecified json object, used to include any document type from authentic source
 
 ## Error response
 
-    ```json
+```json
     {
         "error": {
             "title":"",
             "details": {}
         }
     }
-    ```
+```
 
 ### Known error titles
 

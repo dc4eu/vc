@@ -162,10 +162,12 @@ services:
     image: "haproxy:alpine"
     ports:
       - 80:80
+      - 443:443
       - 8404:8404
     volumes:
       - ./dev_haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       - ./pki/vc.pem:/etc/ssl/vc.pem:ro
+      - ./cert/tls-cert-key.pem:/usr/local/etc/haproxy/tls-cert-key.pem:ro
     networks:
       vc-net:
         ipv4_address: 172.16.50.200

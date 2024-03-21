@@ -26,7 +26,6 @@
 		"source=${localEnv:HOME}/work/SUNET/goladok3/,target=/workspaces/goladok3,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/work/SUNET/gosdjwt/,target=/workspaces/gosdjwt,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/work/SUNET/gosunetca/,target=/workspaces/gosunetca,type=bind,consistency=cached",
-		"source=${localEnv:HOME}/work/SUNET/godc4eu/,target=/workspaces/godc4eu,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/work/SUNET/goretask/,target=/workspaces/goretask,type=bind,consistency=cached"
 	],
 	"postCreateCommand": "make vscode",

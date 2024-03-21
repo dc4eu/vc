@@ -25,6 +25,8 @@
         "otlp",
         "otlptrace",
         "otlptracehttp",
+        "promauto",
+        "promhttp",
         "protobuf",
         "qrcode",
         "rpcclient",

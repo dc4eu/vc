@@ -1,7 +1,7 @@
 ---
 common:
   mongo:
-    uri: mongodb://user:pw@mongo:27017
+    uri: mongodb://mongo:27017
   production: false
   basic_auth:
     ladok: xyz
@@ -24,6 +24,8 @@ common:
         name: vc_persistent_save
       vc_persistent_get:
         name: vc_persistent_get
+      vc_persistent_delete:
+        name: vc_persistent_delete
   key_value:
     db: 3
     addr: redis:6379

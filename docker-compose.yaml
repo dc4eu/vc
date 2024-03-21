@@ -2,31 +2,21 @@
 version: "3"
 
 services:
-  issuer:
-    container_name: "vc_issuer"
-    image: docker.sunet.se/dc4eu/issuer:latest
+  apigw:
+    container_name: "vc_apigw"
+    image: docker.sunet.se/dc4eu/apigw:latest
     restart: always
     volumes:
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:
-      - haproxy
-      - jaeger
+      - /var/log/sunet:/var/log/sunet
     depends_on:
       - redis
       - mongo
-      - datastore
-      - registry
-      - haproxy
-      - jaeger
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.2
     environment:
       - "VC_CONFIG_YAML=config.yaml"
-      - "HTTP_PROXY=172.16.50.200"
-      - "http_proxy=172.16.50.200"
-      - "HTTPS_PROXY=172.16.50.200"
-      - "https_proxy=172.16.50.200"
-      - "no_proxy=localhost,127.0.0.0/8,nsqd,nsqlookupd,jaeger"
 
   verifier:
     container_name: "vc_verifier"
@@ -35,30 +25,12 @@ services:
     volumes:
       - ./cert:/cert:ro
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:
-      - haproxy
     depends_on:
       - redis
       - mongo
-      - haproxy
     networks:
-      - vc-net
-    environment:
-      - "VC_CONFIG_YAML=config.yaml"
-
-  datastore:
-    container_name: "vc_datastore"
-    image: docker.sunet.se/dc4eu/datastore:latest
-    restart: always
-    volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
-    links:
-      - haproxy
-    depends_on:
-      - mongo
-      - haproxy
-    networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.3
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
@@ -68,14 +40,12 @@ services:
     restart: always
     volumes:
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:
-      - haproxy
     depends_on:
       - redis
       - mongo
-      - haproxy
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.4
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
@@ -85,12 +55,11 @@ services:
     restart: always
     volumes:
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:
-      - haproxy
     depends_on:
       - redis
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.5
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
@@ -100,30 +69,12 @@ services:
     restart: always
     volumes:
       - ./dev_config_docker.yaml:/config.yaml:ro
-    links:
-      - haproxy
     depends_on:
       - redis
       - mongo
     networks:
-      - vc-net
-    environment:
-      - "VC_CONFIG_YAML=config.yaml"
-
-  apigw:
-    container_name: "vc_apigw"
-    image: docker.sunet.se/dc4eu/apigw:latest
-    restart: always
-    volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
-      - /var/log/sunet:/var/log/sunet
-    links:
-      - haproxy
-    depends_on:
-      - redis
-      - mongo
-    networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.6
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
@@ -137,7 +88,8 @@ services:
     depends_on:
       - redis
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.7
     environment:
       - "CONFIG_YAML=config.yaml"
 
@@ -153,22 +105,10 @@ services:
     depends_on:
       - redis
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.8
     environment:
       - "CONFIG_YAML=config.yaml"
-
-  haproxy:
-    container_name: "vc_haproxy"
-    image: "haproxy:alpine"
-    ports:
-      - 80:80
-      - 8404:8404
-    volumes:
-      - ./dev_haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-      - ./pki/vc.pem:/etc/ssl/vc.pem:ro
-    networks:
-      vc-net:
-        ipv4_address: 172.16.50.200
 
   redis:
     image: redis:alpine
@@ -180,7 +120,8 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.9
 
   mongo:
     image: mongo:4.0.10
@@ -191,62 +132,22 @@ services:
     volumes:
       - mongo_data:/data
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.10
 
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: vc_jaeger
     restart: always
-    links:
-      - haproxy
-    depends_on:
-      - haproxy
     expose:
       - 16686
       - 4317
       - 4318
     networks:
-      - vc-net
+      vc-net:
+        ipv4_address: 172.16.50.11
     environment:
       - "COLLECTOR_OTLP_ENABLED=true"
-      - "HTTP_PROXY=172.16.50.200"
-      - "http_proxy=172.16.50.200"
-      - "HTTPS_PROXY=172.16.50.200"
-      - "https_proxy=172.16.50.200"
-      - "no_proxy=localhost,127.0.0.0/8"
-
-  nsqlookupd:
-    image: nsqio/nsq:v1.2.1
-    container_name: vc_nsqlookupd
-    command: /nsqlookupd
-    networks:
-      - vc-net
-    ports:
-      - "4160"
-      - "4161"
-
-  nsqd:
-    image: nsqio/nsq:v1.2.1
-    container_name: vc_nsqd
-    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=vc_nsqlookupd:4160
-    depends_on:
-      - nsqlookupd
-    networks:
-      - vc-net
-    ports:
-      - "4150"
-      - "4151"
-
-  nsqadmin:
-    image: nsqio/nsq:v1.2.1
-    container_name: vc_nsqadmin
-    command: /nsqadmin --lookupd-http-address=vc_nsqlookupd:4161
-    depends_on:
-      - nsqlookupd
-    networks:
-      - vc-net
-    ports:
-      - "4171"
 
 networks:
   vc-net:

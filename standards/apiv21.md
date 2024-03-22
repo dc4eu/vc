@@ -57,7 +57,9 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
             "member_state": "",
             "document_version": 0,
             "valid_from": "",
-            "valid_to":""
+            "valid_to":"",
+            "issued_at": "",
+            "expire_at":""
         },
         "identity": {
             "version": "",
@@ -89,7 +91,8 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
             "version": 0,
             "type": "",
             "description_short": "",
-            "description_long": ""
+            "description_long": "",
+            "structured_information": {}
             },  
         "document_data": {}
     }

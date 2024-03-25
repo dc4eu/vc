@@ -2,3 +2,4 @@ bin/
 pki/*
 !pki/create_pki.sh
 redis-data/
+.idea/

@@ -1,13 +1,8 @@
 NAME 					:= vc
-SERVERS 				:= issuer verifier
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 
-test: test-issuer test-verifier test-datastore
-
-test-issuer:
-	$(info Testing issuer)
-	go test -v ./cmd/issuer
+test: test-verifier test-datastore
 
 test-verifier:
 	$(info Testing verifier)
@@ -42,9 +37,9 @@ ifndef VERSION
 VERSION := latest
 endif
 
-docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent
+docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent
 
-DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
+DOCKER_TAG_APIGW 		:= docker.sunet.se/dc4eu/apigw:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
 DOCKER_TAG_DATASTORE	:= docker.sunet.se/dc4eu/datastore:$(VERSION)
 DOCKER_TAG_REGISTRY 	:= docker.sunet.se/dc4eu/registry:$(VERSION)
@@ -52,15 +47,10 @@ DOCKER_TAG_CACHE 		:= docker.sunet.se/dc4eu/cache:$(VERSION)
 DOCKER_TAG_PERSISTENT 	:= docker.sunet.se/dc4eu/persistent:$(VERSION)
 DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
-DOCKER_TAG_APIGW 		:= docker.sunet.se/dc4eu/apigw:$(VERSION)
 
 
-build: proto build-issuer build-verifier build-datastore build-registry build-cache build-persistent build-mockas build-apigw
+build: proto build-verifier build-datastore build-registry build-cache build-persistent build-mockas build-apigw
 
-
-build-issuer:
-	$(info Building issuer)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_issuer ${LDFLAGS} ./cmd/issuer/main.go
 
 build-verifier:
 	$(info Building verifier)
@@ -91,15 +81,11 @@ build-apigw:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_apigw ${LDFLAGS} ./cmd/apigw/main.go
 
 
-docker-build: docker-build-issuer docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent docker-build-mockas docker-build-apigw
+docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent docker-build-mockas docker-build-apigw
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_GOBUILD) --file dockerfiles/gobuild .
-
-docker-build-issuer:
-	$(info Docker Building issuer with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker .
 
 docker-build-verifier:
 	$(info Docker Building verifier with tag: $(VERSION))
@@ -164,8 +150,19 @@ docker-push-apigw:
 docker-push: docker-push-gobuild docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-cache docker-push-persistent docker-push-apigw
 	$(info Pushing docker images)
 
+docker-pull:
+	$(info Pulling docker images)
+	docker pull $(DOCKER_TAG_APIGW)
+	docker pull $(DOCKER_TAG_GOBUILD)
+	docker pull $(DOCKER_TAG_MOCKAS)
+	docker pull $(DOCKER_TAG_CACHE)
+	docker pull $(DOCKER_TAG_PERSISTENT)
+	docker pull $(DOCKER_TAG_VERIFIER)
+	docker pull $(DOCKER_TAG_DATASTORE)
+	docker pull $(DOCKER_TAG_REGISTRY)
+
 docker-archive:
-	docker save --output docker_archives/vc_$(VERSION).tar $(DOCKER_TAG_ISSUER) $(DOCKER_TAG_VERIFIER) $(DOCKER_TAG_DATASTORE) $(DOCKER_TAG_REGISTRY)
+	docker save --output docker_archives/vc_$(VERSION).tar $(DOCKER_TAG_VERIFIER) $(DOCKER_TAG_DATASTORE) $(DOCKER_TAG_REGISTRY)
 
 
 clean_redis:
@@ -174,7 +171,6 @@ clean_redis:
 
 clean_docker_images:
 	$(info Cleaning docker images)
-	docker rmi $(DOCKER_TAG_ISSUER) -f
 	docker rmi $(DOCKER_TAG_VERIFIER) -f
 	docker rmi $(DOCKER_TAG_DATASTORE) -f
 	docker rmi $(DOCKER_TAG_REGISTRY) -f
@@ -200,13 +196,10 @@ proto-registry:
 proto-status:
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-status-model.proto 
 
-swagger: swagger-issuer swagger-registry swagger-datastore swagger-verifier swagger-apigw swagger-fmt
+swagger: swagger-registry swagger-datastore swagger-verifier swagger-apigw swagger-fmt
 
 swagger-fmt:
 	swag fmt
-
-swagger-issuer:
-	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency --packageName docs
 
 swagger-registry:
 	swag init -d internal/registry/apiv1/ -g client.go --output docs/registry --parseDependency --packageName docs

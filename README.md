@@ -13,3 +13,11 @@ Each service has its own make target, `make docker-build-<service>` or build all
 run `make build-<service>` to build a specific service or `make build` to build all services.
 
 linux/amd64 is consider supported, other build options may work.
+
+## Swagger
+
+### Endpoint
+
+`GET http://<apigw-url>/swagger/doc.json`
+
+or with web browser: `http://<apigw-url>/swagger/index.html`

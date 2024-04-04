@@ -14,7 +14,7 @@ var (
 	BuildVarGitCommit string
 )
 
-//	@title		Datastore API
+//	@title		APIGW API
 //	@version	0.1.0
 //	@BasePath	/api/v1
 

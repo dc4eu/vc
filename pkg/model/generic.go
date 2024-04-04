@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"net/url"
-	"time"
 
 	"github.com/skip2/go-qrcode"
 )
@@ -109,9 +108,13 @@ type MetaData struct {
 	// example: 2024-12-31
 	ValidTo string `json:"valid_to,omitempty" bson:"valid_to" validate:"required"`
 
-	// required: false
+	// required: true
 	// example: 2024-03-15T10:00:00Z+01:00
-	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at"`
+	IssuedAt string `json:"issued_at,omitempty" bson:"issued_at"`
+
+	// required: true
+	// example: 2024-03-15T10:00:00Z+01:00
+	ExpiredAt string `json:"expired_at,omitempty" bson:"expired_at"`
 }
 
 // Identity identifies a person
@@ -240,6 +243,10 @@ type Attestation struct {
 	// required: true
 	// example: European Health Insurance Card
 	DescriptionLong string `json:"description_long,omitempty" bson:"description_long" validate:"required"`
+
+	// required: true
+	// example: {"description": "a key-value pair", "key": "value"}
+	StructuredInformation map[string]any `json:"structured_information,omitempty" bson:"structured_information" validate:"required"`
 }
 
 // QR is a collection of fields representing a QR code

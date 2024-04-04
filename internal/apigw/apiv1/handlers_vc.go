@@ -36,7 +36,7 @@ func (c *Client) Upload(ctx context.Context, req *model.Upload) error {
 		return err
 	}
 
-	req.Meta.CreatedAt = time.Now().UTC()
+	req.Meta.IssuedAt = time.Now().UTC().String()
 
 	_, err := c.simpleQueue.VCPersistentSave.Enqueue(ctx, req)
 	if err != nil {

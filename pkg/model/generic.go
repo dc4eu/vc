@@ -11,42 +11,42 @@ import (
 
 // Upload is a generic type for upload
 type Upload struct {
-	Meta         *MetaData    `json:"meta" bson:"meta" validate:"required"`
+	Meta         *MetaData    `json:"meta,omitempty" bson:"meta" validate:"required"`
 	Identity     *Identity    `json:"identity,omitempty" bson:"identity" validate:"required"`
 	Attestation  *Attestation `json:"attestation,omitempty" bson:"attestation" validate:"required"`
-	DocumentData any          `json:"document_data" bson:"document_data" validate:"required"`
-	QR           *QR          `json:"qr" bson:"qr"`
+	DocumentData any          `json:"document_data,omitempty" bson:"document_data" validate:"required"`
+	QR           *QR          `json:"qr,omitempty" bson:"qr"`
 }
 
 // QRGenerator generates a QR code
-func (u *Upload) QRGenerator(ctx context.Context, baseURL string, recoveryLevel, size int) error {
+func (m *MetaData) QRGenerator(ctx context.Context, baseURL string, recoveryLevel, size int) (*QR, error) {
 	deepLink, err := url.Parse(baseURL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	q := deepLink.Query()
 
-	q.Add("member_state", u.Meta.MemberState)
-	q.Add("document_type", u.Meta.DocumentType)
-	q.Add("authentic_source", u.Meta.AuthenticSource)
-	q.Add("document_id", u.Meta.DocumentID)
+	q.Add("member_state", m.MemberState)
+	q.Add("document_type", m.DocumentType)
+	q.Add("authentic_source", m.AuthenticSource)
+	q.Add("document_id", m.DocumentID)
 
 	deepLink.RawQuery = q.Encode()
 
 	qrPNG, err := qrcode.Encode(deepLink.String(), qrcode.RecoveryLevel(recoveryLevel), size)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
 
-	u.QR = &QR{
+	qr := &QR{
 		DeepLink:      deepLink.String(),
 		QRBase64Image: qrBase64,
 	}
 
-	return nil
+	return qr, nil
 }
 
 // MetaData is a generic type for metadata
@@ -87,9 +87,7 @@ type MetaData struct {
 	// example: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e
 	UID string `json:"uid,omitempty" bson:"uid" validate:"required"`
 
-	// required: false
-	// example: 8dbd2680-c03f-11ee-a21b-034aafe41222
-	RevocationID string `json:"revocation_id,omitempty" bson:"revocation_id" validate:"required"`
+	Revoke *Revoke `json:"revoke,omitempty" bson:"revoke"`
 
 	// required: false
 	// example: 98fe67fc-c03f-11ee-bbee-4345224d414f
@@ -112,6 +110,34 @@ type MetaData struct {
 	// required: false
 	// example: 2024-03-15T10:00:00Z+01:00
 	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at"`
+}
+
+// Revoke is a collection of fields representing a revocation
+type Revoke struct {
+	// ID is the ID of the revocation
+	// required: false
+	// example: 8dbd2680-c03f-11ee-a21b-034aafe41222
+	ID string `json:"id,omitempty" bson:"id" validate:"required"`
+
+	// Revoked is a flag to indicate if the document has been revoked
+	// required: false
+	// example: false
+	Revoked bool `json:"revoked,omitempty" bson:"revoked"`
+
+	// FollowUpCredential is the ID of the follow-up credential
+	// required: false
+	// example: https://example.com/credential/?collect_id=8dbd2680-c03f-11ee-a21b-034aafe41222
+	FollowUpCredential string `json:"follow_up_credential,omitempty" bson:"follow_up_credential"`
+
+	// RevokedAt is the time the document was revoked or going to be revoked
+	// required: false
+	// example: 2024-03-15T10:00:00Z+01:00
+	RevokedAt time.Time `json:"revoked_at,omitempty" bson:"revoked_at"`
+
+	// Reason is the reason for revocation
+	// required: false
+	// example: lost or stolen
+	Reason string `json:"reason,omitempty" bson:"reason"`
 }
 
 // Identity identifies a person
@@ -240,10 +266,15 @@ type Attestation struct {
 	// required: true
 	// example: European Health Insurance Card
 	DescriptionLong string `json:"description_long,omitempty" bson:"description_long" validate:"required"`
+
+	// DescriptionStructured is a map of structured descriptions
+	// required: true
+	// example: {"en": "European Health Insurance Card", "sv": "Europeiskt sjukförsäkringskortet"}
+	DescriptionStructured map[string]any `json:"description_structured,omitempty" bson:"description_structured" validate:"required"`
 }
 
 // QR is a collection of fields representing a QR code
 type QR struct {
-	QRBase64Image string `json:"base64_image" bson:"base64_image" validate:"required"`
-	DeepLink      string `json:"deep_link" bson:"deep_link" validate:"required"`
+	QRBase64Image string `json:"base64_image,omitempty" bson:"base64_image" validate:"required"`
+	DeepLink      string `json:"deep_link,omitempty" bson:"deep_link" validate:"required"`
 }

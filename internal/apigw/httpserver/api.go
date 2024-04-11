@@ -4,17 +4,16 @@ import (
 	"context"
 	"vc/internal/apigw/apiv1"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
-	"vc/pkg/model"
 )
 
 // Apiv1 interface
 type Apiv1 interface {
-	Upload(ctx context.Context, req *model.Upload) error
+	Upload(ctx context.Context, req *apiv1.UploadRequest) error
 	Notification(ctx context.Context, req *apiv1.NotificationRequest) (*apiv1.NotificationReply, error)
 	IDMapping(ctx context.Context, reg *apiv1.IDMappingRequest) (*apiv1.IDMappingReply, error)
 	GetDocument(ctx context.Context, req *apiv1.GetDocumentRequest) (*apiv1.GetDocumentReply, error)
 	DeleteDocument(ctx context.Context, req *apiv1.DeleteDocumentRequest) error
-	GetDocumentAttestation(ctx context.Context, req *apiv1.GetDocumentAttestationRequest) (*apiv1.GetDocumentAttestationReply, error)
+	GetDocumentCollectID(ctx context.Context, req *apiv1.GetDocumentCollectIDRequest) (*apiv1.GetDocumentCollectIDReply, error)
 	Portal(ctx context.Context, req *apiv1.PortalRequest) (*apiv1.PortalReply, error)
 
 	PDFSign(ctx context.Context, req *apiv1.PDFSignRequest) (*apiv1.PDFSignReply, error)

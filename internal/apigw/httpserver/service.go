@@ -96,7 +96,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/notification", s.endpointNotification)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document", s.endpointGetDocument)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/attestation", s.endpointGetDocumentAttestation)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/attestation", s.endpointGetDocumentCollectID)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id/mapping", s.endpointIDMapping)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/portal", s.endpointPortal)
 

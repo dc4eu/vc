@@ -19,8 +19,14 @@ func (c *Client) mockOne(ctx context.Context, authenticSource, documentType stri
 		LastName:                person.LastName,
 		DateOfBirth:             gofakeit.Date().String(),
 		UID:                     gofakeit.UUID(),
-		RevocationID:            gofakeit.UUID(),
 		CollectID:               gofakeit.UUID(),
+		Revoke: &model.Revoke{
+			ID:                 gofakeit.UUID(),
+			Revoked:            gofakeit.Bool(),
+			FollowUpCredential: gofakeit.URL(),
+			RevokedAt:          gofakeit.FutureDate(),
+			Reason:             gofakeit.RandomString([]string{"lost", "stolen", "expired"}),
+		},
 	}
 	mockUpload := &model.Upload{
 		Meta: meta,

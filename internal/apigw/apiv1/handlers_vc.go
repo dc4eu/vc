@@ -8,6 +8,14 @@ import (
 	"vc/pkg/model"
 )
 
+// UploadRequest is the request for Upload
+type UploadRequest struct {
+	Meta         *model.MetaData    `json:"meta" validate:"required"`
+	Identity     *model.Identity    `json:"identity,omitempty" validate:"required"`
+	Attestation  *model.Attestation `json:"attestation,omitempty" validate:"required"`
+	DocumentData any                `json:"document_data" validate:"required"`
+}
+
 // UploadReply is the reply for a generic upload
 type UploadReply struct {
 	Data struct {
@@ -25,20 +33,32 @@ type UploadReply struct {
 //	@Produce		json
 //	@Success		200	{object}	UploadReply				"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		model.Upload			true	" "
+//	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
-func (c *Client) Upload(ctx context.Context, req *model.Upload) error {
+func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return err
 	}
 
-	if err := req.QRGenerator(ctx, c.cfg.Common.QR.BaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size); err != nil {
+	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Common.QR.BaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
+	if err != nil {
 		return err
 	}
 
-	req.Meta.CreatedAt = time.Now().UTC()
+	if req.Meta.Revoke.ID == "" {
+		req.Meta.Revoke.ID = req.Meta.DocumentID
+	}
 
-	_, err := c.simpleQueue.VCPersistentSave.Enqueue(ctx, req)
+	req.Meta.CreatedAt = time.Now().UTC()
+	upload := &model.Upload{
+		Meta:         req.Meta,
+		Identity:     req.Identity,
+		Attestation:  req.Attestation,
+		DocumentData: req.DocumentData,
+		QR:           qr,
+	}
+
+	_, err = c.simpleQueue.VCPersistentSave.Enqueue(ctx, upload)
 	if err != nil {
 		return err
 	}
@@ -208,45 +228,49 @@ func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest)
 	return nil
 }
 
-// GetDocumentAttestationRequest is the request for GetDocumentAttestation
-type GetDocumentAttestationRequest struct {
-	Identity *model.Identity `json:"identity"`
-	Meta     *model.MetaData `json:"meta"`
+// GetDocumentCollectIDRequest is the request for GetDocumentAttestation
+type GetDocumentCollectIDRequest struct {
+	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	DocumentType    string          `json:"document_type" validate:"required"`
+	CollectID       string          `json:"collect_id" validate:"required"`
+	Identity        *model.Identity `json:"identity" validate:"required"`
 }
 
-// GetDocumentAttestationReply is the reply for a generic document
-type GetDocumentAttestationReply struct {
+// GetDocumentCollectIDReply is the reply for a generic document
+type GetDocumentCollectIDReply struct {
 	Data *model.Upload `json:"data"`
 }
 
-// GetDocumentAttestation return a specific document ??
+// GetDocumentCollectID return a specific document ??
 //
-//	@Summary		GetDocumentByCollectCode
-//	@ID				get-document-collect-code
+//	@Summary		GetDocumentByCollectID
+//	@ID				get-document-collect-id
 //	@Description	Get document by collect code endpoint
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	GetDocumentReply		"Success"
+//	@Success		200	{object}	GetDocumentCollectIDReply		"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		model.MetaData			true	" "
-//	@Router			/document/collection_code [post]
-func (c *Client) GetDocumentAttestation(ctx context.Context, req *GetDocumentAttestationRequest) (*GetDocumentAttestationReply, error) {
+//	@Param			req	body		GetDocumentCollectIDRequest			true	" "
+//	@Router			/document/collect_id [post]
+func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentCollectIDRequest) (*GetDocumentCollectIDReply, error) {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return nil, err
 	}
 
-	query := &db.GetDocumentAttestationQuery{
-		Identity: req.Identity,
-		Meta:     req.Meta,
+	query := &db.GetDocumentCollectIDQuery{
+		Identity:        req.Identity,
+		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.DocumentType,
+		CollectID:       req.CollectID,
 	}
 
-	doc, err := c.db.VCDatastoreColl.GetDocumentAttestation(ctx, query)
+	doc, err := c.db.VCDatastoreColl.GetDocumentCollectID(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	reply := &GetDocumentAttestationReply{
+	reply := &GetDocumentCollectIDReply{
 		Data: doc,
 	}
 	return reply, nil

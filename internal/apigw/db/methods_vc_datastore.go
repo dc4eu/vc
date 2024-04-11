@@ -101,31 +101,40 @@ func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*mod
 	return res.QR, nil
 }
 
-// GetDocumentAttestationQuery is the query to get document attestation
-type GetDocumentAttestationQuery struct {
-	Identity *model.Identity
-	Meta     *model.MetaData
+// GetDocumentCollectIDQuery is the query to get document attestation
+type GetDocumentCollectIDQuery struct {
+	Identity        *model.Identity
+	AuthenticSource string
+	DocumentType    string
+	CollectID       string
 }
 
-// GetDocumentAttestation return matching document if any, or error
-func (c *VCDatastoreColl) GetDocumentAttestation(ctx context.Context, query *GetDocumentAttestationQuery) (*model.Upload, error) {
+// GetDocumentCollectID return matching document if any, or error
+func (c *VCDatastoreColl) GetDocumentCollectID(ctx context.Context, query *GetDocumentCollectIDQuery) (*model.Upload, error) {
 	filter := bson.M{
-		"meta.authentic_source": bson.M{"$eq": query.Meta.AuthenticSource},
-		"meta.collect_id":       bson.M{"$eq": query.Meta.CollectID},
-		"meta.document_type":    bson.M{"$eq": query.Meta.DocumentType},
-		"meta.document_id":      bson.M{"$eq": query.Meta.DocumentID},
-		"meta.uid":              bson.M{"$eq": query.Meta.UID},
-		"meta.date_of_birth":    bson.M{"$eq": query.Meta.DateOfBirth},
-		"meta.last_name":        bson.M{"$eq": query.Meta.LastName},
-		"meta.first_name":       bson.M{"$eq": query.Meta.FirstName},
+		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
+		"meta.collect_id":       bson.M{"$eq": query.CollectID},
+		"meta.document_type":    bson.M{"$eq": query.DocumentType},
+		"identity.version":      bson.M{"$eq": query.Identity.Version},
+		"identity.family_name":  bson.M{"$eq": query.Identity.FamilyName},
+		"identity.given_name":   bson.M{"$eq": query.Identity.GivenName},
+		"identity.birth_date":   bson.M{"$eq": query.Identity.BirthDate},
+		"identity.uid":          bson.M{"$eq": query.Identity.UID},
 	}
 
 	opt := options.FindOne().SetProjection(bson.M{
-		"meta.document_type": 1,
-		"meta.document_id":   1,
-		"meta.revocation_id": 1,
-		"meta.collect_id":    1,
-		"meta.document_data": 1,
+		"meta.document_type":              1,
+		"meta.document_id":                1,
+		"meta.document_version":           1,
+		"meta.revocation_id":              1,
+		"meta.revoked":                    1,
+		"meta.collect_id":                 1,
+		"meta.authentic_source_person_id": 1,
+		"meta.authentic_source":           1,
+		"meta.member_state":               1,
+		"meta.valid_from":                 1,
+		"meta.valid_to":                   1,
+		"document_data":                   1,
 	})
 
 	res := &model.Upload{}

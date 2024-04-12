@@ -168,7 +168,10 @@ type GetDocumentRequest struct {
 
 // GetDocumentReply is the reply for a generic document
 type GetDocumentReply struct {
-	Data *model.Upload `json:"data"`
+	Data struct {
+		Meta         *model.MetaData `json:"meta"`
+		DocumentData any             `json:"document_data"`
+	} `json:"data"`
 }
 
 // GetDocument return a specific document
@@ -198,8 +201,15 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 		return nil, err
 	}
 	reply := &GetDocumentReply{
-		Data: doc,
+		Data: struct {
+			Meta         *model.MetaData `json:"meta"`
+			DocumentData any             `json:"document_data"`
+		}{
+			Meta:         doc.Meta,
+			DocumentData: doc.DocumentData,
+		},
 	}
+
 	return reply, nil
 }
 

@@ -46,9 +46,45 @@
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "delete one document endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "DeleteDocument",
+                "operationId": "delete-document",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.DeleteDocumentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
-        "/document/collection_code": {
+        "/document/collect_id": {
             "post": {
                 "description": "Get document by collect code endpoint",
                 "consumes": [
@@ -60,8 +96,8 @@
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "GetDocumentByCollectCode",
-                "operationId": "get-document-collect-code",
+                "summary": "GetDocumentByCollectID",
+                "operationId": "get-document-collect-id",
                 "parameters": [
                     {
                         "description": " ",
@@ -69,7 +105,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.MetaData"
+                            "$ref": "#/definitions/apiv1.GetDocumentCollectIDRequest"
                         }
                     }
                 ],
@@ -77,8 +113,46 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/apiv1.GetDocumentReply"
+                            "$ref": "#/definitions/apiv1.GetDocumentCollectIDReply"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/revoke": {
+            "post": {
+                "description": "Revoke one document",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "RevokeDocument",
+                "operationId": "revoke-document",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.RevokeDocumentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -290,9 +364,9 @@
                 }
             }
         },
-        "/metadata": {
+        "/notification": {
             "post": {
-                "description": "List metadata endpoint",
+                "description": "notification endpoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -302,8 +376,8 @@
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "ListMetadata",
-                "operationId": "list-metadata",
+                "summary": "Notification",
+                "operationId": "generic-notification",
                 "parameters": [
                     {
                         "description": " ",
@@ -311,7 +385,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/apiv1.ListMetadataRequest"
+                            "$ref": "#/definitions/apiv1.NotificationRequest"
                         }
                     }
                 ],
@@ -319,7 +393,7 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/apiv1.ListMetadataReply"
+                            "$ref": "#/definitions/apiv1.NotificationReply"
                         }
                     },
                     "400": {
@@ -434,16 +508,13 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Upload"
+                            "$ref": "#/definitions/apiv1.UploadRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/apiv1.UploadReply"
-                        }
+                        "description": "Success"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -456,7 +527,20 @@
         }
     },
     "definitions": {
-        "apiv1.GetDocumentReply": {
+        "apiv1.DeleteDocumentRequest": {
+            "type": "object",
+            "properties": {
+                "authentic_source": {
+                    "description": "required: true\nexample: skatteverket",
+                    "type": "string"
+                },
+                "document_id": {
+                    "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.GetDocumentCollectIDReply": {
             "type": "object",
             "properties": {
                 "data": {
@@ -464,8 +548,51 @@
                 }
             }
         },
+        "apiv1.GetDocumentCollectIDRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "collect_id",
+                "document_type",
+                "identity"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "collect_id": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
+                },
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
+                }
+            }
+        },
+        "apiv1.GetDocumentReply": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data *model.Upload `json:\"data\"`",
+                    "type": "object",
+                    "properties": {
+                        "document_data": {},
+                        "meta": {
+                            "$ref": "#/definitions/model.MetaData"
+                        }
+                    }
+                }
+            }
+        },
         "apiv1.GetDocumentRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "document_id",
+                "document_type"
+            ],
             "properties": {
                 "authentic_source": {
                     "type": "string"
@@ -491,24 +618,24 @@
                 }
             }
         },
-        "apiv1.ListMetadataReply": {
+        "apiv1.NotificationReply": {
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.MetaData"
-                    }
+                    "$ref": "#/definitions/model.QR"
                 }
             }
         },
-        "apiv1.ListMetadataRequest": {
+        "apiv1.NotificationRequest": {
             "type": "object",
             "properties": {
                 "authentic_source": {
                     "type": "string"
                 },
-                "authentic_source_person_id": {
+                "document_id": {
+                    "type": "string"
+                },
+                "document_type": {
                     "type": "string"
                 }
             }
@@ -591,19 +718,51 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.MetaData"
+                        "$ref": "#/definitions/model.Upload"
                     }
                 }
             }
         },
         "apiv1.PortalRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "authentic_source_person_id"
+            ],
             "properties": {
                 "authentic_source": {
                     "type": "string"
                 },
                 "authentic_source_person_id": {
                     "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
+                },
+                "valid_from": {
+                    "type": "integer"
+                },
+                "valid_to": {
+                    "type": "integer"
+                }
+            }
+        },
+        "apiv1.RevokeDocumentRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "document_type",
+                "revocation"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
+                },
+                "revocation": {
+                    "$ref": "#/definitions/model.Revocation"
                 }
             }
         },
@@ -637,16 +796,24 @@
                 }
             }
         },
-        "apiv1.UploadReply": {
+        "apiv1.UploadRequest": {
             "type": "object",
+            "required": [
+                "attestation",
+                "document_data",
+                "identity",
+                "meta"
+            ],
             "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "status": {
-                            "type": "string"
-                        }
-                    }
+                "attestation": {
+                    "$ref": "#/definitions/model.Attestation"
+                },
+                "document_data": {},
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
+                },
+                "meta": {
+                    "$ref": "#/definitions/model.MetaData"
                 }
             }
         },
@@ -667,23 +834,144 @@
                 }
             }
         },
+        "model.Attestation": {
+            "type": "object",
+            "required": [
+                "description_long",
+                "description_short",
+                "description_structured",
+                "type",
+                "version"
+            ],
+            "properties": {
+                "description_long": {
+                    "description": "TODO(masv): change TextLong to DescriptionLong\nrequired: true\nexample: European Health Insurance Card",
+                    "type": "string"
+                },
+                "description_short": {
+                    "description": "TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended\nrequired: true\nexample: EHIC",
+                    "type": "string"
+                },
+                "description_structured": {
+                    "description": "DescriptionStructured is a map of structured descriptions\nrequired: true\nexample: {\"en\": \"European Health Insurance Card\", \"sv\": \"Europeiskt sjukförsäkringskortet\"}",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "type": {
+                    "description": "required: true\nexample: secure",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant\nrequired: true\nexample: \"1.0.0\"",
+                    "type": "string"
+                }
+            }
+        },
+        "model.Identity": {
+            "type": "object",
+            "required": [
+                "birth_date",
+                "family_name",
+                "given_name",
+                "version"
+            ],
+            "properties": {
+                "birth_city": {
+                    "description": "required: false\nexample: Stockholm",
+                    "type": "string"
+                },
+                "birth_country": {
+                    "description": "TODO(masv): full name or just country code?\nrequired: false\nexample: sweden",
+                    "type": "string"
+                },
+                "birth_date": {
+                    "description": "required: true\nexample: 1970-01-01",
+                    "type": "string"
+                },
+                "birth_place": {
+                    "description": "required: false\nexample: Stockholm",
+                    "type": "string"
+                },
+                "birth_state": {
+                    "description": "required: false\nexample: Stockholm",
+                    "type": "string"
+                },
+                "family_name": {
+                    "description": "required: true\nexample: Svensson",
+                    "type": "string"
+                },
+                "family_name_at_birth": {
+                    "description": "required: false\nexample: Karlsson",
+                    "type": "string"
+                },
+                "gender": {
+                    "description": "required: false\nexample: male",
+                    "type": "string"
+                },
+                "given_name": {
+                    "description": "required: true\nexample: Magnus",
+                    "type": "string"
+                },
+                "given_name_at_birth": {
+                    "description": "required: false\nexample: Magnus",
+                    "type": "string"
+                },
+                "nationality": {
+                    "description": "required: false\nexample: swedish",
+                    "type": "string"
+                },
+                "resident_address": {
+                    "description": "required: false\nexample: 221b baker street",
+                    "type": "string"
+                },
+                "resident_city": {
+                    "description": "required: false\nexample: london",
+                    "type": "string"
+                },
+                "resident_country": {
+                    "description": "required: false\nexample: england",
+                    "type": "string"
+                },
+                "resident_house_number": {
+                    "description": "required: false\nexample: 221b",
+                    "type": "string"
+                },
+                "resident_postal_code": {
+                    "description": "required: false\nexample: W1U 6SG",
+                    "type": "string"
+                },
+                "resident_state": {
+                    "description": "required: false\nexample: england",
+                    "type": "string"
+                },
+                "resident_street": {
+                    "description": "required: false\nexample: baker street",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "required: true\nexample: \"1.0.0\"",
+                    "type": "string"
+                }
+            }
+        },
         "model.MetaData": {
             "type": "object",
             "required": [
                 "authentic_source",
                 "authentic_source_person_id",
-                "collect_id",
                 "date_of_birth",
                 "document_id",
                 "document_type",
+                "document_version",
                 "first_name",
                 "last_name",
-                "revocation_id",
-                "uid"
+                "member_state",
+                "valid_from",
+                "valid_to"
             ],
             "properties": {
                 "authentic_source": {
-                    "description": "required: true\nexample: Sunet",
+                    "description": "required: true\nexample: SUNET",
                     "type": "string"
                 },
                 "authentic_source_person_id": {
@@ -691,8 +979,12 @@
                     "type": "string"
                 },
                 "collect_id": {
-                    "description": "required: true\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
+                    "description": "required: false\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
                     "type": "string"
+                },
+                "created_at": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
                 },
                 "date_of_birth": {
                     "description": "required: true\nexample: 1970-01-01",
@@ -710,6 +1002,10 @@
                         "EHIC"
                     ]
                 },
+                "document_version": {
+                    "description": "required: true\nexample: \"1.0.0\"",
+                    "type": "string"
+                },
                 "first_name": {
                     "description": "required: true\nexample: John",
                     "type": "string"
@@ -718,44 +1014,89 @@
                     "description": "required: true\nexample: Doe",
                     "type": "string"
                 },
-                "qr": {
-                    "description": "required: false",
+                "member_state": {
+                    "description": "required: true\nexample: \"DE\"",
+                    "type": "string"
+                },
+                "revocation": {
+                    "description": "Revocation is a collection of fields representing a revocation",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.QR"
+                            "$ref": "#/definitions/model.Revocation"
                         }
                     ]
                 },
-                "revocation_id": {
-                    "description": "required: true\nexample: 8dbd2680-c03f-11ee-a21b-034aafe41222",
-                    "type": "string"
+                "valid_from": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
                 },
-                "uid": {
-                    "description": "required: true\nexample: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e",
-                    "type": "string"
+                "valid_to": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
                 }
             }
         },
         "model.QR": {
             "type": "object",
             "required": [
-                "base64_image"
+                "base64_image",
+                "deep_link"
             ],
             "properties": {
                 "base64_image": {
                     "type": "string"
+                },
+                "deep_link": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Revocation": {
+            "type": "object",
+            "properties": {
+                "follow_up_credential": {
+                    "description": "FollowUpCredential is the ID of the follow-up credential\nrequired: false\nexample: https://example.com/credential/?collect_id=8dbd2680-c03f-11ee-a21b-034aafe41222",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID is the ID of the revocation\nrequired: false\nexample: 8dbd2680-c03f-11ee-a21b-034aafe41222",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "Reason is the reason for revocation\nrequired: false\nexample: lost or stolen",
+                    "type": "string"
+                },
+                "revoked": {
+                    "description": "Revoked is a flag to indicate if the document has been revoked\nrequired: false\nexample: false",
+                    "type": "boolean"
+                },
+                "revoked_at": {
+                    "description": "RevokedAt is the time the document was revoked or going to be revoked\nrequired: false\nexample: 509567558",
+                    "type": "integer"
                 }
             }
         },
         "model.Upload": {
             "type": "object",
             "required": [
+                "attestation",
+                "document_data",
+                "identity",
                 "meta"
             ],
             "properties": {
+                "attestation": {
+                    "$ref": "#/definitions/model.Attestation"
+                },
                 "document_data": {},
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
+                },
                 "meta": {
                     "$ref": "#/definitions/model.MetaData"
+                },
+                "qr": {
+                    "$ref": "#/definitions/model.QR"
                 }
             }
         },

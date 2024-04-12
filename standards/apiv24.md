@@ -8,9 +8,10 @@
 
 - POST /upload                  - uploads one document
 - POST /notification            - return one qr object
-- POST /document/collect_id     - return one document with collect_id
+- POST /document/collect_id     - return one document by collect_id
 - POST /document/revoke         - revoke one document
 - DELETE /document              - delete one document
+- POST /document                - get one document
 - POST /portal                  - return array of documents
 - POST /id/mapping              - link `PID` to `Datastore`
 
@@ -51,49 +52,21 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
             "document_id": "",
             "document_type": "",
             "authentic_source_person_id": "",
-            "uid": "",
             "revocation_id": "",
             "collect_id": "",
             "member_state": "",
-            "document_version": 0,
+            "document_version": "2.0.1",
             "valid_from": "",
             "valid_to":"",
-            "revoke": {
-                "id": "",
-                "revoked": false,
-                "follow_up_credential": "",
-                "revoked_at":"",
-                "reason":""
-            }
         },
         "identity": {
-            "version": "",
+            "version": "1.1.0",
             "family_name": "",
             "given_name":"",
             "birth_date":"",
-            "uid": "",
-            "family_name_birth":"",
-            "given_name_birth":"",
-            "birth_place":"",
-            "gender":"",
-            "age_over_18":"",
-            "age_over_NN":"",
-            "age_in_years":"",
-            "age_birth_year":"",
-            "birth_country":"",
-            "birth_state":"",
-            "birth_city":"",
-            "resident_address":"",
-            "resident_country":"",
-            "resident_state":"",
-            "resident_city":"",
-            "resident_postal_code":"",
-            "resident_street":"",
-            "resident_house_number":"",
-            "nationality":""
         },
         "attestation": {
-            "version": 0,
+            "version": "7.2.1",
             "type": "",
             "description_short": "",
             "description_long": "",
@@ -182,7 +155,8 @@ Delete one document
 ```json
     {
         "authentic_source": "",
-        "document_id": ""
+        "document_id": "",
+        "document_type":""
     }
 ```
 
@@ -218,30 +192,10 @@ The `collect_id` is used to identify the correct attestation. The attestation da
         "document_type":"",
         "collect_id":"",
         "identity": {
-            "version": "",
+            "version": "1.0.1",
             "family_name": "",
             "given_name":"",
             "birth_date":"",
-            "uid": "",
-            "family_name_birth":"",
-            "given_name_birth":"",
-            "birth_place":"",
-            "gender":"",
-            "age_over_18":"",
-            "age_over_NN":"",
-            "age_in_years":"",
-            "age_birth_year":"",
-            "birth_country":"",
-            "birth_state":"",
-            "birth_city":"",
-            "resident_address":"",
-            "resident_country":"",
-            "resident_state":"",
-            "resident_city":"",
-            "resident_postal_code":"",
-            "resident_street":"",
-            "resident_house_number":"",
-            "nationality":""
         },
     }
 ```
@@ -289,6 +243,7 @@ citizen to initiate the pickup with his/her EUDIW.
     {
     "authentic_source":"",
     "authentic_source_person_id":"",
+    "document_type": "PDA1",
     "valid_from": "",
     "valid_to": ""
     }
@@ -305,28 +260,22 @@ citizen to initiate the pickup with his/her EUDIW.
                 "document_id": "",
                 "document_type": "",
                 "authentic_source_person_id": "",
-                "uid": "",
                 "revocation_id": "",
                 "collect_id": "",
                 "member_state": "",
-                "document_version": 0,
+                "document_version": "9.10.2",
                 "valid_from": "",
                 "valid_to":""
             },
             "identity": {
-                "version": "",
+                "version": "7.2.3",
                 "family_name": "",
                 "given_name":"",
                 "birth_date":"",
-                "uid": "",
                 "family_name_birth":"",
                 "given_name_birth":"",
                 "birth_place":"",
                 "gender":"",
-                "age_over_18":"",
-                "age_over_NN":"",
-                "age_in_years":"",
-                "age_birth_year":"",
                 "birth_country":"",
                 "birth_state":"",
                 "birth_city":"",
@@ -340,10 +289,11 @@ citizen to initiate the pickup with his/her EUDIW.
                 "nationality":""
             },
             "attestation": {
-                "version": 0,
+                "version": "1.0.0",
                 "type": "",
                 "description_short": "",
                 "description_long": "",
+                "description_structured":{}
             },  
             "document_data": {},
             "qr": {
@@ -377,30 +327,10 @@ Input consists of `authentic_source_id` and `identity` object with the informati
     {
         "authentic_source_id":"",
         "identity": {
-            "version": "",
+            "version": "1.0.0",
             "family_name": "",
             "given_name":"",
             "birth_date":"",
-            "uid": "",
-            "family_name_birth":"",
-            "given_name_birth":"",
-            "birth_place":"",
-            "gender":"",
-            "age_over_18":"",
-            "age_over_NN":"",
-            "age_in_years":"",
-            "age_birth_year":"",
-            "birth_country":"",
-            "birth_state":"",
-            "birth_city":"",
-            "resident_address":"",
-            "resident_country":"",
-            "resident_state":"",
-            "resident_city":"",
-            "resident_postal_code":"",
-            "resident_street":"",
-            "resident_house_number":"",
-            "nationality":""
         },
     }
 
@@ -434,12 +364,12 @@ http OK 200, else 400 and error body
 
 If `revoke.id` is not set byt the authentic source at the upload procedure, the `datastore` will set it equal to `document_id`. Depending on the use case and the intention of the authentic source it is possible that two credentials point to the same `revoke.id`.
 
-In order for the Issuer System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `revoke.id` must be submitted as input from the authentic source. The Issuer system should have internally set the endpoint for the revocation registry. It must be able to configure this in the config/ properties.
+In order for the Issuer-System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `revoke.id` must be submitted as input from the authentic source. The Issuer-System should have internally set the endpoint for the revocation registry. It must be able to configure this in the config/ properties.
 
-Revocation status allows flexibility for future decisions and flows. One possibility could be to include `collect_code` in a link in `revoke.follow_up_credential`, which may be interpreted by the EUDIW to automatically establish a new pickup flow to get the new credential version. This is to be further decided. `revoke_at` defines a specific point in time to which the credential shall be defined as revoked.
+Revocation status allows flexibility for future decisions and flows. One possibility could be to include `collect_id` in a link in `revoke.follow_up_credential`, which may be interpreted by the EUDIW to automatically establish a new pickup flow to get the new credential version. This is to be further decided. `revoke_at` defines a specific point in time to which the credential shall be defined as revoked.
 
 This endpoint shall only revoke the credential in the registry and don’t delete the attestation data in the Datastore.
-The Delete attestation data (DELETE /document) Endpoint can be used afterwards if the deletion is intended. Nonetheless there could be a pick-up request for an already revoked credential. In order for the Issuer System to respond properly, the information should still exist and be flagged as revoked. This can be achieved with the following endpoint ( Set revocation flag (POST /revoke/attestation)), which shall be called by the issuer system after this endpoint /revoke is called and the revocation is done.
+The Delete attestation data (DELETE /document) Endpoint can be used afterwards if deletion is intended. Nonetheless there could be a pick-up request for an already revoked credential. In order for the Issuer-System to respond properly, the information should still exist in the Datastore and be flagged as revoked. This can be achieved with the following endpoint. This endpoint shall be called by the Issuer-System after this endpoint /revoke is called and the revocation is done.
 
 ### Request
 
@@ -467,17 +397,17 @@ http OK 200, else 400 and error body
 |type| Attribute | required | description |
 |-|-|-|-|
 | string | authentic_source             | true | globally unambiguous name of the issuing entity (agency or institution) |
+| string | authentic_source_person_id   | true | uniq identifier within `authentic_source` namespace AND globally uniq within authentic source.|
 | string | document_id                  | true | uniq identifier within `authentic_source` namespace |
 | string | document_type                | true | Type of Document, for example “EHIC” or “PDA1” |
-| string | uid                          | true | uniq identifier within `authentic_source` and `document_type`, generated in authentic source|
 | string | revocation_id                | true | uniq identifier within `authentic_source` namespace OR equal to `document_id`|
-| string | collect_id                   | true | uniq identifier within `authentic_source` namespace OR equal to `document_id`|
-| string | authentic_source_person_id   | true | uniq identifier within `authentic_source` namespace AND globally uniq within authentic source.|
-| integer | document_version            | true | MUST be > 0 |
+| string | collect_id                   | false | uniq identifier within `authentic_source` namespace OR equal to `document_id`|
+| string | document_version             | true | MUST comply with <https://semver.org/> |
 | string | member_state                 | true | MUST comply with ISO 3166-1 alpha-2 AND MUST only include EU countries |
 | string | valid_from                   | true | iso8601 utc |
 | string | valid_to                     | true | iso8601 utc |
 | string | created_at                   | false | iso8601 utc |
+| object | revocation                   | false | |
 
 ### revoke{}
 
@@ -493,19 +423,14 @@ http OK 200, else 400 and error body
 
 |type| Attribute | required | description |
 |-|-|-|-|
-| integer | version                 | true  | must be > 0 |
+| string | version                 | true  | MUST comply with <https://semver.org/> |
 | string | family_name              | true  | As in current PID namespace |
 | string | given_name               | true  | As in current PID namespace |
 | string | birth_date               | true  | As in current PID namespace |
-| string | uid                      | true  | As in current PID namespace |
 | string | family_name_birth        | false | As in current PID namespace |
 | string | given_name_birth         | false | As in current PID namespace |
 | string | birth_place              | false | As in current PID namespace |
 | string | gender                   | false | As in current PID namespace |
-| string | age_over_18              | false | As in current PID namespace |
-| string | age_over_NN              | false | As in current PID namespace |
-| string | age_in_years             | false | As in current PID namespace |
-| string | age_birth_year           | false | As in current PID namespace |
 | string | birth_country            | false | As in current PID namespace |
 | string | birth_state              | false | As in current PID namespace |
 | string | birth_city               | false | As in current PID namespace |
@@ -522,10 +447,11 @@ http OK 200, else 400 and error body
 
 |type| Attribute | required | description |
 |-|-|-|-|
-| integer | version             | true | must be > 0 |
-| string | type                 | true | For internal display interpretation/differentiation |
-| string | description_short    | true | To display in the portal |
-| string | description_long     | true | To display in the portal |
+| string | version                 | true | MUST comply with <https://semver.org/> |
+| string | type                     | true | For internal display interpretation/differentiation |
+| string | description_short        | true | To display in the portal, will be removed in later api version |
+| string | description_long         | true | To display in the portal, will be removed in later api version |
+| object | description_structured   | false | accepts json object |
 
 ### document_data{}
 

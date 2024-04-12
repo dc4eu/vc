@@ -16,13 +16,6 @@ type UploadRequest struct {
 	DocumentData any                `json:"document_data" validate:"required"`
 }
 
-// UploadReply is the reply for a generic upload
-type UploadReply struct {
-	Data struct {
-		Status string `json:"status"`
-	} `json:"data"`
-}
-
 // Upload uploads a document with a set of attributes
 //
 //	@Summary		Upload
@@ -31,7 +24,7 @@ type UploadReply struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	UploadReply				"Success"
+//	@Success		200	"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
@@ -42,14 +35,26 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 
 	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Common.QR.BaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
 	if err != nil {
+		c.log.Debug("QR code generation failed", "error", err)
 		return err
 	}
 
-	if req.Meta.Revoke.ID == "" {
-		req.Meta.Revoke.ID = req.Meta.DocumentID
+	if req.Meta.CollectID == "" {
+		req.Meta.CollectID = req.Meta.DocumentID
 	}
 
-	req.Meta.CreatedAt = time.Now().UTC()
+	if req.Meta.Revocation == nil {
+		req.Meta.Revocation = &model.Revocation{
+			ID: req.Meta.DocumentID,
+		}
+	} else {
+		if req.Meta.Revocation.ID == "" {
+			req.Meta.Revocation.ID = req.Meta.DocumentID
+		}
+	}
+
+	req.Meta.CreatedAt = time.Now().Unix()
+
 	upload := &model.Upload{
 		Meta:         req.Meta,
 		Identity:     req.Identity,
@@ -60,8 +65,10 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 
 	_, err = c.simpleQueue.VCPersistentSave.Enqueue(ctx, upload)
 	if err != nil {
+		c.log.Debug("Failed to enqueue upload document", "error", err)
 		return err
 	}
+	c.log.Debug("Document enqueued for saving", "document_id", req.Meta.DocumentID)
 	return nil
 }
 
@@ -85,9 +92,9 @@ type NotificationReply struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	NotificationReply				"Success"
+//	@Success		200	{object}	NotificationReply		"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		NotificationRequest			true	" "
+//	@Param			req	body		NotificationRequest		true	" "
 //	@Router			/notification [post]
 func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
 	qrCode, err := c.db.VCDatastoreColl.GetQR(ctx, &model.MetaData{
@@ -154,9 +161,9 @@ func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappi
 
 // GetDocumentRequest is the request for GetDocument
 type GetDocumentRequest struct {
-	DocumentID      string `json:"document_id"`
-	AuthenticSource string `json:"authentic_source"`
-	DocumentType    string `json:"document_type"`
+	AuthenticSource string `json:"authentic_source" validate:"required"`
+	DocumentType    string `json:"document_type" validate:"required"`
+	DocumentID      string `json:"document_id" validate:"required"`
 }
 
 // GetDocumentReply is the reply for a generic document
@@ -177,6 +184,10 @@ type GetDocumentReply struct {
 //	@Param			req	body		GetDocumentRequest		true	" "
 //	@Router			/document [post]
 func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*GetDocumentReply, error) {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return nil, err
+	}
+
 	query := &model.MetaData{
 		DocumentID:      req.DocumentID,
 		DocumentType:    req.DocumentType,
@@ -211,9 +222,9 @@ type DeleteDocumentRequest struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200				"Success"
+//	@Success		200	"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		DeleteDocumentRequest		true	" "
+//	@Param			req	body		DeleteDocumentRequest	true	" "
 //	@Router			/document [delete]
 func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
@@ -249,9 +260,9 @@ type GetDocumentCollectIDReply struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	GetDocumentCollectIDReply		"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		GetDocumentCollectIDRequest			true	" "
+//	@Success		200	{object}	GetDocumentCollectIDReply	"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse		"Bad Request"
+//	@Param			req	body		GetDocumentCollectIDRequest	true	" "
 //	@Router			/document/collect_id [post]
 func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentCollectIDRequest) (*GetDocumentCollectIDReply, error) {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
@@ -259,10 +270,10 @@ func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentColle
 	}
 
 	query := &db.GetDocumentCollectIDQuery{
-		Identity:        req.Identity,
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,
 		CollectID:       req.CollectID,
+		Identity:        req.Identity,
 	}
 
 	doc, err := c.db.VCDatastoreColl.GetDocumentCollectID(ctx, query)
@@ -276,12 +287,70 @@ func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentColle
 	return reply, nil
 }
 
+// RevokeDocumentRequest is the request for RevokeDocument
+type RevokeDocumentRequest struct {
+	AuthenticSource string            `json:"authentic_source" validate:"required"`
+	DocumentType    string            `json:"document_type" validate:"required"`
+	Revocation      *model.Revocation `json:"revocation" validate:"required"`
+}
+
+// RevokeDocument revokes a specific document
+//
+//	@Summary		RevokeDocument
+//	@ID				revoke-document
+//	@Description	Revoke one document
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		RevokeDocumentRequest	true	" "
+//	@Router			/document/revoke [post]
+func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest) error {
+	c.log.Debug("Revoke request", "request", req)
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return err
+	}
+
+	if req.Revocation.ID == "" {
+		return helpers.NewError("missing meta.revocation.id")
+	}
+
+	doc, err := c.db.VCDatastoreColl.GetByRevocationID(ctx, &model.MetaData{
+		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.DocumentType,
+		Revocation:      &model.Revocation{ID: req.Revocation.ID},
+	})
+	if err != nil {
+		return err
+	}
+	c.log.Debug("Document found", "document_id", doc.Meta.DocumentID)
+
+	doc.Meta.Revocation = req.Revocation
+
+	if req.Revocation.RevokedAt == 0 {
+		doc.Meta.Revocation.RevokedAt = time.Now().Unix()
+		doc.Meta.Revocation.Revoked = true
+	}
+
+	c.log.Debug("Add revocation to document", "document_id", doc.Meta.DocumentID)
+
+	_, err = c.simpleQueue.VCPersistentReplace.Enqueue(ctx, doc)
+	if err != nil {
+		return err
+	}
+	c.log.Debug("Document enqueued for update", "document_id", doc.Meta.DocumentID)
+
+	return nil
+}
+
 // PortalRequest is the request for PortalData
 type PortalRequest struct {
 	AuthenticSource         string `json:"authentic_source" validate:"required"`
 	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
-	ValidFrom               string `json:"validity_from"`
-	ValidTo                 string `json:"validity_to"`
+	DocumentType            string `json:"document_type"`
+	ValidFrom               int64  `json:"valid_from"`
+	ValidTo                 int64  `json:"valid_to"`
 }
 
 // PortalReply is the reply for PortalData
@@ -309,6 +378,7 @@ func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*PortalReply, 
 	query := &db.PortalQuery{
 		AuthenticSource:         req.AuthenticSource,
 		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+		DocumentType:            req.DocumentType,
 		ValidTo:                 req.ValidTo,
 		ValidFrom:               req.ValidFrom,
 	}

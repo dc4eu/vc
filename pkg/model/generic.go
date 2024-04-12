@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"net/url"
-	"time"
 
 	"github.com/skip2/go-qrcode"
 )
@@ -60,8 +59,8 @@ type MetaData struct {
 	AuthenticSourcePersonID string `json:"authentic_source_person_id,omitempty" bson:"authentic_source_person_id" validate:"required"`
 
 	// required: true
-	// example: 1
-	DocumentVersion int `json:"document_version,omitempty" bson:"document_version" validate:"required,min=1"`
+	// example: "1.0.0"
+	DocumentVersion string `json:"document_version,omitempty" bson:"document_version" validate:"required,semver"`
 
 	// required: true
 	// example: PDA1
@@ -83,41 +82,36 @@ type MetaData struct {
 	// example: 1970-01-01
 	DateOfBirth string `json:"date_of_birth,omitempty" bson:"date_of_birth" validate:"required"`
 
-	// required: true
-	// example: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e
-	UID string `json:"uid,omitempty" bson:"uid" validate:"required"`
-
-	Revoke *Revoke `json:"revoke,omitempty" bson:"revoke"`
+	// Revocation is a collection of fields representing a revocation
+	Revocation *Revocation `json:"revocation,omitempty" bson:"revocation"`
 
 	// required: false
 	// example: 98fe67fc-c03f-11ee-bbee-4345224d414f
-	CollectID string `json:"collect_id,omitempty" bson:"collect_id" validate:"required"`
+	CollectID string `json:"collect_id,omitempty" bson:"collect_id"`
 
 	// required: true
 	// example: "DE"
 	MemberState string `json:"member_state,omitempty" bson:"member_state" validate:"required,iso3166_1_alpha2"`
 
-	// TODO(masv): ISO8601?
-	// required: true
-	// example: 2024-01-01
-	ValidFrom string `json:"valid_from,omitempty" bson:"valid_from" validate:"required"`
-
-	// TODO(masv): ISO8601?
-	// required: true
-	// example: 2024-12-31
-	ValidTo string `json:"valid_to,omitempty" bson:"valid_to" validate:"required"`
+	// required: false
+	// example: 509567558
+	ValidFrom int64 `json:"valid_from,omitempty" bson:"valid_from" validate:"required"`
 
 	// required: false
-	// example: 2024-03-15T10:00:00Z+01:00
-	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at"`
+	// example: 509567558
+	ValidTo int64 `json:"valid_to,omitempty" bson:"valid_to" validate:"required"`
+
+	// required: false
+	// example: 509567558
+	CreatedAt int64 `json:"created_at,omitempty" bson:"created_at"`
 }
 
-// Revoke is a collection of fields representing a revocation
-type Revoke struct {
+// Revocation is a collection of fields representing a revocation
+type Revocation struct {
 	// ID is the ID of the revocation
 	// required: false
 	// example: 8dbd2680-c03f-11ee-a21b-034aafe41222
-	ID string `json:"id,omitempty" bson:"id" validate:"required"`
+	ID string `json:"id,omitempty" bson:"id"`
 
 	// Revoked is a flag to indicate if the document has been revoked
 	// required: false
@@ -131,8 +125,8 @@ type Revoke struct {
 
 	// RevokedAt is the time the document was revoked or going to be revoked
 	// required: false
-	// example: 2024-03-15T10:00:00Z+01:00
-	RevokedAt time.Time `json:"revoked_at,omitempty" bson:"revoked_at"`
+	// example: 509567558
+	RevokedAt int64 `json:"revoked_at,omitempty" bson:"revoked_at"`
 
 	// Reason is the reason for revocation
 	// required: false
@@ -143,8 +137,8 @@ type Revoke struct {
 // Identity identifies a person
 type Identity struct {
 	// required: true
-	// example: 1.0.0
-	Version string `json:"version,omitempty" bson:"version" validate:"required"`
+	// example: "1.0.0"
+	Version string `json:"version,omitempty" bson:"version" validate:"required,semver"`
 
 	// required: true
 	// example: Svensson
@@ -157,10 +151,6 @@ type Identity struct {
 	// required: true
 	// example: 1970-01-01
 	BirthDate string `json:"birth_date,omitempty" bson:"birth_date" validate:"required"`
-
-	// required: true
-	// example: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e
-	UID string `json:"uid,omitempty" bson:"uid" validate:"required"`
 
 	// required: false
 	// example: Karlsson
@@ -177,27 +167,6 @@ type Identity struct {
 	// required: false
 	// example: male
 	Gender string `json:"gender,omitempty" bson:"gender"`
-
-	// TODO(masv): int instead of string?
-	// required: false
-	// example: 19
-	AgeOver18 string `json:"age_over_18,omitempty" bson:"age_over_18"`
-
-	// TODO(masv): int instead of string? How is supposed to work, query NN?
-	// required: false
-	// example: 19
-	AgeOverNN string `json:"age_over_nn,omitempty" bson:"age_over_nn"`
-
-	// TODO(masv): int instead of string?
-	// required: false
-	// example: 19
-	AgeInYears string `json:"age_in_years,omitempty" bson:"age_in_years"`
-	// String age_birth_year o As in current PID namespace
-
-	// TODO(masv): int instead of string?
-	// required: false
-	// example: 1970
-	AgeBirthYear string `json:"age_birth_year,omitempty" bson:"age_birth_year"`
 
 	// TODO(masv): full name or just country code?
 	// required: false
@@ -246,12 +215,11 @@ type Identity struct {
 }
 
 // Attestation is a collection of fields representing an attestation
-// TODO(masv): Change AttestationData to Attestation, data seems redundant
 type Attestation struct {
 	// TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant
 	// required: true
-	// example: 1.0.0
-	Version int `json:"version,omitempty" bson:"version" validate:"required"`
+	// example: "1.0.0"
+	Version string `json:"version,omitempty" bson:"version" validate:"required,semver"`
 
 	// required: true
 	// example: secure

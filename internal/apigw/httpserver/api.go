@@ -14,6 +14,7 @@ type Apiv1 interface {
 	GetDocument(ctx context.Context, req *apiv1.GetDocumentRequest) (*apiv1.GetDocumentReply, error)
 	DeleteDocument(ctx context.Context, req *apiv1.DeleteDocumentRequest) error
 	GetDocumentCollectID(ctx context.Context, req *apiv1.GetDocumentCollectIDRequest) (*apiv1.GetDocumentCollectIDReply, error)
+	RevokeDocument(ctx context.Context, req *apiv1.RevokeDocumentRequest) error
 	Portal(ctx context.Context, req *apiv1.PortalRequest) (*apiv1.PortalReply, error)
 
 	PDFSign(ctx context.Context, req *apiv1.PDFSignRequest) (*apiv1.PDFSignReply, error)

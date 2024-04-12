@@ -61,6 +61,22 @@ func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any,
 	return reply, nil
 }
 
+func (s *Service) endpointRevokeDocument(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointRevokeDocument")
+	defer span.End()
+
+	request := &apiv1.RevokeDocumentRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	if err := s.apiv1.RevokeDocument(ctx, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return nil, nil
+}
+
 func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointDeleteDocument")
 	defer span.End()

@@ -18,13 +18,12 @@ func (c *Client) mockOne(ctx context.Context, authenticSource, documentType stri
 		FirstName:               person.FirstName,
 		LastName:                person.LastName,
 		DateOfBirth:             gofakeit.Date().String(),
-		UID:                     gofakeit.UUID(),
 		CollectID:               gofakeit.UUID(),
-		Revoke: &model.Revoke{
+		Revocation: &model.Revocation{
 			ID:                 gofakeit.UUID(),
 			Revoked:            gofakeit.Bool(),
 			FollowUpCredential: gofakeit.URL(),
-			RevokedAt:          gofakeit.FutureDate(),
+			RevokedAt:          gofakeit.Date().Unix(),
 			Reason:             gofakeit.RandomString([]string{"lost", "stolen", "expired"}),
 		},
 	}

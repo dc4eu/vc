@@ -93,12 +93,13 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	rgAPIv1 := rgRoot.Group("api/v1")
 
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/upload", s.endpointUpload)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/portal", s.endpointPortal)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/notification", s.endpointNotification)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document", s.endpointGetDocument)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/attestation", s.endpointGetDocumentCollectID)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/collect_id", s.endpointGetDocumentCollectID)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/revoke", s.endpointRevokeDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id/mapping", s.endpointIDMapping)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/portal", s.endpointPortal)
 
 	rgEduSealV1 := rgAPIv1.Group("/ladok/pdf", s.middlewareClientCertAuth(ctx))
 	rgEduSealV1.Use(s.middlewareAuthLog(ctx))

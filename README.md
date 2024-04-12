@@ -1,6 +1,6 @@
 # VC
 
-This is repository consists of the source code for the VC EU project, but also tools and make targets that's making sense for developers, please do not use for anything else.
+This repository consists of the source code for the VC EU project, but also tools and make targets that's making sense for developers, please do not use for anything else.
 
 ## How to build
 

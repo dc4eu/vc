@@ -2,9 +2,9 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"vc/pkg/ehic"
 	"vc/pkg/eidas"
-	"vc/pkg/model"
 
 	"github.com/brianvoe/gofakeit/v6"
 )
@@ -14,19 +14,19 @@ type EHICService struct {
 	Client *Client
 }
 
-func (s *EHICService) random(ctx context.Context, meta *model.MetaData) any {
+func (s *EHICService) random(ctx context.Context, person *gofakeit.PersonInfo) map[string]any {
 	doc := ehic.Document{
 		PID: eidas.Identification{
-			FirstName:   gofakeit.FirstName(),
-			LastName:    gofakeit.LastName(),
-			Gender:      gofakeit.Gender(),
+			FirstName:   person.FirstName,
+			LastName:    person.LastName,
+			Gender:      person.Gender,
 			PINS:        []string{},
 			ExhibitorID: gofakeit.Numerify("##########"),
 		},
 		CardHolder: ehic.CardHolder{
-			FamilyName:       meta.LastName,
-			GivenName:        meta.FirstName,
-			BirthDate:        meta.DateOfBirth,
+			FamilyName:       person.LastName,
+			GivenName:        person.FirstName,
+			BirthDate:        gofakeit.Date().String(),
 			ID:               gofakeit.UUID(),
 			CardholderStatus: gofakeit.RandomString([]string{"active", "inactive"}),
 		},
@@ -51,5 +51,15 @@ func (s *EHICService) random(ctx context.Context, meta *model.MetaData) any {
 		},
 	}
 
-	return doc
+	d, err := json.Marshal(doc)
+	if err != nil {
+		panic(err)
+	}
+
+	var t map[string]any
+	if err := json.Unmarshal(d, &t); err != nil {
+		panic(err)
+	}
+
+	return t
 }

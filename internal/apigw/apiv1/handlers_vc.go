@@ -13,7 +13,7 @@ type UploadRequest struct {
 	Meta         *model.MetaData    `json:"meta" validate:"required"`
 	Identity     *model.Identity    `json:"identity,omitempty" validate:"required"`
 	Attestation  *model.Attestation `json:"attestation,omitempty" validate:"required"`
-	DocumentData any                `json:"document_data" validate:"required"`
+	DocumentData map[string]any     `json:"document_data" validate:"required"`
 }
 
 // Upload uploads a document with a set of attributes

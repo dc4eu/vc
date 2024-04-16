@@ -10,11 +10,11 @@ import (
 
 // Upload is a generic type for upload
 type Upload struct {
-	Meta         *MetaData    `json:"meta,omitempty" bson:"meta" validate:"required"`
-	Identity     *Identity    `json:"identity,omitempty" bson:"identity" validate:"required"`
-	Attestation  *Attestation `json:"attestation,omitempty" bson:"attestation" validate:"required"`
-	DocumentData any          `json:"document_data,omitempty" bson:"document_data" validate:"required"`
-	QR           *QR          `json:"qr,omitempty" bson:"qr"`
+	Meta         *MetaData      `json:"meta,omitempty" bson:"meta" validate:"required"`
+	Identity     *Identity      `json:"identity,omitempty" bson:"identity" validate:"required"`
+	Attestation  *Attestation   `json:"attestation,omitempty" bson:"attestation" validate:"required"`
+	DocumentData map[string]any `json:"document_data,omitempty" bson:"document_data" validate:"required"`
+	QR           *QR            `json:"qr,omitempty" bson:"qr"`
 }
 
 // QRGenerator generates a QR code
@@ -91,7 +91,7 @@ type MetaData struct {
 
 	// required: true
 	// example: "DE"
-	MemberState string `json:"member_state,omitempty" bson:"member_state" validate:"required,iso3166_1_alpha2"`
+	MemberState string `json:"member_state,omitempty" bson:"member_state" validate:"required,iso3166_1_alpha3_eu"`
 
 	// required: false
 	// example: 509567558

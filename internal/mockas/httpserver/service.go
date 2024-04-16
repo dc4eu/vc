@@ -5,8 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"reflect"
-	"strings"
 	"time"
 	"vc/internal/mockas/apiv1"
 	"vc/pkg/helpers"
@@ -16,7 +14,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 )
 
 // Service is the service object for httpserver
@@ -47,16 +44,11 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 		gin.SetMode(gin.DebugMode)
 	}
 
-	apiValidator := validator.New()
-	apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+	apiValidator, err := helpers.NewValidator()
+	if err != nil {
+		return nil, err
+	}
 
-		if name == "-" {
-			return ""
-		}
-
-		return name
-	})
 	binding.Validator = &defaultValidator{
 		Validate: apiValidator,
 	}

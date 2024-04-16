@@ -13,26 +13,19 @@ import (
 	"github.com/masv3971/gosunetca/types"
 )
 
-type uploaderReply struct {
-	Data struct {
-		Status string `json:"status"`
-	} `json:"data"`
-}
-
-func (c *Client) uploader(ctx context.Context, upload *model.Upload) (*uploaderReply, *http.Response, error) {
-	reply := &uploaderReply{}
+func (c *Client) uploader(ctx context.Context, upload *model.Upload) (*http.Response, error) {
 	resp, err := c.call(
 		ctx,
 		http.MethodPost,
 		"/api/v1/upload",
 		upload,
-		reply,
+		nil,
 	)
 	if err != nil {
-		return nil, resp, err
+		return resp, err
 	}
 
-	return reply, resp, nil
+	return resp, nil
 }
 
 // NewRequest make a new request
@@ -93,10 +86,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, value any) (*http.Re
 		return nil, caError
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(value); err != nil {
-		c.log.Debug("json decode", "error", err)
-		return nil, err
-	}
+	c.log.Debug("do", "body", resp.Body, "status", resp.StatusCode)
 
 	return resp, nil
 }

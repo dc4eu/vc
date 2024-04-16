@@ -19,7 +19,7 @@ type AddressType struct {
 	PostCode     string `json:"postCode" bson:"postCode"`
 	Town         string `json:"town" bson:"town"`
 	Region       string `json:"region" bson:"region"`
-	CountryCode  string `json:"countryCode" bson:"country_code" validate:"oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SI SK UK"`
+	CountryCode  string `json:"countryCode" bson:"country_code" validate:"iso3166_1_alpha3_eu"`
 }
 
 // WorkPlaceNameType is the model for the PDA1 work place name type
@@ -41,7 +41,7 @@ type WorkPlaceAddressType struct {
 type BirthPlaceType struct {
 	Town        string `json:"town" bson:"town"`
 	Region      string `json:"region" bson:"region"`
-	CountryCode string `json:"countryCode" bson:"countryCode" validate:"oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SI SK UK"`
+	CountryCode string `json:"countryCode" bson:"countryCode" validate:"iso3166_1_alpha3_eu"`
 }
 
 // Section1 is the model for the PDA1 section 1
@@ -52,7 +52,7 @@ type Section1 struct {
 	Forenames                    string         `json:"forenames" bson:"forenames"`
 	SurnameAtBirth               string         `json:"surnameAtBirth" bson:"surnameAtBirth"`
 	DateBirth                    string         `json:"dateBirth" bson:"dateBirth"`
-	Nationality                  string         `json:"nationality" bson:"nationality" validate:"oneof=AT BE BG HR CY CZ DK EE FI FR DE EL HU IS IE IT LV LI LT LU MT NL NO PL PT RO SK SI ES SE CH UK XR XS XU AF AL DZ AD AO AG AR AM AU AZ BS BH BD BB BY BZ BJ BT BO BA BW BR BN BF BI KH CM CA CV CF TD CL CN CO KM CG CD CR CI CU DJ DM DO EC EG SV GQ ER ET FJ GA GM GE GH GD GT GN GW GY HT VA HN IN ID IR IQ IL JM JP JO KZ KE KI KP KR KW KG LA LB LS LR LY MK MG MW MY MV ML MH MR MU MX FM MD MC MN ME MA MZ MM NA NR NP NZ NI NE NG OM PK PW PS PA PG PY PE PH QA RU RW KN LC VC WS SM ST SA SN RS SC SL SG SB SO ZA SS LK SD SR SZ SY TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE US UY UZ VU VE VN YE ZM ZW BQAQ BUMM BYAA CTKI CSHH DYBJ NQAQ TPTL FXFR AIDJ FQHH DDDE GEHH JTUM MIUM ANHH NTHH NHVU PCHH PZPA CSXX SKIN RHZW HVBF PUUM SUHH VDVN WKUM YDYE YUCS ZRCD"`
+	Nationality                  string         `json:"nationality" bson:"nationality" validate:"iso3166_1_alpha2"`
 	PlaceBirth                   BirthPlaceType `json:"placeBirth" bson:"placeBirth"`
 	StateOfResidenceAddress      AddressType    `json:"stateOfResidenceAddress" bson:"stateOfResidenceAddress"`
 	StateOfStayAddress           AddressType    `json:"stateOfStayAddress" bson:"stateOfStayAddress"`
@@ -60,7 +60,7 @@ type Section1 struct {
 
 // Section2 is the model for the PDA1 section 2
 type Section2 struct {
-	MemberStateWhichLegislationApplies string    `json:"memberStateWhichLegislationApplies" bson:"member_state_which_legislation_applies" validate:"oneof=AT BE BG CY CZ DE DK EE EL ES FI FR HR HU IE IT LT LU LV MT NL PL PT RO SE SI SK UK"`
+	MemberStateWhichLegislationApplies string    `json:"memberStateWhichLegislationApplies" bson:"member_state_which_legislation_applies" validate:"iso3166_1_alpha2"`
 	StartingDate                       time.Time `json:"startingDate" bson:"starting_date"`
 	EndingDate                         time.Time `json:"endingDate" bson:"ending_date"`
 	CertificateForDurationActivity     bool      `json:"certificateForDurationActivity" bson:"certificate_for_duration_activity"`

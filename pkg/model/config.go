@@ -98,6 +98,9 @@ type Queues struct {
 		VCPersistentDelete struct {
 			Name string `yaml:"name" validate:"required"`
 		} `yaml:"vc_persistent_delete" validate:"required"`
+		VCPersistentReplace struct {
+			Name string `yaml:"name" validate:"required"`
+		} `yaml:"vc_persistent_replace" validate:"required"`
 	} `yaml:"simple_queue" validate:"required"`
 }
 

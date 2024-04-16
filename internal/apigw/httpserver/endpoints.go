@@ -4,7 +4,6 @@ import (
 	"context"
 	"vc/internal/apigw/apiv1"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
-	"vc/pkg/model"
 
 	"go.opentelemetry.io/otel/codes"
 
@@ -15,7 +14,7 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointUpload")
 	defer span.End()
 
-	request := &model.Upload{}
+	request := &apiv1.UploadRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
@@ -62,6 +61,22 @@ func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any,
 	return reply, nil
 }
 
+func (s *Service) endpointRevokeDocument(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointRevokeDocument")
+	defer span.End()
+
+	request := &apiv1.RevokeDocumentRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	if err := s.apiv1.RevokeDocument(ctx, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return nil, nil
+}
+
 func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointDeleteDocument")
 	defer span.End()
@@ -79,16 +94,16 @@ func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (a
 	return nil, nil
 }
 
-func (s *Service) endpointGetDocumentAttestation(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointGetDocumentCollectID(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointGetDocumentAttestation")
 	defer span.End()
 
-	request := &apiv1.GetDocumentAttestationRequest{}
+	request := &apiv1.GetDocumentCollectIDRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.GetDocumentAttestation(ctx, request)
+	reply, err := s.apiv1.GetDocumentCollectID(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

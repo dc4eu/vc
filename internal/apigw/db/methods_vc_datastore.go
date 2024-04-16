@@ -50,7 +50,6 @@ func (c *VCDatastoreColl) IDMapping(ctx context.Context, query *IDMappingQuery) 
 		"identity.version":      bson.M{"$eq": query.Identity.Version},
 		"identity.family_name":  bson.M{"$eq": query.Identity.FamilyName},
 		"identity.given_name":   bson.M{"$eq": query.Identity.GivenName},
-		"identity.uid":          bson.M{"$eq": query.Identity.UID},
 	}
 	opts := options.FindOne().SetProjection(bson.M{
 		"meta.authentic_source_person_id": 1,
@@ -71,9 +70,16 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, attr *model.MetaData)
 		"meta.document_id":      bson.M{"$eq": attr.DocumentID},
 	}
 	opt := options.FindOne().SetProjection(bson.M{
-		"meta.revocation_id": 1,
-		"meta.collect_id":    1,
-		"meta.document_data": 1,
+		"meta.authentic_source_person_id": 1,
+		"meta.authentic_source":           1,
+		"meta.document_type":              1,
+		"meta.document_id":                1,
+		"meta.revocation":                 1,
+		"meta.collect_id":                 1,
+		"meta.document_version":           1,
+		"meta.valid_from":                 1,
+		"meta.valid_to":                   1,
+		"document_data":                   1,
 	})
 
 	res := &model.Upload{}
@@ -101,31 +107,39 @@ func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*mod
 	return res.QR, nil
 }
 
-// GetDocumentAttestationQuery is the query to get document attestation
-type GetDocumentAttestationQuery struct {
-	Identity *model.Identity
-	Meta     *model.MetaData
+// GetDocumentCollectIDQuery is the query to get document attestation
+type GetDocumentCollectIDQuery struct {
+	Identity        *model.Identity
+	AuthenticSource string
+	DocumentType    string
+	CollectID       string
 }
 
-// GetDocumentAttestation return matching document if any, or error
-func (c *VCDatastoreColl) GetDocumentAttestation(ctx context.Context, query *GetDocumentAttestationQuery) (*model.Upload, error) {
+// GetDocumentCollectID return matching document if any, or error
+func (c *VCDatastoreColl) GetDocumentCollectID(ctx context.Context, query *GetDocumentCollectIDQuery) (*model.Upload, error) {
 	filter := bson.M{
-		"meta.authentic_source": bson.M{"$eq": query.Meta.AuthenticSource},
-		"meta.collect_id":       bson.M{"$eq": query.Meta.CollectID},
-		"meta.document_type":    bson.M{"$eq": query.Meta.DocumentType},
-		"meta.document_id":      bson.M{"$eq": query.Meta.DocumentID},
-		"meta.uid":              bson.M{"$eq": query.Meta.UID},
-		"meta.date_of_birth":    bson.M{"$eq": query.Meta.DateOfBirth},
-		"meta.last_name":        bson.M{"$eq": query.Meta.LastName},
-		"meta.first_name":       bson.M{"$eq": query.Meta.FirstName},
+		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
+		"meta.collect_id":       bson.M{"$eq": query.CollectID},
+		"meta.document_type":    bson.M{"$eq": query.DocumentType},
+		"identity.version":      bson.M{"$eq": query.Identity.Version},
+		"identity.family_name":  bson.M{"$eq": query.Identity.FamilyName},
+		"identity.given_name":   bson.M{"$eq": query.Identity.GivenName},
+		"identity.birth_date":   bson.M{"$eq": query.Identity.BirthDate},
 	}
 
 	opt := options.FindOne().SetProjection(bson.M{
-		"meta.document_type": 1,
-		"meta.document_id":   1,
-		"meta.revocation_id": 1,
-		"meta.collect_id":    1,
-		"meta.document_data": 1,
+		"meta.document_type":              1,
+		"meta.document_id":                1,
+		"meta.document_version":           1,
+		"meta.revocation_id":              1,
+		"meta.revoked":                    1,
+		"meta.collect_id":                 1,
+		"meta.authentic_source_person_id": 1,
+		"meta.authentic_source":           1,
+		"meta.member_state":               1,
+		"meta.valid_from":                 1,
+		"meta.valid_to":                   1,
+		"document_data":                   1,
 	})
 
 	res := &model.Upload{}
@@ -139,23 +153,29 @@ func (c *VCDatastoreColl) GetDocumentAttestation(ctx context.Context, query *Get
 type PortalQuery struct {
 	AuthenticSource         string
 	AuthenticSourcePersonID string
-	ValidTo                 string
-	ValidFrom               string
+	DocumentType            string
+	ValidTo                 int64
+	ValidFrom               int64
 }
 
 // PortalData returns a list of portal data
 func (c *VCDatastoreColl) PortalData(ctx context.Context, query *PortalQuery) ([]model.Upload, error) {
-	filter := bson.M{}
-
-	if query.ValidFrom != "" {
-		filter["meta.valid_from"] = bson.M{"$eq": query.ValidFrom}
-	} else if query.ValidTo != "" {
-		filter["meta.valid_to"] = bson.M{"$eq": query.ValidTo}
+	filter := bson.M{
+		"meta.authentic_source":           bson.M{"$eq": query.AuthenticSource},
+		"meta.authentic_source_person_id": bson.M{"$eq": query.AuthenticSourcePersonID},
 	}
-	c.Service.log.Info("filter", "valid_to", query.ValidTo)
 
-	filter["meta.authentic_source"] = bson.M{"$eq": query.AuthenticSource}
-	filter["meta.authentic_source_person_id"] = bson.M{"$eq": query.AuthenticSourcePersonID}
+	if query.ValidFrom != 0 {
+		filter["meta.valid_from"] = bson.M{"$gte": query.ValidFrom}
+	}
+	if query.ValidTo != 0 {
+		c.Service.log.Debug("filter", "valid_to", query.ValidTo)
+		filter["meta.valid_to"] = bson.M{"$lte": query.ValidTo}
+	}
+
+	if query.DocumentType != "" {
+		filter["meta.document_type"] = bson.M{"$eq": query.DocumentType}
+	}
 
 	cursor, err := c.Coll.Find(ctx, filter)
 	if err != nil {
@@ -163,6 +183,34 @@ func (c *VCDatastoreColl) PortalData(ctx context.Context, query *PortalQuery) ([
 	}
 	res := []model.Upload{}
 	if err := cursor.All(ctx, &res); err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+// Get gets one document
+func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.Upload, error) {
+	filter := bson.M{
+		"meta.document_id":      bson.M{"$eq": doc.DocumentID},
+		"meta.authentic_source": bson.M{"$eq": doc.AuthenticSource},
+		"meta.document_type":    bson.M{"$eq": doc.DocumentType},
+	}
+	res := &model.Upload{}
+	if err := c.Coll.FindOne(ctx, filter).Decode(res); err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+// GetByRevocationID gets one document by meta.revocation.id and meta.authentic_source
+func (c *VCDatastoreColl) GetByRevocationID(ctx context.Context, q *model.MetaData) (*model.Upload, error) {
+	filter := bson.M{
+		"meta.authentic_source": bson.M{"$eq": q.AuthenticSource},
+		"meta.document_type":    bson.M{"$eq": q.DocumentType},
+		"meta.revocation.id":    bson.M{"$eq": q.Revocation.ID},
+	}
+	res := &model.Upload{}
+	if err := c.Coll.FindOne(ctx, filter).Decode(res); err != nil {
 		return nil, err
 	}
 	return res, nil

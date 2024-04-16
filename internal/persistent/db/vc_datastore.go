@@ -51,6 +51,42 @@ func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.Upload) error {
 	return nil
 }
 
+// Get gets one document
+func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.Upload, error) {
+	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:get")
+	defer span.End()
+
+	filter := bson.M{
+		"meta.document_id":      bson.M{"$eq": doc.DocumentID},
+		"meta.authentic_source": bson.M{"$eq": doc.AuthenticSource},
+	}
+	res := &model.Upload{}
+	if err := c.coll.FindOne(ctx, filter).Decode(res); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return res, nil
+}
+
+// Replace replaces one document
+func (c *VCDatastoreColl) Replace(ctx context.Context, doc *model.Upload) error {
+	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:replace")
+	defer span.End()
+
+	filter := bson.M{
+		"meta.document_id":      bson.M{"$eq": doc.Meta.DocumentID},
+		"meta.authentic_source": bson.M{"$eq": doc.Meta.AuthenticSource},
+	}
+
+	_, err := c.coll.ReplaceOne(ctx, filter, doc)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+	c.service.log.Info("updated document", "document_id", doc.Meta.DocumentID)
+	return nil
+}
+
 // Delete deletes a document
 func (c *VCDatastoreColl) Delete(ctx context.Context, doc *model.MetaData) error {
 	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:delete")

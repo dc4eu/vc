@@ -32,6 +32,7 @@ type Service struct {
 	VCPersistentSave    queue
 	VCPersistentGet     queue
 	VCPersistentDelete  queue
+	VCPersistentReplace queue
 }
 
 // New creates a new queue service
@@ -79,6 +80,11 @@ func New(ctx context.Context, kv *kvclient.Client, tracer *trace.Tracer, cfg *mo
 	}
 
 	service.VCPersistentDelete, err = NewVCPersistentDelete(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentDelete.Name, service.log.New("VCPersistentDelete"))
+	if err != nil {
+		return nil, err
+	}
+
+	service.VCPersistentReplace, err = NewVCPersistentReplace(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentReplace.Name, service.log.New("VCPersistentReplace"))
 	if err != nil {
 		return nil, err
 	}

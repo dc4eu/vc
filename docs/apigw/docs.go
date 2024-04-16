@@ -583,7 +583,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "Data *model.Upload ` + "`" + `json:\"data\"` + "`" + `",
                     "type": "object",
                     "properties": {
                         "document_data": {},
@@ -816,7 +815,10 @@ const docTemplate = `{
                 "attestation": {
                     "$ref": "#/definitions/model.Attestation"
                 },
-                "document_data": {},
+                "document_data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
                 },
@@ -1096,7 +1098,10 @@ const docTemplate = `{
                 "attestation": {
                     "$ref": "#/definitions/model.Attestation"
                 },
-                "document_data": {},
+                "document_data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
                 },

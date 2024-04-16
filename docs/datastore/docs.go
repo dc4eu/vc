@@ -375,36 +375,32 @@ const docTemplate = `{
         "model.Attestation": {
             "type": "object",
             "required": [
-                "attestation_type",
-                "attestation_version",
                 "description_long",
-                "short_text",
-                "valid_from",
-                "valid_to"
+                "description_short",
+                "description_structured",
+                "type",
+                "version"
             ],
             "properties": {
-                "attestation_type": {
-                    "description": "required: true\nexample: secure",
-                    "type": "string"
-                },
-                "attestation_version": {
-                    "description": "TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant\nrequired: true\nexample: 1.0.0",
-                    "type": "integer"
-                },
                 "description_long": {
                     "description": "TODO(masv): change TextLong to DescriptionLong\nrequired: true\nexample: European Health Insurance Card",
                     "type": "string"
                 },
-                "short_text": {
+                "description_short": {
                     "description": "TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended\nrequired: true\nexample: EHIC",
                     "type": "string"
                 },
-                "valid_from": {
-                    "description": "TODO(masv): ISO8601?\nrequired: true\nexample: 2024-01-01",
+                "description_structured": {
+                    "description": "DescriptionStructured is a map of structured descriptions\nrequired: true\nexample: {\"en\": \"European Health Insurance Card\", \"sv\": \"Europeiskt sjukförsäkringskortet\"}",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "type": {
+                    "description": "required: true\nexample: secure",
                     "type": "string"
                 },
-                "valid_to": {
-                    "description": "TODO(masv): ISO8601?\nrequired: true\nexample: 2024-12-31",
+                "version": {
+                    "description": "TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant\nrequired: true\nexample: \"1.0.0\"",
                     "type": "string"
                 }
             }
@@ -415,26 +411,9 @@ const docTemplate = `{
                 "birth_date",
                 "family_name",
                 "given_name",
-                "identity_data_version",
-                "uuid"
+                "version"
             ],
             "properties": {
-                "age_birth_year": {
-                    "description": "TODO(masv): int instead of string?\nrequired: false\nexample: 1970",
-                    "type": "string"
-                },
-                "age_in_years": {
-                    "description": "TODO(masv): int instead of string?\nrequired: false\nexample: 19",
-                    "type": "string"
-                },
-                "age_over_18": {
-                    "description": "TODO(masv): int instead of string?\nrequired: false\nexample: 19",
-                    "type": "string"
-                },
-                "age_over_nn": {
-                    "description": "TODO(masv): int instead of string? How is supposed to work, query NN?\nrequired: false\nexample: 19",
-                    "type": "string"
-                },
                 "birth_city": {
                     "description": "required: false\nexample: Stockholm",
                     "type": "string"
@@ -464,7 +443,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "description": "TODO(masv): male,female,other,unknown? should this be a string?\nrequired: false\nexample: male",
+                    "description": "required: false\nexample: male",
                     "type": "string"
                 },
                 "given_name": {
@@ -473,10 +452,6 @@ const docTemplate = `{
                 },
                 "given_name_at_birth": {
                     "description": "required: false\nexample: Magnus",
-                    "type": "string"
-                },
-                "identity_data_version": {
-                    "description": "required: true\nexample: 1.0.0",
                     "type": "string"
                 },
                 "nationality": {
@@ -511,8 +486,8 @@ const docTemplate = `{
                     "description": "required: false\nexample: baker street",
                     "type": "string"
                 },
-                "uuid": {
-                    "description": "TODO(masv): change to UUID from \"unique_id\"\nrequired: true\nexample: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e",
+                "version": {
+                    "description": "required: true\nexample: \"1.0.0\"",
                     "type": "string"
                 }
             }
@@ -523,16 +498,18 @@ const docTemplate = `{
                 "authentic_source",
                 "authentic_source_person_id",
                 "date_of_birth",
-                "document_data_version",
                 "document_id",
                 "document_type",
+                "document_version",
                 "first_name",
                 "last_name",
-                "uid"
+                "member_state",
+                "valid_from",
+                "valid_to"
             ],
             "properties": {
                 "authentic_source": {
-                    "description": "required: true\nexample: Sunet",
+                    "description": "required: true\nexample: SUNET",
                     "type": "string"
                 },
                 "authentic_source_person_id": {
@@ -543,12 +520,12 @@ const docTemplate = `{
                     "description": "required: false\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
                     "type": "string"
                 },
+                "created_at": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
+                },
                 "date_of_birth": {
                     "description": "required: true\nexample: 1970-01-01",
-                    "type": "string"
-                },
-                "document_data_version": {
-                    "description": "required: true\nexample: 1.0.0",
                     "type": "string"
                 },
                 "document_id": {
@@ -563,6 +540,10 @@ const docTemplate = `{
                         "EHIC"
                     ]
                 },
+                "document_version": {
+                    "description": "required: true\nexample: \"1.0.0\"",
+                    "type": "string"
+                },
                 "first_name": {
                     "description": "required: true\nexample: John",
                     "type": "string"
@@ -571,31 +552,92 @@ const docTemplate = `{
                     "description": "required: true\nexample: Doe",
                     "type": "string"
                 },
-                "revocation_id": {
-                    "description": "required: false\nexample: 8dbd2680-c03f-11ee-a21b-034aafe41222",
+                "member_state": {
+                    "description": "required: true\nexample: \"DE\"",
                     "type": "string"
                 },
-                "uid": {
-                    "description": "required: true\nexample: 85f90d4c-c03f-11ee-9386-ef1b105c4f3e",
+                "revocation": {
+                    "description": "Revocation is a collection of fields representing a revocation",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Revocation"
+                        }
+                    ]
+                },
+                "valid_from": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
+                },
+                "valid_to": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.QR": {
+            "type": "object",
+            "required": [
+                "base64_image",
+                "deep_link"
+            ],
+            "properties": {
+                "base64_image": {
                     "type": "string"
+                },
+                "deep_link": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Revocation": {
+            "type": "object",
+            "properties": {
+                "follow_up_credential": {
+                    "description": "FollowUpCredential is the ID of the follow-up credential\nrequired: false\nexample: https://example.com/credential/?collect_id=8dbd2680-c03f-11ee-a21b-034aafe41222",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID is the ID of the revocation\nrequired: false\nexample: 8dbd2680-c03f-11ee-a21b-034aafe41222",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "Reason is the reason for revocation\nrequired: false\nexample: lost or stolen",
+                    "type": "string"
+                },
+                "revoked": {
+                    "description": "Revoked is a flag to indicate if the document has been revoked\nrequired: false\nexample: false",
+                    "type": "boolean"
+                },
+                "revoked_at": {
+                    "description": "RevokedAt is the time the document was revoked or going to be revoked\nrequired: false\nexample: 509567558",
+                    "type": "integer"
                 }
             }
         },
         "model.Upload": {
             "type": "object",
             "required": [
+                "attestation",
+                "document_data",
+                "identity",
                 "meta"
             ],
             "properties": {
                 "attestation": {
                     "$ref": "#/definitions/model.Attestation"
                 },
-                "document_data": {},
+                "document_data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
                 },
                 "meta": {
                     "$ref": "#/definitions/model.MetaData"
+                },
+                "qr": {
+                    "$ref": "#/definitions/model.QR"
                 }
             }
         }

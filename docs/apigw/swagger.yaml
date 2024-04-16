@@ -37,7 +37,6 @@ definitions:
   apiv1.GetDocumentReply:
     properties:
       data:
-        description: Data *model.Upload `json:"data"`
         properties:
           document_data: {}
           meta:
@@ -183,7 +182,9 @@ definitions:
     properties:
       attestation:
         $ref: '#/definitions/model.Attestation'
-      document_data: {}
+      document_data:
+        additionalProperties: {}
+        type: object
       identity:
         $ref: '#/definitions/model.Identity'
       meta:
@@ -482,7 +483,9 @@ definitions:
     properties:
       attestation:
         $ref: '#/definitions/model.Attestation'
-      document_data: {}
+      document_data:
+        additionalProperties: {}
+        type: object
       identity:
         $ref: '#/definitions/model.Identity'
       meta:

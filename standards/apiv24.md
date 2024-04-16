@@ -355,9 +355,10 @@ http OK 200, else 400 and error body
 
 ```mermaid
     sequenceDiagram;
-    authentic source->>issuer: POST /document/revoke;
-    issuer->>registry:
+    authentic source->>issuer: POST /credential/revoke;
     issuer->>authentic source: 200/400;
+    issuer->>registry: POST /credential/revoke
+    issuer->>datastore: POST /document/revoke
 ```
 
 ### Description

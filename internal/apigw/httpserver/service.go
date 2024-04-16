@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
-	"reflect"
-	"strings"
 	"time"
 	"vc/internal/apigw/apiv1"
 	"vc/pkg/helpers"
@@ -18,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -53,15 +50,10 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 		gin.SetMode(gin.DebugMode)
 	}
 
-	apiValidator := validator.New()
-	apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-		if name == "-" {
-			return ""
-		}
-
-		return name
-	})
+	apiValidator, err := helpers.NewValidator()
+	if err != nil {
+		return nil, err
+	}
 	binding.Validator = &defaultValidator{
 		Validate: apiValidator,
 	}

@@ -23,14 +23,14 @@ func (c *Client) SDJWT(ctx context.Context, req *SDJWTRequest) (*SDJWTReply, err
 		Meta: req.Meta,
 	}
 
-	switch req.Meta.DocumentType {
-	case "PDA1":
-		mockUpload.DocumentData = c.PDA1.random(ctx)
-	case "EHIC":
-		mockUpload.DocumentData = c.EHIC.random(ctx)
-	default:
-		return nil, model.ErrNoKnownDocumentType
-	}
+	//switch req.Meta.DocumentType {
+	//case "PDA1":
+	//	mockUpload.DocumentData = c.PDA1.random(ctx)
+	//case "EHIC":
+	//	mockUpload.DocumentData = c.EHIC.random(ctx)
+	//default:
+	//	return nil, model.ErrNoKnownDocumentType
+	//}
 
 	reply := &SDJWTReply{
 		Upload: mockUpload,

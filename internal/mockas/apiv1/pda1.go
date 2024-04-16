@@ -2,8 +2,8 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"time"
-	"vc/pkg/model"
 	"vc/pkg/pda1"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -14,20 +14,20 @@ type PDA1Service struct {
 	Client *Client
 }
 
-func (s *PDA1Service) random(ctx context.Context, meta *model.MetaData) any {
+func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) map[string]any {
 	doc := pda1.Document{
 		PersonalDetails: pda1.Section1{
 			PersonalIdentificationNumber: gofakeit.Numerify("##########"),
-			Sex:                          gofakeit.RandomString([]string{"01", "02", "03"}),
-			Surname:                      meta.LastName,
-			Forenames:                    meta.FirstName,
-			SurnameAtBirth:               meta.LastName,
+			Sex:                          gofakeit.RandomString([]string{"01", "02", "98", "99"}),
+			Surname:                      person.LastName,
+			Forenames:                    person.FirstName,
+			SurnameAtBirth:               person.LastName,
 			DateBirth:                    gofakeit.Date().String(),
-			Nationality:                  gofakeit.RandomString([]string{"SE", "DK", "NO", "FI", "IS"}),
+			Nationality:                  s.Client.randomISO31661Alpha3EU(),
 			PlaceBirth: pda1.BirthPlaceType{
 				Town:        gofakeit.City(),
 				Region:      gofakeit.TimeZoneRegion(),
-				CountryCode: gofakeit.RandomString([]string{"SE", "DK", "NO", "FI", "IS"}),
+				CountryCode: s.Client.randomISO31661Alpha3EU(),
 			},
 			StateOfResidenceAddress: pda1.AddressType{
 				BuildingName: "",
@@ -35,12 +35,14 @@ func (s *PDA1Service) random(ctx context.Context, meta *model.MetaData) any {
 				PostCode:     gofakeit.Zip(),
 				Town:         gofakeit.City(),
 				Region:       gofakeit.State(),
-				CountryCode:  gofakeit.Country(), // should be short version
+				CountryCode:  s.Client.randomISO31661Alpha3EU(), // should be short version
 			},
-			StateOfStayAddress: pda1.AddressType{},
+			StateOfStayAddress: pda1.AddressType{
+				CountryCode: s.Client.randomISO31661Alpha3EU(),
+			},
 		},
 		MemberStateLegislation: pda1.Section2{
-			MemberStateWhichLegislationApplies: "",
+			MemberStateWhichLegislationApplies: s.Client.randomISO31661Alpha3EU(),
 			StartingDate:                       time.Now(),
 			EndingDate:                         time.Now().Add(time.Hour * 24 * 365 * 5),
 			CertificateForDurationActivity:     false,
@@ -73,7 +75,7 @@ func (s *PDA1Service) random(ctx context.Context, meta *model.MetaData) any {
 				PostCode:     gofakeit.Zip(),
 				Town:         gofakeit.City(),
 				Region:       gofakeit.State(),
-				CountryCode:  gofakeit.Country(),
+				CountryCode:  s.Client.randomISO31661Alpha3EU(),
 			},
 		},
 		ActivityEmploymentDetails: pda1.Section5{
@@ -85,8 +87,10 @@ func (s *PDA1Service) random(ctx context.Context, meta *model.MetaData) any {
 			NoFixedAddressDescription: "",
 		},
 		CompletingInstitution: pda1.Section6{
-			Name:          "",
-			Address:       pda1.AddressType{},
+			Name: "",
+			Address: pda1.AddressType{
+				CountryCode: s.Client.randomISO31661Alpha3EU(),
+			},
 			InstitutionID: gofakeit.Numerify("##########"),
 			OfficeFaxNo:   gofakeit.Phone(),
 			OfficePhoneNo: gofakeit.Phone(),
@@ -96,5 +100,15 @@ func (s *PDA1Service) random(ctx context.Context, meta *model.MetaData) any {
 		},
 	}
 
-	return doc
+	d, err := json.Marshal(doc)
+	if err != nil {
+		panic(err)
+	}
+
+	var t map[string]any
+	if err := json.Unmarshal(d, &t); err != nil {
+		panic(err)
+	}
+
+	return t
 }

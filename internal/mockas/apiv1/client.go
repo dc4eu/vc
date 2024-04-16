@@ -6,6 +6,8 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+
+	"github.com/brianvoe/gofakeit/v6"
 )
 
 //	@title		Issuer API
@@ -30,6 +32,9 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, logger *logg
 		log:        logger,
 		tp:         tracer,
 		httpClient: &http.Client{},
+
+		PDA1: &PDA1Service{},
+		EHIC: &EHICService{},
 	}
 
 	c.PDA1 = &PDA1Service{
@@ -42,4 +47,15 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, logger *logg
 	c.log.Info("Started")
 
 	return c, nil
+}
+
+func (c *Client) randomISO31661Alpha3EU() string {
+	return gofakeit.RandomString([]string{
+		"AUT", "BEL", "BGR", "HRV", "CYP",
+		"CZE", "DNK", "EST", "FIN", "FRA",
+		"DEU", "GRC", "HUN", "IRL", "ITA",
+		"LVA", "LTU", "LUX", "MLT", "NLD",
+		"POL", "PRT", "ROU", "SVK", "SVN",
+		"ESP", "SWE",
+	})
 }

@@ -8,8 +8,9 @@ import (
 
 // MockNextRequest holds the request
 type MockNextRequest struct {
-	DocumentType    string `json:"document_type"`
-	AuthenticSource string `json:"authentic_source"`
+	DocumentType            string `json:"document_type"`
+	AuthenticSource         string `json:"authentic_source"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
 }
 
 // MockNextReply is the reply
@@ -20,31 +21,38 @@ type MockNextReply struct {
 // MockNext sends one mock upload to the datastore
 func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNextReply, error) {
 	// send to datastore
-	mockUpload, err := c.mockOne(ctx, inData.AuthenticSource, inData.DocumentType)
+	c.log.Debug("mocknext")
+	mockUpload, err := c.mockOne(ctx, inData.AuthenticSourcePersonID, inData.AuthenticSource, inData.DocumentType)
 	if err != nil {
 		return nil, err
 	}
 
-	restReply, _, err := c.uploader(ctx, mockUpload)
+	resp, err := c.uploader(ctx, mockUpload)
 	if err != nil {
 		return nil, err
 	}
-	if restReply.Data.Status != "OK" {
+	c.log.Debug("after uploader")
+
+	if resp.StatusCode != 200 {
 		return nil, errors.New("upload failed")
 	}
+	c.log.Debug("mocknext", "remote status code", resp.StatusCode)
 
 	reply := &MockNextReply{
 		Upload: mockUpload,
 	}
+
+	c.log.Debug("mocknext", "status", "finished")
 
 	return reply, nil
 }
 
 // MockBulkRequest holds the request
 type MockBulkRequest struct {
-	DocumentType    string `json:"document_type"`
-	AuthenticSource string `json:"authentic_source"`
-	N               int    `form:"n"`
+	DocumentType            string `json:"document_type"`
+	AuthenticSource         string `json:"authentic_source"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
+	N                       int    `form:"n"`
 }
 
 // MockBulkReply is the reply
@@ -61,17 +69,18 @@ func (c *Client) MockBulk(ctx context.Context, inData *MockBulkRequest) (*MockBu
 	}
 
 	for i := 0; i < inData.N; i++ {
-		mockUpload, err := c.mockOne(ctx, inData.AuthenticSource, inData.DocumentType)
+		mockUpload, err := c.mockOne(ctx, inData.AuthenticSourcePersonID, inData.AuthenticSource, inData.DocumentType)
 		if err != nil {
 			return nil, err
 		}
 		documentIDS = append(documentIDS, mockUpload.Meta.DocumentID)
 
-		restReply, _, err := c.uploader(ctx, mockUpload)
+		resp, err := c.uploader(ctx, mockUpload)
 		if err != nil {
 			return nil, err
 		}
-		if restReply.Data.Status != "OK" {
+
+		if resp.StatusCode != 200 {
 			return nil, errors.New("upload failed")
 		}
 	}

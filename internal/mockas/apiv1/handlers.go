@@ -32,6 +32,8 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 		return nil, err
 	}
 	c.log.Debug("after uploader")
+	c.log.Debug("mocknext", "remote status code", resp.StatusCode)
+	c.log.Debug("mocknext", "resp body", resp.Body)
 
 	if resp.StatusCode != 200 {
 		return nil, errors.New("upload failed")
@@ -41,6 +43,8 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 	reply := &MockNextReply{
 		Upload: mockUpload,
 	}
+
+	c.log.Debug("mocknext", "reply", reply)
 
 	c.log.Debug("mocknext", "status", "finished")
 

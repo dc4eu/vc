@@ -30,6 +30,7 @@ type UploadRequest struct {
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		c.log.Debug("Validation failed", "error", err)
 		return err
 	}
 

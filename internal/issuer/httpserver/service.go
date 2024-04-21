@@ -5,8 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"reflect"
-	"strings"
 	"time"
 	"vc/internal/issuer/apiv1"
 	"vc/pkg/helpers"
@@ -18,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -51,16 +48,11 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 		gin.SetMode(gin.DebugMode)
 	}
 
-	apiValidator := validator.New()
-	apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+	apiValidator, err := helpers.NewValidator()
+	if err != nil {
+		return nil, err
+	}
 
-		if name == "-" {
-			return ""
-		}
-
-		return name
-	})
 	binding.Validator = &defaultValidator{
 		Validate: apiValidator,
 	}
@@ -88,20 +80,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	rgSatosa := rgRoot.Group("/satosa")
-	s.regEndpoint(ctx, rgSatosa, http.MethodGet, "/credential", s.endpointSatosaCredential)
-
 	rgAPIv1 := rgRoot.Group("api/v1")
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/revoke", s.endpointGenericRevoke)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/get", s.endpointGenericGet)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCredential)
-
-	rgLadokPDFv1 := rgAPIv1.Group("/ladok/pdf", s.middlewareClientCertAuth(ctx))
-	rgLadokPDFv1.Use(s.middlewareAuthLog(ctx))
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/sign", s.endpointSignPDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPost, "/validate", s.endpointValidatePDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodGet, "/:transaction_id", s.endpointGetSignedPDF)
-	s.regEndpoint(ctx, rgLadokPDFv1, http.MethodPut, "/revoke/:transaction_id", s.endpointPDFRevoke)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCreateCredential)
 
 	// Run http server
 	go func() {

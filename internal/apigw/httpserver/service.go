@@ -93,15 +93,14 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/revoke", s.endpointRevokeDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id/mapping", s.endpointIDMapping)
 
+	s.regEndpoint(ctx, rgAPIv1, http.MethodGet, "/credential", s.endpointCredential)
+
 	rgEduSealV1 := rgAPIv1.Group("/ladok/pdf", s.middlewareClientCertAuth(ctx))
 	rgEduSealV1.Use(s.middlewareAuthLog(ctx))
 	s.regEndpoint(ctx, rgEduSealV1, http.MethodPost, "/sign", s.endpointSignPDF)
 	s.regEndpoint(ctx, rgEduSealV1, http.MethodPost, "/validate", s.endpointValidatePDF)
 	s.regEndpoint(ctx, rgEduSealV1, http.MethodGet, "/:transaction_id", s.endpointGetSignedPDF)
 	s.regEndpoint(ctx, rgEduSealV1, http.MethodPut, "/revoke/:transaction_id", s.endpointPDFRevoke)
-
-	rgSATOSAV1 := rgAPIv1.Group("/satosa")
-	s.regEndpoint(ctx, rgSATOSAV1, http.MethodGet, "/credential", s.endpointSatosaCredential)
 
 	// Run http server
 	go func() {

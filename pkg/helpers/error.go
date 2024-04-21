@@ -14,6 +14,12 @@ var (
 	ErrDocumentIsRevoked = NewError("document_is_revoked")
 	// ErrNoTransactionID is returned when transactionID is not present
 	ErrNoTransactionID = NewError("no_transaction_id")
+
+	// ErrNoDocumentFound is returned when no document is found
+	ErrNoDocumentFound = NewError("no_document_found")
+
+	// ErrNoDocumentData is returned when no document_data is found
+	ErrNoDocumentData = NewError("no_document_data")
 )
 
 type Error struct {

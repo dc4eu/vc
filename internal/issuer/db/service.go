@@ -24,7 +24,8 @@ type Service struct {
 	tp         *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	DocumentsColl PDFColl
+	DocumentsColl   PDFColl
+	VCDatastoreColl VCDatastoreColl
 }
 
 // New creates a new database service
@@ -45,6 +46,14 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 		coll:    service.dbClient.Database("issuer").Collection("documents"),
 	}
 	if err := service.DocumentsColl.createIndex(ctx); err != nil {
+		return nil, err
+	}
+
+	service.VCDatastoreColl = VCDatastoreColl{
+		Service: service,
+		Coll:    service.dbClient.Database("vc").Collection("datastore"),
+	}
+	if err := service.VCDatastoreColl.createIndex(ctx); err != nil {
 		return nil, err
 	}
 

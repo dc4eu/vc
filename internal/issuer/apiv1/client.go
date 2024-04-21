@@ -26,6 +26,9 @@ type Client struct {
 	kv          *kvclient.Client
 	log         *logger.Log
 	tp          *trace.Tracer
+
+	ehicClient *ehicClient
+	pda1Client *pda1Client
 }
 
 // New creates a new instance of the public api
@@ -39,6 +42,17 @@ func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient
 		log:         logger,
 		rpcClient:   rpcClient,
 		tp:          tracer,
+	}
+
+	var err error
+	c.ehicClient, err = newEHICClient()
+	if err != nil {
+		return nil, err
+	}
+
+	c.pda1Client, err = newPDA1Client(c.log.New("pda1"))
+	if err != nil {
+		return nil, err
 	}
 
 	c.log.Info("Started")

@@ -8,6 +8,7 @@ import (
 
 // Apiv1 interface
 type Apiv1 interface {
+	// datastore endpoints
 	Upload(ctx context.Context, req *apiv1.UploadRequest) error
 	Notification(ctx context.Context, req *apiv1.NotificationRequest) (*apiv1.NotificationReply, error)
 	IDMapping(ctx context.Context, reg *apiv1.IDMappingRequest) (*apiv1.IDMappingReply, error)
@@ -17,16 +18,16 @@ type Apiv1 interface {
 	RevokeDocument(ctx context.Context, req *apiv1.RevokeDocumentRequest) error
 	Portal(ctx context.Context, req *apiv1.PortalRequest) (*apiv1.PortalReply, error)
 
+	// eduSeal endpoints
 	PDFSign(ctx context.Context, req *apiv1.PDFSignRequest) (*apiv1.PDFSignReply, error)
 	PDFValidate(ctx context.Context, req *apiv1.PDFValidateRequest) (*apiv1.PDFValidateReply, error)
 	PDFGetSigned(ctx context.Context, req *apiv1.PDFGetSignedRequest) (*apiv1.PDFGetSignedReply, error)
 	PDFRevoke(ctx context.Context, req *apiv1.PDFRevokeRequest) (*apiv1.PDFRevokeReply, error)
 
-	Get(ctx context.Context, indata *apiv1.GetRequest) (*apiv1.GetReply, error)
+	// credential endpoints
 	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1.CredentialReply, error)
 
-	SatosaCredential(ctx context.Context, reg *apiv1.SatosaCredentialRequest) (*apiv1.SatosaCredentialReply, error)
-
+	// misc endpoints
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 }

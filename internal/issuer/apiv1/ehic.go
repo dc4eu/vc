@@ -3,16 +3,22 @@ package apiv1
 import (
 	"context"
 	"vc/pkg/ehic"
+	"vc/pkg/logger"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/masv3971/gosdjwt"
 )
 
 type ehicClient struct {
+	log *logger.Log
 }
 
-func newEHICClient() (*ehicClient, error) {
-	return &ehicClient{}, nil
+func newEHICClient(log *logger.Log) (*ehicClient, error) {
+	client := &ehicClient{
+		log: log,
+	}
+
+	return client, nil
 }
 
 func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document) (*gosdjwt.SDJWT, error) {

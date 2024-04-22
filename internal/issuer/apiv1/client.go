@@ -45,7 +45,7 @@ func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient
 	}
 
 	var err error
-	c.ehicClient, err = newEHICClient()
+	c.ehicClient, err = newEHICClient(c.log.New("ehic"))
 	if err != nil {
 		return nil, err
 	}

@@ -37,7 +37,6 @@ ifndef VERSION
 VERSION := latest
 endif
 
-docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent
 
 DOCKER_TAG_APIGW 		:= docker.sunet.se/dc4eu/apigw:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)

@@ -8,16 +8,7 @@ import (
 
 // Apiv1 interface
 type Apiv1 interface {
-	PDFSign(ctx context.Context, req *apiv1.PDFSignRequest) (*apiv1.PDFSignReply, error)
-	PDFValidate(ctx context.Context, req *apiv1.PDFValidateRequest) (*apiv1.PDFValidateReply, error)
-	PDFGetSigned(ctx context.Context, req *apiv1.PDFGetSignedRequest) (*apiv1.PDFGetSignedReply, error)
-	PDFRevoke(ctx context.Context, req *apiv1.PDFRevokeRequest) (*apiv1.PDFRevokeReply, error)
+	CreateCredential(ctx context.Context, req *apiv1.CreateCredentialRequest) (*apiv1.CreateCredentialReply, error)
 
-	Get(ctx context.Context, indata *apiv1.GetRequest) (*apiv1.GetReply, error)
-	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
-	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1.CredentialReply, error)
-
-	SatosaCredential(ctx context.Context, reg *apiv1.SatosaCredentialRequest) (*apiv1.SatosaCredentialReply, error)
-
-	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
+	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 }

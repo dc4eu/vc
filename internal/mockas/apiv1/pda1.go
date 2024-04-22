@@ -30,7 +30,7 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 				CountryCode: s.Client.randomISO31661Alpha3EU(),
 			},
 			StateOfResidenceAddress: pda1.AddressType{
-				BuildingName: "",
+				BuildingName: gofakeit.BuzzWord() + "building",
 				StreetNo:     gofakeit.StreetNumber(),
 				PostCode:     gofakeit.Zip(),
 				Town:         gofakeit.City(),
@@ -56,7 +56,7 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 			SelfEmployedTwoOrMoreStates:  false,
 			CivilServant:                 false,
 			ContractStaff:                false,
-			Mariner:                      false,
+			Mariner:                      true,
 			EmployedAndSelfEmployed:      false,
 			CivilAndEmployedSelfEmployed: false,
 			FlightCrewMember:             false,
@@ -80,14 +80,14 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 		},
 		ActivityEmploymentDetails: pda1.Section5{
 			WorkPlaceNames:            []pda1.WorkPlaceNameType{},
-			WorkPlaceNamesBlob:        "",
+			WorkPlaceNamesBlob:        gofakeit.Company(),
 			WorkPlaceAddresses:        []pda1.WorkPlaceAddressType{},
-			WorkPlaceAddressesBlob:    "",
+			WorkPlaceAddressesBlob:    gofakeit.Address().Address,
 			NoFixedAddress:            false,
 			NoFixedAddressDescription: "",
 		},
 		CompletingInstitution: pda1.Section6{
-			Name: "",
+			Name: gofakeit.Company(),
 			Address: pda1.AddressType{
 				CountryCode: s.Client.randomISO31661Alpha3EU(),
 			},
@@ -95,7 +95,7 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 			OfficeFaxNo:   gofakeit.Phone(),
 			OfficePhoneNo: gofakeit.Phone(),
 			Email:         gofakeit.Email(),
-			Date:          time.Time{},
+			Date:          time.Now(),
 			Signature:     "",
 		},
 	}

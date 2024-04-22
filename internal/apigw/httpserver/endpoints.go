@@ -229,22 +229,6 @@ func (s *Service) endpointPDFRevoke(ctx context.Context, c *gin.Context) (any, e
 	return reply, nil
 }
 
-func (s *Service) endpointSatosaCredential(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointSatosaCredential")
-	defer span.End()
-
-	request := &apiv1.SatosaCredentialRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.SatosaCredential(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
 
 func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointCredential")

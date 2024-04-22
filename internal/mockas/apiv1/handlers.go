@@ -8,9 +8,7 @@ import (
 
 // MockNextRequest holds the request
 type MockNextRequest struct {
-	DocumentType            string `json:"document_type"`
-	AuthenticSource         string `json:"authentic_source"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
+	MockInputData
 }
 
 // MockNextReply is the reply
@@ -22,7 +20,7 @@ type MockNextReply struct {
 func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNextReply, error) {
 	// send to datastore
 	c.log.Debug("mocknext")
-	mockUpload, err := c.mockOne(ctx, inData.AuthenticSourcePersonID, inData.AuthenticSource, inData.DocumentType)
+	mockUpload, err := c.mockOne(ctx, inData.MockInputData)
 	if err != nil {
 		return nil, err
 	}
@@ -31,9 +29,6 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 	if err != nil {
 		return nil, err
 	}
-	c.log.Debug("after uploader")
-	c.log.Debug("mocknext", "remote status code", resp.StatusCode)
-	c.log.Debug("mocknext", "resp body", resp.Body)
 
 	if resp.StatusCode != 200 {
 		return nil, errors.New("upload failed")
@@ -53,10 +48,8 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 
 // MockBulkRequest holds the request
 type MockBulkRequest struct {
-	DocumentType            string `json:"document_type"`
-	AuthenticSource         string `json:"authentic_source"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
-	N                       int    `form:"n"`
+	MockInputData
+	N int `form:"n"`
 }
 
 // MockBulkReply is the reply
@@ -73,7 +66,7 @@ func (c *Client) MockBulk(ctx context.Context, inData *MockBulkRequest) (*MockBu
 	}
 
 	for i := 0; i < inData.N; i++ {
-		mockUpload, err := c.mockOne(ctx, inData.AuthenticSourcePersonID, inData.AuthenticSource, inData.DocumentType)
+		mockUpload, err := c.mockOne(ctx, inData.MockInputData)
 		if err != nil {
 			return nil, err
 		}

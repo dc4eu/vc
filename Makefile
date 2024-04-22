@@ -47,6 +47,7 @@ DOCKER_TAG_CACHE 		:= docker.sunet.se/dc4eu/cache:$(VERSION)
 DOCKER_TAG_PERSISTENT 	:= docker.sunet.se/dc4eu/persistent:$(VERSION)
 DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
+DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 
 
 build: proto build-verifier build-datastore build-registry build-cache build-persistent build-mockas build-apigw
@@ -81,7 +82,7 @@ build-apigw:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_apigw ${LDFLAGS} ./cmd/apigw/main.go
 
 
-docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent docker-build-mockas docker-build-apigw
+docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
@@ -115,6 +116,10 @@ docker-build-apigw:
 	$(info Docker building apigw with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=apigw --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
 
+docker-build-issuer:
+	$(info Docker building issuer with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker .
+
 docker-push-gobuild:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_GOBUILD)
@@ -147,7 +152,11 @@ docker-push-apigw:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_APIGW)
 
-docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-cache docker-push-persistent docker-push-apigw
+docker-push-issuer:
+	$(info Pushing docker images)
+	docker push $(DOCKER_TAG_ISSUER)
+
+docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-cache docker-push-persistent docker-push-apigw docker-push-issuer
 	$(info Pushing docker images)
 
 docker-pull:
@@ -196,7 +205,7 @@ proto-registry:
 proto-status:
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-status-model.proto 
 
-swagger: swagger-registry swagger-datastore swagger-verifier swagger-apigw swagger-fmt
+swagger: swagger-registry swagger-datastore swagger-verifier swagger-apigw swagger-issuer swagger-fmt
 
 swagger-fmt:
 	swag fmt
@@ -212,6 +221,9 @@ swagger-verifier:
 
 swagger-apigw:
 	swag init -d internal/apigw/apiv1/ -g client.go --output docs/apigw --parseDependency --packageName docs
+
+swagger-issuer:
+	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency --packageName docs
 
 install-tools:
 	$(info Install from apt)

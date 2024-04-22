@@ -2,8 +2,14 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
+	"vc/pkg/ehic"
+	"vc/pkg/helpers"
+	"vc/pkg/model"
 	"vc/pkg/pda1"
+
+	"github.com/masv3971/gosdjwt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -56,34 +62,91 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 	return reply, nil
 }
 
-// CredentialRequest is the request for Credential
-type CredentialRequest struct {
-	AuthenticSource string `json:"authentic_source" binding:"required"`
-	DocumentID      string `json:"document_id" binding:"required"`
-	DocumentType    string `json:"document_type" binding:"required"`
-	CollectID       string `json:"collect_id" binding:"required"`
-	DateOfBirth     string `json:"date_of_birth" binding:"required"`
-	LastName        string `json:"last_name" binding:"required"`
-	FirstName       string `json:"first_name" binding:"required"`
-	UID             string `json:"uid" binding:"required"`
+// CreateCredentialRequest is the request for Credential
+type CreateCredentialRequest struct {
+	AuthenticSource         string `json:"authentic_source" validate:"required"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
+	DocumentID              string `json:"document_id" validate:"required"`
+	DocumentType            string `json:"document_type" validate:"required"`
+	DocumentVersion         string `json:"document_version" validate:"required"`
+	CollectID               string `json:"collect_id" validate:"required"`
+	DateOfBirth             string `json:"date_of_birth" validate:"required"`
+	LastName                string `json:"last_name" validate:"required"`
+	FirstName               string `json:"first_name" validate:"required"`
 }
 
-// CredentialReply is the reply for Credential
-type CredentialReply struct {
-	SDJWT string `json:"sdjwt"`
+// CreateCredentialReply is the reply for Credential
+type CreateCredentialReply struct {
+	Data *gosdjwt.PresentationFlat `json:"data"`
 }
 
-// Credential is the credential endpoint
-func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*CredentialReply, error) {
-	c.log.Info("Credential", "req", req)
+// CreateCredential creates a credential
+func (c *Client) CreateCredential(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		c.log.Debug("Validation", "err", err)
+		return nil, err
+	}
+
 	// IDMapping
 
 	// GetDocument
+	uploadDoc, err := c.db.VCDatastoreColl.GetDocument(ctx, &model.MetaData{
+		AuthenticSource:         req.AuthenticSource,
+		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+		DocumentVersion:         req.DocumentVersion,
+		DocumentType:            req.DocumentType,
+		DocumentID:              req.DocumentID,
+		FirstName:               req.FirstName,
+		LastName:                req.LastName,
+		DateOfBirth:             req.DateOfBirth,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if uploadDoc == nil {
+		return nil, helpers.ErrNoDocumentFound
+	}
+	if uploadDoc.DocumentData == nil {
+		return nil, helpers.ErrNoDocumentData
+	}
 
 	// Build SDJWT
-	reply := &CredentialReply{
-		SDJWT: "mock sd-jwt",
+	var sdjwt *gosdjwt.SDJWT
+	//var err error
+	switch req.DocumentType {
+	case "PDA1":
+		d, err := json.Marshal(uploadDoc.DocumentData)
+		if err != nil {
+			return nil, err
+		}
+		doc := &pda1.Document{}
+		if err := json.Unmarshal(d, &doc); err != nil {
+			return nil, err
+		}
+		sdjwt, err = c.pda1Client.sdjwt(ctx, doc)
+		if err != nil {
+			return nil, err
+		}
+
+	case "EHIC":
+		d, err := json.Marshal(uploadDoc.DocumentData)
+		if err != nil {
+			return nil, err
+		}
+		doc := &ehic.Document{}
+		if err := json.Unmarshal(d, &doc); err != nil {
+			return nil, err
+		}
+		sdjwt, err = c.ehicClient.sdjwt(ctx, doc)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	reply := &CreateCredentialReply{
+		Data: sdjwt.PresentationFlat(),
+	}
+
 	return reply, nil
 }
 

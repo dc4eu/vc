@@ -53,6 +53,9 @@ var (
 
 	// BuildVariableGitBranch contains ldsflags -X variable git branch
 	BuildVariableGitBranch string = "undef"
+
+	// BuildVersion contains ldsflags -X variable build version
+	BuildVersion string = "undef"
 )
 
 // Check checks the status of each status, return the first that does not pass.
@@ -66,6 +69,7 @@ func (probes Probes) Check(serviceName string) *apiv1_status.StatusReply {
 				Timestamp: BuildVariableTimestamp,
 				GoVersion: BuildVariableGoVersion,
 				GoArch:    BuildVariableGoArch,
+				Version:   BuildVersion,
 			},
 			Probes: []*apiv1_status.StatusProbe{},
 			Status: fmt.Sprintf(StatusOK, serviceName),

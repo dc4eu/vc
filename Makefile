@@ -1,3 +1,5 @@
+.PHONY : docker-build docker-push release
+
 NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
@@ -113,7 +115,7 @@ docker-build-mockas:
 
 docker-build-apigw:
 	$(info Docker building apigw with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=apigw --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
+	docker build --build-arg SERVICE_NAME=apigw --build-arg VERSION=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
 
 docker-build-issuer:
 	$(info Docker building issuer with tag: $(VERSION))
@@ -158,6 +160,52 @@ docker-push-issuer:
 docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-cache docker-push-persistent docker-push-apigw docker-push-issuer
 	$(info Pushing docker images)
 
+docker-tag-apigw:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_APIGW) docker.sunet.se/dc4eu/apigw:$(NEWTAG)
+
+docker-tag-issuer:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_ISSUER) docker.sunet.se/dc4eu/issuer:$(NEWTAG)
+
+docker-tag-verifier:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_VERIFIER) docker.sunet.se/dc4eu/verifier:$(NEWTAG)
+
+docker-tag-datastore:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_DATASTORE) docker.sunet.se/dc4eu/datastore:$(NEWTAG)
+
+docker-tag-registry:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_REGISTRY) docker.sunet.se/dc4eu/registry:$(NEWTAG)
+
+docker-tag-cache:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_CACHE) docker.sunet.se/dc4eu/cache:$(NEWTAG)
+
+docker-tag-persistent:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_PERSISTENT) docker.sunet.se/dc4eu/persistent:$(NEWTAG)
+
+docker-tag-mockas:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_MOCKAS) docker.sunet.se/dc4eu/mockas:$(NEWTAG)
+
+docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-datastore docker-tag-registry docker-tag-cache docker-tag-persistent docker-tag-mockas
+	$(info Tagging docker images)
+
+release:
+	$(info Release version: $(VERSION))
+	git tag $(VERSION)
+	git push origin ${VERSION}
+	make docker-build
+	make docker-push
+	$(info Release version $(VERSION) done)
+	$(info tag $(NEWTAG) from $(VERSION))
+	make docker-tag
+	make VERSION=$(NEWTAG) docker-push
+
 docker-pull:
 	$(info Pulling docker images)
 	docker pull $(DOCKER_TAG_APIGW)
@@ -186,15 +234,6 @@ clean_docker_images:
 
 ci_build: docker-build docker-push
 	$(info CI Build)
-
-release-tag:
-	git tag -s ${RELEASE} -m"release ${RELEASE}"
-
-release_push:
-	git push --tags
-
-release: release-tag release_push
-	$(info making release ${RELEASE})
 
 proto: proto-status proto-registry
 

@@ -2,6 +2,14 @@
 
 This repository consists of the source code for the VC EU project, but also tools and make targets that's making sense for developers, please do not use for anything else.
 
+## docker release version
+
+`latest` tracks the latest tag available and is build from branch `main`.
+
+## branches
+
+`main` is the stable development branch.
+
 ## How to build
 
 ### Docker

@@ -32,6 +32,7 @@ message BuildVariables {
     string timestamp = 3;
     string go_version = 4;
     string go_arch = 5;
+    string version = 6;
 }
 
 message StatusProbeStore {

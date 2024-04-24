@@ -23,11 +23,11 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 			Forenames:                    person.FirstName,
 			SurnameAtBirth:               person.LastName,
 			DateBirth:                    gofakeit.Date().String(),
-			Nationality:                  s.Client.randomISO31661Alpha3EU(),
+			Nationality:                  s.Client.randomISO31661Alpha2EU(),
 			PlaceBirth: pda1.BirthPlaceType{
 				Town:        gofakeit.City(),
 				Region:      gofakeit.TimeZoneRegion(),
-				CountryCode: s.Client.randomISO31661Alpha3EU(),
+				CountryCode: s.Client.randomISO31661Alpha2EU(),
 			},
 			StateOfResidenceAddress: pda1.AddressType{
 				BuildingName: gofakeit.BuzzWord() + "building",
@@ -35,14 +35,14 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 				PostCode:     gofakeit.Zip(),
 				Town:         gofakeit.City(),
 				Region:       gofakeit.State(),
-				CountryCode:  s.Client.randomISO31661Alpha3EU(), // should be short version
+				CountryCode:  s.Client.randomISO31661Alpha2EU(), // should be short version
 			},
 			StateOfStayAddress: pda1.AddressType{
-				CountryCode: s.Client.randomISO31661Alpha3EU(),
+				CountryCode: s.Client.randomISO31661Alpha2EU(),
 			},
 		},
 		MemberStateLegislation: pda1.Section2{
-			MemberStateWhichLegislationApplies: s.Client.randomISO31661Alpha3EU(),
+			MemberStateWhichLegislationApplies: s.Client.randomISO31661Alpha2EU(),
 			StartingDate:                       time.Now(),
 			EndingDate:                         time.Now().Add(time.Hour * 24 * 365 * 5),
 			CertificateForDurationActivity:     false,
@@ -75,7 +75,7 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 				PostCode:     gofakeit.Zip(),
 				Town:         gofakeit.City(),
 				Region:       gofakeit.State(),
-				CountryCode:  s.Client.randomISO31661Alpha3EU(),
+				CountryCode:  s.Client.randomISO31661Alpha2EU(),
 			},
 		},
 		ActivityEmploymentDetails: pda1.Section5{
@@ -89,7 +89,7 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 		CompletingInstitution: pda1.Section6{
 			Name: gofakeit.Company(),
 			Address: pda1.AddressType{
-				CountryCode: s.Client.randomISO31661Alpha3EU(),
+				CountryCode: s.Client.randomISO31661Alpha2EU(),
 			},
 			InstitutionID: gofakeit.Numerify("##########"),
 			OfficeFaxNo:   gofakeit.Phone(),

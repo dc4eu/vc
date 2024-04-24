@@ -19,7 +19,7 @@ type AddressType struct {
 	PostCode     string `json:"postCode" bson:"postCode"`
 	Town         string `json:"town" bson:"town"`
 	Region       string `json:"region" bson:"region"`
-	CountryCode  string `json:"countryCode" bson:"country_code" validate:"iso3166_1_alpha3_eu"`
+	CountryCode  string `json:"countryCode" bson:"country_code" validate:"iso3166_1_alpha2_eu"`
 }
 
 // WorkPlaceNameType is the model for the PDA1 work place name type
@@ -41,7 +41,7 @@ type WorkPlaceAddressType struct {
 type BirthPlaceType struct {
 	Town        string `json:"town" bson:"town"`
 	Region      string `json:"region" bson:"region"`
-	CountryCode string `json:"countryCode" bson:"countryCode" validate:"iso3166_1_alpha3_eu"`
+	CountryCode string `json:"countryCode" bson:"countryCode" validate:"iso3166_1_alpha2_eu"`
 }
 
 // Section1 is the model for the PDA1 section 1

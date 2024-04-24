@@ -59,7 +59,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload
 		CollectID:               data.CollectID,
 		ValidFrom:               gofakeit.Date().Unix(),
 		ValidTo:                 gofakeit.Date().Unix(),
-		MemberState:             c.randomISO31661Alpha3EU(),
+		MemberState:             c.randomISO31661Alpha2EU(),
 		Revocation: &model.Revocation{
 			ID:                 gofakeit.UUID(),
 			Revoked:            gofakeit.Bool(),

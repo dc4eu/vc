@@ -91,7 +91,7 @@ type MetaData struct {
 
 	// required: true
 	// example: "DE"
-	MemberState string `json:"member_state,omitempty" bson:"member_state" validate:"required,iso3166_1_alpha3_eu"`
+	MemberState string `json:"member_state,omitempty" bson:"member_state" validate:"required,iso3166_1_alpha2_eu"`
 
 	// required: false
 	// example: 509567558

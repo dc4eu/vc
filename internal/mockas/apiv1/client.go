@@ -59,3 +59,14 @@ func (c *Client) randomISO31661Alpha3EU() string {
 		"ESP", "SWE",
 	})
 }
+
+func (c *Client) randomISO31661Alpha2EU() string {
+	return gofakeit.RandomString([]string{
+		"AT", "BE", "BG", "HR", "CY",
+		"CZ", "DK", "EE", "FI", "FR",
+		"DE", "GR", "HU", "IE", "IT",
+		"LV", "LT", "LU", "MT", "NL",
+		"PL", "PT", "RO", "SK", "SI",
+		"ES", "SE",
+	})
+}

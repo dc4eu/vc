@@ -69,10 +69,10 @@ func New(ctx context.Context, kv *kvclient.Client, tracer *trace.Tracer, cfg *mo
 		return nil, err
 	}
 
-	service.VCPersistentSave, err = NewVCPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentSave.Name, service.log.New("VCPersistentSave"))
-	if err != nil {
-		return nil, err
-	}
+	//service.VCPersistentSave, err = NewVCPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentSave.Name, service.log.New("VCPersistentSave"))
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	service.VCPersistentGet, err = NewVCPersistentGet(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentGet.Name, service.log.New("VCPersistentGet"))
 	if err != nil {

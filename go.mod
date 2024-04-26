@@ -17,6 +17,7 @@ require (
 	github.com/masv3971/gosdjwt v0.0.0-20240229085317-d406fd94329c
 	github.com/masv3971/gosunetca v0.0.4
 	github.com/moogar0880/problems v0.1.1
+	github.com/segmentio/kafka-go v0.4.47
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
@@ -56,6 +57,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.25.0 // indirect
 	go.opentelemetry.io/otel/metric v1.25.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.2.0 // indirect

@@ -177,6 +177,63 @@ services:
     environment:
       - "COLLECTOR_OTLP_ENABLED=true"
 
+  kafka_1:
+    image: docker.io/bitnami/kafka:3.4
+    container_name: vc_kafka_1
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.30
+    volumes:
+      - "kafka_data:/bitnami"
+    environment:
+      KAFKA_KRAFT_CLUSTER_ID: 'NjUyYTNkZjI4NGNhNGRjOG'
+      KAFKA_ENABLE_KRAFT: 'yes'
+      KAFKA_CFG_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094'
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://vc_kafka_1:9092,EXTERNAL://vc_kafka_1:9094'
+      KAFKA_BROKER_ID: '1'
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '1@vc_kafka_1:9093'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_CFG_NODE_ID: '1'
+      BITNAMI_DEBUG: 'yes'
+      KAFKA_CFG_NUM_PARTITIONS: '2'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  kafka-ui:
+    container_name: vc_kafka_ui
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka_1
+    ports:
+      - "8080:8080"
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.31
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      LOGGING_LEVEL_ROOT: 'DEBUG'
+    volumes:
+      - ./kafka-ui.yaml:/etc/kafkaui/dynamic_config.yaml:ro
+
+  kafka-exporter:
+    image: docker.io/bitnami/kafka-exporter:latest
+    depends_on:
+      - kafka_1
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.32
+    command: --kafka.server=vc_kafka_1:9092
+    healthcheck:
+      test: "bash -c 'printf \"\" > /dev/tcp/127.0.0.1/9308; exit $$?;'"
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
 networks:
   vc-dev-net:
     driver: bridge
@@ -189,3 +246,5 @@ networks:
 volumes:
   redis_data:
   mongo_data:
+  kafka_data:
+    driver: local

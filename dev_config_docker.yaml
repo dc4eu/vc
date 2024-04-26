@@ -9,6 +9,9 @@ common:
     addr: jaeger:4318
     type: jaeger
   queues:
+    kafka:
+      brokers:
+        - vc_kafka_1:9092
     simple_queue:
       eduseal_sign:
         name: eduseal_sign

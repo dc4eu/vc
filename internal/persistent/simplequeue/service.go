@@ -59,12 +59,12 @@ func New(ctx context.Context, kv *kvclient.Client, db *db.Service, tracer *trace
 
 	go service.EduSealPersistentSave.Worker(ctx)
 
-	service.VCPersistentSave, err = NewVCPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentSave.Name, service.log.New("VCPersistentSave"))
-	if err != nil {
-		return nil, err
-	}
+	//service.VCPersistentSave, err = NewVCPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentSave.Name, service.log.New("VCPersistentSave"))
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	go service.VCPersistentSave.Worker(ctx)
+	//go service.VCPersistentSave.Worker(ctx)
 
 	service.VCPersistentDelete, err = NewVCPersistentDelete(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentDelete.Name, service.log.New("VCPersistentDelete"))
 	if err != nil {

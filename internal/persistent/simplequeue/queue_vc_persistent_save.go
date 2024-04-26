@@ -33,7 +33,6 @@ func NewVCPersistentSave(ctx context.Context, service *Service, queueName string
 
 // Enqueue publishes a document to the queue
 func (s *VCPersistentSave) Enqueue(ctx context.Context, message any) (*retask.Job, error) {
-	s.log.Info("Enqueue")
 	ctx, span := s.service.tp.Start(ctx, "simplequeue:VCPersistentSave:Enqueue")
 	defer span.End()
 

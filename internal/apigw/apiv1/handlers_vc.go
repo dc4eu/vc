@@ -2,10 +2,15 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 	"vc/internal/apigw/db"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
+	"vc/pkg/topicnames"
+
+	"github.com/segmentio/kafka-go/protocol"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // UploadRequest is the request for Upload
@@ -34,9 +39,13 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		return err
 	}
 
+	ctx, span := c.tp.Start(ctx, "apiv1:Upload")
+	defer span.End()
+
 	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Common.QR.BaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
 	if err != nil {
 		c.log.Debug("QR code generation failed", "error", err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 
@@ -67,9 +76,23 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	_, err = c.simpleQueue.VCPersistentSave.Enqueue(ctx, upload)
 	if err != nil {
 		c.log.Debug("Failed to enqueue upload document", "error", err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	c.log.Debug("Document enqueued for saving", "document_id", req.Meta.DocumentID)
+
+	data, err := json.Marshal(req)
+	if err != nil {
+		c.log.Error(err, "failed to marshal request")
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	if err := c.queue.Enqueue(ctx, topicnames.QueuingVCSaveDocumentV0, req.Meta.DocumentID, data, []protocol.Header{}); err != nil {
+		c.log.Error(err, "failed to write message to kafka")
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
 	return nil
 }
 
@@ -98,12 +121,16 @@ type NotificationReply struct {
 //	@Param			req	body		NotificationRequest		true	" "
 //	@Router			/notification [post]
 func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:Notification")
+	defer span.End()
+
 	qrCode, err := c.db.VCDatastoreColl.GetQR(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,
 		DocumentID:      req.DocumentID,
 	})
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
@@ -139,6 +166,9 @@ type IDMappingReply struct {
 //	@Param			req	body		model.MetaData			true	" "
 //	@Router			/id_mapping [post]
 func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappingReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:IDMapping")
+	defer span.End()
+
 	if err := helpers.Check(ctx, c.cfg, reg, c.log); err != nil {
 		return nil, err
 	}
@@ -147,6 +177,7 @@ func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappi
 		Identity:        reg.Identity,
 	})
 	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	reply := &IDMappingReply{
@@ -191,6 +222,9 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return nil, err
 	}
+
+	ctx, span := c.tp.Start(ctx, "apiv1:GetDocument")
+	defer span.End()
 
 	query := &model.MetaData{
 		DocumentID:      req.DocumentID,
@@ -238,6 +272,9 @@ type DeleteDocumentRequest struct {
 //	@Param			req	body		DeleteDocumentRequest	true	" "
 //	@Router			/document [delete]
 func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
+	ctx, span := c.tp.Start(ctx, "apiv1:DeleteDocument")
+	defer span.End()
+
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return err
 	}
@@ -382,6 +419,9 @@ type PortalReply struct {
 //	@Param			req	body		PortalRequest			true	" "
 //	@Router			/portal [post]
 func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*PortalReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:Portal")
+	defer span.End()
+
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return nil, err
 	}

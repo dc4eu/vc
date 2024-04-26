@@ -9,6 +9,7 @@ import (
 	"vc/internal/apigw/apiv1"
 	"vc/internal/apigw/db"
 	"vc/internal/apigw/httpserver"
+	"vc/internal/apigw/queue"
 	"vc/internal/apigw/simplequeue"
 	"vc/pkg/configuration"
 	"vc/pkg/kvclient"
@@ -37,7 +38,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Info("compile variable", "git commit", GitCommit)
 	tracer, err := trace.New(ctx, cfg, log, "vc", "apigw")
 	if err != nil {
 		panic(err)
@@ -54,13 +54,19 @@ func main() {
 		panic(err)
 	}
 
-	simpleQueueService, err := simplequeue.New(ctx, kvClient, tracer, cfg, log.New("queue"))
-	services["queueService"] = simpleQueueService
+	simpleQueueService, err := simplequeue.New(ctx, kvClient, tracer, cfg, log.New("simple_queue"))
+	services["simplequeueService"] = simpleQueueService
 	if err != nil {
 		panic(err)
 	}
 
-	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, simpleQueueService, tracer, cfg, log.New("apiv1"))
+	queueService, err := queue.New(ctx, cfg, tracer, log.New("queue"))
+	services["queueService"] = queueService
+	if err != nil {
+		panic(err)
+	}
+
+	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, simpleQueueService, queueService, tracer, cfg, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}

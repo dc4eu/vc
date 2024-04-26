@@ -33,12 +33,14 @@
         "Satosa",
         "SATOSAV",
         "sdktrace",
+        "segmentio",
         "semconv",
         "simplequeue",
         "skatteverket",
         "stretchr",
         "SUNET",
         "swaggo",
-        "timestamppb"
+        "timestamppb",
+        "topicnames"
     ]
 }

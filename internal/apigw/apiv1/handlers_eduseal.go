@@ -28,15 +28,15 @@ type PDFSignReply struct {
 // PDFSign is the request to sign pdf
 //
 //	@Summary		Sign pdf
-//	@ID				ladok-pdf-sign
+//	@ID				eduseal-pdf-sign
 //	@Description	sign base64 encoded PDF
-//	@Tags			ladok
+//	@Tags			eduseal
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	PDFSignReply			"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		PDFSignRequest			true	" "
-//	@Router			/ladok/pdf/sign [post]
+//	@Router			/eduseal/pdf/sign [post]
 func (c *Client) PDFSign(ctx context.Context, req *PDFSignRequest) (*PDFSignReply, error) {
 	ctx, span := c.tp.Start(ctx, "apiv1:PDFSign")
 	defer span.End()
@@ -94,15 +94,15 @@ type PDFValidateReply struct {
 // PDFValidate is the handler for verify pdf
 //
 //	@Summary		Validate pdf
-//	@ID				ladok-pdf-validate
+//	@ID				eduseal-pdf-validate
 //	@Description	validate a signed base64 encoded PDF
-//	@Tags			ladok
+//	@Tags			eduseal
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	PDFValidateReply		"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			req	body		PDFValidateRequest		true	" "
-//	@Router			/ladok/pdf/validate [post]
+//	@Router			/eduseal/pdf/validate [post]
 func (c *Client) PDFValidate(ctx context.Context, req *PDFValidateRequest) (*PDFValidateReply, error) {
 	ctx, span := c.tp.Start(ctx, "apiv1:PDFValidate")
 	defer span.End()
@@ -184,15 +184,15 @@ type PDFGetSignedReply struct {
 // PDFGetSigned is the request to get signed pdfs
 //
 //	@Summary		fetch singed pdf
-//	@ID				ladok-pdf-fetch
+//	@ID				eduseal-pdf-fetch
 //	@Description	fetch a singed pdf
-//	@Tags			ladok
+//	@Tags			eduseal
 //	@Accept			json
 //	@Produce		json
 //	@Success		200				{object}	PDFGetSignedReply		"Success"
 //	@Failure		400				{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			transaction_id	path		string					true	"transaction_id"
-//	@Router			/ladok/pdf/{transaction_id} [get]
+//	@Router			/eduseal/pdf/{transaction_id} [get]
 func (c *Client) PDFGetSigned(ctx context.Context, req *PDFGetSignedRequest) (*PDFGetSignedReply, error) {
 	ctx, span := c.tp.Start(ctx, "apiv1:PDFGetSigned")
 	defer span.End()
@@ -266,15 +266,15 @@ type PDFRevokeReply struct {
 // PDFRevoke is the request to revoke pdf
 //
 //	@Summary		revoke signed pdf
-//	@ID				ladok-pdf-revoke
+//	@ID				eduseal-pdf-revoke
 //	@Description	revoke a singed pdf
-//	@Tags			ladok
+//	@Tags			eduseal
 //	@Accept			json
 //	@Produce		json
 //	@Success		200				{object}	PDFRevokeReply			"Success"
 //	@Failure		400				{object}	helpers.ErrorResponse	"Bad Request"
 //	@Param			transaction_id	path		string					true	"transaction_id"
-//	@Router			/ladok/pdf/revoke/{transaction_id} [put]
+//	@Router			/eduseal/pdf/revoke/{transaction_id} [put]
 func (c *Client) PDFRevoke(ctx context.Context, req *PDFRevokeRequest) (*PDFRevokeReply, error) {
 	ctx, span := c.tp.Start(ctx, "apiv1:PDFRevoke")
 	defer span.End()

@@ -9,6 +9,7 @@ import (
 	"vc/internal/persistent/apiv1"
 	"vc/internal/persistent/db"
 	"vc/internal/persistent/httpserver"
+	"vc/internal/persistent/queue"
 	"vc/internal/persistent/simplequeue"
 	"vc/pkg/configuration"
 	"vc/pkg/kvclient"
@@ -35,7 +36,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	tracer, err := trace.New(ctx, cfg, log, "vc_persistent", "cache")
+	tracer, err := trace.New(ctx, cfg, log, "vc", "persistent")
 	if err != nil {
 		panic(err)
 	}
@@ -46,6 +47,7 @@ func main() {
 		log.Error(err, "kvClient")
 		panic(err)
 	}
+
 	dbService, err := db.New(ctx, cfg, tracer, log.New("db"))
 	services["dbService"] = dbService
 	if err != nil {
@@ -53,10 +55,16 @@ func main() {
 		panic(err)
 	}
 
-	queueService, err := simplequeue.New(ctx, kvClient, dbService, tracer, cfg, log.New("queue"))
-	services["queueService"] = queueService
+	simpleQueueService, err := simplequeue.New(ctx, kvClient, dbService, tracer, cfg, log.New("simpleQueue"))
+	services["simpleQueueService"] = simpleQueueService
 	if err != nil {
 		log.Error(err, "queueService")
+		panic(err)
+	}
+
+	queueService, err := queue.New(ctx, cfg, dbService, tracer, log.New("queue"))
+	services["queueService"] = queueService
+	if err != nil {
 		panic(err)
 	}
 

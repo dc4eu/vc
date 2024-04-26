@@ -73,6 +73,9 @@ type QRCfg struct {
 
 // Queues have the queue configuration
 type Queues struct {
+	Kafka struct {
+		Brokers []string `yaml:"brokers" validate:"required"`
+	} `yaml:"kafka" validate:"required"`
 	SimpleQueue struct {
 		EduSealSign struct {
 			Name string `yaml:"name" validate:"required"`

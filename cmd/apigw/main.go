@@ -37,7 +37,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Info("compile variable", "git commit", GitCommit)
 	tracer, err := trace.New(ctx, cfg, log, "vc", "apigw")
 	if err != nil {
 		panic(err)

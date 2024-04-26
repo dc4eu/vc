@@ -65,20 +65,6 @@ services:
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
-  cache:
-    container_name: "vc_dev_cache"
-    image: docker.sunet.se/dc4eu/cache:latest
-    restart: always
-    volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
-    depends_on:
-      - redis
-    networks:
-      vc-dev-net:
-        ipv4_address: 172.16.50.10
-    environment:
-      - "VC_CONFIG_YAML=config.yaml"
-
   persistent:
     container_name: "vc_dev_persistent"
     image: docker.sunet.se/dc4eu/persistent:latest
@@ -105,38 +91,6 @@ services:
         ipv4_address: 172.16.50.13
     environment:
       - "VC_CONFIG_YAML=config.yaml"
-
-  pdfsigner:
-    container_name: "vc_dev_pdfsigner"
-    image: docker.sunet.se/dc4eu/py_pdfsigner_dev:latest
-    restart: always
-    volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
-      - /var/log/sunet:/var/log/sunet
-    depends_on:
-      - redis
-    networks:
-      vc-dev-net:
-        ipv4_address: 172.16.50.14
-    environment:
-      - "CONFIG_YAML=config.yaml"
-
-  pdfvalidator:
-    container_name: "vc_dev_pdfvalidator"
-    image: docker.sunet.se/dc4eu/py_pdfvalidator_dev:latest
-    restart: always
-    volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
-      - /var/log/sunet:/var/log/sunet
-    # - ./certs/SectigoRSADocumentSigningCA.crt:/app/SectigoRSADocumentSigningCA.crt:ro
-    # - ./certs/USERTrustRSAAddTrustCA.crt:/app/USERTrustRSAAddTrustCA.crt:ro
-    depends_on:
-      - redis
-    networks:
-      vc-dev-net:
-        ipv4_address: 172.16.50.16
-    environment:
-      - "CONFIG_YAML=config.yaml"
 
   redis:
     image: redis:alpine

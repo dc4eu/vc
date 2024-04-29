@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] - 2024-04-29
+
+### Change
+
+- Remove eduSeal/Ladok pdf signing service, new repo: https://github.com/SUNET/eduseal
+
 ## [0.3.1] - 2024-04-24
 
 ## Changed

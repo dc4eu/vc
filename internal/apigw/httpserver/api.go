@@ -18,12 +18,6 @@ type Apiv1 interface {
 	RevokeDocument(ctx context.Context, req *apiv1.RevokeDocumentRequest) error
 	Portal(ctx context.Context, req *apiv1.PortalRequest) (*apiv1.PortalReply, error)
 
-	// eduSeal endpoints
-	PDFSign(ctx context.Context, req *apiv1.PDFSignRequest) (*apiv1.PDFSignReply, error)
-	PDFValidate(ctx context.Context, req *apiv1.PDFValidateRequest) (*apiv1.PDFValidateReply, error)
-	PDFGetSigned(ctx context.Context, req *apiv1.PDFGetSignedRequest) (*apiv1.PDFGetSignedReply, error)
-	PDFRevoke(ctx context.Context, req *apiv1.PDFRevokeRequest) (*apiv1.PDFRevokeReply, error)
-
 	// credential endpoints
 	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1.CredentialReply, error)

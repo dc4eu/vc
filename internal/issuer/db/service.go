@@ -24,7 +24,6 @@ type Service struct {
 	tp         *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	DocumentsColl   PDFColl
 	VCDatastoreColl VCDatastoreColl
 }
 
@@ -38,14 +37,6 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 	}
 
 	if err := service.connect(ctx); err != nil {
-		return nil, err
-	}
-
-	service.DocumentsColl = PDFColl{
-		service: service,
-		coll:    service.dbClient.Database("issuer").Collection("documents"),
-	}
-	if err := service.DocumentsColl.createIndex(ctx); err != nil {
 		return nil, err
 	}
 

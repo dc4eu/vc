@@ -44,14 +44,13 @@ DOCKER_TAG_APIGW 		:= docker.sunet.se/dc4eu/apigw:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
 DOCKER_TAG_DATASTORE	:= docker.sunet.se/dc4eu/datastore:$(VERSION)
 DOCKER_TAG_REGISTRY 	:= docker.sunet.se/dc4eu/registry:$(VERSION)
-DOCKER_TAG_CACHE 		:= docker.sunet.se/dc4eu/cache:$(VERSION)
 DOCKER_TAG_PERSISTENT 	:= docker.sunet.se/dc4eu/persistent:$(VERSION)
 DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 
 
-build: proto build-verifier build-datastore build-registry build-cache build-persistent build-mockas build-apigw
+build: proto build-verifier build-datastore build-registry build-persistent build-mockas build-apigw
 
 
 build-verifier:
@@ -66,10 +65,6 @@ build-registry:
 	$(info Building registry)
 	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_registry ${LDFLAGS_DYNAMIC} ./cmd/registry/main.go
 
-build-cache:
-	$(info Building cache)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_cache ${LDFLAGS} ./cmd/cache/main.go
-
 build-persistent:
 	$(info Building persistent)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_persistent ${LDFLAGS} ./cmd/persistent/main.go
@@ -83,7 +78,7 @@ build-apigw:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_apigw ${LDFLAGS} ./cmd/apigw/main.go
 
 
-docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-cache docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer
+docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
@@ -100,10 +95,6 @@ docker-build-datastore:
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=registry --tag $(DOCKER_TAG_REGISTRY) --file dockerfiles/worker .
-
-docker-build-cache:
-	$(info Docker Building cache with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=cache --tag $(DOCKER_TAG_CACHE) --file dockerfiles/worker .
 
 docker-build-persistent:
 	$(info Docker Building persistent with tag: $(VERSION))
@@ -141,10 +132,6 @@ docker-push-mockas:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_MOCKAS)
 
-docker-push-cache:
-	$(info Pushing docker images)
-	docker push $(DOCKER_TAG_CACHE)
-
 docker-push-persistent:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_PERSISTENT)
@@ -157,7 +144,7 @@ docker-push-issuer:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_ISSUER)
 
-docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-cache docker-push-persistent docker-push-apigw docker-push-issuer
+docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer
 	$(info Pushing docker images)
 
 docker-tag-apigw:
@@ -180,10 +167,6 @@ docker-tag-registry:
 	$(info Tagging docker images)
 	docker tag $(DOCKER_TAG_REGISTRY) docker.sunet.se/dc4eu/registry:$(NEWTAG)
 
-docker-tag-cache:
-	$(info Tagging docker images)
-	docker tag $(DOCKER_TAG_CACHE) docker.sunet.se/dc4eu/cache:$(NEWTAG)
-
 docker-tag-persistent:
 	$(info Tagging docker images)
 	docker tag $(DOCKER_TAG_PERSISTENT) docker.sunet.se/dc4eu/persistent:$(NEWTAG)
@@ -192,7 +175,7 @@ docker-tag-mockas:
 	$(info Tagging docker images)
 	docker tag $(DOCKER_TAG_MOCKAS) docker.sunet.se/dc4eu/mockas:$(NEWTAG)
 
-docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-datastore docker-tag-registry docker-tag-cache docker-tag-persistent docker-tag-mockas
+docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-datastore docker-tag-registry docker-tag-persistent docker-tag-mockas
 	$(info Tagging docker images)
 
 release:
@@ -211,7 +194,6 @@ docker-pull:
 	docker pull $(DOCKER_TAG_APIGW)
 	docker pull $(DOCKER_TAG_GOBUILD)
 	docker pull $(DOCKER_TAG_MOCKAS)
-	docker pull $(DOCKER_TAG_CACHE)
 	docker pull $(DOCKER_TAG_PERSISTENT)
 	docker pull $(DOCKER_TAG_VERIFIER)
 	docker pull $(DOCKER_TAG_DATASTORE)

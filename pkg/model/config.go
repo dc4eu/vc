@@ -39,7 +39,6 @@ type Common struct {
 	Production bool              `yaml:"production"`
 	Log        Log               `yaml:"log"`
 	Mongo      Mongo             `yaml:"mongo" validate:"required"`
-	BasicAuth  map[string]string `yaml:"basic_auth"`
 	Tracing    OTEL              `yaml:"tracing" validate:"required"`
 	Queues     Queues            `yaml:"queues" validate:"omitempty"`
 	KeyValue   KeyValue          `yaml:"key_value" validate:"omitempty"`
@@ -117,11 +116,6 @@ type Registry struct {
 	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
 }
 
-// Cache holds the cache storage configuration
-type Cache struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-}
-
 // Persistent holds the persistent storage configuration
 type Persistent struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
@@ -164,7 +158,6 @@ type Cfg struct {
 	Verifier   Verifier   `yaml:"verifier" validate:"omitempty"`
 	Datastore  Datastore  `yaml:"datastore" validate:"omitempty"`
 	Registry   Registry   `yaml:"registry" validate:"omitempty"`
-	Cache      Cache      `yaml:"cache" validate:"omitempty"`
 	Persistent Persistent `yaml:"persistent" validate:"omitempty"`
 	MockAS     MockAS     `yaml:"mock_as" validate:"omitempty"`
 }

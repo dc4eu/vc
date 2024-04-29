@@ -64,11 +64,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
-	rgAPIv1 := rgRoot.Group("api/v1", gin.BasicAuth(s.config.Common.BasicAuth))
-	rgAPIv1.Use(s.middlewareAuthLog(ctx))
-
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/validate", s.endpointValidate)
-
 	// Run http server
 	go func() {
 		err := s.server.ListenAndServe()

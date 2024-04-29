@@ -52,13 +52,6 @@ func New(ctx context.Context, kv *kvclient.Client, db *db.Service, tracer *trace
 		return nil, err
 	}
 
-	service.EduSealPersistentSave, err = NewEduSealPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.EduSealPersistentSave.Name, service.log.New("EduSealPersistentSave"))
-	if err != nil {
-		return nil, err
-	}
-
-	go service.EduSealPersistentSave.Worker(ctx)
-
 	service.VCPersistentSave, err = NewVCPersistentSave(ctx, service, cfg.Common.Queues.SimpleQueue.VCPersistentSave.Name, service.log.New("VCPersistentSave"))
 	if err != nil {
 		return nil, err

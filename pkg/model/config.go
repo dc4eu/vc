@@ -35,14 +35,14 @@ type Log struct {
 
 // Common holds the common configuration
 type Common struct {
-	HTTPProxy  string            `yaml:"http_proxy"`
-	Production bool              `yaml:"production"`
-	Log        Log               `yaml:"log"`
-	Mongo      Mongo             `yaml:"mongo" validate:"required"`
-	Tracing    OTEL              `yaml:"tracing" validate:"required"`
-	Queues     Queues            `yaml:"queues" validate:"omitempty"`
-	KeyValue   KeyValue          `yaml:"key_value" validate:"omitempty"`
-	QR         QRCfg             `yaml:"qr" validate:"omitempty"`
+	HTTPProxy  string   `yaml:"http_proxy"`
+	Production bool     `yaml:"production"`
+	Log        Log      `yaml:"log"`
+	Mongo      Mongo    `yaml:"mongo" validate:"required"`
+	Tracing    OTEL     `yaml:"tracing" validate:"required"`
+	Queues     Queues   `yaml:"queues" validate:"omitempty"`
+	KeyValue   KeyValue `yaml:"key_value" validate:"omitempty"`
+	QR         QRCfg    `yaml:"qr" validate:"omitempty"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -73,21 +73,6 @@ type QRCfg struct {
 // Queues have the queue configuration
 type Queues struct {
 	SimpleQueue struct {
-		EduSealSign struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"eduseal_sign" validate:"required"`
-		EduSealValidate struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"eduseal_validate" validate:"required"`
-		EduSealAddSigned struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"eduseal_add_signed" validate:"required"`
-		EduSealDelSigned struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"eduseal_del_signed" validate:"required"`
-		EduSealPersistentSave struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"eduseal_persistent_save" validate:"required"`
 		VCPersistentSave struct {
 			Name string `yaml:"name" validate:"required"`
 		} `yaml:"vc_persistent_save" validate:"required"`

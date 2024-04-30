@@ -23,8 +23,7 @@ type Service struct {
 	tp         *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	EduSealDocumentColl *EduSealDocColl
-	VCDatastoreColl     *VCDatastoreColl
+	VCDatastoreColl *VCDatastoreColl
 }
 
 // New creates a new database service
@@ -40,14 +39,6 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 	defer cancel()
 
 	if err := service.connect(ctx); err != nil {
-		return nil, err
-	}
-
-	service.EduSealDocumentColl = &EduSealDocColl{
-		service: service,
-		coll:    service.dbClient.Database("eduseal").Collection("documents"),
-	}
-	if err := service.EduSealDocumentColl.createIndex(ctx); err != nil {
 		return nil, err
 	}
 

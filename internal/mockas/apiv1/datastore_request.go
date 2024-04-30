@@ -8,9 +8,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"vc/pkg/helpers"
 	"vc/pkg/model"
-
-	"github.com/masv3971/gosunetca/types"
 )
 
 func (c *Client) uploader(ctx context.Context, upload *model.Upload) (*http.Response, error) {
@@ -78,7 +77,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, value any) (*http.Re
 			c.log.Debug("ReadForm", "error", err)
 			return nil, err
 		}
-		caError := &types.ErrorReply{}
+		caError := &helpers.Error{}
 		if err := json.Unmarshal(buf.Bytes(), caError); err != nil {
 			c.log.Debug("json unmarshal", "error", err)
 			return nil, err

@@ -20,8 +20,6 @@ type Client struct {
 	log         *logger.Log
 	probeStore  *apiv1_status.StatusProbeStore
 	tp          *trace.Tracer
-
-	Doc *Doc
 }
 
 // New creates a new instance of kv
@@ -39,11 +37,6 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		DB:       cfg.Common.KeyValue.DB,
 	},
 	)
-
-	c.Doc = &Doc{
-		client: c,
-		key:    "doc:%s:%s",
-	}
 
 	c.log.Info("Started")
 

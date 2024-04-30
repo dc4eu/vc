@@ -15,7 +15,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/masv3971/goretask v0.0.0-20240112121936-7f1366ce1e15
 	github.com/masv3971/gosdjwt v0.0.0-20240229085317-d406fd94329c
-	github.com/masv3971/gosunetca v0.0.4
 	github.com/moogar0880/problems v0.1.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.9.0
@@ -102,12 +101,6 @@ require (
 	google.golang.org/protobuf v1.33.0
 )
 
-replace github.com/masv3971/goladok3 => ../goladok3
-
 replace github.com/masv3971/gosdjwt => ../gosdjwt
-
-replace github.com/masv3971/gosunetca => ../gosunetca
-
-replace github.com/masv3971/godc4eu => ../godc4eu
 
 replace github.com/masv3971/goretask => ../goretask

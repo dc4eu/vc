@@ -135,6 +135,22 @@ type OTEL struct {
 	Type string `yaml:"type" validate:"required"`
 }
 
+type UI struct {
+	// Login: user and pwd
+	Username                       string `yaml:"username" validate:"required"`
+	Password                       string `yaml:"password" validate:"required"`
+	SessionCookieAuthenticationKey string `yaml:"session_cookie_authentication_key" validate:"required"`
+	SessionStoreEncryptionKey      string `yaml:"session_store_encryption_key" validate:"required"`
+	Services                       struct {
+		APIGW struct {
+			Addr string `yaml:"addr"`
+		} `yaml:"apigw"`
+		MockAS struct {
+			Addr string `yaml:"addr"`
+		} `yaml:"mockas"`
+	} `yaml:"services"`
+}
+
 // Cfg is the main configuration structure for this application
 type Cfg struct {
 	Common     Common     `yaml:"common"`
@@ -145,4 +161,5 @@ type Cfg struct {
 	Registry   Registry   `yaml:"registry" validate:"omitempty"`
 	Persistent Persistent `yaml:"persistent" validate:"omitempty"`
 	MockAS     MockAS     `yaml:"mock_as" validate:"omitempty"`
+	UI         UI         `yaml:"ui"`
 }

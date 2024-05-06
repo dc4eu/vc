@@ -161,5 +161,5 @@ type Cfg struct {
 	Registry   Registry   `yaml:"registry" validate:"omitempty"`
 	Persistent Persistent `yaml:"persistent" validate:"omitempty"`
 	MockAS     MockAS     `yaml:"mock_as" validate:"omitempty"`
-	UI         UI         `yaml:"ui"`
+	UI         UI         `yaml:"ui" validate:"omitempty"`
 }

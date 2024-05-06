@@ -48,10 +48,10 @@ DOCKER_TAG_PERSISTENT 	:= docker.sunet.se/dc4eu/persistent:$(VERSION)
 DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
+DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
 
 
-build: proto build-verifier build-datastore build-registry build-persistent build-mockas build-apigw
-
+build: proto build-verifier build-datastore build-registry build-persistent build-mockas build-apigw build-ui
 
 build-verifier:
 	$(info Building verifier)
@@ -77,8 +77,11 @@ build-apigw:
 	$(info Building apigw)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_apigw ${LDFLAGS} ./cmd/apigw/main.go
 
+build-ui:
+	$(info Building ui)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_ui ${LDFLAGS} ./cmd/ui/main.go
 
-docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer
+docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
@@ -112,6 +115,10 @@ docker-build-issuer:
 	$(info Docker building issuer with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker .
 
+docker-build-ui:
+	$(info Docker building ui with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/ui_worker .
+
 docker-push-gobuild:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_GOBUILD)
@@ -144,7 +151,11 @@ docker-push-issuer:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_ISSUER)
 
-docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer
+docker-push-ui:
+	$(info Pushing docker images)
+	docker push $(DOCKER_TAG_UI)
+
+docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui
 	$(info Pushing docker images)
 
 docker-tag-apigw:
@@ -175,7 +186,11 @@ docker-tag-mockas:
 	$(info Tagging docker images)
 	docker tag $(DOCKER_TAG_MOCKAS) docker.sunet.se/dc4eu/mockas:$(NEWTAG)
 
-docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-datastore docker-tag-registry docker-tag-persistent docker-tag-mockas
+docker-tag-ui:
+	$(info Tagging docker images)
+	docker tag $(DOCKER_TAG_UI) docker.sunet.se/dc4eu/ui:$(NEWTAG)
+
+docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-datastore docker-tag-registry docker-tag-persistent docker-tag-mockas docker-tag-ui
 	$(info Tagging docker images)
 
 release:
@@ -198,6 +213,7 @@ docker-pull:
 	docker pull $(DOCKER_TAG_VERIFIER)
 	docker pull $(DOCKER_TAG_DATASTORE)
 	docker pull $(DOCKER_TAG_REGISTRY)
+	docker pull $(DOCKER_TAG_UI)
 
 docker-archive:
 	docker save --output docker_archives/vc_$(VERSION).tar $(DOCKER_TAG_VERIFIER) $(DOCKER_TAG_DATASTORE) $(DOCKER_TAG_REGISTRY)
@@ -244,6 +260,8 @@ swagger-apigw:
 
 swagger-issuer:
 	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency --packageName docs
+
+#TODO: add swagger-ui
 
 install-tools:
 	$(info Install from apt)

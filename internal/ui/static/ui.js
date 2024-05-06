@@ -426,7 +426,7 @@ async function doLogout() {
         method: "DELETE", headers: headers
     });
 
-    //TODO: inför felhantering
+    //TODO: add error handling
     await fetch(request);
     hideSecureMenyItems();
     clearAllContentContainers();

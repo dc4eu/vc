@@ -18,6 +18,21 @@ services:
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
+  ui:
+    container_name: "vc_dev_ui"
+    image: docker.sunet.se/dc4eu/ui:latest
+    restart: always
+    volumes:
+      - ./dev_config_docker.yaml:/config.yaml:ro
+      #TODO: add logging
+    depends_on:
+      - apigw
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.50
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
   issuer:
     container_name: "vc_dev_issuer"
     image: docker.sunet.se/dc4eu/issuer:latest

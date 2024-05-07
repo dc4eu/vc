@@ -28,9 +28,13 @@
         <div id="navbar-div" class="navbar-menu">
 
             <div id="navbar-start-div" class="navbar-start">
-                <a id="fetch-health-btn" onclick="getAndDisplayInArticleContainerFor('/secure/health','Health')"
+                <a id="fetch-health-btn" onclick="getAndDisplayInArticleContainerFor('/secure/health','Health APIGW')"
                    class="navbar-item">
-                    Health
+                    Health(APIGW)
+                </a>
+                <a id="fetch-ui-health-btn" onclick="getAndDisplayInArticleContainerFor('/health','Health UI')"
+                   class="navbar-item">
+                    Health(UI)
                 </a>
                 <a onclick="clearAllContentContainers()" class="navbar-item"> Clear
                 </a>

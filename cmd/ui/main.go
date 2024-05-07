@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
@@ -63,11 +64,12 @@ func main() {
 		panic(err)
 	}
 
-	//apiClient, err := apiv1.New(ctx, nil, cfg, log.New("ui"))
+	apiClient, err := apiv1.New(ctx, cfg, log.New("ui"))
 	if err != nil {
 		panic(err)
 	}
-	httpService, err := httpserver.New(ctx, cfg, log.New("httpserver"))
+
+	httpService, err := httpserver.New(ctx, cfg, apiClient, log.New("httpserver"))
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)

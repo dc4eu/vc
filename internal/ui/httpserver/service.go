@@ -3,6 +3,8 @@ package httpserver
 import (
 	"context"
 	"net/http"
+	"vc/internal/ui/apiv1"
+
 	//"reflect"
 	//"strings"
 	"time"
@@ -20,17 +22,16 @@ type Service struct {
 	config *model.Cfg
 	logger *logger.Log
 	server *http.Server
-	//apiv1  Apiv1
-	gin *gin.Engine
+	apiv1  Apiv1
+	gin    *gin.Engine
 }
 
 // New creates a new httpserver service
-// func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Log) (*Service, error) {
-func New(ctx context.Context, config *model.Cfg, logger *logger.Log) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Log) (*Service, error) {
 	s := &Service{
 		config: config,
 		logger: logger,
-		//apiv1:  api,
+		apiv1:  api,
 		server: &http.Server{Addr: config.UI.APIServer.Addr, ReadHeaderTimeout: 2 * time.Second},
 	}
 
@@ -82,13 +83,13 @@ func New(ctx context.Context, config *model.Cfg, logger *logger.Log) (*Service, 
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	//rgRoot := s.gin.Group("/")
-	//s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
-	//
+	rgRoot := s.gin.Group("/")
+	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
+
 	//rgDocs := rgRoot.Group("/swagger")
 	//rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	//rgAPIV1 := rgRoot.Group("api/v1")
+	//rgSecure := rgRoot.Group("secure")
 
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointUpload)
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGetDocument)

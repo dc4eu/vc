@@ -73,6 +73,8 @@ mock_as:
   datastore_url: http://vc_dev_apigw:8080
 
 ui:
+  api_server:
+    addr: :8080
   username: "admin"
   password: "secret123"
   #It is recommended to use an authentication key with 32 or 64 bytes.
@@ -80,6 +82,7 @@ ui:
   #The encryption key, must be either 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256 modes.
   session_store_encryption_key: "SQxqb3LKw1YFyAiy4j7FaGGJKeEzr8Db"
   services:
+    #TODO: Do same as with mock_as datastore_url?
     apigw:
       addr: "http://172.16.50.2:8080"
     mockas:

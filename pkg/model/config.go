@@ -136,6 +136,7 @@ type OTEL struct {
 }
 
 type UI struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
 	// Login: user and pwd
 	Username                       string `yaml:"username" validate:"required"`
 	Password                       string `yaml:"password" validate:"required"`

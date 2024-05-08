@@ -18,6 +18,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	/* session... constants is also used for the session cookie */
+	sessionName                       = "vcadminwebsession" //if changed, the web (javascript) must also be updated with the new name
+	sessionKey                        = "sessionkey"
+	sessionInactivityTimeoutInSeconds = 3600 //one hour - also the value for the cookie
+	sessionPath                       = "/"
+	sessionHttpOnly                   = true
+	sessionSecure                     = false //TODO: activate for https
+	sessionSameSite                   = http.SameSiteStrictMode
+)
+
 // Service is the service object for httpserver
 type Service struct {
 	config *model.Cfg
@@ -93,7 +104,12 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	//rgDocs := rgRoot.Group("/swagger")
 	//rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	//rgSecure := rgRoot.Group("secure")
+	rgSecure := rgRoot.Group("secure")
+	rgSecure.Use(s.authRequired)
+	{
+		//TODO: use s.regEndpoint(...) below:
+		rgSecure.DELETE("/logout", s.logoutHandler)
+	}
 
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointUpload)
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGetDocument)

@@ -6,23 +6,13 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"net/http"
+	"strings"
 	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-)
-
-const (
-	/* session... constants is also used for the session cookie */
-	sessionName                       = "vcadminwebsession" //if changed, the web (javascript) must also be updated with the new name
-	sessionKey                        = "sessionkey"
-	sessionInactivityTimeoutInSeconds = 3600 //one hour - also the value for the cookie
-	sessionPath                       = "/"
-	sessionHttpOnly                   = true
-	sessionSecure                     = false //TODO: activate for https
-	sessionSameSite                   = http.SameSiteStrictMode
 )
 
 func (s *Service) middlewareDuration(ctx context.Context) gin.HandlerFunc {
@@ -90,4 +80,37 @@ func configureSessionStore(cfg *model.Cfg) sessions.Store {
 		SameSite: sessionSameSite,
 	})
 	return store
+}
+
+func (s *Service) authRequired(c *gin.Context) {
+	session := sessions.Default(c)
+	uuid := session.Get(sessionKey)
+	if uuid == nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized/session expired"})
+		return
+	}
+
+	if !isLogoutRoute(c) { // Don't touch the session (including cookie) during logout
+		// Update MaxAge for the session and its cookie - extended time to expire with another 1 hour from now
+		session.Options(sessions.Options{
+			MaxAge:   sessionInactivityTimeoutInSeconds,
+			Path:     sessionPath,
+			Secure:   sessionSecure,
+			HttpOnly: sessionHttpOnly,
+			SameSite: sessionSameSite,
+		})
+
+		if err := session.Save(); err != nil {
+			c.JSON(500, gin.H{"error": "Could not save session"})
+			return
+		}
+	}
+
+	c.Next()
+}
+
+func isLogoutRoute(c *gin.Context) bool {
+	path := c.Request.URL.Path
+	method := c.Request.Method
+	return strings.HasSuffix(path, "/logout") && method == "DELETE"
 }

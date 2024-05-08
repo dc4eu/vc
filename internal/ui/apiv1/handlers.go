@@ -22,22 +22,23 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type LoginReply struct {
-	SessionKey string `json:"session_key"`
-	Username   string `json:"username"`
+type LoggedinReply struct {
+	SessionKey string `json:"session_key" binding:"required"`
+	Username   string `json:"username" binding:"required"`
 }
 
-func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoginReply, error) {
+func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, error) {
 
-	c.log.Info("From browser", req.Username, req.Password)
+	//TODO: ta bort nedan logging av username och password
+	c.log.Info("From browser username and password", req.Username, req.Password)
 
 	if req.Username != c.cfg.UI.Username || req.Password != c.cfg.UI.Password {
-		return nil, errors.New("invalid username or password")
+		return nil, errors.New("Invalid username and/or password")
 	}
 
 	uuid := uuid.NewString()
 
-	reply := &LoginReply{
+	reply := &LoggedinReply{
 		SessionKey: uuid,
 		Username:   c.cfg.UI.Username,
 	}

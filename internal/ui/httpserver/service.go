@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"vc/internal/ui/apiv1"
+	"vc/pkg/trace"
 
 	//"reflect"
 	//"strings"
@@ -21,16 +22,18 @@ import (
 type Service struct {
 	config *model.Cfg
 	logger *logger.Log
+	tp     *trace.Tracer
 	server *http.Server
 	apiv1  Apiv1
 	gin    *gin.Engine
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Log) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, logger *logger.Log) (*Service, error) {
 	s := &Service{
 		config: config,
 		logger: logger,
+		tp:     tracer,
 		apiv1:  api,
 		server: &http.Server{Addr: config.UI.APIServer.Addr, ReadHeaderTimeout: 2 * time.Second},
 	}
@@ -85,7 +88,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
-	//s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.login)
+	s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.login)
 
 	//rgDocs := rgRoot.Group("/swagger")
 	//rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

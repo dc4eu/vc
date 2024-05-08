@@ -17,7 +17,7 @@ import (
 const (
 	/* session... constants is also used for the session cookie */
 	sessionName                       = "vcadminwebsession" //if changed, the web (javascript) must also be updated with the new name
-	sessionKey                        = "user"
+	sessionKey                        = "sessionkey"
 	sessionInactivityTimeoutInSeconds = 3600 //one hour - also the value for the cookie
 	sessionPath                       = "/"
 	sessionHttpOnly                   = true

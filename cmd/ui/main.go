@@ -69,7 +69,7 @@ func main() {
 		panic(err)
 	}
 
-	httpService, err := httpserver.New(ctx, cfg, apiClient, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiClient, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
@@ -241,7 +241,7 @@ func authRequired(c *gin.Context) {
 	}
 
 	if !isLogoutRoute(c) { // Don't touch the session (including cookie) during logout
-		// Update MaxAge for the session and its cookie - extended time to expire with another 5 minutes from now
+		// Update MaxAge for the session and its cookie - extended time to expire with another 1 hour from now
 		session.Options(sessions.Options{
 			MaxAge:   sessionInactivityTimeoutInSeconds,
 			Path:     sessionPath,

@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/ui/apiv1"
 )
 
 // Apiv1 interface
@@ -15,4 +16,5 @@ type Apiv1 interface {
 	//Portal(ctx context.Context, req *apiv1.PortalRequest) (*apiv1.PortalReply, error)
 
 	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
+	Login(ctx context.Context, req *apiv1.LoginRequest) (*apiv1.LoginReply, error)
 }

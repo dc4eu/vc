@@ -85,10 +85,7 @@ function isLoggedIn() {
     console.debug("User is not logged in");
     //Note: Expire time for cookie is handled by the browser and is removed from document.cookie when expired
 
-    //TODO: HARDCODED TO ALWAYS BE TREATED AS LOGGED IN TO JAVASCRIPT TO SIMPLIFY UI DEV
-    console.warn("HARDCODED TO ALWAYS BE TREATED AS LOGGED IN TO JAVASCRIPT TO SIMPLIFY UI DEV");
-    return true;
-    // return false;
+    return false;
 }
 
 const addNewRequestResponseArticleToContainer = (articleHeaderText) => {

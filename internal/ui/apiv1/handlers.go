@@ -6,7 +6,7 @@ import (
 	"vc/pkg/model"
 )
 
-// Status return status for each ladok instance
+// Status return status for the service
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	probes := model.Probes{}
 

@@ -4,11 +4,11 @@ const getElementById = (id) => document.getElementById(id);
 
 const removeElementById = (id) => {
     getElementById(id)?.remove();
-}
+};
 
 const validateHasValueAndNotEmpty = (element) => {
     return element && element.value && element.value.trim() !== "" && element.value.trim() !== " ";
-}
+};
 
 const clearContainer = (id) => {
     console.debug(`Clearing element : ${id}`);
@@ -16,12 +16,12 @@ const clearContainer = (id) => {
     if (element) {
         element.innerHTML = "";
     }
-}
+};
 
 const clearAllContentContainers = () => {
     clearContainer("login-container");
     clearContainer("article-container");
-}
+};
 
 function displayAElement(id) {
     getElementById(id).style.display = 'inline'; // Use 'inline' for <a>-element
@@ -41,14 +41,14 @@ function hideDiv(id) {
 
 function hideSecureMenyItems() {
     hideDiv('navbar-start-div');
-    hideAElement("do-logout-btn")
-    displayAElement("show-login-form-btn")
+    hideAElement("do-logout-btn");
+    displayAElement("show-login-form-btn");
 }
 
 function displaySecureMenyItems() {
-    displayDiv('navbar-start-div')
-    displayAElement("do-logout-btn")
-    hideAElement("show-login-form-btn")
+    displayDiv('navbar-start-div');
+    displayAElement("do-logout-btn");
+    hideAElement("show-login-form-btn");
 }
 
 let currentIdNumber = 0;
@@ -65,7 +65,7 @@ const toogleThemeDarkLight = () => {
     } else {
         htmlElement.className = "theme-light";
     }
-}
+};
 
 const generateArticleIDBasis = () => {
     const uuid = secureGenerateUUID();
@@ -74,10 +74,10 @@ const generateArticleIDBasis = () => {
     return {
         uuid, articleID,
     };
-}
+};
 
 function isLoggedIn() {
-    const cookie = document.cookie
+    const cookie = document.cookie;
     if (cookie && cookie.match(/vcadminwebsession=(.*?)(;|$)/)[1]) {
         console.debug("User is logged in");
         return true;
@@ -85,8 +85,8 @@ function isLoggedIn() {
     console.debug("User is not logged in");
     //Note: Expire time for cookie is handled by the browser and is removed from document.cookie when expired
 
-    //TODO: HARDCODED TO ALLWAYS BE TREATED AS LOGGED IN IN JAVASCRIPT TO SIMPLIFY DEV
-    console.warn("HARDCODED TO ALLWAYS BE TREATED AS LOGGED IN IN JAVASCRIPT TO SIMPLIFY DEV");
+    //TODO: HARDCODED TO ALWAYS BE TREATED AS LOGGED IN TO JAVASCRIPT TO SIMPLIFY UI DEV
+    console.warn("HARDCODED TO ALWAYS BE TREATED AS LOGGED IN TO JAVASCRIPT TO SIMPLIFY UI DEV");
     return true;
     // return false;
 }
@@ -114,7 +114,7 @@ const addNewRequestResponseArticleToContainer = (articleHeaderText) => {
     const articleContainer = getElementById('article-container');
     articleContainer.prepend(articleDiv);
     return bodyChildren;
-}
+};
 
 function buildResponseMeta(response) {
     const status = response.status; //
@@ -227,14 +227,14 @@ const createMock = () => {
     const path = "/secure/mock";
     const articleHeaderText = "Upload";
     doPostForDemo(path, articleHeaderText);
-}
+};
 
 const fetchFromPortal = () => {
     console.debug("fetchFromPortal");
     const path = "/secure/portal";
     const articleHeaderText = "Fetch";
     doPostForDemo(path, articleHeaderText);
-}
+};
 
 const updateUploadAndFetchButtons = () => {
     const input = getElementById('authentic_source_person_id-input');
@@ -244,7 +244,7 @@ const updateUploadAndFetchButtons = () => {
     //TODO: Validate input values?
     mockButton.disabled = !(input.value);
     fetchButton.disabled = !(input.value);
-}
+};
 
 /** Builds an article with custom body children but does not add it to the DOM
  *
@@ -289,7 +289,7 @@ const buildArticle = (articleID, articleHeaderText, bodyChildrenElementArray) =>
     article.prepend(divHeader, divBody);
 
     return article;
-}
+};
 
 async function doLogin() {
     const url = new URL("/login", baseUrl);
@@ -407,7 +407,7 @@ const addLoginArticleToContainer = () => {
         buttonControl.appendChild(submitButton);
 
         return [usernameField, passwordField, buttonControl];
-    }
+    };
 
     clearContainer("login-container"); //To always only have 0..1 login articles displayed
     const articleIdBasis = generateArticleIDBasis();
@@ -416,11 +416,11 @@ const addLoginArticleToContainer = () => {
     loginContainer.prepend(articleDiv);
 
     getElementById("username-input").focus();
-}
+};
 
 async function doLogout() {
     const url = new URL("/secure/logout", baseUrl);
-    console.debug("doLogout for url: " + url)
+    console.debug("doLogout for url: " + url);
 
     const headers = {
         'Accept': 'application/json', 'Content-Type': 'application/json'

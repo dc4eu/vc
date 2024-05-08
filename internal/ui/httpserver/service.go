@@ -85,6 +85,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logg
 
 	rgRoot := s.gin.Group("/")
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
+	//s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.login)
 
 	//rgDocs := rgRoot.Group("/swagger")
 	//rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

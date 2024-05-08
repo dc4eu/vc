@@ -98,7 +98,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	})
 
 	rgRoot := s.gin.Group("/")
-	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 	s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.login)
 
 	//rgDocs := rgRoot.Group("/swagger")
@@ -106,10 +105,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 
 	rgSecure := rgRoot.Group("secure")
 	rgSecure.Use(s.authRequired)
-	{
-		//TODO: use s.regEndpoint(...) below:
-		rgSecure.DELETE("/logout", s.logoutHandler)
-	}
+	s.regEndpoint(ctx, rgSecure, http.MethodGet, "health/ui", s.endpointStatus)
+	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "/logout", s.logout)
 
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointUpload)
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGetDocument)

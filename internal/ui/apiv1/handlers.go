@@ -29,8 +29,7 @@ type LoggedinReply struct {
 
 func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, error) {
 
-	//TODO: ta bort nedan logging av username och password
-	c.log.Info("From browser username and password", req.Username, req.Password)
+	//c.log.Info("From browser username and password", req.Username, req.Password)
 
 	if req.Username != c.cfg.UI.Username || req.Password != c.cfg.UI.Password {
 		return nil, errors.New("Invalid username and/or password")
@@ -44,4 +43,8 @@ func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, 
 	}
 
 	return reply, nil
+}
+
+func (c *Client) Logout(ctx context.Context) error {
+	return nil
 }

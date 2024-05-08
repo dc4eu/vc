@@ -28,13 +28,15 @@
         <div id="navbar-div" class="navbar-menu">
 
             <div id="navbar-start-div" class="navbar-start">
-                <a id="fetch-health-btn" onclick="getAndDisplayInArticleContainerFor('/secure/health','Health APIGW')"
-                   class="navbar-item">
-                    Health(APIGW)
-                </a>
-                <a id="fetch-ui-health-btn" onclick="getAndDisplayInArticleContainerFor('/health','Health UI')"
+                <a id="fetch-ui-health-btn"
+                   onclick="getAndDisplayInArticleContainerFor('/secure/health/ui','Health UI')"
                    class="navbar-item">
                     Health(UI)
+                </a>
+                <a id="fetch-health-btn"
+                   onclick="getAndDisplayInArticleContainerFor('/secure/health/apigw','Health APIGW')"
+                   class="navbar-item">
+                    Health(APIGW)
                 </a>
                 <a onclick="clearAllContentContainers()" class="navbar-item"> Clear
                 </a>

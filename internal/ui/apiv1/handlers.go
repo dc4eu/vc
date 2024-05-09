@@ -3,7 +3,7 @@ package apiv1
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
+	"time"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/model"
 )
@@ -23,8 +23,9 @@ type LoginRequest struct {
 }
 
 type LoggedinReply struct {
-	SessionKey string `json:"session_key" binding:"required"`
-	Username   string `json:"username" binding:"required"`
+	//SessionKey string `json:"session_key" binding:"required"`
+	Username     string    `json:"username" binding:"required"`
+	LoggedInTime time.Time `json:"logged_in_time" binding:"required"` //time.Time encoded to JSON will use the RFC3339 format by default, which is essentially ISO 8601 (e.g., "2024-05-09T14:00:00Z"
 }
 
 func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, error) {
@@ -35,11 +36,12 @@ func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, 
 		return nil, errors.New("Invalid username and/or password")
 	}
 
-	uuid := uuid.NewString()
+	//uuid := uuid.NewString()
 
 	reply := &LoggedinReply{
-		SessionKey: uuid,
-		Username:   c.cfg.UI.Username,
+		//SessionKey: uuid,
+		Username:     c.cfg.UI.Username,
+		LoggedInTime: time.Now(),
 	}
 
 	return reply, nil

@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"github.com/gin-contrib/sessions"
 	"net/http"
 	"vc/internal/ui/apiv1"
 	"vc/pkg/trace"
@@ -20,13 +21,15 @@ import (
 
 const (
 	/* session... constants is also used for the session cookie */
-	sessionName                       = "vcadminwebsession" //if changed, the web (javascript) must also be updated with the new name
-	sessionKey                        = "sessionkey"
-	sessionInactivityTimeoutInSeconds = 3600 //one hour - also the value for the cookie
+	sessionName = "vc_ui_auth_session" //if changed, the web (javascript) must also be updated with the new name
+	//sessionKey                        = "sessionkey"
+	sessionInactivityTimeoutInSeconds = 300 // after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
 	sessionPath                       = "/"
 	sessionHttpOnly                   = true
 	sessionSecure                     = false //TODO: activate for https
 	sessionSameSite                   = http.SameSiteStrictMode
+	sessionUsernameKey                = "username_key" //key to retrive the username for the logged in user from the session (not stored in any cookie)
+	sessionLoggedInTimeKey            = "logged_in_time"
 )
 
 // Service is the service object for httpserver
@@ -107,6 +110,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	rgSecure.Use(s.authRequired)
 	s.regEndpoint(ctx, rgSecure, http.MethodGet, "health/ui", s.endpointStatus)
 	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "/logout", s.logout)
+	rgSecure.GET("/user", getUserHandler)
 
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointUpload)
 	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGetDocument)
@@ -127,6 +131,13 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.logger.Info("started")
 
 	return s, nil
+}
+
+func getUserHandler(c *gin.Context) {
+	session := sessions.Default(c)
+	user := session.Get(sessionUsernameKey)
+	loggedInTime := session.Get(sessionLoggedInTimeKey)
+	c.JSON(http.StatusOK, gin.H{"user": user, "logged_in_time": loggedInTime})
 }
 
 func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, handler func(context.Context, *gin.Context) (interface{}, error)) {

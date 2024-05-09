@@ -84,14 +84,14 @@ func configureSessionStore(cfg *model.Cfg) sessions.Store {
 
 func (s *Service) authRequired(c *gin.Context) {
 	session := sessions.Default(c)
-	uuid := session.Get(sessionKey)
-	if uuid == nil {
+	username := session.Get(sessionUsernameKey)
+	if username == nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized/session expired"})
 		return
 	}
 
 	if !isLogoutRoute(c) { // Don't touch the session (including cookie) during logout
-		// Update MaxAge for the session and its cookie - extended time to expire with another 1 hour from now
+		// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in sessionInactivityTimeoutInSeconds
 		session.Options(sessions.Options{
 			MaxAge:   sessionInactivityTimeoutInSeconds,
 			Path:     sessionPath,

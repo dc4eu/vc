@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"io"
 	"log"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
 	"vc/pkg/configuration"
@@ -47,6 +49,8 @@ func main() {
 	wg := &sync.WaitGroup{}
 	ctx := context.Background()
 
+	gob.Register(time.Time{})
+
 	services := make(map[string]service)
 
 	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
@@ -68,6 +72,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	//TODO: add clients to connect with all other vc services and add to httpService
 
 	httpService, err := httpserver.New(ctx, cfg, apiClient, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
@@ -98,6 +104,8 @@ func main() {
 
 	mainLog.Info("Stopped")
 }
+
+//TODO: remove all the func's below after refactor is done
 
 func engine() {
 	ctx := context.Background()

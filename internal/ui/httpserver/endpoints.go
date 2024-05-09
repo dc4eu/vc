@@ -33,8 +33,10 @@ func (s *Service) login(ctx context.Context, c *gin.Context) (interface{}, error
 	}
 
 	session := sessions.Default(c)
-	session.Set(sessionKey, reply.SessionKey) //the sessionkey is only stored in session storage (backend)
-	if err := session.Save(); err != nil {    //This is also where the session-id and sessioncookie is created
+	//session.Set(sessionKey, reply.SessionKey) //the sessionkey is only stored in session storage (backend),
+	session.Set(sessionUsernameKey, reply.Username)
+	session.Set(sessionLoggedInTimeKey, reply.LoggedInTime)
+	if err := session.Save(); err != nil { //This is also where the session cookie is created by gin
 		//s.logger.Error(err, "Failed to save session (and send cookie) during login")
 		return nil, err
 	}
@@ -43,9 +45,9 @@ func (s *Service) login(ctx context.Context, c *gin.Context) (interface{}, error
 }
 
 func (s *Service) logout(ctx context.Context, c *gin.Context) (interface{}, error) {
-	session := sessions.Default(c)  //gets the session based on session-id in session cookie (handled by gin)
-	uuid := session.Get(sessionKey) //retrieve session key value from session storage
-	if uuid == nil {
+	session := sessions.Default(c)              //gets the session based on session-ID in session cookie (handled by gin)
+	username := session.Get(sessionUsernameKey) //retrieve username for the logged in user from session storage (if nil the session does not exist or has been cleared)
+	if username == nil {
 		return nil, errors.New("Invalid session token")
 	}
 

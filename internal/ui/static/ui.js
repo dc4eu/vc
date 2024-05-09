@@ -78,7 +78,7 @@ const generateArticleIDBasis = () => {
 
 function isLoggedIn() {
     const cookie = document.cookie;
-    if (cookie && cookie.match(/vcadminwebsession=(.*?)(;|$)/)[1]) {
+    if (cookie && cookie.match(/vc_ui_auth_session=(.*?)(;|$)/)[1]) {
         console.debug("User is logged in");
         return true;
     }

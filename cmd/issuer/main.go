@@ -8,9 +8,7 @@ import (
 	"syscall"
 	"vc/internal/issuer/apiv1"
 	"vc/internal/issuer/db"
-	"vc/internal/issuer/ehic"
 	"vc/internal/issuer/httpserver"
-	"vc/internal/issuer/pda1"
 	"vc/internal/issuer/simplequeue"
 	"vc/pkg/configuration"
 	"vc/pkg/kvclient"
@@ -64,17 +62,7 @@ func main() {
 		panic(err)
 	}
 
-	ehicService, err := ehic.New(ctx, cfg, log.New("ehic"))
-	services["ehicService"] = ehicService
-	if err != nil {
-		panic(err)
-	}
-	pda1Service, err := pda1.New(ctx, cfg, log.New("pda1"))
-	services["pda1Service"] = pda1Service
-	if err != nil {
-		panic(err)
-	}
-	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, pda1Service, kvClient, dbService, cfg, tracer, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, kvClient, dbService, cfg, tracer, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}

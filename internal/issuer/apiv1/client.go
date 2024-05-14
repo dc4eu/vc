@@ -3,7 +3,6 @@ package apiv1
 import (
 	"context"
 	"vc/internal/issuer/db"
-	"vc/internal/issuer/pda1"
 	"vc/internal/issuer/simplequeue"
 	"vc/pkg/kvclient"
 	"vc/pkg/logger"
@@ -19,7 +18,6 @@ import (
 // Client holds the public api object
 type Client struct {
 	simpleQueue *simplequeue.Service
-	pda1        *pda1.Service
 	rpcClient   *rpcclient.Client
 	cfg         *model.Cfg
 	db          *db.Service
@@ -32,10 +30,9 @@ type Client struct {
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient *rpcclient.Client, pda1 *pda1.Service, kv *kvclient.Client, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient *rpcclient.Client, kv *kvclient.Client, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
 	c := &Client{
 		simpleQueue: simpleQueueService,
-		pda1:        pda1,
 		cfg:         cfg,
 		db:          db,
 		kv:          kv,
@@ -45,12 +42,12 @@ func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient
 	}
 
 	var err error
-	c.ehicClient, err = newEHICClient(c.log.New("ehic"))
+	c.ehicClient, err = newEHICClient(ctx, tracer, c.log.New("ehic"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.pda1Client, err = newPDA1Client(c.log.New("pda1"))
+	c.pda1Client, err = newPDA1Client(tracer, c.log.New("pda1"))
 	if err != nil {
 		return nil, err
 	}

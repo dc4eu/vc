@@ -30,36 +30,7 @@ type GetReply struct {
 
 // Get gets a credential
 func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error) {
-	doc := &pda1.Document{}
-	jwt, err := c.pda1.Build(doc, "mura")
-	if err != nil {
-		return nil, err
-	}
-
-	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
-	//optServiceConfig := grpc.WithDefaultServiceConfig(clientConfig)
-
-	conn, err := grpc.Dial(c.cfg.Registry.RPCServer.Addr, optInsecure)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	client := apiv1_registry.NewRegistryServiceClient(conn)
-	req := apiv1_registry.AddRequest{
-		Entity: "mura",
-	}
-	resp, err := client.Add(ctx, &req)
-	if err != nil {
-		return nil, err
-	}
-
-	c.log.Info("rpc reply", "reply", resp)
-
-	reply := &GetReply{
-		JWT: jwt,
-	}
-	return reply, nil
+	return nil, nil
 }
 
 // CreateCredentialRequest is the request for Credential
@@ -82,6 +53,9 @@ type CreateCredentialReply struct {
 
 // CreateCredential creates a credential
 func (c *Client) CreateCredential(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:CreateCredential")
+	defer span.End()
+
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		c.log.Debug("Validation", "err", err)
 		return nil, err
@@ -178,6 +152,9 @@ type RevokeReply struct {
 //	@Param			req	body		RevokeRequest			true	" "
 //	@Router			/revoke [post]
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:Revoke")
+	defer span.End()
+
 	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
 
 	conn, err := grpc.Dial(c.cfg.Registry.RPCServer.Addr, optInsecure)

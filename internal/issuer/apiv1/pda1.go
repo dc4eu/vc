@@ -4,6 +4,7 @@ import (
 	"context"
 	"vc/pkg/logger"
 	"vc/pkg/pda1"
+	"vc/pkg/trace"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/masv3971/gosdjwt"
@@ -11,17 +12,22 @@ import (
 
 type pda1Client struct {
 	log *logger.Log
+	tp  *trace.Tracer
 }
 
-func newPDA1Client(log *logger.Log) (*pda1Client, error) {
+func newPDA1Client(tp *trace.Tracer, log *logger.Log) (*pda1Client, error) {
 	client := &pda1Client{
 		log: log,
+		tp:  tp,
 	}
 
 	return client, nil
 }
 
 func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document) (*gosdjwt.SDJWT, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:pda1:sdjwt")
+	defer span.End()
+
 	ins := gosdjwt.InstructionsV2{
 		&gosdjwt.ParentInstructionV2{
 			Name: "activityEmploymentDetails",

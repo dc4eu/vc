@@ -4,6 +4,7 @@ import (
 	"context"
 	"vc/pkg/ehic"
 	"vc/pkg/logger"
+	"vc/pkg/trace"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/masv3971/gosdjwt"
@@ -11,17 +12,22 @@ import (
 
 type ehicClient struct {
 	log *logger.Log
+	tp  *trace.Tracer
 }
 
-func newEHICClient(log *logger.Log) (*ehicClient, error) {
+func newEHICClient(ctx context.Context, tp *trace.Tracer, log *logger.Log) (*ehicClient, error) {
 	client := &ehicClient{
 		log: log,
+		tp:  tp,
 	}
 
 	return client, nil
 }
 
 func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document) (*gosdjwt.SDJWT, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:ehic:sdjwt")
+	defer span.End()
+
 	ins := gosdjwt.InstructionsV2{
 		&gosdjwt.ParentInstructionV2{
 			Name: "cardHolder",

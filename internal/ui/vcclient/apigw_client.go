@@ -22,6 +22,5 @@ func (apigwc *APIGWClient) Portal(req *representations.PortalRequest) (any, erro
 	if err != nil {
 		return nil, err
 	}
-	//TODO impl Portal
 	return reply, nil
 }

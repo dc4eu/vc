@@ -71,9 +71,9 @@ func main() {
 
 	//TODO: add clients to connect with all other vc services and add to httpService
 	apigwClient := vcclient.NewAPIGWClient(cfg, tracer, log.New("ui_apiwg_client"))
-	//mockasClient :=
+	mockasClient := vcclient.NewMockASClient(cfg, tracer, log.New("ui_mockas_client"))
 
-	apiClient, err := apiv1.New(ctx, cfg, apigwClient, log.New("ui"))
+	apiClient, err := apiv1.New(ctx, cfg, apigwClient, mockasClient, log.New("ui"))
 	if err != nil {
 		panic(err)
 	}

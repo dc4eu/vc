@@ -6,9 +6,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"time"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
-	"vc/internal/ui/representations"
-
-	"vc/internal/ui/apiv1"
+	rep "vc/internal/ui/representations"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +21,7 @@ func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, erro
 }
 
 func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.LoginRequest{}
+	request := &rep.LoginRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
@@ -80,7 +78,7 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 		return nil, errors.New("Failed to convert logged in time to time.Time")
 	}
 
-	reply := &apiv1.LoggedinReply{
+	reply := &rep.LoggedinReply{
 		Username:     username,
 		LoggedInTime: loggedInTime,
 	}
@@ -88,8 +86,21 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 	return reply, nil
 }
 
+func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
+	request := &rep.PortalRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.MockNext(ctx, request)
+
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, error) {
-	request := &representations.PortalRequest{}
+	request := &rep.PortalRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
@@ -99,9 +110,4 @@ func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, erro
 		return nil, err
 	}
 	return reply, nil
-}
-
-func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
-	//TODO: impl endpointMockNext
-	return nil, nil
 }

@@ -13,17 +13,19 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg    *model.Cfg
-	log    *logger.Log
-	apigwc *vcclient.APIGWClient
+	cfg     *model.Cfg
+	log     *logger.Log
+	apigwc  *vcclient.APIGWClient
+	mockasc *vcclient.MockASClient
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, cfg *model.Cfg, apigwc *vcclient.APIGWClient, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, apigwc *vcclient.APIGWClient, mockasc *vcclient.MockASClient, logger *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:    cfg,
-		log:    logger,
-		apigwc: apigwc,
+		cfg:     cfg,
+		log:     logger,
+		apigwc:  apigwc,
+		mockasc: mockasc,
 	}
 
 	c.log.Info("Started")

@@ -2,7 +2,11 @@ package httpserver
 
 import (
 	"context"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"net/http"
+	"reflect"
+	"strings"
 	"vc/internal/ui/apiv1"
 	"vc/pkg/trace"
 
@@ -20,9 +24,8 @@ import (
 
 const (
 	/* session... constants is also used for the session cookie */
-	sessionName = "vc_ui_auth_session" //if changed, the web (javascript) must also be updated with the new name
-	//sessionKey                        = "sessionkey"
-	sessionInactivityTimeoutInSeconds = 300 // after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
+	sessionName                       = "vc_ui_auth_session" //if changed, the web (javascript) must also be updated with the new name
+	sessionInactivityTimeoutInSeconds = 300                  // after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
 	sessionPath                       = "/"
 	sessionHttpOnly                   = true
 	sessionSecure                     = false //TODO: activate for https
@@ -58,19 +61,17 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 		gin.SetMode(gin.DebugMode)
 	}
 
-	//apiValidator := validator.New()
-	//apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
-	//	name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-	//
-	//	if name == "-" {
-	//		return ""
-	//	}
-	//
-	//	return name
-	//})
-	//binding.Validator = &defaultValidator{
-	//	Validate: apiValidator,
-	//}
+	apiValidator := validator.New()
+	apiValidator.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
+	binding.Validator = &defaultValidator{
+		Validate: apiValidator,
+	}
 
 	s.gin = gin.New()
 	s.server.Handler = s.gin
@@ -111,9 +112,11 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "/logout", s.endpointLogout)
 	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/user", s.endpointUser)
 
+	///apigw
 	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/health/apigw", s.endpointAPIGWStatus)
 	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/portal", s.endpointPortal)
 
+	//mockas
 	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/mock/next", s.endpointMockNext)
 
 	// Run http server

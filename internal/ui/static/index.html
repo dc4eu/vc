@@ -28,16 +28,6 @@
         <div id="navbar-div" class="navbar-menu">
 
             <div id="navbar-start-div" class="navbar-start">
-                <a id="fetch-ui-health-btn"
-                   onclick="getAndDisplayInArticleContainerFor('/secure/health/ui','Health UI')"
-                   class="navbar-item">
-                    Health(UI)
-                </a>
-                <a id="fetch-apigw-health-btn"
-                   onclick="getAndDisplayInArticleContainerFor('/secure/health/apigw','Health APIGW')"
-                   class="navbar-item">
-                    Health(APIGW)
-                </a>
                 <a onclick="clearAllContentContainers()" class="navbar-item"> Clear
                 </a>
                 <div class="navbar-item has-dropdown is-hoverable">
@@ -49,6 +39,16 @@
                            onclick="toogleThemeDarkLight()"
                            class="navbar-item">
                             Toogle theme (dark/light)
+                        </a>
+                        <a id="fetch-ui-health-btn"
+                           onclick="getAndDisplayInArticleContainerFor('/secure/health/ui','Health UI')"
+                           class="navbar-item">
+                            Health(UI)
+                        </a>
+                        <a id="fetch-apigw-health-btn"
+                           onclick="getAndDisplayInArticleContainerFor('/secure/health/apigw','Health APIGW')"
+                           class="navbar-item">
+                            Health(APIGW)
                         </a>
                         <a id="fetch-user-btn" onclick="getAndDisplayInArticleContainerFor('/secure/user','User')"
                            class="navbar-item">

@@ -1,7 +1,6 @@
 package vcclient
 
 import (
-	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/internal/ui/representations"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -26,7 +25,7 @@ func (apigwc *APIGWClient) Portal(req *representations.PortalRequest) (any, erro
 	return reply, nil
 }
 
-func (apigwc *APIGWClient) Status(req *apiv1_status.StatusRequest) (any, error) {
+func (apigwc *APIGWClient) Status() (any, error) {
 	reply, err := apigwc.DoGetJSON("/health")
 	if err != nil {
 		return nil, err

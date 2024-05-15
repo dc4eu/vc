@@ -59,7 +59,7 @@ func (c *Client) MockNext(ctx context.Context, req *representations.PortalReques
 }
 
 func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (*any, error) {
-	reply, err := c.apigwc.Status(req)
+	reply, err := c.apigwc.Status()
 	if err != nil {
 		return nil, err
 	}

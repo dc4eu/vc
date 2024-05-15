@@ -43,12 +43,12 @@ func New(serviceName string, baseUrl string, tracer *trace.Tracer, logger *logge
 func (vcbc *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]interface{}, error) {
 	url := vcbc.url(endpoint)
 
-	requestBodyJSON, err := json.Marshal(reqBody)
+	reqBodyJSON, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBodyJSON))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBodyJSON))
 	if err != nil {
 		return nil, err
 	}

@@ -7,10 +7,6 @@ import (
 	"vc/pkg/model"
 )
 
-//	@title		UI API
-//	@version	0.1.0
-//	@BasePath	/api/v1
-
 // Client holds the public api object
 type Client struct {
 	cfg     *model.Cfg
@@ -19,7 +15,6 @@ type Client struct {
 	mockasc *vcclient.MockASClient
 }
 
-// New creates a new instance of the public api
 func New(ctx context.Context, cfg *model.Cfg, apigwc *vcclient.APIGWClient, mockasc *vcclient.MockASClient, logger *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:     cfg,

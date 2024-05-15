@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"vc/internal/ui/vcclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 )
@@ -12,15 +13,17 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg *model.Cfg
-	log *logger.Log
+	cfg    *model.Cfg
+	log    *logger.Log
+	apigwc *vcclient.APIGWClient
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, apigwc *vcclient.APIGWClient, logger *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg: cfg,
-		log: logger,
+		cfg:    cfg,
+		log:    logger,
+		apigwc: apigwc,
 	}
 
 	c.log.Info("Started")

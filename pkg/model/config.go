@@ -144,10 +144,14 @@ type UI struct {
 	SessionStoreEncryptionKey      string `yaml:"session_store_encryption_key" validate:"required"`
 	Services                       struct {
 		APIGW struct {
-			Addr string `yaml:"addr"`
+			//TODO: remove addr
+			Addr    string `yaml:"addr"`
+			BaseURL string `yaml:"base_url"`
 		} `yaml:"apigw"`
 		MockAS struct {
-			Addr string `yaml:"addr"`
+			//TODO: remove addr
+			Addr    string `yaml:"addr"`
+			BaseURL string `yaml:"base_url"`
 		} `yaml:"mockas"`
 	} `yaml:"services"`
 }

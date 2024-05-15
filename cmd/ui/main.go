@@ -16,6 +16,7 @@ import (
 	"time"
 	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
+	"vc/internal/ui/vcclient"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -68,12 +69,14 @@ func main() {
 		panic(err)
 	}
 
-	apiClient, err := apiv1.New(ctx, cfg, log.New("ui"))
+	//TODO: add clients to connect with all other vc services and add to httpService
+	apigwClient := vcclient.NewAPIGWClient(cfg, tracer, log.New("ui_apiwg_client"))
+	//mockasClient :=
+
+	apiClient, err := apiv1.New(ctx, cfg, apigwClient, log.New("ui"))
 	if err != nil {
 		panic(err)
 	}
-
-	//TODO: add clients to connect with all other vc services and add to httpService
 
 	httpService, err := httpserver.New(ctx, cfg, apiClient, tracer, log.New("httpserver"))
 	services["httpService"] = httpService

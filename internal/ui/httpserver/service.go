@@ -2,7 +2,6 @@ package httpserver
 
 import (
 	"context"
-	"github.com/gin-contrib/sessions"
 	"net/http"
 	"vc/internal/ui/apiv1"
 	"vc/pkg/trace"
@@ -101,23 +100,18 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	})
 
 	rgRoot := s.gin.Group("/")
-	s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.login)
+	s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.endpointLogin)
 
 	//rgDocs := rgRoot.Group("/swagger")
 	//rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	rgSecure := rgRoot.Group("secure")
 	rgSecure.Use(s.authRequired)
-	s.regEndpoint(ctx, rgSecure, http.MethodGet, "health/ui", s.endpointStatus)
-	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "/logout", s.logout)
-	rgSecure.GET("/user", getUserHandler)
-
-	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/upload", s.endpointUpload)
-	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document", s.endpointGetDocument)
-	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/document/collect_code", s.endpointGetDocumentByCollectCode)
-	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/id_mapping", s.endpointIDMapping)
-	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/metadata", s.endpointListMetadata)
-	//s.regEndpoint(ctx, rgAPIV1, http.MethodPost, "/portal", s.endpointPortal)
+	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/health/ui", s.endpointStatus)
+	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "/logout", s.endpointLogout)
+	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/user", s.endpointUser)
+	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/mock/next", s.endpointMockNext)
+	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/portal", s.endpointPortal)
 
 	// Run http server
 	go func() {
@@ -131,13 +125,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.logger.Info("started")
 
 	return s, nil
-}
-
-func getUserHandler(c *gin.Context) {
-	session := sessions.Default(c)
-	user := session.Get(sessionUsernameKey)
-	loggedInTime := session.Get(sessionLoggedInTimeKey)
-	c.JSON(http.StatusOK, gin.H{"user": user, "logged_in_time": loggedInTime})
 }
 
 func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, handler func(context.Context, *gin.Context) (interface{}, error)) {

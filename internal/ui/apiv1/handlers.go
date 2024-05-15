@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/ui/representations"
 	"vc/pkg/model"
 )
 
@@ -49,4 +50,16 @@ func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, 
 
 func (c *Client) Logout(ctx context.Context) error {
 	return nil
+}
+
+func (c *Client) User(ctx context.Context) (*LoggedinReply, error) {
+	return nil, nil
+}
+
+func (c *Client) Portal(ctx context.Context, req *representations.PortalRequest) (*any, error) {
+	reply, err := c.apigwc.Portal(req)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
 }

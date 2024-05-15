@@ -221,7 +221,7 @@ function doPostForDemo(path, articleHeaderText) {
 /* ie upload */
 const createMock = () => {
     console.debug("createMock");
-    const path = "/secure/mock";
+    const path = "/secure/mock/next";
     const articleHeaderText = "Upload";
     doPostForDemo(path, articleHeaderText);
 };

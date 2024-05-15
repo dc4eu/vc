@@ -84,6 +84,10 @@ ui:
   services:
     #TODO: Do same as with mock_as datastore_url?
     apigw:
+      #TODO: remove addr
       addr: "http://172.16.50.2:8080"
+      base_url: http://vc_dev_apigw:8080
     mockas:
+      #TODO: remove addr
       addr: "http://172.16.50.13:8080"
+      base_url: http://vc_dev_mockas:8080

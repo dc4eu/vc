@@ -11,6 +11,9 @@ type Apiv1 interface {
 	Login(ctx context.Context, req *rep.LoginRequest) (*rep.LoggedinReply, error)
 	Logout(ctx context.Context) error
 	User(ctx context.Context) (*rep.LoggedinReply, error)
+
+	StatusAPIGW(ctx context.Context, request *apiv1_status.StatusRequest) (*any, error)
 	Portal(ctx context.Context, req *rep.PortalRequest) (*any, error)
+
 	MockNext(ctx context.Context, req *rep.PortalRequest) (*any, error)
 }

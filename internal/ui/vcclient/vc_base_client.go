@@ -74,36 +74,34 @@ func (vcbc *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]
 	return &jsonResp, nil
 }
 
-//func (vcbc *VCBaseClient) DoGetJSON(c *gin.Context, endpoint string) {
-//	url := vcbc.url(endpoint)
-//
-//	req, err := http.NewRequest("GET", url, nil)
-//	if err != nil {
-//		c.JSON(http.StatusInternalServerError, gin.H{"Error creating new http(s) request": err.Error()})
-//	}
-//	req.Header.Set("Accept", ACCEPT)
-//
-//	resp, err := vcbc.httpClient.Do(req)
-//	if err != nil {
-//		c.JSON(http.StatusInternalServerError, gin.H{"Error request": err.Error()})
-//	}
-//
-//	defer closeBody(resp)
-//	body, err := io.ReadAll(resp.Body)
-//	if err != nil {
-//		c.JSON(http.StatusInternalServerError, gin.H{"Error read response": err.Error()})
-//		return
-//	}
-//
-//	var jsonResp map[string]interface{}
-//	if err := json.Unmarshal(body, &jsonResp); err != nil {
-//		c.JSON(http.StatusInternalServerError, gin.H{"Error Unmarshal response to json": err.Error()})
-//		return
-//	}
-//
-//	c.JSON(resp.StatusCode, jsonResp)
-//
-//}
+func (vcbc *VCBaseClient) DoGetJSON(endpoint string) (*map[string]interface{}, error) {
+	url := vcbc.url(endpoint)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", ACCEPT)
+
+	resp, err := vcbc.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer closeBody(resp)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var jsonResp map[string]interface{}
+	if err := json.Unmarshal(body, &jsonResp); err != nil {
+		return nil, err
+	}
+
+	return &jsonResp, nil
+
+}
 
 func (vcbc *VCBaseClient) url(path string) string {
 	return vcbc.baseUrl + path

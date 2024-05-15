@@ -86,13 +86,9 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 	return reply, nil
 }
 
-func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
-	request := &rep.PortalRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.MockNext(ctx, request)
-
+func (s *Service) endpointAPIGWStatus(ctx context.Context, g *gin.Context) (interface{}, error) {
+	request := &apiv1_status.StatusRequest{}
+	reply, err := s.apiv1.StatusAPIGW(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -105,6 +101,19 @@ func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, erro
 		return nil, err
 	}
 	reply, err := s.apiv1.Portal(ctx, request)
+
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
+	request := &rep.PortalRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.MockNext(ctx, request)
 
 	if err != nil {
 		return nil, err

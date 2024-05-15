@@ -110,8 +110,11 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/health/ui", s.endpointStatus)
 	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "/logout", s.endpointLogout)
 	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/user", s.endpointUser)
-	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/mock/next", s.endpointMockNext)
+
+	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/health/apigw", s.endpointAPIGWStatus)
 	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/portal", s.endpointPortal)
+
+	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/mock/next", s.endpointMockNext)
 
 	// Run http server
 	go func() {

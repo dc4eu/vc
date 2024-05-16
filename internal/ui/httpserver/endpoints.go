@@ -47,7 +47,7 @@ func (s *Service) endpointLogout(ctx context.Context, c *gin.Context) (any, erro
 	session := sessions.Default(c)              //gets the session based on session-ID in session cookie (handled by gin)
 	username := session.Get(sessionUsernameKey) //retrieve username for the logged in user from session storage (if nil the session does not exist or has been cleared)
 	if username == nil {
-		return nil, errors.New("Invalid session token")
+		return nil, errors.New("invalid session token")
 	}
 
 	session.Clear()                   //clear the session, is later removed by MaxAge in session storage (sessionInactivityTimeoutInSeconds)
@@ -59,7 +59,7 @@ func (s *Service) endpointLogout(ctx context.Context, c *gin.Context) (any, erro
 		SameSite: sessionSameSite,
 	})
 	if err := session.Save(); err != nil { //Save the cleared session and send remove session cookie to browser
-		return nil, errors.New("Failed to remove session (and cookie)")
+		return nil, errors.New("failed to remove session (and cookie)")
 	}
 
 	return nil, nil
@@ -70,12 +70,12 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 
 	username, ok := session.Get(sessionUsernameKey).(string)
 	if !ok {
-		return nil, errors.New("Failed to convert username to string")
+		return nil, errors.New("failed to convert username to string")
 	}
 
 	loggedInTime, ok := session.Get(sessionLoggedInTimeKey).(time.Time)
 	if !ok {
-		return nil, errors.New("Failed to convert logged in time to time.Time")
+		return nil, errors.New("failed to convert logged in time to time.Time")
 	}
 
 	reply := &rep.LoggedinReply{
@@ -109,7 +109,7 @@ func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, erro
 }
 
 func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
-	request := &rep.PortalRequest{}
+	request := &rep.MockNextRequest{}
 	if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}

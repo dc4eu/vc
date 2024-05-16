@@ -5,28 +5,24 @@ import (
 	"errors"
 	"time"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
-	"vc/internal/ui/representations"
+	rep "vc/internal/ui/representations"
 	"vc/pkg/model"
 )
 
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	probes := model.Probes{}
-
 	status := probes.Check("ui")
-
 	return status, nil
 }
 
-func (c *Client) Login(ctx context.Context, req *representations.LoginRequest) (*representations.LoggedinReply, error) {
+func (c *Client) Login(ctx context.Context, req *rep.LoginRequest) (*rep.LoggedinReply, error) {
 	//c.log.Info("From browser username and password", req.Username, req.Password)
 
 	if req.Username != c.cfg.UI.Username || req.Password != c.cfg.UI.Password {
-		return nil, errors.New("Invalid username and/or password")
+		return nil, errors.New("invalid username and/or password")
 	}
 
-	//uuid := uuid.NewString()
-	reply := &representations.LoggedinReply{
-		//SessionKey: uuid,
+	reply := &rep.LoggedinReply{
 		Username:     c.cfg.UI.Username,
 		LoggedInTime: time.Now(),
 	}
@@ -38,11 +34,11 @@ func (c *Client) Logout(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) User(ctx context.Context) (*representations.LoggedinReply, error) {
+func (c *Client) User(ctx context.Context) (*rep.LoggedinReply, error) {
 	return nil, nil
 }
 
-func (c *Client) Portal(ctx context.Context, req *representations.PortalRequest) (*any, error) {
+func (c *Client) Portal(ctx context.Context, req *rep.PortalRequest) (*any, error) {
 	reply, err := c.apigwc.Portal(req)
 	if err != nil {
 		return nil, err
@@ -50,7 +46,7 @@ func (c *Client) Portal(ctx context.Context, req *representations.PortalRequest)
 	return &reply, nil
 }
 
-func (c *Client) MockNext(ctx context.Context, req *representations.PortalRequest) (*any, error) {
+func (c *Client) MockNext(ctx context.Context, req *rep.MockNextRequest) (*any, error) {
 	reply, err := c.mockasc.MockNext(req)
 	if err != nil {
 		return nil, err

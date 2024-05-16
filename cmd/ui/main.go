@@ -48,7 +48,7 @@ func main() {
 	apigwClient := vcclient.NewAPIGWClient(cfg, tracer, log.New("ui_apiwg_client"))
 	mockasClient := vcclient.NewMockASClient(cfg, tracer, log.New("ui_mockas_client"))
 
-	apiClient, err := apiv1.New(ctx, cfg, apigwClient, mockasClient, log.New("ui"))
+	apiClient, err := apiv1.New(ctx, cfg, apigwClient, mockasClient, tracer, log.New("ui_api_client"))
 	if err != nil {
 		panic(err)
 	}

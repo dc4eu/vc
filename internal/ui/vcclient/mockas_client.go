@@ -17,7 +17,7 @@ func NewMockASClient(cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) *
 	}
 }
 
-func (mockasc *MockASClient) MockNext(req *rep.PortalRequest) (any, error) {
+func (mockasc *MockASClient) MockNext(req *rep.MockNextRequest) (any, error) {
 	reply, err := mockasc.DoPostJSON("/api/v1/mock/next", req)
 	if err != nil {
 		return nil, err

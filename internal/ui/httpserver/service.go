@@ -10,14 +10,10 @@ import (
 	"vc/internal/ui/apiv1"
 	"vc/pkg/trace"
 
-	//"reflect"
-	//"strings"
 	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-
-	//_ "vc/docs/datastore"
 
 	"github.com/gin-gonic/gin"
 )
@@ -121,7 +117,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 
 	// Run http server
 	go func() {
-		//TODO: add tls support (see service apigw)
+		//TODO: add tls support (see service apigw) + sessionSecure must be set to true
 		err := s.server.ListenAndServe()
 		if err != nil {
 			s.logger.New("http").Trace("listen_error", "error", err)

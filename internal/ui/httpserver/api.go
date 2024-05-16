@@ -15,5 +15,5 @@ type Apiv1 interface {
 	StatusAPIGW(ctx context.Context, request *apiv1_status.StatusRequest) (*any, error)
 	Portal(ctx context.Context, req *rep.PortalRequest) (*any, error)
 
-	MockNext(ctx context.Context, req *rep.PortalRequest) (*any, error)
+	MockNext(ctx context.Context, req *rep.MockNextRequest) (*any, error)
 }

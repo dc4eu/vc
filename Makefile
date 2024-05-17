@@ -261,8 +261,6 @@ swagger-apigw:
 swagger-issuer:
 	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency --packageName docs
 
-#TODO: add swagger-ui
-
 install-tools:
 	$(info Install from apt)
 	apt-get update && apt-get install -y \

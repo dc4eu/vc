@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"time"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
-	rep "vc/internal/ui/representations"
-
-	"github.com/gin-gonic/gin"
+	rep "vc/internal/ui/apiv1"
 )
+
+//TODO: använd ej alias om det inte verkligen behövs, se rep lite här och var
 
 func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}

@@ -2,7 +2,6 @@ package apiv1
 
 import (
 	"context"
-	"vc/internal/ui/vcclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -13,11 +12,11 @@ type Client struct {
 	cfg     *model.Cfg
 	tp      *trace.Tracer
 	log     *logger.Log
-	apigwc  *vcclient.APIGWClient
-	mockasc *vcclient.MockASClient
+	apigwc  *APIGWClient
+	mockasc *MockASClient
 }
 
-func New(ctx context.Context, cfg *model.Cfg, apigwc *vcclient.APIGWClient, mockasc *vcclient.MockASClient, tp *trace.Tracer, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, apigwc *APIGWClient, mockasc *MockASClient, tp *trace.Tracer, log *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:     cfg,
 		tp:      tp,

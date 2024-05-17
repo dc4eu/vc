@@ -10,7 +10,6 @@ import (
 	"time"
 	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
-	"vc/internal/ui/vcclient"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
@@ -45,8 +44,8 @@ func main() {
 		panic(err)
 	}
 
-	apigwClient := vcclient.NewAPIGWClient(cfg, tracer, log.New("ui_apiwg_client"))
-	mockasClient := vcclient.NewMockASClient(cfg, tracer, log.New("ui_mockas_client"))
+	apigwClient := apiv1.NewAPIGWClient(cfg, tracer, log.New("ui_apiwg_client"))
+	mockasClient := apiv1.NewMockASClient(cfg, tracer, log.New("ui_mockas_client"))
 
 	apiClient, err := apiv1.New(ctx, cfg, apigwClient, mockasClient, tracer, log.New("ui_api_client"))
 	if err != nil {

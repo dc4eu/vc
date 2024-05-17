@@ -3,7 +3,7 @@ package httpserver
 import (
 	"context"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
-	rep "vc/internal/ui/representations"
+	rep "vc/internal/ui/apiv1"
 )
 
 type Apiv1 interface {

@@ -1,7 +1,6 @@
-package vcclient
+package apiv1
 
 import (
-	rep "vc/internal/ui/representations"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -13,11 +12,11 @@ type MockASClient struct {
 
 func NewMockASClient(cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) *MockASClient {
 	return &MockASClient{
-		VCBaseClient: New("APIGW", cfg.UI.Services.MockAS.BaseURL, tracer, logger),
+		VCBaseClient: NewClient("APIGW", cfg.UI.Services.MockAS.BaseURL, tracer, logger),
 	}
 }
 
-func (mockasc *MockASClient) MockNext(req *rep.MockNextRequest) (any, error) {
+func (mockasc *MockASClient) MockNext(req *MockNextRequest) (any, error) {
 	reply, err := mockasc.DoPostJSON("/api/v1/mock/next", req)
 	if err != nil {
 		return nil, err

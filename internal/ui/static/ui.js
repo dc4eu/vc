@@ -51,11 +51,13 @@ function displaySecureMenyItems() {
     hideAElement("show-login-form-btn");
 }
 
-let currentIdNumber = 0;
-const secureGenerateUUID = () => {
-    //TODO: JonL: hur kan jag få till UUID:er, medför crypto.randomUUID() "Uncaught TypeError: crypto.randomUUID is not a function"
-    //return crypto.randomUUID();
-    return currentIdNumber++;
+const generateUUID = () => {
+    //UUID v4
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 };
 
 const toogleThemeDarkLight = () => {
@@ -68,7 +70,7 @@ const toogleThemeDarkLight = () => {
 };
 
 const generateArticleIDBasis = () => {
-    const uuid = secureGenerateUUID();
+    const uuid = generateUUID();
     const articleID = "article-" + uuid;
 
     return {
@@ -221,14 +223,14 @@ function doPostForDemo(path, articleHeaderText) {
 /* ie upload */
 const createMock = () => {
     console.debug("createMock");
-    const path = "/secure/mock/next";
+    const path = "/secure/mockas/mock/next";
     const articleHeaderText = "Upload";
     doPostForDemo(path, articleHeaderText);
 };
 
 const fetchFromPortal = () => {
     console.debug("fetchFromPortal");
-    const path = "/secure/portal";
+    const path = "/secure/apigw/portal";
     const articleHeaderText = "Fetch";
     doPostForDemo(path, articleHeaderText);
 };

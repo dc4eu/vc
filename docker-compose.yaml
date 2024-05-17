@@ -24,7 +24,6 @@ services:
     restart: always
     volumes:
       - ./dev_config_docker.yaml:/config.yaml:ro
-      #TODO: add logging
     depends_on:
       - apigw
     networks:

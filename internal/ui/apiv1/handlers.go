@@ -15,8 +15,6 @@ func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*
 }
 
 func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, error) {
-	//c.log.Info("From browser username and password", req.Username, req.Password)
-
 	if req.Username != c.cfg.UI.Username || req.Password != c.cfg.UI.Password {
 		return nil, errors.New("invalid username and/or password")
 	}

@@ -18,28 +18,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TODO: flytta konstanter till Service structen MEN "I Go finns det inget direkt sätt att ha statiska fält i en struct som i vissa andra programmeringsspråk. Alla fält i en struct i Go är dynamiska, vilket betyder att de är specifika för varje instans av structen."
-const (
-	/* session... constants is also used for the session cookie */
-	sessionName                       = "vc_ui_auth_session" //if changed, the web (javascript) must also be updated with the new name
-	sessionInactivityTimeoutInSeconds = 300                  // after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
-	sessionPath                       = "/"
-	sessionHttpOnly                   = true
-	//TODO: sätt värde baserat på om tls är aktiverat eller ej via config
-	sessionSecure          = false //TODO: activate for https
-	sessionSameSite        = http.SameSiteStrictMode
-	sessionUsernameKey     = "username_key" //key to retrive the username for the logged in user from the session (not stored in any cookie)
-	sessionLoggedInTimeKey = "logged_in_time"
-)
-
 // Service is the service object for httpserver
 type Service struct {
-	config *model.Cfg
-	logger *logger.Log
-	tp     *trace.Tracer
-	server *http.Server
-	apiv1  Apiv1
-	gin    *gin.Engine
+	config        *model.Cfg
+	logger        *logger.Log
+	tp            *trace.Tracer
+	server        *http.Server
+	apiv1         Apiv1
+	gin           *gin.Engine
+	sessionConfig *sessionConfig
+}
+
+type sessionConfig struct {
+	/* session... values is also used for the session cookie */
+	sessionName                       string //if changed, the web (javascript) must also be updated with the new name
+	sessionInactivityTimeoutInSeconds int    // after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
+	sessionPath                       string
+	sessionHttpOnly                   bool
+	sessionSecure                     bool
+	sessionSameSite                   http.SameSite
+	sessionUsernameKey                string //key to retrive the username for the logged in user from the session (not stored in any cookie)
+	sessionLoggedInTimeKey            string //key to retrive the time user logged in for this session (not stored in any cookie)
 }
 
 // New creates a new httpserver service
@@ -51,14 +50,25 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 		apiv1:  api,
 		server: &http.Server{
 			Addr: config.UI.APIServer.Addr,
-			/* TODO: sätt och ta in via config
+			/* TODO: set all server configutations below and remove the same set(s) after s.server.Handler = s.gin ?
 			ReadTimeout	Den maximala tiden som servern väntar på att läsa hela förfrågan (inklusive kroppen). Skyddar mot långsamma klienter.
 			WriteTimeout	Den maximala tiden som servern väntar på att skriva svaret till klienten. Skyddar mot långsamma nätverk och klienter.
 			IdleTimeout	Den maximala tiden som en anslutning kan vara inaktiv innan den stängs. Skyddar mot att hålla anslutningar öppna för länge utan aktivitet.
 			ReadHeaderTimeout	Den maximala tiden som servern väntar på att läsa HTTP-rubrikerna. Skyddar mot långsamma klienter vid början av en anslutning.
 			MaxHeaderBytes	Den maximala storleken på HTTP-rubrikerna i byte. Skyddar mot attacker med stora rubriker som kan överbelasta servern.
 			*/
-			ReadHeaderTimeout: 2 * time.Second},
+			ReadHeaderTimeout: 2 * time.Second,
+		},
+		sessionConfig: &sessionConfig{
+			sessionName:                       "vc_ui_auth_session",
+			sessionInactivityTimeoutInSeconds: 300,
+			sessionPath:                       "/",
+			sessionHttpOnly:                   true,
+			sessionSecure:                     config.UI.APIServer.TLS.Enabled,
+			sessionSameSite:                   http.SameSiteStrictMode,
+			sessionUsernameKey:                "username_key",
+			sessionLoggedInTimeKey:            "logged_in_time_key",
+		},
 	}
 
 	switch s.config.Common.Production {
@@ -80,16 +90,9 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 		Validate: apiValidator,
 	}
 
-	//TODO: flytta till config
 	s.gin = gin.New()
 	s.server.Handler = s.gin
-	/* TODO: sätt och ta in via config
-	ReadTimeout	Den maximala tiden som servern väntar på att läsa hela förfrågan (inklusive kroppen). Skyddar mot långsamma klienter.
-	WriteTimeout	Den maximala tiden som servern väntar på att skriva svaret till klienten. Skyddar mot långsamma nätverk och klienter.
-	IdleTimeout	Den maximala tiden som en anslutning kan vara inaktiv innan den stängs. Skyddar mot att hålla anslutningar öppna för länge utan aktivitet.
-	ReadHeaderTimeout	Den maximala tiden som servern väntar på att läsa HTTP-rubrikerna. Skyddar mot långsamma klienter vid början av en anslutning.
-	MaxHeaderBytes	Den maximala storleken på HTTP-rubrikerna i byte. Skyddar mot attacker med stora rubriker som kan överbelasta servern.
-	*/
+
 	s.server.ReadTimeout = time.Second * 5
 	s.server.WriteTimeout = time.Second * 30
 	s.server.IdleTimeout = time.Second * 90

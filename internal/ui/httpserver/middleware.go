@@ -59,32 +59,31 @@ func (s *Service) middlewareGzip(ctx context.Context) gin.HandlerFunc {
 }
 
 func (s *Service) middlewareUserSession(ctx context.Context, cfg *model.Cfg) gin.HandlerFunc {
-	return setupSessionMiddleware(cfg)
+	return setupSessionMiddleware(cfg, s)
 }
 
-func setupSessionMiddleware(cfg *model.Cfg) gin.HandlerFunc {
-	// Configure session cookie store
-	store := configureSessionStore(cfg)
-	return sessions.Sessions(sessionName, store)
+func setupSessionMiddleware(cfg *model.Cfg, s *Service) gin.HandlerFunc {
+	store := configureSessionStore(cfg, s)
+	return sessions.Sessions(s.sessionConfig.sessionName, store)
 }
 
-func configureSessionStore(cfg *model.Cfg) sessions.Store {
+func configureSessionStore(cfg *model.Cfg, s *Service) sessions.Store {
 	//The first parameter is used to encrypt and decrypt cookies.
 	//The second parameter is used internally by cookie.Store to handle the encryption and decryption process
 	store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
 	store.Options(sessions.Options{
-		Path:     sessionPath,
-		MaxAge:   sessionInactivityTimeoutInSeconds,
-		Secure:   sessionSecure,
-		HttpOnly: sessionHttpOnly,
-		SameSite: sessionSameSite,
+		Path:     s.sessionConfig.sessionPath,
+		MaxAge:   s.sessionConfig.sessionInactivityTimeoutInSeconds,
+		Secure:   s.sessionConfig.sessionSecure,
+		HttpOnly: s.sessionConfig.sessionHttpOnly,
+		SameSite: s.sessionConfig.sessionSameSite,
 	})
 	return store
 }
 
 func (s *Service) authRequired(c *gin.Context) {
 	session := sessions.Default(c)
-	username := session.Get(sessionUsernameKey)
+	username := session.Get(s.sessionConfig.sessionUsernameKey)
 	if username == nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized/session expired"})
 		return
@@ -93,11 +92,7 @@ func (s *Service) authRequired(c *gin.Context) {
 	if !isLogoutRoute(c) { // Don't touch the session (including cookie) during logout
 		// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in sessionInactivityTimeoutInSeconds
 		session.Options(sessions.Options{
-			MaxAge:   sessionInactivityTimeoutInSeconds,
-			Path:     sessionPath,
-			Secure:   sessionSecure,
-			HttpOnly: sessionHttpOnly,
-			SameSite: sessionSameSite,
+			MaxAge: s.sessionConfig.sessionInactivityTimeoutInSeconds,
 		})
 
 		if err := session.Save(); err != nil {

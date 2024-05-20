@@ -16,16 +16,16 @@ func NewAPIGWClient(cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) *A
 	}
 }
 
-func (apigwc *APIGWClient) Portal(req *PortalRequest) (any, error) {
-	reply, err := apigwc.DoPostJSON("/api/v1/portal", req)
+func (c *APIGWClient) Portal(req *PortalRequest) (any, error) {
+	reply, err := c.DoPostJSON("/api/v1/portal", req)
 	if err != nil {
 		return nil, err
 	}
 	return reply, nil
 }
 
-func (apigwc *APIGWClient) Status() (any, error) {
-	reply, err := apigwc.DoGetJSON("/health")
+func (c *APIGWClient) Status() (any, error) {
+	reply, err := c.DoGetJSON("/health")
 	if err != nil {
 		return nil, err
 	}

@@ -26,6 +26,7 @@ services:
       - ./dev_config_docker.yaml:/config.yaml:ro
     depends_on:
       - apigw
+      - mockas
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.50

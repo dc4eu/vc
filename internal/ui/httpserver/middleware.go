@@ -64,7 +64,7 @@ func (s *Service) middlewareUserSession(ctx context.Context, cfg *model.Cfg) gin
 
 func setupSessionMiddleware(cfg *model.Cfg, s *Service) gin.HandlerFunc {
 	store := configureSessionStore(cfg, s)
-	return sessions.Sessions(s.sessionConfig.sessionName, store)
+	return sessions.Sessions(s.sessionConfig.name, store)
 }
 
 func configureSessionStore(cfg *model.Cfg, s *Service) sessions.Store {
@@ -72,27 +72,28 @@ func configureSessionStore(cfg *model.Cfg, s *Service) sessions.Store {
 	//The second parameter is used internally by cookie.Store to handle the encryption and decryption process
 	store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
 	store.Options(sessions.Options{
-		Path:     s.sessionConfig.sessionPath,
-		MaxAge:   s.sessionConfig.sessionInactivityTimeoutInSeconds,
-		Secure:   s.sessionConfig.sessionSecure,
-		HttpOnly: s.sessionConfig.sessionHttpOnly,
-		SameSite: s.sessionConfig.sessionSameSite,
+		Path:     s.sessionConfig.path,
+		MaxAge:   s.sessionConfig.inactivityTimeoutInSeconds,
+		Secure:   s.sessionConfig.secure,
+		HttpOnly: s.sessionConfig.httpOnly,
+		SameSite: s.sessionConfig.sameSite,
 	})
 	return store
 }
 
 func (s *Service) authRequired(c *gin.Context) {
 	session := sessions.Default(c)
-	username := session.Get(s.sessionConfig.sessionUsernameKey)
+	username := session.Get(s.sessionConfig.usernameKey)
 	if username == nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized/session expired"})
 		return
 	}
 
-	if !isLogoutRoute(c) { // Don't touch the session (including cookie) during logout
-		// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in sessionInactivityTimeoutInSeconds
+	// Don't touch the session (including cookie) during logout flow
+	if !isLogoutRoute(c) {
+		// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in inactivityTimeoutInSeconds
 		session.Options(sessions.Options{
-			MaxAge: s.sessionConfig.sessionInactivityTimeoutInSeconds,
+			MaxAge: s.sessionConfig.inactivityTimeoutInSeconds,
 		})
 
 		if err := session.Save(); err != nil {

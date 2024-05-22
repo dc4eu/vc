@@ -36,7 +36,7 @@ func (c *Client) User(ctx context.Context) (*LoggedinReply, error) {
 }
 
 func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*any, error) {
-	reply, err := c.apigwc.Portal(req)
+	reply, err := c.apigwClient.Portal(req)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*any, error) {
 }
 
 func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (*any, error) {
-	reply, err := c.mockasc.MockNext(req)
+	reply, err := c.mockasClient.MockNext(req)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (*any, erro
 }
 
 func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (*any, error) {
-	reply, err := c.apigwc.Status()
+	reply, err := c.apigwClient.Status()
 	if err != nil {
 		return nil, err
 	}

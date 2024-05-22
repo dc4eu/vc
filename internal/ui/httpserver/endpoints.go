@@ -31,8 +31,8 @@ func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error
 	}
 
 	session := sessions.Default(c)
-	session.Set(s.sessionConfig.sessionUsernameKey, reply.Username)
-	session.Set(s.sessionConfig.sessionLoggedInTimeKey, reply.LoggedInTime)
+	session.Set(s.sessionConfig.usernameKey, reply.Username)
+	session.Set(s.sessionConfig.loggedInTimeKey, reply.LoggedInTime)
 	if err := session.Save(); err != nil { //This is also where the session cookie is created by gin
 		s.logger.Error(err, "Failed to save session (and send cookie) during login")
 		return nil, err
@@ -42,19 +42,23 @@ func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error
 }
 
 func (s *Service) endpointLogout(ctx context.Context, c *gin.Context) (any, error) {
-	session := sessions.Default(c)                              //gets the session based on session-ID in session cookie (handled by gin)
-	username := session.Get(s.sessionConfig.sessionUsernameKey) //retrieve username for the logged in user from session storage (if nil the session does not exist or has been cleared)
+	//gets the session based on session-ID in session cookie (handled by gin)
+	session := sessions.Default(c)
+	//retrieve username for the logged in user from session storage (if nil the session does not exist or has been cleared)
+	username := session.Get(s.sessionConfig.usernameKey)
 	if username == nil {
 		return nil, errors.New("invalid session token")
 	}
 
-	session.Clear()                   //clear the session, is later removed by MaxAge in session storage (sessionInactivityTimeoutInSeconds)
-	session.Options(sessions.Options{ //Order the browser to remove the session cookie
+	//clear the session, is later removed by MaxAge in session storage (inactivityTimeoutInSeconds)
+	session.Clear()
+	//Order the browser to remove the session cookie
+	session.Options(sessions.Options{
 		MaxAge:   -1, // Expired
-		Path:     s.sessionConfig.sessionPath,
-		Secure:   s.sessionConfig.sessionSecure,
-		HttpOnly: s.sessionConfig.sessionHttpOnly,
-		SameSite: s.sessionConfig.sessionSameSite,
+		Path:     s.sessionConfig.path,
+		Secure:   s.sessionConfig.secure,
+		HttpOnly: s.sessionConfig.httpOnly,
+		SameSite: s.sessionConfig.sameSite,
 	})
 	if err := session.Save(); err != nil { //Save the cleared session and send remove session cookie to browser
 		return nil, errors.New("failed to remove session (and cookie)")
@@ -66,12 +70,12 @@ func (s *Service) endpointLogout(ctx context.Context, c *gin.Context) (any, erro
 func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error) {
 	session := sessions.Default(c)
 
-	username, ok := session.Get(s.sessionConfig.sessionUsernameKey).(string)
+	username, ok := session.Get(s.sessionConfig.usernameKey).(string)
 	if !ok {
 		return nil, errors.New("failed to convert username to string")
 	}
 
-	loggedInTime, ok := session.Get(s.sessionConfig.sessionLoggedInTimeKey).(time.Time)
+	loggedInTime, ok := session.Get(s.sessionConfig.loggedInTimeKey).(time.Time)
 	if !ok {
 		return nil, errors.New("failed to convert logged in time to time.Time")
 	}
@@ -84,7 +88,7 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 	return reply, nil
 }
 
-func (s *Service) endpointAPIGWStatus(ctx context.Context, g *gin.Context) (interface{}, error) {
+func (s *Service) endpointAPIGWStatus(ctx context.Context, g *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.StatusAPIGW(ctx, request)
 	if err != nil {

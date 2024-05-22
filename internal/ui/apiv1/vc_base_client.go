@@ -10,11 +10,6 @@ import (
 	"vc/pkg/trace"
 )
 
-const (
-	CONTENT_TYPE = "application/json"
-	ACCEPT       = "application/json"
-)
-
 // VCBaseClient Defines a base http(s) client for a service in the vc (verifiable credential) domain (for example: apigw, datastore, etc.)
 //
 //	request: json
@@ -40,7 +35,7 @@ func NewClient(serviceName string, baseUrl string, tracer *trace.Tracer, logger 
 	return client
 }
 
-func (c *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]interface{}, error) {
+func (c *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]any, error) {
 	url := c.url(endpoint)
 
 	reqBodyJSON, err := json.Marshal(reqBody)
@@ -52,8 +47,8 @@ func (c *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]int
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", CONTENT_TYPE)
-	req.Header.Set("Accept", ACCEPT)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -66,7 +61,7 @@ func (c *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]int
 		return nil, err
 	}
 
-	var jsonResp map[string]interface{}
+	var jsonResp map[string]any
 	if err := json.Unmarshal(body, &jsonResp); err != nil {
 		return nil, err
 	}
@@ -74,14 +69,14 @@ func (c *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]int
 	return &jsonResp, nil
 }
 
-func (c *VCBaseClient) DoGetJSON(endpoint string) (*map[string]interface{}, error) {
+func (c *VCBaseClient) DoGetJSON(endpoint string) (*map[string]any, error) {
 	url := c.url(endpoint)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Accept", ACCEPT)
+	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -95,7 +90,7 @@ func (c *VCBaseClient) DoGetJSON(endpoint string) (*map[string]interface{}, erro
 		return nil, err
 	}
 
-	var jsonResp map[string]interface{}
+	var jsonResp map[string]any
 	if err := json.Unmarshal(body, &jsonResp); err != nil {
 		return nil, err
 	}

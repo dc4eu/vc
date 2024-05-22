@@ -29,16 +29,20 @@ type Service struct {
 	sessionConfig *sessionConfig
 }
 
+// sessionConfig... values is also used for the session cookie
 type sessionConfig struct {
-	/* session... values is also used for the session cookie */
-	sessionName                       string //if changed, the web (javascript) must also be updated with the new name
-	sessionInactivityTimeoutInSeconds int    // after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
-	sessionPath                       string
-	sessionHttpOnly                   bool
-	sessionSecure                     bool
-	sessionSameSite                   http.SameSite
-	sessionUsernameKey                string //key to retrive the username for the logged in user from the session (not stored in any cookie)
-	sessionLoggedInTimeKey            string //key to retrive the time user logged in for this session (not stored in any cookie)
+	//if changed, the web (javascript) must also be updated with the new name
+	name string
+	// after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
+	inactivityTimeoutInSeconds int
+	path                       string
+	httpOnly                   bool
+	secure                     bool
+	sameSite                   http.SameSite
+	//key to retrive the username for the logged in user from the session (not stored in any cookie)
+	usernameKey string
+	//key to retrive the time user logged in for this session (not stored in any cookie)
+	loggedInTimeKey string
 }
 
 // New creates a new httpserver service
@@ -49,25 +53,21 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 		tp:     tracer,
 		apiv1:  api,
 		server: &http.Server{
-			Addr: config.UI.APIServer.Addr,
-			/* TODO: set all server configutations below and remove the same set(s) after s.server.Handler = s.gin ?
-			ReadTimeout	Den maximala tiden som servern väntar på att läsa hela förfrågan (inklusive kroppen). Skyddar mot långsamma klienter.
-			WriteTimeout	Den maximala tiden som servern väntar på att skriva svaret till klienten. Skyddar mot långsamma nätverk och klienter.
-			IdleTimeout	Den maximala tiden som en anslutning kan vara inaktiv innan den stängs. Skyddar mot att hålla anslutningar öppna för länge utan aktivitet.
-			ReadHeaderTimeout	Den maximala tiden som servern väntar på att läsa HTTP-rubrikerna. Skyddar mot långsamma klienter vid början av en anslutning.
-			MaxHeaderBytes	Den maximala storleken på HTTP-rubrikerna i byte. Skyddar mot attacker med stora rubriker som kan överbelasta servern.
-			*/
-			ReadHeaderTimeout: 2 * time.Second,
+			Addr:              config.UI.APIServer.Addr,
+			ReadTimeout:       time.Second * 5,
+			WriteTimeout:      time.Second * 30,
+			IdleTimeout:       time.Second * 90,
+			ReadHeaderTimeout: time.Second * 2,
 		},
 		sessionConfig: &sessionConfig{
-			sessionName:                       "vc_ui_auth_session",
-			sessionInactivityTimeoutInSeconds: 300,
-			sessionPath:                       "/",
-			sessionHttpOnly:                   true,
-			sessionSecure:                     config.UI.APIServer.TLS.Enabled,
-			sessionSameSite:                   http.SameSiteStrictMode,
-			sessionUsernameKey:                "username_key",
-			sessionLoggedInTimeKey:            "logged_in_time_key",
+			name:                       "vc_ui_auth_session",
+			inactivityTimeoutInSeconds: 300,
+			path:                       "/",
+			httpOnly:                   true,
+			secure:                     config.UI.APIServer.TLS.Enabled,
+			sameSite:                   http.SameSiteStrictMode,
+			usernameKey:                "username_key",
+			loggedInTimeKey:            "logged_in_time_key",
 		},
 	}
 
@@ -119,24 +119,23 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	})
 
 	rgRoot := s.gin.Group("/")
-	s.regEndpoint(ctx, rgRoot, http.MethodPost, "/login", s.endpointLogin)
-	s.regEndpoint(ctx, rgRoot, http.MethodGet, "/health", s.endpointStatus)
+	s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.endpointLogin)
+	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
 	rgSecure := rgRoot.Group("secure")
 	rgSecure.Use(s.authRequired)
-	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "/logout", s.endpointLogout)
-	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/user", s.endpointUser)
+	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "logout", s.endpointLogout)
+	s.regEndpoint(ctx, rgSecure, http.MethodGet, "user", s.endpointUser)
 
-	///apigw
-	s.regEndpoint(ctx, rgSecure, http.MethodGet, "/apigw/health", s.endpointAPIGWStatus)
-	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/apigw/portal", s.endpointPortal)
+	rgAPIGW := rgSecure.Group("apigw")
+	s.regEndpoint(ctx, rgAPIGW, http.MethodGet, "health", s.endpointAPIGWStatus)
+	s.regEndpoint(ctx, rgAPIGW, http.MethodPost, "portal", s.endpointPortal)
 
-	//mockas
-	s.regEndpoint(ctx, rgSecure, http.MethodPost, "/mockas/mock/next", s.endpointMockNext)
+	rgMockAS := rgSecure.Group("mockas")
+	s.regEndpoint(ctx, rgMockAS, http.MethodPost, "mock/next", s.endpointMockNext)
 
 	// Run http server
 	go func() {
-		//TODO: add tls support (see service apigw) + sessionSecure must be set to true
 		err := s.server.ListenAndServe()
 		if err != nil {
 			s.logger.New("http").Trace("listen_error", "error", err)

@@ -14,6 +14,15 @@ func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*
 	return status, nil
 }
 
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+type LoggedinReply struct {
+	Username     string    `json:"username" binding:"required"`
+	LoggedInTime time.Time `json:"logged_in_time" binding:"required"` //time.Time encoded to JSON will use the RFC3339 format by default, which is essentially ISO 8601 (e.g., "2024-05-09T14:00:00Z"
+}
+
 func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, error) {
 	if req.Username != c.cfg.UI.Username || req.Password != c.cfg.UI.Password {
 		return nil, errors.New("invalid username and/or password")
@@ -35,12 +44,22 @@ func (c *Client) User(ctx context.Context) (*LoggedinReply, error) {
 	return nil, nil
 }
 
+type PortalRequest struct {
+	DocumentType            string `json:"document_type" binding:"required"`
+	AuthenticSource         string `json:"authentic_source" binding:"required"`
+	AuthenticSourcePersonId string `json:"authentic_source_person_id" binding:"required"`
+}
+
 func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*any, error) {
 	reply, err := c.apigwClient.Portal(req)
 	if err != nil {
 		return nil, err
 	}
 	return &reply, nil
+}
+
+type MockNextRequest struct {
+	PortalRequest
 }
 
 func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (*any, error) {

@@ -93,10 +93,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.gin = gin.New()
 	s.server.Handler = s.gin
 
-	s.server.ReadTimeout = time.Second * 5
-	s.server.WriteTimeout = time.Second * 30
-	s.server.IdleTimeout = time.Second * 90
-
 	// Middlewares
 	s.gin.Use(s.middlewareTraceID(ctx))
 	s.gin.Use(s.middlewareDuration(ctx))

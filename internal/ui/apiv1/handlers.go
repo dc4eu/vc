@@ -18,6 +18,7 @@ type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
 type LoggedinReply struct {
 	Username string `json:"username" binding:"required"`
 	// LoggedInTime RFC3339
@@ -51,30 +52,30 @@ type PortalRequest struct {
 	AuthenticSourcePersonId string `json:"authentic_source_person_id" binding:"required"`
 }
 
-func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*any, error) {
+func (c *Client) Portal(ctx context.Context, req *PortalRequest) (any, error) {
 	reply, err := c.apigwClient.Portal(req)
 	if err != nil {
 		return nil, err
 	}
-	return &reply, nil
+	return reply, nil
 }
 
 type MockNextRequest struct {
 	PortalRequest
 }
 
-func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (*any, error) {
+func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error) {
 	reply, err := c.mockasClient.MockNext(req)
 	if err != nil {
 		return nil, err
 	}
-	return &reply, nil
+	return reply, nil
 }
 
-func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (*any, error) {
+func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
 	reply, err := c.apigwClient.Status()
 	if err != nil {
 		return nil, err
 	}
-	return &reply, nil
+	return reply, nil
 }

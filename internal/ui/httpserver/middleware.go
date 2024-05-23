@@ -59,11 +59,6 @@ func (s *Service) middlewareGzip(ctx context.Context) gin.HandlerFunc {
 }
 
 func (s *Service) middlewareUserSession(ctx context.Context, cfg *model.Cfg) gin.HandlerFunc {
-	store := configureSessionStore(cfg, s)
-	return sessions.Sessions(s.sessionConfig.name, store)
-}
-
-func configureSessionStore(cfg *model.Cfg, s *Service) sessions.Store {
 	store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
 	store.Options(sessions.Options{
 		Path:     s.sessionConfig.path,
@@ -72,35 +67,37 @@ func configureSessionStore(cfg *model.Cfg, s *Service) sessions.Store {
 		HttpOnly: s.sessionConfig.httpOnly,
 		SameSite: s.sessionConfig.sameSite,
 	})
-	return store
-}
-
-func (s *Service) authRequired(c *gin.Context) {
-	session := sessions.Default(c)
-	username := session.Get(s.sessionConfig.usernameKey)
-	if username == nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized/session expired"})
-		return
-	}
-
-	// Don't touch the session (including cookie) during logout flow
-	if !isLogoutRoute(c) {
-		// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in inactivityTimeoutInSeconds
-		session.Options(sessions.Options{
-			MaxAge: s.sessionConfig.inactivityTimeoutInSeconds,
-		})
-
-		if err := session.Save(); err != nil {
-			c.JSON(500, gin.H{"error": "Could not save session"})
-			return
-		}
-	}
-
-	c.Next()
+	return sessions.Sessions(s.sessionConfig.name, store)
 }
 
 func isLogoutRoute(c *gin.Context) bool {
 	path := c.Request.URL.Path
 	method := c.Request.Method
 	return strings.HasSuffix(path, "/logout") && method == "DELETE"
+}
+
+func (s *Service) middlewareAuthRequired(ctx context.Context) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		username := session.Get(s.sessionConfig.usernameKey)
+		if username == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized/session expired"})
+			return
+		}
+
+		// Don't touch the session (including cookie) during logout flow
+		if !isLogoutRoute(c) {
+			// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in inactivityTimeoutInSeconds
+			session.Options(sessions.Options{
+				MaxAge: s.sessionConfig.inactivityTimeoutInSeconds,
+			})
+
+			if err := session.Save(); err != nil {
+				c.JSON(500, gin.H{"error": "Could not save session"})
+				return
+			}
+		}
+
+		c.Next()
+	}
 }

@@ -114,7 +114,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
 	rgSecure := rgRoot.Group("secure")
-	rgSecure.Use(s.authRequired)
+	rgSecure.Use(s.middlewareAuthRequired(ctx))
 	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "logout", s.endpointLogout)
 	s.regEndpoint(ctx, rgSecure, http.MethodGet, "user", s.endpointUser)
 

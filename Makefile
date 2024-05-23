@@ -225,6 +225,9 @@ proto-registry:
 proto-status:
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-status-model.proto 
 
+proto-issuer:
+	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-issuer.proto 
+
 swagger: swagger-registry swagger-datastore swagger-verifier swagger-apigw swagger-issuer swagger-fmt
 
 swagger-fmt:

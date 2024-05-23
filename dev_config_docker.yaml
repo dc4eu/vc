@@ -3,8 +3,6 @@ common:
   mongo:
     uri: mongodb://mongo:27017
   production: false
-  basic_auth:
-    ladok: xyz
   tracing:
     addr: jaeger:4318
     type: jaeger
@@ -30,25 +28,22 @@ common:
 issuer:
   api_server:
     addr: :8080
-  rpc_server:
-    addr: :8090
-  http_proxy:
-  log:
-    level:
+  grpc_server:
+    addr: vc_dev_issuer:8090
   datastore:
     addr: datastore:8080
   
 datastore:
   api_server:
     addr: :8080
-  rpc_server: 
-    addr: datastore:8090
+  grpc_server:
+    addr: vc_dev_datastore:8090
   
 verifier:
   api_server:
     addr: :8080
-  rpc_server:
-    addr: verifier:8090
+  grpc_server:
+    addr: vc_dev_verifier:8090
 
 registry:
   api_server:
@@ -56,8 +51,8 @@ registry:
   smt:
     update_periodicity: 5
     init_leaf: 575cea4a-5725-11ee-8287-2b486b7ace28
-  rpc_server:
-    addr: registry:8090
+  grpc_server:
+    addr: vc_dev_registry:8090
 
 persistent:
   api_server:

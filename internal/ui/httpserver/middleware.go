@@ -89,7 +89,11 @@ func (s *Service) middlewareAuthRequired(ctx context.Context) gin.HandlerFunc {
 		if !isLogoutRoute(c) {
 			// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in inactivityTimeoutInSeconds
 			session.Options(sessions.Options{
-				MaxAge: s.sessionConfig.inactivityTimeoutInSeconds,
+				Path:     s.sessionConfig.path,
+				MaxAge:   s.sessionConfig.inactivityTimeoutInSeconds,
+				Secure:   s.sessionConfig.secure,
+				HttpOnly: s.sessionConfig.httpOnly,
+				SameSite: s.sessionConfig.sameSite,
 			})
 
 			if err := session.Save(); err != nil {

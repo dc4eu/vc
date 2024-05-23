@@ -113,16 +113,16 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.regEndpoint(ctx, rgRoot, http.MethodPost, "login", s.endpointLogin)
 	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
 
-	rgSecure := rgRoot.Group("secure")
+	rgSecure := rgRoot.Group("secure", s.middlewareAuthRequired(ctx))
 	rgSecure.Use(s.middlewareAuthRequired(ctx))
 	s.regEndpoint(ctx, rgSecure, http.MethodDelete, "logout", s.endpointLogout)
 	s.regEndpoint(ctx, rgSecure, http.MethodGet, "user", s.endpointUser)
 
-	rgAPIGW := rgSecure.Group("apigw")
+	rgAPIGW := rgSecure.Group("apigw", s.middlewareAuthRequired(ctx))
 	s.regEndpoint(ctx, rgAPIGW, http.MethodGet, "health", s.endpointAPIGWStatus)
 	s.regEndpoint(ctx, rgAPIGW, http.MethodPost, "portal", s.endpointPortal)
 
-	rgMockAS := rgSecure.Group("mockas")
+	rgMockAS := rgSecure.Group("mockas", s.middlewareAuthRequired(ctx))
 	s.regEndpoint(ctx, rgMockAS, http.MethodPost, "mock/next", s.endpointMockNext)
 
 	// Run http server

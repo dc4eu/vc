@@ -59,17 +59,11 @@ func (s *Service) middlewareGzip(ctx context.Context) gin.HandlerFunc {
 }
 
 func (s *Service) middlewareUserSession(ctx context.Context, cfg *model.Cfg) gin.HandlerFunc {
-	return setupSessionMiddleware(cfg, s)
-}
-
-func setupSessionMiddleware(cfg *model.Cfg, s *Service) gin.HandlerFunc {
 	store := configureSessionStore(cfg, s)
 	return sessions.Sessions(s.sessionConfig.name, store)
 }
 
 func configureSessionStore(cfg *model.Cfg, s *Service) sessions.Store {
-	//The first parameter is used to encrypt and decrypt cookies.
-	//The second parameter is used internally by cookie.Store to handle the encryption and decryption process
 	store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
 	store.Options(sessions.Options{
 		Path:     s.sessionConfig.path,

@@ -10,10 +10,6 @@ import (
 	"vc/pkg/trace"
 )
 
-// VCBaseClient Defines a base http(s) client for a service in the vc (verifiable credential) domain (for example: apigw, datastore, etc.)
-//
-//	request: json
-//	response: json
 type VCBaseClient struct {
 	serviceName string
 	baseUrl     string

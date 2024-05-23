@@ -31,18 +31,15 @@ type Service struct {
 
 // sessionConfig... values is also used for the session cookie
 type sessionConfig struct {
-	//if changed, the web (javascript) must also be updated with the new name
-	name string
-	// after this time with inactivity the session is auto removed from session storage - also the MaxAge value for the cookie
+	//if name is changed, the web (javascript) must also be updated with the new name
+	name                       string
 	inactivityTimeoutInSeconds int
 	path                       string
 	httpOnly                   bool
 	secure                     bool
 	sameSite                   http.SameSite
-	//key to retrive the username for the logged in user from the session (not stored in any cookie)
-	usernameKey string
-	//key to retrive the time user logged in for this session (not stored in any cookie)
-	loggedInTimeKey string
+	usernameKey                string
+	loggedInTimeKey            string
 }
 
 // New creates a new httpserver service
@@ -93,7 +90,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	s.gin = gin.New()
 	s.server.Handler = s.gin
 
-	// Middlewares
 	s.gin.Use(s.middlewareTraceID(ctx))
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))
@@ -107,7 +103,6 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	}
 	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, problem404) })
 
-	// Static route
 	s.gin.Static("/static", "./static")
 	s.gin.LoadHTMLFiles("./static/index.html")
 	s.gin.GET("/", func(c *gin.Context) {

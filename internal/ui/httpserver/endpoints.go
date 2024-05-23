@@ -42,17 +42,13 @@ func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error
 }
 
 func (s *Service) endpointLogout(ctx context.Context, c *gin.Context) (any, error) {
-	//gets the session based on session-ID in session cookie (handled by gin)
 	session := sessions.Default(c)
-	//retrieve username for the logged in user from session storage (if nil the session does not exist or has been cleared)
 	username := session.Get(s.sessionConfig.usernameKey)
 	if username == nil {
 		return nil, errors.New("invalid session token")
 	}
 
-	//clear the session, is later removed by MaxAge in session storage (inactivityTimeoutInSeconds)
 	session.Clear()
-	//Order the browser to remove the session cookie
 	session.Options(sessions.Options{
 		MaxAge:   -1, // Expired
 		Path:     s.sessionConfig.path,

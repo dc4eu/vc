@@ -136,12 +136,11 @@ type OTEL struct {
 }
 
 type UI struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	// Login: user and pwd
-	Username                       string `yaml:"username" validate:"required"`
-	Password                       string `yaml:"password" validate:"required"`
-	SessionCookieAuthenticationKey string `yaml:"session_cookie_authentication_key" validate:"required"`
-	SessionStoreEncryptionKey      string `yaml:"session_store_encryption_key" validate:"required"`
+	APIServer                      APIServer `yaml:"api_server" validate:"required"`
+	Username                       string    `yaml:"username" validate:"required"`
+	Password                       string    `yaml:"password" validate:"required"`
+	SessionCookieAuthenticationKey string    `yaml:"session_cookie_authentication_key" validate:"required"`
+	SessionStoreEncryptionKey      string    `yaml:"session_store_encryption_key" validate:"required"`
 	Services                       struct {
 		APIGW struct {
 			BaseURL string `yaml:"base_url"`

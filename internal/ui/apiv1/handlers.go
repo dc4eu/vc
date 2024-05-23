@@ -19,8 +19,9 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 type LoggedinReply struct {
-	Username     string    `json:"username" binding:"required"`
-	LoggedInTime time.Time `json:"logged_in_time" binding:"required"` //time.Time encoded to JSON will use the RFC3339 format by default, which is essentially ISO 8601 (e.g., "2024-05-09T14:00:00Z"
+	Username string `json:"username" binding:"required"`
+	// LoggedInTime RFC3339
+	LoggedInTime time.Time `json:"logged_in_time" binding:"required"`
 }
 
 func (c *Client) Login(ctx context.Context, req *LoginRequest) (*LoggedinReply, error) {

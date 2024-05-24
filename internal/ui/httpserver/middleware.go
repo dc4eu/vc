@@ -77,7 +77,9 @@ func isLogoutRoute(c *gin.Context) bool {
 }
 
 func (s *Service) middlewareAuthRequired(ctx context.Context) gin.HandlerFunc {
+	log := s.logger.New("authHandler")
 	return func(c *gin.Context) {
+		log.Debug("enter authRequired", "url", c.Request.URL.String(), "method", c.Request.Method)
 		session := sessions.Default(c)
 		username := session.Get(s.sessionConfig.usernameKey)
 		if username == nil {
@@ -85,7 +87,6 @@ func (s *Service) middlewareAuthRequired(ctx context.Context) gin.HandlerFunc {
 			return
 		}
 
-		// Don't touch the session (including cookie) during logout flow
 		if !isLogoutRoute(c) {
 			// Update MaxAge for the session and its cookie - extended time to expire with another x seconds defined in inactivityTimeoutInSeconds
 			session.Options(sessions.Options{

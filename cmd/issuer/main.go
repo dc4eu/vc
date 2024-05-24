@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"vc/internal/issuer/apiv1"
 	"vc/internal/issuer/db"
+	"vc/internal/issuer/grpcserver"
 	"vc/internal/issuer/httpserver"
 	"vc/internal/issuer/simplequeue"
 	"vc/pkg/configuration"
@@ -68,6 +69,11 @@ func main() {
 	}
 	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
+	if err != nil {
+		panic(err)
+	}
+	grpcService, err := grpcserver.New(ctx, cfg, apiv1Client, log.New("grpcserver"))
+	services["grpcService"] = grpcService
 	if err != nil {
 		panic(err)
 	}

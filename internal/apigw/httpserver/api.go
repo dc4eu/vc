@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"vc/internal/apigw/apiv1"
+	apiv1_issuer "vc/internal/gen/issuer/apiv1.issuer"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
 )
 
@@ -20,7 +21,7 @@ type Apiv1 interface {
 
 	// credential endpoints
 	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
-	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1.CredentialReply, error)
+	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error)
 
 	// misc endpoints
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)

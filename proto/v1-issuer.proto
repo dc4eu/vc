@@ -1,39 +1,31 @@
 syntax = "proto3";
 
-package v1.registry;
+package v1.issuer;
 
 option go_package = "vc/internal/gen/issuer/apiv1.issuer";
 
-import "google/protobuf/timestamp.proto";
-import "v1-status-model.proto";
+//import "google/protobuf/timestamp.proto";
+//import "google/protobuf/any.proto";
 
-service RegistryService {
-    rpc Add (AddRequest) returns (AddReply) {}
-    rpc Revoke (RevokeRequest) returns (RevokeReply) {}
-    rpc Validate (ValidateRequest) returns (ValidateReply) {}
-    rpc Status (v1.status.StatusRequest) returns (v1.status.StatusReply) {}
+service IssuerService {
+    rpc MakeSDJWT (MakeSDJWTRequest) returns (MakeSDJWTReply) {}
 }
 
-message AddRequest {
-    string Entity = 1;
+message MakeSDJWTRequest {
+    string AuthenticSource = 1;
+    string AuthenticSourcePersonID = 2;
+    string DocumentType = 3;
+    string DocumentID = 4;
+    string DocumentVersion = 5;
+    string CollectID = 6;
+    string DateOfBirth = 7;
+    string LastName = 8;
+    string FirstName = 9;
+    string CredentialType = 10;
+    bytes DocumentData = 11;
 }
 
-message AddReply {
-    bool Status = 1; 
-}
-
-message RevokeRequest {
-    string Entity = 1;
-}
-
-message RevokeReply {
-    bool Status = 1;
-}
-
-message ValidateRequest {
-    string Entity = 1;
-}
-
-message ValidateReply {
-    bool Valid = 1;
+message MakeSDJWTReply {
+    string JWT = 1;
+    repeated string Disclosures = 2;
 }

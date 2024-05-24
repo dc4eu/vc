@@ -30,7 +30,7 @@ func New(ctx context.Context, api *apiv1.Client, cfg *model.Cfg, log *logger.Log
 	}
 
 	var err error
-	s.listener, err = net.Listen("tcp", cfg.Registry.RPCServer.Addr)
+	s.listener, err = net.Listen("tcp", cfg.Registry.GRPCServer.Addr)
 	if err != nil {
 		return nil, err
 	}

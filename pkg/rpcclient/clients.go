@@ -25,22 +25,22 @@ func New(cfg *model.Cfg, log *logger.Log) (*Client, error) {
 		log: log,
 		rpc: map[string]config{
 			"issuer": {
-				addr:           cfg.Issuer.RPCServer.Addr,
+				addr:           cfg.Issuer.GRPCServer.Addr,
 				v1:             "IssuerV1",
 				statusEndpoint: "IssuerV1.Health",
 			},
 			"registry": {
-				addr:           cfg.Registry.RPCServer.Addr,
+				addr:           cfg.Registry.GRPCServer.Addr,
 				v1:             "RegistryV1",
 				statusEndpoint: "RegistryV1.Health",
 			},
 			"verifier": {
-				addr:           cfg.Verifier.RPCServer.Addr,
+				addr:           cfg.Verifier.GRPCServer.Addr,
 				v1:             "VerifierV1",
 				statusEndpoint: "VerifierV1.Health",
 			},
 			"datastore": {
-				addr:           cfg.Datastore.RPCServer.Addr,
+				addr:           cfg.Datastore.GRPCServer.Addr,
 				v1:             "DatastoreV1",
 				statusEndpoint: "DatastoreV1.Health",
 			},

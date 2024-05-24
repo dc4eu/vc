@@ -51,8 +51,8 @@ type SMT struct {
 	InitLeaf          string `yaml:"init_leaf" validate:"required"`
 }
 
-// RPCServer holds the rpc configuration
-type RPCServer struct {
+// GRPCServer holds the rpc configuration
+type GRPCServer struct {
 	Addr     string `yaml:"addr" validate:"required"`
 	Insecure bool   `yaml:"insecure"`
 }
@@ -90,15 +90,15 @@ type Queues struct {
 
 // Issuer holds the issuer configuration
 type Issuer struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // Registry holds the registry configuration
 type Registry struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	SMT       SMT       `yaml:"smt" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	SMT        SMT        `yaml:"smt" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // Persistent holds the persistent storage configuration
@@ -114,14 +114,14 @@ type MockAS struct {
 
 // Verifier holds the verifier configuration
 type Verifier struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // Datastore holds the datastore configuration
 type Datastore struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // APIGW holds the datastore configuration

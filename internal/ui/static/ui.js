@@ -362,7 +362,7 @@ const addUploadFormArticleToContainer = () => {
             const text = textarea.value;
             textarea.disabled = true;
 
-            postAndDisplayInArticleContainerFor("/secure/upload", text, "Upload result");
+            postAndDisplayInArticleContainerFor("/secure/apigw/upload", text, "Upload result");
         };
         submitButton.onclick = () => doUpload();
 

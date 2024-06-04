@@ -120,6 +120,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 	rgAPIGW := rgSecure.Group("apigw")
 	s.regEndpoint(ctx, rgAPIGW, http.MethodGet, "health", s.endpointAPIGWStatus)
 	s.regEndpoint(ctx, rgAPIGW, http.MethodPost, "portal", s.endpointPortal)
+	s.regEndpoint(ctx, rgAPIGW, http.MethodPost, "upload", s.endpointUpload)
 
 	rgMockAS := rgSecure.Group("mockas")
 	s.regEndpoint(ctx, rgMockAS, http.MethodPost, "mock/next", s.endpointMockNext)

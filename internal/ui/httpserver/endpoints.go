@@ -7,6 +7,8 @@ import (
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/ui/apiv1"
 
+	apigw_apiv1 "vc/internal/apigw/apiv1"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -85,7 +87,7 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 	return reply, nil
 }
 
-func (s *Service) endpointAPIGWStatus(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointAPIGWStatus(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.StatusAPIGW(ctx, request)
 	if err != nil {
@@ -100,6 +102,19 @@ func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, erro
 		return nil, err
 	}
 	reply, err := s.apiv1.Portal(ctx, request)
+
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apigw_apiv1.UploadRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		return nil, err
+	}
+	reply, err := s.apiv1.Upload(ctx, request)
 
 	if err != nil {
 		return nil, err

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	apigw_apiv1 "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 )
@@ -54,6 +55,14 @@ type PortalRequest struct {
 
 func (c *Client) Portal(ctx context.Context, req *PortalRequest) (any, error) {
 	reply, err := c.apigwClient.Portal(req)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (c *Client) Upload(ctx context.Context, req *apigw_apiv1.UploadRequest) (any, error) {
+	reply, err := c.apigwClient.Upload(req)
 	if err != nil {
 		return nil, err
 	}

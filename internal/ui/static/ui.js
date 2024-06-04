@@ -220,11 +220,10 @@ function doPostForDemo(path, articleHeaderText) {
     postAndDisplayInArticleContainerFor(path, postBody, articleHeaderText);
 }
 
-/* ie upload */
 const createMock = () => {
     console.debug("createMock");
     const path = "/secure/mockas/mock/next";
-    const articleHeaderText = "Upload";
+    const articleHeaderText = "Upload new mock";
     doPostForDemo(path, articleHeaderText);
 };
 
@@ -254,7 +253,6 @@ const updateUploadAndFetchButtons = () => {
  * @returns {HTMLElement} article
  */
 const buildArticle = (articleID, articleHeaderText, bodyChildrenElementArray) => {
-    //<button onClick="toggleContent('article-6')" className="toggle-button">Toggle</button>
     const expandCollapseButton = document.createElement('button');
     expandCollapseButton.onclick = () => toggleExpandCollapseArticle(articleID);
     expandCollapseButton.classList.add("button", "is-dark");
@@ -342,6 +340,46 @@ async function doLogin() {
         //TODO if auth!=ok display some info/error message...
     }
 }
+
+const addUploadFormArticleToContainer = () => {
+    const buildUploadFormElements = () => {
+        //TODO: Only one form is handled since id's is static?
+
+        const textarea = document.createElement("textarea");
+        textarea.id = 'upload-textarea';
+        textarea.classList.add("textarea");
+        textarea.rows = 10;
+
+        const submitButton = document.createElement('button');
+        submitButton.id = 'do-upload-btn';
+        submitButton.classList.add('button', 'is-link');
+        submitButton.textContent = 'Upload';
+
+        const doUpload = () => {
+            getElementById("do-upload-btn").disabled = true;
+
+            const textarea = getElementById("upload-textarea");
+            const text = textarea.value;
+            textarea.disabled = true;
+
+            postAndDisplayInArticleContainerFor("/secure/upload", text, "Upload result");
+        };
+        submitButton.onclick = () => doUpload();
+
+        const buttonControl = document.createElement('div');
+        buttonControl.classList.add('control');
+        buttonControl.appendChild(submitButton);
+
+        return [textarea, buttonControl];
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Upload", buildUploadFormElements());
+    const articleContainer = getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+
+    getElementById("upload-textarea").focus();
+};
 
 const addLoginArticleToContainer = () => {
     const buildLoginElements = () => {

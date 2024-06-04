@@ -27,6 +27,20 @@ common:
     recovery_level: 2
     size: 256
 
+authenticSources:
+  authenticSource1:
+    authenticSourceIdentifier: ""
+    countryCode: ""
+    notificationEndpoint:
+    authenticSourceEndpoint:
+    signatureServiceEndpoint:
+    revocationServiceEndpoint:
+    credentialTypes:
+      EHIC:
+        profile: "W3CVC"
+      PDA1:
+        profile: "SD-JWT"
+
 issuer:
   api_server:
     addr: :8080

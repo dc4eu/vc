@@ -2,6 +2,7 @@
     "cSpell.words": [
         "apigw",
         "apiv",
+        "auditlog",
         "bson",
         "eduseal",
         "ehic",
@@ -9,6 +10,7 @@
         "gofakeit",
         "gonic",
         "goretask",
+        "gosdjwt",
         "gosunetca",
         "Karlsson",
         "kvclient",
@@ -32,6 +34,7 @@
         "rpcclient",
         "Satosa",
         "SATOSAV",
+        "SDJWT",
         "sdktrace",
         "semconv",
         "simplequeue",

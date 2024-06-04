@@ -102,6 +102,8 @@ func (c *Client) CreateCredential(ctx context.Context, req *CreateCredentialRequ
 			return nil, err
 		}
 
+		c.auditLog.AddAuditLog(ctx, "create_credential", sdjwt.PresentationFlat())
+
 	case "EHIC":
 		d, err := json.Marshal(uploadDoc.DocumentData)
 		if err != nil {
@@ -115,6 +117,8 @@ func (c *Client) CreateCredential(ctx context.Context, req *CreateCredentialRequ
 		if err != nil {
 			return nil, err
 		}
+
+		c.auditLog.AddAuditLog(ctx, "create_credential", sdjwt.PresentationFlat())
 	}
 
 	reply := &CreateCredentialReply{
@@ -170,6 +174,9 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 	if err != nil {
 		return nil, err
 	}
+
+	// AuditLog
+	c.auditLog.AddAuditLog(ctx, "revoke", "mura")
 
 	reply := &RevokeReply{
 		Data: struct {

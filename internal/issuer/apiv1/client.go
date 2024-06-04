@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"vc/internal/issuer/auditlog"
 	"vc/internal/issuer/db"
 	"vc/internal/issuer/simplequeue"
 	"vc/pkg/kvclient"
@@ -24,13 +25,14 @@ type Client struct {
 	kv          *kvclient.Client
 	log         *logger.Log
 	tp          *trace.Tracer
+	auditLog    *auditlog.Service
 
 	ehicClient *ehicClient
 	pda1Client *pda1Client
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient *rpcclient.Client, kv *kvclient.Client, db *db.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient *rpcclient.Client, kv *kvclient.Client, db *db.Service, auditLog *auditlog.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
 	c := &Client{
 		simpleQueue: simpleQueueService,
 		cfg:         cfg,
@@ -39,6 +41,7 @@ func New(ctx context.Context, simpleQueueService *simplequeue.Service, rpcClient
 		log:         logger,
 		rpcClient:   rpcClient,
 		tp:          tracer,
+		auditLog:    auditLog,
 	}
 
 	var err error

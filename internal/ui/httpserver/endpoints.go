@@ -25,7 +25,7 @@ func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, erro
 func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.LoginRequest{}
 	if err := c.ShouldBindJSON(&request); err != nil {
-		//if err := s.bindRequest(ctx, c, request); err != nil {
+		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
 

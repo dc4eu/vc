@@ -75,6 +75,8 @@ build-ui:
 
 docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
 
+docker-build-goland-debug: docker-build-verifier docker-build-datastore docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui-goland-debug
+
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_GOBUILD) --file dockerfiles/gobuild .
@@ -106,6 +108,10 @@ docker-build-issuer:
 docker-build-ui:
 	$(info Docker building ui with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/ui_worker .
+
+docker-build-ui-goland-debug:
+	$(info Docker building ui with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/ui_worker_goland_debug .
 
 docker-push-gobuild:
 	$(info Pushing docker images)

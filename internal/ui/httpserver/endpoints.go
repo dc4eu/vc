@@ -6,6 +6,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"time"
+	apiv1_apigw "vc/internal/apigw/apiv1"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/internal/ui/apiv1"
 )
@@ -21,7 +22,8 @@ func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, erro
 
 func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.LoginRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
+		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
 
@@ -84,7 +86,7 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 	return reply, nil
 }
 
-func (s *Service) endpointAPIGWStatus(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointAPIGWStatus(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.StatusAPIGW(ctx, request)
 	if err != nil {
@@ -95,7 +97,8 @@ func (s *Service) endpointAPIGWStatus(ctx context.Context, g *gin.Context) (any,
 
 func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.PortalRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
+		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
 	reply, err := s.apiv1.Portal(ctx, request)
@@ -106,9 +109,26 @@ func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, erro
 	return reply, nil
 }
 
+func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1_apigw.UploadRequest{}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
+		s.logger.Debug("Binding error", "error", err)
+		return nil, err
+	}
+
+	reply, err := s.apiv1.Upload(ctx, request)
+
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.MockNextRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
+		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
 	reply, err := s.apiv1.MockNext(ctx, request)

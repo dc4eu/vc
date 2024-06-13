@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -20,12 +21,24 @@ func (s *Service) bindRequest(ctx context.Context, c *gin.Context, v any) error 
 	ctx, span := s.tp.Start(ctx, "httpserver:bindRequest")
 	defer span.End()
 
+	//TODO: remove s.logger.Debug("bindRequest start")
+
 	if c.ContentType() == gin.MIMEJSON {
-		_ = c.ShouldBindJSON(v)
+		if err := c.ShouldBindJSON(v); err != nil {
+			return err
+		}
 	}
-	_ = s.bindRequestQuery(ctx, c, v)
-	_ = c.ShouldBindQuery(v)
-	return c.ShouldBindUri(v)
+	if err := s.bindRequestQuery(ctx, c, v); err != nil {
+		return err
+	}
+	if err := c.ShouldBindQuery(v); err != nil {
+		return err
+	}
+	err := c.ShouldBindUri(v)
+
+	//TODO: remove s.logger.Debug("bindRequest end")
+
+	return err
 }
 
 func (s *Service) bindRequestQuery(ctx context.Context, c *gin.Context, v any) error {
@@ -72,6 +85,8 @@ func (s *Service) bindRequestQuery(ctx context.Context, c *gin.Context, v any) e
 				continue
 			}
 			refV.FieldByName(field.Name).Set(reflect.ValueOf(&v))
+		default:
+			return errors.New("fieldType.String(): " + fieldType.String())
 		}
 	}
 	return nil

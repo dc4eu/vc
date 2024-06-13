@@ -1,7 +1,7 @@
 package apiv1
 
 import (
-	apigw_apiv1 "vc/internal/apigw/apiv1"
+	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -33,7 +33,7 @@ func (c *APIGWClient) Status() (any, error) {
 	return reply, nil
 }
 
-func (c *APIGWClient) Upload(req *apigw_apiv1.UploadRequest) (any, error) {
+func (c *APIGWClient) Upload(req *apiv1_apigw.UploadRequest) (any, error) {
 	reply, err := c.DoPostJSON("/api/v1/upload", req)
 	if err != nil {
 		return nil, err

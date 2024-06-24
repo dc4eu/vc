@@ -75,12 +75,15 @@ type MockNextRequest struct {
 	PortalRequest
 }
 
-func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error) {
-	reply, err := c.mockasClient.MockNext(req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
+func (c *Client) MockNext(ctx context.Context, mnr *MockNextRequest) (any, error) {
+	//err := c.kafkaClient.SendMockNextMessage(req.AuthenticSourcePersonId, `{"attr1":"value1"}`)
+	err := c.kafkaClient.SendMockNextMessage(mnr)
+	//reply, err := c.mockasClient.MockNext(req)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return reply, nil
+	return nil, err
 }
 
 func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {

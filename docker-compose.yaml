@@ -25,6 +25,7 @@ services:
     depends_on:
       - apigw
       - mockas
+      - kafka
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.50
@@ -41,7 +42,7 @@ services:
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
       #- KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.50.60:9092 # Only the broker-listener
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.50.60:9092,  # Only the broker-listener
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     ports:
       - '9092:9092'
@@ -49,10 +50,25 @@ services:
     volumes:
       - ./kraft-data:/bitnami/kafka
     #user: "${UID}:${GID}"  # TODO: Använd variabler för att få rätt UID och GID från värdmaskinen
-    user: "0:0" # TODO: avser användare root bara för att få allt att rulla, behöver revideras
+    user: "0:0" # TODO: ATTENTION: using root user just to get it to work during initiall dev, needs to be changed before pull request
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.60
+
+  kafka-ui:
+    container_name: "vc_dev_kafka_ui"
+    image: provectuslabs/kafka-ui:latest
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.61
 
   issuer:
     container_name: "vc_dev_issuer"

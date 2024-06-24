@@ -14,15 +14,17 @@ type Client struct {
 	log          *logger.Log
 	apigwClient  *APIGWClient
 	mockasClient *MockASClient
+	kafkaClient  *KafkaClient
 }
 
-func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log, kafkaClient *KafkaClient) (*Client, error) {
 	c := &Client{
 		cfg:          cfg,
 		tp:           tp,
 		log:          log,
 		apigwClient:  NewAPIGWClient(cfg, tp, log.New("ui_apiwg_client")),
 		mockasClient: NewMockASClient(cfg, tp, log.New("ui_mockas_client")),
+		kafkaClient:  kafkaClient,
 	}
 
 	c.log.Info("Started")

@@ -31,6 +31,29 @@ services:
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
+  kafka:
+    container_name: "vc_dev_kafka"
+    image: bitnami/kafka:latest
+    restart: always
+    environment:
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      #- KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.50.60:9092 # Only the broker-listener
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    ports:
+      - '9092:9092'
+      - '9093:9093'
+    volumes:
+      - ./kraft-data:/bitnami/kafka
+    #user: "${UID}:${GID}"  # TODO: Använd variabler för att få rätt UID och GID från värdmaskinen
+    user: "0:0" # TODO: avser användare root bara för att få allt att rulla, behöver revideras
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.60
+
   issuer:
     container_name: "vc_dev_issuer"
     image: docker.sunet.se/dc4eu/issuer:latest

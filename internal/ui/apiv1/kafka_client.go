@@ -57,7 +57,7 @@ func (c *KafkaClient) SendMockNextMessage(payload *MockNextRequest) error {
 		return err
 	} else {
 		//TODO: fixa loggning nedan samt på fler ställen rörande kafka
-		fmt.Printf("Kafka message with key %s sent to partition %d at offset %d\n", payload.AuthenticSourcePersonId, partition, offset)
+		fmt.Printf("Kafka message with key %s sent to partition %d at offset %d to topic %s\n", payload.AuthenticSourcePersonId, partition, offset, message.Topic)
 	}
 
 	return nil

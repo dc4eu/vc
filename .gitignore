@@ -3,8 +3,7 @@ pki/*
 !pki/create_pki.sh
 redis-data/
 .idea/
-kraft-data/
-kraft0-data/
+kraft[0-9]*-data/
 kraft[0-9]+-data/
 *.orig
 **/.*.orig

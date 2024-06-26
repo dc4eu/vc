@@ -151,6 +151,8 @@ services:
     restart: always
     volumes:
       - ./config.yaml:/config.yaml:ro
+    depends_on:
+      - kafka0
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.13

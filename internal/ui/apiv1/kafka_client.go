@@ -22,6 +22,11 @@ func NewKafkaClient() (*KafkaClient, error) {
 	config.Net.SASL.Enable = false //TODO: Activate SASL-auth when needed
 	//TODO add other sec configs here
 
+	err := config.Validate()
+	if err != nil {
+		return nil, err
+	}
+
 	producer, err := sarama.NewSyncProducer([]string{"kafka0:9092"}, config)
 	if err != nil {
 		return nil, err

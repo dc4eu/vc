@@ -37,6 +37,12 @@ func main() {
 		panic(err)
 	}
 
+	consumer := apiv1.NewEventConsumer()
+	err = consumer.Start()
+	if err != nil {
+		panic(err)
+	}
+
 	apiv1Client, err := apiv1.New(ctx, cfg, tracer, log.New("apiv1"))
 	if err != nil {
 		panic(err)

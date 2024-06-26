@@ -37,18 +37,17 @@ func main() {
 		panic(err)
 	}
 
-	consumer := apiv1.NewEventConsumer()
-	err = consumer.Start()
-	if err != nil {
-		panic(err)
-	}
-
 	apiv1Client, err := apiv1.New(ctx, cfg, tracer, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
 	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
+	if err != nil {
+		panic(err)
+	}
+
+	eventConsumer, err := httpserver.NewEventConsumer(ctx, cfg, apiv1Client, tracer, log.New("eventconsumer"))
 	if err != nil {
 		panic(err)
 	}
@@ -61,6 +60,8 @@ func main() {
 
 	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
+
+	eventConsumer.Close()
 
 	for serviceName, service := range services {
 		if err := service.Close(ctx); err != nil {

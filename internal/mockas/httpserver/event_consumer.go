@@ -17,16 +17,18 @@ import (
 type EventConsumer struct {
 	config *model.Cfg
 	logger *logger.Log
-	apiv1  Apiv1
+	apiv1  *apiv1.Client
 	tp     *trace.Tracer
+	ctx    *context.Context
 }
 
-func NewEventConsumer(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, logger *logger.Log) (*EventConsumer, error) {
+func NewEventConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, logger *logger.Log) (*EventConsumer, error) {
 	ec := &EventConsumer{
 		config: config,
 		logger: logger,
 		apiv1:  api,
 		tp:     tracer,
+		ctx:    ctx,
 	}
 	err := ec.start()
 	if err != nil {
@@ -65,6 +67,7 @@ func (ec *EventConsumer) start() error {
 		logger: ec.logger,
 		apiv1:  ec.apiv1,
 		tp:     ec.tp,
+		ctx:    ec.ctx,
 	}
 
 	topics := []string{"topic_mock_next"}
@@ -91,13 +94,19 @@ func (ec *EventConsumer) Close() {
 type consumerGroupHandler struct {
 	config *model.Cfg
 	logger *logger.Log
-	apiv1  Apiv1
+	apiv1  *apiv1.Client
 	tp     *trace.Tracer
+	ctx    *context.Context
 }
 
-func (cgh *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+// Setup is called before the session starts, prior to message consumption.
+func (cgh *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error { return nil }
+
+// Cleanup is called after the session ends, after message consumption has stopped.
 func (cgh *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 
+// ConsumeClaim must start a consumption loop. The code in this method should keep consuming messages
+// from the claim.Messages() channel and call session.MarkMessage for each message consumed.
 func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
 		fmt.Println("Raw message:", message)
@@ -119,13 +128,18 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 		var mockNextRequest apiv1.MockNextRequest
 		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
 			log.Println("Failed to unmarshal event:", err)
+			//TODO: only logging of error now
 			continue
 		}
 
 		fmt.Println("mockNextRequest:", mockNextRequest)
 		fmt.Printf("Unmarshaled received: AuthenticSourcePersonId=%s, DocumentType=%s, AuthenticSource=%s\n", mockNextRequest.AuthenticSourcePersonID, mockNextRequest.DocumentType, mockNextRequest.AuthenticSource)
 
-		cgh.apiv1.MockNext(nil, &mockNextRequest)
+		_, err := cgh.apiv1.MockNext(*cgh.ctx, &mockNextRequest)
+		if err != nil {
+			log.Println("Failed to mock next:", err)
+			//TODO: only logging of error now
+		}
 
 		// Mark message as treated
 		session.MarkMessage(message, "")

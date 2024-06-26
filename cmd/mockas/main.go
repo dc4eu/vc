@@ -47,7 +47,7 @@ func main() {
 		panic(err)
 	}
 
-	eventConsumer, err := httpserver.NewEventConsumer(ctx, cfg, apiv1Client, tracer, log.New("eventconsumer"))
+	eventConsumer, err := httpserver.NewEventConsumer(&ctx, cfg, apiv1Client, tracer, log.New("eventconsumer"))
 	if err != nil {
 		panic(err)
 	}

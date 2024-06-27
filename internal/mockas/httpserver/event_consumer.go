@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
-	"log"
 	"os"
 	"os/signal"
+	"syscall"
+	"time"
 	"vc/internal/mockas/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -44,9 +45,12 @@ func (ec *EventConsumer) start() error {
 	config.Net.SASL.Enable = false // Aktivera SASL-autentisering vid behov
 	// ... (övriga säkerhetskonfigurationer)
 
-	consumerGroup, err := sarama.NewConsumerGroup([]string{"kafka0:9092"}, "my-consumer-group-name-1", config)
+	brokers := []string{"kafka0:9092", "kafka1:9092"}
+	consumerGroup, err := sarama.NewConsumerGroup(brokers, "my-consumer-group-name-1", config)
 	if err != nil {
-		log.Fatalln("Failed to create consumer group:", err)
+		ec.logger.Error(err, "Failed to create consumer group")
+		return err
+
 	}
 	defer consumerGroup.Close()
 
@@ -55,12 +59,12 @@ func (ec *EventConsumer) start() error {
 
 	go func() {
 		for err := range consumerGroup.Errors() {
-			log.Println("Consumer group error:", err)
+			ec.logger.Error(err, "Consumer group error")
 		}
 	}()
 
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
+	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	handler := &consumerGroupHandler{
 		config: ec.config,
@@ -72,19 +76,23 @@ func (ec *EventConsumer) start() error {
 
 	topics := []string{"topic_mock_next"}
 
-	for {
-		err := consumerGroup.Consume(ctx, topics, handler)
-		if err != nil {
-			log.Println("Error consuming:", err)
+	go func() {
+		for {
+			if err := consumerGroup.Consume(ctx, topics, handler); err != nil {
+				ec.logger.Error(err, "Error consuming")
+				time.Sleep(1 * time.Second) // Simple retry mechanism
+			}
+			if ctx.Err() != nil {
+				return
+			}
 		}
+	}()
 
-		select {
-		case <-signals:
-			cancel()
-			return nil
-		default:
-		}
-	}
+	<-signals
+	ec.logger.Info("Received termination signal, shutting down gracefully...")
+	cancel()
+	time.Sleep(5 * time.Second) // Allow time for shutdown
+	return nil
 }
 
 func (ec *EventConsumer) Close() {
@@ -109,36 +117,21 @@ func (cgh *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { 
 // from the claim.Messages() channel and call session.MarkMessage for each message consumed.
 func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		fmt.Println("Raw message:", message)
-		fmt.Println("Raw message as string:", message)
-		fmt.Printf("Raw message.Value: %v\n", message.Value)
-		fmt.Printf("Message value as string: %s\n", string(message.Value))
-		fmt.Printf("Message metadata Partition: %d, Offset: %d, Timestamp: %s, Topic: %s\n",
-			message.Partition, message.Offset, message.Timestamp, message.Topic)
-		fmt.Println("Headers:")
-		if len(message.Headers) > 0 {
-			for _, header := range message.Headers {
-				fmt.Printf("  %s: %s\n", header.Key, string(header.Value))
-			}
-		}
-		if len(message.Key) > 0 {
-			fmt.Printf("Message Key: %s\n", string(message.Key))
-		}
+		printMessageInfo(message)
 
 		var mockNextRequest apiv1.MockNextRequest
 		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
-			log.Println("Failed to unmarshal event:", err)
-			//TODO: only logging of error now
+			cgh.logger.Error(err, "Failed to unmarshal event")
+			//TODO replace with cgh.handleErrorMessage(session, message, err)
 			continue
 		}
 
-		fmt.Println("mockNextRequest:", mockNextRequest)
-		fmt.Printf("Unmarshaled received: AuthenticSourcePersonId=%s, DocumentType=%s, AuthenticSource=%s\n", mockNextRequest.AuthenticSourcePersonID, mockNextRequest.DocumentType, mockNextRequest.AuthenticSource)
+		cgh.logger.Debug("mockNextRequest:", "", mockNextRequest)
 
 		_, err := cgh.apiv1.MockNext(*cgh.ctx, &mockNextRequest)
 		if err != nil {
-			log.Println("Failed to mock next:", err)
-			//TODO: only logging of error now
+			cgh.logger.Error(err, "Failed to mock next")
+			//TODO replace handleErrorMessage(session, message, err) and send to topic_mock_next_error
 		}
 
 		// Mark message as treated
@@ -146,3 +139,93 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 	}
 	return nil
 }
+
+func printMessageInfo(message *sarama.ConsumerMessage) {
+	//TODO: change to debug logging
+	fmt.Println("Raw message:", message)
+	fmt.Println("Raw message as string:", message)
+	fmt.Printf("Raw message.Value: %v\n", message.Value)
+	fmt.Printf("Message value as string: %s\n", string(message.Value))
+	fmt.Printf("Message metadata Partition: %d, Offset: %d, Timestamp: %s, Topic: %s\n",
+		message.Partition, message.Offset, message.Timestamp, message.Topic)
+	fmt.Println("Headers:")
+	if len(message.Headers) > 0 {
+		for _, header := range message.Headers {
+			fmt.Printf("  %s: %s\n", header.Key, string(header.Value))
+		}
+	}
+	if len(message.Key) > 0 {
+		fmt.Printf("Message Key: %s\n", string(message.Key))
+	}
+}
+
+//TODO: one possible solution when failing to processes a consumed message
+//func (cgh *consumerGroupHandler) handleErrorMessage(session sarama.ConsumerGroupSession, message *sarama.ConsumerMessage, err error) {
+//	retries := 0
+//
+//	for retries < cgh.retryLimit {
+//		time.Sleep(cgh.retryBackoff)
+//		retries++
+//
+//		// Retry message processing
+//		var mockNextRequest apiv1.MockNextRequest
+//		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
+//			cgh.logger.Errorf("Retry %d: Failed to unmarshal event: %v", retries, err)
+//			continue
+//		}
+//
+//		_, err := cgh.apiv1.MockNext(nil, &mockNextRequest)
+//		if err != nil {
+//			cgh.logger.Errorf("Retry %d: Failed to mock next: %v", retries, err)
+//			continue
+//		}
+//
+//		// Successful processing, mark the message
+//		session.MarkMessage(message, "")
+//		return
+//	}
+//
+//	// If retries exceeded, send to DLQ
+//	cgh.sendToDLQ(message)
+//}
+//
+//func (cgh *consumerGroupHandler) sendToDLQ(message *sarama.ConsumerMessage) {
+//	// Implement DLQ logic here, e.g., producing to a DLQ topic
+//	dlqProducer, err := sarama.NewSyncProducer([]string{cgh.config.KafkaBrokers}, nil)
+//	if err != nil {
+//		cgh.logger.Errorf("Failed to create DLQ producer: %v", err)
+//		return
+//	}
+//	defer dlqProducer.Close()
+//
+//	dlqMessage := &sarama.ProducerMessage{
+//		Topic: "topic_mock_next_error",
+//		Key:   sarama.ByteEncoder(message.Key),
+//		Value: sarama.ByteEncoder(message.Value),
+//	}
+//
+//	_, _, err = dlqProducer.SendMessage(dlqMessage)
+//	if err != nil {
+//		cgh.logger.Error(err,"Failed to send message to DLQ")
+//	}
+//}
+
+//TODO: möjlig hantering av omprövning från error topic, sätt även time to live så att ex. ett event tas bort säg efter 1 dygn eller liknande?
+//for {
+//// Tidpunkt A
+//startTime := time.Now()
+//
+//// Hämta alla olästa meddelanden
+//for message := range claim.Messages() {
+//// ... (bearbeta meddelande) ...
+//session.MarkMessage(message, "") // Markera meddelandet som läst
+//}
+//
+//// Beräkna återstående tid till nästa timme
+//timeToNextHour := time.Hour - time.Since(startTime)
+//
+//// Vänta tills nästa timme
+//if timeToNextHour > 0 {
+//time.Sleep(timeToNextHour)
+//}
+//}

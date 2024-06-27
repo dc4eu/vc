@@ -27,7 +27,8 @@ func NewKafkaClient() (*KafkaClient, error) {
 		return nil, err
 	}
 
-	producer, err := sarama.NewSyncProducer([]string{"kafka0:9092"}, config)
+	brokers := []string{"kafka0:9092", "kafka1:9092"}
+	producer, err := sarama.NewSyncProducer(brokers, config)
 	if err != nil {
 		return nil, err
 	}

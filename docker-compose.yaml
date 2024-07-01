@@ -167,6 +167,7 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka0:9092
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      ## TODO: Cluster ID (generate this using kafka-storage.sh script), use the same Id for kafka1
       - KAFKA_KRAFT_CLUSTER_ID=550e8400-e29b-42d4-a716-446655440000
       - KAFKA_CFG_NUM_PARTITIONS=2
       - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=2
@@ -206,6 +207,7 @@ services:
       - '9095:9093'
     volumes:
       - ./kraft1-data:/bitnami/kafka
+    #user: "${UID}:${GID}"  # TODO: Använd variabler för att få rätt UID och GID från värdmaskinen
     user: "0:0" # TODO: ATTENTION: using root user just to get it to work during initial dev, needs to be changed before pull request
     networks:
       vc-dev-net:

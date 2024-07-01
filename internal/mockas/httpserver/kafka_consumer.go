@@ -50,7 +50,7 @@ func (ec *EventConsumer) start() error {
 	brokers := []string{"kafka0:9092", "kafka1:9092"}
 	consumerGroup, err := sarama.NewConsumerGroup(brokers, "my-consumer-group-name-1", config)
 	if err != nil {
-		ec.logger.Error(err, "Failed to create consumer group")
+		ec.logger.Error(err, "Failed to create Kafka consumer group")
 		return err
 
 	}
@@ -61,7 +61,7 @@ func (ec *EventConsumer) start() error {
 
 	go func() {
 		for err := range consumerGroup.Errors() {
-			ec.logger.Error(err, "Consumer group error")
+			ec.logger.Error(err, "Kafka consumer group error")
 		}
 	}()
 
@@ -81,7 +81,7 @@ func (ec *EventConsumer) start() error {
 	go func() {
 		for {
 			if err := consumerGroup.Consume(ctx, topics, handler); err != nil {
-				ec.logger.Error(err, "Error consuming")
+				ec.logger.Error(err, "Error consuming from Kafka")
 				time.Sleep(1 * time.Second) // Simple retry mechanism
 			}
 			if ctx.Err() != nil {
@@ -93,7 +93,7 @@ func (ec *EventConsumer) start() error {
 	<-signals
 	ec.logger.Info("Received termination signal, shutting down gracefully...")
 	cancel()
-	time.Sleep(5 * time.Second) // Allow time for shutdown
+	time.Sleep(10 * time.Second) // Allow time for shutdown
 	return nil
 }
 
@@ -123,7 +123,7 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 		var mockNextRequest apiv1.MockNextRequest
 		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
-			cgh.logger.Error(err, "Failed to unmarshal event")
+			cgh.logger.Error(err, "Failed to unmarshal event from Kafka")
 			//TODO replace with cgh.handleErrorMessage(session, message, err)
 			continue
 		}
@@ -209,6 +209,7 @@ func logMessageInfo(message *sarama.ConsumerMessage) {
 //		Topic: "topic_mock_next_error",
 //		Key:   sarama.ByteEncoder(message.Key),
 //		Value: sarama.ByteEncoder(message.Value),
+//		//TODO add error info in message header?
 //	}
 //
 //	_, _, err = dlqProducer.SendMessage(dlqMessage)

@@ -45,7 +45,12 @@ func main() {
 		panic(err)
 	}
 
-	apiClient, err := apiv1.New(ctx, cfg, tracer, log.New("ui_api_client"))
+	kafkaClient, err := apiv1.NewKafkaClient()
+	if err != nil {
+		panic(err)
+	}
+
+	apiClient, err := apiv1.New(ctx, cfg, tracer, log.New("ui_api_client"), kafkaClient)
 	if err != nil {
 		panic(err)
 	}
@@ -71,6 +76,9 @@ func main() {
 		}
 	}
 
+	if err := kafkaClient.Shutdown(ctx); err != nil {
+		mainLog.Error(err, "Kafka client shutdown")
+	}
 	if err := tracer.Shutdown(ctx); err != nil {
 		mainLog.Error(err, "Tracer shutdown")
 	}

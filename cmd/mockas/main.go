@@ -47,6 +47,11 @@ func main() {
 		panic(err)
 	}
 
+	eventConsumer, err := httpserver.NewEventConsumer(&ctx, cfg, apiv1Client, tracer, log.New("eventconsumer"))
+	if err != nil {
+		panic(err)
+	}
+
 	// Handle sigterm and await termChan signal
 	termChan := make(chan os.Signal, 1)
 	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM)
@@ -55,6 +60,8 @@ func main() {
 
 	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
+
+	eventConsumer.Close()
 
 	for serviceName, service := range services {
 		if err := service.Close(ctx); err != nil {

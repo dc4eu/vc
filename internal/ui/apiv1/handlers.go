@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	apiv1_apigw "vc/internal/apigw/apiv1"
 	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/pkg/model"
 )
@@ -60,16 +61,27 @@ func (c *Client) Portal(ctx context.Context, req *PortalRequest) (any, error) {
 	return reply, nil
 }
 
-type MockNextRequest struct {
-	PortalRequest
-}
-
-func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error) {
-	reply, err := c.mockasClient.MockNext(req)
+func (c *Client) Upload(ctx context.Context, req *apiv1_apigw.UploadRequest) (any, error) {
+	reply, err := c.apigwClient.Upload(req)
 	if err != nil {
 		return nil, err
 	}
 	return reply, nil
+}
+
+type MockNextRequest struct {
+	PortalRequest
+}
+
+func (c *Client) MockNext(ctx context.Context, mnr *MockNextRequest) (any, error) {
+	//err := c.kafkaClient.SendMockNextMessage(req.AuthenticSourcePersonId, `{"attr1":"value1"}`)
+	err := c.kafkaClient.SendMockNextMessage(mnr)
+	//reply, err := c.mockasClient.MockNext(req)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return reply, nil
+	return nil, err
 }
 
 func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {

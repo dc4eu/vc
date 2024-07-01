@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -39,6 +40,7 @@ func NewEventConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client
 }
 
 func (ec *EventConsumer) start() error {
+	//TODO: config from file
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
@@ -117,7 +119,7 @@ func (cgh *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { 
 // from the claim.Messages() channel and call session.MarkMessage for each message consumed.
 func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		printMessageInfo(message)
+		logMessageInfo(message)
 
 		var mockNextRequest apiv1.MockNextRequest
 		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
@@ -131,16 +133,16 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 		_, err := cgh.apiv1.MockNext(*cgh.ctx, &mockNextRequest)
 		if err != nil {
 			cgh.logger.Error(err, "Failed to mock next")
-			//TODO replace handleErrorMessage(session, message, err) and send to topic_mock_next_error
+			//TODO handleErrorMessage(session, message, err) and send to topic_mock_next_error
 		}
 
 		// Mark message as treated
-		session.MarkMessage(message, "")
+		session.MarkMessage(message, "Marked this message as treated in metadata")
 	}
 	return nil
 }
 
-func printMessageInfo(message *sarama.ConsumerMessage) {
+func logMessageInfo(message *sarama.ConsumerMessage) {
 	//TODO: change to debug logging
 	fmt.Println("Raw message:", message)
 	fmt.Println("Raw message as string:", message)
@@ -148,12 +150,17 @@ func printMessageInfo(message *sarama.ConsumerMessage) {
 	fmt.Printf("Message value as string: %s\n", string(message.Value))
 	fmt.Printf("Message metadata Partition: %d, Offset: %d, Timestamp: %s, Topic: %s\n",
 		message.Partition, message.Offset, message.Timestamp, message.Topic)
+
 	fmt.Println("Headers:")
-	if len(message.Headers) > 0 {
-		for _, header := range message.Headers {
-			fmt.Printf("  %s: %s\n", header.Key, string(header.Value))
-		}
+	headers := make(map[string]string)
+	for _, header := range message.Headers {
+		headers[string(header.Key)] = string(header.Value)
 	}
+	log.Println("Headers:")
+	for key, value := range headers {
+		fmt.Printf("  %s: %s\n", key, value)
+	}
+
 	if len(message.Key) > 0 {
 		fmt.Printf("Message Key: %s\n", string(message.Key))
 	}

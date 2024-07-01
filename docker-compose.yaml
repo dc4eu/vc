@@ -181,11 +181,11 @@ services:
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.60
-  #    healthcheck:
-  #      test: [ "CMD-SHELL", "nc -z localhost 9092 || exit 1" ]
-  #      interval: 10s
-  #      timeout: 5s
-  #      retries: 20
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 9092 || exit 1" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 20
 
   kafka1:
     container_name: "vc_dev_kafka1"
@@ -212,11 +212,11 @@ services:
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.61
-  #    healthcheck:
-  #      test: [ "CMD-SHELL", "nc -z localhost 9092 || exit 1" ]
-  #      interval: 10s
-  #      timeout: 5s
-  #      retries: 20
+#    healthcheck:
+#      test: [ "CMD-SHELL", "nc -z localhost 9092 || exit 1" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 20
 
   kafka-ui:
     container_name: "vc_dev_kafka_ui"
@@ -227,13 +227,19 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka0:9092,kafka1:9092
+      AUTH_TYPE: "LOGIN_FORM"
+      SPRING_SECURITY_USER_NAME: "admin"
+      SPRING_SECURITY_USER_PASSWORD: "admin123"
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_UI_MAX_RECORDS_PER_PAGE: 500
+      KAFKA_UI_DEFAULT_OFFSET_SEARCH_STRATEGY: "LATEST"
     depends_on:
       - kafka0
       - kafka1
-    #      kafka0:
-    #        condition: service_healthy
-    #      kafka1:
-    #        condition: service_healthy
+#      kafka0:
+#        condition: service_healthy
+#      kafka1:
+#        condition: service_healthy
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.70

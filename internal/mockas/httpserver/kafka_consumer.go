@@ -1,13 +1,18 @@
 package httpserver
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
 	"log"
+	"math"
+	"math/rand"
 	"os"
 	"os/signal"
+	"runtime"
+	"strconv"
 	"syscall"
 	"time"
 	"vc/internal/mockas/apiv1"
@@ -79,11 +84,18 @@ func (ec *EventConsumer) start() error {
 	topics := []string{"topic_mock_next"}
 
 	go func() {
+		attempt := 0
 		for {
 			if err := consumerGroup.Consume(ctx, topics, handler); err != nil {
 				ec.logger.Error(err, "Error consuming from Kafka")
-				time.Sleep(1 * time.Second) // Simple retry mechanism
+				// A simple form of "throttling with exponential backoff" which limits how quickly new attempts are made. This can help avoid overwhelming the Kafka cluster or network if many errors occur in a short period.
+				delay := exponentialBackoff(attempt)
+				time.Sleep(delay)
+				attempt++
+			} else {
+				attempt = 0
 			}
+
 			if ctx.Err() != nil {
 				return
 			}
@@ -93,8 +105,23 @@ func (ec *EventConsumer) start() error {
 	<-signals
 	ec.logger.Info("Received termination signal, shutting down gracefully...")
 	cancel()
-	time.Sleep(10 * time.Second) // Allow time for shutdown
+	time.Sleep(20 * time.Second) // Allow time for shutdown
 	return nil
+}
+
+func exponentialBackoff(attempt int) time.Duration {
+	min := float64(100)            // Minimum delay in milliseconds
+	max := float64(10 * 60 * 1000) // Maximum delay in milliseconds (10 minutes)
+	factor := 2.0                  // Backoff factor
+
+	delay := min * math.Pow(factor, float64(attempt))
+	delay = delay + rand.Float64()*min
+
+	if delay > max {
+		delay = max
+	}
+
+	return time.Duration(delay) * time.Millisecond
 }
 
 func (ec *EventConsumer) Close() {
@@ -136,14 +163,14 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 			//TODO handleErrorMessage(session, message, err) and send to topic_mock_next_error
 		}
 
-		// Mark message as treated
-		session.MarkMessage(message, "Marked this message as treated in metadata")
+		session.MarkMessage(message, fmt.Sprintf("GoID %d marked message as treated by handler", getGoroutineID()))
 	}
 	return nil
 }
 
 func logMessageInfo(message *sarama.ConsumerMessage) {
 	//TODO: change to debug logging
+	fmt.Println("Go routine ID:", getGoroutineID())
 	fmt.Println("Raw message:", message)
 	fmt.Println("Raw message as string:", message)
 	fmt.Printf("Raw message.Value: %v\n", message.Value)
@@ -164,6 +191,19 @@ func logMessageInfo(message *sarama.ConsumerMessage) {
 	if len(message.Key) > 0 {
 		fmt.Printf("Message Key: %s\n", string(message.Key))
 	}
+}
+
+// getGoroutineID Debug function to get the current id for the go routine
+func getGoroutineID() int {
+	stackBuf := make([]byte, 64)
+	stackBuf = stackBuf[:runtime.Stack(stackBuf, false)]
+	firstLine := bytes.SplitN(stackBuf, []byte("\n"), 2)[0]
+	fields := bytes.Fields(firstLine)
+	id, err := strconv.Atoi(string(fields[1]))
+	if err != nil {
+		return -1
+	}
+	return id
 }
 
 //TODO: one possible solution when failing to processes a consumed message

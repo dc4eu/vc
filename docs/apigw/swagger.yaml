@@ -1,5 +1,74 @@
 basePath: /api/v1
 definitions:
+  apiv1.AddDocumentIdentityRequest:
+    properties:
+      authentic_source:
+        description: |-
+          required: true
+          example: SUNET
+        type: string
+      document_id:
+        description: |-
+          required: true
+          example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
+        type: string
+      document_type:
+        description: |-
+          required: true
+          example: PDA1
+        type: string
+      identity:
+        $ref: '#/definitions/model.Identity'
+    type: object
+  apiv1.CredentialReply:
+    properties:
+      sdjwt:
+        type: string
+    type: object
+  apiv1.CredentialRequest:
+    properties:
+      authentic_source:
+        type: string
+      credential_type:
+        type: string
+      document_id:
+        type: string
+      document_type:
+        type: string
+      document_version:
+        type: string
+      identity:
+        $ref: '#/definitions/model.Identity'
+    required:
+    - authentic_source
+    - credential_type
+    - document_id
+    - document_type
+    - identity
+    type: object
+  apiv1.DeleteDocumentIdentityRequest:
+    properties:
+      authentic_source:
+        description: |-
+          required: true
+          example: SUNET
+        type: string
+      authentic_source_person_id:
+        description: |-
+          required: true
+          example: 83c1a3c8-3e1a-11ef-9c01-6b6642c8d638
+        type: string
+      document_id:
+        description: |-
+          required: true
+          example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
+        type: string
+      document_type:
+        description: |-
+          required: true
+          example: PDA1
+        type: string
+    type: object
   apiv1.DeleteDocumentRequest:
     properties:
       authentic_source:
@@ -16,7 +85,7 @@ definitions:
   apiv1.GetDocumentCollectIDReply:
     properties:
       data:
-        $ref: '#/definitions/model.Upload'
+        $ref: '#/definitions/model.Document'
     type: object
   apiv1.GetDocumentCollectIDRequest:
     properties:
@@ -37,11 +106,7 @@ definitions:
   apiv1.GetDocumentReply:
     properties:
       data:
-        properties:
-          document_data: {}
-          meta:
-            $ref: '#/definitions/model.MetaData'
-        type: object
+        $ref: '#/definitions/model.Document'
     type: object
   apiv1.GetDocumentRequest:
     properties:
@@ -59,10 +124,7 @@ definitions:
   apiv1.IDMappingReply:
     properties:
       data:
-        properties:
-          authentic_source_person_id:
-            type: string
-        type: object
+        $ref: '#/definitions/model.IDMapping'
     type: object
   apiv1.NotificationReply:
     properties:
@@ -82,7 +144,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/model.Upload'
+          $ref: '#/definitions/model.UploadDocument'
         type: array
     type: object
   apiv1.PortalRequest:
@@ -135,18 +197,18 @@ definitions:
     type: object
   apiv1.UploadRequest:
     properties:
-      attestation:
-        $ref: '#/definitions/model.Attestation'
       document_data:
         additionalProperties: {}
         type: object
+      document_display:
+        $ref: '#/definitions/model.DocumentDisplay'
       identity:
         $ref: '#/definitions/model.Identity'
       meta:
         $ref: '#/definitions/model.MetaData'
     required:
-    - attestation
     - document_data
+    - document_display
     - identity
     - meta
     type: object
@@ -161,20 +223,30 @@ definitions:
       error:
         $ref: '#/definitions/helpers.Error'
     type: object
-  model.Attestation:
+  model.Collect:
     properties:
-      description_long:
+      id:
         description: |-
-          TODO(masv): change TextLong to DescriptionLong
-          required: true
-          example: European Health Insurance Card
+          required: false
+          example: 98fe67fc-c03f-11ee-bbee-4345224d414f
         type: string
-      description_short:
+      valid_until:
         description: |-
-          TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended
-          required: true
-          example: EHIC
-        type: string
+          required: false
+          example: 509567558
+        type: integer
+    type: object
+  model.Document:
+    properties:
+      document_data: {}
+      meta:
+        $ref: '#/definitions/model.MetaData'
+    required:
+    - document_data
+    - meta
+    type: object
+  model.DocumentDisplay:
+    properties:
       description_structured:
         additionalProperties: {}
         description: |-
@@ -189,19 +261,26 @@ definitions:
         type: string
       version:
         description: |-
-          TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant
           required: true
           example: "1.0.0"
         type: string
     required:
-    - description_long
-    - description_short
     - description_structured
     - type
     - version
     type: object
+  model.IDMapping:
+    properties:
+      authentic_source_person_id:
+        type: string
+    type: object
   model.Identity:
     properties:
+      authentic_source_person_id:
+        description: |-
+          required: true
+          example: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a
+        type: string
       birth_city:
         description: |-
           required: false
@@ -293,16 +372,29 @@ definitions:
           required: false
           example: baker street
         type: string
-      version:
-        description: |-
-          required: true
-          example: "1.0.0"
-        type: string
+      schema:
+        $ref: '#/definitions/model.IdentitySchema'
     required:
+    - authentic_source_person_id
     - birth_date
     - family_name
     - given_name
-    - version
+    - schema
+    type: object
+  model.IdentitySchema:
+    properties:
+      name:
+        description: |-
+          required: true
+          example: "SE"
+        type: string
+      version:
+        description: |-
+          required: false
+          example: "1.0.0"
+        type: string
+    required:
+    - name
     type: object
   model.MetaData:
     properties:
@@ -311,26 +403,18 @@ definitions:
           required: true
           example: SUNET
         type: string
-      authentic_source_person_id:
-        description: |-
-          required: true
-          example: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a
-        type: string
-      collect_id:
-        description: |-
-          required: false
-          example: 98fe67fc-c03f-11ee-bbee-4345224d414f
-        type: string
-      created_at:
+      collect:
+        $ref: '#/definitions/model.Collect'
+      credential_valid_from:
         description: |-
           required: false
           example: 509567558
         type: integer
-      date_of_birth:
+      credential_valid_to:
         description: |-
-          required: true
-          example: 1970-01-01
-        type: string
+          required: false
+          example: 509567558
+        type: integer
       document_id:
         description: |-
           required: true
@@ -349,53 +433,33 @@ definitions:
           required: true
           example: "1.0.0"
         type: string
-      first_name:
+      real_data:
         description: |-
+          RealData is a flag to indicate if the document contains real data
           required: true
-          example: John
-        type: string
-      last_name:
-        description: |-
-          required: true
-          example: Doe
-        type: string
-      member_state:
-        description: |-
-          required: true
-          example: "DE"
-        type: string
+          example: true
+        type: boolean
       revocation:
         allOf:
         - $ref: '#/definitions/model.Revocation'
         description: Revocation is a collection of fields representing a revocation
-      valid_from:
-        description: |-
-          required: false
-          example: 509567558
-        type: integer
-      valid_to:
-        description: |-
-          required: false
-          example: 509567558
-        type: integer
     required:
     - authentic_source
-    - authentic_source_person_id
-    - date_of_birth
     - document_id
     - document_type
     - document_version
-    - first_name
-    - last_name
-    - member_state
-    - valid_from
-    - valid_to
     type: object
   model.QR:
     properties:
       base64_image:
+        description: |-
+          required: true
+          example: "ZWFzdGVyIGVnZyE="
         type: string
       deep_link:
+        description: |-
+          required: true
+          example: "https://example.com"
         type: string
     required:
     - base64_image
@@ -403,12 +467,6 @@ definitions:
     type: object
   model.Revocation:
     properties:
-      follow_up_credential:
-        description: |-
-          FollowUpCredential is the ID of the follow-up credential
-          required: false
-          example: https://example.com/credential/?collect_id=8dbd2680-c03f-11ee-a21b-034aafe41222
-        type: string
       id:
         description: |-
           ID is the ID of the revocation
@@ -421,6 +479,8 @@ definitions:
           required: false
           example: lost or stolen
         type: string
+      reference:
+        $ref: '#/definitions/model.RevocationReference'
       revoked:
         description: |-
           Revoked is a flag to indicate if the document has been revoked
@@ -434,13 +494,34 @@ definitions:
           example: 509567558
         type: integer
     type: object
-  model.Upload:
+  model.RevocationReference:
     properties:
-      attestation:
-        $ref: '#/definitions/model.Attestation'
+      authentic_source:
+        type: string
+      document_id:
+        type: string
+      document_type:
+        enum:
+        - PDA1
+        - EHIC
+        type: string
+    required:
+    - authentic_source
+    - document_id
+    - document_type
+    type: object
+  model.UploadDocument:
+    properties:
       document_data:
         additionalProperties: {}
         type: object
+      document_data_version:
+        description: |-
+          required: true
+          example: "1.0.0"
+        type: string
+      document_display:
+        $ref: '#/definitions/model.DocumentDisplay'
       identity:
         $ref: '#/definitions/model.Identity'
       meta:
@@ -448,8 +529,9 @@ definitions:
       qr:
         $ref: '#/definitions/model.QR'
     required:
-    - attestation
     - document_data
+    - document_data_version
+    - document_display
     - identity
     - meta
     type: object
@@ -458,6 +540,33 @@ info:
   title: Datastore API
   version: 0.1.0
 paths:
+  /credential:
+    post:
+      consumes:
+      - application/json
+      description: Create credential endpoint
+      operationId: create-credential
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.CredentialRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/apiv1.CredentialReply'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: Credential
+      tags:
+      - dc4eu
   /document:
     delete:
       consumes:
@@ -534,6 +643,55 @@ paths:
           schema:
             $ref: '#/definitions/helpers.ErrorResponse'
       summary: GetDocumentByCollectID
+      tags:
+      - dc4eu
+  /document/identity:
+    delete:
+      consumes:
+      - application/json
+      description: Delete identity to document endpoint
+      operationId: delete-document-identity
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.DeleteDocumentIdentityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: DeleteDocumentIdentity
+      tags:
+      - dc4eu
+    put:
+      consumes:
+      - application/json
+      description: Adding identity to document endpoint
+      operationId: add-document-identity
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.AddDocumentIdentityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: AddDocumentIdentity
       tags:
       - dc4eu
   /document/revoke:

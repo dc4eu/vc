@@ -15,6 +15,47 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/credential": {
+            "post": {
+                "description": "Create credential endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "Credential",
+                "operationId": "create-credential",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.CredentialRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.CredentialReply"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/document": {
             "post": {
                 "description": "Get document endpoint",
@@ -123,6 +164,80 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/apiv1.GetDocumentCollectIDReply"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/identity": {
+            "put": {
+                "description": "Adding identity to document endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "AddDocumentIdentity",
+                "operationId": "add-document-identity",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.AddDocumentIdentityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete identity to document endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "DeleteDocumentIdentity",
+                "operationId": "delete-document-identity",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.DeleteDocumentIdentityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -375,6 +490,85 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "apiv1.AddDocumentIdentityRequest": {
+            "type": "object",
+            "properties": {
+                "authentic_source": {
+                    "description": "required: true\nexample: SUNET",
+                    "type": "string"
+                },
+                "document_id": {
+                    "description": "required: true\nexample: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8",
+                    "type": "string"
+                },
+                "document_type": {
+                    "description": "required: true\nexample: PDA1",
+                    "type": "string"
+                },
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
+                }
+            }
+        },
+        "apiv1.CredentialReply": {
+            "type": "object",
+            "properties": {
+                "sdjwt": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.CredentialRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "credential_type",
+                "document_id",
+                "document_type",
+                "identity"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "credential_type": {
+                    "type": "string"
+                },
+                "document_id": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
+                },
+                "document_version": {
+                    "type": "string"
+                },
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
+                }
+            }
+        },
+        "apiv1.DeleteDocumentIdentityRequest": {
+            "type": "object",
+            "properties": {
+                "authentic_source": {
+                    "description": "required: true\nexample: SUNET",
+                    "type": "string"
+                },
+                "authentic_source_person_id": {
+                    "description": "required: true\nexample: 83c1a3c8-3e1a-11ef-9c01-6b6642c8d638",
+                    "type": "string"
+                },
+                "document_id": {
+                    "description": "required: true\nexample: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8",
+                    "type": "string"
+                },
+                "document_type": {
+                    "description": "required: true\nexample: PDA1",
+                    "type": "string"
+                }
+            }
+        },
         "apiv1.DeleteDocumentRequest": {
             "type": "object",
             "properties": {
@@ -392,7 +586,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/model.Upload"
+                    "$ref": "#/definitions/model.Document"
                 }
             }
         },
@@ -423,13 +617,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "properties": {
-                        "document_data": {},
-                        "meta": {
-                            "$ref": "#/definitions/model.MetaData"
-                        }
-                    }
+                    "$ref": "#/definitions/model.Document"
                 }
             }
         },
@@ -456,12 +644,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "properties": {
-                        "authentic_source_person_id": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/model.IDMapping"
                 }
             }
         },
@@ -493,7 +676,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Upload"
+                        "$ref": "#/definitions/model.UploadDocument"
                     }
                 }
             }
@@ -574,18 +757,18 @@ const docTemplate = `{
         "apiv1.UploadRequest": {
             "type": "object",
             "required": [
-                "attestation",
                 "document_data",
+                "document_display",
                 "identity",
                 "meta"
             ],
             "properties": {
-                "attestation": {
-                    "$ref": "#/definitions/model.Attestation"
-                },
                 "document_data": {
                     "type": "object",
                     "additionalProperties": {}
+                },
+                "document_display": {
+                    "$ref": "#/definitions/model.DocumentDisplay"
                 },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
@@ -612,24 +795,40 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Attestation": {
+        "model.Collect": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "required: false\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
+                    "type": "string"
+                },
+                "valid_until": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Document": {
             "type": "object",
             "required": [
-                "description_long",
-                "description_short",
+                "document_data",
+                "meta"
+            ],
+            "properties": {
+                "document_data": {},
+                "meta": {
+                    "$ref": "#/definitions/model.MetaData"
+                }
+            }
+        },
+        "model.DocumentDisplay": {
+            "type": "object",
+            "required": [
                 "description_structured",
                 "type",
                 "version"
             ],
             "properties": {
-                "description_long": {
-                    "description": "TODO(masv): change TextLong to DescriptionLong\nrequired: true\nexample: European Health Insurance Card",
-                    "type": "string"
-                },
-                "description_short": {
-                    "description": "TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended\nrequired: true\nexample: EHIC",
-                    "type": "string"
-                },
                 "description_structured": {
                     "description": "DescriptionStructured is a map of structured descriptions\nrequired: true\nexample: {\"en\": \"European Health Insurance Card\", \"sv\": \"Europeiskt sjukförsäkringskortet\"}",
                     "type": "object",
@@ -640,7 +839,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
-                    "description": "TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant\nrequired: true\nexample: \"1.0.0\"",
+                    "description": "required: true\nexample: \"1.0.0\"",
+                    "type": "string"
+                }
+            }
+        },
+        "model.IDMapping": {
+            "type": "object",
+            "properties": {
+                "authentic_source_person_id": {
                     "type": "string"
                 }
             }
@@ -648,12 +855,17 @@ const docTemplate = `{
         "model.Identity": {
             "type": "object",
             "required": [
+                "authentic_source_person_id",
                 "birth_date",
                 "family_name",
                 "given_name",
-                "version"
+                "schema"
             ],
             "properties": {
+                "authentic_source_person_id": {
+                    "description": "required: true\nexample: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a",
+                    "type": "string"
+                },
                 "birth_city": {
                     "description": "required: false\nexample: Stockholm",
                     "type": "string"
@@ -726,8 +938,23 @@ const docTemplate = `{
                     "description": "required: false\nexample: baker street",
                     "type": "string"
                 },
+                "schema": {
+                    "$ref": "#/definitions/model.IdentitySchema"
+                }
+            }
+        },
+        "model.IdentitySchema": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "description": "required: true\nexample: \"SE\"",
+                    "type": "string"
+                },
                 "version": {
-                    "description": "required: true\nexample: \"1.0.0\"",
+                    "description": "required: false\nexample: \"1.0.0\"",
                     "type": "string"
                 }
             }
@@ -736,37 +963,25 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "authentic_source",
-                "authentic_source_person_id",
-                "date_of_birth",
                 "document_id",
                 "document_type",
-                "document_version",
-                "first_name",
-                "last_name",
-                "member_state",
-                "valid_from",
-                "valid_to"
+                "document_version"
             ],
             "properties": {
                 "authentic_source": {
                     "description": "required: true\nexample: SUNET",
                     "type": "string"
                 },
-                "authentic_source_person_id": {
-                    "description": "required: true\nexample: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a",
-                    "type": "string"
+                "collect": {
+                    "$ref": "#/definitions/model.Collect"
                 },
-                "collect_id": {
-                    "description": "required: false\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
-                    "type": "string"
-                },
-                "created_at": {
+                "credential_valid_from": {
                     "description": "required: false\nexample: 509567558",
                     "type": "integer"
                 },
-                "date_of_birth": {
-                    "description": "required: true\nexample: 1970-01-01",
-                    "type": "string"
+                "credential_valid_to": {
+                    "description": "required: false\nexample: 509567558",
+                    "type": "integer"
                 },
                 "document_id": {
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
@@ -784,17 +999,9 @@ const docTemplate = `{
                     "description": "required: true\nexample: \"1.0.0\"",
                     "type": "string"
                 },
-                "first_name": {
-                    "description": "required: true\nexample: John",
-                    "type": "string"
-                },
-                "last_name": {
-                    "description": "required: true\nexample: Doe",
-                    "type": "string"
-                },
-                "member_state": {
-                    "description": "required: true\nexample: \"DE\"",
-                    "type": "string"
+                "real_data": {
+                    "description": "RealData is a flag to indicate if the document contains real data\nrequired: true\nexample: true",
+                    "type": "boolean"
                 },
                 "revocation": {
                     "description": "Revocation is a collection of fields representing a revocation",
@@ -803,14 +1010,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/model.Revocation"
                         }
                     ]
-                },
-                "valid_from": {
-                    "description": "required: false\nexample: 509567558",
-                    "type": "integer"
-                },
-                "valid_to": {
-                    "description": "required: false\nexample: 509567558",
-                    "type": "integer"
                 }
             }
         },
@@ -822,9 +1021,11 @@ const docTemplate = `{
             ],
             "properties": {
                 "base64_image": {
+                    "description": "required: true\nexample: \"ZWFzdGVyIGVnZyE=\"",
                     "type": "string"
                 },
                 "deep_link": {
+                    "description": "required: true\nexample: \"https://example.com\"",
                     "type": "string"
                 }
             }
@@ -832,10 +1033,6 @@ const docTemplate = `{
         "model.Revocation": {
             "type": "object",
             "properties": {
-                "follow_up_credential": {
-                    "description": "FollowUpCredential is the ID of the follow-up credential\nrequired: false\nexample: https://example.com/credential/?collect_id=8dbd2680-c03f-11ee-a21b-034aafe41222",
-                    "type": "string"
-                },
                 "id": {
                     "description": "ID is the ID of the revocation\nrequired: false\nexample: 8dbd2680-c03f-11ee-a21b-034aafe41222",
                     "type": "string"
@@ -843,6 +1040,9 @@ const docTemplate = `{
                 "reason": {
                     "description": "Reason is the reason for revocation\nrequired: false\nexample: lost or stolen",
                     "type": "string"
+                },
+                "reference": {
+                    "$ref": "#/definitions/model.RevocationReference"
                 },
                 "revoked": {
                     "description": "Revoked is a flag to indicate if the document has been revoked\nrequired: false\nexample: false",
@@ -854,21 +1054,49 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Upload": {
+        "model.RevocationReference": {
             "type": "object",
             "required": [
-                "attestation",
+                "authentic_source",
+                "document_id",
+                "document_type"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "document_id": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string",
+                    "enum": [
+                        "PDA1",
+                        "EHIC"
+                    ]
+                }
+            }
+        },
+        "model.UploadDocument": {
+            "type": "object",
+            "required": [
                 "document_data",
+                "document_data_version",
+                "document_display",
                 "identity",
                 "meta"
             ],
             "properties": {
-                "attestation": {
-                    "$ref": "#/definitions/model.Attestation"
-                },
                 "document_data": {
                     "type": "object",
                     "additionalProperties": {}
+                },
+                "document_data_version": {
+                    "description": "required: true\nexample: \"1.0.0\"",
+                    "type": "string"
+                },
+                "document_display": {
+                    "$ref": "#/definitions/model.DocumentDisplay"
                 },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"

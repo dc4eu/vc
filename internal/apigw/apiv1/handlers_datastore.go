@@ -10,10 +10,10 @@ import (
 
 // UploadRequest is the request for Upload
 type UploadRequest struct {
-	Meta         *model.MetaData    `json:"meta" validate:"required"`
-	Identity     *model.Identity    `json:"identity,omitempty" validate:"required"`
-	Attestation  *model.Attestation `json:"attestation,omitempty" validate:"required"`
-	DocumentData map[string]any     `json:"document_data" validate:"required"`
+	Meta            *model.MetaData        `json:"meta" validate:"required"`
+	Identity        *model.Identity        `json:"identity,omitempty" validate:"required"`
+	DocumentDisplay *model.DocumentDisplay `json:"document_display,omitempty" validate:"required"`
+	DocumentData    map[string]any         `json:"document_data" validate:"required"`
 }
 
 // Upload uploads a document with a set of attributes
@@ -40,8 +40,8 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		return err
 	}
 
-	if req.Meta.CollectID == "" {
-		req.Meta.CollectID = req.Meta.DocumentID
+	if req.Meta.Collect.ID == "" {
+		req.Meta.Collect.ID = req.Meta.DocumentID
 	}
 
 	if req.Meta.Revocation == nil {
@@ -54,14 +54,12 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		}
 	}
 
-	req.Meta.CreatedAt = time.Now().Unix()
-
-	upload := &model.Upload{
-		Meta:         req.Meta,
-		Identity:     req.Identity,
-		Attestation:  req.Attestation,
-		DocumentData: req.DocumentData,
-		QR:           qr,
+	upload := &model.UploadDocument{
+		Meta:            req.Meta,
+		Identity:        req.Identity,
+		DocumentDisplay: req.DocumentDisplay,
+		DocumentData:    req.DocumentData,
+		QR:              qr,
 	}
 
 	_, err = c.simpleQueue.VCPersistentSave.Enqueue(ctx, upload)
@@ -115,15 +113,15 @@ func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*N
 
 // IDMappingRequest is the request for IDMapping
 type IDMappingRequest struct {
-	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	// required: true
+	// example: SUNET
+	AuthenticSource string          `json:"authentic_source" required:"true"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
 }
 
 // IDMappingReply is the reply for a IDMapping
 type IDMappingReply struct {
-	Data struct {
-		AuthenticSourcePersonID string `json:"authentic_source_person_id"`
-	} `json:"data"`
+	Data *model.IDMapping `json:"data"`
 }
 
 // IDMapping return a mapping between PID and AuthenticSource
@@ -149,69 +147,83 @@ func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappi
 	if err != nil {
 		return nil, err
 	}
+
 	reply := &IDMappingReply{
-		Data: struct {
-			AuthenticSourcePersonID string `json:"authentic_source_person_id"`
-		}{
+		Data: &model.IDMapping{
 			AuthenticSourcePersonID: authenticSourcePersonID,
 		},
 	}
+
 	return reply, nil
 
 }
 
-// GetDocumentRequest is the request for GetDocument
-type GetDocumentRequest struct {
-	AuthenticSource string `json:"authentic_source" validate:"required"`
-	DocumentType    string `json:"document_type" validate:"required"`
-	DocumentID      string `json:"document_id" validate:"required"`
+// AddDocumentIdentityRequest is the request for DocumentIdentity
+type AddDocumentIdentityRequest struct {
+	// required: true
+	// example: SUNET
+	AuthenticSource string `json:"authentic_source" required:"true"`
+
+	// required: true
+	// example: PDA1
+	DocumentType string `json:"document_type" required:"true"`
+
+	// required: true
+	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
+	DocumentID string `json:"document_id" required:"true"`
+
+	Identity *model.Identity `json:"identity" required:"true"`
 }
 
-// GetDocumentReply is the reply for a generic document
-type GetDocumentReply struct {
-	Data struct {
-		Meta         *model.MetaData `json:"meta"`
-		DocumentData any             `json:"document_data"`
-	} `json:"data"`
-}
-
-// GetDocument return a specific document
+// AddDocumentIdentity adds an identity to a document
 //
-//	@Summary		GetDocument
-//	@ID				get-document
-//	@Description	Get document endpoint
+//	@Summary		AddDocumentIdentity
+//	@ID				add-document-identity
+//	@Description	Adding identity to document endpoint
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	GetDocumentReply		"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		GetDocumentRequest		true	" "
-//	@Router			/document [post]
-func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*GetDocumentReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
-	}
+//	@Success		200
+//	@Failure		400	{object}	helpers.ErrorResponse		"Bad Request"
+//	@Param			req	body		AddDocumentIdentityRequest	true	" "
+//	@Router			/document/identity [put]
+func (c *Client) AddDocumentIdentity(ctx context.Context, req *AddDocumentIdentityRequest) error {
+	return nil
+}
 
-	query := &model.MetaData{
-		DocumentID:      req.DocumentID,
-		DocumentType:    req.DocumentType,
-		AuthenticSource: req.AuthenticSource,
-	}
-	doc, err := c.db.VCDatastoreColl.GetDocument(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	reply := &GetDocumentReply{
-		Data: struct {
-			Meta         *model.MetaData `json:"meta"`
-			DocumentData any             `json:"document_data"`
-		}{
-			Meta:         doc.Meta,
-			DocumentData: doc.DocumentData,
-		},
-	}
+// DeleteDocumentIdentityRequest is the request for DeleteDocumentIdentity
+type DeleteDocumentIdentityRequest struct {
+	// required: true
+	// example: SUNET
+	AuthenticSource string `json:"authentic_source" required:"true"`
 
-	return reply, nil
+	// required: true
+	// example: PDA1
+	DocumentType string `json:"document_type" required:"true"`
+
+	// required: true
+	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
+	DocumentID string `json:"document_id" required:"true"`
+
+	// required: true
+	// example: 83c1a3c8-3e1a-11ef-9c01-6b6642c8d638
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" required:"true"`
+}
+
+// DeleteDocumentIdentity deletes an identity from a document
+//
+//	@Summary		DeleteDocumentIdentity
+//	@ID				delete-document-identity
+//	@Description	Delete identity to document endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200
+//	@Failure		400	{object}	helpers.ErrorResponse			"Bad Request"
+//	@Param			req	body		DeleteDocumentIdentityRequest	true	" "
+//	@Router			/document/identity [delete]
+func (c *Client) DeleteDocumentIdentity(ctx context.Context, req *DeleteDocumentIdentityRequest) error {
+	return nil
 }
 
 // DeleteDocumentRequest is the request for DeleteDocument
@@ -250,6 +262,75 @@ func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest)
 	return nil
 }
 
+// GetDocumentRequest is the request for GetDocument
+type GetDocumentRequest struct {
+	AuthenticSource string `json:"authentic_source" validate:"required"`
+	DocumentType    string `json:"document_type" validate:"required"`
+	DocumentID      string `json:"document_id" validate:"required"`
+}
+
+// GetDocumentReply is the reply for a generic document
+type GetDocumentReply struct {
+	Data *model.Document `json:"data"`
+}
+
+// GetDocument return a specific document
+//
+//	@Summary		GetDocument
+//	@ID				get-document
+//	@Description	Get document endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	GetDocumentReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		GetDocumentRequest		true	" "
+//	@Router			/document [post]
+func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*GetDocumentReply, error) {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return nil, err
+	}
+
+	query := &db.GetDocumentQuery{
+		Meta: &model.MetaData{
+			AuthenticSource: req.AuthenticSource,
+			DocumentType:    req.DocumentType,
+			DocumentID:      req.DocumentID,
+		},
+	}
+	doc, err := c.db.VCDatastoreColl.GetDocument(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	reply := &GetDocumentReply{
+		Data: &model.Document{
+			Meta:         &model.MetaData{},
+			DocumentData: doc,
+		},
+	}
+
+	return reply, nil
+}
+
+// DocumentListRequest is the request for DocumentList
+type DocumentListRequest struct {
+	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	Identity        *model.Identity `json:"identity" validate:"required"`
+	DocumentType    string          `json:"document_type" validate:"required"`
+	ValidFrom       int64           `json:"valid_from"`
+	ValidTo         int64           `json:"valid_to"`
+}
+
+// DocumentListReply is the reply for a list of documents
+type DocumentListReply struct {
+	Data []model.DocumentList `json:"data"`
+}
+
+// DocumentList return a list of metadata for a specific identity
+func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*DocumentListReply, error) {
+	return nil, nil
+}
+
 // GetDocumentCollectIDRequest is the request for GetDocumentAttestation
 type GetDocumentCollectIDRequest struct {
 	AuthenticSource string          `json:"authentic_source" validate:"required"`
@@ -260,7 +341,7 @@ type GetDocumentCollectIDRequest struct {
 
 // GetDocumentCollectIDReply is the reply for a generic document
 type GetDocumentCollectIDReply struct {
-	Data *model.Upload `json:"data"`
+	Data *model.Document `json:"data"`
 }
 
 // GetDocumentCollectID return a specific document ??
@@ -281,10 +362,14 @@ func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentColle
 	}
 
 	query := &db.GetDocumentCollectIDQuery{
-		AuthenticSource: req.AuthenticSource,
-		DocumentType:    req.DocumentType,
-		CollectID:       req.CollectID,
-		Identity:        req.Identity,
+		Identity: req.Identity,
+		Meta: &model.MetaData{
+			AuthenticSource: req.AuthenticSource,
+			DocumentType:    req.DocumentType,
+			Collect: &model.Collect{
+				ID: req.CollectID,
+			},
+		},
 	}
 
 	doc, err := c.db.VCDatastoreColl.GetDocumentCollectID(ctx, query)
@@ -366,7 +451,7 @@ type PortalRequest struct {
 
 // PortalReply is the reply for PortalData
 type PortalReply struct {
-	Data []model.Upload `json:"data"`
+	Data []model.UploadDocument `json:"data"`
 }
 
 // Portal return a list of metadata for a specific person

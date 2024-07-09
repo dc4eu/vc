@@ -12,7 +12,7 @@ import (
 	"vc/pkg/model"
 )
 
-func (c *Client) uploader(ctx context.Context, upload *model.Upload) (*http.Response, error) {
+func (c *Client) uploader(ctx context.Context, upload *model.UploadDocument) (*http.Response, error) {
 	resp, err := c.call(
 		ctx,
 		http.MethodPost,

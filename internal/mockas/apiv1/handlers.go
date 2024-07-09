@@ -13,17 +13,17 @@ type MockNextRequest struct {
 
 // MockNextReply is the reply
 type MockNextReply struct {
-	Upload *model.Upload `json:"upload"`
+	Upload *model.UploadDocument `json:"upload"`
 }
 
 // MockNext sends one mock upload to the datastore
 func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNextReply, error) {
-	// send to datastore
 	c.log.Debug("mocknext")
 	mockUpload, err := c.mockOne(ctx, inData.MockInputData)
 	if err != nil {
 		return nil, err
 	}
+	c.log.Debug("mocknext", "mockUpload", mockUpload)
 
 	resp, err := c.uploader(ctx, mockUpload)
 	if err != nil {

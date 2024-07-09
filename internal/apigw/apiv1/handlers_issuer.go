@@ -3,6 +3,7 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
+	"vc/internal/apigw/db"
 	apiv1_issuer "vc/internal/gen/issuer/apiv1.issuer"
 	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
 	"vc/pkg/helpers"
@@ -14,16 +15,13 @@ import (
 
 // CredentialRequest is the request for Credential
 type CredentialRequest struct {
-	AuthenticSource         string `json:"authentic_source" binding:"required"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" binding:"required"`
-	CredentialType          string `json:"credential_type" binding:"required"`
-	DocumentID              string `json:"document_id" binding:"required"`
-	DocumentType            string `json:"document_type" binding:"required"`
-	DocumentVersion         string `json:"document_version" bind:"required"`
-	CollectID               string `json:"collect_id" binding:"required"`
-	DateOfBirth             string `json:"date_of_birth" binding:"required"`
-	LastName                string `json:"last_name" binding:"required"`
-	FirstName               string `json:"first_name" binding:"required"`
+	Identity        *model.Identity `json:"identity" binding:"required"`
+	AuthenticSource string          `json:"authentic_source" binding:"required"`
+	CredentialType  string          `json:"credential_type" binding:"required"`
+	DocumentID      string          `json:"document_id" binding:"required"`
+	DocumentType    string          `json:"document_type" binding:"required"`
+	DocumentVersion string          `json:"document_version" bind:"required"`
+	//CollectID               string `json:"collect_id" binding:"required"`
 }
 
 // CredentialReply is the reply for Credential
@@ -31,34 +29,31 @@ type CredentialReply struct {
 	SDJWT string `json:"sdjwt"`
 }
 
-// Credential makes a credential based on
+// Credential makes a credential
 //
-//	@Summary		Revoke
-//	@ID				generic-revoke
-//	@Description	Revoke endpoint
+//	@Summary		Credential
+//	@ID				create-credential
+//	@Description	Create credential endpoint
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	RevokeReply				"Success"
+//	@Success		200	{object}	CredentialReply			"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		RevokeRequest			true	" "
-//	@Router			/revoke [post]
-//
-// Credential is the credential endpoint
+//	@Param			req	body		CredentialRequest		true	" "
+//	@Router			/credential [post]
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
 	c.log.Info("Credential", "req", req)
 	// IDMapping
 
 	// GetDocument
-	uploadDoc, err := c.db.VCDatastoreColl.GetDocument(ctx, &model.MetaData{
-		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		DocumentVersion:         req.DocumentVersion,
-		DocumentType:            req.DocumentType,
-		DocumentID:              req.DocumentID,
-		FirstName:               req.FirstName,
-		LastName:                req.LastName,
-		DateOfBirth:             req.DateOfBirth,
+	uploadDoc, err := c.db.VCDatastoreColl.GetDocument(ctx, &db.GetDocumentQuery{
+		Meta: &model.MetaData{
+			AuthenticSource: req.AuthenticSource,
+			DocumentVersion: req.DocumentVersion,
+			DocumentType:    req.DocumentVersion,
+			DocumentID:      req.DocumentID,
+		},
+		Identity: req.Identity,
 	})
 	if err != nil {
 		return nil, err
@@ -86,16 +81,16 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
 		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+		AuthenticSourcePersonID: req.Identity.AuthenticSourcePersonID,
 		DocumentType:            req.DocumentType,
 		DocumentID:              req.DocumentID,
 		DocumentVersion:         req.DocumentVersion,
-		CollectID:               req.CollectID,
-		DateOfBirth:             req.DateOfBirth,
-		LastName:                req.LastName,
-		FirstName:               req.FirstName,
-		CredentialType:          req.CredentialType,
-		DocumentData:            documentData,
+		//CollectID:               req.CollectID,
+		DateOfBirth:    req.Identity.BirthDate,
+		LastName:       req.Identity.FamilyName,
+		FirstName:      req.Identity.GivenName,
+		CredentialType: req.CredentialType,
+		DocumentData:   documentData,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to call MakeSDJWT")

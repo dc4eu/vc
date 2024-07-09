@@ -12,8 +12,6 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/trace"
 
-	_ "vc/docs/datastore"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"

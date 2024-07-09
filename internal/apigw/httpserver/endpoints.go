@@ -19,11 +19,11 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	err := s.apiv1.Upload(ctx, request)
-	if err != nil {
+	if err := s.apiv1.Upload(ctx, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+
 	return nil, nil
 }
 
@@ -44,6 +44,37 @@ func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any
 	return reply, nil
 }
 
+func (s *Service) endpointAddDocumentIdentity(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointNotification")
+	defer span.End()
+
+	request := &apiv1.AddDocumentIdentityRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	if err := s.apiv1.AddDocumentIdentity(ctx, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (s *Service) endpointDeleteDocumentIdentity(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointNotification")
+	defer span.End()
+
+	request := &apiv1.DeleteDocumentIdentityRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	if err := s.apiv1.DeleteDocumentIdentity(ctx, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return nil, nil
+}
 func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointGetDocument")
 	defer span.End()
@@ -121,6 +152,23 @@ func (s *Service) endpointIDMapping(ctx context.Context, c *gin.Context) (any, e
 		return nil, err
 	}
 	reply, err := s.apiv1.IDMapping(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointDocumentList")
+	defer span.End()
+
+	request := &apiv1.DocumentListRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.DocumentList(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

@@ -66,7 +66,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	s.server.IdleTimeout = 90 * time.Second
 
 	// Middlewares
-	s.gin.Use(s.middlewareTraceID(ctx))
+	s.gin.Use(s.middlewareRequestID(ctx))
 	s.gin.Use(s.middlewareDuration(ctx))
 	s.gin.Use(s.middlewareLogger(ctx))
 	s.gin.Use(s.middlewareCrash(ctx))
@@ -88,6 +88,9 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/portal", s.endpointPortal)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/notification", s.endpointNotification)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPut, "/document/identity", s.endpointAddDocumentIdentity)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document/identity", s.endpointDeleteDocumentIdentity)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/list", s.endpointDocumentList)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document", s.endpointGetDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/collect_id", s.endpointGetDocumentCollectID)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/revoke", s.endpointRevokeDocument)

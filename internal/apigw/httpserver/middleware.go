@@ -7,7 +7,7 @@ import (
 	"vc/pkg/helpers"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/lithammer/shortuuid/v4"
 )
 
 func (s *Service) middlewareDuration(ctx context.Context) gin.HandlerFunc {
@@ -19,10 +19,11 @@ func (s *Service) middlewareDuration(ctx context.Context) gin.HandlerFunc {
 	}
 }
 
-func (s *Service) middlewareTraceID(ctx context.Context) gin.HandlerFunc {
+func (s *Service) middlewareRequestID(ctx context.Context) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("req_id", uuid.NewString())
-		c.Header("req_id", c.GetString("req_id"))
+		id := shortuuid.New()
+		c.Set("req_id", id)
+		c.Header("req_id", id)
 		c.Next()
 	}
 }

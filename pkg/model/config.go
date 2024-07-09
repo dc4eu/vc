@@ -51,8 +51,8 @@ type SMT struct {
 	InitLeaf          string `yaml:"init_leaf" validate:"required"`
 }
 
-// RPCServer holds the rpc configuration
-type RPCServer struct {
+// GRPCServer holds the rpc configuration
+type GRPCServer struct {
 	Addr     string `yaml:"addr" validate:"required"`
 	Insecure bool   `yaml:"insecure"`
 }
@@ -88,17 +88,22 @@ type Queues struct {
 	} `yaml:"simple_queue" validate:"required"`
 }
 
+// TrustModel holds the trust model configuration
+type TrustModel struct{}
+
 // Issuer holds the issuer configuration
 type Issuer struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	Identifier string     `yaml:"identifier" validate:"required"`
+	TrustModel TrustModel `yaml:"trust_model" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // Registry holds the registry configuration
 type Registry struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	SMT       SMT       `yaml:"smt" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	SMT        SMT        `yaml:"smt" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // Persistent holds the persistent storage configuration
@@ -114,14 +119,14 @@ type MockAS struct {
 
 // Verifier holds the verifier configuration
 type Verifier struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // Datastore holds the datastore configuration
 type Datastore struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
-	RPCServer RPCServer `yaml:"rpc_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
 // APIGW holds the datastore configuration
@@ -135,6 +140,7 @@ type OTEL struct {
 	Type string `yaml:"type" validate:"required"`
 }
 
+// UI holds the user-interface configuration
 type UI struct {
 	APIServer                      APIServer `yaml:"api_server" validate:"required"`
 	Username                       string    `yaml:"username" validate:"required"`
@@ -151,15 +157,45 @@ type UI struct {
 	} `yaml:"services"`
 }
 
+// CredentialType holds the configuration for the credential type
+type CredentialType struct {
+	Profile string `yaml:"profile" validate:"required"`
+}
+
+// NotificationEndpoint holds the configuration for the notification endpoint
+type NotificationEndpoint struct {
+	URL string `yaml:"url" validate:"required"`
+}
+
+// AuthenticSourceEndpoint holds the configuration for the authentic source
+type AuthenticSourceEndpoint struct{}
+
+// SignatureServiceEndpoint holds the configuration for the signature service
+type SignatureServiceEndpoint struct{}
+
+// RevocationServiceEndpoint holds the configuration for the revocation service
+type RevocationServiceEndpoint struct{}
+
+// AuthenticSource holds the configuration for the authentic source
+type AuthenticSource struct {
+	CountryCode               string                    `yaml:"country_code" validate:"required,iso3166_1_alpha2"`
+	NotificationEndpoint      NotificationEndpoint      `yaml:"notification_endpoint" validate:"required"`
+	AuthenticSourceEndpoint   AuthenticSourceEndpoint   `yaml:"authentic_source_endpoint" validate:"required"`
+	SignatureServiceEndpoint  SignatureServiceEndpoint  `yaml:"signature_service_endpoint" validate:"required"`
+	RevocationServiceEndpoint RevocationServiceEndpoint `yaml:"revocation_service_endpoint" validate:"required"`
+	CredentialTypes           map[string]CredentialType `yaml:"credential_types" validate:"required"`
+}
+
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common     Common     `yaml:"common"`
-	APIGW      APIGW      `yaml:"apigw" validate:"omitempty"`
-	Issuer     Issuer     `yaml:"issuer" validate:"omitempty"`
-	Verifier   Verifier   `yaml:"verifier" validate:"omitempty"`
-	Datastore  Datastore  `yaml:"datastore" validate:"omitempty"`
-	Registry   Registry   `yaml:"registry" validate:"omitempty"`
-	Persistent Persistent `yaml:"persistent" validate:"omitempty"`
-	MockAS     MockAS     `yaml:"mock_as" validate:"omitempty"`
-	UI         UI         `yaml:"ui" validate:"omitempty"`
+	Common           Common                     `yaml:"common"`
+	AuthenticSources map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
+	APIGW            APIGW                      `yaml:"apigw" validate:"omitempty"`
+	Issuer           Issuer                     `yaml:"issuer" validate:"omitempty"`
+	Verifier         Verifier                   `yaml:"verifier" validate:"omitempty"`
+	Datastore        Datastore                  `yaml:"datastore" validate:"omitempty"`
+	Registry         Registry                   `yaml:"registry" validate:"omitempty"`
+	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
+	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
+	UI               UI                         `yaml:"ui" validate:"omitempty"`
 }

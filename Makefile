@@ -4,15 +4,11 @@ NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 
-test: test-verifier test-datastore
+test: test-verifier
 
 test-verifier:
 	$(info Testing verifier)
 	go test -v ./cmd/verifier
-
-test-datastore:
-	$(info Testing datastore)
-	go test -v ./cmd/datastore
 
 gosec:
 	$(info Run gosec)
@@ -42,7 +38,6 @@ endif
 
 DOCKER_TAG_APIGW 		:= docker.sunet.se/dc4eu/apigw:$(VERSION)
 DOCKER_TAG_VERIFIER		:= docker.sunet.se/dc4eu/verifier:$(VERSION)
-DOCKER_TAG_DATASTORE	:= docker.sunet.se/dc4eu/datastore:$(VERSION)
 DOCKER_TAG_REGISTRY 	:= docker.sunet.se/dc4eu/registry:$(VERSION)
 DOCKER_TAG_PERSISTENT 	:= docker.sunet.se/dc4eu/persistent:$(VERSION)
 DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
@@ -51,15 +46,11 @@ DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
 
 
-build: proto build-verifier build-datastore build-registry build-persistent build-mockas build-apigw build-ui
+build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui
 
 build-verifier:
 	$(info Building verifier)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier ${LDFLAGS} ./cmd/verifier/main.go
-
-build-datastore:
-	$(info Building datastore)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_datastore ${LDFLAGS} ./cmd/datastore/main.go
 
 build-registry:
 	$(info Building registry)
@@ -81,7 +72,7 @@ build-ui:
 	$(info Building ui)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_ui ${LDFLAGS} ./cmd/ui/main.go
 
-docker-build: docker-build-verifier docker-build-datastore docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
+docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
@@ -90,10 +81,6 @@ docker-build-gobuild:
 docker-build-verifier:
 	$(info Docker Building verifier with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/worker .
-
-docker-build-datastore:
-	$(info Docker Building datastore with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=datastore --tag $(DOCKER_TAG_DATASTORE) --file dockerfiles/worker .
 
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
@@ -123,10 +110,6 @@ docker-push-gobuild:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_GOBUILD)
 
-docker-push-datastore:
-	$(info Pushing docker images)
-	docker push $(DOCKER_TAG_DATASTORE)
-
 docker-push-verifier:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_VERIFIER)
@@ -155,7 +138,7 @@ docker-push-ui:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_UI)
 
-docker-push: docker-push-datastore docker-push-datastore docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui
+docker-push: docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui
 	$(info Pushing docker images)
 
 docker-tag-apigw:
@@ -169,10 +152,6 @@ docker-tag-issuer:
 docker-tag-verifier:
 	$(info Tagging docker images)
 	docker tag $(DOCKER_TAG_VERIFIER) docker.sunet.se/dc4eu/verifier:$(NEWTAG)
-
-docker-tag-datastore:
-	$(info Tagging docker images)
-	docker tag $(DOCKER_TAG_DATASTORE) docker.sunet.se/dc4eu/datastore:$(NEWTAG)
 
 docker-tag-registry:
 	$(info Tagging docker images)
@@ -190,7 +169,7 @@ docker-tag-ui:
 	$(info Tagging docker images)
 	docker tag $(DOCKER_TAG_UI) docker.sunet.se/dc4eu/ui:$(NEWTAG)
 
-docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-datastore docker-tag-registry docker-tag-persistent docker-tag-mockas docker-tag-ui
+docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-registry docker-tag-persistent docker-tag-mockas docker-tag-ui
 	$(info Tagging docker images)
 
 release:
@@ -211,12 +190,11 @@ docker-pull:
 	docker pull $(DOCKER_TAG_MOCKAS)
 	docker pull $(DOCKER_TAG_PERSISTENT)
 	docker pull $(DOCKER_TAG_VERIFIER)
-	docker pull $(DOCKER_TAG_DATASTORE)
 	docker pull $(DOCKER_TAG_REGISTRY)
 	docker pull $(DOCKER_TAG_UI)
 
 docker-archive:
-	docker save --output docker_archives/vc_$(VERSION).tar $(DOCKER_TAG_VERIFIER) $(DOCKER_TAG_DATASTORE) $(DOCKER_TAG_REGISTRY)
+	docker save --output docker_archives/vc_$(VERSION).tar $(DOCKER_TAG_VERIFIER) $(DOCKER_TAG_REGISTRY)
 
 
 clean_redis:
@@ -226,7 +204,6 @@ clean_redis:
 clean_docker_images:
 	$(info Cleaning docker images)
 	docker rmi $(DOCKER_TAG_VERIFIER) -f
-	docker rmi $(DOCKER_TAG_DATASTORE) -f
 	docker rmi $(DOCKER_TAG_REGISTRY) -f
 
 
@@ -244,16 +221,13 @@ proto-status:
 proto-issuer:
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-issuer.proto 
 
-swagger: swagger-registry swagger-datastore swagger-verifier swagger-apigw swagger-issuer swagger-fmt
+swagger: swagger-registry swagger-verifier swagger-apigw swagger-issuer swagger-fmt
 
 swagger-fmt:
 	swag fmt
 
 swagger-registry:
 	swag init -d internal/registry/apiv1/ -g client.go --output docs/registry --parseDependency --packageName docs
-
-swagger-datastore:
-	swag init --exclude ./vendor/ -d internal/datastore/apiv1/ -g client.go --output docs/datastore --parseDependency --packageName docs
 
 swagger-verifier:
 	swag init -d internal/verifier/apiv1/ -g client.go --output docs/verifier --parseDependency --packageName docs

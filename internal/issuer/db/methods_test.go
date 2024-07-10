@@ -54,7 +54,7 @@ func TestSaveTransaction(t *testing.T) {
 			assert.NoError(t, err)
 			//mongo.db = mt.DB
 
-			err = s.VCDatastoreColl.Save(context.Background(), &model.UploadDocument{})
+			err = s.VCDatastoreColl.Save(context.Background(), &model.CompleteDocument{})
 			assert.NoError(t, err)
 
 		})

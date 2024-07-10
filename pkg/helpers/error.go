@@ -20,6 +20,9 @@ var (
 
 	// ErrNoDocumentData is returned when no document_data is found
 	ErrNoDocumentData = NewError("no_document_data")
+
+	// ErrNoIdentityFound is returned when no identity is found
+	ErrNoIdentityFound = NewError("no_identity_found")
 )
 
 type Error struct {

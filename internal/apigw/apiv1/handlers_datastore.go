@@ -10,10 +10,11 @@ import (
 
 // UploadRequest is the request for Upload
 type UploadRequest struct {
-	Meta            *model.MetaData        `json:"meta" validate:"required"`
-	Identity        *model.Identity        `json:"identity,omitempty" validate:"required"`
-	DocumentDisplay *model.DocumentDisplay `json:"document_display,omitempty" validate:"required"`
-	DocumentData    map[string]any         `json:"document_data" validate:"required"`
+	Meta                *model.MetaData        `json:"meta" validate:"required"`
+	Identities          []*model.Identity      `json:"identities,omitempty" validate:"required"`
+	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty" validate:"required"`
+	DocumentData        map[string]any         `json:"document_data" validate:"required"`
+	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
 }
 
 // Upload uploads a document with a set of attributes
@@ -54,12 +55,13 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		}
 	}
 
-	upload := &model.UploadDocument{
-		Meta:            req.Meta,
-		Identity:        req.Identity,
-		DocumentDisplay: req.DocumentDisplay,
-		DocumentData:    req.DocumentData,
-		QR:              qr,
+	upload := &model.CompleteDocument{
+		Meta:                req.Meta,
+		DocumentDisplay:     req.DocumentDisplay,
+		DocumentData:        req.DocumentData,
+		DocumentDataVersion: req.DocumentDataVersion,
+		Identities:          req.Identities,
+		QR:                  qr,
 	}
 
 	_, err = c.simpleQueue.VCPersistentSave.Enqueue(ctx, upload)
@@ -155,7 +157,6 @@ func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappi
 	}
 
 	return reply, nil
-
 }
 
 // AddDocumentIdentityRequest is the request for DocumentIdentity
@@ -172,7 +173,7 @@ type AddDocumentIdentityRequest struct {
 	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
 	DocumentID string `json:"document_id" required:"true"`
 
-	Identity *model.Identity `json:"identity" required:"true"`
+	Identities []*model.Identity `json:"identities" required:"true"`
 }
 
 // AddDocumentIdentity adds an identity to a document
@@ -188,6 +189,16 @@ type AddDocumentIdentityRequest struct {
 //	@Param			req	body		AddDocumentIdentityRequest	true	" "
 //	@Router			/document/identity [put]
 func (c *Client) AddDocumentIdentity(ctx context.Context, req *AddDocumentIdentityRequest) error {
+	err := c.db.VCDatastoreColl.AddDocumentIdentity(ctx, &db.AddDocumentIdentityQuery{
+		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.DocumentType,
+		DocumentID:      req.DocumentID,
+		Identities:      req.Identities,
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -223,6 +234,16 @@ type DeleteDocumentIdentityRequest struct {
 //	@Param			req	body		DeleteDocumentIdentityRequest	true	" "
 //	@Router			/document/identity [delete]
 func (c *Client) DeleteDocumentIdentity(ctx context.Context, req *DeleteDocumentIdentityRequest) error {
+	err := c.db.VCDatastoreColl.DeleteDocumentIdentity(ctx, &db.DeleteDocumentIdentityQuery{
+		AuthenticSource:         req.AuthenticSource,
+		DocumentType:            req.DocumentType,
+		DocumentID:              req.DocumentID,
+		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -451,7 +472,7 @@ type PortalRequest struct {
 
 // PortalReply is the reply for PortalData
 type PortalReply struct {
-	Data []model.UploadDocument `json:"data"`
+	Data []model.CompleteDocument `json:"data"`
 }
 
 // Portal return a list of metadata for a specific person
@@ -487,4 +508,49 @@ func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*PortalReply, 
 		Data: portalData,
 	}
 	return reply, nil
+}
+
+// AddConsentRequest is the request for AddConsent
+type AddConsentRequest struct {
+	AuthenticSource         string `json:"authentic_source" validate:"required"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
+	ConsentTo               string `json:"consent_to"`
+	SessionID               string `json:"session_id"`
+}
+
+// AddConsent adds a consent to a document
+func (c *Client) AddConsent(ctx context.Context, req *AddConsentRequest) error {
+	err := c.db.VCConsentColl.Add(ctx, &db.AddConsentQuery{
+		AuthenticSource:         req.AuthenticSource,
+		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+		Consent: &model.Consent{
+			ConsentTo: req.ConsentTo,
+			SessionID: req.SessionID,
+			CreatedAt: time.Now().Unix(),
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetConsentRequest is the request for GetConsent
+type GetConsentRequest struct {
+	AuthenticSource         string `json:"authentic_source" validate:"required"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
+}
+
+// GetConsent gets a consent for a document
+func (c *Client) GetConsent(ctx context.Context, req *GetConsentRequest) (*model.Consent, error) {
+	res, err := c.db.VCConsentColl.Get(ctx, &db.GetConsentQuery{
+		AuthenticSource:         req.AuthenticSource,
+		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

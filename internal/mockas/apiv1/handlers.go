@@ -3,7 +3,6 @@ package apiv1
 import (
 	"context"
 	"errors"
-	"vc/pkg/model"
 )
 
 // MockNextRequest holds the request
@@ -13,7 +12,7 @@ type MockNextRequest struct {
 
 // MockNextReply is the reply
 type MockNextReply struct {
-	Upload *model.UploadDocument `json:"upload"`
+	Upload *uploadMock `json:"upload"`
 }
 
 // MockNext sends one mock upload to the datastore

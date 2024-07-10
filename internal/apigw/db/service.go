@@ -36,6 +36,7 @@ type Service struct {
 	probeStore *apiv1_status.StatusProbeStore
 
 	VCDatastoreColl *VCDatastoreColl
+	VCConsentColl   *VCConsentColl
 }
 
 // New creates a new database service
@@ -59,6 +60,14 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 		Coll:    service.dbClient.Database("vc").Collection("datastore"),
 	}
 	if err := service.VCDatastoreColl.createIndex(ctx); err != nil {
+		return nil, err
+	}
+
+	service.VCConsentColl = &VCConsentColl{
+		Service: service,
+		Coll:    service.dbClient.Database("vc").Collection("consent"),
+	}
+	if err := service.VCConsentColl.createIndex(ctx); err != nil {
 		return nil, err
 	}
 

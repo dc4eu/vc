@@ -8,23 +8,24 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
-// UploadDocument is a generic type for upload
-type UploadDocument struct {
+// CompleteDocument is a generic type for upload
+type CompleteDocument struct {
 	Meta            *MetaData        `json:"meta,omitempty" bson:"meta" validate:"required"`
-	Identity        *Identity        `json:"identity,omitempty" bson:"identity" validate:"required"`
-	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"attestation" validate:"required"`
+	Identities      []*Identity      `json:"identities,omitempty" bson:"identities" validate:"required"`
+	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"document_display" validate:"required"`
 	DocumentData    map[string]any   `json:"document_data,omitempty" bson:"document_data" validate:"required"`
 
 	// required: true
 	// example: "1.0.0"
-	DocumentDataVersion string `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required,semver"`
-	QR                  *QR    `json:"qr,omitempty" bson:"qr"`
+	DocumentDataVersion string   `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required,semver"`
+	QR                  *QR      `json:"qr,omitempty" bson:"qr"`
+	Consent             *Consent `json:"consent,omitempty" bson:"consent"`
 }
 
 // DocumentList is a generic type for document list
 type DocumentList struct {
 	Meta            *MetaData        `json:"meta,omitempty" bson:"meta" validate:"required"`
-	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"attestation" validate:"required"`
+	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"document_display" validate:"required"`
 	QR              *QR              `json:"qr,omitempty" bson:"qr"`
 }
 
@@ -67,6 +68,21 @@ func (m *MetaData) QRGenerator(ctx context.Context, baseURL string, recoveryLeve
 	}
 
 	return qr, nil
+}
+
+// Consent is a generic type for consent
+type Consent struct {
+	// required: true
+	// example: "Using my data for research"
+	ConsentTo string `json:"consent_to,omitempty" bson:"consent_to" validate:"required"`
+
+	// required: true
+	// example: "sess-123"
+	SessionID string `json:"session_id,omitempty" bson:"session_id" validate:"required"`
+
+	// required: true
+	// example: 509567558
+	CreatedAt int64 `json:"created_at,omitempty" bson:"created_at" validate:"required"`
 }
 
 // Collect is a generic type for collect
@@ -137,7 +153,7 @@ type Revocation struct {
 	// example: false
 	Revoked bool `json:"revoked,omitempty" bson:"revoked"`
 
-	Reference RevocationReference `json:"reference"`
+	Reference RevocationReference `json:"reference" bson:"reference"`
 
 	// RevokedAt is the time the document was revoked or going to be revoked
 	// required: false
@@ -165,21 +181,21 @@ type IdentitySchema struct {
 type Identity struct {
 	// required: true
 	// example: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a
-	AuthenticSourcePersonID string `json:"authentic_source_person_id,omitempty" bson:"authentic_source_person_id" validate:"required"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id,omitempty" bson:"authentic_source_person_id"`
 
 	Schema *IdentitySchema `json:"schema,omitempty" bson:"schema" validate:"required"`
 
 	// required: true
 	// example: Svensson
-	FamilyName string `json:"family_name,omitempty" bson:"family_name" validate:"required"`
+	FamilyName string `json:"family_name,omitempty" bson:"family_name"`
 
 	// required: true
 	// example: Magnus
-	GivenName string `json:"given_name,omitempty" bson:"given_name" validate:"required"`
+	GivenName string `json:"given_name,omitempty" bson:"given_name"`
 
 	// required: true
 	// example: 1970-01-01
-	BirthDate string `json:"birth_date,omitempty" bson:"birth_date" validate:"required"`
+	BirthDate string `json:"birth_date,omitempty" bson:"birth_date"`
 
 	// required: false
 	// example: Karlsson

@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
@@ -20,7 +21,15 @@ type MockInputData struct {
 	CollectID               string `json:"collect_id"`
 }
 
-func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.UploadDocument, error) {
+type uploadMock struct {
+	Meta                *model.MetaData        `json:"meta" validate:"required"`
+	Identities          []*model.Identity      `json:"identities,omitempty" validate:"required"`
+	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty" validate:"required"`
+	DocumentData        map[string]any         `json:"document_data" validate:"required"`
+	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
+}
+
+func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, error) {
 	c.log.Debug("mockOne")
 	person := gofakeit.Person()
 
@@ -55,7 +64,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload
 		RealData:        false,
 		Collect: &model.Collect{
 			ID:         data.CollectID,
-			ValidUntil: 0,
+			ValidUntil: time.Now().Add(10 * 24 * time.Hour).Unix(),
 		},
 		CredentialValidFrom: gofakeit.Date().Unix(),
 		CredentialValidTo:   gofakeit.Date().Unix(),
@@ -71,15 +80,17 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload
 		},
 	}
 
-	identity := &model.Identity{
-		AuthenticSourcePersonID: data.AuthenticSourcePersonID,
-		Schema: &model.IdentitySchema{
-			Name:    "SE",
-			Version: "1.0.2",
+	identities := []*model.Identity{
+		{
+			AuthenticSourcePersonID: data.AuthenticSourcePersonID,
+			Schema: &model.IdentitySchema{
+				Name:    "SE",
+				Version: "1.0.2",
+			},
+			FamilyName: data.FamilyName,
+			GivenName:  data.GivenName,
+			BirthDate:  data.DateOfBirth,
 		},
-		FamilyName: person.LastName,
-		GivenName:  person.FirstName,
-		BirthDate:  gofakeit.Date().String(),
 	}
 
 	documentDisplay := &model.DocumentDisplay{
@@ -91,9 +102,9 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload
 		},
 	}
 
-	mockUpload := &model.UploadDocument{
+	mockUpload := &uploadMock{
 		Meta:            meta,
-		Identity:        identity,
+		Identities:      identities,
 		DocumentDisplay: documentDisplay,
 	}
 

@@ -27,12 +27,16 @@ common:
 
 authentic_sources:
   SUNET:
-    authentic_source_identifier: ""
-    country_code: ""
+    authentic_source_identifier: "SUNET"
+    country_code: "SE"
     notification_endpoint:
-    authentic_source_endpoint:
-    signature_service_endpoint:
-    revocation_service_endpoint:
+      url: "http://vc_dev_apigw:8080/api/v1/document/notify"
+    authentic_source_endpoint: 
+      url: "http://vc_dev_mockas:8080"
+    signature_service_endpoint: 
+      url: "http://vc_dev_issuer:8080"
+    revocation_service_endpoint: 
+      url: "http://vc_dev_apigw:8080/api/v1/document/revok"
     credential_types:
       EHIC:
         profile: "SD-JWT"

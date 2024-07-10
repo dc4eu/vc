@@ -168,13 +168,19 @@ type NotificationEndpoint struct {
 }
 
 // AuthenticSourceEndpoint holds the configuration for the authentic source
-type AuthenticSourceEndpoint struct{}
+type AuthenticSourceEndpoint struct {
+	URL string `yaml:"url" validate:"required"`
+}
 
 // SignatureServiceEndpoint holds the configuration for the signature service
-type SignatureServiceEndpoint struct{}
+type SignatureServiceEndpoint struct {
+	URL string `yaml:"url" validate:"required"`
+}
 
 // RevocationServiceEndpoint holds the configuration for the revocation service
-type RevocationServiceEndpoint struct{}
+type RevocationServiceEndpoint struct {
+	URL string `yaml:"url" validate:"required"`
+}
 
 // AuthenticSource holds the configuration for the authentic source
 type AuthenticSource struct {

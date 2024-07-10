@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"vc/pkg/helpers"
 	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -32,7 +33,7 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 }
 
 // Save saves one document to the generic collection
-func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.UploadDocument) error {
+func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.CompleteDocument) error {
 	_, err := c.Coll.InsertOne(ctx, doc)
 	return err
 }
@@ -46,20 +47,75 @@ type IDMappingQuery struct {
 // IDMapping return authentic source person id if any
 func (c *VCDatastoreColl) IDMapping(ctx context.Context, query *IDMappingQuery) (string, error) {
 	filter := bson.M{
-		"meta.authentic_source":   bson.M{"$eq": query.AuthenticSource},
-		"identity.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
-		"identity.family_name":    bson.M{"$eq": query.Identity.FamilyName},
-		"identity.given_name":     bson.M{"$eq": query.Identity.GivenName},
+		"meta.authentic_source":     bson.M{"$eq": query.AuthenticSource},
+		"identities.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
+		"identities.family_name":    bson.M{"$eq": query.Identity.FamilyName},
+		"identities.given_name":     bson.M{"$eq": query.Identity.GivenName},
+		"identities.birth_date":     bson.M{"$eq": query.Identity.BirthDate},
 	}
+
 	opts := options.FindOne().SetProjection(bson.M{
-		"meta.authentic_source_person_id": 1,
+		"identities.authentic_source_person_id": 1,
 	})
-	res := &model.UploadDocument{}
+	res := &model.CompleteDocument{}
 	if err := c.Coll.FindOne(ctx, filter, opts).Decode(&res); err != nil {
 		return "", err
 	}
+	if res.Identities == nil || len(res.Identities) == 0 {
+		return "", helpers.ErrNoIdentityFound
+	}
 
-	return res.Identity.AuthenticSourcePersonID, nil
+	return res.Identities[0].AuthenticSourcePersonID, nil
+}
+
+// AddDocumentIdentityQuery is the query to add document identity
+type AddDocumentIdentityQuery struct {
+	AuthenticSource string            `json:"authentic_source" bson:"authentic_source"`
+	DocumentType    string            `json:"document_type" bson:"document_type"`
+	DocumentID      string            `json:"document_id" bson:"document_id"`
+	Identities      []*model.Identity `json:"identities" bson:"identities"`
+}
+
+// AddDocumentIdentity adds document identity
+func (c *VCDatastoreColl) AddDocumentIdentity(ctx context.Context, query *AddDocumentIdentityQuery) error {
+	filter := bson.M{
+		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
+		"meta.document_id":      bson.M{"$eq": query.DocumentID},
+		"meta.document_type":    bson.M{"$eq": query.DocumentType},
+	}
+
+	// This needs to make sure no duplicate authentic_source_person_id is added in the future
+	update := bson.M{"$addToSet": bson.M{"identities": bson.M{"$each": query.Identities}}}
+
+	_, err := c.Coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteDocumentIdentityQuery is the query to delete identity in document
+type DeleteDocumentIdentityQuery struct {
+	AuthenticSource         string `json:"authentic_source" bson:"authentic_source"`
+	DocumentType            string `json:"document_type" bson:"document_type"`
+	DocumentID              string `json:"document_id" bson:"document_id"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" bson:"authentic_source_person_id"`
+}
+
+// DeleteDocumentIdentity deletes identity in document
+func (c *VCDatastoreColl) DeleteDocumentIdentity(ctx context.Context, query *DeleteDocumentIdentityQuery) error {
+	filter := bson.M{
+		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
+		"meta.document_id":      bson.M{"$eq": query.DocumentID},
+		"meta.document_type":    bson.M{"$eq": query.DocumentType},
+	}
+
+	update := bson.M{"$pull": bson.M{"identities": bson.M{"authentic_source_person_id": query.AuthenticSourcePersonID}}}
+	_, err := c.Coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetDocumentQuery is the query to get document attestation
@@ -69,7 +125,7 @@ type GetDocumentQuery struct {
 }
 
 // GetDocument return matching document if any, or error
-func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQuery) (*model.UploadDocument, error) {
+func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQuery) (*model.Document, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": query.Meta.AuthenticSource},
 		"meta.document_type":    bson.M{"$eq": query.Meta.DocumentType},
@@ -88,11 +144,16 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQue
 		"document_data":                   1,
 	})
 
-	res := &model.UploadDocument{}
+	res := &model.CompleteDocument{}
 	if err := c.Coll.FindOne(ctx, filter, opt).Decode(res); err != nil {
 		return nil, err
 	}
-	return res, nil
+
+	reply := &model.Document{
+		Meta:         res.Meta,
+		DocumentData: res.DocumentData,
+	}
+	return reply, nil
 }
 
 // GetQR return matching document and return its QR code, else error
@@ -106,7 +167,7 @@ func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*mod
 		"qr": 1,
 	})
 
-	res := &model.UploadDocument{}
+	res := &model.CompleteDocument{}
 	if err := c.Coll.FindOne(ctx, filter, opt).Decode(res); err != nil {
 		return nil, err
 	}
@@ -162,7 +223,7 @@ type PortalQuery struct {
 }
 
 // PortalData returns a list of portal data
-func (c *VCDatastoreColl) PortalData(ctx context.Context, query *PortalQuery) ([]model.UploadDocument, error) {
+func (c *VCDatastoreColl) PortalData(ctx context.Context, query *PortalQuery) ([]model.CompleteDocument, error) {
 	filter := bson.M{
 		"meta.authentic_source":           bson.M{"$eq": query.AuthenticSource},
 		"meta.authentic_source_person_id": bson.M{"$eq": query.AuthenticSourcePersonID},
@@ -184,7 +245,7 @@ func (c *VCDatastoreColl) PortalData(ctx context.Context, query *PortalQuery) ([
 	if err != nil {
 		return nil, err
 	}
-	res := []model.UploadDocument{}
+	res := []model.CompleteDocument{}
 	if err := cursor.All(ctx, &res); err != nil {
 		return nil, err
 	}
@@ -192,13 +253,13 @@ func (c *VCDatastoreColl) PortalData(ctx context.Context, query *PortalQuery) ([
 }
 
 // Get gets one document
-func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.UploadDocument, error) {
+func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.CompleteDocument, error) {
 	filter := bson.M{
 		"meta.document_id":      bson.M{"$eq": doc.DocumentID},
 		"meta.authentic_source": bson.M{"$eq": doc.AuthenticSource},
 		"meta.document_type":    bson.M{"$eq": doc.DocumentType},
 	}
-	res := &model.UploadDocument{}
+	res := &model.CompleteDocument{}
 	if err := c.Coll.FindOne(ctx, filter).Decode(res); err != nil {
 		return nil, err
 	}
@@ -206,13 +267,13 @@ func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.
 }
 
 // GetByRevocationID gets one document by meta.revocation.id and meta.authentic_source
-func (c *VCDatastoreColl) GetByRevocationID(ctx context.Context, q *model.MetaData) (*model.UploadDocument, error) {
+func (c *VCDatastoreColl) GetByRevocationID(ctx context.Context, q *model.MetaData) (*model.CompleteDocument, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": q.AuthenticSource},
 		"meta.document_type":    bson.M{"$eq": q.DocumentType},
 		"meta.revocation.id":    bson.M{"$eq": q.Revocation.ID},
 	}
-	res := &model.UploadDocument{}
+	res := &model.CompleteDocument{}
 	if err := c.Coll.FindOne(ctx, filter).Decode(res); err != nil {
 		return nil, err
 	}

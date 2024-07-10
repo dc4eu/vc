@@ -38,7 +38,7 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 }
 
 // Save saves one document
-func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.UploadDocument) error {
+func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.CompleteDocument) error {
 	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:save")
 	defer span.End()
 
@@ -52,7 +52,7 @@ func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.UploadDocument) e
 }
 
 // Get gets one document
-func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.UploadDocument, error) {
+func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.CompleteDocument, error) {
 	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:get")
 	defer span.End()
 
@@ -60,7 +60,7 @@ func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.
 		"meta.document_id":      bson.M{"$eq": doc.DocumentID},
 		"meta.authentic_source": bson.M{"$eq": doc.AuthenticSource},
 	}
-	res := &model.UploadDocument{}
+	res := &model.CompleteDocument{}
 	if err := c.coll.FindOne(ctx, filter).Decode(res); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
@@ -69,7 +69,7 @@ func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.
 }
 
 // Replace replaces one document
-func (c *VCDatastoreColl) Replace(ctx context.Context, doc *model.UploadDocument) error {
+func (c *VCDatastoreColl) Replace(ctx context.Context, doc *model.CompleteDocument) error {
 	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:replace")
 	defer span.End()
 

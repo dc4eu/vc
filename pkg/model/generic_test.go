@@ -11,12 +11,12 @@ import (
 func TestGenericUploadTestv1JSON(t *testing.T) {
 	tts := []struct {
 		name string
-		have *UploadDocument
+		have *CompleteDocument
 		want string
 	}{
 		{
 			name: "testv1",
-			have: &UploadDocument{},
+			have: &CompleteDocument{},
 		},
 	}
 

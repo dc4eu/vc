@@ -193,6 +193,39 @@ func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, erro
 	return reply, nil
 }
 
+func (s *Service) endpointAddConsent(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointPortal")
+	defer span.End()
+
+	request := &apiv1.AddConsentRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	if err := s.apiv1.AddConsent(ctx, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (s *Service) endpointGetConsent(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tp.Start(ctx, "httpserver:endpointPortal")
+	defer span.End()
+
+	request := &apiv1.GetConsentRequest{}
+	if err := s.bindRequest(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.GetConsent(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointHealth")
 	defer span.End()

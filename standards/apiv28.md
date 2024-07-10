@@ -1,12 +1,12 @@
 # Datastore Rest API
 
 ## Introduction and reference
-The following document serves as a reference for the implementation of the Issuer System including the so-called Data Store for the EU-funded DC4EU project. The document focuses on the technical description of the relevant backend endpoints without providing detailed business explanations including scenarios. 
+The following document serves as a reference for the implementation of the `Issuer System` including the so-called `datastore` for the EU-funded DC4EU project. The document focuses on the technical description of the relevant backend endpoints without providing detailed business explanations including scenarios. 
 Participants can find the corresponding business specification in the project's internal [sharepoint at the following address](https://sites.ey.com/sites/DC4EU-EBSINE/Shared%20Documents/Forms/AllItems.aspx?ga=1&id=%2Fsites%2FDC4EU%2DEBSINE%2FShared%20Documents%2FGeneral%2FDC4EU%2FWP7%2FTasks%2FT7%2E2%2E%20Opensource%20Provider%20and%20Verifier%2FBackend%20API%20Documentation&viewid=1d5f5777%2D8eec%2D44ab%2Da8a2%2D488cd0136ef2). 
 The business specification is currently in version 2.8.      
 
 ## Version
-    This document corresponds to the implementation of the API in Version 2.5 - revision 1
+    This document corresponds to the implementation of the API in Version 0.3.3 - revision 1
 
 ## Endpoint summery
 
@@ -21,12 +21,12 @@ The business specification is currently in version 2.8.
 9.  POST /document                - return a full document entry for credential creation
 10. POST /consent                 - optionally store user consent to display `/document/list information` in a portal
 11. POST /consent/get             - return consent status of citizen to display `/document/list information` in a portal
-
 12. POST /document/revoke         - initiate recocation process of a credential at the issuer
 13. PUT  /document/status         - set document status to revoked
 
 ## Backend configurations
 Before the Issuer System and the described API can be used, the Issuer System must be configured. A config file is provided for this purpose, for example to define specific endpoints for each Authentic Source. This makes it possible to define several Authentic Sources. A wide variety of architectures are possible, for example with many data stores per authentic source or one data store at the issuer that contains data for many authentic sources. The endpoint for the signature service and the standard credential profiles should also be defined here for each authentic source. This information is relevant for generating the credential.
+Please note that currently the configuration is present as json, but could also be in other formats like yaml.
 
 ```json
 
@@ -102,13 +102,11 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
 | Type         | Attribute              | (r)eq.<br><br>(o)pt. | Attribute Description                                                                                                                                                                                        |
 | Input        |                        |                      |                                                                                                                                                                                                              |
 | Object       | [meta {](#meta)                 | r                    | Instructions to build credentials                                                                                                                                                                            |
-| Object       | [revocation {}](#revocation)          | o                    |                                                                                                                                                                                                              |
+| Object       | [revocation {}}](#revocation)          | o                    |                                                                                                                                                                                                              |
 | Object       | [identity {}](#identity)            | o                    | Object containing all data for later identity mapping – optional as separate update and put endpoints are offered to add identity later; every document needs at least one identity object to be collectable |
 | Object       | [document_display {}](#document_display)    | o                    | Generic Object which includes all information to display via portal API                                                                                                                                      |
-| String       | document _data_version | r                    | Version of the JSON document data object<br><br>MUST comply with https://semver.org/                                                                                                                         |
+| String            | document_data_version | r   | Version of the JSON document data object<br><br>MUST comply with https://semver.org/                                                                   |
 | Object       | [document_data {}](#document_data)       | r                    | JSON electronic document                                                                                                                                                                                     |
-| Output       |                        |                      |                                                                                                                                                                                                              |
-| Integer      | status                 | r                    | Returns operation status; 200 OK, else 400 and error body                                                                                                                                                    |                                                                   |
 
 
 ### Request
@@ -169,6 +167,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
             "type": "",
             "description_structured": {},
             },  
+        "document_data_version": "",    
         "document_data": {}
     }
 ```
@@ -179,8 +178,8 @@ As described, document_display should contain all information that is relevant f
 | String     | description_short | o   | To display in the portal                                                                                                                                                                                                      |
 | ---------- | ----------------- | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | String     | description_long  | o   | To display in the portal                                                                                                                                                                                                      |
-| int64 unix | valid_from        | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
-| int64 unix | valid_to          | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
+| int64 | valid_from        | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
+| int64 | valid_to          | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
 
 ### Response
 
@@ -269,8 +268,6 @@ It is possible that more than one person is authorized to collect a credential. 
 | String                 | document_id      | r                    | uniq identifier within authentic_source and document_type namespace                       |
 | Object                 | [identity {}](#identity)       | r                    | Object containing all data for later identity mapping – as defined in the upload endpoint |
 |                        |                 |                      |                                                                                           |
-| Output                 |                  |                      |                                                                                           |
-| Integer                | status           | r                    | Returns operation status; 200 OK, else 400 and error body                                 |
 
 ### Request
 
@@ -310,8 +307,6 @@ If an identity is no longer authorized to retrieve a credential or if it is an i
 | String                    | document_type              | r                    | Type of Document, initially only “EHIC” or “PDA1”                                                |
 | String                    | document_id                | r                    | uniq identifier within authentic_source and document_type namespace                              |
 | String                    | authentic_source_person_id | r                    | unique identifier within authentic_source namespace AND globally unique within Authentic Source. |
-| Output                    |                            |                      |                                                                                                  |
-| Integer                   | status                     | r                    | Returns operation status; 200 OK, else 400 and error body                                        |
 
 ### Request
 
@@ -505,8 +500,8 @@ In the response are expected relevant `meta`-data per attestation such as `docum
 | String              | authentic_source       | o                    | globally unambiguous name of the issuing entity (agency or institution)                                                    |
 | Object              | [identity {}](#identity)| r                    | as defined in upload                                                                                                       |
 | String              | document_type          | o                    | Type of Document, initially only “EHIC” or “PDA1” for filter; if empty, all types                                          |
-| int64 unix          | valid_from             | o                    | credentials valid from or specific date; if empty current date                                                             |
-| int64 unix          | valid_to               | o                    | credentials valid after specific date; if empty max date                                                                   |
+| int64               | valid_from             | o                    | credentials valid from or specific date; if empty current date                                                             |
+| int64               | valid_to               | o                    | credentials valid after specific date; if empty max date                                                                   |
 | Output              |                        |                      |                                                                                                                            |
 | Enum/List           | data [{                | r                    | List of one to multiple attestations                                                                                       |
 | Object              | [meta {}](#meta)       | r                    | Technical metadata object - content as defined in the upload                                                               |
@@ -514,7 +509,7 @@ In the response are expected relevant `meta`-data per attestation such as `docum
 | Object              | qr {                   | r                    | QR-Code/Link Object, defined in notification endpoint                                                                      |
 | String              | base64_image           | r                    | Link, formatted as QR-Code to initiate credential pickup with holder-wallet – Typestring which will be interpreted as image|
 | String              | deep_link              | r                    | To be processed by the Wallet to initiate pickup process                                                                   |
-| Object              |  }                     | r                    | QR-Code/Link Object, defined in notification endpoint                                                                      |
+|                     |  }                     | r                    |                                                                                                                            |
 |                     | }                      |                      |                                                                                                                            |
 
 ### Request
@@ -658,7 +653,7 @@ If the POST /consent defined above is used, the following endpoint can be used t
 | Output            |                            |                      |                                                                                             |
 | String            | consent_to                 | r                    | String representing the specific consent.                                                   |
 | String            | session_id                 | r                    | Session identifying information for further reference and allocability                      |
-| int64 unix        | created_at                 | r                    | Technical timestamp on when the entry was uploaded to the Data Store                        |
+| int64       | created_at                 | r                    | Technical timestamp on when the entry was uploaded to the Data Store                        |
 
 ### Request
 
@@ -743,11 +738,10 @@ http OK 200, else 400 and error body
 | Boolean           | real_data             | r   | “true” or “false” – For Pilot, indicating the use of real or test data                                                                                 |
 | Object            | collect {             | o   | This is defining information for general pick-up by QR-Code/link.                                                                                      |
 | String            | id                    | o   | If not defined by institution it should be set to document_id value after upload.<br><br>Used to not expose the real document id, thus limiting fraud. |
-| Int64<br><br>unix | collect_until         | o   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date.                                        |
+| Int64             | collect_until         | o   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date.                                        |
 |                   | }                     |     |                                                                                                                                                        |
-| String            | document _version     | r   | Version of the JSON document data object<br><br>MUST comply with https://semver.org/                                                                   |
-| typeint64 unix    | credential_valid_from | o   | Validity information of the future credential; If empty validity is default equal to attestation validity                                              |
-| int64 unix        | credential_valid_to   | o   | Validity information of the future credential; If empty validity is default equal to attestation validity                                              |
+| int64             | credential_valid_from | o   | Validity information of the future credential; If empty validity is default equal to attestation validity                                              |
+| int64             | credential_valid_to   | o   | Validity information of the future credential; If empty validity is default equal to attestation validity                                              |
 | Object            | revocation {}         | o   |                                                                                                                                                        |
 
 ### revocation{}
@@ -760,7 +754,7 @@ http OK 200, else 400 and error body
 | String     | document_type    | o   | Type of Document, initially only “EHIC” or “PDA1”                                                                                                                                                                                |
 | String     | document_id      | o   | Primary key of the business decision - unique identifier within authentic_source and document_type namespace[[MF1]](#_msocom_1)                                                                                                  |
 |            | }                |     |                                                                                                                                                                                                                                  |
-| int64 unix | revoke_at        | o   | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed                                                 |
+| int64 | revoke_at        | o   | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed                                                 |
 | String     | reason           | o   | Could include a display text for the Issuer System, wont be included in revocation registry                                                                                                                                      |
 | Boolean    | revoked          | o   | Information on whether the respective credential is revoked; Allows to upload attestation information of credentials that are already revoked – if not specified this is set to false by default                                 |
 

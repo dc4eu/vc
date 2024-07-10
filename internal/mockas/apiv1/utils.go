@@ -17,7 +17,7 @@ type MockInputData struct {
 	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
 	GivenName               string `json:"given_name"`
 	FamilyName              string `json:"family_name"`
-	DateOfBirth             string `json:"date_of_birth"`
+	BirthDate               string `json:"birth_date"`
 	CollectID               string `json:"collect_id"`
 }
 
@@ -45,9 +45,10 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 		data.FamilyName = person.LastName
 	}
 
-	if data.DateOfBirth == "" {
-		data.DateOfBirth = gofakeit.Date().String()
+	if data.BirthDate == "" {
+		data.BirthDate = gofakeit.Date().String()
 	}
+
 
 	if data.CollectID == "" {
 		data.CollectID = gofakeit.UUID()
@@ -89,7 +90,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 			},
 			FamilyName: data.FamilyName,
 			GivenName:  data.GivenName,
-			BirthDate:  data.DateOfBirth,
+			BirthDate:  data.BirthDate,
 		},
 	}
 

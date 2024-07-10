@@ -17,9 +17,8 @@ type CompleteDocument struct {
 
 	// required: true
 	// example: "1.0.0"
-	DocumentDataVersion string   `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required,semver"`
-	QR                  *QR      `json:"qr,omitempty" bson:"qr"`
-	Consent             *Consent `json:"consent,omitempty" bson:"consent"`
+	DocumentDataVersion string `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required,semver"`
+	QR                  *QR    `json:"qr,omitempty" bson:"qr"`
 }
 
 // DocumentList is a generic type for document list
@@ -89,7 +88,7 @@ type Consent struct {
 type Collect struct {
 	// required: false
 	// example: 98fe67fc-c03f-11ee-bbee-4345224d414f
-	ID string `json:"id,omitempty" bson:"collect_id"`
+	ID string `json:"id,omitempty" bson:"id"`
 
 	// required: false
 	// example: 509567558
@@ -135,9 +134,9 @@ type MetaData struct {
 
 // RevocationReference refer to a document
 type RevocationReference struct {
-	AuthenticSource string `json:"authentic_source,omitempty" bson:"authentic_source" validate:"required"`
-	DocumentType    string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=PDA1 EHIC"`
-	DocumentID      string `json:"document_id,omitempty" bson:"document_id" validate:"required"`
+	AuthenticSource string `json:"authentic_source,omitempty" bson:"authentic_source"`
+	DocumentType    string `json:"document_type,omitempty" bson:"document_type"`
+	DocumentID      string `json:"document_id,omitempty" bson:"document_id"`
 }
 
 // Revocation is a collection of fields representing a revocation

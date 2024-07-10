@@ -34,17 +34,8 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 
 // CreateCredentialRequest is the request for Credential
 type CreateCredentialRequest struct {
-	AuthenticSource         string `json:"authentic_source" validate:"required"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
-	DocumentID              string `json:"document_id" validate:"required"`
-	DocumentType            string `json:"document_type" validate:"required"`
-	DocumentVersion         string `json:"document_version" validate:"required"`
-	CollectID               string `json:"collect_id" validate:"required"`
-	DateOfBirth             string `json:"date_of_birth" validate:"required"`
-	LastName                string `json:"last_name" validate:"required"`
-	FirstName               string `json:"first_name" validate:"required"`
-	CredentialType          string `json:"credential_type" validate:"required"`
-	DocumentData            []byte `json:"document_data" validate:"required"`
+	DocumentType string `json:"document_type" validate:"required"`
+	DocumentData []byte `json:"document_data" validate:"required"`
 }
 
 // CreateCredentialReply is the reply for Credential

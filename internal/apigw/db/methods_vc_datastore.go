@@ -132,16 +132,8 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQue
 		"meta.document_id":      bson.M{"$eq": query.Meta.DocumentID},
 	}
 	opt := options.FindOne().SetProjection(bson.M{
-		"meta.authentic_source_person_id": 1,
-		"meta.authentic_source":           1,
-		"meta.document_type":              1,
-		"meta.document_id":                1,
-		"meta.revocation":                 1,
-		"meta.collect_id":                 1,
-		"meta.document_version":           1,
-		"meta.valid_from":                 1,
-		"meta.valid_to":                   1,
-		"document_data":                   1,
+		"meta":          1,
+		"document_data": 1,
 	})
 
 	res := &model.CompleteDocument{}
@@ -154,6 +146,45 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQue
 		DocumentData: res.DocumentData,
 	}
 	return reply, nil
+}
+
+// DocumentListQuery is the query to get document list
+type DocumentListQuery struct {
+	AuthenticSource string          `json:"authentic_source" bson:"authentic_source" validate:"required"`
+	Identity        *model.Identity `json:"identity" bson:"identity" validate:"required"`
+	DocumentType    string          `json:"document_type" bson:"document_type" validate:"required"`
+	ValidFrom       int64           `json:"valid_from" bson:"valid_from"`
+	ValidTo         int64           `json:"valid_to" bson:"valid_to"`
+}
+
+// DocumentList return matching documents if any, or error
+func (c *VCDatastoreColl) DocumentList(ctx context.Context, query *DocumentListQuery) ([]*model.DocumentList, error) {
+	filter := bson.M{
+		"meta.authentic_source":     bson.M{"$eq": query.AuthenticSource},
+		"meta.document_type":        bson.M{"$eq": query.DocumentType},
+		"identities.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
+	}
+
+	if query.Identity.AuthenticSourcePersonID != "" {
+		filter["identities.authentic_source_person_id"] = bson.M{"$eq": query.Identity.AuthenticSourcePersonID}
+	} else {
+		filter["identities.family_name"] = bson.M{"$eq": query.Identity.FamilyName}
+		filter["identities.given_name"] = bson.M{"$eq": query.Identity.GivenName}
+		filter["identities.birth_date"] = bson.M{"$eq": query.Identity.BirthDate}
+		//... figure out how to match any of the above attributes
+	}
+
+	cursor, err := c.Coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*model.DocumentList{}
+	if err := cursor.All(ctx, &res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 // GetQR return matching document and return its QR code, else error
@@ -183,87 +214,37 @@ type GetDocumentCollectIDQuery struct {
 // GetDocumentCollectID return matching document if any, or error
 func (c *VCDatastoreColl) GetDocumentCollectID(ctx context.Context, query *GetDocumentCollectIDQuery) (*model.Document, error) {
 	filter := bson.M{
-		"meta.authentic_source":   bson.M{"$eq": query.Meta.AuthenticSource},
-		"meta.collect_id":         bson.M{"$eq": query.Meta.Collect.ID},
-		"meta.document_type":      bson.M{"$eq": query.Meta.DocumentType},
-		"identity.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
-		"identity.family_name":    bson.M{"$eq": query.Identity.FamilyName},
-		"identity.given_name":     bson.M{"$eq": query.Identity.GivenName},
-		"identity.birth_date":     bson.M{"$eq": query.Identity.BirthDate},
+		"meta.authentic_source":     bson.M{"$eq": query.Meta.AuthenticSource},
+		"meta.collect.id":           bson.M{"$eq": query.Meta.Collect.ID},
+		"meta.document_type":        bson.M{"$eq": query.Meta.DocumentType},
+		"identities.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
 	}
 
-	opt := options.FindOne().SetProjection(bson.M{
-		"meta.document_type":              1,
-		"meta.document_id":                1,
-		"meta.document_version":           1,
-		"meta.revocation_id":              1,
-		"meta.revoked":                    1,
-		"meta.collect_id":                 1,
-		"meta.authentic_source_person_id": 1,
-		"meta.authentic_source":           1,
-		"meta.valid_from":                 1,
-		"meta.valid_to":                   1,
-		"document_data":                   1,
+	if query.Identity.AuthenticSourcePersonID != "" {
+		filter["identities.authentic_source_person_id"] = bson.M{"$eq": query.Identity.AuthenticSourcePersonID}
+	} else {
+		filter = bson.M{
+			"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
+			"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
+			"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
+		}
+	}
+
+	opts := options.FindOne().SetProjection(bson.M{
+		"meta":          1,
+		"document_data": 1,
 	})
 
-	res := &model.Document{}
-	if err := c.Coll.FindOne(ctx, filter, opt).Decode(res); err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-// PortalQuery is the query to get portal data
-type PortalQuery struct {
-	AuthenticSource         string
-	AuthenticSourcePersonID string
-	DocumentType            string
-	ValidTo                 int64
-	ValidFrom               int64
-}
-
-// PortalData returns a list of portal data
-func (c *VCDatastoreColl) PortalData(ctx context.Context, query *PortalQuery) ([]model.CompleteDocument, error) {
-	filter := bson.M{
-		"meta.authentic_source":           bson.M{"$eq": query.AuthenticSource},
-		"meta.authentic_source_person_id": bson.M{"$eq": query.AuthenticSourcePersonID},
-	}
-
-	if query.ValidFrom != 0 {
-		filter["meta.valid_from"] = bson.M{"$gte": query.ValidFrom}
-	}
-	if query.ValidTo != 0 {
-		c.Service.log.Debug("filter", "valid_to", query.ValidTo)
-		filter["meta.valid_to"] = bson.M{"$lte": query.ValidTo}
-	}
-
-	if query.DocumentType != "" {
-		filter["meta.document_type"] = bson.M{"$eq": query.DocumentType}
-	}
-
-	cursor, err := c.Coll.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	res := []model.CompleteDocument{}
-	if err := cursor.All(ctx, &res); err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-// Get gets one document
-func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.CompleteDocument, error) {
-	filter := bson.M{
-		"meta.document_id":      bson.M{"$eq": doc.DocumentID},
-		"meta.authentic_source": bson.M{"$eq": doc.AuthenticSource},
-		"meta.document_type":    bson.M{"$eq": doc.DocumentType},
-	}
 	res := &model.CompleteDocument{}
-	if err := c.Coll.FindOne(ctx, filter).Decode(res); err != nil {
+	if err := c.Coll.FindOne(ctx, filter, opts).Decode(res); err != nil {
 		return nil, err
 	}
-	return res, nil
+
+	reply := &model.Document{
+		Meta:         res.Meta,
+		DocumentData: res.DocumentData,
+	}
+	return reply, nil
 }
 
 // GetByRevocationID gets one document by meta.revocation.id and meta.authentic_source

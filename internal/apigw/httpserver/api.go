@@ -21,7 +21,6 @@ type Apiv1 interface {
 	DeleteDocument(ctx context.Context, req *apiv1.DeleteDocumentRequest) error
 	GetDocumentCollectID(ctx context.Context, req *apiv1.GetDocumentCollectIDRequest) (*apiv1.GetDocumentCollectIDReply, error)
 	RevokeDocument(ctx context.Context, req *apiv1.RevokeDocumentRequest) error
-	Portal(ctx context.Context, req *apiv1.PortalRequest) (*apiv1.PortalReply, error)
 	AddConsent(ctx context.Context, req *apiv1.AddConsentRequest) error
 	GetConsent(ctx context.Context, req *apiv1.GetConsentRequest) (*model.Consent, error)
 

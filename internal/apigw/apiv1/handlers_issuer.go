@@ -15,13 +15,13 @@ import (
 
 // CredentialRequest is the request for Credential
 type CredentialRequest struct {
-	Identity        *model.Identity `json:"identity" binding:"required"`
 	AuthenticSource string          `json:"authentic_source" binding:"required"`
+	Identity        *model.Identity `json:"identity" binding:"required"`
 	CredentialType  string          `json:"credential_type" binding:"required"`
 	DocumentID      string          `json:"document_id" binding:"required"`
 	DocumentType    string          `json:"document_type" binding:"required"`
 	DocumentVersion string          `json:"document_version" bind:"required"`
-	//CollectID               string `json:"collect_id" binding:"required"`
+	CollectID       string          `json:"collect_id" binding:"required"`
 }
 
 // CredentialReply is the reply for Credential
@@ -42,15 +42,19 @@ type CredentialReply struct {
 //	@Param			req	body		CredentialRequest		true	" "
 //	@Router			/credential [post]
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return nil, err
+	}
+
 	c.log.Info("Credential", "req", req)
 	// IDMapping
 
 	// GetDocument
-	uploadDoc, err := c.db.VCDatastoreColl.GetDocument(ctx, &db.GetDocumentQuery{
+	document, err := c.db.VCDatastoreColl.GetDocument(ctx, &db.GetDocumentQuery{
 		Meta: &model.MetaData{
 			AuthenticSource: req.AuthenticSource,
 			DocumentVersion: req.DocumentVersion,
-			DocumentType:    req.DocumentVersion,
+			DocumentType:    req.DocumentType,
 			DocumentID:      req.DocumentID,
 		},
 		Identity: req.Identity,
@@ -58,14 +62,11 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 	if err != nil {
 		return nil, err
 	}
-	if uploadDoc == nil {
+	if document == nil || document.DocumentData == nil {
 		return nil, helpers.ErrNoDocumentFound
 	}
-	if uploadDoc.DocumentData == nil {
-		return nil, helpers.ErrNoDocumentData
-	}
 
-	documentData, err := json.Marshal(uploadDoc.DocumentData)
+	documentData, err := json.Marshal(document.DocumentData)
 	if err != nil {
 		return nil, err
 	}
@@ -85,12 +86,12 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 		DocumentType:            req.DocumentType,
 		DocumentID:              req.DocumentID,
 		DocumentVersion:         req.DocumentVersion,
-		//CollectID:               req.CollectID,
-		DateOfBirth:    req.Identity.BirthDate,
-		LastName:       req.Identity.FamilyName,
-		FirstName:      req.Identity.GivenName,
-		CredentialType: req.CredentialType,
-		DocumentData:   documentData,
+		DateOfBirth:             req.Identity.BirthDate,
+		CollectID:               req.CollectID,
+		LastName:                req.Identity.FamilyName,
+		FirstName:               req.Identity.GivenName,
+		CredentialType:          req.CredentialType,
+		DocumentData:            documentData,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to call MakeSDJWT")

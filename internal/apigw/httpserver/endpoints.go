@@ -176,23 +176,6 @@ func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any
 	return reply, nil
 }
 
-func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointPortal")
-	defer span.End()
-
-	request := &apiv1.PortalRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.Portal(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
 func (s *Service) endpointAddConsent(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tp.Start(ctx, "httpserver:endpointPortal")
 	defer span.End()

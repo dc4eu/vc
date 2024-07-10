@@ -23,6 +23,12 @@ var (
 
 	// ErrNoIdentityFound is returned when no identity is found
 	ErrNoIdentityFound = NewError("no_identity_found")
+
+	// ErrDuplicateKey is returned when a duplicate key is found
+	ErrDuplicateKey = NewError("duplicate_key")
+
+	// ErrNoRevocationID is returned when no revocation_id is found
+	ErrNoRevocationID = NewError("no_revocation_id")
 )
 
 type Error struct {

@@ -85,18 +85,17 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	rgAPIv1 := rgRoot.Group("api/v1")
 
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/upload", s.endpointUpload)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/portal", s.endpointPortal)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/notification", s.endpointNotification)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPut, "/document/identity", s.endpointAddDocumentIdentity)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document/identity", s.endpointDeleteDocumentIdentity)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/collect_id", s.endpointGetDocumentCollectID)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id/mapping", s.endpointIDMapping)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/list", s.endpointDocumentList)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document", s.endpointGetDocument)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/collect_id", s.endpointGetDocumentCollectID)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/revoke", s.endpointRevokeDocument)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id/mapping", s.endpointIDMapping)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/consent", s.endpointAddConsent)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/consent/get", s.endpointGetConsent)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/revoke", s.endpointRevokeDocument)
 
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCredential)
 

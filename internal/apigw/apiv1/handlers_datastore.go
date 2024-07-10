@@ -324,10 +324,7 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 		return nil, err
 	}
 	reply := &GetDocumentReply{
-		Data: &model.Document{
-			Meta:         &model.MetaData{},
-			DocumentData: doc,
-		},
+		Data: doc,
 	}
 
 	return reply, nil
@@ -335,21 +332,34 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 
 // DocumentListRequest is the request for DocumentList
 type DocumentListRequest struct {
-	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	AuthenticSource string          `json:"authentic_source"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
-	DocumentType    string          `json:"document_type" validate:"required"`
+	DocumentType    string          `json:"document_type"`
 	ValidFrom       int64           `json:"valid_from"`
 	ValidTo         int64           `json:"valid_to"`
 }
 
 // DocumentListReply is the reply for a list of documents
 type DocumentListReply struct {
-	Data []model.DocumentList `json:"data"`
+	Data []*model.DocumentList `json:"data"`
 }
 
 // DocumentList return a list of metadata for a specific identity
 func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*DocumentListReply, error) {
-	return nil, nil
+	docs, err := c.db.VCDatastoreColl.DocumentList(ctx, &db.DocumentListQuery{
+		AuthenticSource: req.AuthenticSource,
+		Identity:        req.Identity,
+		DocumentType:    req.DocumentType,
+		ValidFrom:       req.ValidFrom,
+		ValidTo:         req.ValidTo,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp := &DocumentListReply{
+		Data: docs,
+	}
+	return resp, nil
 }
 
 // GetDocumentCollectIDRequest is the request for GetDocumentAttestation
@@ -430,7 +440,7 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 	}
 
 	if req.Revocation.ID == "" {
-		return helpers.NewError("missing meta.revocation.id")
+		return helpers.ErrNoRevocationID
 	}
 
 	doc, err := c.db.VCDatastoreColl.GetByRevocationID(ctx, &model.MetaData{
@@ -450,8 +460,6 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 		doc.Meta.Revocation.Revoked = true
 	}
 
-	c.log.Debug("Add revocation to document", "document_id", doc.Meta.DocumentID)
-
 	_, err = c.simpleQueue.VCPersistentReplace.Enqueue(ctx, doc)
 	if err != nil {
 		return err
@@ -459,55 +467,6 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 	c.log.Debug("Document enqueued for update", "document_id", doc.Meta.DocumentID)
 
 	return nil
-}
-
-// PortalRequest is the request for PortalData
-type PortalRequest struct {
-	AuthenticSource         string `json:"authentic_source" validate:"required"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
-	DocumentType            string `json:"document_type"`
-	ValidFrom               int64  `json:"valid_from"`
-	ValidTo                 int64  `json:"valid_to"`
-}
-
-// PortalReply is the reply for PortalData
-type PortalReply struct {
-	Data []model.CompleteDocument `json:"data"`
-}
-
-// Portal return a list of metadata for a specific person
-//
-//	@Summary		Portal
-//	@ID				portal
-//	@Description	Get portal data endpoint
-//	@Tags			dc4eu
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	PortalReply				"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		PortalRequest			true	" "
-//	@Router			/portal [post]
-func (c *Client) Portal(ctx context.Context, req *PortalRequest) (*PortalReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
-	}
-
-	query := &db.PortalQuery{
-		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		DocumentType:            req.DocumentType,
-		ValidTo:                 req.ValidTo,
-		ValidFrom:               req.ValidFrom,
-	}
-	portalData, err := c.db.VCDatastoreColl.PortalData(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-
-	reply := &PortalReply{
-		Data: portalData,
-	}
-	return reply, nil
 }
 
 // AddConsentRequest is the request for AddConsent

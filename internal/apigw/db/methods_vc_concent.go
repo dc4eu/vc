@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"vc/pkg/helpers"
 	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -53,8 +54,13 @@ func (c *VCConsentColl) Add(ctx context.Context, consent *AddConsentQuery) error
 
 	_, err := c.Coll.InsertOne(ctx, consent)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return helpers.ErrDuplicateKey
+		}
+	} else {
 		return err
 	}
+
 	return nil
 }
 

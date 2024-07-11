@@ -190,7 +190,7 @@ It is possible that more than one person is authorized to collect a credential. 
 | string   | authentic_source         | r | globally unambiguous name of the issuing entity (agency or institution) |
 | string   | document_type            | r | Type of Document, initially only “EHIC” or “PDA1” |
 | string   | document_id              | r | uniq identifier within authentic_source and document_type namespace |
-| Object   | [identity {}](#identity) | r | Object containing all data for later identity mapping – as defined in the upload endpoint |
+| object   | [identity {}](#identity) | r | Object containing all data for later identity mapping – as defined in the upload endpoint |
 
 ### Output / Response
 
@@ -585,7 +585,7 @@ unspecified json object, used to include any document type from authentic source
 | string | type                   | o   | For internal display interpretation/differentiation                                                                        |
 | object | description_structured | o   | JSON Object with key-value-pairs for building display data[[MF1]](#_msocom_1)                                              |
 
-### document_list
+### document_list{}
 
 this is just a type to make presentation easier, it will not affect anything in the client API.
 
@@ -595,6 +595,13 @@ this is just a type to make presentation easier, it will not affect anything in 
 | object | [document_display {}](#document_display) | o | Generic Object which includes all information to display via portal API|
 | object | [qr {}](#qr)                             | r | QR-Code/Link Object, defined in notification endpoint|
 
+### qr{}
+
+| Type  | Attribute              | (r)eq. / (o)pt. | Attibute Description |
+| ------| ---------------------- | -------------------- | ------------------------- |
+| string | base64_image | r | |
+| string | deep_link | r | |
+
 ## Error response
 
 ```json
@@ -603,6 +610,14 @@ this is just a type to make presentation easier, it will not affect anything in 
             "title":"",
             "details": {}
         }
+    }
+```
+
+## Normal repsonse JSON
+
+```json
+    {
+        "data": {...}
     }
 ```
 

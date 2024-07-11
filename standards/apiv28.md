@@ -1,31 +1,36 @@
 # Datastore Rest API
 
 ## Introduction and reference
-The following document serves as a reference for the implementation of the `Issuer System` including the so-called `datastore` for the EU-funded DC4EU project. The document focuses on the technical description of the relevant backend endpoints without providing detailed business explanations including scenarios. 
-Participants can find the corresponding business specification in the project's internal [sharepoint at the following address](https://sites.ey.com/sites/DC4EU-EBSINE/Shared%20Documents/Forms/AllItems.aspx?ga=1&id=%2Fsites%2FDC4EU%2DEBSINE%2FShared%20Documents%2FGeneral%2FDC4EU%2FWP7%2FTasks%2FT7%2E2%2E%20Opensource%20Provider%20and%20Verifier%2FBackend%20API%20Documentation&viewid=1d5f5777%2D8eec%2D44ab%2Da8a2%2D488cd0136ef2). 
-The business specification is currently in version 2.8.      
+
+The following document serves as a reference for the implementation of the `Issuer System` including the so-called `datastore` for the EU-funded DC4EU project. The document focuses on the technical description of the relevant backend endpoints without providing detailed business explanations including scenarios.
+Participants can find the corresponding business specification in the project's internal [sharepoint at the following address](https://sites.ey.com/sites/DC4EU-EBSINE/Shared%20Documents/Forms/AllItems.aspx?ga=1&id=%2Fsites%2FDC4EU%2DEBSINE%2FShared%20Documents%2FGeneral%2FDC4EU%2FWP7%2FTasks%2FT7%2E2%2E%20Opensource%20Provider%20and%20Verifier%2FBackend%20API%20Documentation&viewid=1d5f5777%2D8eec%2D44ab%2Da8a2%2D488cd0136ef2).
+The business specification is currently in version 2.8.
 
 ## Version
+
     This document corresponds to the implementation of the API in Version 0.3.3 - revision 1
 
 ## Endpoint summery
 
-1.  POST /upload                  - upload one document, with additional relevant information
-2.  POST /notification            - return one qr object to be included in a notification
-3.  PUT /document/identity        - append one identity object to a document
-4.  DELETE /document/identity     - delete one identity object from a selected document
-5.  DELETE /document              - delete one full document entry
-6.  POST /document/collect_id     - combined endpoint to retreive a document and do id mapping 
-7.  POST /identity/mapping        - mapp identity attributes and return authentic source person id
-8.  POST /document/list           - return array of documents user interface information
-9.  POST /document                - return a full document entry for credential creation
-10. POST /consent                 - optionally store user consent to display `/document/list information` in a portal
-11. POST /consent/get             - return consent status of citizen to display `/document/list information` in a portal
-12. POST /document/revoke         - initiate recocation process of a credential at the issuer
-13. PUT  /document/status         - set document status to revoked
+| method | endpoint | description |
+|---|---|---|
+| POST   |  /upload               | upload one document, with additional relevant information |
+| POST   |  /notification         | return one qr object to be included in a notification |
+| PUT    |  /document/identity    | append one identity object to a document |
+| DELETE |  /document/identity    | delete one identity object from a selected document |
+| DELETE |  /document             | delete one full document entry |
+| POST   |  /document/collect_id  | combined endpoint to retrieve a document and do id mapping |
+| POST   |  /identity/mapping     | map identity attributes and return authentic source person id |
+| POST   |  /document/list        | return array of documents user interface information |
+| POST   |  /document             | return a full document entry for credential creation |
+| POST   |  /consent              | optionally store user consent to display `/document/list information` in a portal |
+| POST   |  /consent/get          | return consent status of citizen to display `/document/list information` in a portal |
+| POST   |  /document/revoke      | initiate revocation process of a credential at the issuer |
+| PUT    |  /document/status      | set document status to revoked |
 
 ## Backend configurations
-Before the Issuer System and the described API can be used, the Issuer System must be configured. A config file is provided for this purpose, for example to define specific endpoints for each Authentic Source. This makes it possible to define several Authentic Sources. A wide variety of architectures are possible, for example with many data stores per authentic source or one data store at the issuer that contains data for many authentic sources. The endpoint for the signature service and the standard credential profiles should also be defined here for each authentic source. This information is relevant for generating the credential.
+
+Before the Issuer System and the described API can be used, the Issuer System must be configured. A config file is provided for this purpose, for example to define specific endpoints for each Authentic Source. This makes it possible to define several Authentic Sources. A wide variety of architectures are possible, for example with many `datastore` per authentic source or one `datastore` at the issuer that contains data for many `authentic_source`. The endpoint for the signature service and the standard credential profiles should also be defined here for each authentic source. This information is relevant for generating the credential.
 Please note that currently the configuration is present as json, but could also be in other formats like yaml.
 
 ```json
@@ -79,11 +84,11 @@ Please note that currently the configuration is present as json, but could also 
 
 ### Description
 
-The Process starts with the authentic source which is uploading all relevant data to the Datastore. All steps regarding the general application of an attestation are out of scope and reside to the internal processes of the authentic source.
+The Process starts with the authentic source which is uploading all relevant data to the `datastore`. All steps regarding the general application of an attestation are out of scope and reside to the internal processes of the authentic source.
 
 The data upload consist of four objects used as input for the call. These are `meta`, `identity`, `attestation` and `document_data`.
 
-First, the meta object consists of the authentic source ID, document type and document ID. These act as the main identifier in the Datastore. One document ID is valid and unique per document type and authentic source ID. Another required input is the institutional identifier of the person to ensure flexibility in identification and reduce susceptibility to errors. Again, this may also be valid and unique only in the domain of the authentic source. Therefore, in order to match an institutional person ID (authentic_source_person_id) a filter by authentic source ID needs to be applied before a selection operation is done. Finally, the meta object has defined revocation and collect ID as optional parameters. They may be set by the authentic source for special use cases and preferences. If not defined by the upload they shall be set equal to the document ID by the Datastore System.
+First, the meta object consists of the `authentic_source_id`, document type and document ID. These act as the main identifier in the `datastore`. One document ID is valid and unique per document type and authentic source ID. Another required input is the institutional identifier of the person to ensure flexibility in identification and reduce susceptibility to errors. Again, this may also be valid and unique only in the domain of the authentic source. Therefore, in order to match an institutional person ID (authentic_source_person_id) a filter by authentic source ID needs to be applied before a selection operation is done. Finally, the meta object has defined revocation and collect ID as optional parameters. They may be set by the authentic source for special use cases and preferences. If not defined by the upload they shall be set equal to the document ID by the `datastore` System.
 
 Second object is identity data which includes equal to the current definition of the PID, all possible parameters optional and required concerning the subject of the attestation to be uploaded. This is the first approach to handle the identity matching topic. An authentic Source shall upload all available information concerning the defined attributes. The more the better for later matching, against a PID from an EUDIW.
 
@@ -97,93 +102,30 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
 
 ### Attribute Table
 
-| POST /upload |                        |                      |                                                                                                                                                                                                              |
-| ------------ | ---------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Type         | Attribute              | (r)eq.<br><br>(o)pt. | Attribute Description                                                                                                                                                                                        |
-| Input        |                        |                      |                                                                                                                                                                                                              |
-| Object       | [meta {](#meta)                 | r                    | Instructions to build credentials                                                                                                                                                                            |
-| Object       | [revocation {}}](#revocation)          | o                    |                                                                                                                                                                                                              |
-| Object       | [identity {}](#identity)            | o                    | Object containing all data for later identity mapping – optional as separate update and put endpoints are offered to add identity later; every document needs at least one identity object to be collectable |
-| Object       | [document_display {}](#document_display)    | o                    | Generic Object which includes all information to display via portal API                                                                                                                                      |
-| String            | document_data_version | r   | Version of the JSON document data object<br><br>MUST comply with https://semver.org/                                                                   |
-| Object       | [document_data {}](#document_data)       | r                    | JSON electronic document                                                                                                                                                                                     |
+#### Input / Request
 
+| Type         | Attribute              | (r)eq. / (o)pt.      | Attribute Description      |
+| ------------ | ---------------------- | -------------------- | -------------------------- |
+| object | [meta {}](#meta)                         | r | Instructions to build credentials|
+| object | [revocation {}}](#revocation)            | o  ||
+| array |  [identities []](#identity)               | o | Object containing all data for later identity mapping – optional as separate update and put endpoints are offered to add identity later; every document needs at least one identity object to be collectable |
+| object|  [document_display {}](#document_display) | o | Generic Object which includes all information to display via portal API  |
+| object | [document_data {}](#document_data)       | r |  JSON electronic document |
+| string | document_data_version                    | r   | Version of the JSON document data object. MUST comply with <https://semver.org/> |
 
-### Request
+#### Output / Response
 
-```json
-    {
-        "meta": {
-            "authentic_source": "",
-            "document_type": "",
-            "document_id": "",
-            "real_data": "",
-            "collect": {
-                "id": "",
-                "collect_until": ""
-            },
-            "document_version": "2.0.1",
-            "credential_valid_from": "",
-            "credential_valid_to":"",
-            "revocation": {
-                "revocation_id": "",
-                "reference": {
-                    "authentic_source": "",
-                    "document_type": "",
-                    "document_id": ""
-                },
-                "revoke_at": "",
-                "reason": "",
-                "revoked": "false"
-            },
-        },
-        "identity": {
-            "authentic_source_person_id": "",
-            "schema": {
-                "name": "",
-                "version": "",
-            },
-            "family_name": "",
-            "given_name":"",
-            "birth_date":"",
-            "family_name_birth": "",
-            "given_name_birth": "",
-            "birth_place": "",
-            "gender": "",
-            "birth_country": "",
-            "birth_state": "",
-            "birth_city": "",
-            "resident_address": "",
-            "resident_country": "",
-            "resident_state": "",
-            "resident_city": "",
-            "resident_postal_code": "",
-            "resident_street": "",
-            "resident_house_number": "",
-            "nationality": "",
-        },
-        "document_display": {
-            "version": "7.2.1",
-            "type": "",
-            "description_structured": {},
-            },  
-        "document_data_version": "",    
-        "document_data": {}
-    }
-```
+http OK 200, else http 400 and error object
 
 #### Additional remarks on 'description_structured' object
-As described, document_display should contain all information that is relevant for display in a user interface such as a portal. The object description structured contained therein remains undefined in terms of content and must therefore be coordinated between Authentic Source and a portal, for example. It may be sufficient to provide display texts in short and long form as well as the validity of the attestation in order to give the citizen a quick overview of the content of the attestation. The content of the object could therefore look like this: 
 
-| String     | description_short | o   | To display in the portal                                                                                                                                                                                                      |
-| ---------- | ----------------- | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| String     | description_long  | o   | To display in the portal                                                                                                                                                                                                      |
+As described, document_display should contain all information that is relevant for display in a user interface such as a portal. The object description structured contained therein remains undefined in terms of content and must therefore be coordinated between Authentic Source and a portal, for example. It may be sufficient to provide display texts in short and long form as well as the validity of the attestation in order to give the citizen a quick overview of the content of the attestation. The content of the object could therefore look like this:
+
+| String     | description_short | o   | To display in the portal  |
+| ---------- | ----------------- | --- | ------------------------- |
+| String     | description_long  | o   | To display in the portal  |
 | int64 | valid_from        | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
 | int64 | valid_to          | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
-
-### Response
-
-http OK 200, else 400 and error body
 
 ## POST /notification
 
@@ -197,49 +139,31 @@ http OK 200, else 400 and error body
 
 ### Description
 
-After the upload was successful the authentic source can call the get notification endpoint, to receive `qr_base64_image` and `deep_link` to include them in existing notification means. This is split from the upload endpoint to allow fast mass uploads of documents and to allow openness for different system architectures as this information request may be done by a different authentic source component as the upload.
+After the upload was successful the authentic source can call the get notification endpoint, to receive `base64_image` and `deep_link` to include them in existing notification means. This is split from the upload endpoint to allow fast mass uploads of documents and to allow openness for different system architectures as this information request may be done by a different authentic source component as the upload.
 
-As explained before the three attributes used for unequivocal selection of an entry are required as input. These are `authentic_source_id`, `document_type` and `document_id`. A selection/ filter in the Datastore must be executed in this order.
+As explained before the three attributes used for unequivocal selection of an entry are required as input. These are `authentic_source_id`, `document_type` and `document_id`. A selection/ filter in the `datastore` must be executed in this order.
 
-After identifying the respective entry in the Datastore database, the Datastore must generate a pickup link based on the `collect_id`. Note that this may be equal to the `document_id` if not further defined. The link should ultimately be formatted as a QR code, and both the link and QR code should be returned to the Authentic Source.
+After identifying the respective entry in the `datastore` database, the `datastore` must generate a pickup link based on the `collect_id`. Note that this may be equal to the `document_id` if not further defined. The link should ultimately be formatted as a QR code, and both the link and QR code should be returned to the Authentic Source.
 
-Link and QR code can be encoded according to the OID4VCI protocol with `collect_id` and `document_id` reference. However, as sharing of the PID by the EUDIW user is expected, it may be more practical to encode the link and QR code according to the OID4VP protocol and initiate it directly with the request for the credential. It is anticipated that both protocols may be utilized for functionality in presentation and subsequent issuance, and an efficient technical implementation for this purpose is yet to be devised. For the link to be created a specific endpoint needs to be known to the Datastore which points to the Issuer System and can serve issuance requests by the EUDIW. It shall be possible to define this in a Datastore config file/ properties.
+Link and QR code can be encoded according to the OID4VCI protocol with `collect_id` and `document_id` reference. However, as sharing of the PID by the EUDIW user is expected, it may be more practical to encode the link and QR code according to the OID4VP protocol and initiate it directly with the request for the credential. It is anticipated that both protocols may be utilized for functionality in presentation and subsequent issuance, and an efficient technical implementation for this purpose is yet to be devised. For the link to be created a specific endpoint needs to be known to the `datastore` which points to the Issuer System and can serve issuance requests by the EUDIW. It shall be possible to define this in a `datastore` config file/ properties.
 
 After the QR code and link are received the authentic source may follow existing protocols and channels to notify the subject of the credential.
 
 ### Attribute Table
 
-| POST /notification |                  |                      |                                                                                                                             |
-| ------------------ | ---------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Type               | Attribute        | (r)eq.<br><br>(o)pt. | Attibute Description                                                                                                        |
-| Input              |                  |                      |                                                                                                                             |
-| String             | authentic_source | r                    | globally unambiguous name of the issuing entity (agency or institution)                                                     |
-| String             | document_type    | r                    | Type of Document, initially only “EHIC” or “PDA1”                                                                           |
-| String             | document_id      | r                    | uniq identifier within authentic_source and document_type namespace                                                         |
-| Output             |                  |                      |                                                                                                                             |
-| String             | base64_image     | r                    | Link, formatted as QR-Code to initiate credential pickup with holder-wallet – Typestring which will be interpreted as image |
-| String             | deep_link        | r                    | To be processed by the Wallet to initiate pickup process                                                                    |
+#### Input / Request
 
-### Request
+| Type | Attribute | (r)eq. / (o)pt. | Description |
+| ------------------ | ---------------- | -------------------- | ----------------- |
+| string             | authentic_source | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string             | document_type    | r | Type of Document, initially only “EHIC” or “PDA1” |
+| string             | document_id      | r | uniq identifier within authentic_source and document_type namespace |
 
-```json
-    {
-        "authentic_source": "",
-        "document_type": "",
-        "document_id": ""
-    }
-```
+#### Output / Response
 
-### Response
-
-```json
-    {
-        "data": {
-            "qr_base64_image": "",
-            "deep_link": ""
-        }
-    }
-```
+| Type | Attribute | (r)eq. / (o)pt. | Description |
+| ------------------ | ---------------- | ----------- | ----------------- |
+| object             | [qr](#qr)     | r | Link, formatted as QR-Code to initiate credential pickup with holder-wallet – Typestring which will be interpreted as image |
 
 http OK 200, else 400 and error body
 
@@ -255,32 +179,20 @@ http OK 200, else 400 and error body
 
 ### Description
 
-It is possible that more than one person is authorized to collect a credential. For example, if the Authentic Source has certain powers of representation. Information about the identity may also change or errors may occur during the upload. This endpoint should be used for each of these cases. It enables a new or updated/corrected identity to be attached to a specific document. It is identified by standard attributes `authentic_source`, `document_type` and `document_id` which are required. If an identity is to be updated or corrected, the obsolete identity must then be deleted with the following endpoint. 
+It is possible that more than one person is authorized to collect a credential. For example, if the Authentic Source has certain powers of representation. Information about the identity may also change or errors may occur during the upload. This endpoint should be used for each of these cases. It enables a new or updated/corrected identity to be attached to a specific document. It is identified by standard attributes `authentic_source`, `document_type` and `document_id` which are required. If an identity is to be updated or corrected, the obsolete identity must then be deleted with the following endpoint.
 
 ### Attribute Table
 
-| PUT /document/identity |                  |                      |                                                                                           |
-| ---------------------- | ---------------- | -------------------- | ----------------------------------------------------------------------------------------- |
-| Type                   | Attribute        | (r)eq.<br><br>(o)pt. | Attribute Description                                                                     |
-| Input                  |                  |                      |                                                                                           |
-| String                 | authentic_source | r                    | globally unambiguous name of the issuing entity (agency or institution)                   |
-| String                 | document_type    | r                    | Type of Document, initially only “EHIC” or “PDA1”                                         |
-| String                 | document_id      | r                    | uniq identifier within authentic_source and document_type namespace                       |
-| Object                 | [identity {}](#identity)       | r                    | Object containing all data for later identity mapping – as defined in the upload endpoint |
-|                        |                 |                      |                                                                                           |
+#### Input / Request
 
-### Request
+| Type       | Attribute        | (r)eq. / (o)pt. | Attribute Description|
+| ---------- | ---------------- | -------------------- | ------------------ |
+| String   | authentic_source         | r | globally unambiguous name of the issuing entity (agency or institution) |
+| String   | document_type            | r | Type of Document, initially only “EHIC” or “PDA1” |
+| String   | document_id              | r | uniq identifier within authentic_source and document_type namespace |
+| Object   | [identity {}](#identity) | r | Object containing all data for later identity mapping – as defined in the upload endpoint |
 
-```json
-    {
-        "authentic_source": "",
-        "document_id": "",
-        "document_type":"",
-        "identity": {},
-    }
-```
-
-### Response
+### Output / Response
 
 http OK 200, else 400 and error body
 
@@ -299,27 +211,17 @@ http OK 200, else 400 and error body
 If an identity is no longer authorized to retrieve a credential or if it is an identity with incorrect/outdated attributes, it must be deleted using this endpoint. The document is identified again using the three main attributes. To subsequently select the identity object, the authentic_source_person_id must also be supplied.
 
 ### Attribute Table
-| DELETE /document/identity |                            |                      |                                                                                                  |
-| ------------------------- | -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------ |
-| Type                      | Attribute                  | (r)eq.<br><br>(o)pt. | Attibute Description                                                                             |
-| Input                     |                            |                      |                                                                                                  |
-| String                    | authentic_source           | r                    | globally unambiguous name of the issuing entity (agency or institution)                          |
-| String                    | document_type              | r                    | Type of Document, initially only “EHIC” or “PDA1”                                                |
-| String                    | document_id                | r                    | uniq identifier within authentic_source and document_type namespace                              |
-| String                    | authentic_source_person_id | r                    | unique identifier within authentic_source namespace AND globally unique within Authentic Source. |
 
-### Request
+#### Input / Request
 
-```json
-    {
-        "authentic_source": "",
-        "document_type":"",
-        "document_id": "",
-        "authentic_source_person_id": ""
-    }
-```
+| Type   | Attribute                  | (r)eq. / (o)pt. | Attibute Description |
+| ------- | -------------------------- | -------------------- | ----------------------------------------------- |
+| String | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
+| String | document_type              | r | Type of Document, initially only “EHIC” or “PDA1” |
+| String | document_id                | r | uniq identifier within authentic_source and document_type namespace |
+| String | authentic_source_person_id | r | unique identifier within authentic_source namespace AND globally unique within Authentic Source. |
 
-### Response
+### Output / Response
 
 http OK 200, else 400 and error body
 
@@ -335,31 +237,19 @@ http OK 200, else 400 and error body
 
 ### Description
 
-Another important endpoint for the upload API shall be used to delete uploaded data. Input are again the three parameters to select the unequivocal entry in the Data Store database. The endpoint shall return a status code which shall be technical with error logs if occurring.
+Another important endpoint for the upload API shall be used to delete uploaded data. Input are again the three parameters to select the unequivocal entry in the `datastore` database. The endpoint shall return a status code which shall be technical with error logs if occurring.
 
 ### Attribute Table
 
-| DELETE /document |                  |                      |                                                                         |
-| ---------------- | ---------------- | -------------------- | ----------------------------------------------------------------------- |
-| Type             | Attribute        | (r)eq.<br><br>(o)pt. | Attibute Description                                                    |
-| Input            |                  |                      |                                                                         |
-| String           | authentic_source | r                    | globally unambiguous name of the issuing entity (agency or institution) |
-| String           | document_type    | r                    | Type of Document, initially only “EHIC” or “PDA1”                       |
-| String           | document_id      | r                    | unique identifier within authentic_source and document_type namespace   |
-| Output           |                  |                      |                                                                         |
-| Integer          | status           | r                    | Operation result; OK 200, else 400 and error body                       |
+#### Input / Request
 
-### Request
+| Type | Attribute        | (r)eq. / (o)pt. | Attibute Description |
+|-------|----------------|--------------------|--|
+| String | authentic_source | r | globally unambiguous name of the issuing entity (agency or institution) |
+| String | document_type    | r | Type of Document, initially only “EHIC” or “PDA1”                       |
+| String | document_id      | r | unique identifier within authentic_source and document_type namespace   |
 
-```json
-    {
-        "authentic_source": "",
-        "document_id": "",
-        "document_type":""
-    }
-```
-
-### Response
+#### Output / Response
 
 http OK 200, else 400 and error body
 
@@ -375,99 +265,62 @@ http OK 200, else 400 and error body
 
 ### Description
 
-This endpoint is to be used by the Issuer System to retrieve specific document data from the datastore to be issued as credential. As mapping is done in the Data Store the Call has to have identity information included. The inputs `authentic_source`, `document_type`, and `collect_id` are used to identify the correct attestation. After selection of the document, attribute based identity mapping is performed by the Data Store. Only if this is successful, all credential relevant information gets returned to the Issuer System.
+This endpoint is to be used by the Issuer System to retrieve specific document data from the `datastore` to be issued as credential. As mapping is done in the `datastore` the Call has to have identity information included. The inputs `authentic_source`, `document_type`, and `collect_id` are used to identify the correct attestation. After selection of the document, attribute based identity mapping is performed by the `datastore`. Only if this is successful, all credential relevant information gets returned to the Issuer System.
 
-Note: depending on the architecture, the issuer system will determine the endpoint to retrieve the document data based on the `authentic_source` input and the configuration of the Backend. 
+Note: depending on the architecture, the issuer system will determine the endpoint to retrieve the document data based on the `authentic_source` input and the configuration of the Backend.
 
 ### Attribute Table
 
-| POST /document/collect_id |                  |                      |                                                                                                                                                                            |
-| ------------------------- | ---------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type                      | Attribute        | (r)eq.<br><br>(o)pt. | Attribute Description                                                                                                                                                      |
-| Input                     |                  |                      |                                                                                                                                                                            |
-| String                    | authentic_source | r                    | globally unambiguous name of the issuing entity (agency or institution)                                                                                                    |
-| String                    | document_type    | r                    | Type of Document, initially only “EHIC” or “PDA1”                                                                                                                          |
-| String                    | collect_id       | r                    | Document reference ID for collection                                                                                                                                       |
-| Object                    | [identity {}](#identity) | r             | Object containing all data for later identity mapping, originating from a shared identity credential of the citizen wallet – attributes are defined in the upload endpoint |
-| Output                    |                  |                      |                                                                                                                                                                            |
-| Object                    | [document_data {}](#document_data)    | r                    | JSON electronic document                                                                                                                                                   |
-| Object                    | [meta {}](#meta)           | r                    | Technical metadata object, as defined in upload endpoint                                                                                                                   |
+#### Input / Request
 
+| Type                      | Attribute        | (r)eq. / (o)pt. | Attribute Description|
+| ------------------------- | ---------------- | -------------------- | --------------------------------------------- |
+| String | authentic_source          | r | globally unambiguous name of the issuing entity (agency or institution)                                                                                                    |
+| String | document_type             | r | Type of Document, initially only “EHIC” or “PDA1”                                                                                                                          |
+| String | collect_id                | r | Document reference ID for collection                                                                                                                                       |
+| Object | [identity {}](#identity)  | r | Object containing all data for later identity mapping, originating from a shared identity credential of the citizen wallet – attributes are defined in the upload endpoint |
 
-### Request
+#### Output / Response
 
-```json
-    {
-        "authentic_source": "",
-        "document_type":"",
-        "collect_id":"",
-        "identity": {},
-    }
-```
-
-### Response
-
-```json
-    {
-        "meta": {},
-        "document_data": {},
-    }
-
-```
+| Type  | Attribute        | (r)eq. / (o)pt. | Attribute Description|
+| ------ | ---------------- | -------------------- | ------------------------------ |
+| Object | [document_data {}](#document_data)   | r | JSON electronic document |
+| Object | [meta {}](#meta)                     | r | Technical metadata object, as defined in upload endpoint |
 
 http OK 200, else 400 and error body
 
-## POST /id/mapping
+## POST /identity/mapping
 
 ### Flowchart
 
 ```mermaid
     sequenceDiagram;
-    issuer->>datastore/authentic source: POST /id/mapping;
+    issuer->>datastore/authentic source: POST /identity/mapping;
     datastore/authentic source->>issuer: 200/400;
 ```
 
 ### Description
 
-For testing and Scenarios 4 and 5 the identity mapping endpoint is envisioned. Input consists of `authentic_source` and the `identity` object with the information of the received PID. It shall return the institution specific `authentic_source_person_id` if an unequivocal match was found. If not, status information of the operation shall be returned. 
+For testing and Scenarios 4 and 5 the identity mapping endpoint is envisioned. Input consists of `authentic_source` and the `identity` object with the information of the received PID. It shall return the institution specific `authentic_source_person_id` if an unequivocal match was found. If not, status information of the operation shall be returned.
 
-Note: depending on the architecture, the issuer system will determine the endpoint to call based on the authentic_source input and the configuration of the Backend. 
+Note: depending on the architecture, the issuer system will determine the endpoint to call based on the authentic_source input and the configuration of the Backend.
 
 ### Attribute Table
 
-| POST /identity/mapping |                            |                      |                                                                                              |
-| ---------------------- | -------------------------- | -------------------- | -------------------------------------------------------------------------------------------- |
-| Type                   | Attribute                  | (r)eq.<br><br>(o)pt. | Attibute Description                                                                         |
-| Input                  |                            |                      |                                                                                              |
-| String                 | authentic_source           | t                    | globally unambiguous name of the issuing entity (agency or institution)                      |
-| Object                 | [identity {}](#identity)   | r                    | Object containing all data for later identity mapping – as defined in upload endpoint        |
-| Output                 |                            |                      |                                                                                              |
-| String                 | authentic_source_person_id | r                    | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source. |
+#### Input / Request
 
+| Type | Attribute | (r)eq. / (o)pt. | Attibute Description  |
+| ----- | --------- | -------------------- | ---------------- |
+| String | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
+| Object | [identity {}](#identity)   | r | Object containing all data for later identity mapping – as defined in upload endpoint |
 
-### Request
+#### Output / Response
 
-```json
-    {
-        "authentic_source":"",
-        "identity": {},
-    }
-
-```
-
-### Response
-
-```json
-    {
-        "data": {
-            "authentic_source_person_id":""
-        }
-    }
-
-```
+| Type | Attribute | (r)eq. / (o)pt. | Attibute Description  |
+| ----- | --------- | -------------------- | ---------------- |
+| String | authentic_source_person_id | r | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source. |
 
 http OK 200, else 400 and error body
-
 
 ## POST /document/list
 
@@ -481,62 +334,33 @@ http OK 200, else 400 and error body
 
 ### Description
 
-This endpoint shall be used to get all available attestations (-data) for  a specific person. The Response Data includes all document information relevant for display in the national portal (or on a wallet) including the `qr_base64_image` and `deep_link`. 
+This endpoint shall be used to get all available attestations (-data) for  a specific person. The response data includes all document information relevant for display in the national portal (or on a wallet) including the `base64_image` and `deep_link`.
 
-As there can be one data store or one source database for each Authentic Source, the person is identified using the identity attributes from the citizen wallet provided in the process. If no further attributes are provided, the issuer system will make a call to each authentic source (or its data store) set in the configuration. The Authentic Source is ultimately responsible for identity mapping and will return the relevant information from the available documents if successful. Finally, the issuer system will merge the results and respond to this call with a comprehensive list of results. 
+As there can be one `datastore` or one source database for each Authentic Source, the person is identified using the identity attributes from the citizen wallet provided in the process. If no further attributes are provided, the issuer system will make a call to each authentic source (or its `datastore`) set in the configuration. The Authentic Source is ultimately responsible for identity mapping and will return the relevant information from the available documents if successful. Finally, the issuer system will merge the results and respond to this call with a comprehensive list of results.
 
-Optionally, attributes such as `autentic_source` or `document_type` can be supplied as input to reduce the call and the results to relevant information.
+Optionally, attributes such as `authentic_source` or `document_type` can be supplied as input to reduce the call and the results to relevant information.
 
-Also, `valid_to` and `valid_from` parameters are envisioned as additional input. It can be used by the portal request to limit the response of attestations to a specific time frame. 
+Also, `valid_to` and `valid_from` parameters are envisioned as additional input. It can be used by the portal request to limit the response of attestations to a specific time frame.
 
-In the response are expected relevant `meta`-data per attestation such as `document_type` and `document_id` as well as the attestation_data, which is to be used for display information. Finally, QR-code and Deeplink are also included in the response per attestation for the citizen to initiate the pickup with his/her EUDIW. 
+In the response are expected relevant `meta`-data per attestation such as `document_type` and `document_id` as well as the attestation_data, which is to be used for display information. Finally, QR-code and Deeplink are also included in the response per attestation for the citizen to initiate the pickup with his/her EUDIW.
 
 ### Attribute Table
 
-| POST /document/list |                        |                      |                                                                                                                            |
-| ------------------- | ---------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Type                | Attribute              | (r)eq.<br><br>(o)pt. | Attibute Description                                                                                                       |
-| Input               |                        |                      |                                                                                                                            |
-| String              | authentic_source       | o                    | globally unambiguous name of the issuing entity (agency or institution)                                                    |
-| Object              | [identity {}](#identity)| r                    | as defined in upload                                                                                                       |
-| String              | document_type          | o                    | Type of Document, initially only “EHIC” or “PDA1” for filter; if empty, all types                                          |
-| int64               | valid_from             | o                    | credentials valid from or specific date; if empty current date                                                             |
-| int64               | valid_to               | o                    | credentials valid after specific date; if empty max date                                                                   |
-| Output              |                        |                      |                                                                                                                            |
-| Enum/List           | data [{                | r                    | List of one to multiple attestations                                                                                       |
-| Object              | [meta {}](#meta)       | r                    | Technical metadata object - content as defined in the upload                                                               |
-| Object              | [document_display {}](#document_display)     | o                    | Generic Object which includes all information to display via portal API                                                    |
-| Object              | qr {                   | r                    | QR-Code/Link Object, defined in notification endpoint                                                                      |
-| String              | base64_image           | r                    | Link, formatted as QR-Code to initiate credential pickup with holder-wallet – Typestring which will be interpreted as image|
-| String              | deep_link              | r                    | To be processed by the Wallet to initiate pickup process                                                                   |
-|                     |  }                     | r                    |                                                                                                                            |
-|                     | }                      |                      |                                                                                                                            |
+#### Input / Request
 
-### Request
+| Type  | Attribute              | (r)eq. / (o)pt. | Attibute Description |
+| ------ | -------------------------| -------------------- | ------------ |
+| string | authentic_source         | o | globally unambiguous name of the issuing entity (agency or institution) |
+| object | [identity {}](#identity) | r | as defined in upload |
+| string | document_type            | o | Type of Document, initially only “EHIC” or “PDA1” for filter; if empty, all types |
+| int64  | valid_from               | o | credentials valid from or specific date; if empty current date |
+| int64  | valid_to                 | o | credentials valid after specific date; if empty max date |
 
-```json
-    {
-    "authentic_source":"",
-    "identity": {},
-    "document_type": "PDA1",
-    "valid_from": "",
-    "valid_to": ""
-    }
-```
+#### Output / Response
 
-### Response
-
-```json
-    {
-        "data": [
-            {
-            "meta": {},
-            "document_display": {},  
-            "qr": {}
-            }
-        ]
-    }
-```
+| Type  | Attribute | (r)eq. / (o)pt. | Attibute Description |
+| ------| ---------------------- | -------------------- | --- |
+| array | [documentlist](#document_list) | | |
 
 http OK 200, else 400 and error body
 
@@ -551,81 +375,58 @@ http OK 200, else 400 and error body
 ```
 
 ### Description
-The /document endpoint is currently specifically designed for scenario 5. It allows an issuer system to retrieve a document or all credential-relevant information from the data store. A special feature here is that identification is not via the `collect_id` but the `document_id` and no identity is required as input. This is made possible by the specific sequence of the scenario. In addition, the endpoint can be used for test purposes or setups with outsourced identity mapping, for example.
 
-Note: depending on the architecture, the issuer system will determine the endpoint to call based on the `authentic_source` input and the configuration of the backend. 
+The /document endpoint is currently specifically designed for scenario 5. It allows an issuer system to retrieve a document or all credential-relevant information from the `datastore`. A special feature here is that identification is not via the `collect_id` but the `document_id` and no identity is required as input. This is made possible by the specific sequence of the scenario. In addition, the endpoint can be used for test purposes or setups with outsourced identity mapping, for example.
+
+Note: depending on the architecture, the issuer system will determine the endpoint to call based on the `authentic_source` input and the configuration of the backend.
 
 ### Attribute Table
 
-| POST /document |                  |                      |                                                                         |
-| -------------- | ---------------- | -------------------- | ----------------------------------------------------------------------- |
-| Type           | Attribute        | (r)eq.<br><br>(o)pt. | Attibute Description                                                    |
-| Input          |                  |                      |                                                                         |
-| String         | authentic_source | r                    | globally unambiguous name of the issuing entity (agency or institution) |
-| String         | document_type    | r                    | Type of Document, initially only “EHIC” or “PDA1”                       |
-| String         | document_id      | r                    | uniq identifier within authentic_source and document_type namespace     |
-| Output         |                  |                      |                                                                         |
-| Object         | document_data    | r                    | JSON electronic document                                                |
-| Object         | [meta {}](#meta) | r                    | Technical metadata object as defined in upload endpoint                 |
+#### Input / Request
 
-### Request
+| Type    | Attribute        | (r)eq. / (o)pt. | Attibute Description |
+| ------- | ---------------- | -------------------- | ---------------- |
+| string | authentic_source | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string | document_type    | r | Type of Document, initially only “EHIC” or “PDA1”                       |
+| string | document_id      | r | uniq identifier within authentic_source and document_type namespace     |
 
-```json
-    {
-    "authentic_source":"",
-    "document_type": "PDA1",
-    "document_id": "",
-    }
-```
+#### Output / Response
 
-### Response
-```json
-    {
-    "document_data": {},
-    "meta": {},
-    }
-```
+| Type   | Attribute        | (r)eq. / (o)pt. | Attibute Description |
+| ------- | ---------------- | -------------------- | ---------------- |
+| object | document_data    | r | JSON electronic document |
+| object | [meta {}](#meta) | r | Technical metadata object as defined in upload endpoint |
 
 http OK 200, else 400 and error body
 
 ## POST /consent
 
 ### Flowchart
+
 ```mermaid
     sequenceDiagram;
     authentic source->>datastore: POST /consent;
     datastore->>authentic source: 200/400;
 ```
-### Description
-Since the approach of some participants is to carry out the pilot and test with real data and citizens, the prerequisite is to obtain and store the consent of the citizens for participation in the procedure. In order to ensure a fast and standardized procedure, the following method offers a possibility to store such information in the data store. Whether the use of the endpoint is necessary must be decided individually by the participants.
 
-The endpoint can also be used if an agreement has been revised. Calling the endpoint will switch the internal status boolean. 
+### Description
+
+Since the approach of some participants is to carry out the pilot and test with real data and citizens, the prerequisite is to obtain and store the consent of the citizens for participation in the procedure. In order to ensure a fast and standardized procedure, the following method offers a possibility to store such information in the `datastore`. Whether the use of the endpoint is necessary must be decided individually by the participants.
+
+The endpoint can also be used if an agreement has been revised. Calling the endpoint will switch the internal status boolean.
 
 ### Attribute Table
 
-| POST /consent |                            |                      |                                                                                             |
-| ------------- | -------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
-| Type          | Attribute                  | (r)eq.<br><br>(o)pt. | Attribute Description                                                                       |
-| Input         |                            |                      |                                                                                             |
-| String        | authentic_source           | r                    | globally unambiguous name of the issuing entity (agency or institution)                     |
-| String        | authentic_source_person_id | r                    | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source |
-| String        | consent_to                 | o                    | String representing the specific consent.                                                   |
-| String        | session_id                 | o                    | Session identifying information for further reference and allocability                      |
-| Output        |                            |                      |                                                                                             |
-| Integer       | status_code                | r                    | Status of the operation; OK 200, else 400 and error body                                    |
+#### Input / Request
 
-### Request
+| Type          | Attribute                  | (r)eq. / (o)pt. | Attribute Description |
+| -------- | -------------------------- | -------------------- | ---------------------- |
+| string  | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string  | authentic_source_person_id | r | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source |
+| string  | consent_to                 | o | String representing the specific consent. |
+| string  | session_id                 | o | Session identifying information for further reference and allocability |
 
-```json
-    {
-    "authentic_source":"",
-    "authentic_source_person_id": "",
-    "consent_to": "",
-    "session_id": "",
-    }
-```
-
-### Response
+#### Output / Response
 
 http OK 200, else 400 and error body
 
@@ -640,39 +441,27 @@ http OK 200, else 400 and error body
 ```
 
 ### Description
+
 If the POST /consent defined above is used, the following endpoint can be used to query the status of a citizen's consent. Depending on the participants, this method can be used as additional security before issuing a credential.
- 
-## Attribute Table
 
-| POST /consent/get |                            |                      |                                                                                             |
-| ----------------- | -------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
-| Type              | Attribute                  | (r)eq.<br><br>(o)pt. | Attibute Description                                                                        |
-| Input             |                            |                      |                                                                                             |
-| String            | authentic_source           | r                    | globally unambiguous name of the issuing entity (agency or institution)                     |
-| String            | authentic_source_person_id | r                    | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source |
-| Output            |                            |                      |                                                                                             |
-| String            | consent_to                 | r                    | String representing the specific consent.                                                   |
-| String            | session_id                 | r                    | Session identifying information for further reference and allocability                      |
-| int64       | created_at                 | r                    | Technical timestamp on when the entry was uploaded to the Data Store                        |
+### Attribute Table
 
-### Request
+#### Input / Request
 
-```json
-    {
-    "authentic_source":"",
-    "authentic_source_person_id": "",
-    }
-```
+| Type   | Attribute                  | (r)eq. / (o)pt. | Attibute Description |
+| ------ | -------------------------- | -------------------- | --- |
+| string | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string | authentic_source_person_id | r | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source |
 
-### Response
+#### Output / Response
 
-```json
-    {
-    "consent_to":"",
-    "session_id": "",
-    "created_at": "",
-    }
-```
+| Type     | Attribute   | (r)eq. / (o)pt. | Attibute Description|
+| ---------| ----------- | -------------------- | --------------- |
+| string   | consent_to  | r | String representing the specific consent.|
+| string   | session_id  | r | Session identifying information for further reference and allocability|
+| int64    | created_at  | r | Technical timestamp on when the entry was uploaded to the `datastore`|
+
+http OK 200, else 400 and error body
 
 ## POST /document/revoke
 
@@ -689,112 +478,100 @@ If the POST /consent defined above is used, the following endpoint can be used t
 
 ### Description
 
-To clarify the revocation system, it should be known that the `revocation_id` is set by the Authentic Source. Usually this will be the same as the `document_id`, but depending on the use case and the intention of the Authentic Source it is possible that two credentials point to the same `revocation_id`. 
+To clarify the revocation system, it should be known that the `revocation_id` is set by the Authentic Source. Usually this will be the same as the `document_id`, but depending on the use case and the intention of the Authentic Source it is possible that two credentials point to the same `revocation_id`.
 
-In order for the Issuer System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `revocation`-object must be submitted as input from the Authentic Source. The Issuer system has internally set the endpoint for the revocation registry. 
+In order for the Issuer System to select the correct revocation entry in the registry, `authentic_source`, `document_type` and `revocation`-object must be submitted as input from the Authentic Source. The Issuer system has internally set the endpoint for the revocation registry.
 
-The `reference`-object allows flexibility for future decisions and flows. `document_id` in this case will indecate the follow up credential, which may be interpreted by the EUDIW to automatically establish a new pick-up flow to get the new credential version. This is to be further decided. `Revoke_at` defines a specific date and time in the future to which the credential shall be defined as revoked. 
+The `reference`-object allows flexibility for future decisions and flows. `document_id` in this case will indecate the follow up credential, which may be interpreted by the EUDIW to automatically establish a new pick-up flow to get the new credential version. This is to be further decided. `Revoke_at` defines a specific date and time in the future to which the credential shall be defined as revoked.
 
-This endpoint shall only revoke the credential in the registry and don’t delete the attestation data in the Data Store. The `DELETE /document` endpoint can be used afterwards if the deletion is intended. Nonetheless there could be a pick-up request for an already revoked credential. In order for the Issuer System to respond properly, the information should still exist and be flagged as revoked. This can the Issuer calling the same endpoint towards the data store of the respective authentic source. It shall be called by the issuer system after this endpoint /revoke is called and the revocation is done. 
+This endpoint shall only revoke the credential in the registry and don’t delete the attestation data in the `datastore`. The `DELETE /document` endpoint can be used afterwards if the deletion is intended. Nonetheless there could be a pick-up request for an already revoked credential. In order for the Issuer System to respond properly, the information should still exist and be flagged as revoked. This can the Issuer calling the same endpoint towards the `datastore` of the respective authentic source. It shall be called by the issuer system after this endpoint /revoke is called and the revocation is done.
 The endpoint responds with a simple status code with information about the operation status and error log if occurring.
 
 ### Attribute Table
 
-| POST document/revoke |                  |                      |                                                                              |
-| -------------------- | ---------------- | -------------------- | ---------------------------------------------------------------------------- |
-| Type                 | Attribute        | (r)eq.<br><br>(o)pt. | Attibute Description                                                         |
-| Input                |                  |                      |                                                                              |
-| String               | authentic_source | r                    | globally unambiguous name of the issuing entity (agency or institution)      |
-| String               | document_type    | r                    | Type of Document, initially only “EHIC” or “PDA1”                            |
-| Object               | [revocation {}](#revocation)    |                      | Containing relevant revocation information as defined in the upload endpoint |
-| Output               |                  |                      |                                                                              |
-| Integer              | Status_code      | r                    | Status of the operation; OK 200, else 400 and error body                     |
+#### Input / Request
 
+| Type    | Attribute        | (r)eq. / (o)pt. | Attibute Description |
+| ------- | ---------------- | -------------------- | --------------- |
+| String  | authentic_source             | r | globally unambiguous name of the issuing entity (agency or institution) |
+| String  | document_type                | r | Type of Document, initially only “EHIC” or “PDA1” |
+| Object  | [revocation {}](#revocation) | r | Containing relevant revocation information as defined in the upload endpoint |
 
-### Request
+#### Output / Response
 
-```json
-    {
-        "authentic_source":"",
-        "document_type":"",
-        "revocation": {}
-    }
-```
-
-### Response
-
-http OK 200, else 400 and error body
-
+http 200 or http 400 and error body
 
 ## Types
 
 ### meta{}
 
 |type| Attribute | required | description |
-| ----------------- | --------------------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| String            | authentic_source      | r   | globally unambiguous name of the issuing entity (agency or institution)                                                                                |
-| String            | document_type         | r   | Type of Document, initially only “EHIC” or “PDA1”                                                                                                      |
-| String            | document_id           | r   | Primary key of the business decision - unique identifier within authentic_source and document_type namespace[[MF1]](#_msocom_1)                        |
-| Boolean           | real_data             | r   | “true” or “false” – For Pilot, indicating the use of real or test data                                                                                 |
-| Object            | collect {             | o   | This is defining information for general pick-up by QR-Code/link.                                                                                      |
-| String            | id                    | o   | If not defined by institution it should be set to document_id value after upload.<br><br>Used to not expose the real document id, thus limiting fraud. |
-| Int64             | collect_until         | o   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date.                                        |
-|                   | }                     |     |                                                                                                                                                        |
-| int64             | credential_valid_from | o   | Validity information of the future credential; If empty validity is default equal to attestation validity                                              |
-| int64             | credential_valid_to   | o   | Validity information of the future credential; If empty validity is default equal to attestation validity                                              |
-| Object            | revocation {}         | o   |                                                                                                                                                        |
+| ----------------- | --------------------- | --- | ---------------------------------------------------------- |
+| string            | authentic_source              | r   | globally unambiguous name of the issuing entity (agency or institution) |
+| string            | document_type                 | r   | Type of Document, initially only “EHIC” or “PDA1” |
+| string            | document_id                   | r   | Primary key of the business decision - unique identifier within authentic_source and document_type namespace[[MF1]](#_msocom_1) |
+| boolean           | real_data                     | r   | “true” or “false” – For Pilot, indicating the use of real or test data |
+| object            | [collect{}](#collect)         | o   | This is defining information for general pick-up by QR-Code/link.   |
+| int64             | credential_valid_from         | o   | Validity information of the future credential; If empty validity is default equal to attestation validity |
+| int64             | credential_valid_to           | o   | Validity information of the future credential; If empty validity is default equal to attestation validity |
+| object            | [revocation{}](#revocation)   | o   |      |
+
+### collect{}
+
+|type| Attribute | required | description |
+| ----------------- | --------------------- | --- | ---------------------------------------------------------- |
+| string            | id                    | o   | If not defined by institution it should be set to document_id value after upload. Used to not expose the real document id, thus limiting fraud. |
+| int64             | collect_until         | o   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date. |
 
 ### revocation{}
 
+|type| Attribute | required | description       |
+| ---------- | ---------------- | --- | ------- |
+| string     | revocation_id            | o | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
+| object     | [reference](#reference)  | o | Optional reference to follow-up credential|
+| int64      | revoke_at                | o | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed|
+| string     | reason                   | o | Could include a display text for the Issuer System, wont be included in revocation registry|
+| boolean    | revoked                  | o | Information on whether the respective credential is revoked; Allows to upload attestation information of credentials that are already revoked – if not specified this is set to false by default|
+
+### reference{}
+
 |type| Attribute | required | description |
-| ---------- | ---------------- | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| String     | revocation_id    | o   | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
-| Object     | reference {      | o   | Optional reference to follow-up credential                                                                                                                                                                                       |
-| String     | authentic_source | o   | globally unambiguous name of the issuing entity (agency or institution)                                                                                                                                                          |
-| String     | document_type    | o   | Type of Document, initially only “EHIC” or “PDA1”                                                                                                                                                                                |
-| String     | document_id      | o   | Primary key of the business decision - unique identifier within authentic_source and document_type namespace[[MF1]](#_msocom_1)                                                                                                  |
-|            | }                |     |                                                                                                                                                                                                                                  |
-| int64 | revoke_at        | o   | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed                                                 |
-| String     | reason           | o   | Could include a display text for the Issuer System, wont be included in revocation registry                                                                                                                                      |
-| Boolean    | revoked          | o   | Information on whether the respective credential is revoked; Allows to upload attestation information of credentials that are already revoked – if not specified this is set to false by default                                 |
+| ---------- | ---------------- | --- | --- |
+| string     | authentic_source | o   | globally unambiguous name of the issuing entity (agency or institution)|
+| string     | document_type    | o   | Type of Document, initially only “EHIC” or “PDA1”|
+| string     | document_id      | o   | Primary key of the business decision - unique identifier within authentic_source and document_type namespace[[MF1]](#_msocom_1)|
 
 ### identity{}
 
 |type| Attribute | required | description |
 | ------ | -------------------------- | --- | ----------------------------------------------------------------------------------------------------- |
-| String | authentic_source_person_id | r   | unique identifier within authentic_source namespace AND globally unique within Authentic Source.      |
-| Object | schema {                   | r   | Information about the provided attributes for the Authentic Source Person information                 |
-| String | name                       | r   | For the pilot we expect simple strings i.e. DK, AT, DE, but could be more varied if complexity arise. |
-| String | version                    | o   | Identity data schema version<br><br>MUST comply with https://semver.org/                              |
-|        | }                          |     |                                                                                                       |
-| String | family_name                | r   | As in current PID namespace                                                                           |
-| String | given_name                 | r   | As in current PID namespace                                                                           |
-| String | birth_date                 | r   | As in current PID namespace                                                                           |
-| String | family_name_birth          | o   | As in current PID namespace                                                                           |
-| String | given_name_birth           | o   | As in current PID namespace                                                                           |
-| String | birth_place                | o   | As in current PID namespace                                                                           |
-| String | gender                     | o   | As in current PID namespace                                                                           |
-| String | birth_country              | o   | As in current PID namespace                                                                           |
-| String | birth_state                | o   | As in current PID namespace                                                                           |
-| String | birth_city                 | o   | As in current PID namespace                                                                           |
-| String | resident_address           | o   | As in current PID namespace                                                                           |
-| String | resident_country           | o   | As in current PID namespace                                                                           |
-| String | resident_state             | o   | As in current PID namespace                                                                           |
-| String | resident_city              | o   | As in current PID namespace                                                                           |
-| String | resident_postal_code       | o   | As in current PID namespace                                                                           |
-| String | resident_street            | o   | As in current PID namespace                                                                           |
-| String | resident_house_number      | o   | As in current PID namespace                                                                           |
-| String | nationality                | o   | As in current PID namespace                                                                           |
+| string | authentic_source_person_id | r   | unique identifier within authentic_source namespace AND globally unique within Authentic Source.      |
+| object | [schema{}](#schema)        | r   | Information about the provided attributes for the Authentic Source Person information                 |
+| string | family_name                | r   | As in current PID namespace                                                                           |
+| string | given_name                 | r   | As in current PID namespace                                                                           |
+| string | birth_date                 | r   | As in current PID namespace                                                                           |
+| string | family_name_birth          | o   | As in current PID namespace                                                                           |
+| string | given_name_birth           | o   | As in current PID namespace                                                                           |
+| string | birth_place                | o   | As in current PID namespace                                                                           |
+| string | gender                     | o   | As in current PID namespace                                                                           |
+| string | birth_country              | o   | As in current PID namespace                                                                           |
+| string | birth_state                | o   | As in current PID namespace                                                                           |
+| string | birth_city                 | o   | As in current PID namespace                                                                           |
+| string | resident_address           | o   | As in current PID namespace                                                                           |
+| string | resident_country           | o   | As in current PID namespace                                                                           |
+| string | resident_state             | o   | As in current PID namespace                                                                           |
+| string | resident_city              | o   | As in current PID namespace                                                                           |
+| string | resident_postal_code       | o   | As in current PID namespace                                                                           |
+| string | resident_street            | o   | As in current PID namespace                                                                           |
+| string | resident_house_number      | o   | As in current PID namespace                                                                           |
+| string | nationality                | o   | As in current PID namespace                                                                           |
 
-### attestation{}
+### schema{}
 
 |type| Attribute | required | description |
-|-|-|-|-|
-| string | version                 | true | MUST comply with <https://semver.org/> |
-| string | type                     | true | For internal display interpretation/differentiation |
-| string | description_short        | true | To display in the portal, will be removed in later api version |
-| string | description_long         | true | To display in the portal, will be removed in later api version |
-| object | description_structured   | false | accepts json object |
+| ------ | ---------------------- | --- | ---------------- |
+| string | name     | r | For the pilot we expect simple strings i.e. DK, AT, DE, but could be more varied if complexity arise. |
+| string | version  | o | Identity data schema version. MUST comply with <https://semver.org/>|
 
 ### document_data{}
 
@@ -803,10 +580,20 @@ unspecified json object, used to include any document type from authentic source
 ### document_display{}
 
 |type| Attribute | required | description |
-| ------ | ---------------------- | --- | -------------------------------------------------------------------------------------------------------------------------- |
-| String | version                | o   | Version of the attestation data object – to be defined by the Authentic Source<br><br>MUST comply with https://semver.org/ |
-| String | type                   | o   | For internal display interpretation/differentiation                                                                        |
-| Object | description_structured | o   | JSON Object with key-value-pairs for building display data[[MF1]](#_msocom_1)                                              |
+| ------ | ---------------------- | --- | ---------------- |
+| string | version                | o   | Version of the attestation data object – to be defined by the Authentic Source. MUST comply with <https://semver.org/> |
+| string | type                   | o   | For internal display interpretation/differentiation                                                                        |
+| object | description_structured | o   | JSON Object with key-value-pairs for building display data[[MF1]](#_msocom_1)                                              |
+
+### document_list
+
+this is just a type to make presentation easier, it will not affect anything in the client API.
+
+| Type  | Attribute              | (r)eq. / (o)pt. | Attibute Description |
+| ------| ---------------------- | -------------------- | ------------------------- |
+| object | [meta {}](#meta)                         | r | Technical metadata object - content as defined in the upload|
+| object | [document_display {}](#document_display) | o | Generic Object which includes all information to display via portal API|
+| object | [qr {}](#qr)                             | r | QR-Code/Link Object, defined in notification endpoint|
 
 ## Error response
 

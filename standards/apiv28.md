@@ -123,7 +123,7 @@ As described, document_display should contain all information that is relevant f
 
 | String     | description_short | o   | To display in the portal  |
 | ---------- | ----------------- | --- | ------------------------- |
-| String     | description_long  | o   | To display in the portal  |
+| string     | description_long  | o   | To display in the portal  |
 | int64 | valid_from        | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
 | int64 | valid_to          | o   | Validity information of the business decision, which may differ from the validity of the credential. E.g. EHIC may be valid for 4 years (stated here) while the credential for technical reasons is only valid for two years. |
 
@@ -187,9 +187,9 @@ It is possible that more than one person is authorized to collect a credential. 
 
 | Type       | Attribute        | (r)eq. / (o)pt. | Attribute Description|
 | ---------- | ---------------- | -------------------- | ------------------ |
-| String   | authentic_source         | r | globally unambiguous name of the issuing entity (agency or institution) |
-| String   | document_type            | r | Type of Document, initially only “EHIC” or “PDA1” |
-| String   | document_id              | r | uniq identifier within authentic_source and document_type namespace |
+| string   | authentic_source         | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string   | document_type            | r | Type of Document, initially only “EHIC” or “PDA1” |
+| string   | document_id              | r | uniq identifier within authentic_source and document_type namespace |
 | Object   | [identity {}](#identity) | r | Object containing all data for later identity mapping – as defined in the upload endpoint |
 
 ### Output / Response
@@ -216,10 +216,10 @@ If an identity is no longer authorized to retrieve a credential or if it is an i
 
 | Type   | Attribute                  | (r)eq. / (o)pt. | Attibute Description |
 | ------- | -------------------------- | -------------------- | ----------------------------------------------- |
-| String | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
-| String | document_type              | r | Type of Document, initially only “EHIC” or “PDA1” |
-| String | document_id                | r | uniq identifier within authentic_source and document_type namespace |
-| String | authentic_source_person_id | r | unique identifier within authentic_source namespace AND globally unique within Authentic Source. |
+| string | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string | document_type              | r | Type of Document, initially only “EHIC” or “PDA1” |
+| string | document_id                | r | uniq identifier within authentic_source and document_type namespace |
+| string | authentic_source_person_id | r | unique identifier within authentic_source namespace AND globally unique within Authentic Source. |
 
 ### Output / Response
 
@@ -245,9 +245,9 @@ Another important endpoint for the upload API shall be used to delete uploaded d
 
 | Type | Attribute        | (r)eq. / (o)pt. | Attibute Description |
 |-------|----------------|--------------------|--|
-| String | authentic_source | r | globally unambiguous name of the issuing entity (agency or institution) |
-| String | document_type    | r | Type of Document, initially only “EHIC” or “PDA1”                       |
-| String | document_id      | r | unique identifier within authentic_source and document_type namespace   |
+| string | authentic_source | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string | document_type    | r | Type of Document, initially only “EHIC” or “PDA1”                       |
+| string | document_id      | r | unique identifier within authentic_source and document_type namespace   |
 
 #### Output / Response
 
@@ -275,17 +275,17 @@ Note: depending on the architecture, the issuer system will determine the endpoi
 
 | Type                      | Attribute        | (r)eq. / (o)pt. | Attribute Description|
 | ------------------------- | ---------------- | -------------------- | --------------------------------------------- |
-| String | authentic_source          | r | globally unambiguous name of the issuing entity (agency or institution)                                                                                                    |
-| String | document_type             | r | Type of Document, initially only “EHIC” or “PDA1”                                                                                                                          |
-| String | collect_id                | r | Document reference ID for collection                                                                                                                                       |
-| Object | [identity {}](#identity)  | r | Object containing all data for later identity mapping, originating from a shared identity credential of the citizen wallet – attributes are defined in the upload endpoint |
+| string | authentic_source          | r | globally unambiguous name of the issuing entity (agency or institution)                                                                                                    |
+| string | document_type             | r | Type of Document, initially only “EHIC” or “PDA1”                                                                                                                          |
+| string | collect_id                | r | Document reference ID for collection                                                                                                                                       |
+| object | [identity {}](#identity)  | r | Object containing all data for later identity mapping, originating from a shared identity credential of the citizen wallet – attributes are defined in the upload endpoint |
 
 #### Output / Response
 
 | Type  | Attribute        | (r)eq. / (o)pt. | Attribute Description|
 | ------ | ---------------- | -------------------- | ------------------------------ |
-| Object | [document_data {}](#document_data)   | r | JSON electronic document |
-| Object | [meta {}](#meta)                     | r | Technical metadata object, as defined in upload endpoint |
+| object | [document_data {}](#document_data)   | r | JSON electronic document |
+| object | [meta {}](#meta)                     | r | Technical metadata object, as defined in upload endpoint |
 
 http OK 200, else 400 and error body
 
@@ -311,14 +311,14 @@ Note: depending on the architecture, the issuer system will determine the endpoi
 
 | Type | Attribute | (r)eq. / (o)pt. | Attibute Description  |
 | ----- | --------- | -------------------- | ---------------- |
-| String | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
-| Object | [identity {}](#identity)   | r | Object containing all data for later identity mapping – as defined in upload endpoint |
+| string | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
+| object | [identity {}](#identity)   | r | Object containing all data for later identity mapping – as defined in upload endpoint |
 
 #### Output / Response
 
 | Type | Attribute | (r)eq. / (o)pt. | Attibute Description  |
 | ----- | --------- | -------------------- | ---------------- |
-| String | authentic_source_person_id | r | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source. |
+| string | authentic_source_person_id | r | uniq identifier within authentic_source namespace AND globally uniq within Authentic Source. |
 
 http OK 200, else 400 and error body
 
@@ -493,9 +493,9 @@ The endpoint responds with a simple status code with information about the opera
 
 | Type    | Attribute        | (r)eq. / (o)pt. | Attibute Description |
 | ------- | ---------------- | -------------------- | --------------- |
-| String  | authentic_source             | r | globally unambiguous name of the issuing entity (agency or institution) |
-| String  | document_type                | r | Type of Document, initially only “EHIC” or “PDA1” |
-| Object  | [revocation {}](#revocation) | r | Containing relevant revocation information as defined in the upload endpoint |
+| string  | authentic_source             | r | globally unambiguous name of the issuing entity (agency or institution) |
+| string  | document_type                | r | Type of Document, initially only “EHIC” or “PDA1” |
+| object  | [revocation {}](#revocation) | r | Containing relevant revocation information as defined in the upload endpoint |
 
 #### Output / Response
 

@@ -90,7 +90,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document/identity", s.endpointDeleteDocumentIdentity)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodDelete, "/document", s.endpointDeleteDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/collect_id", s.endpointGetDocumentCollectID)
-	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/id/mapping", s.endpointIDMapping)
+	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/identity/mapping", s.endpointIdentityMapping)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/list", s.endpointDocumentList)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/document", s.endpointGetDocument)
 	s.regEndpoint(ctx, rgAPIv1, http.MethodPost, "/consent", s.endpointAddConsent)

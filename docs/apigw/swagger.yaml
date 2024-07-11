@@ -1,5 +1,19 @@
 basePath: /api/v1
 definitions:
+  apiv1.AddConsentRequest:
+    properties:
+      authentic_source:
+        type: string
+      authentic_source_person_id:
+        type: string
+      consent_to:
+        type: string
+      session_id:
+        type: string
+    required:
+    - authentic_source
+    - authentic_source_person_id
+    type: object
   apiv1.AddDocumentIdentityRequest:
     properties:
       authentic_source:
@@ -17,17 +31,16 @@ definitions:
           required: true
           example: PDA1
         type: string
-      identity:
-        $ref: '#/definitions/model.Identity'
-    type: object
-  apiv1.CredentialReply:
-    properties:
-      sdjwt:
-        type: string
+      identities:
+        items:
+          $ref: '#/definitions/model.Identity'
+        type: array
     type: object
   apiv1.CredentialRequest:
     properties:
       authentic_source:
+        type: string
+      collect_id:
         type: string
       credential_type:
         type: string
@@ -41,6 +54,7 @@ definitions:
         $ref: '#/definitions/model.Identity'
     required:
     - authentic_source
+    - collect_id
     - credential_type
     - document_id
     - document_type
@@ -82,6 +96,38 @@ definitions:
           example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
         type: string
     type: object
+  apiv1.DocumentListReply:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.DocumentList'
+        type: array
+    type: object
+  apiv1.DocumentListRequest:
+    properties:
+      authentic_source:
+        type: string
+      document_type:
+        type: string
+      identity:
+        $ref: '#/definitions/model.Identity'
+      valid_from:
+        type: integer
+      valid_to:
+        type: integer
+    required:
+    - identity
+    type: object
+  apiv1.GetConsentRequest:
+    properties:
+      authentic_source:
+        type: string
+      authentic_source_person_id:
+        type: string
+    required:
+    - authentic_source
+    - authentic_source_person_id
+    type: object
   apiv1.GetDocumentCollectIDReply:
     properties:
       data:
@@ -121,10 +167,22 @@ definitions:
     - document_id
     - document_type
     type: object
-  apiv1.IDMappingReply:
+  apiv1.IdentityMappingReply:
     properties:
       data:
         $ref: '#/definitions/model.IDMapping'
+    type: object
+  apiv1.IdentityMappingRequest:
+    properties:
+      authentic_source:
+        description: |-
+          required: true
+          example: SUNET
+        type: string
+      identity:
+        $ref: '#/definitions/model.Identity'
+    required:
+    - identity
     type: object
   apiv1.NotificationReply:
     properties:
@@ -139,29 +197,6 @@ definitions:
         type: string
       document_type:
         type: string
-    type: object
-  apiv1.PortalReply:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/model.UploadDocument'
-        type: array
-    type: object
-  apiv1.PortalRequest:
-    properties:
-      authentic_source:
-        type: string
-      authentic_source_person_id:
-        type: string
-      document_type:
-        type: string
-      valid_from:
-        type: integer
-      valid_to:
-        type: integer
-    required:
-    - authentic_source
-    - authentic_source_person_id
     type: object
   apiv1.RevokeDocumentRequest:
     properties:
@@ -200,17 +235,31 @@ definitions:
       document_data:
         additionalProperties: {}
         type: object
+      document_data_version:
+        type: string
       document_display:
         $ref: '#/definitions/model.DocumentDisplay'
-      identity:
-        $ref: '#/definitions/model.Identity'
+      identities:
+        items:
+          $ref: '#/definitions/model.Identity'
+        type: array
       meta:
         $ref: '#/definitions/model.MetaData'
     required:
     - document_data
+    - document_data_version
     - document_display
-    - identity
+    - identities
     - meta
+    type: object
+  apiv1_issuer.MakeSDJWTReply:
+    properties:
+      Disclosures:
+        items:
+          type: string
+        type: array
+      JWT:
+        type: string
     type: object
   helpers.Error:
     properties:
@@ -235,6 +284,28 @@ definitions:
           required: false
           example: 509567558
         type: integer
+    type: object
+  model.Consent:
+    properties:
+      consent_to:
+        description: |-
+          required: true
+          example: "Using my data for research"
+        type: string
+      created_at:
+        description: |-
+          required: true
+          example: 509567558
+        type: integer
+      session_id:
+        description: |-
+          required: true
+          example: "sess-123"
+        type: string
+    required:
+    - consent_to
+    - created_at
+    - session_id
     type: object
   model.Document:
     properties:
@@ -268,6 +339,18 @@ definitions:
     - description_structured
     - type
     - version
+    type: object
+  model.DocumentList:
+    properties:
+      document_display:
+        $ref: '#/definitions/model.DocumentDisplay'
+      meta:
+        $ref: '#/definitions/model.MetaData'
+      qr:
+        $ref: '#/definitions/model.QR'
+    required:
+    - document_display
+    - meta
     type: object
   model.IDMapping:
     properties:
@@ -375,10 +458,6 @@ definitions:
       schema:
         $ref: '#/definitions/model.IdentitySchema'
     required:
-    - authentic_source_person_id
-    - birth_date
-    - family_name
-    - given_name
     - schema
     type: object
   model.IdentitySchema:
@@ -501,45 +580,65 @@ definitions:
       document_id:
         type: string
       document_type:
-        enum:
-        - PDA1
-        - EHIC
         type: string
-    required:
-    - authentic_source
-    - document_id
-    - document_type
-    type: object
-  model.UploadDocument:
-    properties:
-      document_data:
-        additionalProperties: {}
-        type: object
-      document_data_version:
-        description: |-
-          required: true
-          example: "1.0.0"
-        type: string
-      document_display:
-        $ref: '#/definitions/model.DocumentDisplay'
-      identity:
-        $ref: '#/definitions/model.Identity'
-      meta:
-        $ref: '#/definitions/model.MetaData'
-      qr:
-        $ref: '#/definitions/model.QR'
-    required:
-    - document_data
-    - document_data_version
-    - document_display
-    - identity
-    - meta
     type: object
 info:
   contact: {}
   title: Datastore API
   version: 0.1.0
 paths:
+  /consent:
+    post:
+      consumes:
+      - application/json
+      description: Add consent endpoint
+      operationId: add-consent
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.AddConsentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: AddConsent
+      tags:
+      - dc4eu
+  /consent/get:
+    post:
+      consumes:
+      - application/json
+      description: Get consent endpoint
+      operationId: get-consent
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.GetConsentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.Consent'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: GetConsent
+      tags:
+      - dc4eu
   /credential:
     post:
       consumes:
@@ -559,7 +658,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/apiv1.CredentialReply'
+            $ref: '#/definitions/apiv1_issuer.MakeSDJWTReply'
         "400":
           description: Bad Request
           schema:
@@ -622,7 +721,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Get document by collect code endpoint
+      description: Get one document with collect id
       operationId: get-document-collect-id
       parameters:
       - description: ' '
@@ -673,7 +772,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Adding identity to document endpoint
+      description: Adding array of identities to one document
       operationId: add-document-identity
       parameters:
       - description: ' '
@@ -692,6 +791,33 @@ paths:
           schema:
             $ref: '#/definitions/helpers.ErrorResponse'
       summary: AddDocumentIdentity
+      tags:
+      - dc4eu
+  /document/list:
+    post:
+      consumes:
+      - application/json
+      description: List documents for an identity
+      operationId: document-list
+      parameters:
+      - description: ' '
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/apiv1.DocumentListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/apiv1.DocumentListReply'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: DocumentList
       tags:
       - dc4eu
   /document/revoke:
@@ -719,31 +845,31 @@ paths:
       summary: RevokeDocument
       tags:
       - dc4eu
-  /id_mapping:
+  /identity/mapping:
     post:
       consumes:
       - application/json
-      description: ID mapping endpoint
-      operationId: id-mapping
+      description: Identity mapping endpoint
+      operationId: identity-mapping
       parameters:
       - description: ' '
         in: body
         name: req
         required: true
         schema:
-          $ref: '#/definitions/model.MetaData'
+          $ref: '#/definitions/apiv1.IdentityMappingRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/apiv1.IDMappingReply'
+            $ref: '#/definitions/apiv1.IdentityMappingReply'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/helpers.ErrorResponse'
-      summary: IDMapping
+      summary: IdentityMapping
       tags:
       - dc4eu
   /notification:
@@ -771,33 +897,6 @@ paths:
           schema:
             $ref: '#/definitions/helpers.ErrorResponse'
       summary: Notification
-      tags:
-      - dc4eu
-  /portal:
-    post:
-      consumes:
-      - application/json
-      description: Get portal data endpoint
-      operationId: portal
-      parameters:
-      - description: ' '
-        in: body
-        name: req
-        required: true
-        schema:
-          $ref: '#/definitions/apiv1.PortalRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: '#/definitions/apiv1.PortalReply'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/helpers.ErrorResponse'
-      summary: Portal
       tags:
       - dc4eu
   /revoke:

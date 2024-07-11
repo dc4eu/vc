@@ -113,32 +113,32 @@ func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*N
 	return reply, nil
 }
 
-// IDMappingRequest is the request for IDMapping
-type IDMappingRequest struct {
+// IdentityMappingRequest is the request for IDMapping
+type IdentityMappingRequest struct {
 	// required: true
 	// example: SUNET
 	AuthenticSource string          `json:"authentic_source" required:"true"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
 }
 
-// IDMappingReply is the reply for a IDMapping
-type IDMappingReply struct {
+// IdentityMappingReply is the reply for a IDMapping
+type IdentityMappingReply struct {
 	Data *model.IDMapping `json:"data"`
 }
 
-// IDMapping return a mapping between PID and AuthenticSource
+// IdentityMapping return a mapping between PID and AuthenticSource
 //
-//	@Summary		IDMapping
-//	@ID				id-mapping
-//	@Description	ID mapping endpoint
+//	@Summary		IdentityMapping
+//	@ID				identity-mapping
+//	@Description	Identity mapping endpoint
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	IDMappingReply			"Success"
+//	@Success		200	{object}	IdentityMappingReply	"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		model.MetaData			true	" "
-//	@Router			/id_mapping [post]
-func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappingReply, error) {
+//	@Param			req	body		IdentityMappingRequest	true	" "
+//	@Router			/identity/mapping [post]
+func (c *Client) IdentityMapping(ctx context.Context, reg *IdentityMappingRequest) (*IdentityMappingReply, error) {
 	if err := helpers.Check(ctx, c.cfg, reg, c.log); err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (c *Client) IDMapping(ctx context.Context, reg *IDMappingRequest) (*IDMappi
 		return nil, err
 	}
 
-	reply := &IDMappingReply{
+	reply := &IdentityMappingReply{
 		Data: &model.IDMapping{
 			AuthenticSourcePersonID: authenticSourcePersonID,
 		},
@@ -180,7 +180,7 @@ type AddDocumentIdentityRequest struct {
 //
 //	@Summary		AddDocumentIdentity
 //	@ID				add-document-identity
-//	@Description	Adding identity to document endpoint
+//	@Description	Adding array of identities to one document
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
@@ -345,6 +345,17 @@ type DocumentListReply struct {
 }
 
 // DocumentList return a list of metadata for a specific identity
+//
+//	@Summary		DocumentList
+//	@ID				document-list
+//	@Description	List documents for an identity
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	DocumentListReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		DocumentListRequest		true	" "
+//	@Router			/document/list [post]
 func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*DocumentListReply, error) {
 	docs, err := c.db.VCDatastoreColl.DocumentList(ctx, &db.DocumentListQuery{
 		AuthenticSource: req.AuthenticSource,
@@ -379,7 +390,7 @@ type GetDocumentCollectIDReply struct {
 //
 //	@Summary		GetDocumentByCollectID
 //	@ID				get-document-collect-id
-//	@Description	Get document by collect code endpoint
+//	@Description	Get one document with collect id
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
@@ -467,49 +478,4 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 	c.log.Debug("Document enqueued for update", "document_id", doc.Meta.DocumentID)
 
 	return nil
-}
-
-// AddConsentRequest is the request for AddConsent
-type AddConsentRequest struct {
-	AuthenticSource         string `json:"authentic_source" validate:"required"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
-	ConsentTo               string `json:"consent_to"`
-	SessionID               string `json:"session_id"`
-}
-
-// AddConsent adds a consent to a document
-func (c *Client) AddConsent(ctx context.Context, req *AddConsentRequest) error {
-	err := c.db.VCConsentColl.Add(ctx, &db.AddConsentQuery{
-		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		Consent: &model.Consent{
-			ConsentTo: req.ConsentTo,
-			SessionID: req.SessionID,
-			CreatedAt: time.Now().Unix(),
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// GetConsentRequest is the request for GetConsent
-type GetConsentRequest struct {
-	AuthenticSource         string `json:"authentic_source" validate:"required"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
-}
-
-// GetConsent gets a consent for a document
-func (c *Client) GetConsent(ctx context.Context, req *GetConsentRequest) (*model.Consent, error) {
-	res, err := c.db.VCConsentColl.Get(ctx, &db.GetConsentQuery{
-		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
 }

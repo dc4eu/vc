@@ -24,11 +24,6 @@ type CredentialRequest struct {
 	CollectID       string          `json:"collect_id" binding:"required"`
 }
 
-// CredentialReply is the reply for Credential
-type CredentialReply struct {
-	SDJWT string `json:"sdjwt"`
-}
-
 // Credential makes a credential
 //
 //	@Summary		Credential
@@ -37,9 +32,9 @@ type CredentialReply struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	CredentialReply			"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		CredentialRequest		true	" "
+//	@Success		200	{object}	apiv1_issuer.MakeSDJWTReply	"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse		"Bad Request"
+//	@Param			req	body		CredentialRequest			true	" "
 //	@Router			/credential [post]
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
@@ -131,7 +126,7 @@ type RevokeReply struct {
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
 	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	conn, err := grpc.Dial(c.cfg.Registry.GRPCServer.Addr, optInsecure)
+	conn, err := grpc.NewClient(c.cfg.Registry.GRPCServer.Addr, optInsecure)
 	if err != nil {
 		return nil, err
 	}

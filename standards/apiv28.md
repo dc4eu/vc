@@ -259,8 +259,9 @@ http OK 200, else 400 and error body
 
 ```mermaid
     sequenceDiagram;
-    Application (Portal/Wallet)->>Issuer: POST document/collect_id;
-    Issuer->>Application (Portal/Wallet): 200/400;
+    Issuer->>Datastore: POST document/collect_id;
+    Datastore->>Issuer: Receives document data;
+    Issuer->>Wallet: (send credential based on document);
 ```
 
 ### Description
@@ -521,13 +522,13 @@ http 200 or http 400 and error body
 |type| Attribute | required | description |
 | ----------------- | --------------------- | --- | ---------------------------------------------------------- |
 | string            | id                    | o   | If not defined by institution it should be set to document_id value after upload. Used to not expose the real document id, thus limiting fraud. |
-| int64             | collect_until         | o   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date. |
+| int64             | valid_until         | o   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date. |
 
 ### revocation{}
 
 |type| Attribute | required | description       |
 | ---------- | ---------------- | --- | ------- |
-| string     | revocation_id            | o | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
+| string     | id            | o | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
 | object     | [reference](#reference)  | o | Optional reference to follow-up credential|
 | int64      | revoke_at                | o | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed|
 | string     | reason                   | o | Could include a display text for the Issuer System, wont be included in revocation registry|

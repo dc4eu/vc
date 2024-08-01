@@ -11,7 +11,7 @@ The business specification is currently in version 2.8.
     This document corresponds to the implementation of the API in Version 0.3.3 - revision 1.
     In relation to the last version, schema definitions for PDA1 and EHIC have been added.
 
-## Endpoint summery
+## Endpoint summary
 
 | method | endpoint | description |
 |---|---|---|
@@ -107,7 +107,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
 
 | Type         | Attribute              | (r)eq. / (o)pt.      | Attribute Description      |
 | ------------ | ---------------------- | -------------------- | -------------------------- |
-| object | [meta {}](#meta)                         | r | Instructions to build credentials|
+| object | [meta {](#meta)                         | r | Instructions to build credentials|
 | object | [revocation {}}](#revocation)            | o  ||
 | array |  [identities []](#identity)               | o | Object containing all data for later identity mapping – optional as separate update and put endpoints are offered to add identity later; every document needs at least one identity object to be collectable |
 | object|  [document_display {}](#document_display) | o | Generic Object which includes all information to display via portal API  |
@@ -191,7 +191,7 @@ It is possible that more than one person is authorized to collect a credential. 
 | string   | authentic_source         | r | globally unambiguous name of the issuing entity (agency or institution) |
 | string   | document_type            | r | Type of Document, initially only “EHIC” or “PDA1” |
 | string   | document_id              | r | uniq identifier within authentic_source and document_type namespace |
-| object   | [identity {}](#identity) | r | Object containing all data for later identity mapping – as defined in the upload endpoint |
+| array   | [identities []](#identity) | r | Object containing all data for later identity mapping – as defined in the upload endpoint |
 
 ### Output / Response
 
@@ -269,7 +269,7 @@ http OK 200, else 400 and error body
 
 This endpoint is to be used by the Issuer System to retrieve specific document data from the `datastore` to be issued as credential. As mapping is done in the `datastore` the Call has to have identity information included. The inputs `authentic_source`, `document_type`, and `collect_id` are used to identify the correct attestation. After selection of the document, attribute based identity mapping is performed by the `datastore`. Only if this is successful, all credential relevant information gets returned to the Issuer System.
 
-Note: depending on the architecture, the issuer system will determine the endpoint to retrieve the document data based on the `authentic_source` input and the configuration of the Backend.
+Note: Depending on the architecture, the issuer system will determine the endpoint to retrieve the document data based on the `authentic_source` input and the configuration of the Backend.
 
 ### Attribute Table
 
@@ -314,7 +314,9 @@ Note: depending on the architecture, the issuer system will determine the endpoi
 | Type | Attribute | (r)eq. / (o)pt. | Attibute Description  |
 | ----- | --------- | -------------------- | ---------------- |
 | string | authentic_source           | r | globally unambiguous name of the issuing entity (agency or institution) |
-| object | [identity {}](#identity)   | r | Object containing all data for later identity mapping – as defined in upload endpoint |
+| object | [identity {](#identity)   | r | Object containing all data for later identity mapping – as defined in upload endpoint |
+| string | authentic_source_person_id | o | unique identifier within authentic_source namespace AND globally unique within Authentic Source - optional, since this shall be the return value |
+|  | }   | r |  |
 
 #### Output / Response
 
@@ -353,7 +355,9 @@ In the response are expected relevant `meta`-data per attestation such as `docum
 | Type  | Attribute              | (r)eq. / (o)pt. | Attibute Description |
 | ------ | -------------------------| -------------------- | ------------ |
 | string | authentic_source         | o | globally unambiguous name of the issuing entity (agency or institution) |
-| object | [identity {}](#identity) | r | as defined in upload |
+| object | [identity {](#identity) | r | as defined in upload |
+| string | authentic_source_person_id | o | unique identifier within authentic_source namespace AND globally unique within Authentic Source - optional to enable a request independent of authentic source |
+|  | }   | r |  |
 | string | document_type            | o | Type of Document, initially only “EHIC” or “PDA1” for filter; if empty, all types |
 | int64  | valid_from               | o | credentials valid from or specific date; if empty current date |
 | int64  | valid_to                 | o | credentials valid after specific date; if empty max date |
@@ -471,9 +475,9 @@ http OK 200, else 400 and error body
 
 ```mermaid
     sequenceDiagram;
-    authentic source->>issuer: POST /credential/revoke;
+    authentic source->>issuer: POST /document/revoke;
     issuer->>authentic source: 200/400;
-    issuer->>registry: POST /credential/revoke;
+    issuer->>registry: revoke process is done;
     issuer->>registry: 200/400;
     issuer->>datastore: POST /document/revoke
 ```
@@ -522,14 +526,14 @@ http 200 or http 400 and error body
 
 |type| Attribute | required | description |
 | ----------------- | --------------------- | --- | ---------------------------------------------------------- |
-| string            | id                    | o   | If not defined by institution it should be set to document_id value after upload. Used to not expose the real document id, thus limiting fraud. |
-| int64             | valid_until         | o   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date. |
+| string            | id                    | r   | If not defined by institution it should be set to document_id value after upload. Used to not expose the real document id, thus limiting fraud. |
+| int64             | valid_until         | r   | If not defined the collect id can be used indefinitely, otherwise issuer should reject request after this date. |
 
 ### revocation{}
 
 |type| Attribute | required | description       |
 | ---------- | ---------------- | --- | ------- |
-| string     | id            | o | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
+| string     | id            | r | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
 | object     | [reference](#reference)  | o | Optional reference to follow-up credential|
 | int64      | revoke_at                | o | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed|
 | string     | reason                   | o | Could include a display text for the Issuer System, wont be included in revocation registry|

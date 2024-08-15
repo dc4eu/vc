@@ -17,30 +17,34 @@ type Client struct {
 	kafkaClient  *KafkaClient
 }
 
-func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, kafkaClient *KafkaClient, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:          cfg,
 		tp:           tp,
 		log:          log,
 		apigwClient:  NewAPIGWClient(cfg, tp, log.New("ui_apiwg_client")),
 		mockasClient: NewMockASClient(cfg, tp, log.New("ui_mockas_client")),
-		kafkaClient:  kafkaClient,
 	}
 
-	//if kafkaClient, err := NewKafkaClient(); err != nil {
-	//	return nil, err
-	//} else {
-	//	c.kafkaClient = kafkaClient
-	//}
+	if cfg.Common.Kafka.Enabled {
+		kafkaClient, err := NewKafkaClient()
+		if err != nil {
+			return nil, err
+		}
+		c.kafkaClient = kafkaClient
+		log.Info("Kafka client created")
+	} else {
+		log.Info("Kafka disabled - no Kafka client created")
+	}
 
 	c.log.Info("Started")
 
 	return c, nil
 }
 
-//func (c *Client) Shutdown(ctx context.Context) error {
-//	if c.kafkaClient != nil {
-//		return c.kafkaClient.Shutdown(ctx)
-//	}
-//	return nil
-//}
+func (c *Client) Close(ctx context.Context) error {
+	if c.kafkaClient != nil {
+		return c.kafkaClient.Close(ctx)
+	}
+	return nil
+}

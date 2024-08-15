@@ -21,6 +21,8 @@ import (
 	"vc/pkg/trace"
 )
 
+//TODO: använda event, message eller record som begrepp? - message kallas det av sarama?
+
 type EventConsumer struct {
 	config *model.Cfg
 	logger *logger.Log
@@ -30,6 +32,7 @@ type EventConsumer struct {
 }
 
 func NewEventConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, logger *logger.Log) (*EventConsumer, error) {
+	logger.Info("Kafka enabled. Starting consumer ...")
 	ec := &EventConsumer{
 		config: config,
 		logger: logger,
@@ -87,13 +90,14 @@ func (ec *EventConsumer) start() error {
 		attempt := 0
 		for {
 			if err := consumerGroup.Consume(ctx, topics, handler); err != nil {
-				ec.logger.Error(err, "Error consuming from Kafka")
+				ec.logger.Error(err, "Error consuming from Kafka - Using exponential backoff strategy for consumtion")
 				// A simple form of "throttling with exponential backoff" which limits how quickly new attempts are made. This can help avoid overwhelming the Kafka cluster or network if many errors occur in a short period.
 				delay := exponentialBackoff(attempt)
 				time.Sleep(delay)
 				attempt++
 			} else {
 				attempt = 0
+				ec.logger.Info("Kafka consumtion now back in normal consumtion strategy")
 			}
 
 			if ctx.Err() != nil {
@@ -101,6 +105,8 @@ func (ec *EventConsumer) start() error {
 			}
 		}
 	}()
+
+	ec.logger.Info("Kafka consumer started")
 
 	<-signals
 	ec.logger.Info("Received termination signal, shutting down gracefully...")
@@ -124,8 +130,9 @@ func exponentialBackoff(attempt int) time.Duration {
 	return time.Duration(delay) * time.Millisecond
 }
 
-func (ec *EventConsumer) Close() {
+func (ec *EventConsumer) Close(ctx context.Context) error {
 	//TODO: clean up what ever needs to be cleaned up
+	return nil
 }
 
 type consumerGroupHandler struct {

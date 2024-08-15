@@ -76,15 +76,19 @@ type MockNextRequest struct {
 }
 
 func (c *Client) MockNext(ctx context.Context, mnr *MockNextRequest) (any, error) {
-	//TODO gör generiskt så att det är c (Client) som avgör om Kafka, REST eller annan teknik som ska användas utan att handlern behöver bry sig
-	//err := c.kafkaClient.SendMockNextMessage(req.AuthenticSourcePersonId, `{"attr1":"value1"}`)
-	err := c.kafkaClient.SendMockNextMessage(mnr)
-	//reply, err := c.mockasClient.MockNext(req)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//return reply, nil
-	return nil, err
+	//TODO: kanske flytta in delar av nedan till filen client.go så att bara den behöver känna till Kafka?
+	if c.cfg.Common.Kafka.Enabled {
+		if err := c.kafkaClient.SendMockNextMessage(mnr); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	reply, err := c.mockasClient.MockNext(mnr)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
 }
 
 func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {

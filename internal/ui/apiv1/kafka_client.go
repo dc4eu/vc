@@ -7,10 +7,11 @@ import (
 	"github.com/IBM/sarama"
 )
 
-//TODO: gör generisk KafkaClient som konfigureras samt där man vid instansiering anger vilken ~"handler" som ska användas
+//TODO: gör generisk KafkaClient som konfigureras samt där man vid instansiering anger vilken ~"sender" som ska användas
 
 type KafkaClient struct {
 	producer sarama.SyncProducer
+	//TODO: deklarera en generisk sender istället för att hålla
 }
 
 // TODO: ta in en logger, mm och sätt i structen
@@ -42,14 +43,15 @@ func NewKafkaClient() (*KafkaClient, error) {
 	return service, nil
 }
 
-// Shutdown closing kafka client's resources
-func (c *KafkaClient) Shutdown(ctx context.Context) error {
+// Closing kafka client's resources
+func (c *KafkaClient) Close(ctx context.Context) error {
 	if err := c.producer.Close(); err != nil {
 		return err
 	}
 	return nil
 }
 
+// TODO: ersätt med generisk sender
 func (c *KafkaClient) SendMockNextMessage(payload *MockNextRequest) error {
 	jsonData, err := json.Marshal(payload)
 	if err != nil {

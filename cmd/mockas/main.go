@@ -32,6 +32,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	mainLog := log.New("main")
+
 	tracer, err := trace.New(ctx, cfg, log, "vc", "mock_as")
 	if err != nil {
 		panic(err)
@@ -41,15 +43,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
 	}
 
-	eventConsumer, err := httpserver.NewEventConsumer(&ctx, cfg, apiv1Client, tracer, log.New("eventconsumer"))
-	if err != nil {
-		panic(err)
+	if cfg.Common.Kafka.Enabled {
+		messageConsumer, err := httpserver.NewEventConsumer(&ctx, cfg, apiv1Client, tracer, log.New("messageconsumer"))
+		if err != nil {
+			panic(err)
+		}
+		services["messageConsumer"] = messageConsumer
+	} else {
+		log.Info("Kafka disabled - no consumer created")
 	}
 
 	// Handle sigterm and await termChan signal
@@ -58,10 +66,7 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
-
-	eventConsumer.Close()
 
 	for serviceName, service := range services {
 		if err := service.Close(ctx); err != nil {

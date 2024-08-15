@@ -51,11 +51,11 @@ func main() {
 	}
 
 	if cfg.Common.Kafka.Enabled {
-		messageConsumer, err := httpserver.NewEventConsumer(&ctx, cfg, apiv1Client, tracer, log.New("messageconsumer"))
+		kafkaConsumer, err := httpserver.NewKafkaConsumer(&ctx, cfg, apiv1Client, tracer, log.New("kafka-consumer"))
 		if err != nil {
 			panic(err)
 		}
-		services["messageConsumer"] = messageConsumer
+		services["kafkaConsumer"] = kafkaConsumer
 	} else {
 		log.Info("Kafka disabled - no consumer created")
 	}

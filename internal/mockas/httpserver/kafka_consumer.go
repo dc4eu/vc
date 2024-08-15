@@ -21,33 +21,31 @@ import (
 	"vc/pkg/trace"
 )
 
-//TODO: använda event, message eller record som begrepp? - message kallas det av sarama?
-
-type EventConsumer struct {
+type KafkaConsumer struct {
 	config *model.Cfg
-	logger *logger.Log
+	log    *logger.Log
 	apiv1  *apiv1.Client
 	tp     *trace.Tracer
 	ctx    *context.Context
 }
 
-func NewEventConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, logger *logger.Log) (*EventConsumer, error) {
-	logger.Info("Kafka enabled. Starting consumer ...")
-	ec := &EventConsumer{
+func NewKafkaConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (*KafkaConsumer, error) {
+	log.Info("Kafka enabled. Starting consumer ...")
+	kafkaConsumer := &KafkaConsumer{
 		config: config,
-		logger: logger,
+		log:    log,
 		apiv1:  api,
 		tp:     tracer,
 		ctx:    ctx,
 	}
-	err := ec.start()
+	err := kafkaConsumer.start()
 	if err != nil {
 		return nil, err
 	}
-	return ec, nil
+	return kafkaConsumer, nil
 }
 
-func (ec *EventConsumer) start() error {
+func (kc *KafkaConsumer) start() error {
 	//TODO: read config from file
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -58,7 +56,7 @@ func (ec *EventConsumer) start() error {
 	brokers := []string{"kafka0:9092", "kafka1:9092"}
 	consumerGroup, err := sarama.NewConsumerGroup(brokers, "my-consumer-group-name-1", config)
 	if err != nil {
-		ec.logger.Error(err, "Failed to create Kafka consumer group")
+		kc.log.Error(err, "Failed to create Kafka consumer group")
 		return err
 
 	}
@@ -69,7 +67,7 @@ func (ec *EventConsumer) start() error {
 
 	go func() {
 		for err := range consumerGroup.Errors() {
-			ec.logger.Error(err, "Kafka consumer group error")
+			kc.log.Error(err, "Kafka consumer group error")
 		}
 	}()
 
@@ -77,11 +75,11 @@ func (ec *EventConsumer) start() error {
 	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	handler := &consumerGroupHandler{
-		config: ec.config,
-		logger: ec.logger,
-		apiv1:  ec.apiv1,
-		tp:     ec.tp,
-		ctx:    ec.ctx,
+		config: kc.config,
+		logger: kc.log,
+		apiv1:  kc.apiv1,
+		tp:     kc.tp,
+		ctx:    kc.ctx,
 	}
 
 	topics := []string{"topic_mock_next"}
@@ -90,14 +88,14 @@ func (ec *EventConsumer) start() error {
 		attempt := 0
 		for {
 			if err := consumerGroup.Consume(ctx, topics, handler); err != nil {
-				ec.logger.Error(err, "Error consuming from Kafka - Using exponential backoff strategy for consumtion")
+				kc.log.Error(err, "Error consuming from Kafka - Using exponential backoff strategy for consumtion")
 				// A simple form of "throttling with exponential backoff" which limits how quickly new attempts are made. This can help avoid overwhelming the Kafka cluster or network if many errors occur in a short period.
 				delay := exponentialBackoff(attempt)
 				time.Sleep(delay)
 				attempt++
 			} else {
 				attempt = 0
-				ec.logger.Info("Kafka consumtion now back in normal consumtion strategy")
+				kc.log.Info("Kafka consumtion now back in normal consumtion strategy")
 			}
 
 			if ctx.Err() != nil {
@@ -106,10 +104,10 @@ func (ec *EventConsumer) start() error {
 		}
 	}()
 
-	ec.logger.Info("Kafka consumer started")
+	kc.log.Info("Kafka consumer started")
 
 	<-signals
-	ec.logger.Info("Received termination signal, shutting down gracefully...")
+	kc.log.Info("Received termination signal, shutting down gracefully...")
 	cancel()
 	time.Sleep(20 * time.Second) // Allow time for shutdown
 	return nil
@@ -130,7 +128,7 @@ func exponentialBackoff(attempt int) time.Duration {
 	return time.Duration(delay) * time.Millisecond
 }
 
-func (ec *EventConsumer) Close(ctx context.Context) error {
+func (kc *KafkaConsumer) Close(ctx context.Context) error {
 	//TODO: clean up what ever needs to be cleaned up
 	return nil
 }
@@ -223,13 +221,13 @@ func getGoroutineID() int {
 //		// Retry message processing
 //		var mockNextRequest apiv1.MockNextRequest
 //		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
-//			cgh.logger.Errorf("Retry %d: Failed to unmarshal event: %v", retries, err)
+//			cgh.log.Errorf("Retry %d: Failed to unmarshal event: %v", retries, err)
 //			continue
 //		}
 //
 //		_, err := cgh.apiv1.MockNext(nil, &mockNextRequest)
 //		if err != nil {
-//			cgh.logger.Errorf("Retry %d: Failed to mock next: %v", retries, err)
+//			cgh.log.Errorf("Retry %d: Failed to mock next: %v", retries, err)
 //			continue
 //		}
 //
@@ -246,7 +244,7 @@ func getGoroutineID() int {
 //	// Implement DLQ logic here, e.g., producing to a DLQ topic
 //	dlqProducer, err := sarama.NewSyncProducer([]string{cgh.config.KafkaBrokers}, nil)
 //	if err != nil {
-//		cgh.logger.Errorf("Failed to create DLQ producer: %v", err)
+//		cgh.log.Errorf("Failed to create DLQ producer: %v", err)
 //		return
 //	}
 //	defer dlqProducer.Close()
@@ -260,7 +258,7 @@ func getGoroutineID() int {
 //
 //	_, _, err = dlqProducer.SendMessage(dlqMessage)
 //	if err != nil {
-//		cgh.logger.Error(err,"Failed to send message to DLQ")
+//		cgh.log.Error(err,"Failed to send message to DLQ")
 //	}
 //}
 

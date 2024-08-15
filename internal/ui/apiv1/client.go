@@ -17,7 +17,7 @@ type Client struct {
 	kafkaClient  *KafkaClient
 }
 
-func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log, kafkaClient *KafkaClient) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, kafkaClient *KafkaClient, log *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:          cfg,
 		tp:           tp,
@@ -27,7 +27,20 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log,
 		kafkaClient:  kafkaClient,
 	}
 
+	//if kafkaClient, err := NewKafkaClient(); err != nil {
+	//	return nil, err
+	//} else {
+	//	c.kafkaClient = kafkaClient
+	//}
+
 	c.log.Info("Started")
 
 	return c, nil
 }
+
+//func (c *Client) Shutdown(ctx context.Context) error {
+//	if c.kafkaClient != nil {
+//		return c.kafkaClient.Shutdown(ctx)
+//	}
+//	return nil
+//}

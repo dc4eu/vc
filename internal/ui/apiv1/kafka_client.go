@@ -7,6 +7,8 @@ import (
 	"github.com/IBM/sarama"
 )
 
+//TODO: gör generisk KafkaClient som konfigureras samt där man vid instansiering anger vilken ~"handler" som ska användas
+
 type KafkaClient struct {
 	producer sarama.SyncProducer
 }

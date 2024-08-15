@@ -45,12 +45,13 @@ func main() {
 		panic(err)
 	}
 
+	//TODO ev. instansiera kafka klienten inne i apiClient istället + kör Shutdown när apiClient stängs istället
 	kafkaClient, err := apiv1.NewKafkaClient()
 	if err != nil {
 		panic(err)
 	}
 
-	apiClient, err := apiv1.New(ctx, cfg, tracer, log.New("ui_api_client"), kafkaClient)
+	apiClient, err := apiv1.New(ctx, cfg, tracer, kafkaClient, log.New("ui_api_client"))
 	if err != nil {
 		panic(err)
 	}

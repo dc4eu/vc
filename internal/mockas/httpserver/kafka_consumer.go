@@ -45,11 +45,11 @@ func NewEventConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client
 }
 
 func (ec *EventConsumer) start() error {
-	//TODO: config from file
+	//TODO: read config from file
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
-	config.Net.SASL.Enable = false // Aktivera SASL-autentisering vid behov
+	config.Net.SASL.Enable = false //TODO: Activate SASL-auth when needed
 	// ... (övriga säkerhetskonfigurationer)
 
 	brokers := []string{"kafka0:9092", "kafka1:9092"}
@@ -172,7 +172,6 @@ func logMessageInfo(message *sarama.ConsumerMessage) {
 	//TODO: change to debug logging
 	fmt.Println("Go routine ID:", getGoroutineID())
 	fmt.Println("Raw message:", message)
-	fmt.Println("Raw message as string:", message)
 	fmt.Printf("Raw message.Value: %v\n", message.Value)
 	fmt.Printf("Message value as string: %s\n", string(message.Value))
 	fmt.Printf("Message metadata Partition: %d, Offset: %d, Timestamp: %s, Topic: %s\n",

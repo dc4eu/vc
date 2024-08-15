@@ -76,6 +76,7 @@ type MockNextRequest struct {
 }
 
 func (c *Client) MockNext(ctx context.Context, mnr *MockNextRequest) (any, error) {
+	//TODO gör generiskt så att det är c (Client) som avgör om Kafka, REST eller annan teknik som ska användas utan att handlern behöver bry sig
 	//err := c.kafkaClient.SendMockNextMessage(req.AuthenticSourcePersonId, `{"attr1":"value1"}`)
 	err := c.kafkaClient.SendMockNextMessage(mnr)
 	//reply, err := c.mockasClient.MockNext(req)

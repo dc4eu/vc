@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	apiv1_status "vc/internal/gen/status/apiv1.status"
 	"vc/internal/mockas/apiv1"
 
 	"go.opentelemetry.io/otel/codes"
@@ -38,6 +39,15 @@ func (s *Service) endpointMockBulk(ctx context.Context, c *gin.Context) (any, er
 	reply, err := s.apiv1.MockBulk(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1_status.StatusRequest{}
+	reply, err := s.apiv1.Status(ctx, request)
+	if err != nil {
 		return nil, err
 	}
 	return reply, nil

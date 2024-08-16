@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
-	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -76,9 +75,9 @@ func (kc *KafkaConsumer) start() error {
 
 	handler := &consumerGroupHandler{
 		config: kc.config,
-		logger: kc.log,
+		log:    kc.log,
 		apiv1:  kc.apiv1,
-		tp:     kc.tp,
+		tracer: kc.tp,
 		ctx:    kc.ctx,
 	}
 
@@ -86,8 +85,10 @@ func (kc *KafkaConsumer) start() error {
 
 	go func() {
 		attempt := 0
+		errOccured := false
 		for {
 			if err := consumerGroup.Consume(ctx, topics, handler); err != nil {
+				errOccured = true
 				kc.log.Error(err, "Error consuming from Kafka - Using exponential backoff strategy for consumtion")
 				// A simple form of "throttling with exponential backoff" which limits how quickly new attempts are made. This can help avoid overwhelming the Kafka cluster or network if many errors occur in a short period.
 				delay := exponentialBackoff(attempt)
@@ -95,7 +96,10 @@ func (kc *KafkaConsumer) start() error {
 				attempt++
 			} else {
 				attempt = 0
-				kc.log.Info("Kafka consumtion now back in normal consumtion strategy")
+				if errOccured {
+					errOccured = false
+					kc.log.Info("Kafka consumtion now back in normal consumtion strategy")
+				}
 			}
 
 			if ctx.Err() != nil {
@@ -135,9 +139,9 @@ func (kc *KafkaConsumer) Close(ctx context.Context) error {
 
 type consumerGroupHandler struct {
 	config *model.Cfg
-	logger *logger.Log
+	log    *logger.Log
 	apiv1  *apiv1.Client
-	tp     *trace.Tracer
+	tracer *trace.Tracer
 	ctx    *context.Context
 }
 
@@ -155,16 +159,16 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 		var mockNextRequest apiv1.MockNextRequest
 		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
-			cgh.logger.Error(err, "Failed to unmarshal event from Kafka")
+			cgh.log.Error(err, "Failed to unmarshal event from Kafka")
 			//TODO replace with cgh.handleErrorMessage(session, message, err)
 			continue
 		}
 
-		cgh.logger.Debug("mockNextRequest:", "", mockNextRequest)
+		cgh.log.Debug("mockNextRequest:", "", mockNextRequest)
 
 		_, err := cgh.apiv1.MockNext(*cgh.ctx, &mockNextRequest)
 		if err != nil {
-			cgh.logger.Error(err, "Failed to mock next")
+			cgh.log.Error(err, "Failed to mock next")
 			//TODO handleErrorMessage(session, message, err) and send to topic_mock_next_error
 		}
 
@@ -175,19 +179,20 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 func logMessageInfo(message *sarama.ConsumerMessage) {
 	//TODO: change to debug logging
-	fmt.Println("Go routine ID:", getGoroutineID())
-	fmt.Println("Raw message:", message)
-	fmt.Printf("Raw message.Value: %v\n", message.Value)
+	fmt.Println("========= Consuming message from Kafka =========")
+	fmt.Println("Consumed by Go routine ID:", getGoroutineID())
+	fmt.Println("Raw:", message)
+	fmt.Printf("Message value raw: %v\n", message.Value)
 	fmt.Printf("Message value as string: %s\n", string(message.Value))
-	fmt.Printf("Message metadata Partition: %d, Offset: %d, Timestamp: %s, Topic: %s\n",
+	fmt.Printf("Message metadata: Partition: %d, Offset: %d, Timestamp: %s, Topic: %s\n",
 		message.Partition, message.Offset, message.Timestamp, message.Topic)
 
-	fmt.Println("Headers:")
+	fmt.Println("Message headers:")
 	headers := make(map[string]string)
 	for _, header := range message.Headers {
 		headers[string(header.Key)] = string(header.Value)
 	}
-	log.Println("Headers:")
+
 	for key, value := range headers {
 		fmt.Printf("  %s: %s\n", key, value)
 	}

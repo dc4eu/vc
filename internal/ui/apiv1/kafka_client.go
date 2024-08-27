@@ -20,11 +20,10 @@ type KafkaClient struct {
 	//TODO: deklarera och använd en generisk sender
 }
 
-// TODO: ta in en logger, mm och sätt i structen
 func NewKafkaClient(ctx context.Context, config *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*KafkaClient, error) {
 	log.Info("Kafka client starting ...")
 
-	//TODO: saramaConfig from file inkl brokers
+	//TODO: saramaConfig from file
 	saramaConfig := sarama.NewConfig()
 	saramaConfig.Producer.Return.Successes = true
 	saramaConfig.Producer.RequiredAcks = sarama.WaitForAll
@@ -38,9 +37,7 @@ func NewKafkaClient(ctx context.Context, config *model.Cfg, tracer *trace.Tracer
 		return nil, err
 	}
 
-	brokers := []string{"kafka0:9092", "kafka1:9092"}
-
-	producer, err := sarama.NewSyncProducer(brokers, saramaConfig)
+	producer, err := sarama.NewSyncProducer(config.Common.Kafka.Brokers, saramaConfig)
 	if err != nil {
 		return nil, err
 	}

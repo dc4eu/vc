@@ -76,7 +76,6 @@ type MockNextRequest struct {
 }
 
 func (c *Client) MockNext(ctx context.Context, mnr *MockNextRequest) (any, error) {
-	//TODO: kanske flytta in delar av nedan till filen client.go så att bara den behöver känna till Kafka?
 	if c.cfg.Common.Kafka.Enabled {
 		if err := c.kafkaClient.SendMockNextMessage(mnr); err != nil {
 			return nil, err

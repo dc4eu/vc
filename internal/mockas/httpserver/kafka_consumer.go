@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"runtime"
 	"strconv"
+	"sync"
 	"syscall"
 	"time"
 	"vc/internal/mockas/apiv1"
@@ -45,17 +46,17 @@ func NewKafkaConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client
 }
 
 func (kc *KafkaConsumer) start() error {
-	//TODO: read config from file
-	config := sarama.NewConfig()
-	config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	config.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
-	config.Net.SASL.Enable = false //TODO: Activate SASL-auth when needed
+	//TODO: read saramaConfig from file
+	saramaConfig := sarama.NewConfig()
+	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	saramaConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
+	saramaConfig.Net.SASL.Enable = false //TODO: Activate SASL-auth when needed
 	// ... (övriga säkerhetskonfigurationer)
 
-	brokers := []string{"kafka0:9092", "kafka1:9092"}
-	consumerGroup, err := sarama.NewConsumerGroup(brokers, "my-consumer-group-name-1", config)
+	groupID := "consumer_group_1_for_topic_mock_next"
+	consumerGroup, err := sarama.NewConsumerGroup(kc.config.Common.Kafka.Brokers, groupID, saramaConfig)
 	if err != nil {
-		kc.log.Error(err, "Failed to create Kafka consumer group")
+		kc.log.Error(err, "Failed to create Kafka consumer", "groupID", groupID)
 		return err
 
 	}
@@ -64,7 +65,11 @@ func (kc *KafkaConsumer) start() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	var wg sync.WaitGroup
+
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for err := range consumerGroup.Errors() {
 			kc.log.Error(err, "Kafka consumer group error")
 		}
@@ -83,9 +88,11 @@ func (kc *KafkaConsumer) start() error {
 
 	topics := []string{"topic_mock_next"}
 
+	wg.Add(1)
 	go func() {
 		attempt := 0
 		errOccured := false
+		defer wg.Done()
 		for {
 			if err := consumerGroup.Consume(ctx, topics, handler); err != nil {
 				errOccured = true
@@ -113,6 +120,9 @@ func (kc *KafkaConsumer) start() error {
 	<-signals
 	kc.log.Info("Received termination signal, shutting down gracefully...")
 	cancel()
+
+	wg.Wait()
+
 	time.Sleep(20 * time.Second) // Allow time for shutdown
 	return nil
 }
@@ -159,7 +169,7 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 		var mockNextRequest apiv1.MockNextRequest
 		if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
-			cgh.log.Error(err, "Failed to unmarshal event from Kafka")
+			cgh.log.Error(err, "Failed to unmarshal event from Kafka - skip this message")
 			//TODO replace with cgh.handleErrorMessage(session, message, err)
 			continue
 		}
@@ -168,7 +178,7 @@ func (cgh *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 		_, err := cgh.apiv1.MockNext(*cgh.ctx, &mockNextRequest)
 		if err != nil {
-			cgh.log.Error(err, "Failed to mock next")
+			cgh.log.Error(err, "Failed to mock next - skip this message")
 			//TODO handleErrorMessage(session, message, err) and send to topic_mock_next_error
 		}
 

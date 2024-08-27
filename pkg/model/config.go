@@ -22,7 +22,8 @@ type Mongo struct {
 
 // Kafka holds the kafka configuration that is common for the entire system
 type Kafka struct {
-	Enabled bool `yaml:"enabled"`
+	Enabled bool     `yaml:"enabled"`
+	Brokers []string `yaml:"brokers"`
 }
 
 // KeyValue holds the key/value configuration

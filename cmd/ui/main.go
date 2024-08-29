@@ -45,7 +45,7 @@ func main() {
 		panic(err)
 	}
 
-	apiClient, err := apiv1.New(ctx, cfg, tracer, log.New("ui_api_client"))
+	apiClient, err := apiv1.New(ctx, cfg, tracer, log.New("api_client"))
 	services["apiClient"] = apiClient
 	if err != nil {
 		panic(err)

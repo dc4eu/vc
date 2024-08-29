@@ -51,7 +51,7 @@ func main() {
 	}
 
 	if cfg.Common.Kafka.Enabled {
-		kafkaConsumer, err := httpserver.NewKafkaConsumer(&ctx, cfg, apiv1Client, tracer, log.New("kafka-consumer"))
+		kafkaConsumer, err := httpserver.NewKafkaConsumer(&ctx, cfg, apiv1Client, tracer, log.New("kafka_consumer"))
 		if err != nil {
 			panic(err)
 		}

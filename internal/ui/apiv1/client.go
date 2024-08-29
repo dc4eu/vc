@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"vc/pkg/kafka"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -9,12 +10,12 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg          *model.Cfg
-	tp           *trace.Tracer
-	log          *logger.Log
-	apigwClient  *APIGWClient
-	mockasClient *MockASClient
-	kafkaClient  *KafkaClient
+	cfg                  *model.Cfg
+	tp                   *trace.Tracer
+	log                  *logger.Log
+	apigwClient          *APIGWClient
+	mockasClient         *MockASClient
+	kafkaMessageProducer *KafkaMessageProducer
 }
 
 func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log) (*Client, error) {
@@ -22,18 +23,18 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 		cfg:          cfg,
 		tp:           tp,
 		log:          log,
-		apigwClient:  NewAPIGWClient(cfg, tp, log.New("ui-apiwg-client")),
-		mockasClient: NewMockASClient(cfg, tp, log.New("ui-mockas-client")),
+		apigwClient:  NewAPIGWClient(cfg, tp, log.New("apiwg_client")),
+		mockasClient: NewMockASClient(cfg, tp, log.New("mockas_client")),
 	}
 
 	if cfg.Common.Kafka.Enabled {
-		kafkaClient, err := NewKafkaClient(ctx, cfg, tp, log.New("ui-kafka-client"))
+		kafkaMessageProducerClient, err := kafka.NewKafkaMessageSyncProducerClient(ctx, cfg, tp, log.New("kafka_message_producer_client"))
 		if err != nil {
 			return nil, err
 		}
-		c.kafkaClient = kafkaClient
+		c.kafkaMessageProducer = NewKafkaMessageProducer(kafkaMessageProducerClient)
 	} else {
-		log.Info("Kafka disabled - no Kafka client created")
+		log.Info("Kafka disabled - no Kafka message producer client created")
 	}
 
 	c.log.Info("Started")
@@ -42,8 +43,8 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 }
 
 func (c *Client) Close(ctx context.Context) error {
-	if c.kafkaClient != nil {
-		return c.kafkaClient.Close(ctx)
+	if c.kafkaMessageProducer != nil {
+		return c.kafkaMessageProducer.Close(ctx)
 	}
 	return nil
 }

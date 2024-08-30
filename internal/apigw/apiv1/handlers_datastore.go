@@ -41,8 +41,12 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		return err
 	}
 
-	if req.Meta.Collect.ID == "" {
-		req.Meta.Collect.ID = req.Meta.DocumentID
+	if req.Meta.Collect == nil || req.Meta.Collect.ID == "" {
+		collect := &model.Collect{
+			ID: req.Meta.DocumentID,
+		}
+
+		req.Meta.Collect = collect
 	}
 
 	if req.Meta.Revocation == nil {

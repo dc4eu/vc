@@ -11,8 +11,8 @@ import (
 // UploadRequest is the request for Upload
 type UploadRequest struct {
 	Meta                *model.MetaData        `json:"meta" validate:"required"`
-	Identities          []*model.Identity      `json:"identities,omitempty" validate:"required"`
-	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty" validate:"required"`
+	Identities          []*model.Identity      `json:"identities,omitempty"`
+	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty"`
 	DocumentData        map[string]any         `json:"document_data" validate:"required"`
 	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
 }

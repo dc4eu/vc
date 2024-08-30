@@ -70,6 +70,10 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		QR:                  qr,
 	}
 
+	if upload.Identities == nil {
+		upload.Identities = []model.Identity{}
+	}
+
 	if err := c.db.VCDatastoreColl.Save(ctx, upload); err != nil {
 		c.log.Debug("Failed to save document", "error", err)
 		if mongo.IsDuplicateKeyError(err) {

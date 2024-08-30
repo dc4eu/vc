@@ -6,12 +6,14 @@ import (
 	"vc/internal/apigw/db"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // UploadRequest is the request for Upload
 type UploadRequest struct {
 	Meta                *model.MetaData        `json:"meta" validate:"required"`
-	Identities          []*model.Identity      `json:"identities,omitempty"`
+	Identities          []model.Identity       `json:"identities,omitempty"`
 	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty"`
 	DocumentData        map[string]any         `json:"document_data" validate:"required"`
 	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
@@ -68,12 +70,14 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		QR:                  qr,
 	}
 
-	_, err = c.simpleQueue.VCPersistentSave.Enqueue(ctx, upload)
-	if err != nil {
-		c.log.Debug("Failed to enqueue upload document", "error", err)
+	if err := c.db.VCDatastoreColl.Save(ctx, upload); err != nil {
+		c.log.Debug("Failed to save document", "error", err)
+		if mongo.IsDuplicateKeyError(err) {
+			return helpers.ErrDocumentAlreadyExists
+		}
 		return err
 	}
-	c.log.Debug("Document enqueued for saving", "document_id", req.Meta.DocumentID)
+
 	return nil
 }
 

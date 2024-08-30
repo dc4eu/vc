@@ -18,6 +18,9 @@ var (
 	// ErrNoDocumentFound is returned when no document is found
 	ErrNoDocumentFound = NewError("no_document_found")
 
+	// ErrDocumentAlreadyExists is returned when a document already exists
+	ErrDocumentAlreadyExists = NewError("document_already_exists")
+
 	// ErrNoDocumentData is returned when no document_data is found
 	ErrNoDocumentData = NewError("no_document_data")
 

@@ -6,8 +6,10 @@ import (
 	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // VCDatastoreColl is the generic collection
@@ -20,12 +22,14 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 	ctx, span := c.Service.tp.Start(ctx, "db:vc:datastore:createIndex")
 	defer span.End()
 
-	indexModel := mongo.IndexModel{
-		Keys: bson.M{
-			"document_id": 1,
+	indexDocumentIDInAuthenticSourceUniq := mongo.IndexModel{
+		Keys: bson.D{
+			primitive.E{Key: "meta.document_id", Value: 1},
+			primitive.E{Key: "meta.authentic_source", Value: 1},
 		},
+		Options: options.Index().SetName("document_id_uniq").SetUnique(true),
 	}
-	_, err := c.Coll.Indexes().CreateOne(ctx, indexModel)
+	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexDocumentIDInAuthenticSourceUniq})
 	if err != nil {
 		return err
 	}
@@ -34,8 +38,17 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 
 // Save saves one document to the generic collection
 func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.CompleteDocument) error {
+	ctx, span := c.Service.tp.Start(ctx, "db:vc:datastore:save")
+	defer span.End()
+
 	_, err := c.Coll.InsertOne(ctx, doc)
-	return err
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+
+		return err
+	}
+
+	return nil
 }
 
 // IDMappingQuery is the query to get authentic source person id

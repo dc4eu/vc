@@ -11,7 +11,7 @@ import (
 // CompleteDocument is a generic type for upload
 type CompleteDocument struct {
 	Meta            *MetaData        `json:"meta,omitempty" bson:"meta" validate:"required"`
-	Identities      []*Identity      `json:"identities,omitempty" bson:"identities" validate:"required"`
+	Identities      []Identity       `json:"identities,omitempty" bson:"identities" validate:"required"`
 	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"document_display" validate:"required"`
 	DocumentData    map[string]any   `json:"document_data,omitempty" bson:"document_data" validate:"required"`
 

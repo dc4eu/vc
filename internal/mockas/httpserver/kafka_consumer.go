@@ -16,10 +16,13 @@ import (
 	"syscall"
 	"time"
 	"vc/internal/mockas/apiv1"
+	"vc/pkg/kafka"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
 )
+
+//TODO: REMOVE ME WHEN new common kafka consumtion is working properly
 
 type KafkaConsumer struct {
 	config *model.Cfg
@@ -53,7 +56,7 @@ func (kc *KafkaConsumer) start() error {
 	saramaConfig.Net.SASL.Enable = false //TODO: Activate SASL-auth when needed
 	// ... (övriga säkerhetskonfigurationer)
 
-	groupID := "consumer_group_1_for_topic_mock_next"
+	groupID := "topic_mock_next_consumer_group_1"
 	consumerGroup, err := sarama.NewConsumerGroup(kc.config.Common.Kafka.Brokers, groupID, saramaConfig)
 	if err != nil {
 		kc.log.Error(err, "Failed to create Kafka consumer", "groupID", groupID)
@@ -86,7 +89,7 @@ func (kc *KafkaConsumer) start() error {
 		ctx:    kc.ctx,
 	}
 
-	topics := []string{"topic_mock_next"}
+	topics := []string{kafka.TopicMockNextName}
 
 	wg.Add(1)
 	go func() {

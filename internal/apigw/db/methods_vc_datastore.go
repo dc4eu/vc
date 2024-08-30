@@ -131,6 +131,26 @@ func (c *VCDatastoreColl) DeleteDocumentIdentity(ctx context.Context, query *Del
 	return nil
 }
 
+// Delete deletes a document
+func (c *VCDatastoreColl) Delete(ctx context.Context, doc *model.MetaData) error {
+	ctx, span := c.Service.tp.Start(ctx, "db:vc:datastore:delete")
+	defer span.End()
+
+	filter := bson.M{
+		"meta.document_id":      bson.M{"$eq": doc.DocumentID},
+		"meta.authentic_source": bson.M{"$eq": doc.AuthenticSource},
+		"meta.document_type":    bson.M{"$eq": doc.DocumentType},
+	}
+	_, err := c.Coll.DeleteOne(ctx, filter)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+	//c.service.log.Info("deleted document", "document_id", doc.DocumentID, "from authentic_source", doc.AuthenticSource)
+	return nil
+
+}
+
 // GetDocumentQuery is the query to get document attestation
 type GetDocumentQuery struct {
 	Meta     *model.MetaData

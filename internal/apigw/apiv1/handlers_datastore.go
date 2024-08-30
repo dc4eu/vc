@@ -87,9 +87,9 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 
 // NotificationRequest is the request for Notification
 type NotificationRequest struct {
-	AuthenticSource string `json:"authentic_source" required:"true"`
-	DocumentType    string `json:"document_type" required:"true"`
-	DocumentID      string `json:"document_id" required:"true"`
+	AuthenticSource string `json:"authentic_source" validate:"required"`
+	DocumentType    string `json:"document_type" validate:"required"`
+	DocumentID      string `json:"document_id" validate:"required"`
 }
 
 // NotificationReply is the reply for a Notification
@@ -129,7 +129,7 @@ func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*N
 type IdentityMappingRequest struct {
 	// required: true
 	// example: SUNET
-	AuthenticSource string          `json:"authentic_source" required:"true"`
+	AuthenticSource string          `json:"authentic_source" validate:"required"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
 }
 
@@ -175,17 +175,17 @@ func (c *Client) IdentityMapping(ctx context.Context, reg *IdentityMappingReques
 type AddDocumentIdentityRequest struct {
 	// required: true
 	// example: SUNET
-	AuthenticSource string `json:"authentic_source" required:"true"`
+	AuthenticSource string `json:"authentic_source" validate:"required"`
 
 	// required: true
 	// example: PDA1
-	DocumentType string `json:"document_type" required:"true"`
+	DocumentType string `json:"document_type" validate:"required"`
 
 	// required: true
 	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
-	DocumentID string `json:"document_id" required:"true"`
+	DocumentID string `json:"document_id" validate:"required"`
 
-	Identities []*model.Identity `json:"identities" required:"true"`
+	Identities []*model.Identity `json:"identities" validate:"required"`
 }
 
 // AddDocumentIdentity adds an identity to a document
@@ -218,19 +218,19 @@ func (c *Client) AddDocumentIdentity(ctx context.Context, req *AddDocumentIdenti
 type DeleteDocumentIdentityRequest struct {
 	// required: true
 	// example: SUNET
-	AuthenticSource string `json:"authentic_source" required:"true"`
+	AuthenticSource string `json:"authentic_source" validate:"required"`
 
 	// required: true
 	// example: PDA1
-	DocumentType string `json:"document_type" required:"true"`
+	DocumentType string `json:"document_type" validate:"required"`
 
 	// required: true
 	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
-	DocumentID string `json:"document_id" required:"true"`
+	DocumentID string `json:"document_id" validate:"required"`
 
 	// required: true
 	// example: 83c1a3c8-3e1a-11ef-9c01-6b6642c8d638
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" required:"true"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
 }
 
 // DeleteDocumentIdentity deletes an identity from a document
@@ -263,11 +263,15 @@ func (c *Client) DeleteDocumentIdentity(ctx context.Context, req *DeleteDocument
 type DeleteDocumentRequest struct {
 	// required: true
 	// example: skatteverket
-	AuthenticSource string `json:"authentic_source" required:"true"`
+	AuthenticSource string `json:"authentic_source" validate:"required"`
 
 	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
-	DocumentID string `json:"document_id" required:"true"`
+	DocumentID string `json:"document_id" validate:"required"`
+
+	// required: true
+	// example: PDA1
+	DocumentType string `json:"document_type" validate:"required"`
 }
 
 // DeleteDocument deletes a specific document
@@ -284,10 +288,15 @@ type DeleteDocumentRequest struct {
 //	@Router			/document [delete]
 func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		c.log.Error(err, "Validation failed")
 		return err
 	}
 
-	_, err := c.simpleQueue.VCPersistentDelete.Enqueue(ctx, req)
+	err := c.db.VCDatastoreColl.Delete(ctx, &model.MetaData{
+		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.DocumentType,
+		DocumentID:      req.DocumentID,
+	})
 	if err != nil {
 		return err
 	}

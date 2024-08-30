@@ -84,9 +84,7 @@ Please note that currently the configuration is present as json, but could also 
 
 ### Description
 
-The Process starts with the authentic source which is uploading all relevant data to the `datastore`. All steps regarding the general application of an attestation are out of scope and reside to the internal processes of the authentic source.
-
-The data upload consist of four objects used as input for the call. These are `meta`, `identity`, `attestation` and `document_data`.
+The Process starts with the authentic source uploading all relevant data to the `datastore`. All steps regarding the general application of a document are out of scope and reside to the internal processes of the authentic source.
 
 First, the meta object consists of the `authentic_source_id`, document type and document ID. These act as the main identifier in the `datastore`. One document ID is valid and unique per document type and authentic source ID. Another required input is the institutional identifier of the person to ensure flexibility in identification and reduce susceptibility to errors. Again, this may also be valid and unique only in the domain of the authentic source. Therefore, in order to match an institutional person ID (authentic_source_person_id) a filter by authentic source ID needs to be applied before a selection operation is done. Finally, the meta object has defined revocation and collect ID as optional parameters. They may be set by the authentic source for special use cases and preferences. If not defined by the upload they shall be set equal to the document ID by the `datastore` System.
 
@@ -109,7 +107,7 @@ Finally, the document data object needs to be submitted. We expect a JSON electr
 | object | [meta {}](#meta)                         | r | Instructions to build credentials|
 | object | [revocation {}}](#revocation)            | o  ||
 | array |  [identities []](#identity)               | o | Object containing all data for later identity mapping – optional as separate update and put endpoints are offered to add identity later; every document needs at least one identity object to be collectable |
-| object|  [document_display {}](#document_display) | o | Generic Object which includes all information to display via portal API  |
+| object|  [document_display {}](#document_display) | o | Generic Object which includes all information to display via portal API |
 | object | [document_data {}](#document_data)       | r |  JSON electronic document |
 | string | document_data_version                    | r   | Version of the JSON document data object. MUST comply with <https://semver.org/> |
 

@@ -24,8 +24,8 @@ type CompleteDocument struct {
 // DocumentList is a generic type for document list
 type DocumentList struct {
 	Meta            *MetaData        `json:"meta,omitempty" bson:"meta" validate:"required"`
-	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"document_display" validate:"required"`
-	QR              *QR              `json:"qr,omitempty" bson:"qr"`
+	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"document_display"`
+	QR              *QR              `json:"qr,omitempty" bson:"qr" validate:"required"`
 }
 
 // Document is a generic type for get document

@@ -3,7 +3,7 @@
     "info": {
         "title": "Datastore API",
         "contact": {},
-        "version": "0.1.0"
+        "version": "2.8"
     },
     "basePath": "/api/v1",
     "paths": {

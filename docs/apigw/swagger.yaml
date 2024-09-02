@@ -607,7 +607,7 @@ definitions:
 info:
   contact: {}
   title: Datastore API
-  version: 0.1.0
+  version: "2.8"
 paths:
   /consent:
     post:

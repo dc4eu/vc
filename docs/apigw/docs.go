@@ -977,7 +977,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "valid_until": {
-                    "description": "required: false\nexample: 509567558",
+                    "description": "required: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 }
             }
@@ -995,7 +995,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
-                    "description": "required: true\nexample: 509567558",
+                    "description": "required: true\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 },
                 "session_id": {
@@ -1186,11 +1186,11 @@ const docTemplate = `{
                     "$ref": "#/definitions/model.Collect"
                 },
                 "credential_valid_from": {
-                    "description": "required: false\nexample: 509567558",
+                    "description": "required: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 },
                 "credential_valid_to": {
-                    "description": "required: false\nexample: 509567558",
+                    "description": "required: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 },
                 "document_id": {
@@ -1259,7 +1259,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "revoked_at": {
-                    "description": "RevokedAt is the time the document was revoked or going to be revoked\nrequired: false\nexample: 509567558",
+                    "description": "RevokedAt is the time the document was revoked or going to be revoked\nrequired: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 }
             }

@@ -305,6 +305,7 @@ definitions:
         description: |-
           required: false
           example: 509567558
+          format: int64
         type: integer
     type: object
   model.Consent:
@@ -318,6 +319,7 @@ definitions:
         description: |-
           required: true
           example: 509567558
+          format: int64
         type: integer
       session_id:
         description: |-
@@ -510,11 +512,13 @@ definitions:
         description: |-
           required: false
           example: 509567558
+          format: int64
         type: integer
       credential_valid_to:
         description: |-
           required: false
           example: 509567558
+          format: int64
         type: integer
       document_id:
         description: |-
@@ -593,6 +597,7 @@ definitions:
           RevokedAt is the time the document was revoked or going to be revoked
           required: false
           example: 509567558
+          format: int64
         type: integer
     type: object
   model.RevocationReference:

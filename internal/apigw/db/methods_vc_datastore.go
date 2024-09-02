@@ -193,9 +193,15 @@ type DocumentListQuery struct {
 // DocumentList return matching documents if any, or error
 func (c *VCDatastoreColl) DocumentList(ctx context.Context, query *DocumentListQuery) ([]*model.DocumentList, error) {
 	filter := bson.M{
-		"meta.authentic_source":     bson.M{"$eq": query.AuthenticSource},
-		"meta.document_type":        bson.M{"$eq": query.DocumentType},
 		"identities.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
+	}
+
+	if query.AuthenticSource != "" {
+		filter["meta.authentic_source"] = bson.M{"$eq": query.AuthenticSource}
+	}
+
+	if query.DocumentType != "" {
+		filter["meta.document_type"] = bson.M{"$eq": query.DocumentType}
 	}
 
 	if query.Identity.AuthenticSourcePersonID != "" {

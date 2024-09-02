@@ -35,6 +35,11 @@ definitions:
         items:
           $ref: '#/definitions/model.Identity'
         type: array
+    required:
+    - authentic_source
+    - document_id
+    - document_type
+    - identities
     type: object
   apiv1.CredentialRequest:
     properties:
@@ -82,6 +87,11 @@ definitions:
           required: true
           example: PDA1
         type: string
+    required:
+    - authentic_source
+    - authentic_source_person_id
+    - document_id
+    - document_type
     type: object
   apiv1.DeleteDocumentRequest:
     properties:
@@ -95,6 +105,15 @@ definitions:
           required: true
           example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
         type: string
+      document_type:
+        description: |-
+          required: true
+          example: PDA1
+        type: string
+    required:
+    - authentic_source
+    - document_id
+    - document_type
     type: object
   apiv1.DocumentListReply:
     properties:
@@ -182,6 +201,7 @@ definitions:
       identity:
         $ref: '#/definitions/model.Identity'
     required:
+    - authentic_source
     - identity
     type: object
   apiv1.NotificationReply:
@@ -197,6 +217,10 @@ definitions:
         type: string
       document_type:
         type: string
+    required:
+    - authentic_source
+    - document_id
+    - document_type
     type: object
   apiv1.RevokeDocumentRequest:
     properties:
@@ -248,8 +272,6 @@ definitions:
     required:
     - document_data
     - document_data_version
-    - document_display
-    - identities
     - meta
     type: object
   apiv1_issuer.MakeSDJWTReply:

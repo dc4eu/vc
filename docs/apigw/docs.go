@@ -592,6 +592,12 @@ const docTemplate = `{
         },
         "apiv1.AddDocumentIdentityRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "document_id",
+                "document_type",
+                "identities"
+            ],
             "properties": {
                 "authentic_source": {
                     "description": "required: true\nexample: SUNET",
@@ -649,6 +655,12 @@ const docTemplate = `{
         },
         "apiv1.DeleteDocumentIdentityRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "authentic_source_person_id",
+                "document_id",
+                "document_type"
+            ],
             "properties": {
                 "authentic_source": {
                     "description": "required: true\nexample: SUNET",
@@ -670,6 +682,11 @@ const docTemplate = `{
         },
         "apiv1.DeleteDocumentRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "document_id",
+                "document_type"
+            ],
             "properties": {
                 "authentic_source": {
                     "description": "required: true\nexample: skatteverket",
@@ -677,6 +694,10 @@ const docTemplate = `{
                 },
                 "document_id": {
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
+                    "type": "string"
+                },
+                "document_type": {
+                    "description": "required: true\nexample: PDA1",
                     "type": "string"
                 }
             }
@@ -799,6 +820,7 @@ const docTemplate = `{
         "apiv1.IdentityMappingRequest": {
             "type": "object",
             "required": [
+                "authentic_source",
                 "identity"
             ],
             "properties": {
@@ -821,6 +843,11 @@ const docTemplate = `{
         },
         "apiv1.NotificationRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "document_id",
+                "document_type"
+            ],
             "properties": {
                 "authentic_source": {
                     "type": "string"
@@ -887,8 +914,6 @@ const docTemplate = `{
             "required": [
                 "document_data",
                 "document_data_version",
-                "document_display",
-                "identities",
                 "meta"
             ],
             "properties": {

@@ -13,39 +13,33 @@ import (
 )
 
 const (
-	TopicMockNextName          = "topic_mock_next"
+	TopicMockNext              = "topic_mock_next"
 	TopicUpload                = "topic_upload"
 	TypeOfStructInMessageValue = "type_of_struct_in_value"
 )
 
-type KafkaMessageSyncProducerClient struct {
+type MessageSyncProducerClient struct {
 	producer sarama.SyncProducer
 	config   *model.Cfg
 	tracer   *trace.Tracer
 	log      *logger.Log
 }
 
-func NewKafkaMessageSyncProducerClient(ctx context.Context, config *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*KafkaMessageSyncProducerClient, error) {
+func NewMessageSyncProducerClient(producerConfig *sarama.Config, ctx context.Context, config *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*MessageSyncProducerClient, error) {
 	log.Info("Starting ...")
 
-	saramaConfig := sarama.NewConfig()
-	saramaConfig.Producer.Return.Successes = true
-	saramaConfig.Producer.RequiredAcks = sarama.WaitForAll
-	saramaConfig.Producer.Idempotent = true
-	saramaConfig.Net.MaxOpenRequests = 1
-	saramaConfig.Producer.Retry.Max = 3
-	saramaConfig.Net.SASL.Enable = false
+	//TODO: validera så config ej är nil
 
-	if err := saramaConfig.Validate(); err != nil {
+	if err := producerConfig.Validate(); err != nil {
 		return nil, err
 	}
 
-	producer, err := sarama.NewSyncProducer(config.Common.Kafka.Brokers, saramaConfig)
+	producer, err := sarama.NewSyncProducer(config.Common.Kafka.Brokers, producerConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	client := &KafkaMessageSyncProducerClient{
+	client := &MessageSyncProducerClient{
 		producer: producer,
 		config:   config,
 		tracer:   tracer,
@@ -56,7 +50,18 @@ func NewKafkaMessageSyncProducerClient(ctx context.Context, config *model.Cfg, t
 	return client, nil
 }
 
-func (c *KafkaMessageSyncProducerClient) Close(ctx context.Context) error {
+func CommonProducerConfig() *sarama.Config {
+	producerConfig := sarama.NewConfig()
+	producerConfig.Producer.Return.Successes = true
+	producerConfig.Producer.RequiredAcks = sarama.WaitForAll
+	producerConfig.Producer.Idempotent = true
+	producerConfig.Net.MaxOpenRequests = 1
+	producerConfig.Producer.Retry.Max = 3
+	producerConfig.Net.SASL.Enable = false
+	return producerConfig
+}
+
+func (c *MessageSyncProducerClient) Close(ctx context.Context) error {
 	err := c.producer.Close()
 	if err != nil {
 		c.log.Error(err, "Error closing")
@@ -66,7 +71,7 @@ func (c *KafkaMessageSyncProducerClient) Close(ctx context.Context) error {
 	return nil
 }
 
-func (c *KafkaMessageSyncProducerClient) PublishMessage(topic string, key string, json []byte, headers []sarama.RecordHeader) error {
+func (c *MessageSyncProducerClient) PublishMessage(topic string, key string, json []byte, headers []sarama.RecordHeader) error {
 	message := &sarama.ProducerMessage{
 		Topic:   topic,
 		Key:     sarama.StringEncoder(key),
@@ -84,11 +89,7 @@ func (c *KafkaMessageSyncProducerClient) PublishMessage(topic string, key string
 	return nil
 }
 
-type KafkaMessageConsumerClient struct {
-	//TODO: impl
-}
-
-type KafkaTopicConfig struct {
+type HandlerConfig struct {
 	Topic         string
 	ConsumerGroup string
 }
@@ -98,55 +99,69 @@ type Consumer interface {
 	Close(ctx context.Context) error
 }
 
-type BaseKafkaConsumer struct {
-	saramaConfig *sarama.Config
-	topicConfigs []KafkaTopicConfig
-	brokers      []string
-	ctx          context.Context
-	cancel       context.CancelFunc
-	wg           sync.WaitGroup
+type MessageConsumerClient struct {
+	consumerConfig *sarama.Config
+	handlerConfigs []HandlerConfig
+	brokers        []string
+	ctx            context.Context
+	cancel         context.CancelFunc
+	wg             sync.WaitGroup
+	log            *logger.Log
 }
 
-func NewBaseKafkaConsumer(brokers []string, topicConfigs []KafkaTopicConfig, config *sarama.Config) (*BaseKafkaConsumer, error) {
+func CommonConsumerConfig() *sarama.Config {
+	consumerConfig := sarama.NewConfig()
+	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	consumerConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
+	consumerConfig.Net.SASL.Enable = false //TODO: Aktivera SASL-auth när det behövs
+	return consumerConfig
+}
+
+func NewMessageConsumerClient(consumerConfig *sarama.Config, brokers []string, handlerConfigs []HandlerConfig, log *logger.Log) (*MessageConsumerClient, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &BaseKafkaConsumer{
-		brokers:      brokers,
-		topicConfigs: topicConfigs,
-		ctx:          ctx,
-		cancel:       cancel,
-		wg:           sync.WaitGroup{},
+	return &MessageConsumerClient{
+		consumerConfig: consumerConfig,
+		brokers:        brokers,
+		handlerConfigs: handlerConfigs,
+		ctx:            ctx,
+		cancel:         cancel,
+		wg:             sync.WaitGroup{},
+		log:            log,
 	}, nil
 }
 
-func (bc *BaseKafkaConsumer) Start(handlerFactory func(string) sarama.ConsumerGroupHandler) error {
-	for _, topicConfig := range bc.topicConfigs {
-		consumerGroup, err := sarama.NewConsumerGroup(bc.brokers, topicConfig.ConsumerGroup, bc.saramaConfig)
+func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.ConsumerGroupHandler) error {
+	for _, handlerConfig := range c.handlerConfigs {
+		consumerGroup, err := sarama.NewConsumerGroup(c.brokers, handlerConfig.ConsumerGroup, c.consumerConfig)
 		if err != nil {
+			c.log.Error(err, "Error creating consumer group", "group", handlerConfig.ConsumerGroup)
 			return err
 		}
+		c.log.Info("Started consumer group", "group", handlerConfig.ConsumerGroup)
 
-		bc.wg.Add(1)
+		c.wg.Add(1)
 		go func(group sarama.ConsumerGroup, topic string) {
-			defer bc.wg.Done()
+			defer c.wg.Done()
 			for {
 				handler := handlerFactory(topic)
-				if err := group.Consume(bc.ctx, []string{topic}, handler); err != nil {
+				if err := group.Consume(c.ctx, []string{topic}, handler); err != nil {
 					//TODO: Hantera fel och potentiell återkoppling
-					time.Sleep(1 * time.Second) //TODO: justera backoff till mer avancerad
+					time.Sleep(1 * time.Second) //TODO: justera backoff till mer avancerad som tidigare
 				}
 
-				if bc.ctx.Err() != nil {
+				if c.ctx.Err() != nil {
 					return
 				}
 			}
-		}(consumerGroup, topicConfig.Topic)
+		}(consumerGroup, handlerConfig.Topic)
 	}
 	return nil
 }
 
-func (bc *BaseKafkaConsumer) Close(ctx context.Context) error {
-	bc.cancel()
-	bc.wg.Wait()
+func (c *MessageConsumerClient) Close(ctx context.Context) error {
+	c.cancel()
+	c.wg.Wait()
+	c.log.Info("Closed")
 	return nil
 }
 

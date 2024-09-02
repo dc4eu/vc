@@ -10,10 +10,10 @@ import (
 )
 
 type KafkaMessageProducer struct {
-	kafkaMessageProducerClient *kafka.KafkaMessageSyncProducerClient
+	kafkaMessageProducerClient *kafka.MessageSyncProducerClient
 }
 
-func NewKafkaMessageProducer(kafkaMessageProducerClient *kafka.KafkaMessageSyncProducerClient) *KafkaMessageProducer {
+func NewKafkaMessageProducer(kafkaMessageProducerClient *kafka.MessageSyncProducerClient) *KafkaMessageProducer {
 	return &KafkaMessageProducer{
 		kafkaMessageProducerClient: kafkaMessageProducerClient,
 	}
@@ -36,7 +36,7 @@ func (s *KafkaMessageProducer) MockNext(mockNextRequest *MockNextRequest) error 
 		{Key: []byte(kafka.TypeOfStructInMessageValue), Value: typeHeader},
 	}
 
-	return s.kafkaMessageProducerClient.PublishMessage(kafka.TopicMockNextName, mockNextRequest.AuthenticSourcePersonId, jsonMarshaled, headers)
+	return s.kafkaMessageProducerClient.PublishMessage(kafka.TopicMockNext, mockNextRequest.AuthenticSourcePersonId, jsonMarshaled, headers)
 }
 
 func (s *KafkaMessageProducer) Close(ctx context.Context) error {

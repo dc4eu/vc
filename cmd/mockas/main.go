@@ -12,6 +12,7 @@ import (
 	"vc/pkg/configuration"
 	"vc/pkg/kafka"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/trace"
 )
 
@@ -52,46 +53,12 @@ func main() {
 		panic(err)
 	}
 
-	if cfg.Common.Kafka.Enabled {
-		//kafkaConsumer, err := httpserver.NewKafkaConsumer(&ctx, cfg, apiv1Client, tracer, log.New("kafka_consumer"))
-		//-------------------------------------------------
-		saramaConfig := sarama.NewConfig()
-		saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
-		saramaConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
-		saramaConfig.Net.SASL.Enable = false //TODO: Aktivera SASL-auth när det behövs
-
-		topicConfigs := []kafka.KafkaTopicConfig{
-			{Topic: kafka.TopicMockNextName, ConsumerGroup: "topic_mock_next_consumer_group_mockas"},
-			//{Topic: "topic2", ConsumerGroup: "consumer_group2"},
-		}
-
-		baseConsumer, err := kafka.NewBaseKafkaConsumer(cfg.Common.Kafka.Brokers, topicConfigs, saramaConfig)
-		if err != nil {
-			// Hantera fel
-			panic(err)
-		}
-
-		// Factory-funktion för att skapa specifika handlers för varje topic
-		handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
-			handlersMap := map[string]kafka.MessageHandler{
-				kafka.TopicMockNextName: &httpserver.MockNextHandler{Log: log.New("kafka_mock_next_handler"), ApiV1: apiv1Client, Tracer: tracer},
-				// Lägg till fler handlers om det behövs
-			}
-			return &kafka.ConsumerGroupHandler{Handlers: handlersMap}
-		}
-
-		// Starta konsumenten med specifika handlers
-		if err := baseConsumer.Start(handlerFactory); err != nil {
-			// Hantera fel
-			panic(err)
-		}
-		//-------------------------------------------------
-		//if err != nil {
-		//	panic(err)
-		//}
-		services["kafkaConsumer"] = baseConsumer
-	} else {
-		log.Info("Kafka disabled - no consumer created")
+	kafkaMessageConsumerClient, err := startNewKafkaMessangerConsumerClient(cfg, log, apiv1Client, tracer)
+	if err != nil {
+		panic(err)
+	}
+	if kafkaMessageConsumerClient != nil {
+		services["kafkaConsumer"] = kafkaMessageConsumerClient
 	}
 
 	// Handle sigterm and await termChan signal
@@ -115,4 +82,33 @@ func main() {
 	wg.Wait() // Block here until are workers are done
 
 	mainLog.Info("Stopped")
+}
+
+func startNewKafkaMessangerConsumerClient(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (*kafka.MessageConsumerClient, error) {
+	if !cfg.Common.Kafka.Enabled {
+		log.Info("Kafka disabled - no consumer created")
+	}
+
+	handlerConfigs := []kafka.HandlerConfig{
+		{Topic: kafka.TopicMockNext, ConsumerGroup: "topic_mock_next_consumer_group_mockas"},
+		// add more handlerconfigs here
+	}
+
+	kafkaMessageConsumerClient, err := kafka.NewMessageConsumerClient(kafka.CommonConsumerConfig(), cfg.Common.Kafka.Brokers, handlerConfigs, log.New("kafka_consumer_client"))
+	if err != nil {
+		return nil, err
+	}
+
+	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
+		handlersMap := map[string]kafka.MessageHandler{
+			kafka.TopicMockNext: &apiv1.MockNextMessageHandler{Log: log.New("kafka_mock_next_handler"), ApiV1: apiv1Client, Tracer: tracer},
+			// add more handlers here...
+		}
+		return &kafka.ConsumerGroupHandler{Handlers: handlersMap}
+	}
+
+	if err := kafkaMessageConsumerClient.Start(handlerFactory); err != nil {
+		return nil, err
+	}
+	return kafkaMessageConsumerClient, nil
 }

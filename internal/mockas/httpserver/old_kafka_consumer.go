@@ -24,7 +24,7 @@ import (
 
 //TODO: REMOVE ME WHEN new common kafka consumtion is working properly
 
-type KafkaConsumer struct {
+type OldKafkaConsumer struct {
 	config *model.Cfg
 	log    *logger.Log
 	apiv1  *apiv1.Client
@@ -32,9 +32,9 @@ type KafkaConsumer struct {
 	ctx    *context.Context
 }
 
-func NewKafkaConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (*KafkaConsumer, error) {
+func NewKafkaConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (*OldKafkaConsumer, error) {
 	log.Info("Kafka enabled. Starting consumer ...")
-	kafkaConsumer := &KafkaConsumer{
+	kafkaConsumer := &OldKafkaConsumer{
 		config: config,
 		log:    log,
 		apiv1:  api,
@@ -48,7 +48,7 @@ func NewKafkaConsumer(ctx *context.Context, config *model.Cfg, api *apiv1.Client
 	return kafkaConsumer, nil
 }
 
-func (kc *KafkaConsumer) start() error {
+func (kc *OldKafkaConsumer) start() error {
 	//TODO: read saramaConfig from file
 	saramaConfig := sarama.NewConfig()
 	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -89,7 +89,7 @@ func (kc *KafkaConsumer) start() error {
 		ctx:    kc.ctx,
 	}
 
-	topics := []string{kafka.TopicMockNextName}
+	topics := []string{kafka.TopicMockNext}
 
 	wg.Add(1)
 	go func() {
@@ -131,21 +131,21 @@ func (kc *KafkaConsumer) start() error {
 }
 
 func exponentialBackoff(attempt int) time.Duration {
-	min := float64(100)            // Minimum delay in milliseconds
-	max := float64(10 * 60 * 1000) // Maximum delay in milliseconds (10 minutes)
-	factor := 2.0                  // Backoff factor
+	minDelayMs := float64(100)
+	maxDelayMs := float64(10 * 60 * 1000) // (10 minutes)
+	factor := 2.0                         // Backoff factor
 
-	delay := min * math.Pow(factor, float64(attempt))
-	delay = delay + rand.Float64()*min
+	delay := minDelayMs * math.Pow(factor, float64(attempt))
+	delay = delay + rand.Float64()*minDelayMs
 
-	if delay > max {
-		delay = max
+	if delay > maxDelayMs {
+		delay = maxDelayMs
 	}
 
 	return time.Duration(delay) * time.Millisecond
 }
 
-func (kc *KafkaConsumer) Close(ctx context.Context) error {
+func (kc *OldKafkaConsumer) Close(ctx context.Context) error {
 	//TODO: clean up what ever needs to be cleaned up
 	return nil
 }

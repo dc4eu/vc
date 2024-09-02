@@ -241,7 +241,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     restart: always
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: vc_kafka_cluster
       KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka0:9092,kafka1:9092

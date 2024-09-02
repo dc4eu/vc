@@ -81,6 +81,7 @@ type Consent struct {
 
 	// required: true
 	// example: 509567558
+	// format: int64
 	CreatedAt int64 `json:"created_at,omitempty" bson:"created_at" validate:"required"`
 }
 
@@ -92,6 +93,7 @@ type Collect struct {
 
 	// required: false
 	// example: 509567558
+	// format: int64
 	ValidUntil int64 `json:"valid_until,omitempty" bson:"valid_until"`
 }
 
@@ -125,10 +127,12 @@ type MetaData struct {
 
 	// required: false
 	// example: 509567558
+	// format: int64
 	CredentialValidFrom int64 `json:"credential_valid_from,omitempty" bson:"valid_from"`
 
 	// required: false
 	// example: 509567558
+	// format: int64
 	CredentialValidTo int64 `json:"credential_valid_to,omitempty" bson:"valid_to"`
 }
 
@@ -157,6 +161,7 @@ type Revocation struct {
 	// RevokedAt is the time the document was revoked or going to be revoked
 	// required: false
 	// example: 509567558
+	// format: int64
 	RevokedAt int64 `json:"revoked_at,omitempty" bson:"revoked_at"`
 
 	// Reason is the reason for revocation

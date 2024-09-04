@@ -19,6 +19,16 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+
+	if s.kafkaMessageProducer != nil {
+		err := s.kafkaMessageProducer.Upload(request)
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
+		}
+		return nil, nil
+	}
+
 	if err := s.apiv1.Upload(ctx, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

@@ -26,24 +26,24 @@ func NewKafkaMessageProducer(producerConfig *sarama.Config, ctx context.Context,
 	}, nil
 }
 
-func (s *KafkaMessageProducer) MockNext(mockNextRequest *MockNextRequest) error {
-	if mockNextRequest == nil {
-		return errors.New("param mockNextRequest is nil")
+func (s *KafkaMessageProducer) Upload(uploadRequest *UploadRequest) error {
+	if uploadRequest == nil {
+		return errors.New("param uploadRequest is nil")
 	}
 
-	jsonMarshaled, err := json.Marshal(mockNextRequest)
+	jsonMarshaled, err := json.Marshal(uploadRequest)
 	if err != nil {
 		return err
 	}
 
-	paramType := reflect.TypeOf(mockNextRequest).Elem().Name()
+	paramType := reflect.TypeOf(uploadRequest).Elem().Name()
 	typeHeader := []byte(paramType)
 
 	headers := []sarama.RecordHeader{
 		{Key: []byte(kafka.TypeOfStructInMessageValue), Value: typeHeader},
 	}
 
-	return s.kafkaMessageProducerClient.PublishMessage(kafka.TopicMockNext, mockNextRequest.AuthenticSourcePersonId, jsonMarshaled, headers)
+	return s.kafkaMessageProducerClient.PublishMessage(kafka.TopicUpload, uploadRequest.Meta.DocumentID, jsonMarshaled, headers)
 }
 
 func (s *KafkaMessageProducer) Close(ctx context.Context) error {

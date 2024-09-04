@@ -53,12 +53,12 @@ func main() {
 		panic(err)
 	}
 
-	kafkaMessageConsumerClient, err := startNewKafkaMessangerConsumerClient(cfg, log, apiv1Client, tracer)
+	kafkaMessageConsumer, err := startNewKafkaMessangerConsumerClient(cfg, log, apiv1Client, tracer)
 	if err != nil {
 		panic(err)
 	}
-	if kafkaMessageConsumerClient != nil {
-		services["kafkaConsumer"] = kafkaMessageConsumerClient
+	if kafkaMessageConsumer != nil {
+		services["kafkaMessageConsumer"] = kafkaMessageConsumer
 	}
 
 	// Handle sigterm and await termChan signal
@@ -91,6 +91,7 @@ func startNewKafkaMessangerConsumerClient(cfg *model.Cfg, log *logger.Log, apiv1
 
 	handlerConfigs := []kafka.HandlerConfig{
 		{Topic: kafka.TopicMockNext, ConsumerGroup: "topic_mock_next_consumer_group_mockas"},
+		{Topic: kafka.TopicUpload, ConsumerGroup: "topic_upload_consumer_group_mockas"},
 		// add more handlerconfigs here
 	}
 
@@ -102,6 +103,7 @@ func startNewKafkaMessangerConsumerClient(cfg *model.Cfg, log *logger.Log, apiv1
 	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
 		handlersMap := map[string]kafka.MessageHandler{
 			kafka.TopicMockNext: &apiv1.MockNextMessageHandler{Log: log.New("kafka_mock_next_handler"), ApiV1: apiv1Client, Tracer: tracer},
+			kafka.TopicUpload:   &apiv1.UploadMessageHandler{Log: log.New("kafka_upload_handler"), ApiV1: apiv1Client, Tracer: tracer},
 			// add more handlers here...
 		}
 		return &kafka.ConsumerGroupHandler{Handlers: handlersMap}

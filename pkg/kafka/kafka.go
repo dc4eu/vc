@@ -61,6 +61,7 @@ func CommonProducerConfig() *sarama.Config {
 	return producerConfig
 }
 
+// TODO: make sure that Close is called for every created instance of Producer
 func (c *MessageSyncProducerClient) Close(ctx context.Context) error {
 	err := c.producer.Close()
 	if err != nil {
@@ -158,6 +159,7 @@ func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.Consume
 	return nil
 }
 
+// TODO: make sure that Close is called for every created instance of Consumer
 func (c *MessageConsumerClient) Close(ctx context.Context) error {
 	c.cancel()
 	c.wg.Wait()

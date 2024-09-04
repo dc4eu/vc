@@ -22,17 +22,18 @@ import (
 
 // Service is the service object for httpserver
 type Service struct {
-	config    *model.Cfg
-	logger    *logger.Log
-	server    *http.Server
-	apiv1     Apiv1
-	gin       *gin.Engine
-	tlsConfig *tls.Config
-	tp        *trace.Tracer
+	config               *model.Cfg
+	logger               *logger.Log
+	server               *http.Server
+	apiv1                Apiv1
+	gin                  *gin.Engine
+	tlsConfig            *tls.Config
+	tp                   *trace.Tracer
+	kafkaMessageProducer *apiv1.KafkaMessageProducer
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tracer, logger *logger.Log) (*Service, error) {
+func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tracer, logger *logger.Log, kafkaMessageProducer *apiv1.KafkaMessageProducer) (*Service, error) {
 	s := &Service{
 		config: config,
 		logger: logger,
@@ -41,6 +42,7 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tp *trace.Tr
 		server: &http.Server{
 			ReadHeaderTimeout: 2 * time.Second,
 		},
+		kafkaMessageProducer: kafkaMessageProducer,
 	}
 
 	switch s.config.Common.Production {

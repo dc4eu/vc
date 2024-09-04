@@ -28,11 +28,11 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 	}
 
 	if cfg.Common.Kafka.Enabled {
-		kafkaMessageProducerClient, err := kafka.NewMessageSyncProducerClient(kafka.CommonProducerConfig(), ctx, cfg, tp, log.New("kafka_message_producer_client"))
+		kafkaMessageProducer, err := NewKafkaMessageProducer(kafka.CommonProducerConfig(), ctx, cfg, tp, log)
 		if err != nil {
 			return nil, err
 		}
-		c.kafkaMessageProducer = NewKafkaMessageProducer(kafkaMessageProducerClient)
+		c.kafkaMessageProducer = kafkaMessageProducer
 	} else {
 		log.Info("Kafka disabled - no Kafka message producer client created")
 	}

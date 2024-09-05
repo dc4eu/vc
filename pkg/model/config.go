@@ -136,8 +136,9 @@ type APIGW struct {
 
 // OTEL holds the opentelemetry configuration
 type OTEL struct {
-	Addr string `yaml:"addr" validate:"required"`
-	Type string `yaml:"type" validate:"required"`
+	Addr    string `yaml:"addr" validate:"required"`
+	Type    string `yaml:"type" validate:"required"`
+	Timeout int64  `yaml:"timeout" validate:"required"`
 }
 
 // UI holds the user-interface configuration

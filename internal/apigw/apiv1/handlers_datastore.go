@@ -378,6 +378,10 @@ type DocumentListReply struct {
 //	@Param			req	body		DocumentListRequest		true	" "
 //	@Router			/document/list [post]
 func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*DocumentListReply, error) {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		return nil, err
+	}
+
 	docs, err := c.db.VCDatastoreColl.DocumentList(ctx, &db.DocumentListQuery{
 		AuthenticSource: req.AuthenticSource,
 		Identity:        req.Identity,

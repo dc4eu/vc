@@ -15,13 +15,15 @@ import (
 
 // CredentialRequest is the request for Credential
 type CredentialRequest struct {
-	AuthenticSource string          `json:"authentic_source" binding:"required"`
-	Identity        *model.Identity `json:"identity" binding:"required"`
-	CredentialType  string          `json:"credential_type" binding:"required"`
-	DocumentID      string          `json:"document_id" binding:"required"`
-	DocumentType    string          `json:"document_type" binding:"required"`
-	DocumentVersion string          `json:"document_version" bind:"required"`
-	CollectID       string          `json:"collect_id" binding:"required"`
+	AuthenticSource         string `json:"authentic_source" validate:"required"`
+	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
+	DocumentType            string `json:"document_type" validate:"required"`
+	CredentialType          string `json:"credential_type" validate:"required"`
+
+	// Identity        *model.Identity `json:"identity" validate:"required"`
+	// DocumentID      string          `json:"document_id" validate:"required"`
+	// DocumentVersion string          `json:"document_version" validate:"required"`
+	// CollectID       string          `json:"collect_id" validate:"required"`
 }
 
 // Credential makes a credential
@@ -48,11 +50,13 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 	document, err := c.db.VCDatastoreColl.GetDocument(ctx, &db.GetDocumentQuery{
 		Meta: &model.MetaData{
 			AuthenticSource: req.AuthenticSource,
-			DocumentVersion: req.DocumentVersion,
-			DocumentType:    req.DocumentType,
-			DocumentID:      req.DocumentID,
+			//DocumentVersion: req.DocumentVersion,
+			DocumentType: req.DocumentType,
+			//DocumentID:      req.DocumentID,
 		},
-		Identity: req.Identity,
+		Identity: &model.Identity{
+			AuthenticSourcePersonID: req.AuthenticSourcePersonID,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -77,16 +81,16 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
 		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.Identity.AuthenticSourcePersonID,
+		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
 		DocumentType:            req.DocumentType,
-		DocumentID:              req.DocumentID,
-		DocumentVersion:         req.DocumentVersion,
-		DateOfBirth:             req.Identity.BirthDate,
-		CollectID:               req.CollectID,
-		LastName:                req.Identity.FamilyName,
-		FirstName:               req.Identity.GivenName,
-		CredentialType:          req.CredentialType,
-		DocumentData:            documentData,
+		//	DocumentID:              req.DocumentID,
+		//	DocumentVersion:         req.DocumentVersion,
+		//	DateOfBirth:             req.Identity.BirthDate,
+		//	CollectID:               req.CollectID,
+		//	LastName:                req.Identity.FamilyName,
+		//	FirstName:               req.Identity.GivenName,
+		CredentialType: req.CredentialType,
+		DocumentData:   documentData,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to call MakeSDJWT")

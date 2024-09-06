@@ -66,7 +66,7 @@ func main() {
 	if cfg.Common.Kafka.Enabled {
 		// Start max one producer client for each service
 		var err error
-		kafkaMessageProducer, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(), ctx, cfg, tracer, log)
+		kafkaMessageProducer, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log)
 		if err != nil {
 			panic(err)
 		}
@@ -85,7 +85,7 @@ func main() {
 		panic(err)
 	}
 
-	kafkaMessageConsumer, err := startNewKafkaMessangerConsumerClient(cfg, log, apiv1Client, tracer)
+	kafkaMessageConsumer, err := startNewKafkaMessangerConsumer(cfg, log, apiv1Client, tracer)
 	if err != nil {
 		panic(err)
 	}
@@ -117,9 +117,14 @@ func main() {
 	mainLog.Info("Stopped")
 }
 
-func startNewKafkaMessangerConsumerClient(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (*kafka.MessageConsumerClient, error) {
+func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (*kafka.MessageConsumerClient, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
+	}
+
+	kafkaMessageConsumerClient, err := kafka.NewMessageConsumerClient(kafka.CommonConsumerConfig(cfg), cfg.Common.Kafka.Brokers, log.New("kafka_consumer_client"))
+	if err != nil {
+		return nil, err
 	}
 
 	handlerConfigs := []kafka.HandlerConfig{
@@ -127,20 +132,15 @@ func startNewKafkaMessangerConsumerClient(cfg *model.Cfg, log *logger.Log, apiv1
 		// add more handlerconfigs here
 	}
 
-	kafkaMessageConsumerClient, err := kafka.NewMessageConsumerClient(kafka.CommonConsumerConfig(), cfg.Common.Kafka.Brokers, handlerConfigs, log.New("kafka_consumer_client"))
-	if err != nil {
-		return nil, err
-	}
-
 	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
 		handlersMap := map[string]kafka.MessageHandler{
 			kafka.TopicUpload: &apiv1.UploadMessageHandler{Log: log.New("kafka_upload_handler"), ApiV1: apiv1Client, Tracer: tracer},
 			// add more handlers here...
 		}
-		return &kafka.ConsumerGroupHandler{Handlers: handlersMap}
+		return &kafka.ConsumerGroupHandler{Handlers: handlersMap, Log: log.New("kafka_consumer_group_handler")}
 	}
 
-	if err := kafkaMessageConsumerClient.Start(handlerFactory); err != nil {
+	if err := kafkaMessageConsumerClient.Start(handlerFactory, handlerConfigs); err != nil {
 		return nil, err
 	}
 	return kafkaMessageConsumerClient, nil

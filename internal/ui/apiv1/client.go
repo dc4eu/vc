@@ -28,7 +28,7 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 	}
 
 	if cfg.Common.Kafka.Enabled {
-		kafkaMessageProducer, err := NewKafkaMessageProducer(kafka.CommonProducerConfig(), ctx, cfg, tp, log)
+		kafkaMessageProducer, err := NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tp, log)
 		if err != nil {
 			return nil, err
 		}

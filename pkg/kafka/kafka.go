@@ -2,9 +2,9 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/IBM/sarama"
-	"log"
 	"sync"
 	"time"
 	"vc/pkg/logger"
@@ -18,30 +18,32 @@ const (
 	TypeOfStructInMessageValue = "type_of_struct_in_value"
 )
 
+// MessageConsumerClient ATTENTION: Start max one instance of consumer client for each service to keep resource usage low
 type MessageSyncProducerClient struct {
 	producer sarama.SyncProducer
-	config   *model.Cfg
+	cfg      *model.Cfg
 	tracer   *trace.Tracer
 	log      *logger.Log
 }
 
-func NewMessageSyncProducerClient(producerConfig *sarama.Config, ctx context.Context, config *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*MessageSyncProducerClient, error) {
+func NewMessageSyncProducerClient(producerConfig *sarama.Config, ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*MessageSyncProducerClient, error) {
 	log.Info("Starting ...")
 
-	//TODO: validera så config ej är nil
-
+	if producerConfig == nil {
+		return nil, errors.New("param producerConfig is nil")
+	}
 	if err := producerConfig.Validate(); err != nil {
 		return nil, err
 	}
 
-	producer, err := sarama.NewSyncProducer(config.Common.Kafka.Brokers, producerConfig)
+	producer, err := sarama.NewSyncProducer(cfg.Common.Kafka.Brokers, producerConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	client := &MessageSyncProducerClient{
 		producer: producer,
-		config:   config,
+		cfg:      cfg,
 		tracer:   tracer,
 		log:      log,
 	}
@@ -50,7 +52,8 @@ func NewMessageSyncProducerClient(producerConfig *sarama.Config, ctx context.Con
 	return client, nil
 }
 
-func CommonProducerConfig() *sarama.Config {
+func CommonProducerConfig(cfg *model.Cfg) *sarama.Config {
+	//TODO: set cfg from file
 	producerConfig := sarama.NewConfig()
 	producerConfig.Producer.Return.Successes = true
 	producerConfig.Producer.RequiredAcks = sarama.WaitForAll
@@ -58,6 +61,7 @@ func CommonProducerConfig() *sarama.Config {
 	producerConfig.Net.MaxOpenRequests = 1
 	producerConfig.Producer.Retry.Max = 3
 	producerConfig.Net.SASL.Enable = false
+	// ...
 	return producerConfig
 }
 
@@ -100,9 +104,9 @@ type Consumer interface {
 	Close(ctx context.Context) error
 }
 
+// MessageConsumerClient ATTENTION: Start max one instance of consumer client for each service to keep resource usage low
 type MessageConsumerClient struct {
 	consumerConfig *sarama.Config
-	handlerConfigs []HandlerConfig
 	brokers        []string
 	ctx            context.Context
 	cancel         context.CancelFunc
@@ -110,20 +114,28 @@ type MessageConsumerClient struct {
 	log            *logger.Log
 }
 
-func CommonConsumerConfig() *sarama.Config {
+func CommonConsumerConfig(cfg *model.Cfg) *sarama.Config {
+	//TODO: set cfg from file
 	consumerConfig := sarama.NewConfig()
 	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 	consumerConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
-	consumerConfig.Net.SASL.Enable = false //TODO: Aktivera SASL-auth när det behövs
+	consumerConfig.Net.SASL.Enable = false
+	// ...
 	return consumerConfig
 }
 
-func NewMessageConsumerClient(consumerConfig *sarama.Config, brokers []string, handlerConfigs []HandlerConfig, log *logger.Log) (*MessageConsumerClient, error) {
+func NewMessageConsumerClient(consumerConfig *sarama.Config, brokers []string, log *logger.Log) (*MessageConsumerClient, error) {
+	if consumerConfig == nil {
+		return nil, errors.New("param consumerConfig is nil")
+	}
+	if err := consumerConfig.Validate(); err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	return &MessageConsumerClient{
 		consumerConfig: consumerConfig,
 		brokers:        brokers,
-		handlerConfigs: handlerConfigs,
 		ctx:            ctx,
 		cancel:         cancel,
 		wg:             sync.WaitGroup{},
@@ -131,8 +143,8 @@ func NewMessageConsumerClient(consumerConfig *sarama.Config, brokers []string, h
 	}, nil
 }
 
-func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.ConsumerGroupHandler) error {
-	for _, handlerConfig := range c.handlerConfigs {
+func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.ConsumerGroupHandler, handlerConfigs []HandlerConfig) error {
+	for _, handlerConfig := range handlerConfigs {
 		consumerGroup, err := sarama.NewConsumerGroup(c.brokers, handlerConfig.ConsumerGroup, c.consumerConfig)
 		if err != nil {
 			c.log.Error(err, "Error creating consumer group", "group", handlerConfig.ConsumerGroup)
@@ -146,11 +158,12 @@ func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.Consume
 			for {
 				handler := handlerFactory(topic)
 				if err := group.Consume(c.ctx, []string{topic}, handler); err != nil {
-					//TODO: Hantera fel och potentiell återkoppling
+					//TODO: Logga och hantera fel och potentiell återkoppling
 					time.Sleep(1 * time.Second) //TODO: justera backoff till mer avancerad som tidigare
 				}
 
 				if c.ctx.Err() != nil {
+					//TODO: logga fel och ev. ytterligare hantering?
 					return
 				}
 			}
@@ -173,23 +186,31 @@ type MessageHandler interface {
 
 type ConsumerGroupHandler struct {
 	Handlers map[string]MessageHandler
+	Log      *logger.Log
 }
 
 func (cgh *ConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (cgh *ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 
 func (cgh *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	if cgh.Handlers == nil {
+		//TODO: Hantera fel, potentiellt skicka till error-topic
+		cgh.Log.Error(errors.New("No handler for"), "topic", claim.Topic())
+		return nil
+	}
+
 	handler, exists := cgh.Handlers[claim.Topic()]
 	if !exists {
-		log.Printf("No handler for topic: %s", claim.Topic())
+		cgh.Log.Error(errors.New("No handler for"), "topic", claim.Topic())
+		//TODO: Hantera fel, potentiellt skicka till error-topic
 		return nil
 	}
 	for message := range claim.Messages() {
 		if err := handler.HandleMessage(session.Context(), message); err != nil {
+			cgh.Log.Error(err, "Error handling message", "topic", claim.Topic())
 			//TODO: Hantera fel, potentiellt skicka till error-topic
-			log.Printf("Error handling message from topic %s: %v", claim.Topic(), err)
 		}
-		session.MarkMessage(message, "")
+		session.MarkMessage(message, "message consumed by handler")
 	}
 	return nil
 }

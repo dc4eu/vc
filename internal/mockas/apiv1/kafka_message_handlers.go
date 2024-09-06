@@ -23,20 +23,20 @@ func (h *MockNextMessageHandler) HandleMessage(ctx context.Context, message *sar
 
 	_, err := h.ApiV1.MockNext(ctx, &mockNextRequest)
 	if err != nil {
-		h.Log.Error(err, "Failed to handle MockNextRequest")
+		h.Log.Error(err, "Failed to MockNext")
 		return err
 	}
 	return nil
 }
 
+// TODO: REMOVE ME, JUST TO TEST A SECOND KAFKA CONSUMER GROUP FROM A DIFFERENT SERVICE
 type UploadMessageHandler struct {
 	Log    *logger.Log
 	ApiV1  *Client
 	Tracer *trace.Tracer
 }
 
-// TODO: REMOVE ME, JUST TO TEST A SECOND KAFKA CONSUMER GROUP FROM A DIFFERENT SERVICE
 func (h *UploadMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
-	h.Log.Debug("Consuming message just to log it to debug", "message.Key", string(message.Key), "message.Topic", message.Topic, "message.Value", string(message.Value))
+	h.Log.Debug("Consuming message to debug", "message.Key", string(message.Key), "message.Topic", message.Topic, "message.Value", string(message.Value))
 	return nil
 }

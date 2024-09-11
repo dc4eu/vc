@@ -2,7 +2,7 @@ package apiv1
 
 import (
 	"context"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 )
 

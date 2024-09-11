@@ -3,7 +3,7 @@ package rpcserver
 import (
 	"context"
 	"net"
-	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
+	"vc/internal/gen/registry/apiv1_registry"
 	"vc/internal/registry/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Service is the service object for rpcserver
+// Service is the service object for grpcserver
 type Service struct {
 	apiv1      Apiv1
 	log        *logger.Log

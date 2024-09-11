@@ -3,8 +3,8 @@ package httpserver
 import (
 	"context"
 	"vc/internal/apigw/apiv1"
-	apiv1_issuer "vc/internal/gen/issuer/apiv1.issuer"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/gen/issuer/apiv1_issuer"
+	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 )
 

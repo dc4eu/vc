@@ -3,7 +3,7 @@ package grpcserver
 import (
 	"context"
 	"net"
-	apiv1_issuer "vc/internal/gen/issuer/apiv1.issuer"
+	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/model"

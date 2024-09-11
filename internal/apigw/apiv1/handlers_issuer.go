@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"vc/internal/apigw/db"
-	apiv1_issuer "vc/internal/gen/issuer/apiv1.issuer"
-	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
+	"vc/internal/gen/issuer/apiv1_issuer"
+	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 

@@ -3,7 +3,7 @@ package httpserver
 import (
 	"context"
 	"vc/internal/apigw/apiv1"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/gen/status/apiv1_status"
 
 	"go.opentelemetry.io/otel/codes"
 

@@ -3,8 +3,8 @@ package rpcserver
 import (
 	"context"
 
-	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/gen/registry/apiv1_registry"
+	"vc/internal/gen/status/apiv1_status"
 )
 
 // Add adds an entity to the registry

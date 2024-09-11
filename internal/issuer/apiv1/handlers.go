@@ -3,7 +3,7 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
-	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
+	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/ehic"
 	"vc/pkg/helpers"
 	"vc/pkg/pda1"

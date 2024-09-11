@@ -26,8 +26,9 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 		Keys: bson.D{
 			primitive.E{Key: "meta.document_id", Value: 1},
 			primitive.E{Key: "meta.authentic_source", Value: 1},
+			primitive.E{Key: "meta.document_type", Value: 1},
 		},
-		Options: options.Index().SetName("document_id_uniq").SetUnique(true),
+		Options: options.Index().SetName("document_unique_within_namespace").SetUnique(true),
 	}
 	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexDocumentIDInAuthenticSourceUniq})
 	if err != nil {

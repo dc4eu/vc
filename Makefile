@@ -210,7 +210,7 @@ clean_docker_images:
 ci_build: docker-build docker-push
 	$(info CI Build)
 
-proto: proto-status proto-registry
+proto: proto-status proto-registry proto-issuer
 
 proto-registry:
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go-grpc_out=. --go_opt=module=vc --go_out=. ./proto/v1-registry.proto

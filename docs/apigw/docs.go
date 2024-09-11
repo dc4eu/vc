@@ -623,33 +623,22 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "authentic_source",
-                "collect_id",
+                "authentic_source_person_id",
                 "credential_type",
-                "document_id",
-                "document_type",
-                "identity"
+                "document_type"
             ],
             "properties": {
                 "authentic_source": {
                     "type": "string"
                 },
-                "collect_id": {
+                "authentic_source_person_id": {
                     "type": "string"
                 },
                 "credential_type": {
                     "type": "string"
                 },
-                "document_id": {
-                    "type": "string"
-                },
                 "document_type": {
                     "type": "string"
-                },
-                "document_version": {
-                    "type": "string"
-                },
-                "identity": {
-                    "$ref": "#/definitions/model.Identity"
                 }
             }
         },
@@ -1043,8 +1032,8 @@ const docTemplate = `{
         "model.DocumentList": {
             "type": "object",
             "required": [
-                "document_display",
-                "meta"
+                "meta",
+                "qr"
             ],
             "properties": {
                 "document_display": {

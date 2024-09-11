@@ -45,25 +45,17 @@ definitions:
     properties:
       authentic_source:
         type: string
-      collect_id:
+      authentic_source_person_id:
         type: string
       credential_type:
         type: string
-      document_id:
-        type: string
       document_type:
         type: string
-      document_version:
-        type: string
-      identity:
-        $ref: '#/definitions/model.Identity'
     required:
     - authentic_source
-    - collect_id
+    - authentic_source_person_id
     - credential_type
-    - document_id
     - document_type
-    - identity
     type: object
   apiv1.DeleteDocumentIdentityRequest:
     properties:
@@ -373,8 +365,8 @@ definitions:
       qr:
         $ref: '#/definitions/model.QR'
     required:
-    - document_display
     - meta
+    - qr
     type: object
   model.IDMapping:
     properties:

@@ -4,7 +4,7 @@ package v1.status;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "vc/internal/gen/status/apiv1.status";
+option go_package = "vc/internal/gen/status/apiv1_status";
 
 
 message StatusRequest {}

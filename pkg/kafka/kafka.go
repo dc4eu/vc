@@ -53,7 +53,7 @@ func NewMessageSyncProducerClient(producerConfig *sarama.Config, ctx context.Con
 }
 
 func CommonProducerConfig(cfg *model.Cfg) *sarama.Config {
-	//TODO: set cfg from file
+	//TODO: set cfg from file - is now hardcoded
 	producerConfig := sarama.NewConfig()
 	producerConfig.Producer.Return.Successes = true
 	producerConfig.Producer.RequiredAcks = sarama.WaitForAll
@@ -65,7 +65,6 @@ func CommonProducerConfig(cfg *model.Cfg) *sarama.Config {
 	return producerConfig
 }
 
-// TODO: make sure that Close is called for every created instance of Producer
 func (c *MessageSyncProducerClient) Close(ctx context.Context) error {
 	err := c.producer.Close()
 	if err != nil {
@@ -115,7 +114,7 @@ type MessageConsumerClient struct {
 }
 
 func CommonConsumerConfig(cfg *model.Cfg) *sarama.Config {
-	//TODO: set cfg from file
+	//TODO: set cfg from file - is now hardcoded
 	consumerConfig := sarama.NewConfig()
 	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 	consumerConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
@@ -172,7 +171,6 @@ func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.Consume
 	return nil
 }
 
-// TODO: make sure that Close is called for every created instance of Consumer
 func (c *MessageConsumerClient) Close(ctx context.Context) error {
 	c.cancel()
 	c.wg.Wait()
@@ -202,13 +200,13 @@ func (cgh *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 	handler, exists := cgh.Handlers[claim.Topic()]
 	if !exists {
 		cgh.Log.Error(errors.New("No handler for"), "topic", claim.Topic())
-		//TODO: Hantera fel, potentiellt skicka till error-topic
+		//TODO: Hantera fel
 		return nil
 	}
 	for message := range claim.Messages() {
 		if err := handler.HandleMessage(session.Context(), message); err != nil {
 			cgh.Log.Error(err, "Error handling message", "topic", claim.Topic())
-			//TODO: Hantera fel, potentiellt skicka till error-topic
+			//TODO: Hantera fel, potentiellt skicka meddelande till error-topic
 		}
 		session.MarkMessage(message, "message consumed by handler")
 	}

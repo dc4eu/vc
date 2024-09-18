@@ -11,6 +11,7 @@ import (
 	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
 	"vc/pkg/configuration"
+	"vc/pkg/kafka"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
 )
@@ -45,7 +46,20 @@ func main() {
 		panic(err)
 	}
 
-	apiClient, err := apiv1.New(ctx, cfg, tracer, log.New("api_client"))
+	var kafkaMessageProducer *apiv1.KafkaMessageProducer
+	if cfg.Common.Kafka.Enabled {
+		// Start max one producer client for each service
+		var err error
+		kafkaMessageProducer, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log)
+		if err != nil {
+			panic(err)
+		}
+		services["kafkaMessageProducer"] = kafkaMessageProducer
+	} else {
+		log.Info("Kafka disabled - no Kafka message producer created")
+	}
+
+	apiClient, err := apiv1.New(ctx, cfg, tracer, kafkaMessageProducer, log.New("api_client"))
 	services["apiClient"] = apiClient
 	if err != nil {
 		panic(err)

@@ -20,7 +20,7 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 		return nil, err
 	}
 
-	if s.kafkaMessageProducer != nil {
+	if s.config.Common.Kafka.Enabled {
 		err := s.kafkaMessageProducer.Upload(request)
 		if err != nil {
 			span.SetStatus(codes.Error, err.Error())

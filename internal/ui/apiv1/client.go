@@ -9,22 +9,22 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg                  *model.Cfg
-	tp                   *trace.Tracer
-	log                  *logger.Log
-	apigwClient          *APIGWClient
-	mockasClient         *MockASClient
-	kafkaMessageProducer *KafkaMessageProducer
+	cfg            *model.Cfg
+	tp             *trace.Tracer
+	log            *logger.Log
+	apigwClient    *APIGWClient
+	mockasClient   *MockASClient
+	eventPublisher EventPublisher
 }
 
-func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, kafkaMessageProducer *KafkaMessageProducer, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, eventPublisher EventPublisher, log *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:                  cfg,
-		tp:                   tp,
-		log:                  log,
-		apigwClient:          NewAPIGWClient(cfg, tp, log.New("apiwg_client")),
-		mockasClient:         NewMockASClient(cfg, tp, log.New("mockas_client")),
-		kafkaMessageProducer: kafkaMessageProducer,
+		cfg:            cfg,
+		tp:             tp,
+		log:            log,
+		apigwClient:    NewAPIGWClient(cfg, tp, log.New("apiwg_client")),
+		mockasClient:   NewMockASClient(cfg, tp, log.New("mockas_client")),
+		eventPublisher: eventPublisher,
 	}
 
 	c.log.Info("Started")

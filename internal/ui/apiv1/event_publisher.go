@@ -12,6 +12,11 @@ import (
 	"vc/pkg/trace"
 )
 
+type EventPublisher interface {
+	MockNext(mockNextRequest *MockNextRequest) error
+	Close(ctx context.Context) error
+}
+
 type KafkaMessageProducer struct {
 	kafkaMessageProducerClient *kafka.MessageSyncProducerClient
 }

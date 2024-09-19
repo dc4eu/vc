@@ -77,7 +77,7 @@ type MockNextRequest struct {
 
 func (c *Client) MockNext(ctx context.Context, mnr *MockNextRequest) (any, error) {
 	if c.cfg.Common.Kafka.Enabled {
-		if err := c.kafkaMessageProducer.MockNext(mnr); err != nil {
+		if err := c.eventPublisher.MockNext(mnr); err != nil {
 			return nil, err
 		}
 		return nil, nil

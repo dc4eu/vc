@@ -11,8 +11,8 @@ import (
 	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
 	"vc/pkg/configuration"
-	"vc/pkg/kafka"
 	"vc/pkg/logger"
+	"vc/pkg/messagebrokers/kafka"
 	"vc/pkg/trace"
 )
 

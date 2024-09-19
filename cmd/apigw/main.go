@@ -12,9 +12,10 @@ import (
 	"vc/internal/apigw/httpserver"
 	"vc/internal/apigw/simplequeue"
 	"vc/pkg/configuration"
-	"vc/pkg/kafka"
 	"vc/pkg/kvclient"
 	"vc/pkg/logger"
+	"vc/pkg/messagebrokers"
+	"vc/pkg/messagebrokers/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
 )
@@ -62,35 +63,35 @@ func main() {
 		panic(err)
 	}
 
-	var kafkaMessageProducer *apiv1.KafkaMessageProducer
+	var eventPublisher apiv1.EventPublisher
 	if cfg.Common.Kafka.Enabled {
 		// Start max one producer client for each service
 		var err error
-		kafkaMessageProducer, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log)
+		eventPublisher, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log)
 		if err != nil {
 			panic(err)
 		}
-		services["kafkaMessageProducer"] = kafkaMessageProducer
+		services["eventPublisher"] = eventPublisher
 	} else {
-		log.Info("Kafka disabled - no Kafka message producer created")
+		log.Info("EventPublisher disabled in config")
 	}
 
 	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, simpleQueueService, tracer, cfg, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"), kafkaMessageProducer)
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"), eventPublisher)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
 	}
 
-	kafkaMessageConsumer, err := startNewKafkaMessangerConsumer(cfg, log, apiv1Client, tracer)
+	eventConsumer, err := startNewKafkaMessangerConsumer(cfg, log, apiv1Client, tracer)
 	if err != nil {
 		panic(err)
 	}
-	if kafkaMessageConsumer != nil {
-		services["kafkaMessageConsumer"] = kafkaMessageConsumer
+	if eventConsumer != nil {
+		services["eventConsumer"] = eventConsumer
 	}
 
 	// Handle sigterm and await termChan signal
@@ -117,7 +118,7 @@ func main() {
 	mainLog.Info("Stopped")
 }
 
-func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (*kafka.MessageConsumerClient, error) {
+func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebrokers.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
 	}

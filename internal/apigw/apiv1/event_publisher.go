@@ -6,11 +6,16 @@ import (
 	"errors"
 	"github.com/IBM/sarama"
 	"reflect"
-	"vc/pkg/kafka"
 	"vc/pkg/logger"
+	"vc/pkg/messagebrokers/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
 )
+
+type EventPublisher interface {
+	Upload(uploadRequest *UploadRequest) error
+	Close(ctx context.Context) error
+}
 
 type KafkaMessageProducer struct {
 	kafkaMessageProducerClient *kafka.MessageSyncProducerClient

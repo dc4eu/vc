@@ -10,8 +10,9 @@ import (
 	"vc/internal/mockas/apiv1"
 	"vc/internal/mockas/httpserver"
 	"vc/pkg/configuration"
-	"vc/pkg/kafka"
 	"vc/pkg/logger"
+	"vc/pkg/messagebrokers"
+	"vc/pkg/messagebrokers/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
 )
@@ -53,12 +54,12 @@ func main() {
 		panic(err)
 	}
 
-	kafkaMessageConsumer, err := startNewKafkaMessangerConsumer(cfg, log, apiv1Client, tracer)
+	eventConsumer, err := startNewKafkaMessangerConsumer(cfg, log, apiv1Client, tracer)
 	if err != nil {
 		panic(err)
 	}
-	if kafkaMessageConsumer != nil {
-		services["kafkaMessageConsumer"] = kafkaMessageConsumer
+	if eventConsumer != nil {
+		services["eventConsumer"] = eventConsumer
 	}
 
 	// Handle sigterm and await termChan signal
@@ -84,7 +85,7 @@ func main() {
 	mainLog.Info("Stopped")
 }
 
-func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (*kafka.MessageConsumerClient, error) {
+func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebrokers.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
 	}

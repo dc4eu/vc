@@ -1,13 +1,11 @@
 ---
-version: "3"
-
 services:
   apigw:
     container_name: "vc_dev_apigw"
     image: docker.sunet.se/dc4eu/apigw:latest
     restart: always
     volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
       - /var/log/sunet:/var/log/sunet
     depends_on:
       - redis
@@ -23,7 +21,7 @@ services:
     image: docker.sunet.se/dc4eu/ui:latest
     restart: always
     volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
     depends_on:
       - apigw
       - mockas
@@ -38,7 +36,7 @@ services:
     image: docker.sunet.se/dc4eu/issuer:latest
     restart: always
     volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
       - /var/log/sunet:/var/log/sunet
     depends_on:
       - redis
@@ -55,7 +53,7 @@ services:
     restart: always
     volumes:
       - ./cert:/cert:ro
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
     depends_on:
       - redis
       - mongo
@@ -70,7 +68,7 @@ services:
     image: docker.sunet.se/dc4eu/registry:latest
     restart: always
     volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
     depends_on:
       - redis
       - mongo
@@ -85,7 +83,7 @@ services:
     image: docker.sunet.se/dc4eu/persistent:latest
     restart: always
     volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
     depends_on:
       - redis
       - mongo
@@ -100,7 +98,7 @@ services:
     image: docker.sunet.se/dc4eu/mockas:latest
     restart: always
     volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.13

@@ -15,7 +15,7 @@ var (
 )
 
 //	@title		Datastore API
-//	@version	0.1.0
+//	@version	2.8
 //	@BasePath	/api/v1
 
 // Client holds the public api object

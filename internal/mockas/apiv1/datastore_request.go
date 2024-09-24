@@ -9,10 +9,9 @@ import (
 	"net/http"
 	"net/url"
 	"vc/pkg/helpers"
-	"vc/pkg/model"
 )
 
-func (c *Client) uploader(ctx context.Context, upload *model.Upload) (*http.Response, error) {
+func (c *Client) uploader(ctx context.Context, upload *uploadMock) (*http.Response, error) {
 	resp, err := c.call(
 		ctx,
 		http.MethodPost,

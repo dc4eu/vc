@@ -7,7 +7,7 @@ import (
 	"vc/pkg/helpers"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/lithammer/shortuuid/v4"
 )
 
 func (s *Service) middlewareDuration(ctx context.Context) gin.HandlerFunc {
@@ -19,10 +19,11 @@ func (s *Service) middlewareDuration(ctx context.Context) gin.HandlerFunc {
 	}
 }
 
-func (s *Service) middlewareTraceID(ctx context.Context) gin.HandlerFunc {
+func (s *Service) middlewareRequestID(ctx context.Context) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("req_id", uuid.NewString())
-		c.Header("req_id", c.GetString("req_id"))
+		id := shortuuid.New()
+		c.Set("req_id", id)
+		c.Header("req_id", id)
 		c.Next()
 	}
 }
@@ -44,6 +45,23 @@ func (s *Service) middlewareAuthLog(ctx context.Context) gin.HandlerFunc {
 		u, _ := c.Get("user")
 		c.Next()
 		log.Info("auth", "user", u, "req_id", c.GetString("req_id"))
+	}
+}
+
+func (s *Service) middlewareBasicAuth(ctx context.Context) gin.HandlerFunc {
+	ctx, span := s.tp.Start(ctx, "httpserver:middlewareBasicAuth")
+	defer span.End()
+
+	log := s.logger.New("http")
+	return func(c *gin.Context) {
+		user, pass, ok := c.Request.BasicAuth()
+		password, ok := s.config.APIGW.APIServer.BasicAuth.Users[user]
+		if !ok || pass != password {
+			c.AbortWithStatus(401)
+			return
+		}
+		c.Next()
+		log.Info("basic_auth", "user", user, "req_id", c.GetString("req_id"))
 	}
 }
 

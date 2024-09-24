@@ -26,7 +26,7 @@ func newExporter(ctx context.Context, cfg *model.Cfg) (sdktrace.SpanExporter, er
 	return otlptracehttp.New(ctx,
 		otlptracehttp.WithEndpoint(cfg.Common.Tracing.Addr),
 		otlptracehttp.WithInsecure(),
-		otlptracehttp.WithTimeout(10*time.Second),
+		otlptracehttp.WithTimeout(time.Duration(cfg.Common.Tracing.Timeout)*time.Second),
 	)
 }
 

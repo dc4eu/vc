@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
@@ -14,13 +15,21 @@ type MockInputData struct {
 	DocumentID              string `json:"document_id"`
 	AuthenticSource         string `json:"authentic_source"`
 	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
-	FirstName               string `json:"first_name"`
-	LastName                string `json:"last_name"`
-	DateOfBirth             string `json:"date_of_birth"`
+	GivenName               string `json:"given_name"`
+	FamilyName              string `json:"family_name"`
+	BirthDate               string `json:"birth_date"`
 	CollectID               string `json:"collect_id"`
 }
 
-func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload, error) {
+type uploadMock struct {
+	Meta                *model.MetaData        `json:"meta" validate:"required"`
+	Identities          []*model.Identity      `json:"identities,omitempty" validate:"required"`
+	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty" validate:"required"`
+	DocumentData        map[string]any         `json:"document_data" validate:"required"`
+	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
+}
+
+func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, error) {
 	c.log.Debug("mockOne")
 	person := gofakeit.Person()
 
@@ -28,17 +37,18 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload
 		data.AuthenticSourcePersonID = gofakeit.UUID()
 	}
 
-	if data.FirstName == "" {
-		data.FirstName = person.FirstName
+	if data.GivenName == "" {
+		data.GivenName = person.FirstName
 	}
 
-	if data.LastName == "" {
-		data.LastName = person.LastName
+	if data.FamilyName == "" {
+		data.FamilyName = person.LastName
 	}
 
-	if data.DateOfBirth == "" {
-		data.DateOfBirth = gofakeit.Date().String()
+	if data.BirthDate == "" {
+		data.BirthDate = gofakeit.Date().String()
 	}
+
 
 	if data.CollectID == "" {
 		data.CollectID = gofakeit.UUID()
@@ -48,51 +58,55 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload
 	}
 
 	meta := &model.MetaData{
-		AuthenticSource:         data.AuthenticSource,
-		AuthenticSourcePersonID: data.AuthenticSourcePersonID,
-		DocumentType:            data.DocumentType,
-		DocumentID:              data.DocumentID,
-		DocumentVersion:         "1.0.0",
-		FirstName:               data.FirstName,
-		LastName:                data.LastName,
-		DateOfBirth:             data.DateOfBirth,
-		CollectID:               data.CollectID,
-		ValidFrom:               gofakeit.Date().Unix(),
-		ValidTo:                 gofakeit.Date().Unix(),
-		MemberState:             c.randomISO31661Alpha2EU(),
+		AuthenticSource: data.AuthenticSource,
+		DocumentType:    data.DocumentType,
+		DocumentID:      data.DocumentID,
+		DocumentVersion: "1.0.0",
+		RealData:        false,
+		Collect: &model.Collect{
+			ID:         data.CollectID,
+			ValidUntil: time.Now().Add(10 * 24 * time.Hour).Unix(),
+		},
+		CredentialValidFrom: gofakeit.Date().Unix(),
+		CredentialValidTo:   gofakeit.Date().Unix(),
 		Revocation: &model.Revocation{
-			ID:                 gofakeit.UUID(),
-			Revoked:            gofakeit.Bool(),
-			FollowUpCredential: gofakeit.URL(),
-			RevokedAt:          gofakeit.Date().Unix(),
-			Reason:             gofakeit.RandomString([]string{"lost", "stolen", "expired"}),
+			ID:      gofakeit.UUID(),
+			Revoked: false,
+			Reference: model.RevocationReference{
+				AuthenticSource: data.AuthenticSource,
+				DocumentType:    data.DocumentType,
+				DocumentID:      data.DocumentID,
+			},
+			//Reason: gofakeit.RandomString([]string{"lost", "stolen", "expired"}),
 		},
 	}
 
-	c.log.Debug("1")
-
-	identity := &model.Identity{
-		Version:    "1.0.0",
-		FamilyName: person.LastName,
-		GivenName:  person.FirstName,
-		BirthDate:  gofakeit.Date().String(),
+	identities := []*model.Identity{
+		{
+			AuthenticSourcePersonID: data.AuthenticSourcePersonID,
+			Schema: &model.IdentitySchema{
+				Name:    "SE",
+				Version: "1.0.2",
+			},
+			FamilyName: data.FamilyName,
+			GivenName:  data.GivenName,
+			BirthDate:  data.BirthDate,
+		},
 	}
 
-	attestation := &model.Attestation{
-		Version:          "1.0.0",
-		Type:             data.DocumentType,
-		DescriptionShort: "short",
-		DescriptionLong:  "long",
+	documentDisplay := &model.DocumentDisplay{
+		Version: "1.0.0",
+		Type:    data.DocumentType,
 		DescriptionStructured: map[string]any{
 			"en": "issuer",
 			"sv": "utfärdare",
 		},
 	}
 
-	mockUpload := &model.Upload{
-		Meta:        meta,
-		Identity:    identity,
-		Attestation: attestation,
+	mockUpload := &uploadMock{
+		Meta:            meta,
+		Identities:      identities,
+		DocumentDisplay: documentDisplay,
 	}
 
 	switch data.DocumentType {
@@ -103,6 +117,8 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*model.Upload
 	default:
 		return nil, model.ErrNoKnownDocumentType
 	}
+
+	mockUpload.DocumentDataVersion = "1.0.0"
 
 	c.log.Debug("2")
 	if err := helpers.CheckSimple(mockUpload); err != nil {

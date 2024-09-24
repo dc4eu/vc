@@ -3,10 +3,9 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
-	apiv1_registry "vc/internal/gen/registry/apiv1.registry"
+	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/ehic"
 	"vc/pkg/helpers"
-	"vc/pkg/model"
 	"vc/pkg/pda1"
 
 	"github.com/masv3971/gosdjwt"
@@ -35,15 +34,8 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 
 // CreateCredentialRequest is the request for Credential
 type CreateCredentialRequest struct {
-	AuthenticSource         string `json:"authentic_source" validate:"required"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
-	DocumentID              string `json:"document_id" validate:"required"`
-	DocumentType            string `json:"document_type" validate:"required"`
-	DocumentVersion         string `json:"document_version" validate:"required"`
-	CollectID               string `json:"collect_id" validate:"required"`
-	DateOfBirth             string `json:"date_of_birth" validate:"required"`
-	LastName                string `json:"last_name" validate:"required"`
-	FirstName               string `json:"first_name" validate:"required"`
+	DocumentType string `json:"document_type" validate:"required"`
+	DocumentData []byte `json:"document_data" validate:"required"`
 }
 
 // CreateCredentialReply is the reply for Credential
@@ -52,7 +44,7 @@ type CreateCredentialReply struct {
 }
 
 // CreateCredential creates a credential
-func (c *Client) CreateCredential(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
+func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
 	ctx, span := c.tp.Start(ctx, "apiv1:CreateCredential")
 	defer span.End()
 
@@ -61,62 +53,35 @@ func (c *Client) CreateCredential(ctx context.Context, req *CreateCredentialRequ
 		return nil, err
 	}
 
-	// IDMapping
-
-	// GetDocument
-	uploadDoc, err := c.db.VCDatastoreColl.GetDocument(ctx, &model.MetaData{
-		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		DocumentVersion:         req.DocumentVersion,
-		DocumentType:            req.DocumentType,
-		DocumentID:              req.DocumentID,
-		FirstName:               req.FirstName,
-		LastName:                req.LastName,
-		DateOfBirth:             req.DateOfBirth,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if uploadDoc == nil {
-		return nil, helpers.ErrNoDocumentFound
-	}
-	if uploadDoc.DocumentData == nil {
-		return nil, helpers.ErrNoDocumentData
-	}
-
 	// Build SDJWT
 	var sdjwt *gosdjwt.SDJWT
-	//var err error
 	switch req.DocumentType {
 	case "PDA1":
-		d, err := json.Marshal(uploadDoc.DocumentData)
-		if err != nil {
-			return nil, err
-		}
 		doc := &pda1.Document{}
-		if err := json.Unmarshal(d, &doc); err != nil {
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
+		var err error
 		sdjwt, err = c.pda1Client.sdjwt(ctx, doc)
 		if err != nil {
 			return nil, err
 		}
 
+		c.auditLog.AddAuditLog(ctx, "create_credential", sdjwt.PresentationFlat())
+
 	case "EHIC":
-		d, err := json.Marshal(uploadDoc.DocumentData)
-		if err != nil {
-			return nil, err
-		}
 		doc := &ehic.Document{}
-		if err := json.Unmarshal(d, &doc); err != nil {
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
+		var err error
 		sdjwt, err = c.ehicClient.sdjwt(ctx, doc)
 		if err != nil {
 			return nil, err
 		}
-	}
 
+		c.auditLog.AddAuditLog(ctx, "create_credential", sdjwt.PresentationFlat())
+	}
 	reply := &CreateCredentialReply{
 		Data: sdjwt.PresentationFlat(),
 	}
@@ -157,7 +122,7 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 
 	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	conn, err := grpc.Dial(c.cfg.Registry.RPCServer.Addr, optInsecure)
+	conn, err := grpc.Dial(c.cfg.Registry.GRPCServer.Addr, optInsecure)
 	if err != nil {
 		return nil, err
 	}
@@ -170,6 +135,9 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 	if err != nil {
 		return nil, err
 	}
+
+	// AuditLog
+	c.auditLog.AddAuditLog(ctx, "revoke", "mura")
 
 	reply := &RevokeReply{
 		Data: struct {

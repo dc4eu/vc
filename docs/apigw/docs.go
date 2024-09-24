@@ -15,6 +15,126 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/consent": {
+            "post": {
+                "description": "Add consent endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "AddConsent",
+                "operationId": "add-consent",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.AddConsentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/consent/get": {
+            "post": {
+                "description": "Get consent endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "GetConsent",
+                "operationId": "get-consent",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.GetConsentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.Consent"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/credential": {
+            "post": {
+                "description": "Create credential endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "Credential",
+                "operationId": "create-credential",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.CredentialRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/apiv1_issuer.MakeSDJWTReply"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/document": {
             "post": {
                 "description": "Get document endpoint",
@@ -94,7 +214,7 @@ const docTemplate = `{
         },
         "/document/collect_id": {
             "post": {
-                "description": "Get document by collect code endpoint",
+                "description": "Get one document with collect id",
                 "consumes": [
                     "application/json"
                 ],
@@ -122,6 +242,121 @@ const docTemplate = `{
                         "description": "Success",
                         "schema": {
                             "$ref": "#/definitions/apiv1.GetDocumentCollectIDReply"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/identity": {
+            "put": {
+                "description": "Adding array of identities to one document",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "AddDocumentIdentity",
+                "operationId": "add-document-identity",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.AddDocumentIdentityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete identity to document endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "DeleteDocumentIdentity",
+                "operationId": "delete-document-identity",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.DeleteDocumentIdentityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/list": {
+            "post": {
+                "description": "List documents for an identity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "DocumentList",
+                "operationId": "document-list",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.DocumentListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/apiv1.DocumentListReply"
                         }
                     },
                     "400": {
@@ -171,9 +406,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/id_mapping": {
+        "/identity/mapping": {
             "post": {
-                "description": "ID mapping endpoint",
+                "description": "Identity mapping endpoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -183,8 +418,8 @@ const docTemplate = `{
                 "tags": [
                     "dc4eu"
                 ],
-                "summary": "IDMapping",
-                "operationId": "id-mapping",
+                "summary": "IdentityMapping",
+                "operationId": "identity-mapping",
                 "parameters": [
                     {
                         "description": " ",
@@ -192,7 +427,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.MetaData"
+                            "$ref": "#/definitions/apiv1.IdentityMappingRequest"
                         }
                     }
                 ],
@@ -200,7 +435,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/apiv1.IDMappingReply"
+                            "$ref": "#/definitions/apiv1.IdentityMappingReply"
                         }
                     },
                     "400": {
@@ -242,47 +477,6 @@ const docTemplate = `{
                         "description": "Success",
                         "schema": {
                             "$ref": "#/definitions/apiv1.NotificationReply"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/helpers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/portal": {
-            "post": {
-                "description": "Get portal data endpoint",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "dc4eu"
-                ],
-                "summary": "Portal",
-                "operationId": "portal",
-                "parameters": [
-                    {
-                        "description": " ",
-                        "name": "req",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/apiv1.PortalRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/apiv1.PortalReply"
                         }
                     },
                     "400": {
@@ -375,8 +569,113 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "apiv1.AddConsentRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "authentic_source_person_id"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "authentic_source_person_id": {
+                    "type": "string"
+                },
+                "consent_to": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.AddDocumentIdentityRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "document_id",
+                "document_type",
+                "identities"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "description": "required: true\nexample: SUNET",
+                    "type": "string"
+                },
+                "document_id": {
+                    "description": "required: true\nexample: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8",
+                    "type": "string"
+                },
+                "document_type": {
+                    "description": "required: true\nexample: PDA1",
+                    "type": "string"
+                },
+                "identities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Identity"
+                    }
+                }
+            }
+        },
+        "apiv1.CredentialRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "authentic_source_person_id",
+                "credential_type",
+                "document_type"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "authentic_source_person_id": {
+                    "type": "string"
+                },
+                "credential_type": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.DeleteDocumentIdentityRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "authentic_source_person_id",
+                "document_id",
+                "document_type"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "description": "required: true\nexample: SUNET",
+                    "type": "string"
+                },
+                "authentic_source_person_id": {
+                    "description": "required: true\nexample: 83c1a3c8-3e1a-11ef-9c01-6b6642c8d638",
+                    "type": "string"
+                },
+                "document_id": {
+                    "description": "required: true\nexample: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8",
+                    "type": "string"
+                },
+                "document_type": {
+                    "description": "required: true\nexample: PDA1",
+                    "type": "string"
+                }
+            }
+        },
         "apiv1.DeleteDocumentRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "document_id",
+                "document_type"
+            ],
             "properties": {
                 "authentic_source": {
                     "description": "required: true\nexample: skatteverket",
@@ -385,6 +684,59 @@ const docTemplate = `{
                 "document_id": {
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
                     "type": "string"
+                },
+                "document_type": {
+                    "description": "required: true\nexample: PDA1",
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1.DocumentListReply": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.DocumentList"
+                    }
+                }
+            }
+        },
+        "apiv1.DocumentListRequest": {
+            "type": "object",
+            "required": [
+                "identity"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "document_type": {
+                    "type": "string"
+                },
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
+                },
+                "valid_from": {
+                    "type": "integer"
+                },
+                "valid_to": {
+                    "type": "integer"
+                }
+            }
+        },
+        "apiv1.GetConsentRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "authentic_source_person_id"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "type": "string"
+                },
+                "authentic_source_person_id": {
+                    "type": "string"
                 }
             }
         },
@@ -392,7 +744,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/model.Upload"
+                    "$ref": "#/definitions/model.Document"
                 }
             }
         },
@@ -423,13 +775,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "properties": {
-                        "document_data": {},
-                        "meta": {
-                            "$ref": "#/definitions/model.MetaData"
-                        }
-                    }
+                    "$ref": "#/definitions/model.Document"
                 }
             }
         },
@@ -452,16 +798,27 @@ const docTemplate = `{
                 }
             }
         },
-        "apiv1.IDMappingReply": {
+        "apiv1.IdentityMappingReply": {
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object",
-                    "properties": {
-                        "authentic_source_person_id": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/model.IDMapping"
+                }
+            }
+        },
+        "apiv1.IdentityMappingRequest": {
+            "type": "object",
+            "required": [
+                "authentic_source",
+                "identity"
+            ],
+            "properties": {
+                "authentic_source": {
+                    "description": "required: true\nexample: SUNET",
+                    "type": "string"
+                },
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
                 }
             }
         },
@@ -475,6 +832,11 @@ const docTemplate = `{
         },
         "apiv1.NotificationRequest": {
             "type": "object",
+            "required": [
+                "authentic_source",
+                "document_id",
+                "document_type"
+            ],
             "properties": {
                 "authentic_source": {
                     "type": "string"
@@ -484,41 +846,6 @@ const docTemplate = `{
                 },
                 "document_type": {
                     "type": "string"
-                }
-            }
-        },
-        "apiv1.PortalReply": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Upload"
-                    }
-                }
-            }
-        },
-        "apiv1.PortalRequest": {
-            "type": "object",
-            "required": [
-                "authentic_source",
-                "authentic_source_person_id"
-            ],
-            "properties": {
-                "authentic_source": {
-                    "type": "string"
-                },
-                "authentic_source_person_id": {
-                    "type": "string"
-                },
-                "document_type": {
-                    "type": "string"
-                },
-                "valid_from": {
-                    "type": "integer"
-                },
-                "valid_to": {
-                    "type": "integer"
                 }
             }
         },
@@ -574,24 +901,43 @@ const docTemplate = `{
         "apiv1.UploadRequest": {
             "type": "object",
             "required": [
-                "attestation",
                 "document_data",
-                "identity",
+                "document_data_version",
                 "meta"
             ],
             "properties": {
-                "attestation": {
-                    "$ref": "#/definitions/model.Attestation"
-                },
                 "document_data": {
                     "type": "object",
                     "additionalProperties": {}
                 },
-                "identity": {
-                    "$ref": "#/definitions/model.Identity"
+                "document_data_version": {
+                    "type": "string"
+                },
+                "document_display": {
+                    "$ref": "#/definitions/model.DocumentDisplay"
+                },
+                "identities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Identity"
+                    }
                 },
                 "meta": {
                     "$ref": "#/definitions/model.MetaData"
+                }
+            }
+        },
+        "apiv1_issuer.MakeSDJWTReply": {
+            "type": "object",
+            "properties": {
+                "Disclosures": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "JWT": {
+                    "type": "string"
                 }
             }
         },
@@ -612,24 +958,62 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Attestation": {
+        "model.Collect": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "required: false\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
+                    "type": "string"
+                },
+                "valid_until": {
+                    "description": "required: false\nexample: 509567558\nformat: int64",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Consent": {
             "type": "object",
             "required": [
-                "description_long",
-                "description_short",
+                "consent_to",
+                "created_at",
+                "session_id"
+            ],
+            "properties": {
+                "consent_to": {
+                    "description": "required: true\nexample: \"Using my data for research\"",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "required: true\nexample: 509567558\nformat: int64",
+                    "type": "integer"
+                },
+                "session_id": {
+                    "description": "required: true\nexample: \"sess-123\"",
+                    "type": "string"
+                }
+            }
+        },
+        "model.Document": {
+            "type": "object",
+            "required": [
+                "document_data",
+                "meta"
+            ],
+            "properties": {
+                "document_data": {},
+                "meta": {
+                    "$ref": "#/definitions/model.MetaData"
+                }
+            }
+        },
+        "model.DocumentDisplay": {
+            "type": "object",
+            "required": [
                 "description_structured",
                 "type",
                 "version"
             ],
             "properties": {
-                "description_long": {
-                    "description": "TODO(masv): change TextLong to DescriptionLong\nrequired: true\nexample: European Health Insurance Card",
-                    "type": "string"
-                },
-                "description_short": {
-                    "description": "TODO(masv): ShortText to DescriptionShort, more descriptive, pun intended\nrequired: true\nexample: EHIC",
-                    "type": "string"
-                },
                 "description_structured": {
                     "description": "DescriptionStructured is a map of structured descriptions\nrequired: true\nexample: {\"en\": \"European Health Insurance Card\", \"sv\": \"Europeiskt sjukförsäkringskortet\"}",
                     "type": "object",
@@ -640,7 +1024,33 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
-                    "description": "TODO(masv): change AttestationDataVersion to AttestationVersion, data seems redundant\nrequired: true\nexample: \"1.0.0\"",
+                    "description": "required: true\nexample: \"1.0.0\"",
+                    "type": "string"
+                }
+            }
+        },
+        "model.DocumentList": {
+            "type": "object",
+            "required": [
+                "meta",
+                "qr"
+            ],
+            "properties": {
+                "document_display": {
+                    "$ref": "#/definitions/model.DocumentDisplay"
+                },
+                "meta": {
+                    "$ref": "#/definitions/model.MetaData"
+                },
+                "qr": {
+                    "$ref": "#/definitions/model.QR"
+                }
+            }
+        },
+        "model.IDMapping": {
+            "type": "object",
+            "properties": {
+                "authentic_source_person_id": {
                     "type": "string"
                 }
             }
@@ -648,12 +1058,13 @@ const docTemplate = `{
         "model.Identity": {
             "type": "object",
             "required": [
-                "birth_date",
-                "family_name",
-                "given_name",
-                "version"
+                "schema"
             ],
             "properties": {
+                "authentic_source_person_id": {
+                    "description": "required: true\nexample: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a",
+                    "type": "string"
+                },
                 "birth_city": {
                     "description": "required: false\nexample: Stockholm",
                     "type": "string"
@@ -726,8 +1137,23 @@ const docTemplate = `{
                     "description": "required: false\nexample: baker street",
                     "type": "string"
                 },
+                "schema": {
+                    "$ref": "#/definitions/model.IdentitySchema"
+                }
+            }
+        },
+        "model.IdentitySchema": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "description": "required: true\nexample: \"SE\"",
+                    "type": "string"
+                },
                 "version": {
-                    "description": "required: true\nexample: \"1.0.0\"",
+                    "description": "required: false\nexample: \"1.0.0\"",
                     "type": "string"
                 }
             }
@@ -736,37 +1162,25 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "authentic_source",
-                "authentic_source_person_id",
-                "date_of_birth",
                 "document_id",
                 "document_type",
-                "document_version",
-                "first_name",
-                "last_name",
-                "member_state",
-                "valid_from",
-                "valid_to"
+                "document_version"
             ],
             "properties": {
                 "authentic_source": {
                     "description": "required: true\nexample: SUNET",
                     "type": "string"
                 },
-                "authentic_source_person_id": {
-                    "description": "required: true\nexample: 65636cbc-c03f-11ee-8dc4-67135cc9bd8a",
-                    "type": "string"
+                "collect": {
+                    "$ref": "#/definitions/model.Collect"
                 },
-                "collect_id": {
-                    "description": "required: false\nexample: 98fe67fc-c03f-11ee-bbee-4345224d414f",
-                    "type": "string"
-                },
-                "created_at": {
-                    "description": "required: false\nexample: 509567558",
+                "credential_valid_from": {
+                    "description": "required: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 },
-                "date_of_birth": {
-                    "description": "required: true\nexample: 1970-01-01",
-                    "type": "string"
+                "credential_valid_to": {
+                    "description": "required: false\nexample: 509567558\nformat: int64",
+                    "type": "integer"
                 },
                 "document_id": {
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
@@ -784,17 +1198,9 @@ const docTemplate = `{
                     "description": "required: true\nexample: \"1.0.0\"",
                     "type": "string"
                 },
-                "first_name": {
-                    "description": "required: true\nexample: John",
-                    "type": "string"
-                },
-                "last_name": {
-                    "description": "required: true\nexample: Doe",
-                    "type": "string"
-                },
-                "member_state": {
-                    "description": "required: true\nexample: \"DE\"",
-                    "type": "string"
+                "real_data": {
+                    "description": "RealData is a flag to indicate if the document contains real data\nrequired: true\nexample: true",
+                    "type": "boolean"
                 },
                 "revocation": {
                     "description": "Revocation is a collection of fields representing a revocation",
@@ -803,14 +1209,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/model.Revocation"
                         }
                     ]
-                },
-                "valid_from": {
-                    "description": "required: false\nexample: 509567558",
-                    "type": "integer"
-                },
-                "valid_to": {
-                    "description": "required: false\nexample: 509567558",
-                    "type": "integer"
                 }
             }
         },
@@ -822,9 +1220,11 @@ const docTemplate = `{
             ],
             "properties": {
                 "base64_image": {
+                    "description": "required: true\nexample: \"ZWFzdGVyIGVnZyE=\"",
                     "type": "string"
                 },
                 "deep_link": {
+                    "description": "required: true\nexample: \"https://example.com\"",
                     "type": "string"
                 }
             }
@@ -832,10 +1232,6 @@ const docTemplate = `{
         "model.Revocation": {
             "type": "object",
             "properties": {
-                "follow_up_credential": {
-                    "description": "FollowUpCredential is the ID of the follow-up credential\nrequired: false\nexample: https://example.com/credential/?collect_id=8dbd2680-c03f-11ee-a21b-034aafe41222",
-                    "type": "string"
-                },
                 "id": {
                     "description": "ID is the ID of the revocation\nrequired: false\nexample: 8dbd2680-c03f-11ee-a21b-034aafe41222",
                     "type": "string"
@@ -844,40 +1240,30 @@ const docTemplate = `{
                     "description": "Reason is the reason for revocation\nrequired: false\nexample: lost or stolen",
                     "type": "string"
                 },
+                "reference": {
+                    "$ref": "#/definitions/model.RevocationReference"
+                },
                 "revoked": {
                     "description": "Revoked is a flag to indicate if the document has been revoked\nrequired: false\nexample: false",
                     "type": "boolean"
                 },
                 "revoked_at": {
-                    "description": "RevokedAt is the time the document was revoked or going to be revoked\nrequired: false\nexample: 509567558",
+                    "description": "RevokedAt is the time the document was revoked or going to be revoked\nrequired: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 }
             }
         },
-        "model.Upload": {
+        "model.RevocationReference": {
             "type": "object",
-            "required": [
-                "attestation",
-                "document_data",
-                "identity",
-                "meta"
-            ],
             "properties": {
-                "attestation": {
-                    "$ref": "#/definitions/model.Attestation"
+                "authentic_source": {
+                    "type": "string"
                 },
-                "document_data": {
-                    "type": "object",
-                    "additionalProperties": {}
+                "document_id": {
+                    "type": "string"
                 },
-                "identity": {
-                    "$ref": "#/definitions/model.Identity"
-                },
-                "meta": {
-                    "$ref": "#/definitions/model.MetaData"
-                },
-                "qr": {
-                    "$ref": "#/definitions/model.QR"
+                "document_type": {
+                    "type": "string"
                 }
             }
         }
@@ -886,7 +1272,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.1.0",
+	Version:          "2.8",
 	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},

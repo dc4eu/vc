@@ -2,7 +2,7 @@ package httpserver
 
 import (
 	"context"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/issuer/apiv1"
 
 	"go.opentelemetry.io/otel/codes"
@@ -19,7 +19,7 @@ func (s *Service) endpointCreateCredential(ctx context.Context, c *gin.Context) 
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.CreateCredential(ctx, request)
+	reply, err := s.apiv1.MakeSDJWT(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

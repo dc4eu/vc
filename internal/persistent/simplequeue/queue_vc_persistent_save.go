@@ -94,7 +94,7 @@ func (s *VCPersistentSave) Worker(ctx context.Context) error {
 			return err
 		case task := <-taskChan:
 			s.log.Info("Got task", "task", task.Data)
-			document := &model.Upload{}
+			document := &model.CompleteDocument{}
 			if err := json.Unmarshal([]byte(task.Data), document); err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				s.log.Error(err, "Unmarshal failed")

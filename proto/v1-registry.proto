@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package v1.registry;
 
-option go_package = "vc/internal/gen/registry/apiv1.registry";
+option go_package = "vc/internal/gen/registry/apiv1_registry";
 
 import "v1-status-model.proto";
 

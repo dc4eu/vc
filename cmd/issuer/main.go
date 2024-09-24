@@ -7,7 +7,9 @@ import (
 	"sync"
 	"syscall"
 	"vc/internal/issuer/apiv1"
+	"vc/internal/issuer/auditlog"
 	"vc/internal/issuer/db"
+	"vc/internal/issuer/grpcserver"
 	"vc/internal/issuer/httpserver"
 	"vc/internal/issuer/simplequeue"
 	"vc/pkg/configuration"
@@ -41,6 +43,12 @@ func main() {
 		panic(err)
 	}
 
+	auditLogService, err := auditlog.New(ctx, cfg, log.New("auditlog"))
+	services["auditLogService"] = auditLogService
+	if err != nil {
+		panic(err)
+	}
+
 	rpcClients, err := rpcclient.New(cfg, log.New("rpc"))
 	if err != nil {
 		panic(err)
@@ -62,12 +70,17 @@ func main() {
 		panic(err)
 	}
 
-	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, kvClient, dbService, cfg, tracer, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, simpleQueueService, rpcClients, kvClient, dbService, auditLogService, cfg, tracer, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
 	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
+	if err != nil {
+		panic(err)
+	}
+	grpcService, err := grpcserver.New(ctx, cfg, apiv1Client, log.New("grpcserver"))
+	services["grpcService"] = grpcService
 	if err != nil {
 		panic(err)
 	}

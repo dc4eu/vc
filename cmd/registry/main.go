@@ -9,7 +9,6 @@ import (
 	"vc/internal/registry/apiv1"
 	"vc/internal/registry/db"
 	"vc/internal/registry/httpserver"
-	"vc/internal/registry/rpcserver"
 	"vc/internal/registry/tree"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
@@ -48,12 +47,6 @@ func main() {
 	}
 
 	apiv1Client, err := apiv1.New(ctx, cfg, treeService, log.New("apiv1"))
-	if err != nil {
-		panic(err)
-	}
-
-	rpcServer, err := rpcserver.New(ctx, apiv1Client, cfg, log.New("rpc"))
-	services["rpcServer"] = rpcServer
 	if err != nil {
 		panic(err)
 	}

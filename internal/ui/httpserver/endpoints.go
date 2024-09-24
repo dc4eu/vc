@@ -3,11 +3,12 @@ package httpserver
 import (
 	"context"
 	"errors"
+	"time"
+	"vc/internal/gen/status/apiv1_status"
+	"vc/internal/ui/apiv1"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"time"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
-	"vc/internal/ui/apiv1"
 )
 
 func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {

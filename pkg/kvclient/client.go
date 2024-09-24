@@ -3,7 +3,7 @@ package kvclient
 import (
 	"context"
 	"time"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"

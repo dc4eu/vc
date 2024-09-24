@@ -25,10 +25,6 @@ type Service struct {
 	log         *logger.Log
 	cfg         *model.Cfg
 
-	LadokSign           queue
-	LadokValidate       queue
-	LadokDelSigned      queue
-	LadokPersistentSave queue
 	VCPersistentSave    queue
 	VCPersistentGet     queue
 	VCPersistentDelete  queue

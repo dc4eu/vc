@@ -48,6 +48,23 @@ func (s *Service) middlewareAuthLog(ctx context.Context) gin.HandlerFunc {
 	}
 }
 
+func (s *Service) middlewareBasicAuth(ctx context.Context) gin.HandlerFunc {
+	ctx, span := s.tp.Start(ctx, "httpserver:middlewareBasicAuth")
+	defer span.End()
+
+	log := s.logger.New("http")
+	return func(c *gin.Context) {
+		user, pass, ok := c.Request.BasicAuth()
+		password, ok := s.config.APIGW.APIServer.BasicAuth.Users[user]
+		if !ok || pass != password {
+			c.AbortWithStatus(401)
+			return
+		}
+		c.Next()
+		log.Info("basic_auth", "user", user, "req_id", c.GetString("req_id"))
+	}
+}
+
 func (s *Service) middlewareValidationCert(ctx context.Context) gin.HandlerFunc {
 	ctx, span := s.tp.Start(ctx, "httpserver:middlewareValidationCert")
 	defer span.End()

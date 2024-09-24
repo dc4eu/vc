@@ -44,6 +44,9 @@ github.com/cloudwego/base64x
 ## explicit; go 1.16
 github.com/cloudwego/iasm/expr
 github.com/cloudwego/iasm/x86_64
+# github.com/creasty/defaults v1.8.0
+## explicit; go 1.14
+github.com/creasty/defaults
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew

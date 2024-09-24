@@ -6,6 +6,7 @@ toolchain go1.22.0
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
+	github.com/creasty/defaults v1.8.0
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0

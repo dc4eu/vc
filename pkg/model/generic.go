@@ -118,7 +118,7 @@ type MetaData struct {
 	// RealData is a flag to indicate if the document contains real data
 	// required: true
 	// example: true
-	RealData bool `json:"real_data,omitempty" bson:"real_data" validate:"required"`
+	RealData bool `json:"real_data" bson:"real_data"`
 
 	Collect *Collect `json:"collect,omitempty" bson:"collect"`
 

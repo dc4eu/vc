@@ -163,8 +163,8 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQue
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": query.Meta.AuthenticSource},
 		"meta.document_type":    bson.M{"$eq": query.Meta.DocumentType},
-		//"meta.document_id":                      bson.M{"$eq": query.Meta.DocumentID},
-		"identities.authentic_source_person_id": bson.M{"$eq": query.Identity.AuthenticSourcePersonID},
+		"meta.document_id":      bson.M{"$eq": query.Meta.DocumentID},
+		//"identities.authentic_source_person_id": bson.M{"$eq": query.Identity.AuthenticSourcePersonID},
 	}
 	opt := options.FindOne().SetProjection(bson.M{
 		"meta":          1,

@@ -5,6 +5,7 @@ type APIServer struct {
 	Addr       string            `yaml:"addr" validate:"required"`
 	PublicKeys map[string]string `yaml:"public_keys"`
 	TLS        TLS               `yaml:"tls" validate:"omitempty"`
+	BasicAuth  BasicAuth         `yaml:"basic_auth"`
 }
 
 // TLS holds the tls configuration
@@ -129,6 +130,12 @@ type Datastore struct {
 	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
+// BasicAuth holds the basic auth configuration
+type BasicAuth struct {
+	Users   map[string]string `yaml:"users"`
+	Enabled bool              `yaml:"enabled"`
+}
+
 // APIGW holds the datastore configuration
 type APIGW struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
@@ -138,7 +145,7 @@ type APIGW struct {
 type OTEL struct {
 	Addr    string `yaml:"addr" validate:"required"`
 	Type    string `yaml:"type" validate:"required"`
-	Timeout int64  `yaml:"timeout" validate:"required"`
+	Timeout int64  `yaml:"timeout" default:"10"`
 }
 
 // UI holds the user-interface configuration

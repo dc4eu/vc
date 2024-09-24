@@ -11,6 +11,8 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
+
+	"github.com/creasty/defaults"
 )
 
 type envVars struct {
@@ -28,6 +30,10 @@ func Parse(ctx context.Context, logger *logger.Log) (*model.Cfg, error) {
 	configPath := env.EduIDConfigYAML
 
 	cfg := &model.Cfg{}
+
+	if err := defaults.Set(cfg); err != nil {
+		return nil, err
+	}
 
 	configFile, err := os.ReadFile(filepath.Clean(configPath))
 	if err != nil {

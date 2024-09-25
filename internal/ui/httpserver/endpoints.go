@@ -9,8 +9,6 @@ import (
 	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/ui/apiv1"
-
-	apigw_apiv1 "vc/internal/apigw/apiv1"
 )
 
 func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {

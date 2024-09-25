@@ -5,8 +5,6 @@ import (
 	"errors"
 	"time"
 	apiv1_apigw "vc/internal/apigw/apiv1"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
-	apigw_apiv1 "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 )

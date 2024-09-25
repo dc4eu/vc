@@ -121,7 +121,7 @@ services:
     image: docker.sunet.se/dc4eu/mockas:latest
     restart: always
     volumes:
-      - ./dev_config_docker.yaml:/config.yaml:ro
+      - ./config.yaml:/config.yaml:ro
     depends_on:
       - kafka0
       - kafka1

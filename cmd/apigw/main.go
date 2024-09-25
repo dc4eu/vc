@@ -121,6 +121,7 @@ func main() {
 func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebrokers.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
+		return nil, nil
 	}
 
 	kafkaMessageConsumerClient, err := kafka.NewMessageConsumerClient(kafka.CommonConsumerConfig(cfg), cfg.Common.Kafka.Brokers, log.New("kafka_consumer_client"))

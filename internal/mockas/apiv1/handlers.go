@@ -3,7 +3,7 @@ package apiv1
 import (
 	"context"
 	"errors"
-	apiv1_status "vc/internal/gen/status/apiv1.status"
+	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 )
 
@@ -28,6 +28,8 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 
 	resp, err := c.uploader(ctx, mockUpload)
 	if err != nil {
+		//TODO ta bort nedan error logging?
+		c.log.Error(err, "failed to upload", "mockUpload", mockUpload)
 		return nil, err
 	}
 

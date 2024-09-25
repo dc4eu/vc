@@ -3,6 +3,7 @@
 NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
+CURRENT_BRANCH 			:= $(shell git rev-parse --abbrev-ref HEAD)
 
 test: test-verifier
 
@@ -172,7 +173,16 @@ docker-tag-ui:
 docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-registry docker-tag-persistent docker-tag-mockas docker-tag-ui
 	$(info Tagging docker images)
 
-release:
+check_current_branch:
+	$(info Mura branch: $(CURRENT_BRANCH))
+ifeq ($(CURRENT_BRANCH),main)
+	$(info main branch)
+else
+	$(error Not on main branch)
+endif
+
+
+release: check_current_branch
 	$(info Release version: $(VERSION))
 	git tag $(VERSION)
 	git push origin ${VERSION}
@@ -182,6 +192,10 @@ release:
 	$(info tag $(NEWTAG) from $(VERSION))
 	make docker-tag
 	make VERSION=$(NEWTAG) docker-push
+
+	$(info point latest to $(NEWTAG))
+	make NEWTAG=latest docker-tag
+	make VERSION=latest docker-push
 
 docker-pull:
 	$(info Pulling docker images)

@@ -80,7 +80,7 @@ apigw:
   api_server:
     addr: :8080
     basic_auth:
-      enabled: true
+      enabled: false
       users:
         admin: "secret123"
 

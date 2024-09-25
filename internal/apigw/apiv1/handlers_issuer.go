@@ -47,12 +47,10 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 	// IDMapping
 
 	// GetDocument
-	document, err := c.db.VCDatastoreColl.GetDocument(ctx, &db.GetDocumentQuery{
+	document, err := c.db.VCDatastoreColl.GetDocumentForCredential(ctx, &db.GetDocumentForCredential{
 		Meta: &model.MetaData{
 			AuthenticSource: req.AuthenticSource,
-			//DocumentVersion: req.DocumentVersion,
-			DocumentType: req.DocumentType,
-			//DocumentID:      req.DocumentID,
+			DocumentType:    req.DocumentType,
 		},
 		Identity: &model.Identity{
 			AuthenticSourcePersonID: req.AuthenticSourcePersonID,

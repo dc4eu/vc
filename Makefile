@@ -174,7 +174,7 @@ docker-tag: docker-tag-apigw docker-tag-issuer docker-tag-verifier docker-tag-re
 	$(info Tagging docker images)
 
 check_current_branch:
-	$(info Mura branch: $(CURRENT_BRANCH))
+	$(info Current branch: $(CURRENT_BRANCH))
 ifeq ($(CURRENT_BRANCH),main)
 	$(info main branch)
 else

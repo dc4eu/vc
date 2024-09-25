@@ -152,6 +152,36 @@ func (c *VCDatastoreColl) Delete(ctx context.Context, doc *model.MetaData) error
 
 }
 
+// GetDocumentForCredential is the query to get document attestation
+type GetDocumentForCredential struct {
+	Meta     *model.MetaData
+	Identity *model.Identity
+}
+
+// GetDocumentForCredential return matching document if any, or error
+func (c *VCDatastoreColl) GetDocumentForCredential(ctx context.Context, query *GetDocumentForCredential) (*model.Document, error) {
+	filter := bson.M{
+		"meta.authentic_source":                 bson.M{"$eq": query.Meta.AuthenticSource},
+		"meta.document_type":                    bson.M{"$eq": query.Meta.DocumentType},
+		"identities.authentic_source_person_id": bson.M{"$eq": query.Identity.AuthenticSourcePersonID},
+	}
+	opt := options.FindOne().SetProjection(bson.M{
+		"meta":          1,
+		"document_data": 1,
+	})
+
+	res := &model.CompleteDocument{}
+	if err := c.Coll.FindOne(ctx, filter, opt).Decode(res); err != nil {
+		return nil, err
+	}
+
+	reply := &model.Document{
+		Meta:         res.Meta,
+		DocumentData: res.DocumentData,
+	}
+	return reply, nil
+}
+
 // GetDocumentQuery is the query to get document attestation
 type GetDocumentQuery struct {
 	Meta     *model.MetaData

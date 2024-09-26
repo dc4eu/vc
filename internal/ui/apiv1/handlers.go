@@ -47,14 +47,22 @@ func (c *Client) User(ctx context.Context) (*LoggedinReply, error) {
 	return nil, nil
 }
 
+type DocumentListRequest struct {
+	AuthenticSource string          `json:"authentic_source"`
+	Identity        *model.Identity `json:"identity" validate:"required"`
+	DocumentType    string          `json:"document_type"`
+	ValidFrom       int64           `json:"valid_from"`
+	ValidTo         int64           `json:"valid_to"`
+}
+
 type PortalRequest struct {
 	DocumentType            string `json:"document_type" binding:"required"`
 	AuthenticSource         string `json:"authentic_source" binding:"required"`
 	AuthenticSourcePersonId string `json:"authentic_source_person_id" binding:"required"`
 }
 
-func (c *Client) Portal(ctx context.Context, req *PortalRequest) (any, error) {
-	reply, err := c.apigwClient.Portal(req)
+func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (any, error) {
+	reply, err := c.apigwClient.DocumentList(req)
 	if err != nil {
 		return nil, err
 	}

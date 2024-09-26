@@ -95,13 +95,13 @@ func (s *Service) endpointAPIGWStatus(ctx context.Context, c *gin.Context) (any,
 	return reply, nil
 }
 
-func (s *Service) endpointPortal(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.PortalRequest{}
+func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1.DocumentListRequest{}
 	if err := c.ShouldBindJSON(&request); err != nil {
 		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
-	reply, err := s.apiv1.Portal(ctx, request)
+	reply, err := s.apiv1.DocumentList(ctx, request)
 
 	if err != nil {
 		return nil, err

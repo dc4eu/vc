@@ -17,8 +17,8 @@ func NewAPIGWClient(cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) *A
 	}
 }
 
-func (c *APIGWClient) Portal(req *PortalRequest) (any, error) {
-	reply, err := c.DoPostJSON("/api/v1/portal", req)
+func (c *APIGWClient) DocumentList(req *DocumentListRequest) (any, error) {
+	reply, err := c.DoPostJSON("/api/v1/document/list", req)
 	if err != nil {
 		return nil, err
 	}

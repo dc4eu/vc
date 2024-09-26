@@ -227,21 +227,44 @@ const createMock = () => {
     doPostForDemo(path, articleHeaderText);
 };
 
-const fetchFromPortal = () => {
-    console.debug("fetchFromPortal");
-    const path = "/secure/apigw/portal";
-    const articleHeaderText = "Fetch";
-    doPostForDemo(path, articleHeaderText);
+const postDocumentList = () => {
+    console.debug("postDocumentList");
+    const path = "/secure/apigw/document/list";
+    const articleHeaderText = "document/list";
+
+    const documentTypeElement = getElementById("document-type-select");
+    const authenticSourceElement = getElementById("authentic-source-input");
+    const authenticSourcePersonIdElement = getElementById("authentic_source_person_id-input");
+
+    if (!(validateHasValueAndNotEmpty(documentTypeElement) && validateHasValueAndNotEmpty(authenticSourceElement) && validateHasValueAndNotEmpty(authenticSourcePersonIdElement))) {
+        //TODO: show an error message for input params
+        return;
+    }
+
+    const documentListRequest = {
+        authentic_source: authenticSourceElement.value,
+        identity: {
+            authentic_source_person_id: authenticSourcePersonIdElement.value,
+            schema: {
+                name: "SE",
+                version: "1.0.0"
+            }
+        },
+        document_type: documentTypeElement.value
+    };
+
+    postAndDisplayInArticleContainerFor(path, documentListRequest, articleHeaderText);
 };
+
 
 const updateUploadAndFetchButtons = () => {
     const input = getElementById('authentic_source_person_id-input');
-    const mockButton = getElementById('create-mock-btn');
-    const fetchButton = getElementById('fetch-from-portal-btn');
+    const mockBtn = getElementById('create-mock-btn');
+    const documentListBtn = getElementById('post-document-list-btn');
 
     //TODO: Validate input values?
-    mockButton.disabled = !(input.value);
-    fetchButton.disabled = !(input.value);
+    mockBtn.disabled = !(input.value);
+    documentListBtn.disabled = !(input.value);
 };
 
 /** Builds an article with custom body children but does not add it to the DOM

@@ -247,7 +247,7 @@ const postDocumentList = () => {
             authentic_source_person_id: authenticSourcePersonIdElement.value,
             schema: {
                 name: "SE",
-                version: "1.0.0"
+                version: "1.0.2"
             }
         },
         document_type: documentTypeElement.value

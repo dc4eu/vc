@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/IBM/sarama"
+	"reflect"
 	"sync"
 	"time"
 	"vc/pkg/logger"
@@ -157,12 +158,13 @@ func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.Consume
 			for {
 				handler := handlerFactory(topic)
 				if err := group.Consume(c.ctx, []string{topic}, handler); err != nil {
-					//TODO: Logga och hantera fel och potentiell återkoppling
-					time.Sleep(1 * time.Second) //TODO: justera backoff till mer avancerad som tidigare
+					c.log.Error(err, "Error on consumer group", "group", handlerConfig.ConsumerGroup)
+					//TODO: use more advanced backoff algorithm?
+					time.Sleep(1 * time.Second)
 				}
 
 				if c.ctx.Err() != nil {
-					//TODO: logga fel och ev. ytterligare hantering?
+					c.log.Error(c.ctx.Err(), "Error on consumer group ctx", "group", handlerConfig.ConsumerGroup)
 					return
 				}
 			}
@@ -192,23 +194,39 @@ func (cgh *ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { 
 
 func (cgh *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	if cgh.Handlers == nil {
-		//TODO: Hantera fel, potentiellt skicka till error-topic
-		cgh.Log.Error(errors.New("No handler for"), "topic", claim.Topic())
+		cgh.Log.Error(errors.New("No handlers defined"), "No Handlers for any topic")
+		//TODO: send to a general error topic?
 		return nil
 	}
 
 	handler, exists := cgh.Handlers[claim.Topic()]
 	if !exists {
-		cgh.Log.Error(errors.New("No handler for"), "topic", claim.Topic())
-		//TODO: Hantera fel
+		cgh.Log.Error(errors.New("No handler for topic"), "topic", claim.Topic())
+		//TODO: send to a general error topic?
 		return nil
 	}
+
+	handlerType := reflect.TypeOf(handler).String()
+
 	for message := range claim.Messages() {
+		var errMessage string
+
 		if err := handler.HandleMessage(session.Context(), message); err != nil {
 			cgh.Log.Error(err, "Error handling message", "topic", claim.Topic())
-			//TODO: Hantera fel, potentiellt skicka meddelande till error-topic
+			//TODO: more advanced retry/error handling including send to error topic if not OK after X number of retries
+			errMessage = fmt.Sprintf("error handling message: %v", err)
 		}
-		session.MarkMessage(message, "message consumed by handler")
+
+		info := fmt.Sprintf("message consumed by handler type: %s, topic: %s, partition: %d, offset: %d",
+			handlerType,
+			claim.Topic(),
+			message.Partition,
+			message.Offset,
+		)
+		if errMessage != "" {
+			info = fmt.Sprintf("%s, error: %s", info, errMessage)
+		}
+		session.MarkMessage(message, info)
 	}
 	return nil
 }

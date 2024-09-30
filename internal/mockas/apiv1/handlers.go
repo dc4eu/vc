@@ -28,7 +28,6 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 
 	resp, err := c.uploader(ctx, mockUpload)
 	if err != nil {
-		//TODO ta bort nedan error logging?
 		c.log.Error(err, "failed to upload", "mockUpload", mockUpload)
 		return nil, err
 	}

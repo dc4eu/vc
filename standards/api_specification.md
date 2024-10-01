@@ -8,10 +8,6 @@ The following document serves as a reference for the implementation of the `Issu
 Participants can find the corresponding business specification in the project's internal [sharepoint at the following address](https://sites.ey.com/sites/DC4EU-EBSINE/Shared%20Documents/Forms/AllItems.aspx?ga=1&id=%2Fsites%2FDC4EU%2DEBSINE%2FShared%20Documents%2FGeneral%2FDC4EU%2FWP7%2FTasks%2FT7%2E2%2E%20Opensource%20Provider%20and%20Verifier%2FBackend%20API%20Documentation&viewid=1d5f5777%2D8eec%2D44ab%2Da8a2%2D488cd0136ef2).
 The business specification is currently in version 2.8.
 
-## Version
-
-    This document corresponds to the implementation of the API in Version 0.3.3 - revision 1
-
 ## Endpoint summary
 
 | method | endpoint | description |
@@ -268,7 +264,7 @@ http OK 200, else 400 and error body
 
 This endpoint is to be used by the Issuer System to retrieve specific document data from the `datastore` to be issued as credential. As mapping is done in the `datastore` the Call has to have identity information included. The inputs `authentic_source`, `document_type`, and `collect_id` are used to identify the correct attestation. After selection of the document, attribute based identity mapping is performed by the `datastore`. Only if this is successful, all credential relevant information gets returned to the Issuer System.
 
-Note: depending on the architecture, the issuer system will determine the endpoint to retrieve the document data based on the `authentic_source` input and the configuration of the Backend.
+Note: Depending on the architecture, the issuer system will determine the endpoint to retrieve the document data based on the `authentic_source` input and the configuration of the Backend.
 
 ### Attribute Table
 
@@ -470,11 +466,8 @@ http OK 200, else 400 and error body
 
 ```mermaid
     sequenceDiagram;
-    authentic source->>issuer: POST /credential/revoke;
+    authentic source->>apigw: POST /document/revoke;
     issuer->>authentic source: 200/400;
-    issuer->>registry: POST /credential/revoke;
-    issuer->>registry: 200/400;
-    issuer->>datastore: POST /document/revoke
 ```
 
 ### Description
@@ -576,7 +569,8 @@ http 200 or http 400 and error body
 
 ### document_data{}
 
-unspecified json object, used to include any document type from authentic source
+There is currently no verification of this object. In the future the system will check the structure and attributes of this object based on `document_type` and `document_data_version`. There will be specific schemas defined based on the type of the document.
+The currents schema definitions for testing can be found here [PDA1](./pda1.md) and [ehic](./ehic.md).
 
 ### document_display{}
 

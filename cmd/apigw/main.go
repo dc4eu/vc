@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/IBM/sarama"
 	"os"
 	"os/signal"
 	"sync"
@@ -18,6 +17,8 @@ import (
 	"vc/pkg/messagebrokers/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+
+	"github.com/IBM/sarama"
 )
 
 type service interface {

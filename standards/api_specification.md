@@ -47,7 +47,7 @@ Please note that currently the configuration is present as json, but could also 
         },
         "authenticSourceEndpoint": {
             //including all items required for interacting with the authentic source.
-            //Used by the issuer to fetch data if the generic data store is not used.
+            //Used by the issuer to fetch data if the generic datastore is not used.
         },
         "signatureServiceEndpoint": {
             //including all items required for interacting with the signature service.

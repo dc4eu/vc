@@ -1,5 +1,7 @@
 # Datastore Rest API
 
+version: 2.8
+
 ## Introduction and reference
 
 The following document serves as a reference for the implementation of the `Issuer System` including the so-called `datastore` for the EU-funded DC4EU project. The document focuses on the technical description of the relevant backend endpoints without providing detailed business explanations including scenarios.
@@ -10,7 +12,7 @@ The business specification is currently in version 2.8.
 
     This document corresponds to the implementation of the API in Version 0.3.3 - revision 1
 
-## Endpoint summery
+## Endpoint summary
 
 | method | endpoint | description |
 |---|---|---|

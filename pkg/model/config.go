@@ -96,7 +96,6 @@ type TrustModel struct{}
 type Issuer struct {
 	APIServer  APIServer  `yaml:"api_server" validate:"required"`
 	Identifier string     `yaml:"identifier" validate:"required"`
-	TrustModel TrustModel `yaml:"trust_model" validate:"required"`
 	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
 }
 
@@ -138,7 +137,8 @@ type BasicAuth struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	TrustModel TrustModel `yaml:"trust_model" validate:"required"`
 }
 
 // OTEL holds the opentelemetry configuration

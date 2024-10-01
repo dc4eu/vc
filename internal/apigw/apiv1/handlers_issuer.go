@@ -3,11 +3,10 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
-	"vc/internal/apigw/db"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
+	"vc/pkg/datastoreclient"
 	"vc/pkg/helpers"
-	"vc/pkg/model"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,6 +18,7 @@ type CredentialRequest struct {
 	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
 	DocumentType            string `json:"document_type" validate:"required"`
 	CredentialType          string `json:"credential_type" validate:"required"`
+	DocumentID              string `json:"document_id" validate:"required"`
 
 	// Identity        *model.Identity `json:"identity" validate:"required"`
 	// DocumentID      string          `json:"document_id" validate:"required"`
@@ -46,19 +46,18 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 	c.log.Info("Credential", "req", req)
 	// IDMapping
 
-	// GetDocument
-	document, err := c.db.VCDatastoreColl.GetDocumentForCredential(ctx, &db.GetDocumentForCredential{
-		Meta: &model.MetaData{
-			AuthenticSource: req.AuthenticSource,
-			DocumentType:    req.DocumentType,
-		},
-		Identity: &model.Identity{
-			AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		},
+	document, r, err := c.datastoreClient.DocumentService.Get(ctx, &datastoreclient.DocumentGetQuery{
+		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.DocumentType,
+		DocumentID:      req.DocumentID,
 	})
 	if err != nil {
+		c.log.Debug("mura")
 		return nil, err
 	}
+
+	c.log.Debug("credential", "resp", r)
+
 	if document == nil || document.DocumentData == nil {
 		return nil, helpers.ErrNoDocumentFound
 	}

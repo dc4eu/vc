@@ -1,0 +1,12 @@
+@startuml
+
+rectangle Issuer as i
+rectangle AuthenticSource_1 as as1
+rectangle AuthenticSource_2 as as2
+rectangle AuthenticSource_3 as as3
+
+i <-- as1
+i <-- as2
+i <-- as3
+
+@enduml

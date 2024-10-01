@@ -4,6 +4,7 @@
         "apiv",
         "auditlog",
         "bson",
+        "datastoreclient",
         "eduseal",
         "ehic",
         "eidas",

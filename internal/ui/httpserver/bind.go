@@ -2,12 +2,16 @@ package httpserver
 
 import (
 	"context"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"reflect"
+)
+
+//TODO(mk): remove file after generic bind.go is created in pkg that support marshal support for map string any
+
+import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"reflect"
-
-	"github.com/gin-gonic/gin"
 )
 
 func (s *Service) bindV2(ctx context.Context, c *gin.Context, v any) error {
@@ -21,8 +25,6 @@ func (s *Service) bindRequest(ctx context.Context, c *gin.Context, v any) error 
 	ctx, span := s.tp.Start(ctx, "httpserver:bindRequest")
 	defer span.End()
 
-	//TODO: remove s.logger.Debug("bindRequest start")
-
 	if c.ContentType() == gin.MIMEJSON {
 		if err := c.ShouldBindJSON(v); err != nil {
 			return err
@@ -35,8 +37,6 @@ func (s *Service) bindRequest(ctx context.Context, c *gin.Context, v any) error 
 		return err
 	}
 	err := c.ShouldBindUri(v)
-
-	//TODO: remove s.logger.Debug("bindRequest end")
 
 	return err
 }

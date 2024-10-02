@@ -104,8 +104,8 @@ func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client
 
 	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
 		handlersMap := map[string]kafka.MessageHandler{
-			kafka.TopicMockNext: &apiv1.MockNextMessageHandler{Log: log.New("kafka_mock_next_handler"), ApiV1: apiv1Client, Tracer: tracer},
-			kafka.TopicUpload:   &apiv1.UploadMessageHandler{Log: log.New("kafka_upload_handler"), ApiV1: apiv1Client, Tracer: tracer},
+			kafka.TopicMockNext: apiv1.NewMockNextMessageHandler(log.New("kafka_mock_next_handler"), apiv1Client, tracer),
+			kafka.TopicUpload:   apiv1.NewUploadMessageHandler(log.New("kafka_upload_handler"), apiv1Client, tracer),
 			// add more handlers here...
 		}
 		return &kafka.ConsumerGroupHandler{Handlers: handlersMap, Log: log.New("kafka_consumer_group_handler")}

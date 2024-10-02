@@ -22,8 +22,8 @@ func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, erro
 
 func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.LoginRequest{}
+	//TODO(mk): use pkg bind.go after it has been fixed instead of context.go
 	if err := c.ShouldBindJSON(&request); err != nil {
-		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
 
@@ -97,8 +97,8 @@ func (s *Service) endpointAPIGWStatus(ctx context.Context, c *gin.Context) (any,
 
 func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.DocumentListRequest{}
+	//TODO(mk): use pkg bind.go after it has been fixed instead of context.go
 	if err := c.ShouldBindJSON(&request); err != nil {
-		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
 	reply, err := s.apiv1.DocumentList(ctx, request)
@@ -111,8 +111,8 @@ func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any
 
 func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_apigw.UploadRequest{}
+	//TODO(mk): use pkg bind.go after it has been fixed instead of context.go
 	if err := c.ShouldBindJSON(&request); err != nil {
-		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		s.logger.Debug("Binding error", "error", err)
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 
 func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.MockNextRequest{}
+	//TODO(mk): use pkg bind.go after it has been fixed instead of context.go
 	if err := c.ShouldBindJSON(&request); err != nil {
-		//TODO: remove if err := s.bindRequest(ctx, c, request); err != nil {
 		return nil, err
 	}
 	reply, err := s.apiv1.MockNext(ctx, request)

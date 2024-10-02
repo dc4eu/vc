@@ -9,21 +9,29 @@ import (
 )
 
 type UploadMessageHandler struct {
-	Log    *logger.Log
-	ApiV1  *Client
-	Tracer *trace.Tracer
+	log    *logger.Log
+	apiv1  *Client
+	tracer *trace.Tracer
+}
+
+func NewUploadMessageHandler(log *logger.Log, apiv1 *Client, tracer *trace.Tracer) *UploadMessageHandler {
+	return &UploadMessageHandler{
+		log:    log,
+		apiv1:  apiv1,
+		tracer: tracer,
+	}
 }
 
 func (h *UploadMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
 	var uploadRequest UploadRequest
 	if err := json.Unmarshal(message.Value, &uploadRequest); err != nil {
-		h.Log.Error(err, "Failed to unmarshal message.Value from Kafka")
+		h.log.Error(err, "Failed to unmarshal message.Value from Kafka")
 		return err
 	}
 
-	err := h.ApiV1.Upload(ctx, &uploadRequest)
+	err := h.apiv1.Upload(ctx, &uploadRequest)
 	if err != nil {
-		h.Log.Error(err, "Failed to handle UploadRequest")
+		h.log.Error(err, "Failed to handle UploadRequest")
 		return err
 	}
 	return nil

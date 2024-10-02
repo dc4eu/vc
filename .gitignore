@@ -4,7 +4,6 @@ pki/*
 redis-data/
 .idea/
 kraft[0-9]*-data/
-kraft[0-9]+-data/
 *.orig
 **/.*.orig
 .env

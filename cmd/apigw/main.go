@@ -66,7 +66,6 @@ func main() {
 
 	var eventPublisher apiv1.EventPublisher
 	if cfg.Common.Kafka.Enabled {
-		// Start max one producer client for each service
 		var err error
 		eventPublisher, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log)
 		if err != nil {
@@ -137,7 +136,7 @@ func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client
 
 	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
 		handlersMap := map[string]kafka.MessageHandler{
-			kafka.TopicUpload: &apiv1.UploadMessageHandler{Log: log.New("kafka_upload_handler"), ApiV1: apiv1Client, Tracer: tracer},
+			kafka.TopicUpload: apiv1.NewUploadMessageHandler(log.New("kafka_upload_handler"), apiv1Client, tracer),
 			// add more handlers here...
 		}
 		return &kafka.ConsumerGroupHandler{Handlers: handlersMap, Log: log.New("kafka_consumer_group_handler")}

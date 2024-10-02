@@ -81,15 +81,15 @@ type MockNextRequest struct {
 	PortalRequest
 }
 
-func (c *Client) MockNext(ctx context.Context, mnr *MockNextRequest) (any, error) {
+func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error) {
 	if c.cfg.Common.Kafka.Enabled {
-		if err := c.eventPublisher.MockNext(mnr); err != nil {
+		if err := c.eventPublisher.MockNext(req); err != nil {
 			return nil, err
 		}
 		return nil, nil
 	}
 
-	reply, err := c.mockasClient.MockNext(mnr)
+	reply, err := c.mockasClient.MockNext(req)
 	if err != nil {
 		return nil, err
 	}

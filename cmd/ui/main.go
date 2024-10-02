@@ -48,7 +48,6 @@ func main() {
 
 	var eventPublisher apiv1.EventPublisher
 	if cfg.Common.Kafka.Enabled {
-		// Start max one producer client for each service
 		var err error
 		eventPublisher, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log)
 		if err != nil {

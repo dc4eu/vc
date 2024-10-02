@@ -140,7 +140,7 @@ function handleErrorInArticle(err, elements) {
 
 async function doFetchAPICallAndHandleResult(url, options, elements) {
     try {
-        //TODO: add timeout on clientside for fetch?
+        //TODO(mk): add timeout on clientside for fetch
         const response = await fetch(url, options);
         const jsonBody = await response.json();
         console.debug(jsonBody);
@@ -207,7 +207,7 @@ function doPostForDemo(path, articleHeaderText) {
     const authenticSourcePersonIdElement = getElementById("authentic_source_person_id-input");
 
     if (!(validateHasValueAndNotEmpty(documentTypeElement) && validateHasValueAndNotEmpty(authenticSourceElement) && validateHasValueAndNotEmpty(authenticSourcePersonIdElement))) {
-        //TODO: show an error message for input params
+        //TODO(mk): show an error message for input params
         return
     }
 
@@ -237,7 +237,7 @@ const postDocumentList = () => {
     const authenticSourcePersonIdElement = getElementById("authentic_source_person_id-input");
 
     if (!(validateHasValueAndNotEmpty(documentTypeElement) && validateHasValueAndNotEmpty(authenticSourceElement) && validateHasValueAndNotEmpty(authenticSourcePersonIdElement))) {
-        //TODO: show an error message for input params
+        //TODO(mk): show an error message for input params
         return;
     }
 
@@ -247,7 +247,7 @@ const postDocumentList = () => {
             authentic_source_person_id: authenticSourcePersonIdElement.value,
             schema: {
                 name: "SE",
-                version: "1.0.2"
+                version: "1.0.0"
             }
         },
         document_type: documentTypeElement.value
@@ -262,7 +262,7 @@ const updateUploadAndFetchButtons = () => {
     const mockBtn = getElementById('create-mock-btn');
     const documentListBtn = getElementById('post-document-list-btn');
 
-    //TODO: Validate input values?
+    //TODO(mk): Validate input values?
     mockBtn.disabled = !(input.value);
     documentListBtn.disabled = !(input.value);
 };
@@ -355,18 +355,18 @@ async function doLogin() {
     if (authOK) {
         clearContainer("login-container");
         displaySecureMenyItems();
-        //TODO: show logged in user?
+        //TODO(mk): show logged in user?
     } else {
         usernameInput.disabled = false;
         passwordInput.disabled = false;
         doLoginButton.disabled = false;
-        //TODO if auth!=ok display some info/error message...
+        //TODO(mk): if auth!=ok display some info/error message...
     }
 }
 
 const addUploadFormArticleToContainer = () => {
     const buildUploadFormElements = () => {
-        //TODO: Only one form is handled since id's is static?
+        //TODO:(mk) Only one form is handled in Browser simultaneous since element id's is static
 
         const textarea = document.createElement("textarea");
         textarea.id = 'upload-textarea';
@@ -491,7 +491,7 @@ async function doLogout() {
         method: "DELETE", headers: headers
     });
 
-    //TODO: add error handling
+    //TODO(mk): add error handling
     await fetch(request);
     hideSecureMenyItems();
     clearAllContentContainers();

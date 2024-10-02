@@ -54,7 +54,8 @@ func NewMessageSyncProducerClient(producerConfig *sarama.Config, ctx context.Con
 }
 
 func CommonProducerConfig(cfg *model.Cfg) *sarama.Config {
-	//TODO: set cfg from file - is now hardcoded
+	//TODO(mk): set cfg from file - is now hardcoded
+	//TODO(mk: enable security when publishing to Kafka
 	producerConfig := sarama.NewConfig()
 	producerConfig.Producer.Return.Successes = true
 	producerConfig.Producer.RequiredAcks = sarama.WaitForAll
@@ -77,6 +78,7 @@ func (c *MessageSyncProducerClient) Close(ctx context.Context) error {
 }
 
 func (c *MessageSyncProducerClient) PublishMessage(topic string, key string, json []byte, headers []sarama.RecordHeader) error {
+	//TODO(mk): create header data in this func, ie change func def.
 	message := &sarama.ProducerMessage{
 		Topic:   topic,
 		Key:     sarama.StringEncoder(key),
@@ -115,7 +117,8 @@ type MessageConsumerClient struct {
 }
 
 func CommonConsumerConfig(cfg *model.Cfg) *sarama.Config {
-	//TODO: set cfg from file - is now hardcoded
+	//TODO(mk): set cfg from file - is now hardcoded
+	//TODO(mk): enable security when consumting from Kafka
 	consumerConfig := sarama.NewConfig()
 	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 	consumerConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
@@ -159,7 +162,7 @@ func (c *MessageConsumerClient) Start(handlerFactory func(string) sarama.Consume
 				handler := handlerFactory(topic)
 				if err := group.Consume(c.ctx, []string{topic}, handler); err != nil {
 					c.log.Error(err, "Error on consumer group", "group", handlerConfig.ConsumerGroup)
-					//TODO: use more advanced backoff algorithm?
+					//TODO(mk): use more advanced backoff algorithm?
 					time.Sleep(1 * time.Second)
 				}
 
@@ -195,14 +198,14 @@ func (cgh *ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { 
 func (cgh *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	if cgh.Handlers == nil {
 		cgh.Log.Error(errors.New("No handlers defined"), "No Handlers for any topic")
-		//TODO: send to a general error topic?
+		//TODO(mk): send to a general error topic?
 		return nil
 	}
 
 	handler, exists := cgh.Handlers[claim.Topic()]
 	if !exists {
 		cgh.Log.Error(errors.New("No handler for topic"), "topic", claim.Topic())
-		//TODO: send to a general error topic?
+		//TODO(mk): send to a general error topic?
 		return nil
 	}
 
@@ -213,7 +216,7 @@ func (cgh *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 		if err := handler.HandleMessage(session.Context(), message); err != nil {
 			cgh.Log.Error(err, "Error handling message", "topic", claim.Topic())
-			//TODO: more advanced retry/error handling including send to error topic if not OK after X number of retries
+			//TODO(mk): more advanced retry/error handling including send to error topic if not OK after X number of retries
 			errMessage = fmt.Sprintf("error handling message: %v", err)
 		}
 

@@ -41,9 +41,9 @@ func (s *KafkaMessageProducer) Upload(uploadRequest *UploadRequest) error {
 		return err
 	}
 
+	//TODO(mk): make header code below including in other kafka publisher generic and move to kafka client
 	paramType := reflect.TypeOf(uploadRequest).Elem().Name()
 	typeHeader := []byte(paramType)
-
 	headers := []sarama.RecordHeader{
 		{Key: []byte(kafka.TypeOfStructInMessageValue), Value: typeHeader},
 	}

@@ -9,34 +9,50 @@ import (
 )
 
 type MockNextMessageHandler struct {
-	Log    *logger.Log
-	ApiV1  *Client
-	Tracer *trace.Tracer
+	log    *logger.Log
+	apiv1  *Client
+	tracer *trace.Tracer
+}
+
+func NewMockNextMessageHandler(log *logger.Log, apiv1 *Client, tracer *trace.Tracer) *MockNextMessageHandler {
+	return &MockNextMessageHandler{
+		log:    log,
+		apiv1:  apiv1,
+		tracer: tracer,
+	}
 }
 
 func (h *MockNextMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
 	var mockNextRequest MockNextRequest
 	if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
-		h.Log.Error(err, "Failed to unmarshal message.Value from Kafka")
+		h.log.Error(err, "Failed to unmarshal message.Value from Kafka")
 		return err
 	}
 
-	_, err := h.ApiV1.MockNext(ctx, &mockNextRequest)
+	_, err := h.apiv1.MockNext(ctx, &mockNextRequest)
 	if err != nil {
-		h.Log.Error(err, "Failed to MockNext")
+		h.log.Error(err, "Failed to MockNext")
 		return err
 	}
 	return nil
 }
 
-// TODO: REMOVE ME, JUST TO TEST A SECOND KAFKA CONSUMER GROUP FROM A DIFFERENT SERVICE
+// TODO(mk): REMOVE ME, JUST TO TEST A SECOND KAFKA CONSUMER GROUP FROM A DIFFERENT SERVICE
 type UploadMessageHandler struct {
-	Log    *logger.Log
-	ApiV1  *Client
-	Tracer *trace.Tracer
+	log    *logger.Log
+	apiv1  *Client
+	tracer *trace.Tracer
+}
+
+func NewUploadMessageHandler(log *logger.Log, apiv1 *Client, tracer *trace.Tracer) *UploadMessageHandler {
+	return &UploadMessageHandler{
+		log:    log,
+		apiv1:  apiv1,
+		tracer: tracer,
+	}
 }
 
 func (h *UploadMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
-	h.Log.Debug("Consuming message to debug", "message.Key", string(message.Key), "message.Topic", message.Topic, "message.Value", string(message.Value))
+	h.log.Debug("Consuming message to debug", "message.Key", string(message.Key), "message.Topic", message.Topic, "message.Value", string(message.Value))
 	return nil
 }

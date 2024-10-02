@@ -75,7 +75,7 @@ build-ui:
 
 docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
 
-docker-build-goland-debug: docker-build-verifier docker-build-datastore docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui-goland-debug
+docker-build-goland-debug: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui-goland-debug
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))

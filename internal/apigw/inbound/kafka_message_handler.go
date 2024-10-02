@@ -1,0 +1,72 @@
+package inbound
+
+import (
+	"context"
+	"encoding/json"
+	"github.com/IBM/sarama"
+	"vc/internal/apigw/apiv1"
+	"vc/pkg/logger"
+	"vc/pkg/messagebroker"
+	"vc/pkg/messagebroker/kafka"
+	"vc/pkg/model"
+	"vc/pkg/trace"
+)
+
+func NewEventConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebroker.EventConsumer, error) {
+	if !cfg.Common.Kafka.Enabled {
+		log.Info("Kafka disabled - no consumer created")
+		return nil, nil
+	}
+
+	kafkaMessageConsumerClient, err := kafka.NewMessageConsumerClient(kafka.CommonConsumerConfig(cfg), cfg.Common.Kafka.Brokers, log.New("kafka_consumer_client"))
+	if err != nil {
+		return nil, err
+	}
+
+	handlerConfigs := []kafka.HandlerConfig{
+		{Topic: kafka.TopicUpload, ConsumerGroup: "topic_upload_consumer_group_apigw"},
+		// add more handlerconfigs here
+	}
+
+	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
+		handlersMap := map[string]kafka.MessageHandler{
+			kafka.TopicUpload: newUploadMessageHandler(log.New("kafka_upload_handler"), apiv1Client, tracer),
+			// add more handlers here...
+		}
+		return &kafka.ConsumerGroupHandler{Handlers: handlersMap, Log: log.New("kafka_consumer_group_handler")}
+	}
+
+	if err := kafkaMessageConsumerClient.Start(handlerFactory, handlerConfigs); err != nil {
+		return nil, err
+	}
+	return kafkaMessageConsumerClient, nil
+}
+
+func newUploadMessageHandler(log *logger.Log, apiv1 *apiv1.Client, tracer *trace.Tracer) *UploadMessageHandler {
+	return &UploadMessageHandler{
+		log:    log,
+		apiv1:  apiv1,
+		tracer: tracer,
+	}
+}
+
+type UploadMessageHandler struct {
+	log    *logger.Log
+	apiv1  *apiv1.Client
+	tracer *trace.Tracer
+}
+
+func (h *UploadMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
+	var uploadRequest apiv1.UploadRequest
+	if err := json.Unmarshal(message.Value, &uploadRequest); err != nil {
+		h.log.Error(err, "Failed to unmarshal message.Value from Kafka")
+		return err
+	}
+
+	err := h.apiv1.Upload(ctx, &uploadRequest)
+	if err != nil {
+		h.log.Error(err, "Failed to handle UploadRequest")
+		return err
+	}
+	return nil
+}

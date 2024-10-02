@@ -10,9 +10,9 @@ import (
 	"time"
 	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
+	"vc/internal/ui/outbound"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
-	"vc/pkg/messagebrokers/kafka"
 	"vc/pkg/trace"
 )
 
@@ -49,7 +49,7 @@ func main() {
 	var eventPublisher apiv1.EventPublisher
 	if cfg.Common.Kafka.Enabled {
 		var err error
-		eventPublisher, err = apiv1.NewKafkaMessageProducer(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log)
+		eventPublisher, err = outbound.NewEventPublisher(ctx, cfg, tracer, log)
 		if err != nil {
 			panic(err)
 		}

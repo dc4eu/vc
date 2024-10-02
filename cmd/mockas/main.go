@@ -2,18 +2,15 @@ package main
 
 import (
 	"context"
-	"github.com/IBM/sarama"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"vc/internal/mockas/apiv1"
 	"vc/internal/mockas/httpserver"
+	"vc/internal/mockas/inbound"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
-	"vc/pkg/messagebrokers"
-	"vc/pkg/messagebrokers/kafka"
-	"vc/pkg/model"
 	"vc/pkg/trace"
 )
 
@@ -54,7 +51,7 @@ func main() {
 		panic(err)
 	}
 
-	eventConsumer, err := startNewKafkaMessangerConsumer(cfg, log, apiv1Client, tracer)
+	eventConsumer, err := inbound.NewEventConsumer(cfg, log, apiv1Client, tracer)
 	if err != nil {
 		panic(err)
 	}
@@ -83,36 +80,4 @@ func main() {
 	wg.Wait() // Block here until are workers are done
 
 	mainLog.Info("Stopped")
-}
-
-func startNewKafkaMessangerConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebrokers.EventConsumer, error) {
-	if !cfg.Common.Kafka.Enabled {
-		log.Info("Kafka disabled - no consumer created")
-		return nil, nil
-	}
-
-	kafkaMessageConsumerClient, err := kafka.NewMessageConsumerClient(kafka.CommonConsumerConfig(cfg), cfg.Common.Kafka.Brokers, log.New("kafka_consumer_client"))
-	if err != nil {
-		return nil, err
-	}
-
-	handlerConfigs := []kafka.HandlerConfig{
-		{Topic: kafka.TopicMockNext, ConsumerGroup: "topic_mock_next_consumer_group_mockas"},
-		{Topic: kafka.TopicUpload, ConsumerGroup: "topic_upload_consumer_group_mockas"},
-		// add more handlerconfigs here
-	}
-
-	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
-		handlersMap := map[string]kafka.MessageHandler{
-			kafka.TopicMockNext: apiv1.NewMockNextMessageHandler(log.New("kafka_mock_next_handler"), apiv1Client, tracer),
-			kafka.TopicUpload:   apiv1.NewUploadMessageHandler(log.New("kafka_upload_handler"), apiv1Client, tracer),
-			// add more handlers here...
-		}
-		return &kafka.ConsumerGroupHandler{Handlers: handlersMap, Log: log.New("kafka_consumer_group_handler")}
-	}
-
-	if err := kafkaMessageConsumerClient.Start(handlerFactory, handlerConfigs); err != nil {
-		return nil, err
-	}
-	return kafkaMessageConsumerClient, nil
 }

@@ -13,23 +13,23 @@ import (
 	"vc/pkg/trace"
 )
 
-type KafkaMessageProducer struct {
-	kafkaMessageProducerClient *kafka.MessageSyncProducerClient
+type kafkaMessageProducer struct {
+	client *kafka.SyncProducerClient
 }
 
-func NewEventPublisher(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (apiv1.EventPublisher, error) {
-	kafkaMessageProducerClient, err := kafka.NewMessageSyncProducerClient(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log.New("kafka_message_producer_client"))
+func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (apiv1.EventPublisher, error) {
+	client, err := kafka.NewSyncProducerClient(ctx, kafka.CommonProducerConfig(cfg), cfg, tracer, log.New("kafka_message_producer_client"))
 	if err != nil {
 		return nil, err
 	}
 
-	return &KafkaMessageProducer{
-		kafkaMessageProducerClient: kafkaMessageProducerClient,
+	return &kafkaMessageProducer{
+		client: client,
 	}, nil
 
 }
 
-func (s *KafkaMessageProducer) Upload(uploadRequest *apiv1.UploadRequest) error {
+func (s *kafkaMessageProducer) Upload(uploadRequest *apiv1.UploadRequest) error {
 	if uploadRequest == nil {
 		return errors.New("param uploadRequest is nil")
 	}
@@ -46,12 +46,12 @@ func (s *KafkaMessageProducer) Upload(uploadRequest *apiv1.UploadRequest) error 
 		{Key: []byte(kafka.TypeOfStructInMessageValue), Value: typeHeader},
 	}
 
-	return s.kafkaMessageProducerClient.PublishMessage(kafka.TopicUpload, uploadRequest.Meta.DocumentID, jsonMarshaled, headers)
+	return s.client.PublishMessage(kafka.TopicUpload, uploadRequest.Meta.DocumentID, jsonMarshaled, headers)
 }
 
-func (s *KafkaMessageProducer) Close(ctx context.Context) error {
-	if s.kafkaMessageProducerClient != nil {
-		return s.kafkaMessageProducerClient.Close(ctx)
+func (s *kafkaMessageProducer) Close(ctx context.Context) error {
+	if s.client != nil {
+		return s.client.Close(ctx)
 	}
 	return nil
 }

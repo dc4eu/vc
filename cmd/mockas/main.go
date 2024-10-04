@@ -51,7 +51,7 @@ func main() {
 		panic(err)
 	}
 
-	eventConsumer, err := inbound.NewEventConsumer(cfg, log, apiv1Client, tracer)
+	eventConsumer, err := inbound.New(ctx, cfg, log, apiv1Client, tracer)
 	if err != nil {
 		panic(err)
 	}

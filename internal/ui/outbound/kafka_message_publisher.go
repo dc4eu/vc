@@ -13,21 +13,21 @@ import (
 	"vc/pkg/trace"
 )
 
-type KafkaMessageProducer struct {
-	kafkaMessageProducerClient *kafka.MessageSyncProducerClient
+type kafkaMessageProducer struct {
+	client *kafka.SyncProducerClient
 }
 
-func NewEventPublisher(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (apiv1.EventPublisher, error) {
-	kafkaMessageProducerClient, err := kafka.NewMessageSyncProducerClient(kafka.CommonProducerConfig(cfg), ctx, cfg, tracer, log.New("kafka_message_producer_client"))
+func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (apiv1.EventPublisher, error) {
+	client, err := kafka.NewSyncProducerClient(ctx, kafka.CommonProducerConfig(cfg), cfg, tracer, log.New("kafka_message_producer_client"))
 	if err != nil {
 		return nil, err
 	}
-	return &KafkaMessageProducer{
-		kafkaMessageProducerClient: kafkaMessageProducerClient,
+	return &kafkaMessageProducer{
+		client: client,
 	}, nil
 }
 
-func (s *KafkaMessageProducer) MockNext(mockNextRequest *apiv1.MockNextRequest) error {
+func (s *kafkaMessageProducer) MockNext(mockNextRequest *apiv1.MockNextRequest) error {
 	if mockNextRequest == nil {
 		return errors.New("param mockNextRequest is nil")
 	}
@@ -44,12 +44,12 @@ func (s *KafkaMessageProducer) MockNext(mockNextRequest *apiv1.MockNextRequest) 
 		{Key: []byte(kafka.TypeOfStructInMessageValue), Value: typeHeader},
 	}
 
-	return s.kafkaMessageProducerClient.PublishMessage(kafka.TopicMockNext, mockNextRequest.AuthenticSourcePersonId, jsonMarshaled, headers)
+	return s.client.PublishMessage(kafka.TopicMockNext, mockNextRequest.AuthenticSourcePersonId, jsonMarshaled, headers)
 }
 
-func (s *KafkaMessageProducer) Close(ctx context.Context) error {
-	if s.kafkaMessageProducerClient != nil {
-		return s.kafkaMessageProducerClient.Close(ctx)
+func (s *kafkaMessageProducer) Close(ctx context.Context) error {
+	if s.client != nil {
+		return s.client.Close(ctx)
 	}
 	return nil
 }

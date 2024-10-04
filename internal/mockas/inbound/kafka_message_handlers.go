@@ -12,13 +12,13 @@ import (
 	"vc/pkg/trace"
 )
 
-func NewEventConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebroker.EventConsumer, error) {
+func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebroker.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
 		return nil, nil
 	}
 
-	kafkaMessageConsumerClient, err := kafka.NewMessageConsumerClient(kafka.CommonConsumerConfig(cfg), cfg.Common.Kafka.Brokers, log.New("kafka_consumer_client"))
+	client, err := kafka.NewConsumerClient(ctx, cfg, cfg.Common.Kafka.Brokers, log.New("kafka_consumer_client"))
 	if err != nil {
 		return nil, err
 	}
@@ -38,10 +38,10 @@ func NewEventConsumer(cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client
 		return &kafka.ConsumerGroupHandler{Handlers: handlersMap, Log: log.New("kafka_consumer_group_handler")}
 	}
 
-	if err := kafkaMessageConsumerClient.Start(handlerFactory, handlerConfigs); err != nil {
+	if err := client.Start(ctx, handlerFactory, handlerConfigs); err != nil {
 		return nil, err
 	}
-	return kafkaMessageConsumerClient, nil
+	return client, nil
 }
 
 type MockNextMessageHandler struct {
@@ -89,6 +89,6 @@ func newUploadMessageHandler(log *logger.Log, apiv1 *apiv1.Client, tracer *trace
 }
 
 func (h *UploadMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
-	h.log.Debug("Consuming message to debug", "message.Key", string(message.Key), "message.Topic", message.Topic, "message.Value", string(message.Value))
+	h.log.Debug("Consuming message to debug", "message.Key", string(message.Key), "message.Topic", message.Topic)
 	return nil
 }

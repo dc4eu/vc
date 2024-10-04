@@ -49,7 +49,7 @@ func main() {
 	var eventPublisher apiv1.EventPublisher
 	if cfg.Common.Kafka.Enabled {
 		var err error
-		eventPublisher, err = outbound.NewEventPublisher(ctx, cfg, tracer, log)
+		eventPublisher, err = outbound.New(ctx, cfg, tracer, log)
 		if err != nil {
 			panic(err)
 		}

@@ -24,7 +24,6 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 	if err != nil {
 		return nil, err
 	}
-	c.log.Debug("mocknext", "mockUpload", mockUpload)
 
 	resp, err := c.uploader(ctx, mockUpload)
 	if err != nil {

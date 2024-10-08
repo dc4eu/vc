@@ -18,6 +18,7 @@ const (
 	TypeOfStructInMessageValue = "type_of_struct_in_value"
 )
 
+// HandlerConfig struct to define the Kafka topic and consumer group for a specific message handler
 type HandlerConfig struct {
 	Topic         string
 	ConsumerGroup string
@@ -38,30 +39,29 @@ type MessageConsumerClient struct {
 	log          *logger.Log
 }
 
-func (c *MessageConsumerClient) CommonConsumerConfig(cfg *model.Cfg) {
-	//TODO(mk): set cfg from file - is now hardcoded
-	//TODO(mk): enable security when consumting from Kafka
-	c.SaramaConfig = sarama.NewConfig()
-	c.SaramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
-	c.SaramaConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
-	c.SaramaConfig.Net.SASL.Enable = false
-	// ...
-	//return SaramaConfig
-}
-
 func NewConsumerClient(ctx context.Context, cfg *model.Cfg, brokers []string, log *logger.Log) (*MessageConsumerClient, error) {
 	client := &MessageConsumerClient{
-		SaramaConfig: &sarama.Config{},
+		SaramaConfig: commonConsumerConfig(cfg),
 		brokers:      brokers,
 		wg:           sync.WaitGroup{},
 		log:          log,
 	}
 
-	client.CommonConsumerConfig(cfg)
-
 	return client, nil
 }
 
+// commonConsumerConfig returns a new Kafka consumer configuration instance with sane defaults for vc.
+func commonConsumerConfig(cfg *model.Cfg) *sarama.Config {
+	//TODO(mk): set cfg from file - is now hardcoded
+	saramaConfig := sarama.NewConfig()
+	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	saramaConfig.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRange()}
+	saramaConfig.Net.SASL.Enable = false
+	//TODO(mk): enable and configure security when consuming from Kafka
+	return saramaConfig
+}
+
+// Start starts the actual event consumting from specified kafka topics
 func (c *MessageConsumerClient) Start(ctx context.Context, handlerFactory func(string) sarama.ConsumerGroupHandler, handlerConfigs []HandlerConfig) error {
 	if err := c.SaramaConfig.Validate(); err != nil {
 		return err
@@ -105,6 +105,7 @@ func (c *MessageConsumerClient) Close(ctx context.Context) error {
 	return nil
 }
 
+// MessageHandler definition of a generic Kafka message handler
 type MessageHandler interface {
 	HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error
 }

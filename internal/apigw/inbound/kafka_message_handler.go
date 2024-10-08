@@ -12,6 +12,7 @@ import (
 	"vc/pkg/trace"
 )
 
+// New creates a new Kafka event consumer instance used by apigw
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebroker.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
@@ -50,12 +51,14 @@ func newUploadMessageHandler(log *logger.Log, apiv1 *apiv1.Client, tracer *trace
 	}
 }
 
+// UploadMessageHandler struct that handles Kafka messages of type UploadRequest
 type UploadMessageHandler struct {
 	log    *logger.Log
 	apiv1  *apiv1.Client
 	tracer *trace.Tracer
 }
 
+// HandleMessage handles Kafka message of type UploadRequest
 func (h *UploadMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
 	var uploadRequest apiv1.UploadRequest
 	if err := json.Unmarshal(message.Value, &uploadRequest); err != nil {

@@ -33,7 +33,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	mainLog := log.New("main")
 
 	tracer, err := trace.New(ctx, cfg, log, "vc", "mock_as")
 	if err != nil {
@@ -51,12 +50,13 @@ func main() {
 		panic(err)
 	}
 
-	eventConsumer, err := inbound.New(ctx, cfg, log, apiv1Client, tracer)
-	if err != nil {
-		panic(err)
-	}
-	if eventConsumer != nil {
+	mainLog := log.New("main")
+	if cfg.IsAsyncEnabled(mainLog) {
+		eventConsumer, err := inbound.New(ctx, cfg, log.New("eventConsumer"), apiv1Client, tracer)
 		services["eventConsumer"] = eventConsumer
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Handle sigterm and await termChan signal

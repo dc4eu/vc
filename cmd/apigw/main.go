@@ -61,16 +61,16 @@ func main() {
 		panic(err)
 	}
 
+	mainLog := log.New("main")
+
 	var eventPublisher apiv1.EventPublisher
-	if cfg.Common.Kafka.Enabled {
+	if cfg.IsAsyncEnabled(mainLog) {
 		var err error
 		eventPublisher, err = outbound.New(ctx, cfg, tracer, log)
+		services["eventPublisher"] = eventPublisher
 		if err != nil {
 			panic(err)
 		}
-		services["eventPublisher"] = eventPublisher
-	} else {
-		log.Info("EventPublisher disabled in config")
 	}
 
 	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, simpleQueueService, tracer, cfg, log.New("apiv1"))
@@ -83,12 +83,12 @@ func main() {
 		panic(err)
 	}
 
-	eventConsumer, err := inbound.New(ctx, cfg, log, apiv1Client, tracer)
-	if err != nil {
-		panic(err)
-	}
-	if eventConsumer != nil {
+	if cfg.IsAsyncEnabled(mainLog) {
+		eventConsumer, err := inbound.New(ctx, cfg, log.New("eventConsumer"), apiv1Client, tracer)
 		services["eventConsumer"] = eventConsumer
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Handle sigterm and await termChan signal
@@ -97,7 +97,6 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

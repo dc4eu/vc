@@ -10,7 +10,7 @@ import (
 	"vc/pkg/trace"
 )
 
-// MessageConsumerClient ATTENTION: Start max one instance of consumer client for each service to keep resource usage low
+// MessageConsumerClient ATTENTION: Start max one instance of Kafka consumer client for each service to keep resource usage low
 type SyncProducerClient struct {
 	producer sarama.SyncProducer
 	cfg      *model.Cfg
@@ -18,6 +18,7 @@ type SyncProducerClient struct {
 	log      *logger.Log
 }
 
+// NewSyncProducerClient creates a Kafka sync producer client
 func NewSyncProducerClient(ctx context.Context, saramaConfig *sarama.Config, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*SyncProducerClient, error) {
 	client := &SyncProducerClient{
 		cfg:    cfg,
@@ -25,7 +26,7 @@ func NewSyncProducerClient(ctx context.Context, saramaConfig *sarama.Config, cfg
 		log:    log,
 	}
 
-	log.Info("Starting ...")
+	client.log.Info("Starting ...")
 
 	if saramaConfig == nil {
 		return nil, errors.New("param saramaConfig is nil")
@@ -40,13 +41,13 @@ func NewSyncProducerClient(ctx context.Context, saramaConfig *sarama.Config, cfg
 		return nil, err
 	}
 
-	log.Info("... started.")
+	client.log.Info("... started.")
 	return client, nil
 }
 
+// CommonProducerConfig returns a new Kafka producer configuration instance with sane defaults for vc.
 func CommonProducerConfig(cfg *model.Cfg) *sarama.Config {
 	//TODO(mk): set cfg from file - is now hardcoded
-	//TODO(mk: enable security when publishing to Kafka
 	saramaConfig := sarama.NewConfig()
 	saramaConfig.Producer.Return.Successes = true
 	saramaConfig.Producer.RequiredAcks = sarama.WaitForAll
@@ -54,10 +55,11 @@ func CommonProducerConfig(cfg *model.Cfg) *sarama.Config {
 	saramaConfig.Net.MaxOpenRequests = 1
 	saramaConfig.Producer.Retry.Max = 3
 	saramaConfig.Net.SASL.Enable = false
-	// ...
+	//TODO(mk): enable and configure security when publishing to Kafka
 	return saramaConfig
 }
 
+// Close close the producer
 func (c *SyncProducerClient) Close(ctx context.Context) error {
 	err := c.producer.Close()
 	if err != nil {
@@ -68,6 +70,7 @@ func (c *SyncProducerClient) Close(ctx context.Context) error {
 	return nil
 }
 
+// PublishMessage publish a message to a Kafka topic
 func (c *SyncProducerClient) PublishMessage(topic string, key string, json []byte, headers []sarama.RecordHeader) error {
 	//TODO(mk): create header data in this func, ie change func def.
 	message := &sarama.ProducerMessage{

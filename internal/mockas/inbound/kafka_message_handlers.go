@@ -12,6 +12,7 @@ import (
 	"vc/pkg/trace"
 )
 
+// New creates a new Kafka event consumer instance used by mockas
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebroker.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
@@ -44,6 +45,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, apiv1Client *apiv
 	return client, nil
 }
 
+// MockNextMessageHandler struct that handles Kafka messages of type MockNextRequest
 type MockNextMessageHandler struct {
 	log    *logger.Log
 	apiv1  *apiv1.Client
@@ -58,6 +60,7 @@ func newMockNextMessageHandler(log *logger.Log, apiv1 *apiv1.Client, tracer *tra
 	}
 }
 
+// HandleMessage handles Kafka message of type MockNextRequest
 func (h *MockNextMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
 	var mockNextRequest apiv1.MockNextRequest
 	if err := json.Unmarshal(message.Value, &mockNextRequest); err != nil {
@@ -73,7 +76,7 @@ func (h *MockNextMessageHandler) HandleMessage(ctx context.Context, message *sar
 	return nil
 }
 
-// TODO(mk): REMOVE ME, JUST TO TEST A SECOND KAFKA CONSUMER GROUP FROM A DIFFERENT SERVICE
+// TODO(mk): REMOVE ME BEFORE PRODUCTION, JUST TO TEST A SECOND KAFKA CONSUMER GROUP FROM A DIFFERENT SERVICE
 type UploadMessageHandler struct {
 	log    *logger.Log
 	apiv1  *apiv1.Client

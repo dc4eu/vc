@@ -1,0 +1,13 @@
+@startuml
+
+title Sync upload
+
+state "https" as https
+state "mongo" as db
+
+[*] -> https : https
+https -> db
+
+db -> [*]
+
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+
+title Async upload
+
+state "http-service" as https
+state "kafka-service" as kafka
+state "mongo" as db
+
+[*] -> https : https
+https -> kafka
+
+[*] -> kafka : tcp
+kafka -> db
+
+db -> [*]
+
+@enduml

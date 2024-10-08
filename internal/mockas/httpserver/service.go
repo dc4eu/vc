@@ -72,6 +72,8 @@ func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, tracer *trac
 
 	rgRoot := s.gin.Group("/")
 
+	s.regEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointStatus)
+
 	rgAPIv1 := rgRoot.Group("api/v1")
 	rgMock := rgAPIv1.Group("/mock")
 	s.regEndpoint(ctx, rgMock, http.MethodPost, "/next", s.endpointMockNext)

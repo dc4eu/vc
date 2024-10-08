@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 )
@@ -46,14 +47,30 @@ func (c *Client) User(ctx context.Context) (*LoggedinReply, error) {
 	return nil, nil
 }
 
+type DocumentListRequest struct {
+	AuthenticSource string          `json:"authentic_source"`
+	Identity        *model.Identity `json:"identity" validate:"required"`
+	DocumentType    string          `json:"document_type"`
+	ValidFrom       int64           `json:"valid_from"`
+	ValidTo         int64           `json:"valid_to"`
+}
+
 type PortalRequest struct {
 	DocumentType            string `json:"document_type" binding:"required"`
 	AuthenticSource         string `json:"authentic_source" binding:"required"`
 	AuthenticSourcePersonId string `json:"authentic_source_person_id" binding:"required"`
 }
 
-func (c *Client) Portal(ctx context.Context, req *PortalRequest) (any, error) {
-	reply, err := c.apigwClient.Portal(req)
+func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (any, error) {
+	reply, err := c.apigwClient.DocumentList(req)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (c *Client) Upload(ctx context.Context, req *apiv1_apigw.UploadRequest) (any, error) {
+	reply, err := c.apigwClient.Upload(req)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +82,13 @@ type MockNextRequest struct {
 }
 
 func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error) {
+	if c.cfg.Common.Kafka.Enabled {
+		if err := c.eventPublisher.MockNext(req); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
 	reply, err := c.mockasClient.MockNext(req)
 	if err != nil {
 		return nil, err

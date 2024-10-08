@@ -9,6 +9,8 @@ import (
 	"vc/internal/apigw/apiv1"
 	"vc/internal/apigw/db"
 	"vc/internal/apigw/httpserver"
+	"vc/internal/apigw/inbound"
+	"vc/internal/apigw/outbound"
 	"vc/internal/apigw/simplequeue"
 	"vc/pkg/configuration"
 	"vc/pkg/kvclient"
@@ -59,14 +61,34 @@ func main() {
 		panic(err)
 	}
 
+	mainLog := log.New("main")
+
+	var eventPublisher apiv1.EventPublisher
+	if cfg.IsAsyncEnabled(mainLog) {
+		var err error
+		eventPublisher, err = outbound.New(ctx, cfg, tracer, log)
+		services["eventPublisher"] = eventPublisher
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, simpleQueueService, tracer, cfg, log.New("apiv1"))
 	if err != nil {
 		panic(err)
 	}
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"), eventPublisher)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
+	}
+
+	if cfg.IsAsyncEnabled(mainLog) {
+		eventConsumer, err := inbound.New(ctx, cfg, log.New("eventConsumer"), apiv1Client, tracer)
+		services["eventConsumer"] = eventConsumer
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Handle sigterm and await termChan signal
@@ -75,7 +97,6 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

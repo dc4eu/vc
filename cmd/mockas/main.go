@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"vc/internal/mockas/apiv1"
 	"vc/internal/mockas/httpserver"
+	"vc/internal/mockas/inbound"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
@@ -32,6 +33,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	tracer, err := trace.New(ctx, cfg, log, "vc", "mock_as")
 	if err != nil {
 		panic(err)
@@ -41,10 +43,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
+	}
+
+	mainLog := log.New("main")
+	if cfg.IsAsyncEnabled(mainLog) {
+		eventConsumer, err := inbound.New(ctx, cfg, log.New("eventConsumer"), apiv1Client, tracer)
+		services["eventConsumer"] = eventConsumer
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// Handle sigterm and await termChan signal
@@ -53,7 +65,6 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

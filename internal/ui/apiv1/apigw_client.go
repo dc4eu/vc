@@ -1,6 +1,7 @@
 package apiv1
 
 import (
+	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -16,8 +17,8 @@ func NewAPIGWClient(cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) *A
 	}
 }
 
-func (c *APIGWClient) Portal(req *PortalRequest) (any, error) {
-	reply, err := c.DoPostJSON("/api/v1/portal", req)
+func (c *APIGWClient) DocumentList(req *DocumentListRequest) (any, error) {
+	reply, err := c.DoPostJSON("/api/v1/document/list", req)
 	if err != nil {
 		return nil, err
 	}
@@ -26,6 +27,14 @@ func (c *APIGWClient) Portal(req *PortalRequest) (any, error) {
 
 func (c *APIGWClient) Status() (any, error) {
 	reply, err := c.DoGetJSON("/health")
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (c *APIGWClient) Upload(req *apiv1_apigw.UploadRequest) (any, error) {
+	reply, err := c.DoPostJSON("/api/v1/upload", req)
 	if err != nil {
 		return nil, err
 	}

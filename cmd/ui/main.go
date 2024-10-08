@@ -10,6 +10,7 @@ import (
 	"time"
 	"vc/internal/ui/apiv1"
 	"vc/internal/ui/httpserver"
+	"vc/internal/ui/outbound"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
@@ -45,7 +46,22 @@ func main() {
 		panic(err)
 	}
 
-	apiClient, err := apiv1.New(ctx, cfg, tracer, log.New("ui_api_client"))
+	mainLog := log.New("main")
+
+	var eventPublisher apiv1.EventPublisher
+	if cfg.IsAsyncEnabled(mainLog) {
+		var err error
+		eventPublisher, err = outbound.New(ctx, cfg, tracer, log)
+		services["eventPublisher"] = eventPublisher
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		log.Info("EventPublisher disabled in config")
+	}
+
+	apiClient, err := apiv1.New(ctx, cfg, tracer, eventPublisher, log.New("api_client"))
+	services["apiClient"] = apiClient
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +78,6 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

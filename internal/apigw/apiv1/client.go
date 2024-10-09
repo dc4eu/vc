@@ -4,14 +4,11 @@ import (
 	"context"
 	"vc/internal/apigw/db"
 	"vc/internal/apigw/simplequeue"
+	"vc/pkg/datastoreclient"
 	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
-)
-
-var (
-	BuildVarGitCommit string
 )
 
 //	@title		Datastore API
@@ -20,12 +17,13 @@ var (
 
 // Client holds the public api object
 type Client struct {
-	cfg         *model.Cfg
-	db          *db.Service
-	log         *logger.Log
-	tp          *trace.Tracer
-	kv          *kvclient.Client
-	simpleQueue *simplequeue.Service
+	cfg             *model.Cfg
+	db              *db.Service
+	log             *logger.Log
+	tp              *trace.Tracer
+	kv              *kvclient.Client
+	simpleQueue     *simplequeue.Service
+	datastoreClient *datastoreclient.Client
 }
 
 // New creates a new instance of the public api
@@ -37,6 +35,16 @@ func New(ctx context.Context, kv *kvclient.Client, db *db.Service, simplequeue *
 		kv:          kv,
 		tp:          tp,
 		simpleQueue: simplequeue,
+	}
+
+	// Specifies the issuer configuration based on the issuer identifier, should be initialized in main I guess.
+	issuerIdentifier := cfg.Issuer.Identifier
+	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
+
+	var err error
+	c.datastoreClient, err = datastoreclient.New(&datastoreclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL})
+	if err != nil {
+		return nil, err
 	}
 
 	c.log.Info("Started")

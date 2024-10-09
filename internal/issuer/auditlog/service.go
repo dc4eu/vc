@@ -34,6 +34,8 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 	service.wg.Add(1)
 	go service.processAuditLog(ctx)
 
+	service.log.Info("Started")
+
 	return service, nil
 }
 
@@ -42,6 +44,8 @@ func (s *Service) Close(ctx context.Context) error {
 	ctx.Done()
 	s.wg.Done()
 	s.wg.Wait()
+
+	s.log.Info("Stopped")
 
 	return nil
 }

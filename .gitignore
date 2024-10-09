@@ -6,5 +6,5 @@ redis-data/
 kraft[0-9]*-data/
 *.orig
 **/.*.orig
+developer_tools/*.pem
 .env
-

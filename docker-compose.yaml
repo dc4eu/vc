@@ -46,6 +46,7 @@ services:
     volumes:
       - ./config.yaml:/config.yaml:ro
       - /var/log/sunet:/var/log/sunet
+      - ./developer_tools/private_ec256.pem:/private_ec256.pem:ro
     depends_on:
       - redis
       - mongo

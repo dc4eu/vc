@@ -3,9 +3,9 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
-	"vc/internal/apigw/db"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
+	"vc/pkg/datastoreclient"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
@@ -15,15 +15,11 @@ import (
 
 // CredentialRequest is the request for Credential
 type CredentialRequest struct {
-	AuthenticSource         string `json:"authentic_source" validate:"required"`
-	AuthenticSourcePersonID string `json:"authentic_source_person_id" validate:"required"`
-	DocumentType            string `json:"document_type" validate:"required"`
-	CredentialType          string `json:"credential_type" validate:"required"`
-
-	// Identity        *model.Identity `json:"identity" validate:"required"`
-	// DocumentID      string          `json:"document_id" validate:"required"`
-	// DocumentVersion string          `json:"document_version" validate:"required"`
-	// CollectID       string          `json:"collect_id" validate:"required"`
+	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	Identity        *model.Identity `json:"identity" validate:"required"`
+	DocumentType    string          `json:"document_type" validate:"required"`
+	CredentialType  string          `json:"credential_type" validate:"required"`
+	CollectID       string          `json:"collect_id" validate:"required"`
 }
 
 // Credential makes a credential
@@ -43,22 +39,16 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 		return nil, err
 	}
 
-	c.log.Info("Credential", "req", req)
-	// IDMapping
-
-	// GetDocument
-	document, err := c.db.VCDatastoreColl.GetDocumentForCredential(ctx, &db.GetDocumentForCredential{
-		Meta: &model.MetaData{
-			AuthenticSource: req.AuthenticSource,
-			DocumentType:    req.DocumentType,
-		},
-		Identity: &model.Identity{
-			AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		},
+	document, _, err := c.datastoreClient.DocumentService.CollectID(ctx, &datastoreclient.DocumentCollectIDQuery{
+		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.DocumentType,
+		CollectID:       req.CollectID,
+		Identity:        req.Identity,
 	})
 	if err != nil {
 		return nil, err
 	}
+
 	if document == nil || document.DocumentData == nil {
 		return nil, helpers.ErrNoDocumentFound
 	}
@@ -78,17 +68,8 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 	client := apiv1_issuer.NewIssuerServiceClient(conn)
 
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		AuthenticSource:         req.AuthenticSource,
-		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		DocumentType:            req.DocumentType,
-		//	DocumentID:              req.DocumentID,
-		//	DocumentVersion:         req.DocumentVersion,
-		//	DateOfBirth:             req.Identity.BirthDate,
-		//	CollectID:               req.CollectID,
-		//	LastName:                req.Identity.FamilyName,
-		//	FirstName:               req.Identity.GivenName,
-		CredentialType: req.CredentialType,
-		DocumentData:   documentData,
+		DocumentType: req.DocumentType,
+		DocumentData: documentData,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to call MakeSDJWT")

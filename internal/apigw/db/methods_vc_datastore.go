@@ -289,16 +289,15 @@ func (c *VCDatastoreColl) GetDocumentCollectID(ctx context.Context, query *GetDo
 		"meta.collect.id":           bson.M{"$eq": query.Meta.Collect.ID},
 		"meta.document_type":        bson.M{"$eq": query.Meta.DocumentType},
 		"identities.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
+		"identities.schema.name":    bson.M{"$eq": query.Identity.Schema.Name},
 	}
 
 	if query.Identity.AuthenticSourcePersonID != "" {
 		filter["identities.authentic_source_person_id"] = bson.M{"$eq": query.Identity.AuthenticSourcePersonID}
 	} else {
-		filter = bson.M{
-			"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
-			"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
-			"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
-		}
+		filter["identities.family_name"] = bson.M{"$eq": query.Identity.FamilyName}
+		filter["identities.given_name"] = bson.M{"$eq": query.Identity.GivenName}
+		filter["identities.birth_date"] = bson.M{"$eq": query.Identity.BirthDate}
 	}
 
 	opts := options.FindOne().SetProjection(bson.M{

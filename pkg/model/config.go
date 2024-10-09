@@ -103,12 +103,32 @@ type Queues struct {
 // TrustModel holds the trust model configuration
 type TrustModel struct{}
 
+// JWTAttribute holds the jwt attribute configuration.
+// In a later state this should be placed under authentic source in order to issue credentials based on that configuration.
+type JWTAttribute struct {
+	// Issuer of the token example: https://issuer.sunet.se
+	Issuer string `yaml:"issuer" validate:"required"`
+
+	// EnableNotBefore states the time not before which the token is valid
+	EnableNotBefore bool `yaml:"enable_not_before"`
+
+	// Valid duration of the token in seconds
+	ValidDuration int64 `yaml:"valid_duration" validate:"required_with=EnableNotBefore"`
+
+	// VerifiableCredentialType URL example: https://credential.sunet.se/identity_credential
+	VerifiableCredentialType string `yaml:"verifiable_credential_type" validate:"required"`
+
+	// Status status of the Verifiable Credential
+	Status string `yaml:"status"`
+}
+
 // Issuer holds the issuer configuration
 type Issuer struct {
-	APIServer  APIServer  `yaml:"api_server" validate:"required"`
-	Identifier string     `yaml:"identifier" validate:"required"`
-	TrustModel TrustModel `yaml:"trust_model" validate:"required"`
-	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
+	APIServer      APIServer    `yaml:"api_server" validate:"required"`
+	Identifier     string       `yaml:"identifier" validate:"required"`
+	GRPCServer     GRPCServer   `yaml:"grpc_server" validate:"required"`
+	SigningKeyPath string       `yaml:"signing_key_path" validate:"required"`
+	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 }
 
 // Registry holds the registry configuration
@@ -149,7 +169,8 @@ type BasicAuth struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
+	APIServer  APIServer  `yaml:"api_server" validate:"required"`
+	TrustModel TrustModel `yaml:"trust_model" validate:"required"`
 }
 
 // OTEL holds the opentelemetry configuration

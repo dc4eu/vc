@@ -43,7 +43,7 @@ type CreateCredentialReply struct {
 	Data *gosdjwt.PresentationFlat `json:"data"`
 }
 
-// CreateCredential creates a credential
+// MakeSDJWT creates a credential
 func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
 	ctx, span := c.tp.Start(ctx, "apiv1:CreateCredential")
 	defer span.End()
@@ -54,36 +54,31 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	}
 
 	// Build SDJWT
-	var sdjwt *gosdjwt.SDJWT
+	var instruction gosdjwt.InstructionsV2
 	switch req.DocumentType {
 	case "PDA1":
 		doc := &pda1.Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
-		var err error
-		sdjwt, err = c.pda1Client.sdjwt(ctx, doc)
-		if err != nil {
-			return nil, err
-		}
-
-		c.auditLog.AddAuditLog(ctx, "create_credential", sdjwt.PresentationFlat())
+		instruction = c.pda1Client.sdjwt(ctx, doc)
 
 	case "EHIC":
 		doc := &ehic.Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
-		var err error
-		sdjwt, err = c.ehicClient.sdjwt(ctx, doc)
-		if err != nil {
-			return nil, err
-		}
-
-		c.auditLog.AddAuditLog(ctx, "create_credential", sdjwt.PresentationFlat())
+		instruction = c.ehicClient.sdjwt(ctx, doc)
 	}
+
+	signedCredential, err := c.sign(instruction)
+	if err != nil {
+		return nil, err
+	}
+
+	c.auditLog.AddAuditLog(ctx, "create_credential", signedCredential.PresentationFlat())
 	reply := &CreateCredentialReply{
-		Data: sdjwt.PresentationFlat(),
+		Data: signedCredential.PresentationFlat(),
 	}
 
 	return reply, nil

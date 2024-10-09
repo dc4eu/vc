@@ -258,6 +258,9 @@ swagger-apigw:
 swagger-issuer:
 	swag init -d internal/issuer/apiv1/ -g client.go --output docs/issuer --parseDependency --packageName docs
 
+diagram:
+	plantuml docs/diagrams/*.puml
+
 install-tools:
 	$(info Install from apt)
 	apt-get update && apt-get install -y \
@@ -277,7 +280,8 @@ vscode:
 	$(info Install APT packages)
 	sudo apt-get update && sudo apt-get install -y \
 		protobuf-compiler \
-		netcat-openbsd
+		netcat-openbsd \
+		plantuml
 	$(info Install go packages)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \

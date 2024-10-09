@@ -6,7 +6,6 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/trace"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/masv3971/gosdjwt"
 )
 
@@ -24,11 +23,11 @@ func newEHICClient(ctx context.Context, tp *trace.Tracer, log *logger.Log) (*ehi
 	return client, nil
 }
 
-func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document) (*gosdjwt.SDJWT, error) {
+func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document) gosdjwt.InstructionsV2 {
 	ctx, span := c.tp.Start(ctx, "apiv1:ehic:sdjwt")
 	defer span.End()
 
-	ins := gosdjwt.InstructionsV2{
+	instruction := gosdjwt.InstructionsV2{
 		&gosdjwt.ParentInstructionV2{
 			Name: "cardHolder",
 			Children: []any{
@@ -151,10 +150,5 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document) (*gosdjwt.SD
 		},
 	}
 
-	cred, err := ins.SDJWT(jwt.SigningMethodHS256, "key")
-	if err != nil {
-		return nil, err
-	}
-
-	return cred, nil
+	return instruction
 }

@@ -6,29 +6,30 @@ import (
 	"vc/pkg/pda1"
 	"vc/pkg/trace"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/masv3971/gosdjwt"
 )
 
 type pda1Client struct {
-	log *logger.Log
-	tp  *trace.Tracer
+	log    *logger.Log
+	tp     *trace.Tracer
+	client *Client
 }
 
-func newPDA1Client(tp *trace.Tracer, log *logger.Log) (*pda1Client, error) {
-	client := &pda1Client{
-		log: log,
-		tp:  tp,
+func newPDA1Client(tp *trace.Tracer, client *Client, log *logger.Log) (*pda1Client, error) {
+	c := &pda1Client{
+		log:    log,
+		tp:     tp,
+		client: client,
 	}
 
-	return client, nil
+	return c, nil
 }
 
-func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document) (*gosdjwt.SDJWT, error) {
+func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document) gosdjwt.InstructionsV2 {
 	ctx, span := c.tp.Start(ctx, "apiv1:pda1:sdjwt")
 	defer span.End()
 
-	ins := gosdjwt.InstructionsV2{
+	instruction := gosdjwt.InstructionsV2{
 		&gosdjwt.ParentInstructionV2{
 			Name: "activityEmploymentDetails",
 			Children: []any{
@@ -372,11 +373,5 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document) (*gosdjwt.SD
 		},
 	}
 
-	cred, err := ins.SDJWT(jwt.SigningMethodHS256, "key")
-	c.log.Debug("SDJWT", "cred", cred, "err", err)
-	if err != nil {
-		return nil, err
-	}
-
-	return cred, nil
+	return instruction
 }

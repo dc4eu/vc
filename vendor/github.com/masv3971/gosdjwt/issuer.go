@@ -260,11 +260,13 @@ func (i InstructionsV2) createSDJWT() (jwt.MapClaims, DisclosuresV2, error) {
 //	return append(a, b...)
 //}
 
-func sign(claims jwt.MapClaims, signingMethod jwt.SigningMethod, signingKey any) (string, error) {
+func sign(claims jwt.MapClaims, signingMethod jwt.SigningMethod, signingKey any, config *Config) (string, error) {
 	//if c.config.SigningMethod == nil {
 	//	c.config.SigningMethod = jwt.SigningMethodHS256
 	//}
 	token := jwt.NewWithClaims(signingMethod, claims)
+	token.Header["typ"] = "sd+jwt-vc"
+	claims["mura"] = "nisse"
 
 	//	if c.config.JWTType == "" {
 	//		token.Header["typ"] = "sd-jwt"
@@ -275,14 +277,42 @@ func sign(claims jwt.MapClaims, signingMethod jwt.SigningMethod, signingKey any)
 	return token.SignedString(signingKey)
 }
 
+type Claim struct {
+	Disclosure bool
+	Value      string
+}
+
+// Config configs sd-jwt-vc
+type Config struct {
+	ISS    string
+	NBF    int64
+	EXP    int64
+	VCT    string
+	Status string
+
+	// SUB MAY be selectively disclosed
+	SUB string
+	// IAT MAY be selectively disclosed
+	IAT int64
+}
+
 // SDJWT returns a signed SD-JWT with disclosures.
 // Maybe this should return a more structured return of jwt and disclosures
-func (i InstructionsV2) SDJWT(signingMethod jwt.SigningMethod, signingKey string) (*SDJWT, error) {
+func (i InstructionsV2) SDJWT(signingMethod jwt.SigningMethod, signingKey any, config *Config) (*SDJWT, error) {
 	rawSDJWT, disclosures, err := i.createSDJWT()
 	if err != nil {
 		return nil, err
 	}
-	signedJWT, err := sign(rawSDJWT, signingMethod, []byte(signingKey))
+
+	rawSDJWT["iss"] = config.ISS
+	rawSDJWT["nbf"] = config.NBF
+	rawSDJWT["exp"] = config.EXP
+	rawSDJWT["cnf"] = ""
+	rawSDJWT["vct"] = config.VCT
+	rawSDJWT["status"] = ""
+	rawSDJWT["_sd_alg"] = "sha-256"
+
+	signedJWT, err := sign(rawSDJWT, signingMethod, signingKey, config)
 	if err != nil {
 		return nil, err
 	}

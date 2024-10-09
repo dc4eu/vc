@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -62,13 +61,8 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 
 	var buf io.ReadWriter
 	if body != nil {
-		payload := struct {
-			Data any `json:"data"`
-		}{
-			Data: body,
-		}
 		buf = new(bytes.Buffer)
-		err = json.NewEncoder(buf).Encode(payload)
+		err = json.NewEncoder(buf).Encode(body)
 		if err != nil {
 			return nil, err
 		}
@@ -79,6 +73,8 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 		return nil, err
 	}
 
+	fmt.Println("req", req)
+
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -87,11 +83,12 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 }
 
 // Do does the new request
-func (c *Client) do(ctx context.Context, req *http.Request, reply interface{}) (*http.Response, error) {
+func (c *Client) do(ctx context.Context, req *http.Request, reply any) (*http.Response, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	if err := checkResponse(resp); err != nil {
@@ -99,20 +96,21 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply interface{}) (
 		if _, err := buf.ReadFrom(resp.Body); err != nil {
 			return nil, err
 		}
-		ladokError := &helpers.Error{}
-		if err := json.Unmarshal(buf.Bytes(), ladokError); err != nil { // TODO(masv): Fix xml error parsing into Errors.
+		if err := json.Unmarshal(buf.Bytes(), err); err != nil {
 			return nil, err
 		}
-		return nil, ladokError
+		return nil, err
 	}
 
-	switch resp.Header.Get("Content-Type") {
-	case "application/json":
-		if err := json.NewDecoder(resp.Body).Decode(reply); err != nil {
-			return nil, err
-		}
-	default:
-		return nil, errors.New("unsupported content type")
+	r := struct {
+		Data any `json:"data"`
+	}{
+		Data: reply,
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		fmt.Println("err", err)
+		return nil, err
 	}
 
 	return resp, nil
@@ -131,7 +129,7 @@ func checkResponse(r *http.Response) error {
 	return ErrInvalidRequest
 }
 
-func (c *Client) call(ctx context.Context, method, url string, body, reply interface{}) (*http.Response, error) {
+func (c *Client) call(ctx context.Context, method, url string, body, reply any) (*http.Response, error) {
 	request, err := c.newRequest(
 		ctx,
 		method,
@@ -146,6 +144,8 @@ func (c *Client) call(ctx context.Context, method, url string, body, reply inter
 	if err != nil {
 		return resp, err
 	}
+
+	fmt.Println("reply", reply)
 
 	return resp, nil
 }

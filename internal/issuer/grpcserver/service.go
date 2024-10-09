@@ -31,7 +31,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, log *logger.L
 	lis, err := net.Listen("tcp", s.cfg.Issuer.GRPCServer.Addr)
 	if err != nil {
 		s.log.Error(err, "failed to listen", "addr", s.cfg.Issuer.GRPCServer.Addr)
-
 	}
 
 	s.server = grpc.NewServer()

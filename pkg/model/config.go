@@ -1,5 +1,9 @@
 package model
 
+import (
+	"vc/pkg/logger"
+)
+
 // APIServer holds the api server configuration
 type APIServer struct {
 	Addr       string            `yaml:"addr" validate:"required"`
@@ -18,6 +22,12 @@ type TLS struct {
 // Mongo holds the database configuration
 type Mongo struct {
 	URI string `yaml:"uri" validate:"required"`
+}
+
+// Kafka holds the kafka configuration that is common for the entire system
+type Kafka struct {
+	Enabled bool     `yaml:"enabled"`
+	Brokers []string `yaml:"brokers"`
 }
 
 // KeyValue holds the key/value configuration
@@ -44,6 +54,7 @@ type Common struct {
 	Queues     Queues   `yaml:"queues" validate:"omitempty"`
 	KeyValue   KeyValue `yaml:"key_value" validate:"omitempty"`
 	QR         QRCfg    `yaml:"qr" validate:"omitempty"`
+	Kafka      Kafka    `yaml:"kafka" validate:"required"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -233,4 +244,12 @@ type Cfg struct {
 	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
 	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
 	UI               UI                         `yaml:"ui" validate:"omitempty"`
+}
+
+func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
+	enabled := cfg.Common.Kafka.Enabled
+	if !enabled {
+		log.Info("EventPublisher disabled in config")
+	}
+	return enabled
 }

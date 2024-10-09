@@ -3,6 +3,8 @@ package apiv1
 import (
 	"context"
 	"errors"
+	"vc/internal/gen/status/apiv1_status"
+	"vc/pkg/model"
 )
 
 // MockNextRequest holds the request
@@ -22,10 +24,10 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 	if err != nil {
 		return nil, err
 	}
-	c.log.Debug("mocknext", "mockUpload", mockUpload)
 
 	resp, err := c.uploader(ctx, mockUpload)
 	if err != nil {
+		c.log.Error(err, "failed to upload", "mockUpload", mockUpload)
 		return nil, err
 	}
 
@@ -84,4 +86,10 @@ func (c *Client) MockBulk(ctx context.Context, inData *MockBulkRequest) (*MockBu
 	return &MockBulkReply{
 		DocumentIDS: documentIDS,
 	}, nil
+}
+
+func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
+	probes := model.Probes{}
+	status := probes.Check("mockas")
+	return status, nil
 }

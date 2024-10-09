@@ -49,7 +49,6 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 		data.BirthDate = gofakeit.Date().String()
 	}
 
-
 	if data.CollectID == "" {
 		data.CollectID = gofakeit.UUID()
 	}
@@ -86,7 +85,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 			AuthenticSourcePersonID: data.AuthenticSourcePersonID,
 			Schema: &model.IdentitySchema{
 				Name:    "SE",
-				Version: "1.0.2",
+				Version: "1.0.0",
 			},
 			FamilyName: data.FamilyName,
 			GivenName:  data.GivenName,

@@ -25,6 +25,11 @@ common:
     base_url: "https://deutsche-rentenversicherung.de"
     recovery_level: 2
     size: 256
+  kafka:
+    enabled: true
+    brokers:
+      - "kafka0:9092"
+      - "kafka1:9092"
 
 authentic_sources:
   SUNET_v1:

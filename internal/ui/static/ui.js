@@ -140,7 +140,7 @@ function handleErrorInArticle(err, elements) {
 
 async function doFetchAPICallAndHandleResult(url, options, elements) {
     try {
-        //TODO: add timeout on clientside for fetch?
+        //TODO(mk): add timeout on clientside for fetch
         const response = await fetch(url, options);
         const jsonBody = await response.json();
         console.debug(jsonBody);
@@ -207,7 +207,7 @@ function doPostForDemo(path, articleHeaderText) {
     const authenticSourcePersonIdElement = getElementById("authentic_source_person_id-input");
 
     if (!(validateHasValueAndNotEmpty(documentTypeElement) && validateHasValueAndNotEmpty(authenticSourceElement) && validateHasValueAndNotEmpty(authenticSourcePersonIdElement))) {
-        //TODO: show an error message for input params
+        //TODO(mk): show an error message for input params
         return
     }
 
@@ -220,29 +220,51 @@ function doPostForDemo(path, articleHeaderText) {
     postAndDisplayInArticleContainerFor(path, postBody, articleHeaderText);
 }
 
-/* ie upload */
 const createMock = () => {
     console.debug("createMock");
     const path = "/secure/mockas/mock/next";
-    const articleHeaderText = "Upload";
+    const articleHeaderText = "Upload new mock";
     doPostForDemo(path, articleHeaderText);
 };
 
-const fetchFromPortal = () => {
-    console.debug("fetchFromPortal");
-    const path = "/secure/apigw/portal";
-    const articleHeaderText = "Fetch";
-    doPostForDemo(path, articleHeaderText);
+const postDocumentList = () => {
+    console.debug("postDocumentList");
+    const path = "/secure/apigw/document/list";
+    const articleHeaderText = "document/list";
+
+    const documentTypeElement = getElementById("document-type-select");
+    const authenticSourceElement = getElementById("authentic-source-input");
+    const authenticSourcePersonIdElement = getElementById("authentic_source_person_id-input");
+
+    if (!(validateHasValueAndNotEmpty(documentTypeElement) && validateHasValueAndNotEmpty(authenticSourceElement) && validateHasValueAndNotEmpty(authenticSourcePersonIdElement))) {
+        //TODO(mk): show an error message for input params
+        return;
+    }
+
+    const documentListRequest = {
+        authentic_source: authenticSourceElement.value,
+        identity: {
+            authentic_source_person_id: authenticSourcePersonIdElement.value,
+            schema: {
+                name: "SE",
+                version: "1.0.0"
+            }
+        },
+        document_type: documentTypeElement.value
+    };
+
+    postAndDisplayInArticleContainerFor(path, documentListRequest, articleHeaderText);
 };
+
 
 const updateUploadAndFetchButtons = () => {
     const input = getElementById('authentic_source_person_id-input');
-    const mockButton = getElementById('create-mock-btn');
-    const fetchButton = getElementById('fetch-from-portal-btn');
+    const mockBtn = getElementById('create-mock-btn');
+    const documentListBtn = getElementById('post-document-list-btn');
 
-    //TODO: Validate input values?
-    mockButton.disabled = !(input.value);
-    fetchButton.disabled = !(input.value);
+    //TODO(mk): Validate input values?
+    mockBtn.disabled = !(input.value);
+    documentListBtn.disabled = !(input.value);
 };
 
 /** Builds an article with custom body children but does not add it to the DOM
@@ -254,7 +276,6 @@ const updateUploadAndFetchButtons = () => {
  * @returns {HTMLElement} article
  */
 const buildArticle = (articleID, articleHeaderText, bodyChildrenElementArray) => {
-    //<button onClick="toggleContent('article-6')" className="toggle-button">Toggle</button>
     const expandCollapseButton = document.createElement('button');
     expandCollapseButton.onclick = () => toggleExpandCollapseArticle(articleID);
     expandCollapseButton.classList.add("button", "is-dark");
@@ -334,14 +355,55 @@ async function doLogin() {
     if (authOK) {
         clearContainer("login-container");
         displaySecureMenyItems();
-        //TODO: show logged in user?
+        //TODO(mk): show logged in user?
     } else {
         usernameInput.disabled = false;
         passwordInput.disabled = false;
         doLoginButton.disabled = false;
-        //TODO if auth!=ok display some info/error message...
+        //TODO(mk): if auth!=ok display some info/error message...
     }
 }
+
+const addUploadFormArticleToContainer = () => {
+    const buildUploadFormElements = () => {
+        //TODO:(mk) Only one form is handled in Browser simultaneous since element id's is static
+
+        const textarea = document.createElement("textarea");
+        textarea.id = 'upload-textarea';
+        textarea.classList.add("textarea");
+        textarea.rows = 10;
+
+        const submitButton = document.createElement('button');
+        submitButton.id = 'do-upload-btn';
+        submitButton.classList.add('button', 'is-link');
+        submitButton.textContent = 'Upload';
+
+        const doUpload = () => {
+            getElementById("do-upload-btn").disabled = true;
+
+            const textarea = getElementById("upload-textarea");
+            const text = textarea.value;
+            textarea.disabled = true;
+
+            const jsonObj = JSON.parse(text);
+            postAndDisplayInArticleContainerFor("/secure/apigw/upload", jsonObj, "Upload result");
+        };
+        submitButton.onclick = () => doUpload();
+
+        const buttonControl = document.createElement('div');
+        buttonControl.classList.add('control');
+        buttonControl.appendChild(submitButton);
+
+        return [textarea, buttonControl];
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Upload", buildUploadFormElements());
+    const articleContainer = getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+
+    getElementById("upload-textarea").focus();
+};
 
 const addLoginArticleToContainer = () => {
     const buildLoginElements = () => {
@@ -429,7 +491,7 @@ async function doLogout() {
         method: "DELETE", headers: headers
     });
 
-    //TODO: add error handling
+    //TODO(mk): add error handling
     await fetch(request);
     hideSecureMenyItems();
     clearAllContentContainers();

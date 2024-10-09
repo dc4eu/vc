@@ -10,12 +10,14 @@ import (
 	"net/url"
 	"time"
 	"vc/pkg/helpers"
+	"vc/pkg/logger"
 )
 
 // Client is the client
 type Client struct {
 	httpClient *http.Client
 	url        string
+	log        *logger.Log
 
 	DocumentService *documentService
 	IdentityService *identityService
@@ -36,10 +38,11 @@ func New(config *Config) (*Client, error) {
 			Timeout: 10 * time.Second,
 		},
 		url: config.URL,
+		log: logger.NewSimple("datastoreclient"),
 	}
 
-	c.DocumentService = &documentService{client: c, service: "api/v1/document"}
-	c.IdentityService = &identityService{client: c, service: "api/v1/identity"}
+	c.DocumentService = &documentService{client: c, service: "api/v1/document", log: c.log.New("document")}
+	c.IdentityService = &identityService{client: c, service: "api/v1/identity", log: c.log.New("identity")}
 
 	return c, nil
 }

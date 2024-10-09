@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"vc/pkg/logger"
 	"vc/pkg/model"
 )
 
 type documentService struct {
 	client  *Client
 	service string
+	log     *logger.Log
 }
 
 // DocumentGetQuery is the query for GetDocument
@@ -40,6 +42,8 @@ type DocumentListQuery struct {
 }
 
 func (s *documentService) List(ctx context.Context, query *DocumentListQuery) ([]model.DocumentList, *http.Response, error) {
+	s.log.Info("List")
+
 	url := fmt.Sprintf("%s/%s", s.service, "list")
 	reply := []model.DocumentList{}
 	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply)
@@ -62,10 +66,12 @@ type DocumentCollectIDReply struct {
 	DocumentData any `json:"document_data"`
 }
 
-func (s *documentService) CollectID(ctx context.Context, query *DocumentCollectIDQuery) (*DocumentCollectIDReply, *http.Response, error) {
+func (s *documentService) CollectID(ctx context.Context, query *DocumentCollectIDQuery) (*model.Document, *http.Response, error) {
+	s.log.Info("CollectID")
+
 	url := fmt.Sprintf("%s/%s", s.service, "collect_id")
-	reply := &DocumentCollectIDReply{}
-	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply)
+	reply := &model.Document{}
+	resp, err := s.client.call(ctx, http.MethodPost, url, query, reply)
 	if err != nil {
 		return nil, resp, err
 	}

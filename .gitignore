@@ -5,3 +5,4 @@ redis-data/
 .idea/
 *.orig
 **/.*.orig
+developer_tools/*.pem

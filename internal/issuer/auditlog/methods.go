@@ -24,6 +24,7 @@ func (s *Service) processAuditLog(ctx context.Context) {
 		case <-ctx.Done():
 			s.log.Info("Audit log service stopped")
 		case auditLog := <-s.auditLogChan:
+			s.log.Info("Processing audit log", "event", auditLog.EventType, "id", auditLog.ID)
 			err := s.SendWebHook(ctx, auditLog)
 			if err != nil {
 				s.log.Error(err, "Error sending webhook")

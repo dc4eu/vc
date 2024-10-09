@@ -12,20 +12,11 @@ service IssuerService {
 }
 
 message MakeSDJWTRequest {
-    string AuthenticSource = 1;
-    string AuthenticSourcePersonID = 2;
-    string DocumentType = 3;
-    string DocumentID = 4;
-    string DocumentVersion = 5;
-    string CollectID = 6;
-    string DateOfBirth = 7;
-    string LastName = 8;
-    string FirstName = 9;
-    string CredentialType = 10;
-    bytes DocumentData = 11;
+    string documentType = 1;
+    bytes documentData = 2;
 }
 
 message MakeSDJWTReply {
-    string JWT = 1;
-    repeated string Disclosures = 2;
+    string jwt = 1;
+    repeated string disclosures = 2;
 }

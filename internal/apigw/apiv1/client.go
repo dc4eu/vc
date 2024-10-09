@@ -42,9 +42,7 @@ func New(ctx context.Context, kv *kvclient.Client, db *db.Service, simplequeue *
 	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
 
 	var err error
-	c.datastoreClient, err = datastoreclient.New(&datastoreclient.Config{
-		URL: issuerCFG.AuthenticSourceEndpoint.URL,
-	})
+	c.datastoreClient, err = datastoreclient.New(&datastoreclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL})
 	if err != nil {
 		return nil, err
 	}

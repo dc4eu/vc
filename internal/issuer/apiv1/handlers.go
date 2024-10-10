@@ -71,7 +71,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		instruction = c.ehicClient.sdjwt(ctx, doc)
 	}
 
-	signedCredential, err := c.sign(instruction)
+	signedCredential, err := c.sign(ctx, instruction)
 	if err != nil {
 		return nil, err
 	}

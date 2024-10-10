@@ -26,6 +26,7 @@ type Client struct {
 	auditLog   *auditlog.Service
 	privateKey *ecdsa.PrivateKey
 	publicKey  *ecdsa.PublicKey
+	jwkClaim   jwt.MapClaims
 
 	ehicClient *ehicClient
 	pda1Client *pda1Client
@@ -51,7 +52,7 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 		return nil, err
 	}
 
-	if err := c.initKeys(); err != nil {
+	if err := c.initKeys(ctx); err != nil {
 		return nil, err
 	}
 
@@ -60,7 +61,7 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	return c, nil
 }
 
-func (c *Client) initKeys() error {
+func (c *Client) initKeys(ctx context.Context) error {
 	keyByte, err := os.ReadFile(c.cfg.Issuer.SigningKeyPath)
 	if err != nil {
 		c.log.Error(err, "Failed to read signing key, please create a ECDSA prime256v1 key and save it to the path")
@@ -76,13 +77,18 @@ func (c *Client) initKeys() error {
 
 	c.publicKey = &c.privateKey.PublicKey
 
+	if err := c.createJWK(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (c *Client) sign(instruction gosdjwt.InstructionsV2) (*gosdjwt.SDJWT, error) {
+func (c *Client) sign(ctx context.Context, instruction gosdjwt.InstructionsV2) (*gosdjwt.SDJWT, error) {
 	jwtConfig := &gosdjwt.Config{
 		ISS: c.cfg.Issuer.JWTAttribute.Issuer,
 		VCT: c.cfg.Issuer.JWTAttribute.VerifiableCredentialType,
+		CNF: c.jwkClaim,
 	}
 
 	if c.cfg.Issuer.JWTAttribute.EnableNotBefore {

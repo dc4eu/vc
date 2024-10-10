@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -60,8 +59,6 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 	}
 	url := u.ResolveReference(rel)
 
-	fmt.Println("url", url.String())
-
 	var buf io.ReadWriter
 	if body != nil {
 		buf = new(bytes.Buffer)
@@ -75,8 +72,6 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("req", req)
 
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
@@ -112,7 +107,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any) (*http.Re
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		fmt.Println("err", err)
+		c.log.Error(err, "failed to decode response")
 		return nil, err
 	}
 
@@ -147,8 +142,6 @@ func (c *Client) call(ctx context.Context, method, url string, body, reply any) 
 	if err != nil {
 		return resp, err
 	}
-
-	fmt.Println("reply", reply)
 
 	return resp, nil
 }

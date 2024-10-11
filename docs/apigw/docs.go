@@ -623,15 +623,16 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "authentic_source",
-                "authentic_source_person_id",
+                "collect_id",
                 "credential_type",
-                "document_type"
+                "document_type",
+                "identity"
             ],
             "properties": {
                 "authentic_source": {
                     "type": "string"
                 },
-                "authentic_source_person_id": {
+                "collect_id": {
                     "type": "string"
                 },
                 "credential_type": {
@@ -639,6 +640,9 @@ const docTemplate = `{
                 },
                 "document_type": {
                     "type": "string"
+                },
+                "identity": {
+                    "$ref": "#/definitions/model.Identity"
                 }
             }
         },
@@ -930,13 +934,13 @@ const docTemplate = `{
         "apiv1_issuer.MakeSDJWTReply": {
             "type": "object",
             "properties": {
-                "Disclosures": {
+                "disclosures": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "JWT": {
+                "jwt": {
                     "type": "string"
                 }
             }

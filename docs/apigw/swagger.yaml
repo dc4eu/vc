@@ -45,17 +45,20 @@ definitions:
     properties:
       authentic_source:
         type: string
-      authentic_source_person_id:
+      collect_id:
         type: string
       credential_type:
         type: string
       document_type:
         type: string
+      identity:
+        $ref: '#/definitions/model.Identity'
     required:
     - authentic_source
-    - authentic_source_person_id
+    - collect_id
     - credential_type
     - document_type
+    - identity
     type: object
   apiv1.DeleteDocumentIdentityRequest:
     properties:
@@ -268,11 +271,11 @@ definitions:
     type: object
   apiv1_issuer.MakeSDJWTReply:
     properties:
-      Disclosures:
+      disclosures:
         items:
           type: string
         type: array
-      JWT:
+      jwt:
         type: string
     type: object
   helpers.Error:

@@ -8,18 +8,18 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	config *model.Cfg
-	logger *logger.Log
+	cfg *model.Cfg
+	log *logger.Log
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, config *model.Cfg, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	c := &Client{
-		config: config,
-		logger: logger,
+		cfg: cfg,
+		log: log.New("apiv1"),
 	}
 
-	c.logger.Info("Started")
+	c.log.Info("Started")
 
 	return c, nil
 }

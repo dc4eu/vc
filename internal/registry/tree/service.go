@@ -27,7 +27,7 @@ type Service struct {
 // New creates a new merkel tree client
 func New(ctx context.Context, wg *sync.WaitGroup, db *db.Service, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	s := &Service{
-		log:      log,
+		log:      log.New("tree"),
 		cfg:      cfg,
 		db:       db,
 		wg:       wg,
@@ -96,6 +96,6 @@ func (s *Service) Close(ctx context.Context) error {
 
 	s.wg.Wait()
 
-	s.log.Info("Quit")
+	s.log.Info("Stopped")
 	return nil
 }

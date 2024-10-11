@@ -3,109 +3,65 @@ package httpserver
 import (
 	"context"
 	"net/http"
-	"time"
 	"vc/internal/verifier/apiv1"
-	"vc/pkg/helpers"
+	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/trace"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 )
 
 // Service is the service object for httpserver
 type Service struct {
-	config *model.Cfg
-	logger *logger.Log
-	server *http.Server
-	apiv1  Apiv1
-	gin    *gin.Engine
+	cfg         *model.Cfg
+	log         *logger.Log
+	server      *http.Server
+	apiv1       Apiv1
+	gin         *gin.Engine
+	tracer      *trace.Tracer
+	httpHelpers *httphelpers.Client
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, config *model.Cfg, api *apiv1.Client, logger *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
 	s := &Service{
-		config: config,
-		logger: logger,
-		apiv1:  api,
-		server: &http.Server{Addr: config.Verifier.APIServer.Addr, ReadHeaderTimeout: 2 * time.Second},
+		cfg:    cfg,
+		log:    log.New("httpserver"),
+		apiv1:  apiv1,
+		gin:    gin.New(),
+		tracer: tracer,
+		server: &http.Server{},
 	}
 
-	switch s.config.Common.Production {
-	case true:
-		gin.SetMode(gin.ReleaseMode)
-	case false:
-		gin.SetMode(gin.DebugMode)
-	}
-
-	apiValidator := validator.New()
-	binding.Validator = &defaultValidator{
-		Validate: apiValidator,
-	}
-
-	s.gin = gin.New()
-	s.server.Handler = s.gin
-	s.server.ReadTimeout = time.Second * 5
-	s.server.WriteTimeout = time.Second * 30
-	s.server.IdleTimeout = time.Second * 90
-
-	// Middlewares
-	s.gin.Use(s.middlewareTraceID(ctx))
-	s.gin.Use(s.middlewareDuration(ctx))
-	s.gin.Use(s.middlewareLogger(ctx))
-	s.gin.Use(s.middlewareCrash(ctx))
-	problem404, err := helpers.Problem404()
+	var err error
+	s.httpHelpers, err = httphelpers.New(ctx, s.tracer, s.cfg, s.log)
 	if err != nil {
 		return nil, err
 	}
-	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, problem404) })
 
-	sgRoot := s.gin.Group("/")
-	s.regEndpoint(ctx, sgRoot, "health", "GET", s.endpointStatus)
+	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.Verifier.APIServer.Addr)
+	if err != nil {
+		return nil, err
+	}
 
-	//	sgAPIv1 := sgRoot.Group("/api/v1")
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
 
 	// Run http server
 	go func() {
-		err := s.server.ListenAndServe()
+		err := s.httpHelpers.Server.ListenAndServe(ctx, s.server, s.cfg.Verifier.APIServer)
 		if err != nil {
-			s.logger.New("http").Trace("listen_error", "error", err)
+			s.log.Trace("listen_error", "error", err)
 		}
 	}()
 
-	s.logger.Info("started")
+	s.log.Info("Started")
 
 	return s, nil
 }
 
-func (s *Service) regEndpoint(ctx context.Context, rg *gin.RouterGroup, path, method string, handler func(context.Context, *gin.Context) (interface{}, error)) {
-	rg.Handle(method, path, func(c *gin.Context) {
-		res, err := handler(ctx, c)
-
-		status := 200
-
-		if err != nil {
-			status = 400
-		}
-
-		renderContent(c, status, gin.H{"data": res, "error": helpers.NewErrorFromError(err)})
-	})
-}
-
-func renderContent(c *gin.Context, code int, data interface{}) {
-	switch c.NegotiateFormat(gin.MIMEJSON, "*/*") {
-	case gin.MIMEJSON:
-		c.JSON(code, data)
-	case "*/*": // curl
-		c.JSON(code, data)
-	default:
-		c.JSON(406, gin.H{"data": nil, "error": helpers.NewErrorDetails("not_acceptable", "Accept header is invalid. It should be \"application/json\".")})
-	}
-}
-
 // Close closing httpserver
 func (s *Service) Close(ctx context.Context) error {
-	s.logger.Info("Quit")
+	s.log.Info("Stopping")
 	return nil
 }

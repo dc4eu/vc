@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/IBM/sarama"
 	"reflect"
 	"sync"
 	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+
+	"github.com/IBM/sarama"
 )
 
 const (
@@ -61,7 +62,7 @@ func commonConsumerConfig(cfg *model.Cfg) *sarama.Config {
 	return saramaConfig
 }
 
-// Start starts the actual event consumting from specified kafka topics
+// Start starts the actual event consuming from specified kafka topics
 func (c *MessageConsumerClient) Start(ctx context.Context, handlerFactory func(string) sarama.ConsumerGroupHandler, handlerConfigs []HandlerConfig) error {
 	if err := c.SaramaConfig.Validate(); err != nil {
 		return err
@@ -98,6 +99,7 @@ func (c *MessageConsumerClient) Start(ctx context.Context, handlerFactory func(s
 	return nil
 }
 
+// Close closes the consumer client
 func (c *MessageConsumerClient) Close(ctx context.Context) error {
 	c.cancel()
 	c.wg.Wait()
@@ -110,6 +112,7 @@ type MessageHandler interface {
 	HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error
 }
 
+// ConsumerGroupHandler struct that handles Kafka group handlers
 type ConsumerGroupHandler struct {
 	Handlers map[string]MessageHandler
 	Log      *logger.Log

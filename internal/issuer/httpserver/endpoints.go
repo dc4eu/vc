@@ -11,11 +11,11 @@ import (
 )
 
 func (s *Service) endpointCreateCredential(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointCredential")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
 	defer span.End()
 
 	request := &apiv1.CreateCredentialRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -27,8 +27,8 @@ func (s *Service) endpointCreateCredential(ctx context.Context, c *gin.Context) 
 	return reply, nil
 }
 
-func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (interface{}, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointStatus")
+func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (interface{}, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointHealth")
 	defer span.End()
 
 	request := &apiv1_status.StatusRequest{}

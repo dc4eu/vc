@@ -8,6 +8,7 @@ import (
 	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // UploadRequest is the request for Upload
@@ -470,6 +471,9 @@ type RevokeDocumentRequest struct {
 //	@Param			req	body		RevokeDocumentRequest	true	" "
 //	@Router			/document/revoke [post]
 func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest) error {
+	ctx, span := c.tracer.Start(ctx, "db:apigw:datastore:revoke")
+	defer span.End()
+
 	c.log.Debug("Revoke request", "request", req)
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return err
@@ -496,8 +500,9 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 		doc.Meta.Revocation.Revoked = true
 	}
 
-	_, err = c.simpleQueue.VCPersistentReplace.Enqueue(ctx, doc)
-	if err != nil {
+	if err := c.db.VCDatastoreColl.Replace(ctx, doc); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		c.log.Error(err, "replace failed")
 		return err
 	}
 	c.log.Debug("Document enqueued for update", "document_id", doc.Meta.DocumentID)

@@ -13,7 +13,7 @@ import (
 )
 
 // New creates a new Kafka event consumer instance used by apigw
-func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebroker.EventConsumer, error) {
+func New(ctx context.Context, cfg *model.Cfg, apiv1Client *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (messagebroker.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
 		return nil, nil

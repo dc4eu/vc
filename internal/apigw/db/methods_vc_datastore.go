@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"vc/pkg/helpers"
+	"vc/pkg/logger"
 	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,10 +17,11 @@ import (
 type VCDatastoreColl struct {
 	Service *Service
 	Coll    *mongo.Collection
+	log     *logger.Log
 }
 
 func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
-	ctx, span := c.Service.tp.Start(ctx, "db:vc:datastore:createIndex")
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:datastore:createIndex")
 	defer span.End()
 
 	indexDocumentIDInAuthenticSourceUniq := mongo.IndexModel{
@@ -39,7 +41,7 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 
 // Save saves one document to the generic collection
 func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.CompleteDocument) error {
-	ctx, span := c.Service.tp.Start(ctx, "db:vc:datastore:save")
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:datastore:save")
 	defer span.End()
 
 	_, err := c.Coll.InsertOne(ctx, doc)
@@ -134,7 +136,7 @@ func (c *VCDatastoreColl) DeleteDocumentIdentity(ctx context.Context, query *Del
 
 // Delete deletes a document
 func (c *VCDatastoreColl) Delete(ctx context.Context, doc *model.MetaData) error {
-	ctx, span := c.Service.tp.Start(ctx, "db:vc:datastore:delete")
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:datastore:delete")
 	defer span.End()
 
 	filter := bson.M{
@@ -329,4 +331,23 @@ func (c *VCDatastoreColl) GetByRevocationID(ctx context.Context, q *model.MetaDa
 		return nil, err
 	}
 	return res, nil
+}
+
+// Replace replaces one document
+func (c *VCDatastoreColl) Replace(ctx context.Context, doc *model.CompleteDocument) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:datastore:replace")
+	defer span.End()
+
+	filter := bson.M{
+		"meta.document_id":      bson.M{"$eq": doc.Meta.DocumentID},
+		"meta.authentic_source": bson.M{"$eq": doc.Meta.AuthenticSource},
+	}
+
+	_, err := c.Coll.ReplaceOne(ctx, filter, doc)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+	c.log.Info("updated document", "document_id", doc.Meta.DocumentID)
+	return nil
 }

@@ -44,7 +44,9 @@ func TestSaveTransaction(t *testing.T) {
 				Verifier: model.Verifier{},
 			}
 
-			tracer, err := trace.New(ctx, cfg, logger.NewSimple("test-tracer"), "vc", "issuer")
+			log := logger.NewSimple("testing")
+
+			tracer, err := trace.NewForTesting(ctx, "persistent", log.New("issuer"))
 			assert.NoError(t, err)
 
 			mt.AddMockResponses(tt.resp)

@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Service) endpointValidate(ctx context.Context, c *gin.Context) (interface{}, error) {
+func (s *Service) endpointValidate(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_registry.ValidateRequest{}
-	if err := s.bindRequest(c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}
 	reply, err := s.apiv1.Validate(ctx, request)
@@ -20,7 +20,7 @@ func (s *Service) endpointValidate(ctx context.Context, c *gin.Context) (interfa
 	return reply, nil
 }
 
-func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (interface{}, error) {
+func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.Status(ctx, request)
 	if err != nil {

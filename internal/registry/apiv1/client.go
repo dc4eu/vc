@@ -9,9 +9,9 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg    *model.Cfg
-	logger *logger.Log
-	tree   *tree.Service
+	cfg  *model.Cfg
+	log  *logger.Log
+	tree *tree.Service
 }
 
 //	@title		Registry API
@@ -19,13 +19,13 @@ type Client struct {
 //	@BasePath	/registry/api/v1
 
 // New creates a new instance of the public api
-func New(ctx context.Context, cfg *model.Cfg, tree *tree.Service, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, tree *tree.Service, log *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:    cfg,
-		logger: logger,
-		tree:   tree,
+		cfg:  cfg,
+		log:  log.New("apiv1"),
+		tree: tree,
 	}
-	c.logger.Info("Started")
+	c.log.Info("Started")
 
 	return c, nil
 }

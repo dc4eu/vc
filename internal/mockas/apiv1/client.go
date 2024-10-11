@@ -18,7 +18,7 @@ import (
 type Client struct {
 	cfg        *model.Cfg
 	log        *logger.Log
-	tp         *trace.Tracer
+	tracer     *trace.Tracer
 	httpClient *http.Client
 
 	PDA1 *PDA1Service
@@ -26,11 +26,11 @@ type Client struct {
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:        cfg,
-		log:        logger,
-		tp:         tracer,
+		log:        log.New("apiv1"),
+		tracer:     tracer,
 		httpClient: &http.Client{},
 
 		PDA1: &PDA1Service{},

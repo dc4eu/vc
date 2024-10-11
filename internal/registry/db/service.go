@@ -19,13 +19,15 @@ type Service struct {
 // New creates a new database service
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	s := &Service{
-		log: log,
+		log: log.New("db"),
 		cfg: cfg,
 	}
 	if err := s.startDB(); err != nil {
 		return nil, err
 	}
+
 	s.log.Info("Started")
+
 	return s, nil
 }
 
@@ -44,7 +46,7 @@ func (s *Service) startDB() error {
 
 // Close closes the database connection
 func (s *Service) Close(ctx context.Context) error {
-	s.log.Info("Quit")
+	s.log.Info("Stopped")
 	ctx.Done()
 	return nil
 }

@@ -11,9 +11,7 @@ import (
 	"vc/internal/apigw/httpserver"
 	"vc/internal/apigw/inbound"
 	"vc/internal/apigw/outbound"
-	"vc/internal/apigw/simplequeue"
 	"vc/pkg/configuration"
-	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
 )
@@ -22,46 +20,37 @@ type service interface {
 	Close(ctx context.Context) error
 }
 
-var GitCommit string
-
 func main() {
-	var wg sync.WaitGroup
-	ctx := context.Background()
+	var (
+		wg                 = &sync.WaitGroup{}
+		ctx                = context.Background()
+		services           = make(map[string]service)
+		serviceName string = "apigw"
+	)
 
-	services := make(map[string]service)
-
-	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
+	cfg, err := configuration.New(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_apigw", cfg.Common.Log.FolderPath, cfg.Common.Production)
-	if err != nil {
-		panic(err)
-	}
-	tracer, err := trace.New(ctx, cfg, log, "vc", "apigw")
+	log, err := logger.New(serviceName, cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
 
-	kvClient, err := kvclient.New(ctx, cfg, tracer, log.New("kvClient"))
-	services["kvClient"] = kvClient
+	// main function log
+	mainLog := log.New("main")
+
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
 	if err != nil {
 		panic(err)
 	}
-	dbService, err := db.New(ctx, cfg, tracer, log.New("db"))
+
+	dbService, err := db.New(ctx, cfg, tracer, log)
 	services["dbService"] = dbService
 	if err != nil {
 		panic(err)
 	}
-
-	simpleQueueService, err := simplequeue.New(ctx, kvClient, tracer, cfg, log.New("queue"))
-	services["queueService"] = simpleQueueService
-	if err != nil {
-		panic(err)
-	}
-
-	mainLog := log.New("main")
 
 	var eventPublisher apiv1.EventPublisher
 	if cfg.IsAsyncEnabled(mainLog) {
@@ -73,18 +62,19 @@ func main() {
 		}
 	}
 
-	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, simpleQueueService, tracer, cfg, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, dbService, tracer, cfg, log)
 	if err != nil {
 		panic(err)
 	}
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"), eventPublisher)
+
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, eventPublisher, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
 	}
 
 	if cfg.IsAsyncEnabled(mainLog) {
-		eventConsumer, err := inbound.New(ctx, cfg, log.New("eventConsumer"), apiv1Client, tracer)
+		eventConsumer, err := inbound.New(ctx, cfg, apiv1Client, tracer, log.New("eventConsumer"))
 		services["eventConsumer"] = eventConsumer
 		if err != nil {
 			panic(err)

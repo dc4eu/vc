@@ -45,7 +45,7 @@ type CreateCredentialReply struct {
 
 // MakeSDJWT creates a credential
 func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1:CreateCredential")
+	ctx, span := c.tracer.Start(ctx, "apiv1:CreateCredential")
 	defer span.End()
 
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
@@ -112,7 +112,7 @@ type RevokeReply struct {
 //	@Param			req	body		RevokeRequest			true	" "
 //	@Router			/revoke [post]
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1:Revoke")
+	ctx, span := c.tracer.Start(ctx, "apiv1:Revoke")
 	defer span.End()
 
 	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())

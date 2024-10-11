@@ -1,48 +1,44 @@
-package httpserver
+package httphelpers
 
 import (
 	"context"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"reflect"
-)
-
-//TODO(mk): remove file after generic bind.go is created in pkg that support marshal support for map string any
-
-import (
 	"encoding/json"
-	"errors"
+	"fmt"
+	"reflect"
+	"vc/pkg/logger"
+
+	"github.com/gin-gonic/gin"
 )
 
-func (s *Service) bindV2(ctx context.Context, c *gin.Context, v any) error {
-	ctx, span := s.tp.Start(ctx, "httpserver:bindV2")
+// bindingHandler is the bindingHandler object for httphelpers
+type bindingHandler struct {
+	client *Client
+	log    *logger.Log
+}
+
+// FastAndSimple binds the request body to the given struct without use of struct tags (except for json)
+func (b *bindingHandler) FastAndSimple(ctx context.Context, c *gin.Context, v any) error {
+	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindV2")
 	defer span.End()
 
 	return json.NewDecoder(c.Request.Body).Decode(&v)
 }
 
-func (s *Service) bindRequest(ctx context.Context, c *gin.Context, v any) error {
-	ctx, span := s.tp.Start(ctx, "httpserver:bindRequest")
+// Request binds the request body to a map structure
+func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) error {
+	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindRequest")
 	defer span.End()
 
 	if c.ContentType() == gin.MIMEJSON {
-		if err := c.ShouldBindJSON(v); err != nil {
-			return err
-		}
+		_ = c.ShouldBindJSON(v)
 	}
-	if err := s.bindRequestQuery(ctx, c, v); err != nil {
-		return err
-	}
-	if err := c.ShouldBindQuery(v); err != nil {
-		return err
-	}
-	err := c.ShouldBindUri(v)
-
-	return err
+	_ = b.bindRequestQuery(ctx, c, v)
+	_ = c.ShouldBindQuery(v)
+	return c.ShouldBindUri(v)
 }
 
-func (s *Service) bindRequestQuery(ctx context.Context, c *gin.Context, v any) error {
-	ctx, span := s.tp.Start(ctx, "httpserver:bindRequestQuery")
+func (b *bindingHandler) bindRequestQuery(ctx context.Context, c *gin.Context, v any) error {
+	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindRequestQuery")
 	defer span.End()
 
 	refV := reflect.ValueOf(v).Elem()
@@ -85,8 +81,6 @@ func (s *Service) bindRequestQuery(ctx context.Context, c *gin.Context, v any) e
 				continue
 			}
 			refV.FieldByName(field.Name).Set(reflect.ValueOf(&v))
-		default:
-			return errors.New("fieldType.String(): " + fieldType.String())
 		}
 	}
 	return nil

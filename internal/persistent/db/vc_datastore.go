@@ -18,7 +18,7 @@ type VCDatastoreColl struct {
 }
 
 func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
-	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:createIndex")
+	ctx, span := c.service.tracer.Start(ctx, "db:vc:datastore:createIndex")
 	defer span.End()
 
 	indexDocumentIDInAuthenticSourceUniq := mongo.IndexModel{
@@ -39,7 +39,7 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 
 // Save saves one document
 func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.CompleteDocument) error {
-	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:save")
+	ctx, span := c.service.tracer.Start(ctx, "db:vc:datastore:save")
 	defer span.End()
 
 	res, err := c.coll.InsertOne(ctx, doc)
@@ -53,7 +53,7 @@ func (c *VCDatastoreColl) Save(ctx context.Context, doc *model.CompleteDocument)
 
 // Get gets one document
 func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.CompleteDocument, error) {
-	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:get")
+	ctx, span := c.service.tracer.Start(ctx, "db:vc:datastore:get")
 	defer span.End()
 
 	filter := bson.M{
@@ -70,7 +70,7 @@ func (c *VCDatastoreColl) Get(ctx context.Context, doc *model.MetaData) (*model.
 
 // Replace replaces one document
 func (c *VCDatastoreColl) Replace(ctx context.Context, doc *model.CompleteDocument) error {
-	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:replace")
+	ctx, span := c.service.tracer.Start(ctx, "db:vc:datastore:replace")
 	defer span.End()
 
 	filter := bson.M{
@@ -89,7 +89,7 @@ func (c *VCDatastoreColl) Replace(ctx context.Context, doc *model.CompleteDocume
 
 // Delete deletes a document
 func (c *VCDatastoreColl) Delete(ctx context.Context, doc *model.MetaData) error {
-	ctx, span := c.service.tp.Start(ctx, "db:vc:datastore:delete")
+	ctx, span := c.service.tracer.Start(ctx, "db:vc:datastore:delete")
 	defer span.End()
 
 	filter := bson.M{

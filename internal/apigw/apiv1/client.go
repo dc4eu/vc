@@ -3,9 +3,7 @@ package apiv1
 import (
 	"context"
 	"vc/internal/apigw/db"
-	"vc/internal/apigw/simplequeue"
 	"vc/pkg/datastoreclient"
-	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -20,21 +18,17 @@ type Client struct {
 	cfg             *model.Cfg
 	db              *db.Service
 	log             *logger.Log
-	tp              *trace.Tracer
-	kv              *kvclient.Client
-	simpleQueue     *simplequeue.Service
+	tracer          *trace.Tracer
 	datastoreClient *datastoreclient.Client
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, kv *kvclient.Client, db *db.Service, simplequeue *simplequeue.Service, tp *trace.Tracer, cfg *model.Cfg, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:         cfg,
-		db:          db,
-		log:         logger,
-		kv:          kv,
-		tp:          tp,
-		simpleQueue: simplequeue,
+		cfg:    cfg,
+		db:     db,
+		log:    log.New("apiv1"),
+		tracer: tracer,
 	}
 
 	// Specifies the issuer configuration based on the issuer identifier, should be initialized in main I guess.

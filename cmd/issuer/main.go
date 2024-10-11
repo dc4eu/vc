@@ -20,44 +20,49 @@ type service interface {
 }
 
 func main() {
-	var wg sync.WaitGroup
-	ctx := context.Background()
+	var (
+		wg                 = &sync.WaitGroup{}
+		ctx                = context.Background()
+		services           = make(map[string]service)
+		serviceName string = "issuer"
+	)
 
-	services := make(map[string]service)
-
-	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
+	cfg, err := configuration.New(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_issuer", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	log, err := logger.New(serviceName, cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
 
-	tracer, err := trace.New(ctx, cfg, log, "vc", "issuer")
+	// main function log
+	mainLog := log.New("main")
+
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
 	if err != nil {
 		panic(err)
 	}
 
-	auditLogService, err := auditlog.New(ctx, cfg, log.New("auditlog"))
+	auditLogService, err := auditlog.New(ctx, cfg, log)
 	services["auditLogService"] = auditLogService
 	if err != nil {
 		panic(err)
 	}
 
-	apiv1Client, err := apiv1.New(ctx, auditLogService, cfg, tracer, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, auditLogService, cfg, tracer, log)
 	if err != nil {
 		panic(err)
 	}
 
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
 	}
 
-	grpcService, err := grpcserver.New(ctx, cfg, apiv1Client, log.New("grpcserver"))
+	grpcService, err := grpcserver.New(ctx, cfg, apiv1Client, log)
 	services["grpcService"] = grpcService
 	if err != nil {
 		panic(err)
@@ -69,7 +74,6 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

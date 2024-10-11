@@ -266,7 +266,6 @@ func sign(claims jwt.MapClaims, signingMethod jwt.SigningMethod, signingKey any,
 	//}
 	token := jwt.NewWithClaims(signingMethod, claims)
 	token.Header["typ"] = "sd+jwt-vc"
-	claims["mura"] = "nisse"
 
 	//	if c.config.JWTType == "" {
 	//		token.Header["typ"] = "sd-jwt"
@@ -289,6 +288,7 @@ type Config struct {
 	EXP    int64
 	VCT    string
 	Status string
+	CNF    jwt.MapClaims
 
 	// SUB MAY be selectively disclosed
 	SUB string
@@ -307,7 +307,7 @@ func (i InstructionsV2) SDJWT(signingMethod jwt.SigningMethod, signingKey any, c
 	rawSDJWT["iss"] = config.ISS
 	rawSDJWT["nbf"] = config.NBF
 	rawSDJWT["exp"] = config.EXP
-	rawSDJWT["cnf"] = ""
+	rawSDJWT["cnf"] = config.CNF
 	rawSDJWT["vct"] = config.VCT
 	rawSDJWT["status"] = ""
 	rawSDJWT["_sd_alg"] = "sha-256"

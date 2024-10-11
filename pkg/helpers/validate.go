@@ -8,7 +8,6 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/trace"
 
-	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -63,42 +62,4 @@ func CheckSimple(s any) error {
 	}
 
 	return nil
-}
-
-type DefaultValidator struct {
-	Validate *validator.Validate
-}
-
-var _ binding.StructValidator = &DefaultValidator{}
-
-func (v *DefaultValidator) ValidateStruct(obj any) error {
-	if kindOfData(obj) == reflect.Struct {
-		if err := v.Validate.Struct(obj); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (v *DefaultValidator) Engine() any {
-	return v.Validate
-}
-
-func kindOfData(data any) reflect.Kind {
-	value := reflect.ValueOf(data)
-	valueType := value.Kind()
-	if valueType == reflect.Ptr {
-		valueType = value.Elem().Kind()
-	}
-	return valueType
-}
-
-// BindingValidator returns a new DefaultValidator instance with validator. Used for gin binding
-func BindingValidator() (*DefaultValidator, error) {
-	validate, err := NewValidator()
-	if err != nil {
-		return nil, err
-	}
-
-	return &DefaultValidator{Validate: validate}, nil
 }

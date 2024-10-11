@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -32,8 +33,15 @@ var (
 
 	// ErrNoRevocationID is returned when no revocation_id is found
 	ErrNoRevocationID = NewError("no_revocation_id")
+
+	// ErrPrivateKeyMissing error for empty private key
+	ErrPrivateKeyMissing = errors.New("ERR_PRIVATE_KEY_MISSING")
+
+	// ErrNoKnownDocumentType error for no known document type
+	ErrNoKnownDocumentType = errors.New("ERR_NO_KNOWN_DOCUMENT_TYPE")
 )
 
+// Error is a struct that represents an error
 type Error struct {
 	Title   string      `json:"title" `
 	Details interface{} `json:"details" xml:"details"`

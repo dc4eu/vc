@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 	"vc/internal/issuer/auditlog"
+	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -41,12 +42,12 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	var err error
-	c.ehicClient, err = newEHICClient(ctx, tracer, c.log.New("ehic"))
+	c.ehicClient, err = newEHICClient(tracer, c.log.New("ehic"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.pda1Client, err = newPDA1Client(tracer, c, c.log.New("pda1"))
+	c.pda1Client, err = newPDA1Client(tracer, c.log.New("pda1"))
 	if err != nil {
 		return nil, err
 	}
@@ -67,12 +68,14 @@ func (c *Client) initKeys() error {
 		return err
 	}
 
-	privateKey, err := jwt.ParseECPrivateKeyFromPEM(keyByte)
+	if keyByte == nil {
+		return helpers.ErrPrivateKeyMissing
+	}
+
+	c.privateKey, err = jwt.ParseECPrivateKeyFromPEM(keyByte)
 	if err != nil {
 		return err
 	}
-
-	c.privateKey = privateKey
 
 	c.publicKey = &c.privateKey.PublicKey
 

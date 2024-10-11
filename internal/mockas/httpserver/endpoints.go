@@ -44,9 +44,12 @@ func (s *Service) endpointMockBulk(ctx context.Context, c *gin.Context) (any, er
 	return reply, nil
 }
 
-func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointHealth")
+	defer span.End()
+
 	request := &apiv1_status.StatusRequest{}
-	reply, err := s.apiv1.Status(ctx, request)
+	reply, err := s.apiv1.Health(ctx, request)
 	if err != nil {
 		return nil, err
 	}

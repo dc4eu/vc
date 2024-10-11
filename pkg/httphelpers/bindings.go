@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"vc/pkg/helpers"
 	"vc/pkg/logger"
 
 	"github.com/gin-gonic/gin"
@@ -84,4 +85,14 @@ func (b *bindingHandler) bindRequestQuery(ctx context.Context, c *gin.Context, v
 		}
 	}
 	return nil
+}
+
+// BindingValidator returns a new DefaultValidator instance with validator. Used for gin binding
+func (b *bindingHandler) Validator() (*DefaultValidator, error) {
+	validate, err := helpers.NewValidator()
+	if err != nil {
+		return nil, err
+	}
+
+	return &DefaultValidator{Validate: validate}, nil
 }

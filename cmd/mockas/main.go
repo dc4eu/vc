@@ -49,14 +49,14 @@ func main() {
 		panic(err)
 	}
 
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
 	}
 
 	if cfg.IsAsyncEnabled(mainLog) {
-		eventConsumer, err := inbound.New(ctx, cfg, log.New("eventConsumer"), apiv1Client, tracer)
+		eventConsumer, err := inbound.New(ctx, cfg, apiv1Client, tracer, log.New("eventConsumer"))
 		services["eventConsumer"] = eventConsumer
 		if err != nil {
 			panic(err)

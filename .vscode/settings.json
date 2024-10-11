@@ -38,6 +38,7 @@
         "protobuf",
         "qrcode",
         "rpcclient",
+        "sarama",
         "Satosa",
         "SATOSAV",
         "SDJWT",

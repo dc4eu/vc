@@ -3,17 +3,18 @@ package inbound
 import (
 	"context"
 	"encoding/json"
-	"github.com/IBM/sarama"
 	"vc/internal/mockas/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/messagebroker"
 	"vc/pkg/messagebroker/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+
+	"github.com/IBM/sarama"
 )
 
 // New creates a new Kafka event consumer instance used by mockas
-func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, apiv1Client *apiv1.Client, tracer *trace.Tracer) (messagebroker.EventConsumer, error) {
+func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (messagebroker.EventConsumer, error) {
 	if !cfg.Common.Kafka.Enabled {
 		log.Info("Kafka disabled - no consumer created")
 		return nil, nil
@@ -27,13 +28,13 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log, apiv1Client *apiv
 	handlerConfigs := []kafka.HandlerConfig{
 		{Topic: kafka.TopicMockNext, ConsumerGroup: "topic_mock_next_consumer_group_mockas"},
 		{Topic: kafka.TopicUpload, ConsumerGroup: "topic_upload_consumer_group_mockas"},
-		// add more handlerconfigs here
+		// add more kafka.HandlerConfig here...
 	}
 
 	handlerFactory := func(topic string) sarama.ConsumerGroupHandler {
 		handlersMap := map[string]kafka.MessageHandler{
-			kafka.TopicMockNext: newMockNextMessageHandler(log.New("kafka_mock_next_handler"), apiv1Client, tracer),
-			kafka.TopicUpload:   newUploadMessageHandler(log.New("kafka_upload_handler"), apiv1Client, tracer),
+			kafka.TopicMockNext: newMockNextMessageHandler(log.New("kafka_mock_next_handler"), apiv1, tracer),
+			kafka.TopicUpload:   newUploadMessageHandler(log.New("kafka_upload_handler"), apiv1, tracer),
 			// add more handlers here...
 		}
 		return &kafka.ConsumerGroupHandler{Handlers: handlersMap, Log: log.New("kafka_consumer_group_handler")}

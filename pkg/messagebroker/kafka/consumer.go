@@ -103,7 +103,7 @@ func (c *MessageConsumerClient) Start(ctx context.Context, handlerFactory func(s
 func (c *MessageConsumerClient) Close(ctx context.Context) error {
 	c.cancel()
 	c.wg.Wait()
-	c.log.Info("Closed")
+	c.log.Info("Stopped")
 	return nil
 }
 

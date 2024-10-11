@@ -8,7 +8,9 @@ import (
 
 // Health return health for this service and dependencies
 func (c *Client) Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
-	c.log.Info("health handler")
+	ctx, span := c.tracer.Start(ctx, "apiv1:Health")
+	defer span.End()
+
 	probes := model.Probes{}
 	probes = append(probes, c.db.Status(ctx))
 

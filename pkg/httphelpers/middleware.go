@@ -118,6 +118,7 @@ func (m *middlewareHandler) BasicAuth(ctx context.Context, users map[string]stri
 	}
 }
 
+// Gzip middleware sets the compression level
 func (m *middlewareHandler) Gzip(ctx context.Context) gin.HandlerFunc {
 	return gzip.Gzip(gzip.DefaultCompression)
 }

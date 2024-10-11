@@ -114,7 +114,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 	case "EHIC":
 		mockUpload.DocumentData = c.EHIC.random(ctx, person)
 	default:
-		return nil, model.ErrNoKnownDocumentType
+		return nil, helpers.ErrNoKnownDocumentType
 	}
 
 	mockUpload.DocumentDataVersion = "1.0.0"

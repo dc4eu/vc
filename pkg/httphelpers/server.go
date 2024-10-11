@@ -70,7 +70,7 @@ func (s *serverHandler) Default(ctx context.Context, serverHTTP *http.Server, se
 	s.SetGinProductionMode()
 
 	var err error
-	binding.Validator, err = helpers.BindingValidator()
+	binding.Validator, err = s.client.Binding.Validator()
 	if err != nil {
 		return nil, err
 	}

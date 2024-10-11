@@ -55,9 +55,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	rgAPIv1 := rgRoot.Group("api/v1")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCreateCredential)
-
 	// Run http server
 	go func() {
 		err := s.httpHelpers.Server.ListenAndServe(ctx, s.server, s.cfg.Issuer.APIServer)

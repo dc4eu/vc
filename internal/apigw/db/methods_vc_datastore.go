@@ -217,17 +217,21 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQue
 
 // DocumentListQuery is the query to get document list
 type DocumentListQuery struct {
-	AuthenticSource string          `json:"authentic_source" bson:"authentic_source" validate:"required"`
+	AuthenticSource string          `json:"authentic_source" bson:"authentic_source"`
 	Identity        *model.Identity `json:"identity" bson:"identity" validate:"required"`
-	DocumentType    string          `json:"document_type" bson:"document_type" validate:"required"`
+	DocumentType    string          `json:"document_type" bson:"document_type"`
 	ValidFrom       int64           `json:"valid_from" bson:"valid_from"`
 	ValidTo         int64           `json:"valid_to" bson:"valid_to"`
 }
 
 // DocumentList return matching documents if any, or error
 func (c *VCDatastoreColl) DocumentList(ctx context.Context, query *DocumentListQuery) ([]*model.DocumentList, error) {
+	if err := helpers.Check(ctx, c.Service.cfg, query, c.Service.log); err != nil {
+		return nil, err
+	}
+
 	filter := bson.M{
-		"identities.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
+		"identities.schema.name": bson.M{"$eq": query.Identity.Schema.Name},
 	}
 
 	if query.AuthenticSource != "" {
@@ -244,7 +248,6 @@ func (c *VCDatastoreColl) DocumentList(ctx context.Context, query *DocumentListQ
 		filter["identities.family_name"] = bson.M{"$eq": query.Identity.FamilyName}
 		filter["identities.given_name"] = bson.M{"$eq": query.Identity.GivenName}
 		filter["identities.birth_date"] = bson.M{"$eq": query.Identity.BirthDate}
-		//... figure out how to match any of the above attributes
 	}
 
 	cursor, err := c.Coll.Find(ctx, filter)
@@ -287,11 +290,10 @@ type GetDocumentCollectIDQuery struct {
 // GetDocumentCollectID return matching document if any, or error
 func (c *VCDatastoreColl) GetDocumentCollectID(ctx context.Context, query *GetDocumentCollectIDQuery) (*model.Document, error) {
 	filter := bson.M{
-		"meta.authentic_source":     bson.M{"$eq": query.Meta.AuthenticSource},
-		"meta.collect.id":           bson.M{"$eq": query.Meta.Collect.ID},
-		"meta.document_type":        bson.M{"$eq": query.Meta.DocumentType},
-		"identities.schema.version": bson.M{"$eq": query.Identity.Schema.Version},
-		"identities.schema.name":    bson.M{"$eq": query.Identity.Schema.Name},
+		"meta.authentic_source":  bson.M{"$eq": query.Meta.AuthenticSource},
+		"meta.collect.id":        bson.M{"$eq": query.Meta.Collect.ID},
+		"meta.document_type":     bson.M{"$eq": query.Meta.DocumentType},
+		"identities.schema.name": bson.M{"$eq": query.Identity.Schema.Name},
 	}
 
 	if query.Identity.AuthenticSourcePersonID != "" {

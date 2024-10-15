@@ -18,8 +18,8 @@ type Client struct {
 	url        string
 	log        *logger.Log
 
-	DocumentService *documentService
-	IdentityService *identityService
+	Document *documentHandler
+	Identity *identityHandler
 }
 
 // Config is the configuration for the client
@@ -40,8 +40,8 @@ func New(config *Config) (*Client, error) {
 		log: logger.NewSimple("datastoreclient"),
 	}
 
-	c.DocumentService = &documentService{client: c, service: "api/v1/document", log: c.log.New("document")}
-	c.IdentityService = &identityService{client: c, service: "api/v1/identity", log: c.log.New("identity")}
+	c.Document = &documentHandler{client: c, service: "api/v1/document", log: c.log.New("document")}
+	c.Identity = &identityHandler{client: c, service: "api/v1/identity", log: c.log.New("identity")}
 
 	return c, nil
 }

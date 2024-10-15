@@ -9,7 +9,7 @@ import (
 
 type Apiv1 interface {
 	// ui
-	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
+	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 	Login(ctx context.Context, req *apiv1.LoginRequest) (*apiv1.LoggedinReply, error)
 	Logout(ctx context.Context) error
 	User(ctx context.Context) (*apiv1.LoggedinReply, error)

@@ -12,27 +12,27 @@ import (
 
 var (
 	// ErrDocumentIsRevoked is returned when a document is revoked
-	ErrDocumentIsRevoked = NewError("document_is_revoked")
+	ErrDocumentIsRevoked = NewError("DOCUMENT_IS_REVOKED")
 	// ErrNoTransactionID is returned when transactionID is not present
-	ErrNoTransactionID = NewError("no_transaction_id")
+	ErrNoTransactionID = NewError("NO_TRANSACTION_ID")
 
 	// ErrNoDocumentFound is returned when no document is found
-	ErrNoDocumentFound = NewError("no_document_found")
+	ErrNoDocumentFound = NewError("NO_DOCUMENT_FOUND")
 
 	// ErrDocumentAlreadyExists is returned when a document already exists
-	ErrDocumentAlreadyExists = NewError("document_already_exists")
+	ErrDocumentAlreadyExists = NewError("DOCUMENT_ALREADY_EXISTS")
 
 	// ErrNoDocumentData is returned when no document_data is found
-	ErrNoDocumentData = NewError("no_document_data")
+	ErrNoDocumentData = NewError("NO_DOCUMENT_DATA")
 
 	// ErrNoIdentityFound is returned when no identity is found
-	ErrNoIdentityFound = NewError("no_identity_found")
+	ErrNoIdentityFound = NewError("NO_IDENTITY_FOUND")
 
 	// ErrDuplicateKey is returned when a duplicate key is found
-	ErrDuplicateKey = NewError("duplicate_key")
+	ErrDuplicateKey = NewError("DUPLICATE_KEY")
 
 	// ErrNoRevocationID is returned when no revocation_id is found
-	ErrNoRevocationID = NewError("no_revocation_id")
+	ErrNoRevocationID = NewError("NO_REVOCATION_ID")
 
 	// ErrPrivateKeyMissing error for empty private key
 	ErrPrivateKeyMissing = errors.New("ERR_PRIVATE_KEY_MISSING")

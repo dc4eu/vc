@@ -47,6 +47,7 @@ func (s *serverHandler) RegEndpoint(ctx context.Context, rg *gin.RouterGroup, me
 
 		res, err := handler(ctx, c)
 		if err != nil {
+			s.log.Debug("RegEndpoint", "err", err)
 			s.client.Rendering.Content(ctx, c, 400, gin.H{"error": helpers.NewErrorFromError(err)})
 			return
 		}

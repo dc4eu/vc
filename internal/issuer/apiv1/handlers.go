@@ -3,6 +3,7 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
+	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/ehic"
 	"vc/pkg/helpers"
@@ -141,5 +142,24 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 			Status: resp.Status,
 		},
 	}
+	return reply, nil
+}
+
+// JWKS creates a credential
+func (c *Client) JWKS(ctx context.Context, in *apiv1_issuer.Empty) (*apiv1_issuer.JwksReply, error) {
+	ctx, span := c.tp.Start(ctx, "apiv1:JWKS")
+	defer span.End()
+
+	keys := &apiv1_issuer.Keys{
+		Keys: []*apiv1_issuer.Jwk{
+			c.jwkProto,
+		},
+	}
+
+	reply := &apiv1_issuer.JwksReply{
+		Issuer: c.cfg.Issuer.JWTAttribute.Issuer,
+		Jwks:   keys,
+	}
+
 	return reply, nil
 }

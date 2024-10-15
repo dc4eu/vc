@@ -39,7 +39,7 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 		return nil, err
 	}
 
-	document, _, err := c.datastoreClient.DocumentService.CollectID(ctx, &datastoreclient.DocumentCollectIDQuery{
+	document, _, err := c.datastoreClient.Document.CollectID(ctx, &datastoreclient.DocumentCollectIDQuery{
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,
 		CollectID:       req.CollectID,
@@ -131,4 +131,42 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 		},
 	}
 	return reply, nil
+}
+
+// PublicKeyReply is the reply for PublicKey
+type PublicKeyReply struct {
+	Data struct {
+		Issuer string             `json:"issuer"`
+		JWKS   *apiv1_issuer.Keys `json:"jwks"`
+	}
+}
+
+// JWKS returns the public key in JWK format
+//
+//	@Summary		JWKS
+//	@ID				issuer-JWKS
+//	@Description	JWKS endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	PublicKeyReply				"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Router			/credential/.well-known/jwks [get]
+func (c *Client) JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error) {
+	c.log.Debug("jwk")
+	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
+
+	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, optInsecure)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := apiv1_issuer.NewIssuerServiceClient(conn)
+	resp, err := client.JWKS(ctx, &apiv1_issuer.Empty{})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

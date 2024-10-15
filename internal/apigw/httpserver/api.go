@@ -27,6 +27,7 @@ type Apiv1 interface {
 	// credential endpoints
 	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error)
+	JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)
 
 	// misc endpoints
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)

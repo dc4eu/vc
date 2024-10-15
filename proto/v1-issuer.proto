@@ -9,6 +9,7 @@ option go_package = "vc/internal/gen/issuer/apiv1_issuer";
 
 service IssuerService {
     rpc MakeSDJWT (MakeSDJWTRequest) returns (MakeSDJWTReply) {}
+    rpc JWKS (Empty) returns (JwksReply) {}
 }
 
 message MakeSDJWTRequest {
@@ -19,4 +20,25 @@ message MakeSDJWTRequest {
 message MakeSDJWTReply {
     string jwt = 1;
     repeated string disclosures = 2;
+}
+
+message Empty {
+}
+
+message JwksReply {
+    string issuer = 1;
+    keys jwks = 2;
+}
+
+message keys {
+    repeated jwk keys = 1;
+}
+
+message jwk {
+    string kid = 1;
+    string crv = 2;
+    string kty = 3;
+    string x = 4;
+    string y = 5;
+    string d = 6;
 }

@@ -46,11 +46,15 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	if err != nil {
 		return nil, err
 	}
+	binding.Validator = &defaultValidator{
+		Validate: apiValidator,
+	}
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
 	if err != nil {
 		return nil, err
 	}
+	s.gin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, problem404) })
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
 
@@ -59,8 +63,8 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	rgAPIv1 := rgRoot.Group("api/v1")
 
-	if s.cfg.APIGW.APIServer.BasicAuth.Enabled {
-		rgAPIv1.Use(s.httpHelpers.Middleware.BasicAuth(ctx, s.cfg.APIGW.APIServer.BasicAuth.Users))
+	if s.config.APIGW.APIServer.BasicAuth.Enabled {
+		rgAPIv1.Use(s.middlewareBasicAuth(ctx))
 	}
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/upload", s.endpointUpload)
@@ -75,10 +79,10 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/consent", s.endpointAddConsent)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/consent/get", s.endpointGetConsent)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/revoke", s.endpointRevokeDocument)
-
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/credential", s.endpointCredential)
-
-	// Run http server
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodGet, "/credential/.well-known/jwks", s.endpointJWKS)
+	
+// Run http server
 	go func() {
 		err := s.httpHelpers.Server.ListenAndServe(ctx, s.server, s.cfg.APIGW.APIServer)
 		if err != nil {

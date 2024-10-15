@@ -8,7 +8,7 @@ import (
 	"vc/pkg/model"
 )
 
-type documentService struct {
+type documentHandler struct {
 	client  *Client
 	service string
 	log     *logger.Log
@@ -22,7 +22,7 @@ type DocumentGetQuery struct {
 }
 
 // Get gets a document
-func (s *documentService) Get(ctx context.Context, query *DocumentGetQuery) (*model.Document, *http.Response, error) {
+func (s *documentHandler) Get(ctx context.Context, query *DocumentGetQuery) (*model.Document, *http.Response, error) {
 	url := fmt.Sprintf("%s", s.service)
 	reply := &model.Document{}
 	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply)
@@ -41,7 +41,7 @@ type DocumentListQuery struct {
 	ValidFrom       int64           `json:"valid_from"`
 }
 
-func (s *documentService) List(ctx context.Context, query *DocumentListQuery) ([]model.DocumentList, *http.Response, error) {
+func (s *documentHandler) List(ctx context.Context, query *DocumentListQuery) ([]model.DocumentList, *http.Response, error) {
 	s.log.Info("List")
 
 	url := fmt.Sprintf("%s/%s", s.service, "list")
@@ -66,7 +66,7 @@ type DocumentCollectIDReply struct {
 	DocumentData any `json:"document_data"`
 }
 
-func (s *documentService) CollectID(ctx context.Context, query *DocumentCollectIDQuery) (*model.Document, *http.Response, error) {
+func (s *documentHandler) CollectID(ctx context.Context, query *DocumentCollectIDQuery) (*model.Document, *http.Response, error) {
 	s.log.Info("CollectID")
 
 	url := fmt.Sprintf("%s/%s", s.service, "collect_id")

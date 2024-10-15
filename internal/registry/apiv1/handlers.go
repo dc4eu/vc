@@ -10,14 +10,14 @@ import (
 
 // Add adds a new entity into the registry
 func (c *Client) Add(ctx context.Context, req *apiv1_registry.AddRequest) (*apiv1_registry.AddReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.logger); err != nil {
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return nil, err
 	}
 
 	if err := c.tree.Insert(req.Entity); err != nil {
 		return nil, err
 	}
-	c.logger.Info("Hash added")
+	c.log.Info("Hash added")
 
 	return nil, nil
 }
@@ -27,7 +27,7 @@ func (c *Client) Revoke(ctx context.Context, req *apiv1_registry.RevokeRequest) 
 	if err := c.tree.Remove(req.Entity); err != nil {
 		return nil, err
 	}
-	c.logger.Info("Hash revoked")
+	c.log.Info("Hash revoked")
 
 	return nil, nil
 }

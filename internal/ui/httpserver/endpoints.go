@@ -3,17 +3,18 @@ package httpserver
 import (
 	"context"
 	"errors"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"time"
 	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/ui/apiv1"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
-func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}
-	reply, err := s.apiv1.Status(ctx, request)
+	reply, err := s.apiv1.Health(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func (s *Service) endpointLogin(ctx context.Context, c *gin.Context) (any, error
 	session.Set(s.sessionConfig.usernameKey, reply.Username)
 	session.Set(s.sessionConfig.loggedInTimeKey, reply.LoggedInTime)
 	if err := session.Save(); err != nil { //This is also where the session cookie is created by gin
-		s.logger.Error(err, "Failed to save session (and send cookie) during login")
+		s.log.Error(err, "Failed to save session (and send cookie) during login")
 		return nil, err
 	}
 
@@ -113,7 +114,7 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	request := &apiv1_apigw.UploadRequest{}
 	//TODO(mk): use pkg bind.go after it has been fixed instead of context.go
 	if err := c.ShouldBindJSON(&request); err != nil {
-		s.logger.Debug("Binding error", "error", err)
+		s.log.Debug("Binding error", "error", err)
 		return nil, err
 	}
 

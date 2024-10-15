@@ -16,18 +16,20 @@ import (
 )
 
 type envVars struct {
-	EduIDConfigYAML string `envconfig:"VC_CONFIG_YAML" required:"true"`
+	ConfigYAML string `envconfig:"VC_CONFIG_YAML" required:"true"`
 }
 
-// Parse parses config file from VC_CONFIG_YAML environment variable
-func Parse(ctx context.Context, logger *logger.Log) (*model.Cfg, error) {
-	logger.Info("Read environmental variable")
+// New parses config file from VC_CONFIG_YAML environment variable
+func New(ctx context.Context) (*model.Cfg, error) {
+	log := logger.NewSimple("Configuration")
+	log.Info("Read environmental variable")
+
 	env := envVars{}
 	if err := envconfig.Process("", &env); err != nil {
 		return nil, err
 	}
 
-	configPath := env.EduIDConfigYAML
+	configPath := env.ConfigYAML
 
 	cfg := &model.Cfg{}
 
@@ -53,7 +55,7 @@ func Parse(ctx context.Context, logger *logger.Log) (*model.Cfg, error) {
 		return nil, err
 	}
 
-	if err := helpers.Check(ctx, cfg, cfg, logger); err != nil {
+	if err := helpers.Check(ctx, cfg, cfg, log); err != nil {
 		return nil, err
 	}
 

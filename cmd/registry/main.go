@@ -12,6 +12,7 @@ import (
 	"vc/internal/registry/tree"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
+	"vc/pkg/trace"
 )
 
 type service interface {
@@ -19,39 +20,49 @@ type service interface {
 }
 
 func main() {
-	wg := &sync.WaitGroup{}
-	ctx := context.Background()
+	var (
+		wg                 = &sync.WaitGroup{}
+		ctx                = context.Background()
+		services           = make(map[string]service)
+		serviceName string = "registry"
+	)
 
-	services := make(map[string]service)
-
-	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
+	cfg, err := configuration.New(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_registry", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	log, err := logger.New(serviceName, cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
 
-	dbService, err := db.New(ctx, cfg, log.New("db"))
+	// main function log
+	mainLog := log.New("main")
+
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
+	if err != nil {
+		panic(err)
+	}
+
+	dbService, err := db.New(ctx, cfg, log)
 	services["dbService"] = dbService
 	if err != nil {
 		panic(err)
 	}
 
-	treeService, err := tree.New(ctx, wg, dbService, cfg, log.New("tree"))
+	treeService, err := tree.New(ctx, wg, dbService, cfg, log)
 	services["treeService"] = treeService
 	if err != nil {
 		panic(err)
 	}
 
-	apiv1Client, err := apiv1.New(ctx, cfg, treeService, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, cfg, treeService, log)
 	if err != nil {
 		panic(err)
 	}
 
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
@@ -63,13 +74,16 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {
 		if err := service.Close(ctx); err != nil {
 			mainLog.Error(err, "serviceName", serviceName)
 		}
+	}
+
+	if err := tracer.Shutdown(ctx); err != nil {
+		mainLog.Error(err, "Tracer shutdown")
 	}
 
 	wg.Wait() // Block here until are workers are done

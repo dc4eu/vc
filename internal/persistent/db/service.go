@@ -20,18 +20,18 @@ type Service struct {
 	dbClient   *mongo.Client
 	cfg        *model.Cfg
 	log        *logger.Log
-	tp         *trace.Tracer
+	tracer     *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
 	VCDatastoreColl *VCDatastoreColl
 }
 
 // New creates a new database service
-func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
 	service := &Service{
-		log:        log,
+		log:        log.New("db"),
 		cfg:        cfg,
-		tp:         tp,
+		tracer:     tracer,
 		probeStore: &apiv1_status.StatusProbeStore{},
 	}
 
@@ -56,7 +56,7 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 
 // Status returns the status of the database
 func (s *Service) Status(ctx context.Context) *apiv1_status.StatusProbe {
-	ctx, span := s.tp.Start(ctx, "db:status")
+	ctx, span := s.tracer.Start(ctx, "db:status")
 	defer span.End()
 
 	if time.Now().Before(s.probeStore.NextCheck.AsTime()) {
@@ -91,7 +91,7 @@ func (s *Service) Status(ctx context.Context) *apiv1_status.StatusProbe {
 
 // connect connects to the database
 func (s *Service) connect(ctx context.Context) error {
-	ctx, span := s.tp.Start(ctx, "db:connect")
+	ctx, span := s.tracer.Start(ctx, "db:connect")
 	defer span.End()
 
 	//credentialOption := options.Credential{
@@ -119,5 +119,6 @@ func (s *Service) connect(ctx context.Context) error {
 
 // Close closes db service
 func (s *Service) Close(ctx context.Context) error {
+	s.log.Info("Stopped")
 	return s.dbClient.Disconnect(ctx)
 }

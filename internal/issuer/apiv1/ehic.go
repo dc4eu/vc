@@ -10,21 +10,21 @@ import (
 )
 
 type ehicClient struct {
-	log *logger.Log
-	tp  *trace.Tracer
+	log    *logger.Log
+	tracer *trace.Tracer
 }
 
-func newEHICClient(ctx context.Context, tp *trace.Tracer, log *logger.Log) (*ehicClient, error) {
+func newEHICClient(tracer *trace.Tracer, log *logger.Log) (*ehicClient, error) {
 	client := &ehicClient{
-		log: log,
-		tp:  tp,
+		log:    log,
+		tracer: tracer,
 	}
 
 	return client, nil
 }
 
 func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document) gosdjwt.InstructionsV2 {
-	ctx, span := c.tp.Start(ctx, "apiv1:ehic:sdjwt")
+	ctx, span := c.tracer.Start(ctx, "apiv1:ehic:sdjwt")
 	defer span.End()
 
 	instruction := gosdjwt.InstructionsV2{

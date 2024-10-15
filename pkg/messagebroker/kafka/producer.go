@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/IBM/sarama"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+
+	"github.com/IBM/sarama"
 )
 
 // MessageConsumerClient ATTENTION: Start max one instance of Kafka consumer client for each service to keep resource usage low
@@ -66,7 +67,7 @@ func (c *SyncProducerClient) Close(ctx context.Context) error {
 		c.log.Error(err, "Error closing")
 		return err
 	}
-	c.log.Info("Closed")
+	c.log.Info("Stopped")
 	return nil
 }
 
@@ -83,9 +84,9 @@ func (c *SyncProducerClient) PublishMessage(topic string, key string, json []byt
 	partition, offset, err := c.producer.SendMessage(message)
 	if err != nil {
 		return err
-	} else {
-		c.log.Debug(fmt.Sprintf("Kafka message with key %s sent to partition %d at offset %d to topic %s\n", key, partition, offset, topic))
 	}
+
+	c.log.Debug(fmt.Sprintf("Kafka message with key %s sent to partition %d at offset %d to topic %s\n", key, partition, offset, topic))
 
 	return nil
 }

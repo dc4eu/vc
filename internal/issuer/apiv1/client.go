@@ -7,6 +7,7 @@ import (
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/auditlog"
+	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -23,7 +24,7 @@ import (
 type Client struct {
 	cfg        *model.Cfg
 	log        *logger.Log
-	tp         *trace.Tracer
+	tracer     *trace.Tracer
 	auditLog   *auditlog.Service
 	privateKey *ecdsa.PrivateKey
 	publicKey  *ecdsa.PublicKey
@@ -36,23 +37,23 @@ type Client struct {
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) (*Client, error) {
+func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:      cfg,
-		log:      logger,
-		tp:       tracer,
+		log:      log.New("apiv1"),
+		tracer:   tracer,
 		auditLog: auditLog,
 		jwkProto: &apiv1_issuer.Jwk{},
 		jwkClaim: jwt.MapClaims{},
 	}
 
 	var err error
-	c.ehicClient, err = newEHICClient(ctx, tracer, c.log.New("ehic"))
+	c.ehicClient, err = newEHICClient(tracer, c.log.New("ehic"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.pda1Client, err = newPDA1Client(tracer, c, c.log.New("pda1"))
+	c.pda1Client, err = newPDA1Client(tracer, c.log.New("pda1"))
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +72,10 @@ func (c *Client) initKeys(ctx context.Context) error {
 	if err != nil {
 		c.log.Error(err, "Failed to read signing key, please create a ECDSA prime256v1 key and save it to the path")
 		return err
+	}
+
+	if keyByte == nil {
+		return helpers.ErrPrivateKeyMissing
 	}
 
 	c.privateKey, err = jwt.ParseECPrivateKeyFromPEM(keyByte)

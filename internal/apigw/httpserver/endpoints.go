@@ -11,16 +11,16 @@ import (
 )
 
 func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointUpload")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUpload")
 	defer span.End()
 
 	request := &apiv1.UploadRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
-	if s.config.Common.Kafka.Enabled {
+	if s.cfg.Common.Kafka.Enabled {
 		err := s.eventPublisher.Upload(request)
 		if err != nil {
 			span.SetStatus(codes.Error, err.Error())
@@ -38,11 +38,11 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 }
 
 func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointNotification")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointNotification")
 	defer span.End()
 
 	request := &apiv1.NotificationRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -55,11 +55,11 @@ func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any
 }
 
 func (s *Service) endpointAddDocumentIdentity(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointNotification")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointNotification")
 	defer span.End()
 
 	request := &apiv1.AddDocumentIdentityRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -71,11 +71,11 @@ func (s *Service) endpointAddDocumentIdentity(ctx context.Context, c *gin.Contex
 }
 
 func (s *Service) endpointDeleteDocumentIdentity(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointNotification")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointNotification")
 	defer span.End()
 
 	request := &apiv1.DeleteDocumentIdentityRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -86,11 +86,11 @@ func (s *Service) endpointDeleteDocumentIdentity(ctx context.Context, c *gin.Con
 	return nil, nil
 }
 func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointGetDocument")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetDocument")
 	defer span.End()
 
 	request := &apiv1.GetDocumentRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -103,11 +103,11 @@ func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any,
 }
 
 func (s *Service) endpointRevokeDocument(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointRevokeDocument")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointRevokeDocument")
 	defer span.End()
 
 	request := &apiv1.RevokeDocumentRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -119,11 +119,11 @@ func (s *Service) endpointRevokeDocument(ctx context.Context, c *gin.Context) (a
 }
 
 func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointDeleteDocument")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointDeleteDocument")
 	defer span.End()
 
 	request := &apiv1.DeleteDocumentRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -136,11 +136,11 @@ func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (a
 }
 
 func (s *Service) endpointGetDocumentCollectID(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointGetDocumentAttestation")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetDocumentAttestation")
 	defer span.End()
 
 	request := &apiv1.GetDocumentCollectIDRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -153,11 +153,11 @@ func (s *Service) endpointGetDocumentCollectID(ctx context.Context, c *gin.Conte
 }
 
 func (s *Service) endpointIdentityMapping(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointIdentityMapping")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointIdentityMapping")
 	defer span.End()
 
 	request := &apiv1.IdentityMappingRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -170,11 +170,11 @@ func (s *Service) endpointIdentityMapping(ctx context.Context, c *gin.Context) (
 }
 
 func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointDocumentList")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointDocumentList")
 	defer span.End()
 
 	request := &apiv1.DocumentListRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -187,11 +187,11 @@ func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any
 }
 
 func (s *Service) endpointAddConsent(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointPortal")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointPortal")
 	defer span.End()
 
 	request := &apiv1.AddConsentRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -203,11 +203,11 @@ func (s *Service) endpointAddConsent(ctx context.Context, c *gin.Context) (any, 
 }
 
 func (s *Service) endpointGetConsent(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointPortal")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointPortal")
 	defer span.End()
 
 	request := &apiv1.GetConsentRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (s *Service) endpointGetConsent(ctx context.Context, c *gin.Context) (any, 
 }
 
 func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointHealth")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointHealth")
 	defer span.End()
 
 	request := &apiv1_status.StatusRequest{}
@@ -232,11 +232,11 @@ func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, erro
 }
 
 func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointCredential")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
 	defer span.End()
 
 	request := &apiv1.CredentialRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, 
 }
 
 func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointJWKS")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")
 	defer span.End()
 
 	reply, err := s.apiv1.JWKS(ctx)

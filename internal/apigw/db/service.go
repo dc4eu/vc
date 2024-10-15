@@ -32,7 +32,7 @@ type Service struct {
 	dbClient   *mongo.Client
 	cfg        *model.Cfg
 	log        *logger.Log
-	tp         *trace.Tracer
+	tracer     *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
 	VCDatastoreColl *VCDatastoreColl
@@ -40,11 +40,11 @@ type Service struct {
 }
 
 // New creates a new database service
-func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
 	service := &Service{
-		log:        log,
+		log:        log.New("db"),
 		cfg:        cfg,
-		tp:         tp,
+		tracer:     tracer,
 		probeStore: &apiv1_status.StatusProbeStore{},
 	}
 
@@ -58,6 +58,7 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 	service.VCDatastoreColl = &VCDatastoreColl{
 		Service: service,
 		Coll:    service.dbClient.Database("vc").Collection("datastore"),
+		log:     log.New("VCDatastoreColl"),
 	}
 	if err := service.VCDatastoreColl.createIndex(ctx); err != nil {
 		return nil, err
@@ -66,6 +67,7 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 	service.VCConsentColl = &VCConsentColl{
 		Service: service,
 		Coll:    service.dbClient.Database("vc").Collection("consent"),
+		log:     log.New("VCConsentColl"),
 	}
 	if err := service.VCConsentColl.createIndex(ctx); err != nil {
 		return nil, err
@@ -78,7 +80,7 @@ func New(ctx context.Context, cfg *model.Cfg, tp *trace.Tracer, log *logger.Log)
 
 // connect connects to the database
 func (s *Service) connect(ctx context.Context) error {
-	ctx, span := s.tp.Start(ctx, "apigw:db:connect")
+	ctx, span := s.tracer.Start(ctx, "apigw:db:connect")
 	defer span.End()
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
@@ -92,7 +94,7 @@ func (s *Service) connect(ctx context.Context) error {
 
 // Status returns the status of the database
 func (s *Service) Status(ctx context.Context) *apiv1_status.StatusProbe {
-	ctx, span := s.tp.Start(ctx, "db:status")
+	ctx, span := s.tracer.Start(ctx, "db:status")
 	defer span.End()
 
 	if time.Now().Before(s.probeStore.NextCheck.AsTime()) {

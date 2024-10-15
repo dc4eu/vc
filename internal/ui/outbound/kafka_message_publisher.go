@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/IBM/sarama"
 	"reflect"
 	"vc/internal/ui/apiv1"
 	"vc/pkg/logger"
 	"vc/pkg/messagebroker/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+
+	"github.com/IBM/sarama"
 )
 
 type kafkaMessageProducer struct {

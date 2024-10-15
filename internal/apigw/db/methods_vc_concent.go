@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"vc/pkg/helpers"
+	"vc/pkg/logger"
 	"vc/pkg/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,10 +15,11 @@ import (
 type VCConsentColl struct {
 	Service *Service
 	Coll    *mongo.Collection
+	log     *logger.Log
 }
 
 func (c *VCConsentColl) createIndex(ctx context.Context) error {
-	ctx, span := c.Service.tp.Start(ctx, "db:vc:consent:createIndex")
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:consent:createIndex")
 	defer span.End()
 
 	indexModel := mongo.IndexModel{
@@ -49,7 +51,7 @@ type AddConsentQuery struct {
 
 // Add adds a consent to the collection
 func (c *VCConsentColl) Add(ctx context.Context, consent *AddConsentQuery) error {
-	ctx, span := c.Service.tp.Start(ctx, "db:vc:consent:add")
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:consent:add")
 	defer span.End()
 
 	_, err := c.Coll.InsertOne(ctx, consent)
@@ -72,7 +74,7 @@ type GetConsentQuery struct {
 
 // Get gets a consent from the collection
 func (c *VCConsentColl) Get(ctx context.Context, query *GetConsentQuery) (*model.Consent, error) {
-	ctx, span := c.Service.tp.Start(ctx, "db:vc:consent:get")
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:consent:get")
 	defer span.End()
 
 	filter := bson.M{

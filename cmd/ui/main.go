@@ -26,27 +26,30 @@ type service interface {
 }
 
 func main() {
-	wg := &sync.WaitGroup{}
-	ctx := context.Background()
+	var (
+		wg                 = &sync.WaitGroup{}
+		ctx                = context.Background()
+		services           = make(map[string]service)
+		serviceName string = "ui"
+	)
 
-	services := make(map[string]service)
-
-	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
+	cfg, err := configuration.New(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_ui", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	log, err := logger.New(serviceName, cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
 
-	tracer, err := trace.New(ctx, cfg, log, "vc", "ui")
-	if err != nil {
-		panic(err)
-	}
-
+	// main function log
 	mainLog := log.New("main")
+
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
+	if err != nil {
+		panic(err)
+	}
 
 	var eventPublisher apiv1.EventPublisher
 	if cfg.IsAsyncEnabled(mainLog) {
@@ -60,13 +63,12 @@ func main() {
 		log.Info("EventPublisher disabled in config")
 	}
 
-	apiClient, err := apiv1.New(ctx, cfg, tracer, eventPublisher, log.New("api_client"))
-	services["apiClient"] = apiClient
+	apiClient, err := apiv1.New(ctx, cfg, tracer, eventPublisher, log)
 	if err != nil {
 		panic(err)
 	}
 
-	httpService, err := httpserver.New(ctx, cfg, apiClient, tracer, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiClient, tracer, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)

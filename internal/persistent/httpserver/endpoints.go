@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "apiv1:Status")
+func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "apiv1:Health")
 	defer span.End()
 
 	request := &apiv1_status.StatusRequest{}

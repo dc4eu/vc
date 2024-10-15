@@ -27,7 +27,7 @@ type Service struct {
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	service := &Service{
 		cfg:          cfg,
-		log:          log,
+		log:          log.New("auditlog"),
 		auditLogChan: make(chan *AuditLog),
 	}
 

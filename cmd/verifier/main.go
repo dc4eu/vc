@@ -10,6 +10,7 @@ import (
 	"vc/internal/verifier/httpserver"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
+	"vc/pkg/trace"
 )
 
 type service interface {
@@ -17,26 +18,37 @@ type service interface {
 }
 
 func main() {
-	wg := &sync.WaitGroup{}
-	ctx := context.Background()
+	var (
+		wg                 = &sync.WaitGroup{}
+		ctx                = context.Background()
+		services           = make(map[string]service)
+		serviceName string = "verifier"
+	)
 
-	services := make(map[string]service)
-
-	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
+	cfg, err := configuration.New(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_verifier", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	log, err := logger.New(serviceName, cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
 
-	apiv1, err := apiv1.New(ctx, cfg, log.New("apiv1"))
+	// main function log
+	mainLog := log.New("main")
+
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
 	if err != nil {
 		panic(err)
 	}
-	httpserver, err := httpserver.New(ctx, cfg, apiv1, log.New("httpserver"))
+
+	apiv1, err := apiv1.New(ctx, cfg, log)
+	if err != nil {
+		panic(err)
+	}
+
+	httpserver, err := httpserver.New(ctx, cfg, apiv1, tracer, log)
 	services["httpserver"] = httpserver
 	if err != nil {
 		panic(err)
@@ -48,7 +60,6 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

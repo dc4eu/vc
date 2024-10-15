@@ -73,13 +73,14 @@ func mockClient(t *testing.T) *Client {
 	auditlog, err := auditlog.New(ctx, cfg, logger.NewSimple("testing_apiv1"))
 	assert.NoError(t, err)
 
-	tracer, err := trace.New(ctx, cfg, logger.NewSimple("testing_apiv1"), "projectName", "serviceName")
+	tracer, err := trace.NewForTesting(ctx, "serviceName", logger.NewSimple("testing_apiv1"))
+
 	assert.NoError(t, err)
 
 	client := &Client{
 		cfg:        cfg,
 		log:        logger.NewSimple("testing_apiv1"),
-		tp:         tracer,
+		tracer:     tracer,
 		auditLog:   auditlog,
 		privateKey: mockGenerateECDSAKey(t),
 	}

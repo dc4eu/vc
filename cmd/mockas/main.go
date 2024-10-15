@@ -19,40 +19,44 @@ type service interface {
 }
 
 func main() {
-	var wg sync.WaitGroup
-	ctx := context.Background()
+	var (
+		wg                 = &sync.WaitGroup{}
+		ctx                = context.Background()
+		services           = make(map[string]service)
+		serviceName string = "mockas"
+	)
 
-	services := make(map[string]service)
-
-	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
+	cfg, err := configuration.New(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_mock_as", cfg.Common.Log.FolderPath, cfg.Common.Production)
+	log, err := logger.New(serviceName, cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
 
-	tracer, err := trace.New(ctx, cfg, log, "vc", "mock_as")
+	// main function log
+	mainLog := log.New("main")
+
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
 	if err != nil {
 		panic(err)
 	}
 
-	apiv1Client, err := apiv1.New(ctx, cfg, tracer, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, cfg, tracer, log)
 	if err != nil {
 		panic(err)
 	}
 
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
 	}
 
-	mainLog := log.New("main")
 	if cfg.IsAsyncEnabled(mainLog) {
-		eventConsumer, err := inbound.New(ctx, cfg, log.New("eventConsumer"), apiv1Client, tracer)
+		eventConsumer, err := inbound.New(ctx, cfg, apiv1Client, tracer, log.New("eventConsumer"))
 		services["eventConsumer"] = eventConsumer
 		if err != nil {
 			panic(err)

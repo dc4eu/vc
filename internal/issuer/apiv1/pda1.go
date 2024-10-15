@@ -11,22 +11,20 @@ import (
 
 type pda1Client struct {
 	log    *logger.Log
-	tp     *trace.Tracer
-	client *Client
+	tracer *trace.Tracer
 }
 
-func newPDA1Client(tp *trace.Tracer, client *Client, log *logger.Log) (*pda1Client, error) {
+func newPDA1Client(tracer *trace.Tracer, log *logger.Log) (*pda1Client, error) {
 	c := &pda1Client{
 		log:    log,
-		tp:     tp,
-		client: client,
+		tracer: tracer,
 	}
 
 	return c, nil
 }
 
 func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document) gosdjwt.InstructionsV2 {
-	ctx, span := c.tp.Start(ctx, "apiv1:pda1:sdjwt")
+	ctx, span := c.tracer.Start(ctx, "apiv1:pda1:sdjwt")
 	defer span.End()
 
 	instruction := gosdjwt.InstructionsV2{

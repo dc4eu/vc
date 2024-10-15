@@ -21,8 +21,8 @@ type Service struct {
 	apiv1_registry.RegistryServiceServer
 }
 
-// New creates a new rpcserver service
-func New(ctx context.Context, api *apiv1.Client, cfg *model.Cfg, log *logger.Log) (*Service, error) {
+// New creates a new gRPC server service
+func New(ctx context.Context, apiv1 *apiv1.Client, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	s := &Service{
 		log:        log,
 		cfg:        cfg,
@@ -49,5 +49,6 @@ func New(ctx context.Context, api *apiv1.Client, cfg *model.Cfg, log *logger.Log
 
 // Close closes the service
 func (s *Service) Close(ctx context.Context) error {
+	s.log.Info("Stopped")
 	return nil
 }

@@ -9,9 +9,7 @@ import (
 	"vc/internal/persistent/apiv1"
 	"vc/internal/persistent/db"
 	"vc/internal/persistent/httpserver"
-	"vc/internal/persistent/simplequeue"
 	"vc/pkg/configuration"
-	"vc/pkg/kvclient"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
 )
@@ -21,51 +19,44 @@ type service interface {
 }
 
 func main() {
-	var wg sync.WaitGroup
-	ctx := context.Background()
+	var (
+		wg                 = &sync.WaitGroup{}
+		ctx                = context.Background()
+		services           = make(map[string]service)
+		serviceName string = "persistent"
+	)
 
-	services := make(map[string]service)
-
-	cfg, err := configuration.Parse(ctx, logger.NewSimple("Configuration"))
+	cfg, err := configuration.New(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	log, err := logger.New("vc_persistent", cfg.Common.Log.FolderPath, cfg.Common.Production)
-	if err != nil {
-		panic(err)
-	}
-	tracer, err := trace.New(ctx, cfg, log, "vc_persistent", "cache")
+	log, err := logger.New(serviceName, cfg.Common.Log.FolderPath, cfg.Common.Production)
 	if err != nil {
 		panic(err)
 	}
 
-	kvClient, err := kvclient.New(ctx, cfg, tracer, log.New("kvClient"))
-	services["kvClient"] = kvClient
+	// main function log
+	mainLog := log.New("main")
+
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
 	if err != nil {
-		log.Error(err, "kvClient")
 		panic(err)
 	}
-	dbService, err := db.New(ctx, cfg, tracer, log.New("db"))
+
+	dbService, err := db.New(ctx, cfg, tracer, log)
 	services["dbService"] = dbService
 	if err != nil {
 		log.Error(err, "dbService")
 		panic(err)
 	}
 
-	queueService, err := simplequeue.New(ctx, kvClient, dbService, tracer, cfg, log.New("queue"))
-	services["queueService"] = queueService
-	if err != nil {
-		log.Error(err, "queueService")
-		panic(err)
-	}
-
-	apiv1Client, err := apiv1.New(ctx, kvClient, dbService, tracer, cfg, log.New("apiv1"))
+	apiv1Client, err := apiv1.New(ctx, dbService, tracer, cfg, log)
 	if err != nil {
 		log.Error(err, "apiv1Client")
 		panic(err)
 	}
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log.New("httpserver"))
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)
@@ -77,7 +68,6 @@ func main() {
 
 	<-termChan // Blocks here until interrupted
 
-	mainLog := log.New("main")
 	mainLog.Info("HALTING SIGNAL!")
 
 	for serviceName, service := range services {

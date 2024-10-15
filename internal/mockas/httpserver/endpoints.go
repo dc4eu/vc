@@ -11,11 +11,11 @@ import (
 )
 
 func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointMockNext")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointMockNext")
 	defer span.End()
 
 	request := &apiv1.MockNextRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -28,11 +28,11 @@ func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, er
 }
 
 func (s *Service) endpointMockBulk(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointMockBulk")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointMockBulk")
 	defer span.End()
 
 	request := &apiv1.MockBulkRequest{}
-	if err := s.bindRequest(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -44,9 +44,12 @@ func (s *Service) endpointMockBulk(ctx context.Context, c *gin.Context) (any, er
 	return reply, nil
 }
 
-func (s *Service) endpointStatus(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointHealth")
+	defer span.End()
+
 	request := &apiv1_status.StatusRequest{}
-	reply, err := s.apiv1.Status(ctx, request)
+	reply, err := s.apiv1.Health(ctx, request)
 	if err != nil {
 		return nil, err
 	}

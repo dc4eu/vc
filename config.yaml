@@ -7,20 +7,6 @@ common:
     addr: jaeger:4318
     type: jaeger
     #timeout: 10
-  queues:
-    simple_queue:
-      vc_persistent_save:
-        name: vc_persistent_save
-      vc_persistent_get:
-        name: vc_persistent_get
-      vc_persistent_delete:
-        name: vc_persistent_delete
-      vc_persistent_replace:
-        name: vc_persistent_replace
-  key_value:
-    db: 3
-    addr: redis:6379
-    password: test-password
   qr:
     base_url: "https://deutsche-rentenversicherung.de"
     recovery_level: 2

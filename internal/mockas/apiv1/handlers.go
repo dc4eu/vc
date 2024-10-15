@@ -19,7 +19,9 @@ type MockNextReply struct {
 
 // MockNext sends one mock upload to the datastore
 func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNextReply, error) {
-	c.log.Debug("mocknext")
+	ctx, span := c.tracer.Start(ctx, "apiv1:MockNext")
+	defer span.End()
+
 	mockUpload, err := c.mockOne(ctx, inData.MockInputData)
 	if err != nil {
 		return nil, err
@@ -34,15 +36,10 @@ func (c *Client) MockNext(ctx context.Context, inData *MockNextRequest) (*MockNe
 	if resp.StatusCode != 200 {
 		return nil, errors.New("upload failed")
 	}
-	c.log.Debug("mocknext", "remote status code", resp.StatusCode)
 
 	reply := &MockNextReply{
 		Upload: mockUpload,
 	}
-
-	c.log.Debug("mocknext", "reply", reply)
-
-	c.log.Debug("mocknext", "status", "finished")
 
 	return reply, nil
 }
@@ -60,6 +57,9 @@ type MockBulkReply struct {
 
 // MockBulk sends N mock uploads to the datastore
 func (c *Client) MockBulk(ctx context.Context, inData *MockBulkRequest) (*MockBulkReply, error) {
+	ctx, span := c.tracer.Start(ctx, "apiv1:MockBulk")
+	defer span.End()
+
 	documentIDS := []string{}
 
 	if inData.N < 1 {
@@ -88,7 +88,11 @@ func (c *Client) MockBulk(ctx context.Context, inData *MockBulkRequest) (*MockBu
 	}, nil
 }
 
-func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
+// Health returns the status of the service
+func (c *Client) Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
+	ctx, span := c.tracer.Start(ctx, "apiv1:Health")
+	defer span.End()
+
 	probes := model.Probes{}
 	status := probes.Check("mockas")
 	return status, nil

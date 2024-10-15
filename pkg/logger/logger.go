@@ -12,18 +12,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-//type Logger interface {
-//	New(path string) *Log
-//	Warn(msg string, args ...interface{})
-//	Error(msg string, args ...interface{})
-//	Fatal(msg string, args ...interface{})
-//	Debug(msg string, args ...interface{})
-//	Info(msg string, args ...interface{})
-//}
-
 // Log for portability
 type Log struct {
-	//zap.Logger
 	logr.Logger
 }
 

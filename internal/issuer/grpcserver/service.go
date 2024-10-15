@@ -23,12 +23,12 @@ type Service struct {
 // New creates a new grpc service
 func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, log *logger.Log) (*Service, error) {
 	s := &Service{
-		log:   log,
+		log:   log.New("grpcserver"),
 		cfg:   cfg,
 		apiv1: apiv1,
 	}
 
-	lis, err := net.Listen("tcp", s.cfg.Issuer.GRPCServer.Addr)
+	listener, err := net.Listen("tcp", s.cfg.Issuer.GRPCServer.Addr)
 	if err != nil {
 		s.log.Error(err, "failed to listen", "addr", s.cfg.Issuer.GRPCServer.Addr)
 	}
@@ -36,7 +36,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, log *logger.L
 	s.server = grpc.NewServer()
 	apiv1_issuer.RegisterIssuerServiceServer(s.server, s)
 	s.log.Info("gRPC server listening")
-	if err := s.server.Serve(lis); err != nil {
+	if err := s.server.Serve(listener); err != nil {
 		s.log.Error(err, "failed to serve")
 	}
 
@@ -47,5 +47,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, log *logger.L
 // Close closes gRPC server
 func (s *Service) Close(ctx context.Context) error {
 	s.server.GracefulStop()
+	s.log.Info("Stopped")
 	return nil
 }

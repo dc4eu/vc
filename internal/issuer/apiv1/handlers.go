@@ -147,7 +147,7 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 
 // JWKS creates a credential
 func (c *Client) JWKS(ctx context.Context, in *apiv1_issuer.Empty) (*apiv1_issuer.JwksReply, error) {
-	ctx, span := c.tp.Start(ctx, "apiv1:JWKS")
+	ctx, span := c.tracer.Start(ctx, "apiv1:JWKS")
 	defer span.End()
 
 	keys := &apiv1_issuer.Keys{

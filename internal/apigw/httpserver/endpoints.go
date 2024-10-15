@@ -249,7 +249,7 @@ func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, 
 }
 
 func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tp.Start(ctx, "httpserver:endpointJWKS")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")
 	defer span.End()
 
 	reply, err := s.apiv1.JWKS(ctx)

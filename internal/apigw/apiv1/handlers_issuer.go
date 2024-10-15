@@ -35,6 +35,8 @@ type CredentialRequest struct {
 //	@Param			req	body		CredentialRequest			true	" "
 //	@Router			/credential [post]
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
+	c.log.Debug("Credential", "req", req)
+
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		return nil, err
 	}

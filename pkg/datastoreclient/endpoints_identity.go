@@ -8,7 +8,7 @@ import (
 	"vc/pkg/model"
 )
 
-type identityService struct {
+type identityHandler struct {
 	client  *Client
 	service string
 	log     *logger.Log
@@ -21,7 +21,7 @@ type IdentityMappingQuery struct {
 }
 
 // Mapping maps an identity, return authentic_source_person_id
-func (s *identityService) Mapping(ctx context.Context, query *IdentityMappingQuery) (string, *http.Response, error) {
+func (s *identityHandler) Mapping(ctx context.Context, query *IdentityMappingQuery) (string, *http.Response, error) {
 	s.log.Info("Mapping")
 
 	url := fmt.Sprintf("%s/%s", s.service, "mapping")

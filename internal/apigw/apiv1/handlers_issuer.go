@@ -39,7 +39,7 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 		return nil, err
 	}
 
-	document, _, err := c.datastoreClient.DocumentService.CollectID(ctx, &datastoreclient.DocumentCollectIDQuery{
+	document, _, err := c.datastoreClient.Document.CollectID(ctx, &datastoreclient.DocumentCollectIDQuery{
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,
 		CollectID:       req.CollectID,

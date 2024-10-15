@@ -21,3 +21,16 @@ func (s *Service) MakeSDJWT(ctx context.Context, in *apiv1_issuer.MakeSDJWTReque
 		Disclosures: reply.Data.Disclosures,
 	}, nil
 }
+
+// JWKS returns the JWKS
+func (s *Service) JWKS(ctx context.Context, in *apiv1_issuer.Empty) (*apiv1_issuer.JwksReply, error) {
+	reply, err := s.apiv1.JWKS(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+
+	return &apiv1_issuer.JwksReply{
+		Issuer: reply.Issuer,
+		Jwks:   reply.Jwks,
+	}, nil
+}

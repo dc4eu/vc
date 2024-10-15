@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"os"
 	"time"
+	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/auditlog"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -27,6 +28,8 @@ type Client struct {
 	privateKey *ecdsa.PrivateKey
 	publicKey  *ecdsa.PublicKey
 	jwkClaim   jwt.MapClaims
+	jwkBytes   []byte
+	jwkProto   *apiv1_issuer.Jwk
 
 	ehicClient *ehicClient
 	pda1Client *pda1Client
@@ -39,6 +42,8 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 		log:      logger,
 		tp:       tracer,
 		auditLog: auditLog,
+		jwkProto: &apiv1_issuer.Jwk{},
+		jwkClaim: jwt.MapClaims{},
 	}
 
 	var err error
@@ -68,12 +73,10 @@ func (c *Client) initKeys(ctx context.Context) error {
 		return err
 	}
 
-	privateKey, err := jwt.ParseECPrivateKeyFromPEM(keyByte)
+	c.privateKey, err = jwt.ParseECPrivateKeyFromPEM(keyByte)
 	if err != nil {
 		return err
 	}
-
-	c.privateKey = privateKey
 
 	c.publicKey = &c.privateKey.PublicKey
 

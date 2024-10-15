@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	IssuerService_MakeSDJWT_FullMethodName = "/v1.issuer.IssuerService/MakeSDJWT"
+	IssuerService_JWKS_FullMethodName      = "/v1.issuer.IssuerService/JWKS"
 )
 
 // IssuerServiceClient is the client API for IssuerService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IssuerServiceClient interface {
 	MakeSDJWT(ctx context.Context, in *MakeSDJWTRequest, opts ...grpc.CallOption) (*MakeSDJWTReply, error)
+	JWKS(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*JwksReply, error)
 }
 
 type issuerServiceClient struct {
@@ -47,11 +49,22 @@ func (c *issuerServiceClient) MakeSDJWT(ctx context.Context, in *MakeSDJWTReques
 	return out, nil
 }
 
+func (c *issuerServiceClient) JWKS(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*JwksReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JwksReply)
+	err := c.cc.Invoke(ctx, IssuerService_JWKS_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IssuerServiceServer is the server API for IssuerService service.
 // All implementations must embed UnimplementedIssuerServiceServer
 // for forward compatibility.
 type IssuerServiceServer interface {
 	MakeSDJWT(context.Context, *MakeSDJWTRequest) (*MakeSDJWTReply, error)
+	JWKS(context.Context, *Empty) (*JwksReply, error)
 	mustEmbedUnimplementedIssuerServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedIssuerServiceServer struct{}
 
 func (UnimplementedIssuerServiceServer) MakeSDJWT(context.Context, *MakeSDJWTRequest) (*MakeSDJWTReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakeSDJWT not implemented")
+}
+func (UnimplementedIssuerServiceServer) JWKS(context.Context, *Empty) (*JwksReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JWKS not implemented")
 }
 func (UnimplementedIssuerServiceServer) mustEmbedUnimplementedIssuerServiceServer() {}
 func (UnimplementedIssuerServiceServer) testEmbeddedByValue()                       {}
@@ -104,6 +120,24 @@ func _IssuerService_MakeSDJWT_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IssuerService_JWKS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IssuerServiceServer).JWKS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IssuerService_JWKS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IssuerServiceServer).JWKS(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // IssuerService_ServiceDesc is the grpc.ServiceDesc for IssuerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var IssuerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakeSDJWT",
 			Handler:    _IssuerService_MakeSDJWT_Handler,
+		},
+		{
+			MethodName: "JWKS",
+			Handler:    _IssuerService_JWKS_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

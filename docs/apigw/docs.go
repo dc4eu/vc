@@ -135,6 +135,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/credential/.well-known/jwks": {
+            "get": {
+                "description": "JWKS endpoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dc4eu"
+                ],
+                "summary": "JWKS",
+                "operationId": "issuer-JWKS",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/apiv1_issuer.JwksReply"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/document": {
             "post": {
                 "description": "Get document endpoint",
@@ -928,6 +958,51 @@ const docTemplate = `{
                 },
                 "meta": {
                     "$ref": "#/definitions/model.MetaData"
+                }
+            }
+        },
+        "apiv1_issuer.Jwk": {
+            "type": "object",
+            "properties": {
+                "crv": {
+                    "type": "string"
+                },
+                "d": {
+                    "type": "string"
+                },
+                "kid": {
+                    "type": "string"
+                },
+                "kty": {
+                    "type": "string"
+                },
+                "x": {
+                    "type": "string"
+                },
+                "y": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiv1_issuer.JwksReply": {
+            "type": "object",
+            "properties": {
+                "issuer": {
+                    "type": "string"
+                },
+                "jwks": {
+                    "$ref": "#/definitions/apiv1_issuer.Keys"
+                }
+            }
+        },
+        "apiv1_issuer.Keys": {
+            "type": "object",
+            "properties": {
+                "keys": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apiv1_issuer.Jwk"
+                    }
                 }
             }
         },

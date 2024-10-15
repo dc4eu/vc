@@ -269,6 +269,35 @@ definitions:
     - document_data_version
     - meta
     type: object
+  apiv1_issuer.Jwk:
+    properties:
+      crv:
+        type: string
+      d:
+        type: string
+      kid:
+        type: string
+      kty:
+        type: string
+      x:
+        type: string
+      "y":
+        type: string
+    type: object
+  apiv1_issuer.JwksReply:
+    properties:
+      issuer:
+        type: string
+      jwks:
+        $ref: '#/definitions/apiv1_issuer.Keys'
+    type: object
+  apiv1_issuer.Keys:
+    properties:
+      keys:
+        items:
+          $ref: '#/definitions/apiv1_issuer.Jwk'
+        type: array
+    type: object
   apiv1_issuer.MakeSDJWTReply:
     properties:
       disclosures:
@@ -686,6 +715,26 @@ paths:
           schema:
             $ref: '#/definitions/helpers.ErrorResponse'
       summary: Credential
+      tags:
+      - dc4eu
+  /credential/.well-known/jwks:
+    get:
+      consumes:
+      - application/json
+      description: JWKS endpoint
+      operationId: issuer-JWKS
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/apiv1_issuer.JwksReply'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: JWKS
       tags:
       - dc4eu
   /document:

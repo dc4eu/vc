@@ -133,14 +133,6 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 	return reply, nil
 }
 
-// PublicKeyReply is the reply for PublicKey
-type PublicKeyReply struct {
-	Data struct {
-		Issuer string             `json:"issuer"`
-		JWKS   *apiv1_issuer.Keys `json:"jwks"`
-	}
-}
-
 // JWKS returns the public key in JWK format
 //
 //	@Summary		JWKS
@@ -149,7 +141,7 @@ type PublicKeyReply struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	PublicKeyReply				"Success"
+//	@Success		200	{object}	apiv1_issuer.JwksReply	"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
 //	@Router			/credential/.well-known/jwks [get]
 func (c *Client) JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error) {

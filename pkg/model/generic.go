@@ -177,7 +177,7 @@ type IdentitySchema struct {
 
 	// required: false
 	// example: "1.0.0"
-	Version string `json:"version,omitempty" bson:"version" validate:"semver"`
+	Version string `json:"version,omitempty" bson:"version" validate:"omitempty,semver"`
 }
 
 // Identity identifies a person

@@ -10,10 +10,10 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/sdjwt"
 	"vc/pkg/trace"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/masv3971/gosdjwt"
 )
 
 //	@title		Issuer API
@@ -92,8 +92,8 @@ func (c *Client) initKeys(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) sign(ctx context.Context, instruction gosdjwt.InstructionsV2) (*gosdjwt.SDJWT, error) {
-	jwtConfig := &gosdjwt.Config{
+func (c *Client) sign(ctx context.Context, instruction sdjwt.InstructionsV2) (*sdjwt.SDJWT, error) {
+	jwtConfig := &sdjwt.Config{
 		ISS: c.cfg.Issuer.JWTAttribute.Issuer,
 		VCT: c.cfg.Issuer.JWTAttribute.VerifiableCredentialType,
 		CNF: c.jwkClaim,

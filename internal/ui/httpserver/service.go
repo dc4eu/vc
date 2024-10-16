@@ -65,14 +65,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
+	// extra middlewares (must be declared before Server.Default)
+	s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
+	s.gin.Use(s.middlewareUserSession(ctx, s.cfg))
+
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.UI.APIServer.Addr)
 	if err != nil {
 		return nil, err
 	}
-
-	// extra middlewares
-	s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
-	s.gin.Use(s.middlewareUserSession(ctx, s.cfg))
 
 	s.gin.Static("/static", "./static")
 	s.gin.LoadHTMLFiles("./static/index.html")

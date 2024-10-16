@@ -39,7 +39,7 @@ func (s *serverHandler) ListenAndServe(ctx context.Context, server *http.Server,
 }
 
 // RegEndpoint registers an endpoint with the gin router
-func (s *serverHandler) RegEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, handler func(context.Context, *gin.Context) (interface{}, error)) {
+func (s *serverHandler) RegEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, handler func(context.Context, *gin.Context) (any, error)) {
 	rg.Handle(method, path, func(c *gin.Context) {
 		k := fmt.Sprintf("api_endpoint %s:%s%s", method, rg.BasePath(), path)
 		ctx, span := s.client.tracer.Start(ctx, k)

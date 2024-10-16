@@ -294,9 +294,6 @@ github.com/lithammer/shortuuid/v4
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
-# github.com/masv3971/gosdjwt v0.0.10 => ../gosdjwt
-## explicit; go 1.22
-github.com/masv3971/gosdjwt
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
@@ -693,5 +690,3 @@ gorm.io/gorm/logger
 gorm.io/gorm/migrator
 gorm.io/gorm/schema
 gorm.io/gorm/utils
-# github.com/masv3971/gosdjwt => ../gosdjwt
-# github.com/masv3971/goretask => ../goretask

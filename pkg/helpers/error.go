@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/moogar0880/problems"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
@@ -35,16 +36,19 @@ var (
 	ErrNoRevocationID = NewError("NO_REVOCATION_ID")
 
 	// ErrPrivateKeyMissing error for empty private key
-	ErrPrivateKeyMissing = errors.New("ERR_PRIVATE_KEY_MISSING")
+	ErrPrivateKeyMissing = NewError("ERR_PRIVATE_KEY_MISSING")
 
 	// ErrNoKnownDocumentType error for no known document type
-	ErrNoKnownDocumentType = errors.New("ERR_NO_KNOWN_DOCUMENT_TYPE")
+	ErrNoKnownDocumentType = NewError("ERR_NO_KNOWN_DOCUMENT_TYPE")
+
+	// ErrInternalServerError error for internal server error
+	ErrInternalServerError = NewError("INTERNAL_SERVER_ERROR")
 )
 
 // Error is a struct that represents an error
 type Error struct {
-	Title   string      `json:"title" `
-	Details interface{} `json:"details" xml:"details"`
+	Title   string `json:"title" `
+	Details any    `json:"details"`
 }
 
 func (e *Error) Error() string {
@@ -74,6 +78,7 @@ func NewErrorFromError(err error) *Error {
 	if err == nil {
 		return nil
 	}
+
 	if pbErr, ok := err.(*Error); ok {
 		return pbErr
 	}
@@ -85,6 +90,9 @@ func NewErrorFromError(err error) *Error {
 	}
 	if validatorErr, ok := err.(validator.ValidationErrors); ok {
 		return &Error{Title: "validation_error", Details: formatValidationErrors(validatorErr)}
+	}
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return &Error{Title: "database_error", Details: ErrNoDocumentFound}
 	}
 
 	return NewErrorDetails("internal_server_error", err.Error())

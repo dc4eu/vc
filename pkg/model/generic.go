@@ -48,9 +48,8 @@ func (m *MetaData) QRGenerator(ctx context.Context, baseURL string, recoveryLeve
 
 	q := deepLink.Query()
 
-	q.Add("document_type", m.DocumentType)
 	q.Add("authentic_source", m.AuthenticSource)
-	q.Add("document_id", m.DocumentID)
+	q.Add("collect_id", m.Collect.ID)
 
 	deepLink.RawQuery = q.Encode()
 

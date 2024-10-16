@@ -9,7 +9,7 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/pda1"
 
-	"github.com/masv3971/gosdjwt"
+	"vc/pkg/sdjwt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -41,7 +41,7 @@ type CreateCredentialRequest struct {
 
 // CreateCredentialReply is the reply for Credential
 type CreateCredentialReply struct {
-	Data *gosdjwt.PresentationFlat `json:"data"`
+	Data *sdjwt.PresentationFlat `json:"data"`
 }
 
 // MakeSDJWT creates a credential
@@ -55,7 +55,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	}
 
 	// Build SDJWT
-	var instruction gosdjwt.InstructionsV2
+	var instruction sdjwt.InstructionsV2
 	switch req.DocumentType {
 	case "PDA1":
 		doc := &pda1.Document{}

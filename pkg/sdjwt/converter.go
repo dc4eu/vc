@@ -1,7 +1,7 @@
-package gosdjwt
+package sdjwt
 
 const (
-	RuleSelectiveDisclosure = "sdjwt::rule::selective_disclosure"
+//RuleSelectiveDisclosure = "sdjwt::rule::selective_disclosure"
 )
 
 // ConvertJSON2SDJWT converts a JSON document to a SDJWT

@@ -1,4 +1,4 @@
-package gosdjwt
+package sdjwt
 
 import (
 	"encoding/base64"
@@ -16,17 +16,6 @@ type Disclosure struct {
 
 // DisclosuresV2 is a map of disclosures
 type DisclosuresV2 map[string]Disclosure
-
-//func (d DisclosuresV2) format() string {
-//	if len(d) == 0 {
-//		return ""
-//	}
-//	s := "~"
-//	for _, v := range d {
-//		s += v.disclosureHash + "~"
-//	}
-//	return s
-//}
 
 func (d DisclosuresV2) new(dd []string) error {
 	for _, v := range dd {

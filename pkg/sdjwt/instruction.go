@@ -1,4 +1,4 @@
-package gosdjwt
+package sdjwt
 
 // ParentInstructionV2 instructs how to build a SD-JWT
 type ParentInstructionV2 struct {

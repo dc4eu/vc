@@ -1,4 +1,4 @@
-package gosdjwt
+package sdjwt
 
 import (
 	"fmt"

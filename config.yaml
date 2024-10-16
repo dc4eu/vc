@@ -8,7 +8,7 @@ common:
     type: jaeger
     #timeout: 10
   qr:
-    base_url: "https://deutsche-rentenversicherung.de"
+    base_url: "http://vc_dev_apigw:8080"
     recovery_level: 2
     size: 256
   kafka:

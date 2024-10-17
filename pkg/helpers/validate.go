@@ -13,7 +13,7 @@ import (
 
 // NewValidator creates a new validator
 func NewValidator() (*validator.Validate, error) {
-	validate := validator.New()
+	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]

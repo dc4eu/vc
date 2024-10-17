@@ -5,7 +5,7 @@
         "contact": {},
         "version": "0.1.0"
     },
-    "basePath": "/registry/api/v1",
+    "basePath": "/api/v1",
     "paths": {
         "/ladok/pdf/sign": {
             "post": {

@@ -16,7 +16,7 @@ type Client struct {
 
 //	@title		Registry API
 //	@version	0.1.0
-//	@BasePath	/registry/api/v1
+//	@BasePath	/api/v1
 
 // New creates a new instance of the public api
 func New(ctx context.Context, cfg *model.Cfg, tree *tree.Service, log *logger.Log) (*Client, error) {

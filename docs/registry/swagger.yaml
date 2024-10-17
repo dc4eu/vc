@@ -1,4 +1,4 @@
-basePath: /registry/api/v1
+basePath: /api/v1
 definitions:
   apiv1.ValidateReply:
     properties:

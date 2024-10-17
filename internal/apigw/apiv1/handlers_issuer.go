@@ -35,10 +35,6 @@ type CredentialRequest struct {
 //	@Param			req	body		CredentialRequest			true	" "
 //	@Router			/credential [post]
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
-	}
-
 	document, _, err := c.datastoreClient.Document.CollectID(ctx, &datastoreclient.DocumentCollectIDQuery{
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,

@@ -100,9 +100,6 @@ type Queues struct {
 	} `yaml:"simple_queue" validate:"required"`
 }
 
-// TrustModel holds the trust model configuration
-type TrustModel struct{}
-
 // JWTAttribute holds the jwt attribute configuration.
 // In a later state this should be placed under authentic source in order to issue credentials based on that configuration.
 type JWTAttribute struct {
@@ -169,8 +166,7 @@ type BasicAuth struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer  APIServer  `yaml:"api_server" validate:"required"`
-	TrustModel TrustModel `yaml:"trust_model" validate:"required"`
+	APIServer APIServer `yaml:"api_server" validate:"required"`
 }
 
 // OTEL holds the opentelemetry configuration

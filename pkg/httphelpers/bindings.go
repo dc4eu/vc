@@ -31,10 +31,16 @@ func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) err
 	defer span.End()
 
 	if c.ContentType() == gin.MIMEJSON {
-		_ = c.ShouldBindJSON(v)
+		if err := c.ShouldBindJSON(v); err != nil {
+			return err
+		}
 	}
-	_ = b.bindRequestQuery(ctx, c, v)
-	_ = c.ShouldBindQuery(v)
+	if err := b.bindRequestQuery(ctx, c, v); err != nil {
+		return err
+	}
+	if err := c.ShouldBindQuery(v); err != nil {
+		return err
+	}
 	return c.ShouldBindUri(v)
 }
 

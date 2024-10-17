@@ -55,12 +55,6 @@ type DocumentListRequest struct {
 	ValidTo         int64           `json:"valid_to"`
 }
 
-type PortalRequest struct {
-	DocumentType            string `json:"document_type" binding:"required"`
-	AuthenticSource         string `json:"authentic_source" binding:"required"`
-	AuthenticSourcePersonId string `json:"authentic_source_person_id" binding:"required"`
-}
-
 func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (any, error) {
 	reply, err := c.apigwClient.DocumentList(req)
 	if err != nil {
@@ -77,8 +71,55 @@ func (c *Client) Upload(ctx context.Context, req *apiv1_apigw.UploadRequest) (an
 	return reply, nil
 }
 
+type CredentialRequest struct {
+	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	Identity        *model.Identity `json:"identity" validate:"required"`
+	DocumentType    string          `json:"document_type" validate:"required"`
+	CredentialType  string          `json:"credential_type" validate:"required"`
+	CollectID       string          `json:"collect_id" validate:"required"`
+}
+
+func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (any, error) {
+	reply, err := c.apigwClient.Credential(req)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+type GetDocumentRequest struct {
+	AuthenticSource string `json:"authentic_source" validate:"required"`
+	DocumentType    string `json:"document_type" validate:"required"`
+	DocumentID      string `json:"document_id" validate:"required"`
+}
+
+func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (any, error) {
+	reply, err := c.apigwClient.GetDocument(req)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+type NotificationRequest struct {
+	AuthenticSource string `json:"authentic_source" validate:"required"`
+	DocumentType    string `json:"document_type" validate:"required"`
+	DocumentID      string `json:"document_id" validate:"required"`
+}
+
+func (c *Client) Notification(ctx context.Context, request *NotificationRequest) (any, error) {
+	reply, err := c.apigwClient.Notification(request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 type MockNextRequest struct {
-	PortalRequest
+	DocumentType            string `json:"document_type" binding:"required"`
+	AuthenticSource         string `json:"authentic_source" binding:"required"`
+	AuthenticSourcePersonId string `json:"authentic_source_person_id" binding:"required"`
+	IdentitySchemaName      string `json:"identity_schema_name" binding:"required"`
 }
 
 func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error) {

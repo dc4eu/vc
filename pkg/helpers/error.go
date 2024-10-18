@@ -47,30 +47,31 @@ var (
 
 // Error is a struct that represents an error
 type Error struct {
-	Title   string `json:"title" `
-	Details any    `json:"details"`
+	Title string `json:"title" `
+	Err   any    `json:"details"`
 }
 
 func (e *Error) Error() string {
 	if e == nil {
 		return ""
 	}
-	if e.Details == nil {
+	if e.Err == nil {
 		return fmt.Sprintf("Error: [%s]", e.Title)
 	}
-	return fmt.Sprintf("Error: [%s] %+v", e.Title, e.Details)
+	return fmt.Sprintf("Error: [%s] %+v", e.Title, e.Err)
 }
 
+// ErrorResponse is a struct that represents an error response in JSON from REST API
 type ErrorResponse struct {
 	Error *Error `json:"error"`
 }
 
-func NewError(id string) *Error {
-	return &Error{Title: id}
+func NewError(title string) *Error {
+	return &Error{Title: title}
 }
 
-func NewErrorDetails(id string, details any) *Error {
-	return &Error{Title: id, Details: details}
+func NewErrorDetails(title string, err any) *Error {
+	return &Error{Title: title, Err: err}
 }
 
 // NewErrorFromError creates a new Error from an error
@@ -79,20 +80,18 @@ func NewErrorFromError(err error) *Error {
 		return nil
 	}
 
-	if pbErr, ok := err.(*Error); ok {
-		return pbErr
-	}
 	if jsonUnmarshalTypeError, ok := err.(*json.UnmarshalTypeError); ok {
-		return &Error{Title: "json_type_error", Details: formatJSONUnmarshalTypeError(jsonUnmarshalTypeError)}
+		return &Error{Title: "json_type_error", Err: formatJSONUnmarshalTypeError(jsonUnmarshalTypeError)}
 	}
 	if jsonSyntaxError, ok := err.(*json.SyntaxError); ok {
-		return &Error{Title: "json_syntax_error", Details: map[string]any{"position": jsonSyntaxError.Offset, "error": jsonSyntaxError.Error()}}
+		return &Error{Title: "json_syntax_error", Err: map[string]any{"position": jsonSyntaxError.Offset, "error": jsonSyntaxError.Error()}}
 	}
 	if validatorErr, ok := err.(validator.ValidationErrors); ok {
-		return &Error{Title: "validation_error", Details: formatValidationErrors(validatorErr)}
+		return &Error{Title: "validation_error", Err: formatValidationErrors(validatorErr)}
 	}
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		return &Error{Title: "database_error", Details: ErrNoDocumentFound}
+	if errors.Is(err, mongo.ErrNoDocuments) || errors.Is(err, ErrNoDocumentFound) {
+		fmt.Println("Mongo no documents")
+		return &Error{Title: "database_error", Err: ErrNoDocumentFound}
 	}
 
 	return NewErrorDetails("internal_server_error", err.Error())

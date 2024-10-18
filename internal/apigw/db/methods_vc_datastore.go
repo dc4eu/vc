@@ -103,10 +103,14 @@ func (c *VCDatastoreColl) AddDocumentIdentity(ctx context.Context, query *AddDoc
 	// This needs to make sure no duplicate authentic_source_person_id is added in the future
 	update := bson.M{"$addToSet": bson.M{"identities": bson.M{"$each": query.Identities}}}
 
-	_, err := c.Coll.UpdateOne(ctx, filter, update)
+	result, err := c.Coll.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
+	if result.ModifiedCount == 0 {
+		return helpers.ErrNoDocumentFound
+	}
+
 	return nil
 }
 

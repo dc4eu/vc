@@ -178,7 +178,7 @@ type AddDocumentIdentityRequest struct {
 	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
 	DocumentID string `json:"document_id" validate:"required"`
 
-	Identities []*model.Identity `json:"identities" validate:"required"`
+	Identities []*model.Identity `json:"identities" validate:"required,dive"`
 }
 
 // AddDocumentIdentity adds an identity to a document

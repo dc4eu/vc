@@ -49,7 +49,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		server: &http.Server{},
 		sessionConfig: &sessionConfig{
 			name:                       "vc_ui_auth_session",
-			inactivityTimeoutInSeconds: 300,
+			inactivityTimeoutInSeconds: cfg.UI.SessionInactivityTimeoutInSeconds,
 			path:                       "/",
 			httpOnly:                   true,
 			secure:                     cfg.UI.APIServer.TLS.Enabled,
@@ -91,6 +91,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodGet, "health", s.endpointAPIGWStatus)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodPost, "document/list", s.endpointDocumentList)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodPost, "upload", s.endpointUpload)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodPost, "credential", s.endpointCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodPost, "document", s.endpointGetDocument)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodPost, "notification", s.endpointNotification)
 
 	rgMockAS := rgSecure.Group("mockas")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgMockAS, http.MethodPost, "mock/next", s.endpointMockNext)

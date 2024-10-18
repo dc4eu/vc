@@ -521,11 +521,11 @@ http 200 or http 400 and error body
 
 |type| Attribute | required | description       |
 | ---------- | ---------------- | --- | ------- |
-| string     | id            | o | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
+| string     | id | o | ID for credential revocation; If not defined by institution it should be set to document_id value after upload. Different value may be used to allow credential coupling – having one revocation status for multiple credentials |
 | object     | [reference](#reference)  | o | Optional reference to follow-up credential|
-| int64      | revoke_at                | o | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed|
-| string     | reason                   | o | Could include a display text for the Issuer System, wont be included in revocation registry|
-| boolean    | revoked                  | o | Information on whether the respective credential is revoked; Allows to upload attestation information of credentials that are already revoked – if not specified this is set to false by default|
+| int64      | revoke_at | o | Value to define a specific time on when the revocation shall be effective; if empty, revoke system date, else on specified datetime - retroactive revocation must not be allowed|
+| string     | reason | o | Could include a display text for the Issuer System, wont be included in revocation registry|
+| boolean    | revoked | o | Information on whether the respective credential is revoked; Allows to upload attestation information of credentials that are already revoked – if not specified this is set to false by default|
 
 ### reference{}
 
@@ -538,27 +538,27 @@ http 200 or http 400 and error body
 ### identity{}
 
 |type| Attribute | required | description |
-| ------ | -------------------------- | --- | ----------------------------------------------------------------------------------------------------- |
-| string | authentic_source_person_id | r   | unique identifier within authentic_source namespace AND globally unique within Authentic Source.      |
-| object | [schema{}](#schema)        | r   | Information about the provided attributes for the Authentic Source Person information                 |
-| string | family_name                | r   | As in current PID namespace                                                                           |
-| string | given_name                 | r   | As in current PID namespace                                                                           |
-| string | birth_date                 | r   | As in current PID namespace                                                                           |
-| string | family_name_birth          | o   | As in current PID namespace                                                                           |
-| string | given_name_birth           | o   | As in current PID namespace                                                                           |
-| string | birth_place                | o   | As in current PID namespace                                                                           |
-| string | gender                     | o   | As in current PID namespace                                                                           |
-| string | birth_country              | o   | As in current PID namespace                                                                           |
-| string | birth_state                | o   | As in current PID namespace                                                                           |
-| string | birth_city                 | o   | As in current PID namespace                                                                           |
-| string | resident_address           | o   | As in current PID namespace                                                                           |
-| string | resident_country           | o   | As in current PID namespace                                                                           |
-| string | resident_state             | o   | As in current PID namespace                                                                           |
-| string | resident_city              | o   | As in current PID namespace                                                                           |
-| string | resident_postal_code       | o   | As in current PID namespace                                                                           |
-| string | resident_street            | o   | As in current PID namespace                                                                           |
-| string | resident_house_number      | o   | As in current PID namespace                                                                           |
-| string | nationality                | o   | As in current PID namespace                                                                           |
+| ------ | -------------------------- | --- | --------------------------------------------------------------------- |
+| string | authentic_source_person_id | r   | unique identifier within `authentic_source` namespace|
+| object | [schema{}](#schema)        | r   | Information about the provided attributes for the Authentic Source Person information |
+| string | family_name                | r   | As in current PID namespace |
+| string | given_name                 | r   | As in current PID namespace |
+| string | birth_date                 | r   | As in current PID namespace, format: yyyy-mm-dd |
+| string | family_name_birth          | o   | As in current PID namespace |
+| string | given_name_birth           | o   | As in current PID namespace |
+| string | birth_place                | o   | As in current PID namespace |
+| string | gender                     | o   | As in current PID namespace |
+| string | birth_country              | o   | As in current PID namespace |
+| string | birth_state                | o   | As in current PID namespace |
+| string | birth_city                 | o   | As in current PID namespace |
+| string | resident_address           | o   | As in current PID namespace |
+| string | resident_country           | o   | As in current PID namespace |
+| string | resident_state             | o   | As in current PID namespace |
+| string | resident_city              | o   | As in current PID namespace |
+| string | resident_postal_code       | o   | As in current PID namespace |
+| string | resident_street            | o   | As in current PID namespace |
+| string | resident_house_number      | o   | As in current PID namespace |
+| string | nationality                | o   | As in current PID namespace |
 
 ### schema{}
 
@@ -577,8 +577,8 @@ The currents schema definitions for testing can be found here [PDA1](./pda1.md) 
 |type| Attribute | required | description |
 | ------ | ---------------------- | --- | ---------------- |
 | string | version                | o   | Version of the attestation data object – to be defined by the Authentic Source. MUST comply with <https://semver.org/> |
-| string | type                   | o   | For internal display interpretation/differentiation                                                                        |
-| object | description_structured | o   | JSON Object with key-value-pairs for building display data[[MF1]](#_msocom_1)                                              |
+| string | type                   | o   | For internal display interpretation/differentiation |
+| object | description_structured | o   | JSON Object with key-value-pairs for building display data[[MF1]](#_msocom_1) |
 
 ### document_list{}
 

@@ -80,6 +80,11 @@ func NewErrorFromError(err error) *Error {
 		return nil
 	}
 
+	if pbErr, ok := err.(*Error); ok {
+		fmt.Println("pbErr", pbErr)
+		return pbErr
+	}
+
 	if jsonUnmarshalTypeError, ok := err.(*json.UnmarshalTypeError); ok {
 		return &Error{Title: "json_type_error", Err: formatJSONUnmarshalTypeError(jsonUnmarshalTypeError)}
 	}
@@ -90,8 +95,11 @@ func NewErrorFromError(err error) *Error {
 		return &Error{Title: "validation_error", Err: formatValidationErrors(validatorErr)}
 	}
 	if errors.Is(err, mongo.ErrNoDocuments) || errors.Is(err, ErrNoDocumentFound) {
-		fmt.Println("Mongo no documents")
 		return &Error{Title: "database_error", Err: ErrNoDocumentFound}
+	}
+	if mongo.IsDuplicateKeyError(err) {
+		fmt.Println("Duplicate key error")
+		return &Error{Title: "database_error", Err: ErrDocumentAlreadyExists}
 	}
 
 	return NewErrorDetails("internal_server_error", err.Error())

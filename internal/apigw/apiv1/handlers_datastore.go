@@ -7,7 +7,6 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -72,9 +71,6 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 
 	if err := c.db.VCDatastoreColl.Save(ctx, upload); err != nil {
 		c.log.Debug("Failed to save document", "error", err)
-		if mongo.IsDuplicateKeyError(err) {
-			return helpers.ErrDocumentAlreadyExists
-		}
 		return err
 	}
 
@@ -178,7 +174,7 @@ type AddDocumentIdentityRequest struct {
 	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
 	DocumentID string `json:"document_id" validate:"required"`
 
-	Identities []*model.Identity `json:"identities" validate:"required,dive"`
+	Identities []*model.Identity `json:"identities" validate:"required"`
 }
 
 // AddDocumentIdentity adds an identity to a document

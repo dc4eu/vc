@@ -23,7 +23,7 @@ type MockInputData struct {
 
 type uploadMock struct {
 	Meta                *model.MetaData        `json:"meta" validate:"required"`
-	Identities          []*model.Identity      `json:"identities,omitempty" validate:"required"`
+	Identities          []model.Identity       `json:"identities,omitempty" validate:"required,dive"`
 	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty" validate:"required"`
 	DocumentData        map[string]any         `json:"document_data" validate:"required"`
 	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
@@ -46,7 +46,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 	}
 
 	if data.BirthDate == "" {
-		data.BirthDate = gofakeit.Date().String()
+		data.BirthDate = gofakeit.Date().Format("2006-01-02")
 	}
 
 	if data.CollectID == "" {
@@ -80,7 +80,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 		},
 	}
 
-	identities := []*model.Identity{
+	identities := []model.Identity{
 		{
 			AuthenticSourcePersonID: data.AuthenticSourcePersonID,
 			Schema: &model.IdentitySchema{

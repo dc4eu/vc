@@ -4,16 +4,14 @@ import (
 	"context"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/internal/gen/status/apiv1_status"
-	"vc/pkg/helpers"
+
+	// swagger complains if this is not imported
+	_ "vc/pkg/helpers"
 	"vc/pkg/model"
 )
 
 // Add adds a new entity into the registry
 func (c *Client) Add(ctx context.Context, req *apiv1_registry.AddRequest) (*apiv1_registry.AddReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
-	}
-
 	if err := c.tree.Insert(req.Entity); err != nil {
 		return nil, err
 	}

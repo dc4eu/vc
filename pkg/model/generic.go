@@ -198,7 +198,7 @@ type Identity struct {
 
 	// required: true
 	// example: 1970-01-01
-	BirthDate string `json:"birth_date,omitempty" bson:"birth_date"`
+	BirthDate string `json:"birth_date,omitempty" bson:"birth_date" validate:"omitempty,datetime=2006-01-02"`
 
 	// required: false
 	// example: Karlsson

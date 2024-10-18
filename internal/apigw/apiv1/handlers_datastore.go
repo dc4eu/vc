@@ -7,14 +7,13 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.opentelemetry.io/otel/codes"
 )
 
 // UploadRequest is the request for Upload
 type UploadRequest struct {
 	Meta                *model.MetaData        `json:"meta" validate:"required"`
-	Identities          []model.Identity       `json:"identities,omitempty"`
+	Identities          []model.Identity       `json:"identities,omitempty" validate:"dive"`
 	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty"`
 	DocumentData        map[string]any         `json:"document_data" validate:"required"`
 	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
@@ -33,11 +32,6 @@ type UploadRequest struct {
 //	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		c.log.Debug("Validation failed", "error", err)
-		return err
-	}
-
 	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Common.QR.BaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
 	if err != nil {
 		c.log.Debug("QR code generation failed", "error", err)
@@ -77,9 +71,6 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 
 	if err := c.db.VCDatastoreColl.Save(ctx, upload); err != nil {
 		c.log.Debug("Failed to save document", "error", err)
-		if mongo.IsDuplicateKeyError(err) {
-			return helpers.ErrDocumentAlreadyExists
-		}
 		return err
 	}
 
@@ -152,9 +143,6 @@ type IdentityMappingReply struct {
 //	@Param			req	body		IdentityMappingRequest	true	" "
 //	@Router			/identity/mapping [post]
 func (c *Client) IdentityMapping(ctx context.Context, reg *IdentityMappingRequest) (*IdentityMappingReply, error) {
-	if err := helpers.Check(ctx, c.cfg, reg, c.log); err != nil {
-		return nil, err
-	}
 	authenticSourcePersonID, err := c.db.VCDatastoreColl.IDMapping(ctx, &db.IDMappingQuery{
 		AuthenticSource: reg.AuthenticSource,
 		Identity:        reg.Identity,
@@ -288,11 +276,6 @@ type DeleteDocumentRequest struct {
 //	@Param			req	body		DeleteDocumentRequest	true	" "
 //	@Router			/document [delete]
 func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		c.log.Error(err, "Validation failed")
-		return err
-	}
-
 	err := c.db.VCDatastoreColl.Delete(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,
@@ -330,10 +313,6 @@ type GetDocumentReply struct {
 //	@Param			req	body		GetDocumentRequest		true	" "
 //	@Router			/document [post]
 func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*GetDocumentReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
-	}
-
 	query := &db.GetDocumentQuery{
 		Meta: &model.MetaData{
 			AuthenticSource: req.AuthenticSource,
@@ -379,10 +358,6 @@ type DocumentListReply struct {
 //	@Param			req	body		DocumentListRequest		true	" "
 //	@Router			/document/list [post]
 func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*DocumentListReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
-	}
-
 	docs, err := c.db.VCDatastoreColl.DocumentList(ctx, &db.DocumentListQuery{
 		AuthenticSource: req.AuthenticSource,
 		Identity:        req.Identity,
@@ -425,10 +400,6 @@ type GetDocumentCollectIDReply struct {
 //	@Param			req	body		GetDocumentCollectIDRequest	true	" "
 //	@Router			/document/collect_id [post]
 func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentCollectIDRequest) (*GetDocumentCollectIDReply, error) {
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return nil, err
-	}
-
 	query := &db.GetDocumentCollectIDQuery{
 		Identity: req.Identity,
 		Meta: &model.MetaData{
@@ -473,11 +444,6 @@ type RevokeDocumentRequest struct {
 func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest) error {
 	ctx, span := c.tracer.Start(ctx, "db:apigw:datastore:revoke")
 	defer span.End()
-
-	c.log.Debug("Revoke request", "request", req)
-	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
-		return err
-	}
 
 	if req.Revocation.ID == "" {
 		return helpers.ErrNoRevocationID

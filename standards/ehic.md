@@ -17,20 +17,6 @@
                 "date_of_birth": {
                     "type": "string",
                     "format": "date"
-                },
-                "other_elements": {
-                    "type": "object",
-                    "properties": {
-                        "sex": {
-                            "$ref": "#/$defs/sex_type"
-                        },
-                        "forename_at_birth": {
-                            "type": "string"
-                        },
-                        "family_name_at_birth": {
-                            "type": "string"
-                        }
-                    }
                 }
             },
             "required": [

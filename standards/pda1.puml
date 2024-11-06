@@ -42,7 +42,7 @@
     ],
     "places_of_work": [
         {
-            "a_fixed_place_of_work_exist": true,
+            "a_fixed_place_of_work_exists": true,
             "country_code": "AT",
             "place_of_work": [
                 {

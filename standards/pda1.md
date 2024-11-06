@@ -61,7 +61,7 @@
             "items": {
                 "type": "object",
                 "properties": {
-                    "no_fixed_place_of_work_exist": {
+                    "a_fixed_place_of_work_exists": {
                         "type": "boolean",
                         "description": "Multiplied from the EESSI model to be mapped on to each country"
                     },
@@ -103,7 +103,7 @@
                     }
                 },
                 "required": [
-                    "no_fixed_place_of_work_exist",
+                    "a_fixed_place_of_work_exists",
                     "country_work"
                 ]
             },

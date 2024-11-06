@@ -81,11 +81,6 @@
             "pattern": "^(AT|BE|BG|HR|CY|CZ|DK|EE|FI|FR|DE|EL|HU|IS|IE|IT|LV|LI|LT|LU|MT|NL|NO|PL|PT|RO|SK|SI|ES|SE|CH|UK|EU){1}$",
             "description": "Country code according to EU/EFTA-Countries according to ISO-3166-1 + UK"
         },
-        "sex_type": {
-            "type": "string",
-            "pattern": "^(01|02|98){1}$",
-            "description": "01 - Male, 02 - Female, 98 - Unknown"
-        },
         "eessi_institution_id": {
             "type": "string",
             "pattern": "^(AT|BE|BG|HR|CY|CZ|DK|EE|FI|FR|DE|EL|HU|IS|IE|IT|LV|LI|LT|LU|MT|NL|NO|PL|PT|RO|SK|SI|ES|SE|CH|UK|EU):[a-zA-Z0-9]{4,10}$",

@@ -1,0 +1,21 @@
+@startjson ehic upload
+#
+{
+    "subject": {
+        "forename": "John",
+        "family_name": "Doe",
+        "date_of_birth": "1980-01-01"
+    },
+    "social_security_pin": "123456789",
+    "period_entitlement": {
+        "starting_date": "2020-01-01",
+        "ending_date": "2021-01-01"
+    },
+    "document_id": "123456789",
+    "competent_institution": {
+        "institution_id": "AT:123",
+        "institution_name": "Austria",
+        "institution_country": "AT"
+    }
+}
+@endjson

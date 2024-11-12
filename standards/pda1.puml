@@ -1,0 +1,80 @@
+@startjson
+#
+{
+    "social_security_pin": "123456789",
+    "nationality": [
+        "AT",
+        "SUHH"
+    ],
+    "details_of_employments": [
+        {
+            "type_of_employment": "01",
+            "name": "Employer A",
+            "ids_of_employer": [
+                {
+                    "employer_id": "123456789",
+                    "type_of_id": "01"
+                }
+            ],
+            "address": {
+                "street": "Hauptstraße 2",
+                "town": "Vienna",
+                "postal_code": "1000",
+                "country": "AT"
+            }
+        },
+        {
+            "type_of_employment": "02",
+            "name": "Employer B",
+            "ids_of_employer": [
+                {
+                    "employer_id": "123456789",
+                    "type_of_id": "01"
+                }
+            ],
+            "address": {
+                "street": "Main Street",
+                "town": "Vienna",
+                "postal_code": "1000",
+                "country": "AT"
+            }
+        }
+    ],
+    "places_of_work": [
+        {
+            "a_fixed_place_of_work_exists": true,
+            "country_code": "AT",
+            "place_of_work": [
+                {
+                    "company_vessel_name": "Company A",
+                    "flag_state_home_base": "AT",
+                    "ids_of_company": [
+                        {
+                            "company_id": "123456789",
+                            "type_of_id": "01"
+                        }
+                    ],
+                    "address": {
+                        "street": "Main Street",
+                        "town": "Vienna",
+                        "postal_code": "1000"
+                    }
+                }
+            ]
+        }
+    ],
+    "decision_legislation_applicable": {
+        "member_state_which_legislation_applies": "AT", //<xsd:pattern value='(AT|BE|BG|HR|CY|CZ|DK|EE|FI|FR|DE|EL|HU|IS|IE|IT|LV|LI|LT|LU|MT|NL|NO|PL|PT|RO|SK|SI|ES|SE|CH|UK){1}'/>
+        "transitional_rules_apply": true,
+        "starting_date": "2018-01-01",
+        "ending_date": "2018-12-31" //for open period end date will be set to 2499-01-01, to ensure that the end date is not reached
+    },
+    "status_confirmation": "01", //A009 article_regulation_ec_no_8832004 01 -> 01, 02 -> 03
+    "unique_number_of_issued_document": "188ae95b-be78-471c-af1a-591dbdab33d1",
+    "competent_institution": {
+        "institution_id": "AT:12345679", //<xsd:pattern value='(AT|BE|BG|HR|CY|CZ|DK|EE|FI|FR|DE|EL|HU|IS|IE|IT|LV|LI|LT|LU|MT|NL|NO|PL|PT|RO|SK|SI|ES|SE|CH|UK|EU):[a-zA-Z0-9]{4,10}' />
+        "institution_name": "SV",
+        "country_code": "AT" //<xsd:pattern value='(AT|BE|BG|HR|CY|CZ|DK|EE|FI|FR|DE|EL|HU|IS|IE|IT|LV|LI|LT|LU|MT|NL|NO|PL|PT|RO|SK|SI|ES|SE|CH|UK|EU){1}'/>
+    }
+}
+@endjson

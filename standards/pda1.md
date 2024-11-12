@@ -5,40 +5,6 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
-        "person": {
-            "type": "object",
-            "properties": {
-                "forename": {
-                    "type": "string"
-                },
-                "family_name": {
-                    "type": "string"
-                },
-                "date_of_birth": {
-                    "type": "string",
-                    "format": "date"
-                },
-                "other_elements": {
-                    "type": "object",
-                    "properties": {
-                        "sex": {
-                            "$ref": "#/$defs/sex_type"
-                        },
-                        "forename_at_birth": {
-                            "type": "string"
-                        },
-                        "family_name_at_birth": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "required": [
-                "forename",
-                "family_name",
-                "date_of_birth"
-            ]
-        },
         "social_security_pin": {
             "type": "string",
             "description": "Personal Identification Number as defined in the issuing institution"
@@ -95,7 +61,7 @@
             "items": {
                 "type": "object",
                 "properties": {
-                    "no_fixed_place_of_work_exist": {
+                    "a_fixed_place_of_work_exists": {
                         "type": "boolean",
                         "description": "Multiplied from the EESSI model to be mapped on to each country"
                     },
@@ -137,7 +103,7 @@
                     }
                 },
                 "required": [
-                    "no_fixed_place_of_work_exist",
+                    "a_fixed_place_of_work_exists",
                     "country_work"
                 ]
             },
@@ -220,11 +186,6 @@
             "type": "string",
             "pattern": "^(AT|BE|BG|HR|CY|CZ|DK|EE|FI|FR|DE|EL|HU|IS|IE|IT|LV|LI|LT|LU|MT|NL|NO|PL|PT|RO|SK|SI|ES|SE|CH|UK|XR|XS|XU|AF|AL|DZ|AD|AO|AG|AR|AM|AU|AZ|BS|BH|BD|BB|BY|BZ|BJ|BT|BO|BA|BW|BR|BN|BF|BI|KH|CM|CA|CV|CF|TD|CL|CN|CO|KM|CG|CD|CR|CI|CU|DJ|DM|DO|EC|EG|SV|GQ|ER|ET|FJ|GA|GM|GE|GH|GD|GT|GN|GW|GY|HT|VA|HN|IN|ID|IR|IQ|IL|JM|JP|JO|KZ|KE|KI|KP|KR|KW|KG|LA|LB|LS|LR|LY|MK|MG|MW|MY|MV|ML|MH|MR|MU|MX|FM|MD|MC|MN|ME|MA|MZ|MM|NA|NR|NP|NZ|NI|NE|NG|OM|PK|PW|PS|PA|PG|PY|PE|PH|QA|RU|RW|KN|LC|VC|WS|SM|ST|SA|SN|RS|SC|SL|SG|SB|SO|ZA|SS|LK|SD|SR|SZ|SY|TJ|TZ|TH|TL|TG|TO|TT|TN|TR|TM|TV|UG|UA|AE|US|UY|UZ|VU|VE|VN|YE|ZM|ZW|BQAQ|BUMM|BYAA|CTKI|CSHH|DYBJ|NQAQ|TPTL|FXFR|AIDJ|FQHH|DDDE|GEHH|JTUM|MIUM|ANHH|NTHH|NHVU|PCHH|PZPA|CSXX|SKIN|RHZW|HVBF|PUUM|SUHH|VDVN|WKUM|YDYE|YUCS|ZRCD){1}$",
             "description": "ISO-3166-1 Country-Codes for all Countries plus 4-Digit Country-Codes for historic countries according to ISO-3166_3"
-        },
-        "sex_type": {
-            "type": "string",
-            "pattern": "^(01|02|98){1}$",
-            "description": "01 - Male, 02 - Female, 98 - Unknown"
         },
         "company_id_type": {
             "type": "string",

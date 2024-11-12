@@ -2,19 +2,28 @@ package apiv1
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
+	"time"
+	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
 	"vc/pkg/pda1"
-	"vc/pkg/sdjwt"
+	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
+
+	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type pda1Client struct {
 	log    *logger.Log
 	tracer *trace.Tracer
+	client *Client
 }
 
-func newPDA1Client(tracer *trace.Tracer, log *logger.Log) (*pda1Client, error) {
+func newPDA1Client(client *Client, tracer *trace.Tracer, log *logger.Log) (*pda1Client, error) {
 	c := &pda1Client{
+		client: client,
 		log:    log,
 		tracer: tracer,
 	}
@@ -22,353 +31,115 @@ func newPDA1Client(tracer *trace.Tracer, log *logger.Log) (*pda1Client, error) {
 	return c, nil
 }
 
-func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document) sdjwt.InstructionsV2 {
-	ctx, span := c.tracer.Start(ctx, "apiv1:pda1:sdjwt")
-	defer span.End()
+func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
 
-	instruction := sdjwt.InstructionsV2{
-		&sdjwt.ParentInstructionV2{
-			Name: "activityEmploymentDetails",
-			Children: []any{
-				&sdjwt.ChildInstructionV2{
-					Name:  "noFixedAddress",
-					Value: doc.ActivityEmploymentDetails.NoFixedAddress,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "noFixedAddressDescription",
-					Value: doc.ActivityEmploymentDetails.NoFixedAddressDescription,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "workPlaceAddresses",
-					Value: doc.ActivityEmploymentDetails.WorkPlaceAddresses,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "workPlaceAddressesBlob",
-					Value: doc.ActivityEmploymentDetails.WorkPlaceAddressesBlob,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "workPlaceNames",
-					Value: doc.ActivityEmploymentDetails.WorkPlaceNames,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "workPlaceNamesBlob",
-					Value: doc.ActivityEmploymentDetails.WorkPlaceNamesBlob,
-				},
-			},
-		},
-		&sdjwt.ParentInstructionV2{
-			Name: "completingInstitution",
-			Children: []any{
-				&sdjwt.ChildInstructionV2{
-					Name:  "date",
-					Value: doc.CompletingInstitution.Date,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "email",
-					Value: doc.CompletingInstitution.Email,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "institutionID",
-					Value: doc.CompletingInstitution.InstitutionID,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "name",
-					Value: doc.CompletingInstitution.Name,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "officeFaxNo",
-					Value: doc.CompletingInstitution.OfficeFaxNo,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "signature",
-					Value: doc.CompletingInstitution.Signature,
-				},
-				&sdjwt.ParentInstructionV2{
-					Name:                "address",
-					SelectiveDisclosure: true,
-					Children: []any{
-						&sdjwt.ChildInstructionV2{
-							Name:  "buildingName",
-							Value: doc.CompletingInstitution.Address.BuildingName,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "countryCode",
-							Value: doc.CompletingInstitution.Address.CountryCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "postCode",
-							Value: doc.CompletingInstitution.Address.PostCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "region",
-							Value: doc.CompletingInstitution.Address.Region,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "streetNo",
-							Value: doc.CompletingInstitution.Address.StreetNo,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "town",
-							Value: doc.CompletingInstitution.Address.Town,
-						},
-					},
-				},
-			},
-		},
-		&sdjwt.ParentInstructionV2{
-			Name: "employmentDetails",
-			Children: []any{
-				&sdjwt.ChildInstructionV2{
-					Name:  "employee",
-					Value: doc.EmploymentDetails.Employee,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "employerSelfEmployedActivityCodes",
-					Value: doc.EmploymentDetails.EmployerSelfEmployedActivityCodes,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "nameBusinessName",
-					Value: doc.EmploymentDetails.NameBusinessName,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "registeredAddress",
-					Value: doc.EmploymentDetails.RegisteredAddress,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "selfEmployedActivity",
-					Value: doc.EmploymentDetails.SelfEmployedActivity,
-				},
-				&sdjwt.ParentInstructionV2{
-					Name: "registeredAddress",
-					Children: []any{
-						&sdjwt.ChildInstructionV2{
-							Name:  "buildingName",
-							Value: doc.EmploymentDetails.RegisteredAddress.BuildingName,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "countryCode",
-							Value: doc.EmploymentDetails.RegisteredAddress.CountryCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "postCode",
-							Value: doc.EmploymentDetails.RegisteredAddress.PostCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "region",
-							Value: doc.EmploymentDetails.RegisteredAddress.Region,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "streetNo",
-							Value: doc.EmploymentDetails.RegisteredAddress.StreetNo,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "town",
-							Value: doc.EmploymentDetails.RegisteredAddress.Town,
-						},
-					},
-				},
-			},
-		},
-		&sdjwt.ParentInstructionV2{
-			Name: "memberStateLegislation",
-			Children: []any{
-				&sdjwt.ChildInstructionV2{
-					Name:  "certificateForDurationActivity",
-					Value: doc.MemberStateLegislation.CertificateForDurationActivity,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "determinationProvisional",
-					Value: doc.MemberStateLegislation.DeterminationProvisional,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "endingDate",
-					Value: doc.MemberStateLegislation.EndingDate,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "memberStateWhichLegislationApplies",
-					Value: doc.MemberStateLegislation.MemberStateWhichLegislationApplies,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "startingDate",
-					Value: doc.MemberStateLegislation.StartingDate,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "transitionRulesApplyAsEC8832004",
-					Value: doc.MemberStateLegislation.TransitionRulesApplyAsEC8832004,
-				},
-			},
-		},
-		&sdjwt.ParentInstructionV2{
-			Name: "personalDetails",
-			Children: []any{
-				&sdjwt.ChildInstructionV2{
-					Name:                "dateBirth",
-					SelectiveDisclosure: true,
-					Value:               doc.PersonalDetails.DateBirth,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "forenames",
-					Value: doc.PersonalDetails.Forenames,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "nationality",
-					Value: doc.PersonalDetails.Nationality,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "personalIdentificationNumber",
-					Value: doc.PersonalDetails.PersonalIdentificationNumber,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "sex",
-					Value: doc.PersonalDetails.Sex,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "surname",
-					Value: doc.PersonalDetails.Surname,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "surnameAtBirth",
-					Value: doc.PersonalDetails.SurnameAtBirth,
-				},
-				&sdjwt.ParentInstructionV2{
-					Name: "placeBirth",
-					Children: []any{
-						&sdjwt.ChildInstructionV2{
-							Name:  "countryCode",
-							Value: doc.PersonalDetails.PlaceBirth.CountryCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "region",
-							Value: doc.PersonalDetails.PlaceBirth.Region,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "town",
-							Value: doc.PersonalDetails.PlaceBirth.Town,
-						},
-					},
-				},
-				&sdjwt.ParentInstructionV2{
-					Name: "stateOfResidenceAddress",
-					Children: []any{
-						&sdjwt.ChildInstructionV2{
-							Name:  "buildingName",
-							Value: doc.PersonalDetails.StateOfResidenceAddress.BuildingName,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "countryCode",
-							Value: doc.PersonalDetails.StateOfResidenceAddress.CountryCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "postCode",
-							Value: doc.PersonalDetails.StateOfResidenceAddress.PostCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "region",
-							Value: doc.PersonalDetails.StateOfResidenceAddress.Region,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "streetNo",
-							Value: doc.PersonalDetails.StateOfResidenceAddress.StreetNo,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "town",
-							Value: doc.PersonalDetails.StateOfResidenceAddress.Town,
-						},
-					},
-				},
-				&sdjwt.ParentInstructionV2{
-					Name: "stateOfStayAddress",
-					Children: []any{
-						&sdjwt.ChildInstructionV2{
-							Name:  "buildingName",
-							Value: doc.PersonalDetails.StateOfStayAddress.BuildingName,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "countryCode",
-							Value: doc.PersonalDetails.StateOfStayAddress.CountryCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "postCode",
-							Value: doc.PersonalDetails.StateOfStayAddress.PostCode,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "region",
-							Value: doc.PersonalDetails.StateOfStayAddress.Region,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "streetNo",
-							Value: doc.PersonalDetails.StateOfStayAddress.StreetNo,
-						},
-						&sdjwt.ChildInstructionV2{
-							Name:  "town",
-							Value: doc.PersonalDetails.StateOfStayAddress.Town,
-						},
-					},
-				},
-			},
-		},
-		&sdjwt.ParentInstructionV2{
-			Name: "statusConfirmation",
-			Children: []any{
-				&sdjwt.ChildInstructionV2{
-					Name:  "civilAndEmployedSelfEmployed",
-					Value: doc.StatusConfirmation.CivilAndEmployedSelfEmployed,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "civilServant",
-					Value: doc.StatusConfirmation.CivilServant,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "contractStaff",
-					Value: doc.StatusConfirmation.ContractStaff,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "employedAndSelfEmployed",
-					Value: doc.StatusConfirmation.EmployedAndSelfEmployed,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "civilAndEmployedSelfEmployed",
-					Value: doc.StatusConfirmation.CivilAndEmployedSelfEmployed,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "employedTwoOrMoreStates",
-					Value: doc.StatusConfirmation.EmployedTwoOrMoreStates,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "exception",
-					Value: doc.StatusConfirmation.Exception,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "exceptionDescription",
-					Value: doc.StatusConfirmation.ExceptionDescription,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "flightCrewMember",
-					Value: doc.StatusConfirmation.FlightCrewMember,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "mariner",
-					Value: doc.StatusConfirmation.Mariner,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "postedEmployedPerson",
-					Value: doc.StatusConfirmation.PostedEmployedPerson,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "postedSelfEmployedPerson",
-					Value: doc.StatusConfirmation.PostedSelfEmployedPerson,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "selfEmployedTwoOrMoreStates",
-					Value: doc.StatusConfirmation.SelfEmployedTwoOrMoreStates,
-				},
-				&sdjwt.ChildInstructionV2{
-					Name:  "workingInStateUnder21",
-					Value: doc.StatusConfirmation.WorkingInStateUnder21,
-				},
-			},
-		},
+	body, err := doc.Marshal()
+	if err != nil {
+		return "", err
 	}
 
-	return instruction
+	body["nbf"] = int64(time.Now().Unix())
+	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
+	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
+	body["_sd_alg"] = "sha-256"
+	body["vct"] = fmt.Sprintf("%s/credential/pda1/1.0", c.client.cfg.Issuer.JWTAttribute.Issuer)
+
+	body["cnf"] = map[string]any{
+		"jwk": jwk,
+	}
+
+	header := map[string]any{
+		"typ": "vc+sd-jwt",
+		"kid": c.client.kid,
+		"alg": "ES256",
+	}
+
+	placesOfWorkDisclosure, err := disclosure.NewFromObject("places_of_work", body["places_of_work"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "places_of_work")
+
+	socialSecurityNumberDisclosure, err := disclosure.NewFromObject("social_security_pin", body["social_security_pin"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "social_security_pin")
+
+	nationalityDisclosure, err := disclosure.NewFromObject("nationality", body["nationality"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "nationality")
+
+	detailsOfEmploymentDisclosure, err := disclosure.NewFromObject("details_of_employment", body["details_of_employment"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "details_of_employment")
+
+	decisionLegislationApplicableDisclosure, err := disclosure.NewFromObject("decision_legislation_applicable", body["decision_legislation_applicable"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "decision_legislation_applicable")
+
+	statusConfirmationDisclosure, err := disclosure.NewFromObject("status_confirmation", body["status_confirmation"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "status_confirmation")
+
+	uniqueNumberOfIssuedDocumentDisclosure, err := disclosure.NewFromObject("unique_number_of_issued_document", body["unique_number_of_issued_document"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "unique_number_of_issued_document")
+
+	competentInstitutionDisclosure, err := disclosure.NewFromObject("competent_institution", body["competent_institution"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "competent_institution")
+
+	personDisclosure, err := disclosure.NewFromObject("person", body["person"], salt)
+	if err != nil {
+		return "", err
+	}
+	delete(body, "person")
+
+	body["_sd"] = []string{
+		string(placesOfWorkDisclosure.Hash(sha256.New())),
+		string(socialSecurityNumberDisclosure.Hash(sha256.New())),
+		string(nationalityDisclosure.Hash(sha256.New())),
+		string(detailsOfEmploymentDisclosure.Hash(sha256.New())),
+		string(decisionLegislationApplicableDisclosure.Hash(sha256.New())),
+		string(statusConfirmationDisclosure.Hash(sha256.New())),
+		string(uniqueNumberOfIssuedDocumentDisclosure.Hash(sha256.New())),
+		string(competentInstitutionDisclosure.Hash(sha256.New())),
+		string(personDisclosure.Hash(sha256.New())),
+	}
+
+	signedToken, err := sdjwt3.Sign(header, body, jwt.SigningMethodES256, c.client.privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	ds := []string{
+		placesOfWorkDisclosure.EncodedValue,
+		socialSecurityNumberDisclosure.EncodedValue,
+		nationalityDisclosure.EncodedValue,
+		detailsOfEmploymentDisclosure.EncodedValue,
+		decisionLegislationApplicableDisclosure.EncodedValue,
+		statusConfirmationDisclosure.EncodedValue,
+		uniqueNumberOfIssuedDocumentDisclosure.EncodedValue,
+		competentInstitutionDisclosure.EncodedValue,
+		personDisclosure.EncodedValue,
+	}
+
+	signedToken = sdjwt3.Combine(signedToken, ds, "")
+
+	return signedToken, nil
 }

@@ -1,117 +1,107 @@
 package pda1
 
-import "time"
+import "encoding/json"
 
 // Document model for PDA1
 type Document struct {
-	PersonalDetails           Section1 `json:"personalDetails" bson:"personalDetails" validate:"required"`
-	MemberStateLegislation    Section2 `json:"memberStateLegislation" bson:"memberStateLegislation"`
-	StatusConfirmation        Section3 `json:"statusConfirmation" bson:"statusConfirmation"`
-	EmploymentDetails         Section4 `json:"employmentDetails" bson:"employmentDetails"`
-	ActivityEmploymentDetails Section5 `json:"activityEmploymentDetails" bson:"activityEmploymentDetails"`
-	CompletingInstitution     Section6 `json:"completingInstitution" bson:"completingInstitution"`
+	Person                        Person                        `json:"person" bson:"person"`
+	SocialSecurityPin             string                        `json:"social_security_pin" bson:"social_security_pin"`
+	Nationality                   []string                      `json:"nationality" bson:"nationality"`
+	DetailsOfEmployment           []DetailsOfEmployment         `json:"details_of_employment" bson:"details_of_employment"`
+	PlacesOfWork                  []PlacesOfWork                `json:"places_of_work" bson:"places_of_work"`
+	DecisionLegislationApplicable DecisionLegislationApplicable `json:"decision_legislation_applicable" bson:"decision_legislation_applicable"`
+	StatusConfirmation            string                        `json:"status_confirmation" bson:"status_confirmation"`
+	UniqueNumberOfIssuedDocument  string                        `json:"unique_number_of_issued_document" bson:"unique_number_of_issued_document"`
+	CompetentInstitution          CompetentInstitution          `json:"competent_institution" bson:"competent_institution"`
 }
 
-// AddressType is the model for the PDA1 address type
-type AddressType struct {
-	BuildingName string `json:"buildingName" bson:"buildingName"`
-	StreetNo     string `json:"streetNo" bson:"streetNo"`
-	PostCode     string `json:"postCode" bson:"postCode"`
-	Town         string `json:"town" bson:"town"`
-	Region       string `json:"region" bson:"region"`
-	CountryCode  string `json:"countryCode" bson:"country_code" validate:"iso3166_1_alpha2_eu"`
+// Marshal marshals the document to a map
+func (d *Document) Marshal() (map[string]any, error) {
+	data, err := json.Marshal(d)
+	if err != nil {
+		return nil, err
+	}
+
+	var doc map[string]any
+	err = json.Unmarshal(data, &doc)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
 }
 
-// WorkPlaceNameType is the model for the PDA1 work place name type
-type WorkPlaceNameType struct {
-	Seqno                 int    `json:"seqno" bson:"seqno"`
-	FlagStateHomeBase     string `json:"flagStatehomeBase" bson:"flag_state_home_base"`
-	CompanyNameVesselName string `json:"companyNameVesselName" bson:"company_name_vessel_name"`
+// Person is the model for the PDA1 person
+type Person struct {
+	Forename      string        `json:"forename" bson:"forename"`
+	FamilyName    string        `json:"family_name" bson:"family_name"`
+	DateOfBirth   string        `json:"date_of_birth" bson:"date_of_birth"`
+	OtherElements OtherElements `json:"other_elements" bson:"other_elements"`
 }
 
-// WorkPlaceAddressType is the model for the PDA1 work place address type
-type WorkPlaceAddressType struct {
-	Address    string `json:"addresses" bson:"addresses"`
-	NameOfShip string `json:"nameOfShips" bson:"name_of_ships"`
-	HomeBase   string `json:"homeBases" bson:"home_bases"`
-	HostState  string `json:"hostStates" bson:"host_states"`
+// OtherElements is the model for the PDA1 other elements
+type OtherElements struct {
+	Sex               string `json:"sex" bson:"sex"`
+	ForenameAtBirth   string `json:"forename_at_birth" bson:"forename_at_birth"`
+	FamilyNameAtBirth string `json:"family_name_at_birth" bson:"family_name_at_birth"`
 }
 
-// BirthPlaceType is the model for the PDA1 birth place type
-type BirthPlaceType struct {
-	Town        string `json:"town" bson:"town"`
-	Region      string `json:"region" bson:"region"`
-	CountryCode string `json:"countryCode" bson:"countryCode" validate:"iso3166_1_alpha2_eu"`
+// DetailsOfEmployment is the model for the PDA1 details of employment
+type DetailsOfEmployment struct {
+	TypeOfEmployment string             `json:"type_of_employment" bson:"type_of_employment"`
+	Name             string             `json:"name" bson:"name"`
+	Address          AddressWithCountry `json:"address" bson:"address"`
+	IDsOfEmployer    []IDsOfEmployer    `json:"ids_of_employer" bson:"ids_of_employer"`
 }
 
-// Section1 is the model for the PDA1 section 1
-type Section1 struct {
-	PersonalIdentificationNumber string         `json:"personalIdentificationNumber" bson:"personalIdentificationNumber"`
-	Sex                          string         `json:"sex" bson:"sex" validate:"oneof=01 02 98 99"`
-	Surname                      string         `json:"surname" bson:"surname"`
-	Forenames                    string         `json:"forenames" bson:"forenames"`
-	SurnameAtBirth               string         `json:"surnameAtBirth" bson:"surnameAtBirth"`
-	DateBirth                    string         `json:"dateBirth" bson:"dateBirth"`
-	Nationality                  string         `json:"nationality" bson:"nationality" validate:"iso3166_1_alpha2"`
-	PlaceBirth                   BirthPlaceType `json:"placeBirth" bson:"placeBirth"`
-	StateOfResidenceAddress      AddressType    `json:"stateOfResidenceAddress" bson:"stateOfResidenceAddress"`
-	StateOfStayAddress           AddressType    `json:"stateOfStayAddress" bson:"stateOfStayAddress"`
+// AddressWithCountry is the model for the PDA1 address type with country
+type AddressWithCountry struct {
+	Street   string `json:"street" bson:"street"`
+	PostCode string `json:"post_code" bson:"post_code"`
+	Town     string `json:"town" bson:"town"`
+	Country  string `json:"country" bson:"country"`
 }
 
-// Section2 is the model for the PDA1 section 2
-type Section2 struct {
-	MemberStateWhichLegislationApplies string    `json:"memberStateWhichLegislationApplies" bson:"member_state_which_legislation_applies" validate:"iso3166_1_alpha2"`
-	StartingDate                       time.Time `json:"startingDate" bson:"starting_date"`
-	EndingDate                         time.Time `json:"endingDate" bson:"ending_date"`
-	CertificateForDurationActivity     bool      `json:"certificateForDurationActivity" bson:"certificate_for_duration_activity"`
-	DeterminationProvisional           bool      `json:"determinationProvisional" bson:"determination_provisional"`
-	TransitionRulesApplyAsEC8832004    bool      `json:"transitionRulesApplyAsEC8832004" bson:"transition_rules_apply_as_ec8832004"`
+// Address is the model for the PDA1 address type
+type Address struct {
+	Street   string `json:"street" bson:"street"`
+	PostCode string `json:"post_code" bson:"post_code"`
+	Town     string `json:"town" bson:"town"`
 }
 
-// Section3 is the model for the PDA1 section 3
-type Section3 struct {
-	PostedEmployedPerson         bool   `json:"postedEmployedPerson" bson:"posted_employed_person"`
-	EmployedTwoOrMoreStates      bool   `json:"employedTwoOrMoreStates" bson:"employed_two_or_more_states"`
-	PostedSelfEmployedPerson     bool   `json:"postedSelfEmployedPerson" bson:"posted_self_employed_person"`
-	SelfEmployedTwoOrMoreStates  bool   `json:"selfEmployedTwoOrMoreStates" bson:"self_employed_two_or_more_states"`
-	CivilServant                 bool   `json:"civilServant" bson:"civil_servant"`
-	ContractStaff                bool   `json:"contractStaff" bson:"contract_staff"`
-	Mariner                      bool   `json:"mariner" bson:"mariner"`
-	EmployedAndSelfEmployed      bool   `json:"employedAndSelfEmployed" bson:"employed_and_self_employed"`
-	CivilAndEmployedSelfEmployed bool   `json:"civilAndEmployedSelfEmployed" bson:"civil_and_employed_self_employed"`
-	FlightCrewMember             bool   `json:"flightCrewMember" bson:"flight_crew_member"`
-	Exception                    bool   `json:"exception" bson:"exception"`
-	ExceptionDescription         string `json:"exceptionDescription" bson:"exception_description"`
-	WorkingInStateUnder21        bool   `json:"workingInStateUnder21" bson:"working_in_state_under_21"`
+// IDsOfEmployer is the model for the PDA1 IDs of employer
+type IDsOfEmployer struct {
+	EmployerID string `json:"employer_id" bson:"employer_id"`
+	TypeOfID   string `json:"type_of_id" bson:"type_of_id"`
 }
 
-// Section4 is the model for the PDA1 section 4
-type Section4 struct {
-	Employee                          bool        `json:"employee" bson:"employee"`
-	SelfEmployedActivity              bool        `json:"selfEmployedActivity" bson:"self_employed_activity"`
-	EmployerSelfEmployedActivityCodes []string    `json:"employerSelfEmployedActivityCodes" bson:"employer_self_employed_activity_codes"`
-	NameBusinessName                  string      `json:"nameBusinessName" bson:"name_business_name"`
-	RegisteredAddress                 AddressType `json:"registeredAddress" bson:"registered_address"`
+type PlacesOfWork struct {
+	NoFixedPlaceOfWorkExist bool          `json:"no_fixed_place_of_work_exist" bson:"no_fixed_place_of_work_exist"`
+	CountryWork             string        `json:"country_work" bson:"country_work"`
+	PlaceOfWork             []PlaceOfWork `json:"place_of_work" bson:"place_of_work"`
 }
 
-// Section5 is the model for the PDA1 section 5
-type Section5 struct {
-	WorkPlaceNames            []WorkPlaceNameType    `json:"workPlaceNames" bson:"work_place_names"`
-	WorkPlaceNamesBlob        string                 `json:"workPlaceNamesBlob" bson:"work_place_names_blob"`
-	WorkPlaceAddresses        []WorkPlaceAddressType `json:"workPlaceAddresses" bson:"work_place_addresses"`
-	WorkPlaceAddressesBlob    string                 `json:"workPlaceAddressesBlob" bson:"work_place_addresses_blob"`
-	NoFixedAddress            bool                   `json:"noFixedAddress" bson:"no_fixed_address"`
-	NoFixedAddressDescription string                 `json:"noFixedAddressDescription" bson:"no_fixed_address_description"`
+type PlaceOfWork struct {
+	CompanyVesselName string         `json:"company_vessel_name" bson:"company_vessel_name"`
+	FlagStateHomeBase string         `json:"flag_state_home_base" bson:"flag_state_home_base"`
+	IDsOfCompany      []IDsOfCompany `json:"ids_of_company" bson:"ids_of_company"`
+	Address           Address        `json:"address" bson:"address"`
 }
 
-// Section6 is the model for the PDA1 section 6
-type Section6 struct {
-	Name          string      `json:"name" bson:"name"`
-	Address       AddressType `json:"address" bson:"address"`
-	InstitutionID string      `json:"institutionID" bson:"institution_id"`
-	OfficeFaxNo   string      `json:"officeFaxNo" bson:"office_fax_no"`
-	OfficePhoneNo string      `json:"officePhoneNo" bson:"office_phone_no"`
-	Email         string      `json:"email" bson:"email"`
-	Date          time.Time   `json:"date" bson:"date"`
-	Signature     string      `json:"signature" bson:"signature"`
+type IDsOfCompany struct {
+	CompanyID string `json:"company_id" bson:"company_id"`
+	TypeOfID  string `json:"type_of_id" bson:"type_of_id"`
+}
+
+type DecisionLegislationApplicable struct {
+	MemberStateWhichLegislationApplies string `json:"member_state_which_legislation_applies" bson:"member_state_which_legislation_applies"`
+	TransitionalRuleApply              bool   `json:"transitional_rule_apply" bson:"transitional_rule_apply"`
+	StartingDate                       string `json:"starting_date" bson:"starting_date"`
+	EndingDate                         string `json:"ending_date" bson:"ending_date"`
+}
+
+type CompetentInstitution struct {
+	InstitutionID   string `json:"institution_id" bson:"institution_id"`
+	InstitutionName string `json:"institution_name" bson:"institution_name"`
+	CountryCode     string `json:"country_code" bson:"country_code"`
 }

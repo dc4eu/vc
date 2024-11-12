@@ -31,6 +31,7 @@ type Client struct {
 	jwkClaim   jwt.MapClaims
 	jwkBytes   []byte
 	jwkProto   *apiv1_issuer.Jwk
+	kid        string
 
 	ehicClient *ehicClient
 	pda1Client *pda1Client
@@ -48,12 +49,12 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	var err error
-	c.ehicClient, err = newEHICClient(tracer, c.log.New("ehic"))
+	c.ehicClient, err = newEHICClient(c, tracer, c.log.New("ehic"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.pda1Client, err = newPDA1Client(tracer, c.log.New("pda1"))
+	c.pda1Client, err = newPDA1Client(c, tracer, c.log.New("pda1"))
 	if err != nil {
 		return nil, err
 	}
@@ -93,10 +94,17 @@ func (c *Client) initKeys(ctx context.Context) error {
 }
 
 func (c *Client) sign(ctx context.Context, instruction sdjwt.InstructionsV2) (*sdjwt.SDJWT, error) {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	jwtConfig := &sdjwt.Config{
 		ISS: c.cfg.Issuer.JWTAttribute.Issuer,
 		VCT: c.cfg.Issuer.JWTAttribute.VerifiableCredentialType,
 		CNF: c.jwkClaim,
+		Header: sdjwt.ConfigHeader{
+			Typ: "sd-jwt",
+			Kid: c.kid,
+		},
 	}
 
 	if c.cfg.Issuer.JWTAttribute.EnableNotBefore {
@@ -114,4 +122,8 @@ func (c *Client) sign(ctx context.Context, instruction sdjwt.InstructionsV2) (*s
 	}
 
 	return signedCredential, nil
+}
+
+func (c *Client) sign2(ctx context.Context, claims map[string]any) {
+
 }

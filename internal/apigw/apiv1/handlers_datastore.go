@@ -65,6 +65,10 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		QR:                  qr,
 	}
 
+	if err := helpers.ValidateDocumentData(ctx, upload, c.log); err != nil {
+		return err
+	}
+
 	if upload.Identities == nil {
 		upload.Identities = []model.Identity{}
 	}

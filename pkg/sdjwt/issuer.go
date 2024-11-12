@@ -91,8 +91,12 @@ func sign(claims jwt.MapClaims, signingMethod jwt.SigningMethod, signingKey any,
 	token := jwt.NewWithClaims(signingMethod, claims)
 	token.Header["typ"] = "sd-jwt"
 
-	if config.HeaderType != "" {
-		token.Header["typ"] = config.HeaderType
+	if config.Header.Typ != "" {
+		token.Header["typ"] = config.Header.Typ
+	}
+
+	if config.Header.Kid != "" {
+		token.Header["kid"] = config.Header.Kid
 	}
 
 	return token.SignedString(signingKey)
@@ -103,15 +107,21 @@ func sign(claims jwt.MapClaims, signingMethod jwt.SigningMethod, signingKey any,
 //	Value      string
 //}
 
+// ConfigHeader configs the header of the jwt
+type ConfigHeader struct {
+	Typ string
+	Kid string
+}
+
 // Config configs sd-jwt-vc
 type Config struct {
-	ISS        string
-	NBF        int64
-	EXP        int64
-	VCT        string
-	Status     string
-	CNF        jwt.MapClaims
-	HeaderType string
+	ISS    string
+	NBF    int64
+	EXP    int64
+	VCT    string
+	Status string
+	CNF    jwt.MapClaims
+	Header ConfigHeader
 
 	// SUB MAY be selectively disclosed
 	SUB string

@@ -1,0 +1,23 @@
+{
+    "subject": {
+        "forename": "Magnus",
+        "family_name": "Svensson",
+        "date_of_birth": "1986-02-23",
+        "other_elements": {
+            "sex": "01",
+            "forename_at_birth": "Magnus",
+            "family_name_at_birth": "Svensson"
+        }
+    },
+    "social_security_pin": "1234",
+    "period_entitlement": {
+        "starting_date": "1970-01-01",
+        "ending_date": "2038-01-19"
+    },
+    "document_id": "12354",
+    "competent_institution": {
+        "institution_id": "SE:1234",
+        "institution_name": "Myndigheten",
+        "institution_country": "SE"
+    }
+}

@@ -8,10 +8,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 	"vc/pkg/helpers"
 )
 
 func (c *Client) uploader(ctx context.Context, upload *uploadMock) (*http.Response, error) {
+	c.log.Debug("uploading bootstrap mock", "authentic_source_person_id", upload.Identities[0].AuthenticSourcePersonID)
+	c.log.Debug("upload", "upload", upload)
 	resp, err := c.call(
 		ctx,
 		http.MethodPost,
@@ -63,6 +66,9 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 
 // Do does the new request
 func (c *Client) do(ctx context.Context, req *http.Request, value any) (*http.Response, error) {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		c.log.Debug("httpClient do", "error", err)
@@ -109,11 +115,13 @@ func (c *Client) call(ctx context.Context, method, path string, body, reply any)
 		body,
 	)
 	if err != nil {
+		c.log.Error(err, "call failed")
 		return nil, err
 	}
 
 	resp, err := c.do(ctx, request, reply)
 	if err != nil {
+		c.log.Error(err, "do failed")
 		return resp, err
 	}
 

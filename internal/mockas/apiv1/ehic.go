@@ -3,8 +3,9 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"time"
 	"vc/pkg/ehic"
-	"vc/pkg/eidas"
 
 	"github.com/brianvoe/gofakeit/v6"
 )
@@ -15,51 +16,42 @@ type EHICService struct {
 }
 
 func (s *EHICService) random(ctx context.Context, person *gofakeit.PersonInfo) map[string]any {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	doc := ehic.Document{
-		PID: eidas.Identification{
-			FirstName:   person.FirstName,
-			LastName:    person.LastName,
-			Gender:      person.Gender,
-			PINS:        []string{},
-			ExhibitorID: gofakeit.Numerify("##########"),
-		},
-		CardHolder: ehic.CardHolder{
-			FamilyName:       person.LastName,
-			GivenName:        person.FirstName,
-			BirthDate:        gofakeit.Date().String(),
-			ID:               gofakeit.UUID(),
-			CardholderStatus: gofakeit.RandomString([]string{"active", "inactive"}),
-		},
-		CompetentInstitution: ehic.CompetentInstitution{
-			InstitutionName: gofakeit.Company(),
-			ID:              gofakeit.UUID(),
-		},
-		CardInformation: ehic.CardInformation{
-			ID:           gofakeit.UUID(),
-			IssuanceDate: gofakeit.Date().String(),
-			ValidSince:   gofakeit.Date().String(),
-			ExpiryDate:   gofakeit.Date().String(),
-			InvalidSince: gofakeit.Date().String(),
-			Signature: ehic.Signature{
-				Issuer: gofakeit.Company(),
-				Seal:   gofakeit.UUID(),
+		Subject: ehic.Subject{
+			Forename:    person.FirstName,
+			FamilyName:  person.LastName,
+			DateOfBirth: gofakeit.Date().String(),
+			OtherElements: ehic.OtherElements{
+				Sex:               gofakeit.RandomString([]string{"01", "02", "98"}),
+				ForenameAtBirth:   person.FirstName,
+				FamilyNameAtBirth: person.LastName,
 			},
 		},
-		Signature: ehic.Signature{
-			Issuer: gofakeit.Company(),
-			Seal:   gofakeit.UUID(),
+		SocialSecurityPin: gofakeit.Numerify("##########"),
+		PeriodEntitlement: ehic.PeriodEntitlement{
+			StartingDate: gofakeit.Date().String(),
+			EndingDate:   gofakeit.Date().String(),
+		},
+		DocumentID: gofakeit.UUID(),
+		CompetentInstitution: ehic.CompetentInstitution{
+			InstitutionID:      fmt.Sprintf("%s:%s", gofakeit.RandomString([]string{"SE", "DK", "NO", "FI"}), gofakeit.Numerify("####")),
+			InstitutionName:    gofakeit.Company(),
+			InstitutionCountry: gofakeit.RandomString([]string{"SE", "DK", "NO", "FI"}),
 		},
 	}
 
-	d, err := json.Marshal(doc)
+	jsonBytes, err := json.Marshal(doc)
 	if err != nil {
 		panic(err)
 	}
 
-	var t map[string]any
-	if err := json.Unmarshal(d, &t); err != nil {
+	reply := map[string]any{}
+	if err := json.Unmarshal(jsonBytes, &reply); err != nil {
 		panic(err)
 	}
 
-	return t
+	return reply
 }

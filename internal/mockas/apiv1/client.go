@@ -16,10 +16,11 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg        *model.Cfg
-	log        *logger.Log
-	tracer     *trace.Tracer
-	httpClient *http.Client
+	cfg                *model.Cfg
+	log                *logger.Log
+	tracer             *trace.Tracer
+	httpClient         *http.Client
+	deterministicMocks []uploadMock
 
 	PDA1 *PDA1Service
 	EHIC *EHICService
@@ -28,10 +29,11 @@ type Client struct {
 // New creates a new instance of the public api
 func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:        cfg,
-		log:        log.New("apiv1"),
-		tracer:     tracer,
-		httpClient: &http.Client{},
+		cfg:                cfg,
+		log:                log.New("apiv1"),
+		tracer:             tracer,
+		httpClient:         &http.Client{},
+		deterministicMocks: []uploadMock{},
 
 		PDA1: &PDA1Service{},
 		EHIC: &EHICService{},
@@ -42,6 +44,10 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	}
 	c.EHIC = &EHICService{
 		Client: c,
+	}
+
+	if err := c.bootstrapper(ctx); err != nil {
+		return nil, err
 	}
 
 	c.log.Info("Started")

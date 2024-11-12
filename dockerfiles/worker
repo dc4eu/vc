@@ -28,6 +28,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/app/bin/vc_${SERVICE_NAME} /vc_service
 COPY --from=builder /go/src/app/docs /docs
+COPY --from=builder /go/src/app/standards /standards
 
 EXPOSE 8080
 

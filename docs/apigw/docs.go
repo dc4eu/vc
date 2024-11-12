@@ -961,6 +961,14 @@ const docTemplate = `{
                 }
             }
         },
+        "apiv1_issuer.Credential": {
+            "type": "object",
+            "properties": {
+                "credential": {
+                    "type": "string"
+                }
+            }
+        },
         "apiv1_issuer.Jwk": {
             "type": "object",
             "properties": {
@@ -1009,14 +1017,11 @@ const docTemplate = `{
         "apiv1_issuer.MakeSDJWTReply": {
             "type": "object",
             "properties": {
-                "disclosures": {
+                "credentials": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/apiv1_issuer.Credential"
                     }
-                },
-                "jwt": {
-                    "type": "string"
                 }
             }
         },
@@ -1260,6 +1265,10 @@ const docTemplate = `{
                 "credential_valid_to": {
                     "description": "required: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
+                },
+                "document_data_validation": {
+                    "description": "required: false\nexample: file://path/to/schema.json or http://example.com/schema.json\nformat: string",
+                    "type": "string"
                 },
                 "document_id": {
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",

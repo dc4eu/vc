@@ -27,7 +27,7 @@ type Mongo struct {
 // Kafka holds the kafka configuration that is common for the entire system
 type Kafka struct {
 	Enabled bool     `yaml:"enabled"`
-	Brokers []string `yaml:"brokers"`
+	Brokers []string `yaml:"brokers" validate:"required"`
 }
 
 // KeyValue holds the key/value configuration
@@ -54,7 +54,7 @@ type Common struct {
 	Queues     Queues   `yaml:"queues" validate:"omitempty"`
 	KeyValue   KeyValue `yaml:"key_value" validate:"omitempty"`
 	QR         QRCfg    `yaml:"qr" validate:"omitempty"`
-	Kafka      Kafka    `yaml:"kafka" validate:"required"`
+	Kafka      Kafka    `yaml:"kafka" validate:"omitempty"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -117,6 +117,9 @@ type JWTAttribute struct {
 
 	// Status status of the Verifiable Credential
 	Status string `yaml:"status"`
+
+	// Kid key id of the signing key
+	Kid string `yaml:"kid"`
 }
 
 // Issuer holds the issuer configuration

@@ -269,6 +269,11 @@ definitions:
     - document_data_version
     - meta
     type: object
+  apiv1_issuer.Credential:
+    properties:
+      credential:
+        type: string
+    type: object
   apiv1_issuer.Jwk:
     properties:
       crv:
@@ -300,12 +305,10 @@ definitions:
     type: object
   apiv1_issuer.MakeSDJWTReply:
     properties:
-      disclosures:
+      credentials:
         items:
-          type: string
+          $ref: '#/definitions/apiv1_issuer.Credential'
         type: array
-      jwt:
-        type: string
     type: object
   helpers.Error:
     properties:
@@ -544,6 +547,12 @@ definitions:
           example: 509567558
           format: int64
         type: integer
+      document_data_validation:
+        description: |-
+          required: false
+          example: file://path/to/schema.json or http://example.com/schema.json
+          format: string
+        type: string
       document_id:
         description: |-
           required: true

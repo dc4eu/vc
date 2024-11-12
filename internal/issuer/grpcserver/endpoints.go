@@ -11,14 +11,16 @@ func (s *Service) MakeSDJWT(ctx context.Context, in *apiv1_issuer.MakeSDJWTReque
 	reply, err := s.apiv1.MakeSDJWT(ctx, &apiv1.CreateCredentialRequest{
 		DocumentType: in.DocumentType,
 		DocumentData: in.DocumentData,
+		JWK:          in.Jwk,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &apiv1_issuer.MakeSDJWTReply{
-		Jwt:         reply.Data.JWT,
-		Disclosures: reply.Data.Disclosures,
+		//Jwt:         reply.Data.JWT,
+		//Disclosures: reply.Data.Disclosures,
+		Credentials: reply.Data,
 	}, nil
 }
 

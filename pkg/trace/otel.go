@@ -9,11 +9,17 @@ import (
 	jaegerPropagator "go.opentelemetry.io/contrib/propagators/jaeger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+
+	//"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
+
+	//"go.opentelemetry.io/otel/api/trace/tracetest"
+	//"go.opentelemetry.io/otel/exporters/stdout"
+	//"go.opentelemetry.io/otel/sdk/export/trace/tracetest"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 )
 
 // Tracer is a wrapper for opentelemetry tracer
@@ -69,8 +75,10 @@ func (t *Tracer) Shutdown(ctx context.Context) error {
 	return t.TP.Shutdown(ctx)
 }
 
-func newStdOutExporter() (sdktrace.SpanExporter, error) {
-	return stdouttrace.New()
+func newStdOutExporter() (*stdouttrace.Exporter, error) {
+	opts := stdouttrace.WithPrettyPrint()
+	return stdouttrace.New(opts)
+
 }
 
 func newExporter(ctx context.Context, cfg *model.Cfg) (sdktrace.SpanExporter, error) {

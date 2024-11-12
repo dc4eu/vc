@@ -276,6 +276,27 @@ func makeSDV2(instructions []any, storage jwt.MapClaims, disclosures Disclosures
 				}
 			}
 
+		case *ParentArrayInstructionV2:
+			fmt.Println("claim name", claim.Name)
+			storage[claim.Name] = []any{}
+			for _, child := range claim.Children {
+				switch child.(type) {
+				case *ChildInstructionV2:
+					c := child.(*ChildInstructionV2)
+					v := jwt.MapClaims{
+						c.Name: c.Value,
+					}
+					addToArray(claim.Name, v, storage)
+				case *ParentInstructionV2:
+					storage[claim.Name] = []any{}
+					//if err := makeSDV2(claim.Children, storage[claim.Name], disclosures); err != nil {
+					//	return err
+					//}
+					//c := child.(*ParentInstructionV2)
+
+				}
+			}
+
 		default:
 			return ErrNotKnownInstruction
 		}

@@ -53,7 +53,6 @@ require (
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/fatih/color v1.18.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.6 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
@@ -85,7 +84,6 @@ require (
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect

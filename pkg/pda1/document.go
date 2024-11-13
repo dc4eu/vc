@@ -4,7 +4,6 @@ import "encoding/json"
 
 // Document model for PDA1
 type Document struct {
-	Person                        Person                        `json:"person" bson:"person"`
 	SocialSecurityPin             string                        `json:"social_security_pin" bson:"social_security_pin"`
 	Nationality                   []string                      `json:"nationality" bson:"nationality"`
 	DetailsOfEmployment           []DetailsOfEmployment         `json:"details_of_employment" bson:"details_of_employment"`
@@ -29,21 +28,6 @@ func (d *Document) Marshal() (map[string]any, error) {
 	}
 
 	return doc, nil
-}
-
-// Person is the model for the PDA1 person
-type Person struct {
-	Forename      string        `json:"forename" bson:"forename"`
-	FamilyName    string        `json:"family_name" bson:"family_name"`
-	DateOfBirth   string        `json:"date_of_birth" bson:"date_of_birth"`
-	OtherElements OtherElements `json:"other_elements" bson:"other_elements"`
-}
-
-// OtherElements is the model for the PDA1 other elements
-type OtherElements struct {
-	Sex               string `json:"sex" bson:"sex"`
-	ForenameAtBirth   string `json:"forename_at_birth" bson:"forename_at_birth"`
-	FamilyNameAtBirth string `json:"family_name_at_birth" bson:"family_name_at_birth"`
 }
 
 // DetailsOfEmployment is the model for the PDA1 details of employment

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 	"vc/pkg/ehic"
 	"vc/pkg/model"
 	"vc/pkg/pda1"
@@ -14,7 +16,6 @@ type person struct {
 	firstName               string
 	lastName                string
 	dateOfBirth             string
-	gender                  string
 	socialSecurityPin       string
 	nationality             []string
 	typeOfEmployment        string
@@ -31,16 +32,6 @@ type address struct {
 
 func (p *person) bootstrapPDA1() (map[string]any, error) {
 	doc := pda1.Document{
-		Person: pda1.Person{
-			Forename:    p.firstName,
-			FamilyName:  p.lastName,
-			DateOfBirth: p.dateOfBirth,
-			OtherElements: pda1.OtherElements{
-				Sex:               p.gender,
-				ForenameAtBirth:   p.firstName,
-				FamilyNameAtBirth: p.lastName,
-			},
-		},
 		SocialSecurityPin: p.socialSecurityPin,
 		Nationality:       p.nationality,
 		DetailsOfEmployment: []pda1.DetailsOfEmployment{
@@ -55,7 +46,7 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 				},
 				IDsOfEmployer: []pda1.IDsOfEmployer{
 					{
-						EmployerID: "f7c317dc-9da3-11ef-ad15-2ff7d0db967b",
+						EmployerID: "f7c317dc",
 						TypeOfID:   "01",
 					},
 				},
@@ -67,11 +58,11 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 				CountryWork:             p.workAddress.Country,
 				PlaceOfWork: []pda1.PlaceOfWork{
 					{
-						CompanyVesselName: fmt.Sprintf("vessel_name_%s", p.workAddress.Country),
+						CompanyVesselName: fmt.Sprintf("vessel_name_%s", strings.ToLower(p.nationality[0])),
 						FlagStateHomeBase: p.workAddress.Country,
 						IDsOfCompany: []pda1.IDsOfCompany{
 							{
-								CompanyID: "3615c840-9da4-11ef-ab82-5bd130b1f1e2",
+								CompanyID: "3615c840",
 								TypeOfID:  "01",
 							},
 						},
@@ -93,8 +84,8 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 		StatusConfirmation:           "01",
 		UniqueNumberOfIssuedDocument: "asd123",
 		CompetentInstitution: pda1.CompetentInstitution{
-			InstitutionID:   fmt.Sprintf("%s:1234", p.workAddress.Country),
-			InstitutionName: fmt.Sprintf("institution_name_%s", p.workAddress.Country),
+			InstitutionID:   fmt.Sprintf("%s:1234", p.nationality[0]),
+			InstitutionName: fmt.Sprintf("institution_name_%s", strings.ToLower(p.nationality[0])),
 			CountryCode:     p.workAddress.Country,
 		},
 	}
@@ -108,11 +99,6 @@ func (p *person) bootstrapEHIC() (map[string]any, error) {
 			Forename:    p.firstName,
 			FamilyName:  p.lastName,
 			DateOfBirth: p.dateOfBirth,
-			OtherElements: ehic.OtherElements{
-				Sex:               p.gender,
-				ForenameAtBirth:   p.firstName,
-				FamilyNameAtBirth: p.lastName,
-			},
 		},
 		SocialSecurityPin: p.socialSecurityPin,
 		PeriodEntitlement: ehic.PeriodEntitlement{
@@ -122,7 +108,7 @@ func (p *person) bootstrapEHIC() (map[string]any, error) {
 		DocumentID: fmt.Sprintf("document_id_%s", p.authenticSourcePersonID),
 		CompetentInstitution: ehic.CompetentInstitution{
 			InstitutionID:      fmt.Sprintf("%s:1234", p.workAddress.Country),
-			InstitutionName:    fmt.Sprintf("institution_name_%s", p.workAddress.Country),
+			InstitutionName:    fmt.Sprintf("institution_name_%s", strings.ToLower(p.nationality[0])),
 			InstitutionCountry: p.workAddress.Country,
 		},
 	}
@@ -137,7 +123,6 @@ var persons = map[string][]person{
 			firstName:               "Carlos",
 			lastName:                "Castaneda",
 			dateOfBirth:             "1970-01-10",
-			gender:                  "01",
 			socialSecurityPin:       "12345",
 			nationality:             []string{"SE"},
 			typeOfEmployment:        "01",
@@ -150,7 +135,6 @@ var persons = map[string][]person{
 			firstName:               "Lenna",
 			lastName:                "Howell",
 			dateOfBirth:             "1935-02-21",
-			gender:                  "02",
 			socialSecurityPin:       "12357",
 			nationality:             []string{"AT"},
 			typeOfEmployment:        "01",
@@ -162,12 +146,33 @@ var persons = map[string][]person{
 			firstName:               "Ute",
 			lastName:                "Anderson",
 			dateOfBirth:             "1967-03-21",
-			gender:                  "02",
 			socialSecurityPin:       "98883123",
 			nationality:             []string{"DE"},
 			typeOfEmployment:        "02",
 			workAddress:             address{Street: "Vurfelser Kaule 31", PostCode: "51427", Town: "Bergisch Gladbach", Country: "DE"},
 			employmentAddress:       address{Street: "Hieronymusgasse 2", PostCode: "78462", Town: "Konstanz", Country: "DE"},
+		},
+		{
+			authenticSourcePersonID: "13",
+			firstName:               "Olivia",
+			lastName:                "Eelman",
+			dateOfBirth:             "1971-03-13",
+			socialSecurityPin:       "097428358",
+			nationality:             []string{"NL"},
+			typeOfEmployment:        "02",
+			workAddress:             address{Street: "Jansplein 49", PostCode: "6811 GD", Town: "Arnhem", Country: "NL"},
+			employmentAddress:       address{Street: "Buytenparklaan 30", PostCode: "2717 AX", Town: "Zoetermeer", Country: "NL"},
+		},
+		{
+			authenticSourcePersonID: "14",
+			firstName:               "Patrick",
+			lastName:                "Høgh-Nørgaard Iversen",
+			dateOfBirth:             "1994-03-07",
+			socialSecurityPin:       "449-49-2795",
+			nationality:             []string{"DK"},
+			typeOfEmployment:        "02",
+			workAddress:             address{Street: "Nørregade 7", PostCode: "1165", Town: "København", Country: "DK"},
+			employmentAddress:       address{Street: "Galgebakkevej 3", PostCode: "2630", Town: "Taastrup", Country: "DK"},
 		},
 	},
 	"PDA1": {
@@ -176,7 +181,6 @@ var persons = map[string][]person{
 			firstName:               "Mats",
 			lastName:                "Christiansen",
 			dateOfBirth:             "1983-03-27",
-			gender:                  "01",
 			socialSecurityPin:       "98123",
 			nationality:             []string{"DK"},
 			typeOfEmployment:        "02",
@@ -188,7 +192,6 @@ var persons = map[string][]person{
 			firstName:               "Aldrich",
 			lastName:                "Derichs",
 			dateOfBirth:             "1971-05-25",
-			gender:                  "01",
 			socialSecurityPin:       "98123123",
 			nationality:             []string{"DE"},
 			typeOfEmployment:        "02",
@@ -200,17 +203,41 @@ var persons = map[string][]person{
 			firstName:               "Algot",
 			lastName:                "Holmberg",
 			dateOfBirth:             "1955-11-25",
-			gender:                  "01",
 			socialSecurityPin:       "12345",
 			nationality:             []string{"SE"},
 			typeOfEmployment:        "01",
 			workAddress:             address{Street: "Idrottsgatan 2", PostCode: "753 33", Town: "Uppsala", Country: "SE"},
-			employmentAddress:       address{Street: "Ostra Storgatan 10A", PostCode: "611 34", Town: "Nykoping", Country: "SE"},
+			employmentAddress:       address{Street: "Östra Storgatan 10A", PostCode: "611 34", Town: "Nyköping", Country: "SE"},
+		},
+		{
+			authenticSourcePersonID: "23",
+			firstName:               "Joep",
+			lastName:                "Cicilia",
+			dateOfBirth:             "1999-07-29",
+			socialSecurityPin:       "753841605",
+			nationality:             []string{"NL"},
+			typeOfEmployment:        "01",
+			workAddress:             address{Street: "Het Rond 6", PostCode: "3701 HS", Town: "Zeist", Country: "NL"},
+			employmentAddress:       address{Street: "Oude Ebbingestraat 68", PostCode: "9712 HM", Town: "Groningen", Country: "NL"},
+		},
+		{
+			authenticSourcePersonID: "24",
+			firstName:               "Hollis",
+			lastName:                "Hoeger",
+			dateOfBirth:             "1983-05-05",
+			socialSecurityPin:       "315-95-2501",
+			nationality:             []string{"AT"},
+			typeOfEmployment:        "01",
+			workAddress:             address{Street: "Stumpergasse 48/8", PostCode: "1060", Town: "Wien", Country: "AT"},
+			employmentAddress:       address{Street: "Franz-Josef-Platz 3", PostCode: "4810", Town: "Gmunden", Country: "AT"},
 		},
 	},
 }
 
 func (c *Client) bootstrapperConstructor(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	for documentType, document := range persons {
 		for _, p := range document {
 			var documentData = map[string]any{}
@@ -229,7 +256,7 @@ func (c *Client) bootstrapperConstructor(ctx context.Context) error {
 				}
 			}
 			meta := &model.MetaData{
-				AuthenticSource: fmt.Sprintf("authentic_source_%s", documentType),
+				AuthenticSource: fmt.Sprintf("authentic_source_%s", strings.ToLower(p.nationality[0])),
 				DocumentType:    documentType,
 				DocumentID:      fmt.Sprintf("document_id_%s", p.authenticSourcePersonID),
 				DocumentVersion: "1.0.0",
@@ -241,10 +268,10 @@ func (c *Client) bootstrapperConstructor(ctx context.Context) error {
 				CredentialValidFrom: 1,
 				CredentialValidTo:   2147520172,
 				Revocation: &model.Revocation{
-					ID:      "9da40dc0-9dd4-11ef-9569-efda8acf5ac4",
+					ID:      "9da40dc0",
 					Revoked: false,
 					Reference: model.RevocationReference{
-						AuthenticSource: fmt.Sprintf("authentic_source_%s", documentType),
+						AuthenticSource: fmt.Sprintf("authentic_source_%s", strings.ToLower(p.nationality[0])),
 						DocumentType:    documentType,
 						DocumentID:      fmt.Sprintf("document_id_%s", p.authenticSourcePersonID),
 					},

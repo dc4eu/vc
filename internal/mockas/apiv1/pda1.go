@@ -20,16 +20,6 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 	defer cancel()
 
 	doc := pda1.Document{
-		Person: pda1.Person{
-			Forename:    person.FirstName,
-			FamilyName:  person.LastName,
-			DateOfBirth: gofakeit.Date().String(),
-			OtherElements: pda1.OtherElements{
-				Sex:               gofakeit.RandomString([]string{"01", "02", "98"}),
-				ForenameAtBirth:   person.FirstName,
-				FamilyNameAtBirth: person.LastName,
-			},
-		},
 		SocialSecurityPin: gofakeit.Numerify("##########"),
 		Nationality:       []string{s.Client.randomISO31661Alpha2EU()},
 		DetailsOfEmployment: []pda1.DetailsOfEmployment{

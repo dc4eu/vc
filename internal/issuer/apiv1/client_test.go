@@ -59,7 +59,14 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 			Identifier:     "",
 			GRPCServer:     model.GRPCServer{},
 			SigningKeyPath: keyPath,
-			JWTAttribute:   model.JWTAttribute{},
+			JWTAttribute: model.JWTAttribute{
+				Issuer:                   "https://test-issuer.sunet.se",
+				EnableNotBefore:          false,
+				ValidDuration:            0,
+				VerifiableCredentialType: "",
+				Status:                   "",
+				Kid:                      "",
+			},
 		},
 	}
 
@@ -76,16 +83,6 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 
 func TestPDA1Credential(t *testing.T) {
 	doc := &pda1.Document{
-		Person: pda1.Person{
-			Forename:    "Kalle",
-			FamilyName:  "Karlsson",
-			DateOfBirth: "1980-01-01",
-			OtherElements: pda1.OtherElements{
-				Sex:               "01",
-				ForenameAtBirth:   "Kalle",
-				FamilyNameAtBirth: "Karlsson",
-			},
-		},
 		SocialSecurityPin: "1234",
 		Nationality:       []string{"SE"},
 		DetailsOfEmployment: []pda1.DetailsOfEmployment{
@@ -154,13 +151,13 @@ func TestPDA1Credential(t *testing.T) {
 			"3LhxTU59mAEfm2c_Uak0N9k-Y4YFOMHnjcgxpeaA1Zs",
 			"PNaFacPiRz7h7vDbeFQreExX7h14rcbTDO32ijPyQPI",
 			"DGsF4bRRLiZuG9rvpJMTP71mhoS-ZlenEU9uRVkvaJI",
-			"z5w4xUj40A-LTZJe6rl1jZdGIr8Li_11zggU5VCFBcI",
+			"xp2G87arqZ6Nogcnck4gWgKFKX8kpHQHkGbZMKB26tg",
 		},
 		"_sd_alg": "sha-256",
 		"nbf":     int64(time.Now().Unix()),
 		"exp":     int64(time.Now().Add(24 * 365 * time.Hour).Unix()),
-		"iss":     "SUNET",
-		"vct":     "https://issuer.sunet.se/credential/pda1/1.0",
+		"iss":     "https://test-issuer.sunet.se",
+		"vct":     "https://test-issuer.sunet.se/credential/pda1/1.0",
 		"cnf": map[string]any{
 			"jwk": map[string]any{
 				"kty": "EC",
@@ -230,7 +227,7 @@ func TestPDA1Credential(t *testing.T) {
 
 func TestEHICCredential(t *testing.T) {
 	doc := &ehic.Document{
-		Subject:           ehic.Subject{Forename: "kalle", FamilyName: "karlsson", DateOfBirth: "1980-01-01", OtherElements: ehic.OtherElements{Sex: "M", ForenameAtBirth: "", FamilyNameAtBirth: ""}},
+		Subject:           ehic.Subject{Forename: "kalle", FamilyName: "karlsson", DateOfBirth: "1980-01-01"},
 		SocialSecurityPin: "12334",
 		PeriodEntitlement: ehic.PeriodEntitlement{
 			StartingDate: "1970-01-01",
@@ -246,7 +243,7 @@ func TestEHICCredential(t *testing.T) {
 
 	want := map[string]any{
 		"_sd": []any{
-			"AKm91SsGqiBINVoRoUGBUT8vGjj8zPwH4dVlqdTEFXw",
+			"6_MtCEPup3vZs8zt37C96rLEGbsNK_bixWzQTCdqfEg",
 			"9s08O0RuxyTVgdglSxpr_bs8t6xvITHiNheNpkgwDM4",
 			"vTqOrfO1sNZpv2oP6U19f-cH72rbG0geb8xJo7uqXDM",
 			"getWi9qfw-uPmFOj1-tSOeFTZEYTfzWt5lfTOfB21Gg",
@@ -255,8 +252,8 @@ func TestEHICCredential(t *testing.T) {
 		"_sd_alg": "sha-256",
 		"nbf":     int64(time.Now().Unix()),
 		"exp":     int64(time.Now().Add(24 * 365 * time.Hour).Unix()),
-		"iss":     "SUNET",
-		"vct":     "https://issuer.sunet.se/credential/ehic/1.0",
+		"iss":     "https://test-issuer.sunet.se",
+		"vct":     "https://test-issuer.sunet.se/credential/ehic/1.0",
 		"cnf": map[string]any{
 			"jwk": map[string]any{
 				"kty": "EC",

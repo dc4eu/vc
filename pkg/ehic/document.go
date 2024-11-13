@@ -15,7 +15,6 @@ type Subject struct {
 	Forename      string        `json:"forename" bson:"forename" validate:"required"`
 	FamilyName    string        `json:"family_name" bson:"familyName" validate:"required"`
 	DateOfBirth   string        `json:"date_of_birth" bson:"dateOfBirth" validate:"required"`
-	OtherElements OtherElements `json:"other_elements" bson:"otherElements" validate:"required"`
 }
 
 type OtherElements struct {

@@ -53,6 +53,7 @@
         "stretchr",
         "SUNET",
         "swaggo",
-        "timestamppb"
+        "timestamppb",
+        "VCTM"
     ]
 }

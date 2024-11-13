@@ -18,11 +18,6 @@ func generateDocument(t *testing.T) map[string]any {
 			Forename:    "Magnus",
 			FamilyName:  "Svensson",
 			DateOfBirth: "1986-02-23",
-			OtherElements: OtherElements{
-				Sex:               "01",
-				ForenameAtBirth:   "Magnus",
-				FamilyNameAtBirth: "Svensson",
-			},
 		},
 		SocialSecurityPin: "1234",
 		PeriodEntitlement: PeriodEntitlement{

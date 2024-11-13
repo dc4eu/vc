@@ -24,11 +24,6 @@ func (s *EHICService) random(ctx context.Context, person *gofakeit.PersonInfo) m
 			Forename:    person.FirstName,
 			FamilyName:  person.LastName,
 			DateOfBirth: gofakeit.Date().String(),
-			OtherElements: ehic.OtherElements{
-				Sex:               gofakeit.RandomString([]string{"01", "02", "98"}),
-				ForenameAtBirth:   person.FirstName,
-				FamilyNameAtBirth: person.LastName,
-			},
 		},
 		SocialSecurityPin: gofakeit.Numerify("##########"),
 		PeriodEntitlement: ehic.PeriodEntitlement{

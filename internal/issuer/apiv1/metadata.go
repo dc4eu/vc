@@ -1,5 +1,10 @@
 package apiv1
 
+import (
+	"encoding/base64"
+	"encoding/json"
+)
+
 // VCTM is the VCTM
 type VCTM struct {
 	VCT                string        `json:"vct"`
@@ -11,6 +16,18 @@ type VCTM struct {
 	SchemaURLIntegrity string        `json:"schema_url#integrity"`
 	Extends            string        `json:"extends"`
 	ExtendsIntegrity   string        `json:"extends#integrity"`
+}
+
+func (v *VCTM) encode() (string, error) {
+	json, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+
+	encoded := base64.URLEncoding.EncodeToString(json)
+
+	return encoded, nil
+
 }
 
 // VCTMDisplay is the display of the VCTM
@@ -73,32 +90,3 @@ type ClaimDisplay struct {
 func (c *Client) metadata() error {
 	return nil
 }
-
-//"vctm": {
-//	"vct": <ehic_vct>,
-//	"name": "EHIC",
-//	"description": "This is an EHIC document issued by the well known EHIC Issuer",
-//	"display": [
-//		{
-//			"en-US": {
-//				"name": "EHIC",
-//				"rendering": {
-//					"simple": {
-//						"logo": {
-//							"uri": "<your_domain>/ehicCard.png",
-//							"uri#integrity": "sha256-94445b2ca72e9155260c8b4879112df7677e8b3df3dcee9b970b40534e26d4ab",
-//							"alt_text": "EHIC Card"
-//						},
-//						"background_color": "#12107c",
-//						"text_color": "#FFFFFF"
-//					},
-//					"svg_templates": [
-//						{
-//							"uri": "<your_domain>/ehicTemplate.svg"
-//						}
-//					]
-//				}
-//			}
-//		}
-//	]
-//}

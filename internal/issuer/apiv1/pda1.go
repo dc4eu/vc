@@ -40,11 +40,13 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document, jwk *apiv1_i
 		return "", err
 	}
 
+	vct := fmt.Sprintf("%s/credential/pda1/1.0", c.client.cfg.Issuer.JWTAttribute.Issuer)
+
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
-	body["vct"] = fmt.Sprintf("%s/credential/pda1/1.0", c.client.cfg.Issuer.JWTAttribute.Issuer)
+	body["vct"] = vct
 
 	body["cnf"] = map[string]any{
 		"jwk": jwk,
@@ -54,6 +56,11 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document, jwk *apiv1_i
 		"typ": "vc+sd-jwt",
 		"kid": c.client.kid,
 		"alg": "ES256",
+	}
+
+	header["vctm"], err = c.MetadataClaim(vct)
+	if err != nil {
+		return "", err
 	}
 
 	placesOfWorkDisclosure, err := disclosure.NewFromObject("places_of_work", body["places_of_work"], salt)

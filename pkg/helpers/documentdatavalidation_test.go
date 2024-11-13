@@ -51,7 +51,7 @@ func TestValidateFromFile(t *testing.T) {
 				},
 				DocumentData: map[string]any{"name": "test_value", "age": "21"},
 			},
-			want: nil,
+			want: &Error{Title: "document_data_schema_error", Err: []map[string]interface{}{{"location": "/age", "message": map[string]interface{}{"type_mismatch": "Value is string but should be integer"}}}},
 		},
 		{
 			name: "age is too low",
@@ -61,7 +61,7 @@ func TestValidateFromFile(t *testing.T) {
 				},
 				DocumentData: map[string]any{"name": "test_value", "age": 19},
 			},
-			want: nil,
+			want: (&Error{Title: "document_data_schema_error", Err: []map[string]interface{}{{"location": "/age", "message": map[string]interface{}{"value_below_minimum": "19 should be at least 20"}}}}),
 		},
 		{
 			name: "array with objects",

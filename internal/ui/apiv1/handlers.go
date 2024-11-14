@@ -71,15 +71,25 @@ func (c *Client) Upload(ctx context.Context, req *apiv1_apigw.UploadRequest) (an
 	return reply, nil
 }
 
+// CredentialRequest is the request for the Credential endpoint
 type CredentialRequest struct {
 	AuthenticSource string          `json:"authentic_source" validate:"required"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
 	DocumentType    string          `json:"document_type" validate:"required"`
 	CredentialType  string          `json:"credential_type" validate:"required"`
 	CollectID       string          `json:"collect_id" validate:"required"`
+	JWK             map[string]any  `json:"jwk"`
 }
 
+// Credential sends POST to apigw /api/v1/credential
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (any, error) {
+	req.JWK = map[string]any{
+		"kty": "EC",
+		"crv": "P-256",
+		"kid": "ejV4WXZMQnE4Sy1meGJRUGFvZ2NiZHltUGQ5SmdNNy1KS1hjYTNOZGdTMA",
+		"x":   "cyViIENmqo4D2CVOc2uGZbe5a8NheCyvN9CsF7ui3tk",
+		"y":   "XA0lVXgjgZzFTDwkndZEo-zVr9ieO2rY9HGiiaaASog",
+	}
 	reply, err := c.apigwClient.Credential(req)
 	if err != nil {
 		return nil, err
@@ -87,6 +97,7 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (any, e
 	return reply, nil
 }
 
+// GetDocumentRequest is the request for the GetDocument endpoint
 type GetDocumentRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`
 	DocumentType    string `json:"document_type" validate:"required"`

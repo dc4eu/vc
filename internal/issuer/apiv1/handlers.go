@@ -9,8 +9,6 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/pda1"
 
-	"vc/pkg/sdjwt"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -35,13 +33,15 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 
 // CreateCredentialRequest is the request for Credential
 type CreateCredentialRequest struct {
-	DocumentType string `json:"document_type" validate:"required"`
-	DocumentData []byte `json:"document_data" validate:"required"`
+	DocumentType string            `json:"document_type" validate:"required"`
+	DocumentData []byte            `json:"document_data" validate:"required"`
+	JWK          *apiv1_issuer.Jwk `json:"jwk" validate:"required"`
 }
 
 // CreateCredentialReply is the reply for Credential
 type CreateCredentialReply struct {
-	Data *sdjwt.PresentationFlat `json:"data"`
+	//Data *sdjwt.PresentationFlat `json:"data"`
+	Data []*apiv1_issuer.Credential `json:"data"`
 }
 
 // MakeSDJWT creates a credential
@@ -55,31 +55,38 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	}
 
 	// Build SDJWT
-	var instruction sdjwt.InstructionsV2
+	var token string
+	var err error
 	switch req.DocumentType {
 	case "PDA1":
 		doc := &pda1.Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
-		instruction = c.pda1Client.sdjwt(ctx, doc)
+		token, err = c.pda1Client.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
 
 	case "EHIC":
 		doc := &ehic.Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
-		instruction = c.ehicClient.sdjwt(ctx, doc)
+		token, err = c.ehicClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	signedCredential, err := c.sign(ctx, instruction)
-	if err != nil {
-		return nil, err
-	}
+	//c.auditLog.AddAuditLog(ctx, "create_credential", signedCredential.PresentationFlat())
 
-	c.auditLog.AddAuditLog(ctx, "create_credential", signedCredential.PresentationFlat())
 	reply := &CreateCredentialReply{
-		Data: signedCredential.PresentationFlat(),
+		Data: []*apiv1_issuer.Credential{
+			{
+				Credential: token,
+			},
+		},
 	}
 
 	return reply, nil

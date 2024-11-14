@@ -1,0 +1,21 @@
+{
+    "$id": "https://example.com/schema_v1.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "parent": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "child_1": {
+                        "type": "string"
+                    },
+                    "child_2": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -656,7 +656,8 @@ const docTemplate = `{
                 "collect_id",
                 "credential_type",
                 "document_type",
-                "identity"
+                "identity",
+                "jwk"
             ],
             "properties": {
                 "authentic_source": {
@@ -673,6 +674,9 @@ const docTemplate = `{
                 },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
+                },
+                "jwk": {
+                    "$ref": "#/definitions/apiv1_issuer.Jwk"
                 }
             }
         },
@@ -961,6 +965,14 @@ const docTemplate = `{
                 }
             }
         },
+        "apiv1_issuer.Credential": {
+            "type": "object",
+            "properties": {
+                "credential": {
+                    "type": "string"
+                }
+            }
+        },
         "apiv1_issuer.Jwk": {
             "type": "object",
             "properties": {
@@ -1009,14 +1021,11 @@ const docTemplate = `{
         "apiv1_issuer.MakeSDJWTReply": {
             "type": "object",
             "properties": {
-                "disclosures": {
+                "credentials": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/apiv1_issuer.Credential"
                     }
-                },
-                "jwt": {
-                    "type": "string"
                 }
             }
         },
@@ -1261,6 +1270,10 @@ const docTemplate = `{
                     "description": "required: false\nexample: 509567558\nformat: int64",
                     "type": "integer"
                 },
+                "document_data_validation": {
+                    "description": "required: false\nexample: file://path/to/schema.json or http://example.com/schema.json\nformat: string",
+                    "type": "string"
+                },
                 "document_id": {
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
                     "type": "string"
@@ -1294,16 +1307,15 @@ const docTemplate = `{
         "model.QR": {
             "type": "object",
             "required": [
-                "base64_image",
-                "deep_link"
+                "base64_image"
             ],
             "properties": {
                 "base64_image": {
                     "description": "required: true\nexample: \"ZWFzdGVyIGVnZyE=\"",
                     "type": "string"
                 },
-                "deep_link": {
-                    "description": "required: true\nexample: \"https://example.com\"",
+                "credential_offer": {
+                    "description": "required: true",
                     "type": "string"
                 }
             }

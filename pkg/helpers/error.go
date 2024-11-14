@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kaptinlin/jsonschema"
 	"github.com/moogar0880/problems"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -43,6 +45,9 @@ var (
 
 	// ErrInternalServerError error for internal server error
 	ErrInternalServerError = NewError("INTERNAL_SERVER_ERROR")
+
+	// ErrDocumentValidationFailed error for document validation failed
+	ErrDocumentValidationFailed = NewError("DOCUMENT_VALIDATION_FAILED")
 )
 
 // Error is a struct that represents an error
@@ -55,10 +60,10 @@ func (e *Error) Error() string {
 	if e == nil {
 		return ""
 	}
-	if e.Err == nil {
-		return fmt.Sprintf("Error: [%s]", e.Title)
+	if e.Err != nil {
+		return fmt.Sprintf("Error: [%s] %+v", e.Title, e.Err)
 	}
-	return fmt.Sprintf("Error: [%s] %+v", e.Title, e.Err)
+	return fmt.Sprintf("Error: [%s]", e.Title)
 }
 
 // ErrorResponse is a struct that represents an error response in JSON from REST API
@@ -81,7 +86,6 @@ func NewErrorFromError(err error) *Error {
 	}
 
 	if pbErr, ok := err.(*Error); ok {
-		fmt.Println("pbErr", pbErr)
 		return pbErr
 	}
 
@@ -93,6 +97,9 @@ func NewErrorFromError(err error) *Error {
 	}
 	if validatorErr, ok := err.(validator.ValidationErrors); ok {
 		return &Error{Title: "validation_error", Err: formatValidationErrors(validatorErr)}
+	}
+	if vErr, ok := err.(*jsonschema.EvaluationResult); ok {
+		return &Error{Title: "document_data_schema_error", Err: formatValidationErrorsDocumentData(vErr)}
 	}
 	if errors.Is(err, mongo.ErrNoDocuments) || errors.Is(err, ErrNoDocumentFound) {
 		return &Error{Title: "database_error", Err: ErrNoDocumentFound}
@@ -119,6 +126,34 @@ func formatValidationErrors(err validator.ValidationErrors) []map[string]any {
 		})
 	}
 	return v
+}
+
+func formatValidationErrorsDocumentDataV2(err *jsonschema.EvaluationResult) []map[string]any {
+
+	return nil
+}
+
+func formatValidationErrorsDocumentData(err *jsonschema.EvaluationResult) []map[string]any {
+	reply := []map[string]any{}
+	for _, e := range err.Details {
+		if !e.Valid {
+			errMsg := map[string]any{}
+			for _, eV := range e.Errors {
+				errMsg[eV.Code] = eV.Error()
+			}
+			reply = append(reply, map[string]any{
+				"location": e.InstanceLocation,
+				"message":  errMsg,
+			})
+		}
+	}
+
+	sort.Slice(reply, func(i, j int) bool {
+		return reply[i]["location"].(string) < reply[j]["location"].(string)
+	})
+
+	fmt.Println("SORTTED!!!!! reply", reply)
+	return reply
 }
 
 func formatJSONUnmarshalTypeError(err *json.UnmarshalTypeError) []map[string]any {

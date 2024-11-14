@@ -3,6 +3,8 @@ package model
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"net/url"
 
 	"github.com/skip2/go-qrcode"
@@ -40,32 +42,67 @@ type IDMapping struct {
 }
 
 // QRGenerator generates a QR code
-func (m *MetaData) QRGenerator(ctx context.Context, baseURL string, recoveryLevel, size int) (*QR, error) {
-	deepLink, err := url.Parse(baseURL)
+func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recoveryLevel, size int) (*QR, error) {
+	credentialOfferURL, err := url.Parse("https://wallet.dc4eu.eu/cb")
+	if err != nil {
+		return nil, err
+	}
+	issuerState := fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", m.Collect.ID, m.DocumentType, m.AuthenticSource)
+
+	query := credentialOfferURL.Query()
+
+	var credentialConfigurationID string
+	switch m.DocumentType {
+	case "PDA1":
+		credentialConfigurationID = "PDA1Credential"
+	case "EHIC":
+		credentialConfigurationID = "EHICCredential"
+	}
+
+	credentialOffer := &CredentialOffer{
+		CredentialIssuer:           issuerBaseURL,
+		CredentialConfigurationIDs: []string{credentialConfigurationID},
+		Grants: map[string]map[string]string{
+			"authorization_code": {
+				"issuer_state": issuerState,
+			},
+		},
+	}
+
+	credentialOfferByte, err := credentialOffer.Marshal()
 	if err != nil {
 		return nil, err
 	}
 
-	q := deepLink.Query()
+	query.Add("credential_offer", string(credentialOfferByte))
+	credentialOfferURL.RawQuery = query.Encode()
 
-	q.Add("authentic_source", m.AuthenticSource)
-	q.Add("collect_id", m.Collect.ID)
-
-	deepLink.RawQuery = q.Encode()
-
-	qrPNG, err := qrcode.Encode(deepLink.String(), qrcode.RecoveryLevel(recoveryLevel), size)
+	qrPNG, err := qrcode.Encode(credentialOfferURL.String(), qrcode.RecoveryLevel(recoveryLevel), size)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("URL", credentialOfferURL)
 
 	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
 
 	qr := &QR{
-		DeepLink:    deepLink.String(),
-		Base64Image: qrBase64,
+		CredentialOfferURL: credentialOfferURL.String(),
+		Base64Image:        qrBase64,
 	}
 
 	return qr, nil
+}
+
+// CredentialOffer https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html 4.1.1 Credential Offer Parameters
+type CredentialOffer struct {
+	CredentialIssuer           string                       `json:"credential_issuer"`
+	CredentialConfigurationIDs []string                     `json:"credential_configuration_ids"`
+	Grants                     map[string]map[string]string `json:"grants"`
+}
+
+// Marshal marshals the CredentialOffer
+func (c *CredentialOffer) Marshal() ([]byte, error) {
+	return json.Marshal(c)
 }
 
 // Consent is a generic type for consent
@@ -133,6 +170,11 @@ type MetaData struct {
 	// example: 509567558
 	// format: int64
 	CredentialValidTo int64 `json:"credential_valid_to,omitempty" bson:"valid_to"`
+
+	// required: false
+	// example: file://path/to/schema.json or http://example.com/schema.json
+	// format: string
+	DocumentDataValidationRef string `json:"document_data_validation,omitempty" bson:"document_data_validation"`
 }
 
 // RevocationReference refer to a document
@@ -285,6 +327,5 @@ type QR struct {
 	Base64Image string `json:"base64_image,omitempty" bson:"base64_image" validate:"required"`
 
 	// required: true
-	// example: "https://example.com"
-	DeepLink string `json:"deep_link,omitempty" bson:"deep_link" validate:"required"`
+	CredentialOfferURL string `json:"credential_offer,omitempty" bson:"credential_offer"`
 }

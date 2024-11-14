@@ -15,11 +15,12 @@ import (
 
 // CredentialRequest is the request for Credential
 type CredentialRequest struct {
-	AuthenticSource string          `json:"authentic_source" validate:"required"`
-	Identity        *model.Identity `json:"identity" validate:"required"`
-	DocumentType    string          `json:"document_type" validate:"required"`
-	CredentialType  string          `json:"credential_type" validate:"required"`
-	CollectID       string          `json:"collect_id" validate:"required"`
+	AuthenticSource string            `json:"authentic_source" validate:"required"`
+	Identity        *model.Identity   `json:"identity" validate:"required"`
+	DocumentType    string            `json:"document_type" validate:"required"`
+	CredentialType  string            `json:"credential_type" validate:"required"`
+	CollectID       string            `json:"collect_id" validate:"required"`
+	JWK             *apiv1_issuer.Jwk `json:"jwk" validate:"required"`
 }
 
 // Credential makes a credential
@@ -66,6 +67,7 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
 		DocumentType: req.DocumentType,
 		DocumentData: documentData,
+		Jwk:          req.JWK,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to call MakeSDJWT")

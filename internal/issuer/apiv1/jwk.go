@@ -9,15 +9,6 @@ import (
 	"github.com/lestrrat-go/jwx/jwk"
 )
 
-//type jwkClaims struct {
-//	CRV string `json:"crv"`
-//	KID string `json:"kid"`
-//	KTY string `json:"kty"`
-//	X   string `json:"x"`
-//	Y   string `json:"y"`
-//	D   string `json:"d"`
-//}
-
 func (c *Client) createJWK(ctx context.Context) error {
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(2*time.Second))
 	defer cancel()
@@ -27,7 +18,13 @@ func (c *Client) createJWK(ctx context.Context) error {
 		return err
 	}
 
-	key.Set("kid", "singing_")
+	key.Set("kid", "default_signing_key_id")
+
+	if c.cfg.Issuer.JWTAttribute.Kid != "" {
+		key.Set("kid", c.cfg.Issuer.JWTAttribute.Kid)
+	}
+
+	c.kid = key.KeyID()
 
 	c.jwkBytes, err = json.MarshalIndent(key, "", "  ")
 	if err != nil {

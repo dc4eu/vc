@@ -3,6 +3,7 @@ package apiv1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 	"vc/pkg/pda1"
 
@@ -15,100 +16,77 @@ type PDA1Service struct {
 }
 
 func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) map[string]any {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	doc := pda1.Document{
-		PersonalDetails: pda1.Section1{
-			PersonalIdentificationNumber: gofakeit.Numerify("##########"),
-			Sex:                          gofakeit.RandomString([]string{"01", "02", "98", "99"}),
-			Surname:                      person.LastName,
-			Forenames:                    person.FirstName,
-			SurnameAtBirth:               person.LastName,
-			DateBirth:                    gofakeit.Date().String(),
-			Nationality:                  s.Client.randomISO31661Alpha2EU(),
-			PlaceBirth: pda1.BirthPlaceType{
-				Town:        gofakeit.City(),
-				Region:      gofakeit.TimeZoneRegion(),
-				CountryCode: s.Client.randomISO31661Alpha2EU(),
-			},
-			StateOfResidenceAddress: pda1.AddressType{
-				BuildingName: gofakeit.BuzzWord() + "building",
-				StreetNo:     gofakeit.StreetNumber(),
-				PostCode:     gofakeit.Zip(),
-				Town:         gofakeit.City(),
-				Region:       gofakeit.State(),
-				CountryCode:  s.Client.randomISO31661Alpha2EU(), // should be short version
-			},
-			StateOfStayAddress: pda1.AddressType{
-				CountryCode: s.Client.randomISO31661Alpha2EU(),
+		SocialSecurityPin: gofakeit.Numerify("##########"),
+		Nationality:       []string{s.Client.randomISO31661Alpha2EU()},
+		DetailsOfEmployment: []pda1.DetailsOfEmployment{
+			{
+				TypeOfEmployment: gofakeit.RandomString([]string{"01", "02"}),
+				Name:             gofakeit.Company(),
+				Address: pda1.AddressWithCountry{
+					Street:   gofakeit.Street(),
+					PostCode: gofakeit.Zip(),
+					Town:     gofakeit.City(),
+					Country:  s.Client.randomISO31661Alpha2EU(),
+				},
+				IDsOfEmployer: []pda1.IDsOfEmployer{
+					{
+						EmployerID: gofakeit.UUID(),
+						TypeOfID:   gofakeit.RandomString([]string{"01", "02", "03", "98"}),
+					},
+				},
 			},
 		},
-		MemberStateLegislation: pda1.Section2{
+		PlacesOfWork: []pda1.PlacesOfWork{
+			{
+				AFixedPlaceOfWorkExist: false,
+				CountryWork:            s.Client.randomISO31661Alpha2EU(),
+				PlaceOfWork: []pda1.PlaceOfWork{
+					{
+						CompanyVesselName: gofakeit.Company(),
+						FlagStateHomeBase: gofakeit.Country(),
+						IDsOfCompany: []pda1.IDsOfCompany{
+							{
+								CompanyID: gofakeit.UUID(),
+								TypeOfID:  gofakeit.RandomString([]string{"01", "02", "03", "98"}),
+							},
+						},
+						Address: pda1.Address{
+							Street:   gofakeit.Street(),
+							PostCode: gofakeit.Zip(),
+							Town:     gofakeit.City(),
+						},
+					},
+				},
+			},
+		},
+		DecisionLegislationApplicable: pda1.DecisionLegislationApplicable{
 			MemberStateWhichLegislationApplies: s.Client.randomISO31661Alpha2EU(),
-			StartingDate:                       time.Now(),
-			EndingDate:                         time.Now().Add(time.Hour * 24 * 365 * 5),
-			CertificateForDurationActivity:     false,
-			DeterminationProvisional:           false,
-			TransitionRulesApplyAsEC8832004:    false,
+			TransitionalRuleApply:              false,
+			StartingDate:                       "1970-01-01",
+			EndingDate:                         "2038-01-19",
 		},
-		StatusConfirmation: pda1.Section3{
-			PostedEmployedPerson:         false,
-			EmployedTwoOrMoreStates:      false,
-			PostedSelfEmployedPerson:     false,
-			SelfEmployedTwoOrMoreStates:  false,
-			CivilServant:                 false,
-			ContractStaff:                false,
-			Mariner:                      true,
-			EmployedAndSelfEmployed:      false,
-			CivilAndEmployedSelfEmployed: false,
-			FlightCrewMember:             false,
-			Exception:                    false,
-			ExceptionDescription:         "",
-			WorkingInStateUnder21:        false,
-		},
-		EmploymentDetails: pda1.Section4{
-			Employee:                          false,
-			SelfEmployedActivity:              false,
-			EmployerSelfEmployedActivityCodes: []string{},
-			NameBusinessName:                  gofakeit.Company(),
-			RegisteredAddress: pda1.AddressType{
-				BuildingName: "",
-				StreetNo:     gofakeit.StreetNumber(),
-				PostCode:     gofakeit.Zip(),
-				Town:         gofakeit.City(),
-				Region:       gofakeit.State(),
-				CountryCode:  s.Client.randomISO31661Alpha2EU(),
-			},
-		},
-		ActivityEmploymentDetails: pda1.Section5{
-			WorkPlaceNames:            []pda1.WorkPlaceNameType{},
-			WorkPlaceNamesBlob:        gofakeit.Company(),
-			WorkPlaceAddresses:        []pda1.WorkPlaceAddressType{},
-			WorkPlaceAddressesBlob:    gofakeit.Address().Address,
-			NoFixedAddress:            false,
-			NoFixedAddressDescription: "",
-		},
-		CompletingInstitution: pda1.Section6{
-			Name: gofakeit.Company(),
-			Address: pda1.AddressType{
-				CountryCode: s.Client.randomISO31661Alpha2EU(),
-			},
-			InstitutionID: gofakeit.Numerify("##########"),
-			OfficeFaxNo:   gofakeit.Phone(),
-			OfficePhoneNo: gofakeit.Phone(),
-			Email:         gofakeit.Email(),
-			Date:          time.Now(),
-			Signature:     "",
+		StatusConfirmation:           "01",
+		UniqueNumberOfIssuedDocument: "asd123",
+		CompetentInstitution: pda1.CompetentInstitution{
+			InstitutionID:   fmt.Sprintf("%s:%s", s.Client.randomISO31661Alpha2EU(), gofakeit.Numerify("####")),
+			InstitutionName: gofakeit.Company(),
+			CountryCode:     s.Client.randomISO31661Alpha2EU(),
 		},
 	}
 
-	d, err := json.Marshal(doc)
+	jsonBytes, err := json.Marshal(doc)
 	if err != nil {
 		panic(err)
 	}
 
-	var t map[string]any
-	if err := json.Unmarshal(d, &t); err != nil {
+	reply := map[string]any{}
+	if err := json.Unmarshal(jsonBytes, &reply); err != nil {
 		panic(err)
 	}
 
-	return t
+	return reply
 }

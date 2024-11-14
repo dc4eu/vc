@@ -11,6 +11,16 @@ type ParentInstructionV2 struct {
 	ChildrenClaimHash   []string `json:"children_claim_hash,omitempty" yaml:"children_claim_hash,omitempty"`
 }
 
+// ParentArrayInstructionV2 is a parent array with children
+type ParentArrayInstructionV2 struct {
+	Name                string `json:"name,omitempty" yaml:"name,omitempty"`
+	Children            []any  `json:"children,omitempty" yaml:"children,omitempty"`
+	SelectiveDisclosure bool   `json:"sd,omitempty" yaml:"sd,omitempty"`
+	Salt                string `json:"salt,omitempty" yaml:"salt,omitempty"`
+	DisclosureHash      string `json:"disclosure_hash,omitempty" yaml:"disclosure_hash,omitempty"`
+	ClaimHash           string `json:"claim_hash,omitempty" yaml:"claim_hash,omitempty"`
+}
+
 // RecursiveInstructionV2 instructs how to build a SD-JWT
 type RecursiveInstructionV2 struct {
 	Name                string   `json:"name,omitempty" yaml:"name,omitempty"`

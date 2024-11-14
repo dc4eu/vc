@@ -7,16 +7,19 @@ import (
 	"vc/pkg/trace"
 )
 
+// APIGWClient client type for apigw
 type APIGWClient struct {
 	*VCBaseClient
 }
 
+// NewAPIGWClient creates a new api client for apigw
 func NewAPIGWClient(cfg *model.Cfg, tracer *trace.Tracer, logger *logger.Log) *APIGWClient {
 	return &APIGWClient{
 		VCBaseClient: NewClient("APIGW", cfg.UI.Services.APIGW.BaseURL, tracer, logger),
 	}
 }
 
+// DocumentList sends POST to apigw /api/v1/document/list
 func (c *APIGWClient) DocumentList(req *DocumentListRequest) (any, error) {
 	reply, err := c.DoPostJSON("/api/v1/document/list", req)
 	if err != nil {
@@ -25,6 +28,7 @@ func (c *APIGWClient) DocumentList(req *DocumentListRequest) (any, error) {
 	return reply, nil
 }
 
+// Status sends GET to apigw /health
 func (c *APIGWClient) Status() (any, error) {
 	reply, err := c.DoGetJSON("/health")
 	if err != nil {
@@ -33,6 +37,7 @@ func (c *APIGWClient) Status() (any, error) {
 	return reply, nil
 }
 
+// Upload sends POST to apigw /api/v1/upload
 func (c *APIGWClient) Upload(req *apiv1_apigw.UploadRequest) (any, error) {
 	reply, err := c.DoPostJSON("/api/v1/upload", req)
 	if err != nil {
@@ -41,6 +46,7 @@ func (c *APIGWClient) Upload(req *apiv1_apigw.UploadRequest) (any, error) {
 	return reply, nil
 }
 
+// Credential sends POST to apigw /api/v1/credential
 func (c *APIGWClient) Credential(req *CredentialRequest) (any, error) {
 	reply, err := c.DoPostJSON("/api/v1/credential", req)
 	if err != nil {
@@ -49,6 +55,7 @@ func (c *APIGWClient) Credential(req *CredentialRequest) (any, error) {
 	return reply, nil
 }
 
+// GetDocument sends POST to apigw /api/v1/document
 func (c *APIGWClient) GetDocument(req *GetDocumentRequest) (any, error) {
 	reply, err := c.DoPostJSON("/api/v1/document", req)
 	if err != nil {
@@ -57,6 +64,7 @@ func (c *APIGWClient) GetDocument(req *GetDocumentRequest) (any, error) {
 	return reply, nil
 }
 
+// Notification sends POST to /api/v1/notification
 func (c *APIGWClient) Notification(request *NotificationRequest) (any, error) {
 	reply, err := c.DoPostJSON("/api/v1/notification", request)
 	if err != nil {

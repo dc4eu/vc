@@ -1,65 +1,119 @@
 package ehic
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
-	"vc/pkg/eidas"
+	"vc/pkg/helpers"
+	"vc/pkg/logger"
+	"vc/pkg/model"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDocument(t *testing.T) {
+func generateDocument(t *testing.T) map[string]any {
+	document := Document{
+		Subject: Subject{
+			Forename:    "Magnus",
+			FamilyName:  "Svensson",
+			DateOfBirth: "1986-02-23",
+		},
+		SocialSecurityPin: "1234",
+		PeriodEntitlement: PeriodEntitlement{
+			StartingDate: "1970-01-01",
+			EndingDate:   "2038-01-19",
+		},
+		DocumentID: "12354",
+		CompetentInstitution: CompetentInstitution{
+			InstitutionID:      "SE:1234",
+			InstitutionName:    "Myndigheten",
+			InstitutionCountry: "SE",
+		},
+	}
+
+	b, err := json.Marshal(document)
+	assert.NoError(t, err)
+
+	fmt.Println("Document", string(b))
+
+	docMap := map[string]any{}
+
+	err = json.Unmarshal(b, &docMap)
+	assert.NoError(t, err)
+
+	return docMap
+}
+
+var mockPDA1JSON = `{
+    "subject": {
+        "forename": "Magnus",
+        "family_name": "Svensson",
+        "date_of_birth": "1986-02-23",
+        "other_elements": {
+            "sex": "01",
+            "forename_at_birth": "Magnus",
+            "family_name_at_birth": "Svensson"
+        }
+    },
+    "social_security_pin": "1234",
+    "period_entitlement": {
+        "starting_date": "1970-01-01",
+        "ending_date": "2038-01-19"
+    },
+    "document_id": "12354",
+    "competent_institution": {
+        "institution_id": "SE:1234",
+        "institution_name": "Myndigheten",
+        "institution_country": "SE"
+    }
+}`
+
+func mockPDA1Map(t *testing.T) map[string]any {
+	docMap := map[string]any{}
+
+	err := json.Unmarshal([]byte(mockPDA1JSON), &docMap)
+	assert.NoError(t, err)
+
+	return docMap
+}
+
+func TestSchemaValidation(t *testing.T) {
 	tts := []struct {
-		name     string
-		document *Document
+		name    string
+		payload *model.CompleteDocument
+		want    error
 	}{
 		{
-			name: "test1",
-			document: &Document{
-				PID: eidas.Identification{
-					FirstName:   "John",
-					LastName:    "Doe",
-					Gender:      "male",
-					PINS:        []string{"1234567890"},
-					ExhibitorID: "1234567890",
+			name: "from struct to map",
+			payload: &model.CompleteDocument{
+				Meta: &model.MetaData{
+					DocumentDataValidationRef: "file://../../standards/schema_ehic.json",
 				},
-				CardHolder: CardHolder{
-					FamilyName:       "Smith",
-					GivenName:        "Adam",
-					BirthDate:        "1990-01-01",
-					ID:               "1234567890",
-					CardholderStatus: "active",
-				},
-				CompetentInstitution: CompetentInstitution{
-					InstitutionName: "NHS",
-					ID:              "1234567890",
-				},
-				CardInformation: CardInformation{
-					ID:           "1234567890",
-					IssuanceDate: "2019-01-01",
-					ValidSince:   "2019-01-01",
-					ExpiryDate:   "2020-01-01",
-					InvalidSince: "2020-01-01",
-					Signature: Signature{
-						Issuer: "NHS",
-						Seal:   "6f356f14d32aae22d1d7c782332d6a3cdc0860e7af73eff644c1773c419b323e",
-					},
-				},
-				Signature: Signature{
-					Issuer: "NHS",
-					Seal:   "5ff28c8953c7b4c5acd71f476d75e800a7d032f40d935074e7d273c328906b70",
-				},
+				DocumentData: generateDocument(t),
 			},
+			want: nil,
+		},
+		{
+			name: "from string to map",
+			payload: &model.CompleteDocument{
+				Meta: &model.MetaData{
+					DocumentDataValidationRef: "file://../../standards/schema_ehic.json",
+				},
+				DocumentData: mockPDA1Map(t),
+			},
+			want: nil,
 		},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := json.MarshalIndent(tt.document, "", "  ")
-			assert.NoError(t, err)
+			ctx := context.Background()
 
-			fmt.Println(string(got))
+			got := helpers.ValidateDocumentData(ctx, tt.payload, logger.NewSimple("test"))
+
+			assert.Equal(t, tt.want, got)
+
 		})
 	}
 }

@@ -1,0 +1,18 @@
+{
+    "$id": "https://example.com/schema_v0.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "age": {
+            "type": "integer",
+            "minimum": 20
+        }
+    },
+    "required": [
+        "name",
+        "age"
+    ]
+}

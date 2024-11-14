@@ -82,7 +82,6 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 				DocumentType:    data.DocumentType,
 				DocumentID:      data.DocumentID,
 			},
-			//Reason: gofakeit.RandomString([]string{"lost", "stolen", "expired"}),
 		},
 	}
 
@@ -117,8 +116,10 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 	switch data.DocumentType {
 	case "PDA1":
 		mockUpload.DocumentData = c.PDA1.random(ctx, person)
+		mockUpload.Meta.DocumentDataValidationRef = "file://../../standards/schema_pda1.json"
 	case "EHIC":
 		mockUpload.DocumentData = c.EHIC.random(ctx, person)
+		mockUpload.Meta.DocumentDataValidationRef = "file://../../standards/schema_ehic.json"
 	default:
 		return nil, helpers.ErrNoKnownDocumentType
 	}

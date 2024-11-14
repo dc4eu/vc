@@ -15,11 +15,15 @@ service IssuerService {
 message MakeSDJWTRequest {
     string documentType = 1;
     bytes documentData = 2;
+    jwk jwk =3;
 }
 
 message MakeSDJWTReply {
-    string jwt = 1;
-    repeated string disclosures = 2;
+   repeated Credential credentials = 1;
+}
+
+message Credential {
+   string credential = 1;
 }
 
 message Empty {

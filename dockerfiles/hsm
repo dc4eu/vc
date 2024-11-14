@@ -1,0 +1,28 @@
+# Deploy
+FROM debian:bookworm-slim
+
+RUN apt update
+
+RUN apt install -y \
+    ca-certificates \
+    git-core \
+    build-essential \
+    cmake \
+    libssl-dev \
+    libseccomp-dev
+
+RUN git clone https://github.com/SUNET/pkcs11-proxy
+
+RUN cd pkcs11-proxy && \
+    cmake . && \
+    make && \
+    make install
+
+WORKDIR /
+
+RUN apt update && apt install -y curl procps iputils-ping less softhsm2 opensc gnutls-bin file libengine-pkcs11-openssl
+
+
+RUN rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]

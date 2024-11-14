@@ -2,13 +2,16 @@ package helpers
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strings"
+	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kaptinlin/jsonschema"
 )
 
 // NewValidator creates a new validator
@@ -59,6 +62,35 @@ func CheckSimple(s any) error {
 
 	if err := validate.Struct(s); err != nil {
 		return NewErrorFromError(err)
+	}
+
+	return nil
+}
+
+// ValidateDocumentData validates DocumentData against the schemaRef in MetaData.DocumentDataValidationRef
+func ValidateDocumentData(ctx context.Context, completeDocument *model.CompleteDocument, log *logger.Log) error {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	if completeDocument.Meta.DocumentDataValidationRef == "" {
+		return nil
+	}
+
+	if completeDocument.DocumentData == nil {
+		return fmt.Errorf("no document data")
+	}
+
+	compiler := jsonschema.NewCompiler()
+
+	jsonSchema, err := getValidationSchema(completeDocument.Meta.DocumentDataValidationRef, compiler)
+	if err != nil {
+		return err
+	}
+
+	result := jsonSchema.Validate(completeDocument.DocumentData)
+
+	if !result.IsValid() {
+		return NewErrorFromError(result)
 	}
 
 	return nil

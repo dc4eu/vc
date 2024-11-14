@@ -145,7 +145,7 @@ docker-push-ui:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_UI)
 
-docker-push: docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui
+docker-push: docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui docker-push-mockas
 	$(info Pushing docker images)
 
 docker-tag-apigw:

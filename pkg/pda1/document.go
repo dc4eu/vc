@@ -60,9 +60,9 @@ type IDsOfEmployer struct {
 }
 
 type PlacesOfWork struct {
-	NoFixedPlaceOfWorkExist bool          `json:"no_fixed_place_of_work_exist" bson:"no_fixed_place_of_work_exist"`
-	CountryWork             string        `json:"country_work" bson:"country_work"`
-	PlaceOfWork             []PlaceOfWork `json:"place_of_work" bson:"place_of_work"`
+	AFixedPlaceOfWorkExist bool          `json:"a_fixed_place_of_work_exist" bson:"a_fixed_place_of_work_exist"`
+	CountryWork            string        `json:"country_work" bson:"country_work"`
+	PlaceOfWork            []PlaceOfWork `json:"place_of_work" bson:"place_of_work"`
 }
 
 type PlaceOfWork struct {

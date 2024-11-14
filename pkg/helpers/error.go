@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -127,6 +128,11 @@ func formatValidationErrors(err validator.ValidationErrors) []map[string]any {
 	return v
 }
 
+func formatValidationErrorsDocumentDataV2(err *jsonschema.EvaluationResult) []map[string]any {
+
+	return nil
+}
+
 func formatValidationErrorsDocumentData(err *jsonschema.EvaluationResult) []map[string]any {
 	reply := []map[string]any{}
 	for _, e := range err.Details {
@@ -142,8 +148,11 @@ func formatValidationErrorsDocumentData(err *jsonschema.EvaluationResult) []map[
 		}
 	}
 
-	fmt.Println("reply", reply)
+	sort.Slice(reply, func(i, j int) bool {
+		return reply[i]["location"].(string) < reply[j]["location"].(string)
+	})
 
+	fmt.Println("SORTTED!!!!! reply", reply)
 	return reply
 }
 

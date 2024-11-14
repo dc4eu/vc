@@ -105,8 +105,8 @@ func TestPDA1Credential(t *testing.T) {
 		},
 		PlacesOfWork: []pda1.PlacesOfWork{
 			{
-				NoFixedPlaceOfWorkExist: false,
-				CountryWork:             "SE",
+				AFixedPlaceOfWorkExist: false,
+				CountryWork:            "SE",
 				PlaceOfWork: []pda1.PlaceOfWork{
 					{
 						CompanyVesselName: "M/S Transpaper",
@@ -143,7 +143,7 @@ func TestPDA1Credential(t *testing.T) {
 
 	want := map[string]any{
 		"_sd": []any{
-			"pXlwfRuomneyJj_C_6Bsy9x4gxwXSCj0MwhQQ15Tkiw",
+			"2D0ScjxNWXCvr9bcj1rVWLAW4xZRsHHq4rzB00RbapI",
 			"UrDQQc6nuN5gmwdeAJ0gUgg36b92xPAC_KvAlhWNtnk",
 			"GR6rmSmjAOUN6PlUjAUqN3f0nBDY_d-yX5JSzOQmeMY",
 			"p3vexe1bxf34Nl7-wBE3uriHvxjhsgRdgEx58EncS5c",

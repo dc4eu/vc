@@ -101,11 +101,11 @@ func TestCreateJWK(t *testing.T) {
 			want: jwt.MapClaims{
 				"jwk": jwt.MapClaims{
 					"crv": "P-256",
-					"kid": "singing_",
+					"kid": "default_signing_key_id",
 					"kty": "EC",
-					"d":   "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
-					"x":   "YiPlXIq3VAfGMMoVzAKB2wYLy0e5n9nYkjmAbBCIdBs",
-					"y":   "d2P8TyUlmM1jop1yUH-fHBYXgbijF0IY4fPA7bQZuDE",
+					"d":   "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE",
+					"x":   "cyViIENmqo4D2CVOc2uGZbe5a8NheCyvN9CsF7ui3tk",
+					"y":   "XA0lVXgjgZzFTDwkndZEo-zVr9ieO2rY9HGiiaaASog",
 				},
 			},
 		},
@@ -113,7 +113,8 @@ func TestCreateJWK(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			client := mockClient(t)
+			ctx := context.TODO()
+			client := mockNewClient(ctx, t, "ecdsa", logger.NewSimple("testing_apiv1"))
 
 			err := client.createJWK(context.Background())
 			assert.NoError(t, err)

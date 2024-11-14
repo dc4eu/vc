@@ -54,8 +54,8 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 		},
 		PlacesOfWork: []pda1.PlacesOfWork{
 			{
-				NoFixedPlaceOfWorkExist: false,
-				CountryWork:             p.workAddress.Country,
+				AFixedPlaceOfWorkExist: false,
+				CountryWork:            p.workAddress.Country,
 				PlaceOfWork: []pda1.PlaceOfWork{
 					{
 						CompanyVesselName: fmt.Sprintf("vessel_name_%s", strings.ToLower(p.nationality[0])),

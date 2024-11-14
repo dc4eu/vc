@@ -42,8 +42,8 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 		},
 		PlacesOfWork: []pda1.PlacesOfWork{
 			{
-				NoFixedPlaceOfWorkExist: false,
-				CountryWork:             s.Client.randomISO31661Alpha2EU(),
+				AFixedPlaceOfWorkExist: false,
+				CountryWork:            s.Client.randomISO31661Alpha2EU(),
 				PlaceOfWork: []pda1.PlaceOfWork{
 					{
 						CompanyVesselName: gofakeit.Company(),

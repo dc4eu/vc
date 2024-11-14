@@ -239,8 +239,8 @@ func TestBootstrapperConstructor(t *testing.T) {
 						},
 						"places_of_work": []any{
 							map[string]any{
-								"no_fixed_place_of_work_exist": false,
-								"country_work":                 "DK",
+								"a_fixed_place_of_work_exist": false,
+								"country_work":                "DK",
 								"place_of_work": []any{
 									map[string]any{
 										"flag_state_home_base": "DK",
@@ -310,8 +310,8 @@ func TestBootstrapperConstructor(t *testing.T) {
 						},
 						"places_of_work": []any{
 							map[string]any{
-								"no_fixed_place_of_work_exist": false,
-								"country_work":                 "DE",
+								"a_fixed_place_of_work_exist": false,
+								"country_work":                "DE",
 								"place_of_work": []any{
 									map[string]any{
 										"flag_state_home_base": "DE",
@@ -381,8 +381,8 @@ func TestBootstrapperConstructor(t *testing.T) {
 						},
 						"places_of_work": []any{
 							map[string]any{
-								"no_fixed_place_of_work_exist": false,
-								"country_work":                 "SE",
+								"a_fixed_place_of_work_exist": false,
+								"country_work":                "SE",
 								"place_of_work": []any{
 									map[string]any{
 										"flag_state_home_base": "SE",
@@ -452,8 +452,8 @@ func TestBootstrapperConstructor(t *testing.T) {
 						},
 						"places_of_work": []any{
 							map[string]any{
-								"no_fixed_place_of_work_exist": false,
-								"country_work":                 "NL",
+								"a_fixed_place_of_work_exist": false,
+								"country_work":                "NL",
 								"place_of_work": []any{
 									map[string]any{
 										"flag_state_home_base": "NL",
@@ -523,8 +523,8 @@ func TestBootstrapperConstructor(t *testing.T) {
 						},
 						"places_of_work": []any{
 							map[string]any{
-								"no_fixed_place_of_work_exist": false,
-								"country_work":                 "AT",
+								"a_fixed_place_of_work_exist": false,
+								"country_work":                "AT",
 								"place_of_work": []any{
 									map[string]any{
 										"flag_state_home_base": "AT",

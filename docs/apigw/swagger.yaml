@@ -53,12 +53,15 @@ definitions:
         type: string
       identity:
         $ref: '#/definitions/model.Identity'
+      jwk:
+        $ref: '#/definitions/apiv1_issuer.Jwk'
     required:
     - authentic_source
     - collect_id
     - credential_type
     - document_type
     - identity
+    - jwk
     type: object
   apiv1.DeleteDocumentIdentityRequest:
     properties:
@@ -594,14 +597,11 @@ definitions:
           required: true
           example: "ZWFzdGVyIGVnZyE="
         type: string
-      deep_link:
-        description: |-
-          required: true
-          example: "https://example.com"
+      credential_offer:
+        description: 'required: true'
         type: string
     required:
     - base64_image
-    - deep_link
     type: object
   model.Revocation:
     properties:

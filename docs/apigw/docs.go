@@ -656,7 +656,8 @@ const docTemplate = `{
                 "collect_id",
                 "credential_type",
                 "document_type",
-                "identity"
+                "identity",
+                "jwk"
             ],
             "properties": {
                 "authentic_source": {
@@ -673,6 +674,9 @@ const docTemplate = `{
                 },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
+                },
+                "jwk": {
+                    "$ref": "#/definitions/apiv1_issuer.Jwk"
                 }
             }
         },
@@ -1303,16 +1307,15 @@ const docTemplate = `{
         "model.QR": {
             "type": "object",
             "required": [
-                "base64_image",
-                "deep_link"
+                "base64_image"
             ],
             "properties": {
                 "base64_image": {
                     "description": "required: true\nexample: \"ZWFzdGVyIGVnZyE=\"",
                     "type": "string"
                 },
-                "deep_link": {
-                    "description": "required: true\nexample: \"https://example.com\"",
+                "credential_offer": {
+                    "description": "required: true",
                     "type": "string"
                 }
             }

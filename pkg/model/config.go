@@ -49,7 +49,7 @@ type Common struct {
 	HTTPProxy  string   `yaml:"http_proxy"`
 	Production bool     `yaml:"production"`
 	Log        Log      `yaml:"log"`
-	Mongo      Mongo    `yaml:"mongo" validate:"required"`
+	Mongo      Mongo    `yaml:"mongo" validate:"omitempty"`
 	Tracing    OTEL     `yaml:"tracing" validate:"required"`
 	Queues     Queues   `yaml:"queues" validate:"omitempty"`
 	KeyValue   KeyValue `yaml:"key_value" validate:"omitempty"`
@@ -172,6 +172,11 @@ type APIGW struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
 }
 
+// Portal holds the persistent storage configuration
+type Portal struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+}
+
 // OTEL holds the opentelemetry configuration
 type OTEL struct {
 	Addr    string `yaml:"addr" validate:"required"`
@@ -244,8 +249,10 @@ type Cfg struct {
 	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
 	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
 	UI               UI                         `yaml:"ui" validate:"omitempty"`
+	Portal           Portal                     `yaml:"portal" validate:"omitempty"`
 }
 
+// IsAsyncEnabled checks if the async is enabled
 func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
 	enabled := cfg.Common.Kafka.Enabled
 	if !enabled {

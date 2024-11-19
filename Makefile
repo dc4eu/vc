@@ -45,6 +45,7 @@ DOCKER_TAG_GOBUILD 		:= docker.sunet.se/dc4eu/gobuild:$(VERSION)
 DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
+DOCKER_TAG_PORTAL 		:= docker.sunet.se/dc4eu/portal:$(VERSION)
 
 
 build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui
@@ -113,6 +114,10 @@ docker-build-ui-goland-debug:
 	$(info Docker building ui with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/ui_worker_goland_debug .
 
+docker-build-portal:
+	$(info Docker building portal with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=portal --tag $(DOCKER_TAG_PORTAL) --file dockerfiles/worker .
+
 docker-push-gobuild:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_GOBUILD)
@@ -144,6 +149,10 @@ docker-push-issuer:
 docker-push-ui:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_UI)
+
+docker-push-portal:
+	$(info Pushing docker images)
+	docker push $(DOCKER_TAG_PORTAL)
 
 docker-push: docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui docker-push-mockas
 	$(info Pushing docker images)

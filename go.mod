@@ -21,12 +21,14 @@ require (
 	github.com/lestrrat-go/jwx v1.2.30
 	github.com/lithammer/shortuuid/v4 v4.0.0
 	github.com/moogar0880/problems v0.1.1
+	github.com/pbnjay/grate v0.0.0-20231006022435-3f8e65d74a14
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.4
 	github.com/wealdtech/go-merkletree v1.0.0
+	github.com/xuri/excelize/v2 v2.9.0
 	go.mongodb.org/mongo-driver v1.17.1
 	go.opentelemetry.io/contrib/propagators/jaeger v1.32.0
 	go.opentelemetry.io/otel v1.32.0
@@ -85,8 +87,13 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
+	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
+	github.com/richardlehane/mscfb v1.0.4 // indirect
+	github.com/richardlehane/msoleps v1.0.4 // indirect
+	github.com/xuri/efp v0.0.0-20240408161823-9ad904a10d6d // indirect
+	github.com/xuri/nfp v0.0.0-20240318013403-ab9948c2c4a7 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.32.0 // indirect
 	go.opentelemetry.io/otel/metric v1.32.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect

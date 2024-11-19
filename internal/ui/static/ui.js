@@ -11,7 +11,7 @@ const validateHasValueAndNotEmpty = (element) => {
 };
 
 const clearContainer = (id) => {
-    console.debug(`Clearing element : ${id}`);
+    //console.debug(`Clearing element : ${id}`);
     const element = getElementById(id);
     if (element) {
         element.innerHTML = "";
@@ -81,10 +81,10 @@ const generateArticleIDBasis = () => {
 function isLoggedIn() {
     const cookie = document.cookie;
     if (cookie && cookie.match(/vc_ui_auth_session=(.*?)(;|$)/)[1]) {
-        console.debug("User is logged in");
+        console.debug("User is authenticated");
         return true;
     }
-    console.debug("User is not logged in");
+    console.debug("User is not authenticated");
     //Note: Expire time for cookie is handled by the browser and is removed from document.cookie when expired
 
     return false;
@@ -138,7 +138,6 @@ function handleErrorInArticle(err, elements) {
     updateTextContentInChildPreTagFor(elements.payloadDiv, "");
 }
 
-
 function openModalQR() {
     const modal = document.getElementById("qrModal");
     modal.classList.add("is-active");
@@ -154,7 +153,7 @@ async function doFetchAPICallAndHandleResult(url, options, elements) {
         //TODO(mk): add timeout on clientside for fetch
         const response = await fetch(url, options);
         const jsonBody = await response.json();
-        console.debug(jsonBody);
+        //console.debug(jsonBody);
 
         if (!response.ok) {
             if (response.status === 401) {
@@ -185,7 +184,7 @@ async function doFetchAPICallAndHandleResult(url, options, elements) {
 
 async function getAndDisplayInArticleContainerFor(path, articleHeaderText) {
     const url = new URL(path, baseUrl);
-    console.debug("Call to getAndDisplayInArticleContainerFor: " + url);
+    //console.debug("Call to getAndDisplayInArticleContainerFor: " + url);
 
     const elements = addNewRequestResponseArticleToContainer(articleHeaderText);
 
@@ -204,7 +203,7 @@ async function getAndDisplayInArticleContainerFor(path, articleHeaderText) {
 
 async function postAndDisplayInArticleContainerFor(path, requestBody, articleHeaderText) {
     const url = new URL(path, baseUrl);
-    console.debug("Call to postAndDisplayInArticleContainerFor: " + url);
+    //console.debug("Call to postAndDisplayInArticleContainerFor: " + url);
 
     const elements = addNewRequestResponseArticleToContainer(articleHeaderText);
 
@@ -222,9 +221,7 @@ async function postAndDisplayInArticleContainerFor(path, requestBody, articleHea
 
 
 const createMock = () => {
-    console.debug("createMock");
-    const path = "/secure/mockas/mock/next";
-    const articleHeaderText = "Upload new mock document result";
+    //console.debug("createMock");
 
     const documentTypeElement = getElementById("document-type-select");
     const authenticSourceElement = getElementById("authentic-source-input");
@@ -238,11 +235,11 @@ const createMock = () => {
         identity_schema_name: identitySchemaNameElement.value,
     };
 
-    postAndDisplayInArticleContainerFor(path, postBody, articleHeaderText);
+    postAndDisplayInArticleContainerFor("/secure/mockas/mock/next", postBody, "Upload new mock document result");
 };
 
 const postDocumentList = () => {
-    console.debug("postDocumentList");
+    //console.debug("postDocumentList");
     const path = "/secure/apigw/document/list";
     const articleHeaderText = "List documents result";
 
@@ -265,8 +262,7 @@ const postDocumentList = () => {
     postAndDisplayInArticleContainerFor(path, documentListRequest, articleHeaderText);
 };
 
-
-const updateUploadAndFetchButtons = () => {
+const updateMockAndListButtons = () => {
     const input = getElementById('authentic_source_person_id-input');
     const mockBtn = getElementById('create-mock-btn');
     const documentListBtn = getElementById('post-document-list-btn');
@@ -322,7 +318,7 @@ const buildArticle = (articleID, articleHeaderText, bodyChildrenElementArray) =>
 
 async function doLogin() {
     const url = new URL("/login", baseUrl);
-    console.debug("doLogin for url: " + url);
+    //console.debug("doLogin for url: " + url);
 
     const doLoginButton = getElementById("do-login-btn");
     doLoginButton.disabled = true;
@@ -364,7 +360,7 @@ async function doLogin() {
     if (authOK) {
         clearContainer("login-container");
         displaySecureMenyItems();
-        //TODO(mk): show logged in user?
+        //TODO(mk): display current logged in user in UI?
     } else {
         usernameInput.disabled = false;
         passwordInput.disabled = false;
@@ -374,30 +370,27 @@ async function doLogin() {
 }
 
 const addUploadFormArticleToContainer = () => {
-    const buildUploadFormElements = () => {
-        //TODO:(mk) Only one form is handled in Browser simultaneous since element id's is static
-
+    const textareaId = generateUUID();
+    const buildUploadFormElements = (textareaId) => {
         const textarea = document.createElement("textarea");
-        textarea.id = 'upload-textarea';
+        textarea.id = textareaId;
         textarea.classList.add("textarea");
-        textarea.rows = 10;
+        textarea.rows = 20;
+        textarea.placeholder = "Document as json";
 
         const submitButton = document.createElement('button');
-        submitButton.id = 'do-upload-btn';
+        submitButton.id = generateUUID();
         submitButton.classList.add('button', 'is-link');
         submitButton.textContent = 'Upload';
 
-        const doUpload = () => {
-            getElementById("do-upload-btn").disabled = true;
-
-            const textarea = getElementById("upload-textarea");
+        const doUpload = (textarea, submitButton) => {
+            submitButton.disabled = true;
             const text = textarea.value;
             textarea.disabled = true;
-
             const jsonObj = JSON.parse(text);
-            postAndDisplayInArticleContainerFor("/secure/apigw/upload", jsonObj, "Upload result");
+            postAndDisplayInArticleContainerFor("/secure/apigw/upload", jsonObj, "Upload document result");
         };
-        submitButton.onclick = () => doUpload();
+        submitButton.onclick = () => doUpload(textarea, submitButton);
 
         const buttonControl = document.createElement('div');
         buttonControl.classList.add('control');
@@ -407,12 +400,152 @@ const addUploadFormArticleToContainer = () => {
     };
 
     const articleIdBasis = generateArticleIDBasis();
-    const articleDiv = buildArticle(articleIdBasis.articleID, "Upload document", buildUploadFormElements());
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Upload document", buildUploadFormElements(textareaId));
     const articleContainer = getElementById('article-container');
     articleContainer.prepend(articleDiv);
 
-    getElementById("upload-textarea").focus();
+    getElementById(textareaId).focus();
 };
+
+
+const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
+    const buildFormElements = () => {
+
+        const familyNameElement = createInputElement('family name', '', 'text');
+        const givenNameElement = createInputElement('given name', '', 'text');
+        const birthdateElement = createInputElement('birth date (YYYY-MM-DD)', '', 'text');
+        const documentTypeSelectWithinDivElement =
+            createSelectElement([
+                {value: 'EHIC', label: 'EHIC'},
+                {value: 'PDA1', label: 'PDA1'}
+            ]);
+
+        const documentTypeDiv = documentTypeSelectWithinDivElement[0];
+        const documentTypeSelect = documentTypeSelectWithinDivElement[1];
+
+        const createButton = document.createElement('button');
+        createButton.id = generateUUID();
+        createButton.classList.add('button', 'is-link');
+        createButton.textContent = 'Upload business decision';
+        createButton.onclick = () => {
+            createButton.disabled = true;
+
+            const requestBody = {
+                family_name: familyNameElement.value,
+                given_name: givenNameElement.value,
+                birth_date: birthdateElement.value,
+                document_type: documentTypeSelect.value,
+            };
+
+            disableElements([
+                familyNameElement,
+                givenNameElement,
+                birthdateElement,
+                documentTypeSelect,
+            ]);
+
+            postAndDisplayInArticleContainerFor("/secure/mockas/mock/next", requestBody, "Uploaded business decision");
+        };
+
+        return [
+            familyNameElement,
+            givenNameElement,
+            birthdateElement,
+            documentTypeDiv,
+            document.createElement('br'),
+            createButton
+        ];
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Upload new business decision", buildFormElements());
+    const articleContainer = document.getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+
+    document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
+};
+
+const addVerifyFormArticleToContainer = () => {
+    const textareaId = generateUUID();
+    const buildVerifyCredentialFormElements = (textareaId) => {
+        const textarea = document.createElement("textarea");
+        textarea.id = textareaId;
+        textarea.classList.add("textarea");
+        textarea.rows = 20;
+        textarea.placeholder = "Base64 encoded vc+sd-jwt string";
+
+        const submitButton = document.createElement('button');
+        submitButton.id = generateUUID();
+        submitButton.classList.add('button', 'is-link');
+        submitButton.textContent = 'Verify';
+
+        const doVerify = (textarea, submitButton) => {
+            submitButton.disabled = true;
+            const text = textarea.value;
+            textarea.disabled = true;
+            const requestBody = {
+                "credential": text
+            };
+            postAndDisplayInArticleContainerFor("/verifier/verify", requestBody, "Verify credential result");
+        };
+        submitButton.onclick = () => doVerify(textarea, submitButton);
+
+        const buttonControl = document.createElement('div');
+        buttonControl.classList.add('control');
+        buttonControl.appendChild(submitButton);
+
+        return [textarea, buttonControl];
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Verify credential", buildVerifyCredentialFormElements(textareaId));
+    const articleContainer = getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+
+    getElementById(textareaId).focus();
+};
+
+const addDecodeCredentialFormArticleToContainer = () => {
+    const textareaId = generateUUID();
+    const buildDecodeCredentialFormElements = (textareaId) => {
+        const textarea = document.createElement("textarea");
+        textarea.id = textareaId;
+        textarea.classList.add("textarea");
+        textarea.rows = 10;
+        textarea.placeholder = "Base64 encoded vc+sd-jwt string";
+
+        const submitButton = document.createElement('button');
+        submitButton.id = generateUUID();
+        submitButton.classList.add('button', 'is-link');
+        submitButton.textContent = 'Decode';
+
+        const doDecode = (textarea, submitButton) => {
+            submitButton.disabled = true;
+            const text = textarea.value;
+            textarea.disabled = true;
+            const requestBody = {
+                "credential": text
+            };
+            postAndDisplayInArticleContainerFor("/verifier/decode", requestBody, "Decode credential result");
+        };
+        submitButton.onclick = () => doDecode(textarea, submitButton);
+
+        const buttonControl = document.createElement('div');
+        buttonControl.classList.add('control');
+        buttonControl.appendChild(submitButton);
+
+        return [textarea, buttonControl];
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    let bodyChildrenElementArray = buildDecodeCredentialFormElements(textareaId);
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Decode credential", bodyChildrenElementArray);
+    const articleContainer = getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+
+    getElementById(textareaId).focus();
+};
+
 
 const createInputElement = (placeholder, value = '', type = 'text', disabled = false) => {
     const input = document.createElement('input');
@@ -424,6 +557,28 @@ const createInputElement = (placeholder, value = '', type = 'text', disabled = f
     input.disabled = disabled;
     return input;
 };
+
+const createSelectElement = (options = [], disabled = false) => {
+    const div = document.createElement('div');
+    div.classList.add('select')
+
+    const select = document.createElement('select');
+    select.id = generateUUID();
+    //select.classList.add('select');
+    select.disabled = disabled;
+
+    options.forEach(({value, label}) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+    });
+
+    div.appendChild(select);
+
+    return [div, select];
+};
+
 
 const disableElements = (elements) => {
     elements.forEach(el => el.disabled = true);
@@ -515,7 +670,7 @@ const addCredentialFormArticleToContainer = () => {
         const birthdateElement = createInputElement('birth date', '', 'text');
         const schemaNameElement = createInputElement('identity schema name', 'SE');
         const documentTypeElement = createInputElement('document type (EHIC/PDA1)', 'EHIC');
-        const credentialTypeElement = createInputElement('credential type', 'SD-JWT');
+        const credentialTypeElement = createInputElement('credential type', 'vc+sd-jwt');
         const authenticSourceElement = createInputElement('authentic source', 'SUNET');
         const collectIdElement = createInputElement('collect id');
 
@@ -646,7 +801,7 @@ const addLoginArticleToContainer = () => {
 
 async function doLogout() {
     const url = new URL("/secure/logout", baseUrl);
-    console.debug("doLogout for url: " + url);
+    //console.debug("doLogout for url: " + url);
 
     const headers = {
         'Accept': 'application/json', 'Content-Type': 'application/json'

@@ -6,7 +6,9 @@ import (
 	"time"
 	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
+	apiv1_mockas "vc/internal/mockas/apiv1"
 	"vc/internal/ui/apiv1"
+	apiv1_verifier "vc/internal/verifier/apiv1"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -86,9 +88,27 @@ func (s *Service) endpointUser(ctx context.Context, c *gin.Context) (any, error)
 	return reply, nil
 }
 
-func (s *Service) endpointAPIGWStatus(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointHealthAPIGW(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}
-	reply, err := s.apiv1.StatusAPIGW(ctx, request)
+	reply, err := s.apiv1.HealthAPIGW(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointHealthVerifier(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1_status.StatusRequest{}
+	reply, err := s.apiv1.HealthVerifier(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointHealthMockAS(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1_status.StatusRequest{}
+	reply, err := s.apiv1.HealthMockAS(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -159,12 +179,38 @@ func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any
 }
 
 func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.MockNextRequest{}
+	request := &apiv1_mockas.MockNextRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}
 
 	reply, err := s.apiv1.MockNext(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointVerifyCredential(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1_verifier.VerifyCredentialRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		return nil, err
+	}
+
+	reply, err := s.apiv1.Verify(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointDecodeCredential(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1_verifier.DecodeCredentialRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		return nil, err
+	}
+
+	reply, err := s.apiv1.DecodeCredential(ctx, request)
 	if err != nil {
 		return nil, err
 	}

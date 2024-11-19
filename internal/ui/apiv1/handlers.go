@@ -6,6 +6,8 @@ import (
 	"time"
 	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
+	apiv1_mockas "vc/internal/mockas/apiv1"
+	apiv1_verifier "vc/internal/verifier/apiv1"
 	"vc/pkg/model"
 )
 
@@ -84,12 +86,13 @@ type CredentialRequest struct {
 // Credential sends POST to apigw /api/v1/credential
 func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (any, error) {
 	req.JWK = map[string]any{
-		"kty": "EC",
-		"crv": "P-256",
-		"kid": "ejV4WXZMQnE4Sy1meGJRUGFvZ2NiZHltUGQ5SmdNNy1KS1hjYTNOZGdTMA",
-		"x":   "cyViIENmqo4D2CVOc2uGZbe5a8NheCyvN9CsF7ui3tk",
-		"y":   "XA0lVXgjgZzFTDwkndZEo-zVr9ieO2rY9HGiiaaASog",
+		"kty": c.jwk.Kty,
+		"kid": c.jwk.Kid,
+		"crv": c.jwk.Crv,
+		"x":   c.jwk.X,
+		"y":   c.jwk.Y,
 	}
+
 	reply, err := c.apigwClient.Credential(req)
 	if err != nil {
 		return nil, err
@@ -118,22 +121,22 @@ type NotificationRequest struct {
 	DocumentID      string `json:"document_id" validate:"required"`
 }
 
-func (c *Client) Notification(ctx context.Context, request *NotificationRequest) (any, error) {
-	reply, err := c.apigwClient.Notification(request)
+func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (any, error) {
+	reply, err := c.apigwClient.Notification(req)
 	if err != nil {
 		return nil, err
 	}
 	return reply, nil
 }
 
-type MockNextRequest struct {
-	DocumentType            string `json:"document_type" validate:"required"`
-	AuthenticSource         string `json:"authentic_source" validate:"required"`
-	AuthenticSourcePersonId string `json:"authentic_source_person_id" validate:"required"`
-	IdentitySchemaName      string `json:"identity_schema_name" validate:"required"`
-}
+//type MockNextRequest struct {
+//	DocumentType            string `json:"document_type" validate:"required"`
+//	AuthenticSource         string `json:"authentic_source" validate:"required"`
+//	AuthenticSourcePersonId string `json:"authentic_source_person_id" validate:"required"`
+//	IdentitySchemaName      string `json:"identity_schema_name" validate:"required"`
+//}
 
-func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error) {
+func (c *Client) MockNext(ctx context.Context, req *apiv1_mockas.MockNextRequest) (any, error) {
 	if c.cfg.Common.Kafka.Enabled {
 		if err := c.eventPublisher.MockNext(req); err != nil {
 			return nil, err
@@ -148,8 +151,40 @@ func (c *Client) MockNext(ctx context.Context, req *MockNextRequest) (any, error
 	return reply, nil
 }
 
-func (c *Client) StatusAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
-	reply, err := c.apigwClient.Status()
+func (c *Client) Verify(ctx context.Context, req *apiv1_verifier.VerifyCredentialRequest) (any, error) {
+	reply, err := c.verifierClient.Verify(req)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (c *Client) HealthAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
+	reply, err := c.apigwClient.Health()
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (c *Client) HealthVerifier(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
+	reply, err := c.verifierClient.Health()
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (c *Client) HealthMockAS(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
+	reply, err := c.mockasClient.Health()
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (c *Client) DecodeCredential(ctx context.Context, req *apiv1_verifier.DecodeCredentialRequest) (any, error) {
+	reply, err := c.verifierClient.Decode(req)
 	if err != nil {
 		return nil, err
 	}

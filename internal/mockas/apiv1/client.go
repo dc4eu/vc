@@ -3,6 +3,7 @@ package apiv1
 import (
 	"context"
 	"net/http"
+	parisusers "vc/internal/mockas/paris_users"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -21,6 +22,7 @@ type Client struct {
 	tracer             *trace.Tracer
 	httpClient         *http.Client
 	deterministicMocks []uploadMock
+	parisMocks         []model.CompleteDocument
 
 	PDA1 *PDA1Service
 	EHIC *EHICService
@@ -34,6 +36,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		tracer:             tracer,
 		httpClient:         &http.Client{},
 		deterministicMocks: []uploadMock{},
+		parisMocks:         []model.CompleteDocument{},
 
 		PDA1: &PDA1Service{},
 		EHIC: &EHICService{},
@@ -45,6 +48,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	c.EHIC = &EHICService{
 		Client: c,
 	}
+	c.parisMocks = parisusers.Make("./users_paris.xlsx")
 
 	if err := c.bootstrapper(ctx); err != nil {
 		return nil, err

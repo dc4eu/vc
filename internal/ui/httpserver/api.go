@@ -4,7 +4,9 @@ import (
 	"context"
 	apigw_apiv1 "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
+	apiv1_mockas "vc/internal/mockas/apiv1"
 	"vc/internal/ui/apiv1"
+	apiv1_verifier "vc/internal/verifier/apiv1"
 )
 
 type Apiv1 interface {
@@ -15,7 +17,7 @@ type Apiv1 interface {
 	User(ctx context.Context) (*apiv1.LoggedinReply, error)
 
 	// apigw
-	StatusAPIGW(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)
+	HealthAPIGW(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)
 	DocumentList(ctx context.Context, request *apiv1.DocumentListRequest) (any, error)
 	Upload(ctx context.Context, request *apigw_apiv1.UploadRequest) (any, error)
 	Credential(ctx context.Context, request *apiv1.CredentialRequest) (any, error)
@@ -23,5 +25,11 @@ type Apiv1 interface {
 	Notification(ctx context.Context, reguest *apiv1.NotificationRequest) (any, error)
 
 	// mockas
-	MockNext(ctx context.Context, request *apiv1.MockNextRequest) (any, error)
+	HealthMockAS(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)
+	MockNext(ctx context.Context, request *apiv1_mockas.MockNextRequest) (any, error)
+
+	// verifier
+	HealthVerifier(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)
+	Verify(ctx context.Context, request *apiv1_verifier.VerifyCredentialRequest) (any, error)
+	DecodeCredential(ctx context.Context, request *apiv1_verifier.DecodeCredentialRequest) (any, error)
 }

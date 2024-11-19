@@ -199,6 +199,9 @@ type UI struct {
 		MockAS struct {
 			BaseURL string `yaml:"base_url"`
 		} `yaml:"mockas"`
+		Verifier struct {
+			BaseURL string `yaml:"base_url"`
+		} `yaml:"verifier"`
 	} `yaml:"services"`
 }
 

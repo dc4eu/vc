@@ -11,9 +11,8 @@ import (
 )
 
 func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
-	//TODO:(mk): fix endpointHealth
 	request := &apiv1_status.StatusRequest{}
-	reply, err := s.apiv1.Status(ctx, request)
+	reply, err := s.apiv1.Health(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -24,12 +23,29 @@ func (s *Service) endpointVerifyCredential(ctx context.Context, c *gin.Context) 
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointVerifyCredential")
 	defer span.End()
 
-	request := &apiv1.VerifyCredentialRequest{}
+	request := &apiv1.Credential{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	reply, err := s.apiv1.VerifyCredential(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointDecodeCredential(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointDecodeCredential")
+	defer span.End()
+
+	request := &apiv1.Credential{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.DecodeCredential(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

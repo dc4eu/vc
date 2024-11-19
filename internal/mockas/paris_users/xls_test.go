@@ -27,5 +27,5 @@ func TestXLS(t *testing.T) {
 func TestMake(t *testing.T) {
 	storage := Make("testdata/users_paris.xlsx")
 
-	assert.Len(t, storage, 2)
+	assert.Len(t, storage, 160)
 }

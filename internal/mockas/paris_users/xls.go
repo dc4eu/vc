@@ -7,10 +7,6 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/pda1"
 
-	// add xlsx support
-
-	_ "github.com/pbnjay/grate/xlsx"
-
 	"github.com/lithammer/shortuuid/v4"
 	"github.com/xuri/excelize/v2"
 )
@@ -52,8 +48,8 @@ func makePID(fs *excelize.File) map[string]*model.CompleteDocument {
 }
 
 // EHIC returns a list of EHIC documents
-func EHIC(filePath string) []model.CompleteDocument {
-	f, err := excelize.OpenFile(filePath)
+func EHIC(sourceFilePath string) []model.CompleteDocument {
+	f, err := excelize.OpenFile(sourceFilePath)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -142,8 +138,8 @@ func EHIC(filePath string) []model.CompleteDocument {
 }
 
 // PDA1 returns a list of PDA1 documents
-func PDA1(filePath string) []model.CompleteDocument {
-	f, err := excelize.OpenFile(filePath)
+func PDA1(sourceFilePath string) []model.CompleteDocument {
+	f, err := excelize.OpenFile(sourceFilePath)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -264,6 +260,7 @@ func PDA1(filePath string) []model.CompleteDocument {
 	return list
 }
 
+// Make returns a list of EHIC and PDA1 documents
 func Make(filePath string) []model.CompleteDocument {
 	return append(EHIC(filePath), PDA1(filePath)...)
 }

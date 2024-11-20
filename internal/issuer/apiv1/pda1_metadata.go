@@ -1,7 +1,5 @@
 package apiv1
 
-import "fmt"
-
 //"vctm": {
 //	"vct": <pda1_vct>,
 //	"name": "PDA1",
@@ -75,7 +73,7 @@ func (c *pda1Client) MetadataClaim(vct string) ([]string, error) {
 				Rendering: Rendering{
 					Simple: SimpleRendering{
 						Logo: Logo{
-							URI:          fmt.Sprintf("%s/pda1.png", c.client.cfg.Issuer.JWTAttribute.StaticHost),
+							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1.png",
 							URIIntegrity: "sha256-94445b2ca72e9155260c8b4879112df7677e8b3df3dcee9b970b40534e26d4ab",
 							AltText:      "PDA1 Card",
 						},
@@ -84,8 +82,8 @@ func (c *pda1Client) MetadataClaim(vct string) ([]string, error) {
 					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          fmt.Sprintf("%s/pda1Template.svg", c.client.cfg.Issuer.JWTAttribute.StaticHost),
-							URLIntegrity: "",
+							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1Template.svg",
+							URLIntegrity: "sha256-08b5d75f209d97f231bf5983e3937f83c515565023cd829fc255eeeba86a88cb",
 							Properties:   SVGTemplateProperties{},
 						},
 					},

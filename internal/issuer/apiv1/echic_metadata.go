@@ -1,7 +1,5 @@
 package apiv1
 
-import "fmt"
-
 func (c *ehicClient) MetadataClaim(vct string) ([]string, error) {
 	var (
 		socialSecurityPin    = "social_security_pin"
@@ -24,8 +22,8 @@ func (c *ehicClient) MetadataClaim(vct string) ([]string, error) {
 				Rendering: Rendering{
 					Simple: SimpleRendering{
 						Logo: Logo{
-							URI:          fmt.Sprintf("%s/ehicCard.png", c.client.cfg.Issuer.JWTAttribute.StaticHost),
-							URIIntegrity: "sha256-94445b2ca72e9155260c8b4879112df7677e8b3df3dcee9b970b40534e26d4ab",
+							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/ehiccard.png",
+							URIIntegrity: "sha256-0b276d01a45c41286220e8fb6e906b3475fa2d4f084e2d21eb502023ca51cacf",
 							AltText:      "EHIC Card",
 						},
 						BackgroundColor: "#12107c",
@@ -33,8 +31,8 @@ func (c *ehicClient) MetadataClaim(vct string) ([]string, error) {
 					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          fmt.Sprintf("%s/ehicTemplate.png", c.client.cfg.Issuer.JWTAttribute.StaticHost),
-							URLIntegrity: "",
+							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/ehicTemplate.svg",
+							URLIntegrity: "sha256-dc538e648b863d6445327897318caee0ce65f219011f7b02995bd07b6abea9af",
 							Properties:   SVGTemplateProperties{},
 						},
 					},

@@ -46,7 +46,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	}
 
 	// statics if mainly for images/logos in vctm attribute
-	rgRoot.Static("statics", "./statics")
+	rgRoot.Static("/statics", "/statics")
+
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
 
 	// Run http server
 	go func() {

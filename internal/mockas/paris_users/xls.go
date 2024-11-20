@@ -1,13 +1,14 @@
 package parisusers
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
 	"strings"
 	"vc/pkg/ehic"
 	"vc/pkg/model"
 	"vc/pkg/pda1"
 
-	"github.com/lithammer/shortuuid/v4"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -29,9 +30,9 @@ func makePID(fs *excelize.File) map[string]*model.CompleteDocument {
 			DocumentDataVersion: "1.0.0",
 			Identities: []model.Identity{
 				{
-					AuthenticSourcePersonID: "",
+					AuthenticSourcePersonID: fmt.Sprintf("authentic_source_person_id_%s", row[0]),
 					Schema: &model.IdentitySchema{
-						Name:    "SE",
+						Name:    "FR",
 						Version: "",
 					},
 					FamilyName: row[6],
@@ -76,6 +77,7 @@ func EHIC(sourceFilePath string) []model.CompleteDocument {
 		SocialSecurityPin := row[4]
 		startDate := row[5]
 		endDate := row[6]
+
 		CardNumber := row[7]
 		InstitutionID := row[8]
 		InstitutionName := row[9]
@@ -115,16 +117,29 @@ func EHIC(sourceFilePath string) []model.CompleteDocument {
 			AuthenticSource: row[2],
 			DocumentVersion: "1.0.0",
 			DocumentType:    "EHIC",
-			DocumentID:      fmt.Sprintf("document_id_%s", shortuuid.New()),
+			DocumentID:      fmt.Sprintf("document_id_ehic_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{
-				ID:         fmt.Sprintf("collect_id_%s", shortuuid.New()),
+				ID:         fmt.Sprintf("collect_id_ehic_%s", row[0]),
 				ValidUntil: 0,
 			},
 			Revocation:                &model.Revocation{},
 			CredentialValidFrom:       0,
 			CredentialValidTo:         0,
 			DocumentDataValidationRef: "",
+		}
+
+		user.DocumentDisplay = &model.DocumentDisplay{
+			Version: "1.0.0",
+			Type:    "secure",
+			DescriptionStructured: map[string]any{
+				"en": map[string]any{
+					"documentType": "EHIC",
+				},
+				"sv": map[string]any{
+					"documentType": "EHIC",
+				},
+			},
 		}
 
 	}
@@ -235,19 +250,32 @@ func PDA1(sourceFilePath string) []model.CompleteDocument {
 		}
 
 		user.Meta = &model.MetaData{
-			AuthenticSource: row[2],
+			AuthenticSource: row[3],
 			DocumentVersion: "1.0.0",
 			DocumentType:    "PDA1",
-			DocumentID:      fmt.Sprintf("document_id_%s", shortuuid.New()),
+			DocumentID:      fmt.Sprintf("document_id_pda1_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{
-				ID:         fmt.Sprintf("collect_id_%s", shortuuid.New()),
+				ID:         fmt.Sprintf("collect_id_pda1_%s", row[0]),
 				ValidUntil: 0,
 			},
 			Revocation:                &model.Revocation{},
 			CredentialValidFrom:       0,
 			CredentialValidTo:         0,
 			DocumentDataValidationRef: "",
+		}
+
+		user.DocumentDisplay = &model.DocumentDisplay{
+			Version: "1.0.0",
+			Type:    "secure",
+			DescriptionStructured: map[string]any{
+				"en": map[string]any{
+					"documentType": "PDA1",
+				},
+				"sv": map[string]any{
+					"documentType": "PDA1",
+				},
+			},
 		}
 
 	}
@@ -263,4 +291,32 @@ func PDA1(sourceFilePath string) []model.CompleteDocument {
 // Make returns a list of EHIC and PDA1 documents
 func Make(filePath string) []model.CompleteDocument {
 	return append(EHIC(filePath), PDA1(filePath)...)
+}
+
+// CSV converts a list of CompleteDocument to CSV and writes it to a file
+func CSV(docs model.CompleteDocuments) ([]string, [][]string, error) {
+	fs, err := os.Create("pda1_users.csv")
+	if err != nil {
+		return nil, nil, err
+	}
+	defer fs.Close()
+
+	return docs.CSV()
+
+}
+
+func saveCSVToDisk(records [][]string, filePath string) error {
+	f, err := os.Create(filePath)
+	defer f.Close()
+	if err != nil {
+		return err
+	}
+
+	w := csv.NewWriter(f)
+	defer w.Flush()
+
+	if err := w.WriteAll(records); err != nil {
+		return err
+	}
+	return nil
 }

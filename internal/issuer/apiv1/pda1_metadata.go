@@ -75,7 +75,7 @@ func (c *pda1Client) MetadataClaim(vct string) ([]string, error) {
 				Rendering: Rendering{
 					Simple: SimpleRendering{
 						Logo: Logo{
-							URI:          fmt.Sprintf("%s/pda1.png", c.client.cfg.Issuer.JWTAttribute.Issuer),
+							URI:          fmt.Sprintf("%s/pda1.png", c.client.cfg.Issuer.JWTAttribute.StaticHost),
 							URIIntegrity: "sha256-94445b2ca72e9155260c8b4879112df7677e8b3df3dcee9b970b40534e26d4ab",
 							AltText:      "PDA1 Card",
 						},
@@ -84,7 +84,7 @@ func (c *pda1Client) MetadataClaim(vct string) ([]string, error) {
 					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          fmt.Sprintf("%s/pda1Template.svg", c.client.cfg.Issuer.JWTAttribute.Issuer),
+							URI:          fmt.Sprintf("%s/pda1Template.svg", c.client.cfg.Issuer.JWTAttribute.StaticHost),
 							URLIntegrity: "",
 							Properties:   SVGTemplateProperties{},
 						},

@@ -51,7 +51,6 @@ type Common struct {
 	Log        Log      `yaml:"log"`
 	Mongo      Mongo    `yaml:"mongo" validate:"omitempty"`
 	Tracing    OTEL     `yaml:"tracing" validate:"required"`
-	Queues     Queues   `yaml:"queues" validate:"omitempty"`
 	KeyValue   KeyValue `yaml:"key_value" validate:"omitempty"`
 	QR         QRCfg    `yaml:"qr" validate:"omitempty"`
 	Kafka      Kafka    `yaml:"kafka" validate:"omitempty"`
@@ -77,27 +76,10 @@ type PDF struct {
 
 // QRCfg holds the qr configuration
 type QRCfg struct {
-	BaseURL       string `yaml:"base_url" validate:"required"`
-	RecoveryLevel int    `yaml:"recovery_level" validate:"required,min=0,max=3"`
-	Size          int    `yaml:"size" validate:"required"`
-}
-
-// Queues have the queue configuration
-type Queues struct {
-	SimpleQueue struct {
-		VCPersistentSave struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"vc_persistent_save" validate:"required"`
-		VCPersistentGet struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"vc_persistent_get" validate:"required"`
-		VCPersistentDelete struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"vc_persistent_delete" validate:"required"`
-		VCPersistentReplace struct {
-			Name string `yaml:"name" validate:"required"`
-		} `yaml:"vc_persistent_replace" validate:"required"`
-	} `yaml:"simple_queue" validate:"required"`
+	BaseURL        string `yaml:"base_url" validate:"required"`
+	RecoveryLevel  int    `yaml:"recovery_level" validate:"required,min=0,max=3"`
+	Size           int    `yaml:"size" validate:"required"`
+	IssuingBaseURL string `yaml:"issuing_base_url" validate:"required"`
 }
 
 // JWTAttribute holds the jwt attribute configuration.
@@ -105,6 +87,9 @@ type Queues struct {
 type JWTAttribute struct {
 	// Issuer of the token example: https://issuer.sunet.se
 	Issuer string `yaml:"issuer" validate:"required"`
+
+	// StaticHost is the static host of the issuer, expose static files, like pictures
+	StaticHost string `yaml:"static_host" validate:"required"`
 
 	// EnableNotBefore states the time not before which the token is valid
 	EnableNotBefore bool `yaml:"enable_not_before"`

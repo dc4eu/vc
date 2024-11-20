@@ -32,7 +32,7 @@ type UploadRequest struct {
 //	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
-	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Common.QR.BaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
+	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Common.QR.IssuingBaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
 	if err != nil {
 		c.log.Debug("QR code generation failed", "error", err)
 		return err

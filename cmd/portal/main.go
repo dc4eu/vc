@@ -38,7 +38,7 @@ func main() {
 	// main function log
 	mainLog := log.New("main")
 
-	tracer, err := trace.NewForTesting(ctx, serviceName, log)
+	tracer, err := trace.New(ctx, cfg, serviceName, log)
 	if err != nil {
 		panic(err)
 	}

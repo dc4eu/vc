@@ -74,7 +74,7 @@ build-ui:
 	$(info Building ui)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_ui ${LDFLAGS} ./cmd/ui/main.go
 
-docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
+docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui docker-build-portal
 
 docker-build-goland-debug: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui-goland-debug
 
@@ -154,7 +154,7 @@ docker-push-portal:
 	$(info Pushing docker images)
 	docker push $(DOCKER_TAG_PORTAL)
 
-docker-push: docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui docker-push-mockas
+docker-push: docker-push-verifier docker-push-registry docker-push-persistent docker-push-apigw docker-push-issuer docker-push-ui docker-push-mockas docker-push-portal
 	$(info Pushing docker images)
 
 docker-tag-apigw:

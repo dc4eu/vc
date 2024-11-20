@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/skip2/go-qrcode"
 )
@@ -22,6 +24,9 @@ type CompleteDocument struct {
 	DocumentDataVersion string `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required,semver"`
 	QR                  *QR    `json:"qr,omitempty" bson:"qr"`
 }
+
+// CompleteDocuments is a array of CompleteDocument
+type CompleteDocuments []CompleteDocument
 
 // DocumentList is a generic type for document list
 type DocumentList struct {
@@ -81,7 +86,6 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recove
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("URL", credentialOfferURL)
 
 	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
 
@@ -91,6 +95,57 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recove
 	}
 
 	return qr, nil
+}
+
+// CSV returns the document as a CSV
+func (c *CompleteDocument) CSV() (string, []string, error) {
+	if len(c.Identities) == 0 {
+		return "", nil, errors.New("no identities found")
+	}
+
+	if c.Meta == nil {
+		return "", nil, errors.New("no metadata found")
+	}
+
+	qr, err := c.Meta.QRGenerator(context.Background(), "https://satosa-test-1.sunet.se", 2, 256)
+	if err != nil {
+		return "", nil, err
+	}
+	attributes := []string{
+		c.Identities[0].AuthenticSourcePersonID,
+		c.Identities[0].GivenName,
+		c.Identities[0].FamilyName,
+		c.Identities[0].BirthDate,
+		c.Identities[0].Schema.Name,
+		c.Meta.AuthenticSource,
+		c.Meta.Collect.ID,
+		c.Meta.DocumentType,
+		c.Meta.DocumentID,
+		qr.CredentialOfferURL,
+	}
+	csv := strings.Join(attributes, ",")
+
+	return csv, attributes, nil
+}
+
+// CSV return CompleteDocuments as a CSV, string array
+func (c *CompleteDocuments) CSV() ([]string, [][]string, error) {
+	if len(*c) == 0 {
+		return nil, nil, errors.New("no documents found")
+	}
+
+	var csvResult []string
+	var csvRaw [][]string
+	for _, doc := range *c {
+		csvRow, raw, err := doc.CSV()
+		if err != nil {
+			return nil, nil, err
+		}
+		csvRaw = append(csvRaw, raw)
+		csvResult = append(csvResult, fmt.Sprintf("%v\n", csvRow))
+	}
+
+	return csvResult, csvRaw, nil
 }
 
 // CredentialOffer https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html 4.1.1 Credential Offer Parameters

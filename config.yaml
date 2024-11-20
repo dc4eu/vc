@@ -8,9 +8,9 @@ common:
     type: jaeger
     #timeout: 10
   qr:
-    base_url: "http://vc_dev_apigw:8080"
     recovery_level: 2
     size: 256
+    issuing_base_url: https://satosa-test-1.sunet.se
   kafka:
     enabled: false
     brokers:
@@ -63,6 +63,7 @@ issuer:
     enable_not_before: true
     valid_duration: 3600
     verifiable_credential_type: "https://credential.sunet.se/identity_credential"
+    static_host: "http://vc_dev_portal:8080/statics"
 
 verifier:
   api_server:
@@ -118,3 +119,7 @@ ui:
       base_url: http://vc_dev_mockas:8080
     verifier:
       base_url: http://vc_dev_verifier:8080
+
+portal:
+  api_server:
+    addr: :8080

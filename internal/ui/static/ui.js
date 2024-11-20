@@ -668,7 +668,7 @@ const addCredentialFormArticleToContainer = () => {
         const familyNameElement = createInputElement('family name', '', 'text');
         const givenNameElement = createInputElement('given name', '', 'text');
         const birthdateElement = createInputElement('birth date', '', 'text');
-        const schemaNameElement = createInputElement('identity schema name', 'SE');
+        const schemaNameElement = createInputElement('identity schema name', 'FR');
         const documentTypeElement = createInputElement('document type (EHIC/PDA1)', 'EHIC');
         const credentialTypeElement = createInputElement('credential type', 'vc+sd-jwt');
         const authenticSourceElement = createInputElement('authentic source', 'SUNET');

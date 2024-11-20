@@ -24,7 +24,7 @@ func (c *ehicClient) MetadataClaim(vct string) ([]string, error) {
 				Rendering: Rendering{
 					Simple: SimpleRendering{
 						Logo: Logo{
-							URI:          fmt.Sprintf("%s/ehicCard.png", c.client.cfg.Issuer.JWTAttribute.Issuer),
+							URI:          fmt.Sprintf("%s/ehicCard.png", c.client.cfg.Issuer.JWTAttribute.StaticHost),
 							URIIntegrity: "sha256-94445b2ca72e9155260c8b4879112df7677e8b3df3dcee9b970b40534e26d4ab",
 							AltText:      "EHIC Card",
 						},
@@ -33,7 +33,7 @@ func (c *ehicClient) MetadataClaim(vct string) ([]string, error) {
 					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          fmt.Sprintf("%s/ehicTemplate.png", c.client.cfg.Issuer.JWTAttribute.Issuer),
+							URI:          fmt.Sprintf("%s/ehicTemplate.png", c.client.cfg.Issuer.JWTAttribute.StaticHost),
 							URLIntegrity: "",
 							Properties:   SVGTemplateProperties{},
 						},

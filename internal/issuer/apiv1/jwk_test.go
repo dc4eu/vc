@@ -54,7 +54,6 @@ func mockClient(t *testing.T) *Client {
 				Type:    "jaeger",
 				Timeout: 0,
 			},
-			Queues:   model.Queues{},
 			KeyValue: model.KeyValue{},
 			QR:       model.QRCfg{},
 			Kafka:    model.Kafka{},

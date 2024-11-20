@@ -343,11 +343,6 @@ github.com/montanaflynn/stats
 # github.com/moogar0880/problems v0.1.1
 ## explicit; go 1.12
 github.com/moogar0880/problems
-# github.com/pbnjay/grate v0.0.0-20231006022435-3f8e65d74a14
-## explicit; go 1.16
-github.com/pbnjay/grate
-github.com/pbnjay/grate/commonxl
-github.com/pbnjay/grate/xlsx
 # github.com/pelletier/go-toml/v2 v2.2.3
 ## explicit; go 1.21.0
 github.com/pelletier/go-toml/v2

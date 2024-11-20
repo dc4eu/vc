@@ -141,6 +141,19 @@ services:
       vc-dev-net:
         ipv4_address: 172.16.50.20
 
+  portal:
+    image: docker.sunet.se/dc4eu/portal:latest
+    container_name: "vc_dev_portal"
+    restart: always
+    volumes:
+      - ./config.yaml:/config.yaml:ro
+      - ./statics:/statics:ro
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.24
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: vc_dev_jaeger
@@ -254,7 +267,7 @@ networks:
         - subnet: 172.16.50.0/24
 volumes:
   mongo_data:
-#  kraft0-data:
-#    driver: local
-#  kraft1-data:
-#    driver: local
+    #  kraft0-data:
+    #    driver: local
+    #  kraft1-data:
+    #    driver: local

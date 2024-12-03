@@ -43,15 +43,18 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 		Identity:        req.Identity,
 	})
 	if err != nil {
+		c.log.Debug("failed to get document", "error", err)
 		return nil, err
 	}
 
 	if document == nil || document.DocumentData == nil {
+		c.log.Debug("document_data not found")
 		return nil, helpers.ErrNoDocumentFound
 	}
 
 	documentData, err := json.Marshal(document.DocumentData)
 	if err != nil {
+		c.log.Debug("failed to marshal document data", "error", err)
 		return nil, err
 	}
 

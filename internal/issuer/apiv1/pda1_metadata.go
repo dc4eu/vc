@@ -73,8 +73,8 @@ func (c *pda1Client) MetadataClaim(vct string) ([]string, error) {
 				Rendering: Rendering{
 					Simple: SimpleRendering{
 						Logo: Logo{
-							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1.png",
-							URIIntegrity: "sha256-94445b2ca72e9155260c8b4879112df7677e8b3df3dcee9b970b40534e26d4ab",
+							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1.png",
+							URIIntegrity: "sha256-ecf6af03924f152deb2fad59c8496750a12e376a3b2b575d53b79f22241e3d96",
 							AltText:      "PDA1 Card",
 						},
 						BackgroundColor: "#8ebeeb",
@@ -82,8 +82,8 @@ func (c *pda1Client) MetadataClaim(vct string) ([]string, error) {
 					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1Template.svg",
-							URLIntegrity: "sha256-08b5d75f209d97f231bf5983e3937f83c515565023cd829fc255eeeba86a88cb",
+							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1Template.svg",
+							URLIntegrity: "sha256-35a9eecb4d2d8d92e42a33e7e765afc6b24c8875cf145ea1b29cde9cd2f63f5e",
 							Properties:   SVGTemplateProperties{},
 						},
 					},

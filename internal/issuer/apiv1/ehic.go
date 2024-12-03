@@ -3,7 +3,6 @@ package apiv1
 import (
 	"context"
 	"crypto/sha256"
-	"fmt"
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/ehic"
@@ -43,7 +42,7 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document, jwk *apiv1_i
 		return "", err
 	}
 
-	vct := fmt.Sprintf("%s/credential/ehic/1.0", c.client.cfg.Issuer.JWTAttribute.Issuer)
+	vct := "EHICCredential"
 
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()

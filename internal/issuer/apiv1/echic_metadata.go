@@ -22,8 +22,8 @@ func (c *ehicClient) MetadataClaim(vct string) ([]string, error) {
 				Rendering: Rendering{
 					Simple: SimpleRendering{
 						Logo: Logo{
-							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/ehiccard.png",
-							URIIntegrity: "sha256-0b276d01a45c41286220e8fb6e906b3475fa2d4f084e2d21eb502023ca51cacf",
+							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/ehiccard.png",
+							URIIntegrity: "sha256-124c5fea148d56527baa77259942b6ee5050e635cc86c268fd42587d022a69c7",
 							AltText:      "EHIC Card",
 						},
 						BackgroundColor: "#12107c",
@@ -31,8 +31,8 @@ func (c *ehicClient) MetadataClaim(vct string) ([]string, error) {
 					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          "https://github.com/dc4eu/vc/blob/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/ehicTemplate.svg",
-							URLIntegrity: "sha256-dc538e648b863d6445327897318caee0ce65f219011f7b02995bd07b6abea9af",
+							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/ehicTemplate.svg",
+							URLIntegrity: "sha256-c9089cb2c8b845a69978cc9adc2d53c88207ed5a586399b9aede8e1a93cd305a",
 							Properties:   SVGTemplateProperties{},
 						},
 					},

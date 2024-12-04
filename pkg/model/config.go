@@ -89,7 +89,7 @@ type JWTAttribute struct {
 	Issuer string `yaml:"issuer" validate:"required"`
 
 	// StaticHost is the static host of the issuer, expose static files, like pictures
-	StaticHost string `yaml:"static_host" validate:"required"`
+	StaticHost string `yaml:"static_host" validate:"omitempty"`
 
 	// EnableNotBefore states the time not before which the token is valid
 	EnableNotBefore bool `yaml:"enable_not_before"`

@@ -76,7 +76,6 @@ type PDF struct {
 
 // QRCfg holds the qr configuration
 type QRCfg struct {
-	BaseURL        string `yaml:"base_url" validate:"required"`
 	RecoveryLevel  int    `yaml:"recovery_level" validate:"required,min=0,max=3"`
 	Size           int    `yaml:"size" validate:"required"`
 	IssuingBaseURL string `yaml:"issuing_base_url" validate:"required"`

@@ -47,8 +47,10 @@ function displaySecureMenyItems() {
     hideAElement("show-login-form-btn");
 }
 
+/**
+ * @returns {string} containing UUID v4
+ */
 const generateUUID = () => {
-    //UUID v4
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -558,11 +560,10 @@ function createCheckboxElement(labelText, disabled = false) {
 
 const createSelectElement = (options = [], disabled = false) => {
     const div = document.createElement('div');
-    div.classList.add('select')
+    div.classList.add('select');
 
     const select = document.createElement('select');
     select.id = generateUUID();
-    //select.classList.add('select');
     select.disabled = disabled;
 
     options.forEach(({value, label}) => {
@@ -628,6 +629,7 @@ function buildDocumentsTableWithoutContent() {
     const headerRow = document.createElement('tr');
 
     const headers = [
+        {title: 'Action', abbr: null},
         {title: 'Document ID', abbr: null},
         {title: 'Collect ID', abbr: null},
         {title: 'Document type', abbr: null},
@@ -636,7 +638,7 @@ function buildDocumentsTableWithoutContent() {
         {title: 'Family name', abbr: null},
         {title: 'Given name', abbr: null},
         {title: 'Birthdate', abbr: null},
-        {title: 'Action', abbr: null}
+        {title: 'QR credential offer url', abbr: null}
     ];
 
     headers.forEach(header => {
@@ -938,6 +940,46 @@ function displayDeleteDocumentInModal(rowData) {
 function buildDocumentTableRow(doc) {
     const row = document.createElement('tr');
 
+    //------select start-------------------
+    const tdActions = document.createElement('td');
+    const divSelect = document.createElement('div');
+    divSelect.className = 'select'; // is-small';
+
+    const select = document.createElement('select');
+    select.id = generateUUID();
+
+    const optionDefault = document.createElement('option');
+    optionDefault.value = '';
+    optionDefault.textContent = 'select...';
+    select.appendChild(optionDefault);
+
+    const optionViewDocument = document.createElement('option');
+    optionViewDocument.value = 'VIEW_COMPLETE_DOCUMENT';
+    optionViewDocument.textContent = 'View complete document';
+    select.appendChild(optionViewDocument);
+
+    const optionViewQR = document.createElement('option');
+    optionViewQR.value = 'VIEW_QR';
+    optionViewQR.textContent = 'View QR';
+    select.appendChild(optionViewQR);
+
+    const optionCreateCredential = document.createElement('option');
+    optionCreateCredential.value = 'CREATE_CREDENTIAL';
+    optionCreateCredential.textContent = 'Create credential';
+    select.appendChild(optionCreateCredential);
+
+    select.appendChild(document.createElement('hr'));
+
+    const optionDeleteDocument = document.createElement('option');
+    optionDeleteDocument.value = 'DELETE_DOCUMENT';
+    optionDeleteDocument.textContent = 'Delete document';
+    select.appendChild(optionDeleteDocument);
+
+    divSelect.appendChild(select);
+    tdActions.appendChild(divSelect);
+    row.appendChild(tdActions);
+    //-------------------------
+
     const tdDocumentId = document.createElement('td');
     const documentId = doc.meta?.document_id || "";
     tdDocumentId.textContent = documentId;
@@ -990,39 +1032,10 @@ function buildDocumentTableRow(doc) {
     tdBirthDate.innerHTML = bdStringBuilder.join("<br>");
     row.appendChild(tdBirthDate);
 
-    const tdActions = document.createElement('td');
-    const divSelect = document.createElement('div');
-    divSelect.className = 'select'; // is-small';
-
-    const select = document.createElement('select');
-    select.id = generateUUID();
-
-    const optionDefault = document.createElement('option');
-    optionDefault.value = '';
-    optionDefault.textContent = 'select...';
-    select.appendChild(optionDefault);
-
-    const optionViewDocument = document.createElement('option');
-    optionViewDocument.value = 'VIEW_COMPLETE_DOCUMENT';
-    optionViewDocument.textContent = 'View complete document';
-    select.appendChild(optionViewDocument);
-
-    const optionViewQR = document.createElement('option');
-    optionViewQR.value = 'VIEW_QR';
-    optionViewQR.textContent = 'View QR';
-    select.appendChild(optionViewQR);
-
-    const optionCreateCredential = document.createElement('option');
-    optionCreateCredential.value = 'CREATE_CREDENTIAL';
-    optionCreateCredential.textContent = 'Create credential';
-    select.appendChild(optionCreateCredential);
-
-    select.appendChild(document.createElement('hr'));
-
-    const optionDeleteDocument = document.createElement('option');
-    optionDeleteDocument.value = 'DELETE_DOCUMENT';
-    optionDeleteDocument.textContent = 'Delete document';
-    select.appendChild(optionDeleteDocument);
+    const tdQRCredentialOfferUrl = document.createElement('td');
+    const credentialOfferUrl = doc.qr?.credential_offer || "";
+    tdQRCredentialOfferUrl.textContent = credentialOfferUrl;
+    row.appendChild(tdQRCredentialOfferUrl);
 
     const rowData = {
         documentId: documentId,
@@ -1054,10 +1067,6 @@ function buildDocumentTableRow(doc) {
         this.value = '';
     });
 
-    divSelect.appendChild(select);
-    tdActions.appendChild(divSelect);
-    row.appendChild(tdActions);
-
     return row;
 }
 
@@ -1065,18 +1074,53 @@ function displayDocumentsTable(data, divResultContainer) {
     divResultContainer.appendChild(document.createElement("br"));
     divResultContainer.appendChild(document.createElement("br"));
 
-    if (Array.isArray(data.documents) && data.documents.length === 0) {
+    if (data.documents == null || (Array.isArray(data.documents) && data.documents.length === 0)) {
         displayInfoTag("No matching documents found", divResultContainer);
         return;
     } else if (data.has_more_results) {
         displayWarningTag("There are more search results available. Narrow down your search criteria to view them all.", divResultContainer);
     }
 
+    const exportToCsvButton = document.createElement("button");
+    exportToCsvButton.id = generateUUID();
+    exportToCsvButton.classList.add('button', 'is-link');
+    exportToCsvButton.textContent = "Export result to csv file";
+    exportToCsvButton.disabled = false;
+    divResultContainer.appendChild(exportToCsvButton);
+
     const tableBasis = buildDocumentsTableWithoutContent();
+    exportToCsvButton.addEventListener('click', () => exportTableToCSV(tableBasis.table));
     divResultContainer.appendChild(tableBasis.table);
     data.documents.forEach(doc => {
         tableBasis.tbody.appendChild(buildDocumentTableRow(doc));
     });
+}
+
+function exportTableToCSV(table) {
+    const rows = table.querySelectorAll('tr');
+    let csvContent = "";
+
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('th, td');
+        const rowContent = Array.from(cells)
+            .map(cell => `"${cell.innerText}"`) // Wrap cell values in quotes to handle commas
+            .join(","); // Join cell values with a comma
+        csvContent += rowContent + "\n";
+    });
+
+
+    const blob = new Blob([csvContent], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'search_result.csv';
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 const addSearchDocumentsFormArticleToContainer = () => {
@@ -1133,7 +1177,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
 
                 limit: parseInt(limitInput.value, 10),
 
-                fields: ["meta.document_id", "meta.authentic_source", "meta.document_type", "meta.collect.id", "identities"],
+                fields: ["meta.document_id", "meta.authentic_source", "meta.document_type", "meta.collect.id", "identities", "qr.credential_offer"],
             };
 
             if (checkboxShowCompleteDocsAsRawJson.checked) {
@@ -1150,7 +1194,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
                     checkboxShowCompleteDocsAsRawJson,
                     limitInput
                 ]);
-                //TODO(mk): display raw json in same container as the table
+                //TODO(mk): display raw json in same div as the result table
                 postAndDisplayInArticleContainerFor(path, requestBody, "Documents");
             } else {
                 fetchData(new URL(path, baseUrl), {
@@ -1195,21 +1239,302 @@ const addSearchDocumentsFormArticleToContainer = () => {
     document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
 };
 
-async function fetchData(url, options) {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        if (response.status === 401) {
-            //TODO(mk): handle not auth/session expired in ui
-            throw new Error("Unauthorized/session expired");
-        }
-        throw new Error(`HTTP error! status: ${response.status}, method: ${response.method}, url: ${url}`);
+const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
+    const buildFormElements = () => {
+        const documentTypeSelectWithinDivElement = createSelectElement([{value: 'EHIC', label: 'EHIC'}], false);
+
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'file has-name is-fullwidth';
+
+        const label = document.createElement('label');
+        label.className = 'file-label';
+
+        const input = document.createElement('input');
+        input.className = 'file-input';
+        input.type = 'file';
+        input.name = 'resume';
+        input.id = generateUUID();
+        input.accept = '.csv';
+
+        const fileCta = document.createElement('span');
+        fileCta.className = 'file-cta';
+
+        const fileIcon = document.createElement('span');
+        fileIcon.className = 'file-icon';
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-upload';
+        fileIcon.appendChild(icon);
+
+        const fileLabel = document.createElement('span');
+        fileLabel.className = 'file-label';
+        fileLabel.textContent = 'Choose a *.csv file…';
+
+        fileCta.appendChild(fileIcon);
+        fileCta.appendChild(fileLabel);
+
+        const fileName = document.createElement('span');
+        fileName.className = 'file-name';
+        fileName.id = generateUUID();
+        fileName.textContent = 'No file selected';
+
+        const uploadButton = document.createElement('button');
+        uploadButton.id = generateUUID();
+        uploadButton.classList.add('button', 'is-link');
+        uploadButton.textContent = 'Upload';
+
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'table-container';
+        tableContainer.style.marginTop = '20px';
+
+        let selectedFile = null;
+        input.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (!file) {
+                alert('Please select a csv file.');
+                return;
+            }
+            selectedFile = file;
+            fileName.textContent = file.name;
+        });
+
+        uploadButton.onclick = () => {
+            if (!selectedFile) {
+                alert('Please select a csv file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+                tableContainer.innerHTML = "";
+
+                const csvData = e.target.result;
+                //displayCSV(csvData, table);
+                const jsonData = csvToJson(csvData);
+
+                console.debug("csvData", csvData);
+                console.debug("jsonData", jsonData);
+
+                const table = document.createElement('table');
+                table.className = 'table is-striped is-hoverable is-fullwidth';
+                table.id = generateUUID();
+                tableContainer.appendChild(table);
+
+                const headers = ["Upload status", "Upload data", "More information"];
+                const thead = document.createElement("thead");
+                const headerRow = document.createElement("tr");
+                headers.forEach(headerText => {
+                    const th = document.createElement("th");
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                const tbody = document.createElement("tbody");
+                table.appendChild(tbody);
+
+                jsonData.forEach((row) => {
+                    try {
+                        const uploadRequest = createUploadRequestFrom(row, documentTypeSelectWithinDivElement[1].value);
+
+                        console.debug("row", row);
+                        console.debug("bodyData", uploadRequest);
+
+                        fetchData(new URL("/secure/apigw/upload", baseUrl), {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json; charset=utf-8',
+                            },
+                            body: JSON.stringify(uploadRequest),
+                        }).then(data => {
+                            let dataOutput;
+                            if (data && typeof data === 'object') {
+                                try {
+                                    dataOutput = JSON.stringify(data, null, 2);
+                                } catch (e) {
+                                    console.error("Failed to stringify data:", e);
+                                    dataOutput = "[Unserializable Object]";
+                                }
+                            } else if (data != null) {
+                                dataOutput = String(data);
+                            } else {
+                                dataOutput = "";
+                            }
+                            addTableRow(tbody, ["SUCCESS", JSON.stringify(uploadRequest), dataOutput]);
+                        }).catch(err => {
+                            console.error("Unexpected error while uploading credential from csv:", err);
+                            addTableRow(tbody, ["FAILED", JSON.stringify(uploadRequest), err]);
+                        });
+                    } catch (error) {
+                        console.error(`Error preparing uploadRequest data from csv: ${JSON.stringify(row)}, Error: ${error}`);
+                        addTableRow(tbody, ["FAILED", JSON.stringify(row), error]);
+                    }
+                });
+            };
+            reader.readAsText(selectedFile);
+        };
+
+        label.appendChild(input);
+        label.appendChild(fileCta);
+        label.appendChild(fileName);
+
+        fileDiv.appendChild(label);
+
+        let brElement = document.createElement('br');
+
+        return {
+            formElements: [documentTypeSelectWithinDivElement[0], fileDiv, uploadButton, brElement, tableContainer],
+            csvFileElement: input,
+            csvFileName: fileName,
+        };
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    const elements = buildFormElements();
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Upload documents using csv", elements.formElements);
+    const articleContainer = document.getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+
+    function createUploadRequestFrom(row, documentType) {
+        const generatedDocumentId = generateUUID();
+
+        return {
+            meta: {
+                authentic_source: row.authentic_source,
+                document_version: "1.0.0",
+                document_type: documentType,
+                document_id: row.document_id,
+                real_data: row.real_data === "true",
+                credential_valid_from: convertToUnixTimestampOrNull(row.ehic_start_date),
+                credential_valid_to: convertToUnixTimestampOrNull(row.ehic_end_date),
+                document_data_validation: null,
+                collect: {
+                    id: row.document_id,
+                    valid_until: convertToUnixTimestampOrNull(row.ehic_expiry_date),
+                },
+            },
+            identities: [
+                {
+                    authentic_source_person_id: row.authentic_source_person_id,
+                    schema: {
+                        name: "DefaultSchema",
+                        version: "1.0.0",
+                    },
+                    family_name: row.family_name,
+                    given_name: row.given_name,
+                    birth_date: row.birth_date,
+                },
+            ],
+            document_display: null,
+            document_data: {
+                subject: {
+                    forename: row.given_name,
+                    family_name: row.family_name,
+                    date_of_birth: row.birth_date,
+                },
+                social_security_pin: row.social_security_pin,
+                period_entitlement: {
+                    starting_date: row.ehic_start_date,
+                    ending_date: row.ehic_end_date
+                },
+                document_id: row.ehic_card_identification_number,
+                competent_institution: {
+                    institution_id: row.ehic_institution_id,
+                    institution_name: row.ehic_institution_name,
+                    institution_country: row.ehic_institution_country_code,
+                }
+            },
+            document_data_version: row.document_data_version || "1.0.0",
+        };
     }
 
-    const data = await response.json();
-    //console.debug(JSON.stringify(data, null, 2));
-    return data;
-}
+    function addTableRow(tbody, cellTexts) {
+        const tr = document.createElement("tr");
+        cellTexts.forEach(text => {
+            const td = document.createElement("td");
+            td.textContent = text;
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    }
 
+    function displayCSV(data, table) {
+        const rows = data.split('\n');
+        table.innerHTML = ''; // Clear previous content
+
+        rows.forEach((row, rowIndex) => {
+            const cols = row.split(',');
+            const tr = document.createElement('tr');
+            cols.forEach((col) => {
+                const cell = rowIndex === 0 ? document.createElement('th') : document.createElement('td');
+                cell.textContent = col.trim();
+                tr.appendChild(cell);
+            });
+            table.appendChild(tr);
+        });
+    }
+
+    function prefixWithAuthenticSourcePersonIdOrNull(pid_id) {
+        return pid_id ? `authentic_source_person_id_${pid_id}` : null;
+    }
+
+    /**
+     * @param dateString YYYY-MM-DD
+     */
+    function convertToUnixTimestampOrNull(dateString) {
+        if (dateString == null) return null;
+        const date = new Date(dateString);
+        return Math.floor(date.getTime() / 1000);
+    }
+
+    function csvToJson(csv) {
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',').map((header) => header.trim());
+        const rows = lines.slice(1);
+
+        return rows
+            .filter((row) => row.trim() !== '')// ignore empty lines
+            .map((row) => {
+                const values = row.split(',').map((value) => value.trim());
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+    }
+};
+
+async function fetchData(url, options) {
+    try {
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            let errorDetails = `HTTP error! status: ${response.status}, url: ${url}`;
+
+            try {
+                const errorData = await response.json();
+                errorDetails += `, details: ${JSON.stringify(errorData)}`;
+            } catch (jsonError) {
+                errorDetails += `, details: (Unable to parse JSON)`;
+            }
+
+            if (response.status === 401) {
+                throw new Error("Unauthorized/session expired");
+            }
+
+            throw new Error(errorDetails);
+        }
+
+        return await response.json();
+    } catch (error) {
+        if (error instanceof TypeError) {
+            throw new Error(`Network error or server did not respond. URL: ${url}, Details: ${error.message}`);
+        }
+
+        throw new Error(`Error: ${error.message}`);
+    }
+}
 
 const addViewNotificationFormArticleToContainer = () => {
     const buildFormElements = () => {

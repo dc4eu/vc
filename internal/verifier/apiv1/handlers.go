@@ -84,6 +84,7 @@ func (c *Client) DecodeCredential(ctx context.Context, request *Credential) (*De
 	 if vp+sd-jwt: a second signature may exist as holderProof (if exists, its found in the last ~disclosure~ so check if its the last one is a disclosure or a holderProof)
 */
 
+// Deprecated: use verifier in pkg.openid4vp instead
 // VerifyCredential verifies a credential (only sd-jwt or sd-jwt-vc signed with ES256 is currently supported)
 func (c *Client) VerifyCredential(ctx context.Context, request *Credential) (*VerifyCredentialReply, error) {
 	if request == nil || strings.TrimSpace(request.Credential) == "" {

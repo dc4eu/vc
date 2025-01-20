@@ -32,7 +32,7 @@ func makePID(fs *excelize.File) map[string]*model.CompleteDocument {
 				{
 					AuthenticSourcePersonID: fmt.Sprintf("authentic_source_person_id_%s", row[0]),
 					Schema: &model.IdentitySchema{
-						Name:    "FR",
+						Name:    "DefaultSchema",
 						Version: "",
 					},
 					FamilyName: row[6],

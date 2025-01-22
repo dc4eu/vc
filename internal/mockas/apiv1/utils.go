@@ -59,7 +59,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 	}
 
 	if data.IdentitySchemaName == "" {
-		data.IdentitySchemaName = "SE"
+		data.IdentitySchemaName = "DefaultSchema"
 	}
 
 	if data.AuthenticSource == "" {

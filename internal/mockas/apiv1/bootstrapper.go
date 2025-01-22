@@ -289,7 +289,7 @@ func (c *Client) bootstrapperConstructor(ctx context.Context) error {
 				{
 					AuthenticSourcePersonID: p.AuthenticSourcePersonID,
 					Schema: &model.IdentitySchema{
-						Name:    p.WorkAddress.Country,
+						Name:    "DefaultSchema",
 						Version: "1.0.0",
 					},
 					FamilyName: p.LastName,

@@ -10,37 +10,6 @@ import (
 	"time"
 )
 
-// VPToken represents the structure for validating a Verifiable Presentation token.
-type VPToken struct {
-	RawToken string // The raw input token
-
-	HeaderDecoded    map[string]interface{}
-	PayloadDecoded   map[string]interface{}
-	SignatureDecoded string
-
-	Credentials []map[string]VC
-
-	DisclosedClaims []string // Claims disclosed by the Holder
-
-	//TODO(mk): gör en struct istället för bool med fält för utfall, error, mm.
-	ValidationResults map[string]bool // Validation results for different steps
-}
-
-type VC struct {
-	//if jwt_vc or ldp
-	Format string
-
-	// jwt_vc
-	RawToken         string
-	HeaderDecoded    map[string]interface{}
-	PayloadDecoded   map[string]interface{}
-	SignatureDecoded string
-	Disclosures      []string
-	//TODO add HolderBinding
-
-	//TODO ldp_vc
-}
-
 // NewVPToken initializes a new VPToken instance from a raw token.
 func NewVPToken(vp_token string) (*VPToken, error) {
 	if vp_token == "" {
@@ -55,21 +24,55 @@ func NewVPToken(vp_token string) (*VPToken, error) {
 	return vp, nil
 }
 
+// VPToken represents the structure for validating a Verifiable Presentation token.
+type VPToken struct {
+	RawToken string // The raw input token
+
+	HeaderDecoded    map[string]interface{}
+	PayloadDecoded   map[string]interface{}
+	SignatureDecoded string
+
+	VerifiableCredentials *[]VC
+
+	//DisclosedClaims []string // Claims disclosed by the Holder
+
+	//TODO(mk): gör en struct istället för bool med fält för utfall, error, mm.
+	ValidationResults map[string]bool // Validation results for different steps
+}
+
+// VC represents the structure for validating a Verifiable Credential.
+type VC struct {
+	//if jwt_vc or ldp_vc
+	Format string
+
+	// jwt_vc
+	RawToken         string
+	HeaderDecoded    map[string]interface{}
+	PayloadDecoded   map[string]interface{}
+	SignatureDecoded string
+	Disclosures      []string
+	//TODO add HolderBinding
+
+	//TODO ldp_vc
+}
+
 // Validate runs the full validation process including extract and decode of all data in the vp_token.
-func (vp *VPToken) Validate(holdersPublicKey interface{}) error {
-	// 1. Extracts And decodes the VP token into its components
-	if err := vp.extractAndDecode(); err != nil {
+func (vp *VPToken) Validate(holderPublicKey interface{}) error {
+	// 1. Extracts And decodes the VP token into its components (top level jwt only)
+	if err := vp.extractAndDecodeVPToken(); err != nil {
 		return err
 	}
 
 	//TODO(mk): find and extract the holders public key instead of param
 
 	// 2. Verify the signature of the outer JWT (VP) using the Holder's public key.
-	if err := vp.validateHolderSignature(holdersPublicKey); err != nil {
+	if err := vp.validateHolderSignature(holderPublicKey); err != nil {
 		return err
 	}
 
-	//TODO 3½ avgör för varje credential via payload.presentation_submission.descriptor_map.format om det är jwt_vc (jwt)eller ldp_vc (json-ld)
+	if err := vp.extractAndDecodeVerifiableCredentials(); err != nil {
+		return err
+	}
 
 	// 3. Validate Issuer's Signatures on Embedded VC's
 	// Extract and verify the signatures of all Verifiable Credentials using the Issuer's public key.
@@ -100,12 +103,9 @@ func (vp *VPToken) Validate(holdersPublicKey interface{}) error {
 	return vp.validatePresentationRequirements()
 }
 
-// extractAndDecode extracts and decodes the VP token into its components: header, payload, and signature.
-// Validates its basic structure to ensure it conforms to the JWT standard.
-func (vp *VPToken) extractAndDecode() error {
-	//TODO analysera om det är en JWT/JWS (header.payload/header.payload.signature(~)) eller en JWE (x.x.x.x.x)
-
-	parsedToken, err := parseRawToken(vp.RawToken)
+// extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
+func (vp *VPToken) extractAndDecodeVPToken() error {
+	parsedToken, err := parseVPToken(vp.RawToken)
 	if err != nil {
 		return err
 	}
@@ -148,20 +148,47 @@ func (vp *VPToken) extractAndDecode() error {
 	vp.PayloadDecoded = payloadMap
 	vp.SignatureDecoded = signatureString
 
-	//TODO: hantera vad som ev. finns i parsedToken.disclosures - kan vara så att vissa disclosures i själva verket är en egen jwt (den sista i så fall?)
+	//TODO: hantera vad som ev. finns i parsedVPToken.disclosures - kan vara så att vissa disclosures i själva verket är en egen jwt (den sista i så fall?)
+
+	return nil
+}
+
+func (vp *VPToken) extractAndDecodeVerifiableCredentials() error {
+
+	//TODO: ta in och använd https://github.com/tidwall/gjson för att suga ut nedan samt presentation_submission och dess delar för att veta vad för vc som finns
+
+	vpField, ok := vp.PayloadDecoded["vp"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("vp key in vp_token.payload is missing or har wrong format/name")
+	}
+
+	vcList, ok := vpField["verifiableCredential"].([]interface{})
+	if !ok {
+		return fmt.Errorf("verifiableCredential key in vp_token.payload is missing or has wrong format/name")
+	}
+
+	for _, vc := range vcList {
+		fmt.Println(vc)
+
+		//TODO avgör för varje vc via payload.presentation_submission.descriptor_map.format om det är jwt_vc (jwt)eller ldp_vc (json-ld)
+
+		//TODO: parsa och extrahera varje vc -> VC
+
+		//TODO: tilldela alla till vp.VerifiableCredentials
+	}
 
 	return nil
 }
 
 // validateHolderSignature verifies the signature of the outer JWT.
-func (vp *VPToken) validateHolderSignature(holdersPublicKey interface{}) error {
+func (vp *VPToken) validateHolderSignature(holderPublicKey interface{}) error {
 	// Placeholder for holder signature validation logic.
 	// Typically involves extracting JWK from payload and verifying signature.
 
 	parsedToken, err := jwt.Parse(vp.RawToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\n🔍 Found signing alg:: %s\n", alg)
-		return holdersPublicKey, nil
+		return holderPublicKey, nil
 	})
 	if err != nil {
 		return fmt.Errorf("JWT-verification failed: %w", err)
@@ -253,24 +280,24 @@ func (vp *VPToken) decodeBase64URL(input string) ([]byte, error) {
 	return decoded, nil
 }
 
-type parsedToken struct {
+type parsedVPToken struct {
 	raw string
 
 	header    string
 	payload   string
 	signature string
-
-	disclosures []string
 }
 
-func parseRawToken(rawToken string) (*parsedToken, error) {
-	result := &parsedToken{
+func parseVPToken(vpToken string) (*parsedVPToken, error) {
+	//TODO: om vp_token är en JWE så dekryptera den först: JWS (header.payload.signature(~)) eller en JWE (x.x.x.x.x)
+
+	result := &parsedVPToken{
 		// just to simplify debug
-		raw: rawToken,
+		raw: vpToken,
 	}
 
 	// Split token at the first `~` to separate first token from disclosures and other stuff (if exists)
-	parts := strings.SplitN(rawToken, "~", 2)
+	parts := strings.SplitN(vpToken, "~", 2)
 	tokenPart := parts[0]
 
 	tokenParts := strings.Split(tokenPart, ".")
@@ -282,7 +309,7 @@ func parseRawToken(rawToken string) (*parsedToken, error) {
 		return nil, fmt.Errorf("invalid JWS/JWE-structure")
 	}
 	if len(parts) == 5 {
-		//TODO(mk): handle that the token is a JWE
+		//TODO(mk): handle that the vp_token is a JWE
 		return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
 	}
 
@@ -298,4 +325,14 @@ func parseRawToken(rawToken string) (*parsedToken, error) {
 	//}
 
 	return result, nil
+}
+
+type parsedVC struct {
+	raw string
+
+	header        string
+	payload       string
+	signature     string
+	disclosures   []string
+	holderBinding string
 }

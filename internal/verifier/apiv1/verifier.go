@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/tidwall/gjson"
+
 	"strings"
 	"time"
 )
@@ -28,11 +30,15 @@ func NewVPToken(vp_token string) (*VPToken, error) {
 type VPToken struct {
 	RawToken string // The raw input token
 
-	HeaderDecoded    map[string]interface{}
-	PayloadDecoded   map[string]interface{}
-	SignatureDecoded string
+	HeaderDecoded     string
+	HeaderDecodedMap  map[string]interface{}
+	PayloadDecoded    string
+	PayloadDecodedMap map[string]interface{}
+	SignatureDecoded  string
 
-	VerifiableCredentials *[]VC
+	VerifiableCredentialList *[]VC
+
+	//TODO ta fram och lägg in presentation submission som en struct
 
 	//DisclosedClaims []string // Claims disclosed by the Holder
 
@@ -44,13 +50,14 @@ type VPToken struct {
 type VC struct {
 	//if jwt_vc or ldp_vc
 	Format string
+	Typ    string
 
 	// jwt_vc
-	RawToken         string
-	HeaderDecoded    map[string]interface{}
-	PayloadDecoded   map[string]interface{}
-	SignatureDecoded string
-	Disclosures      []string
+	RawToken          string
+	HeaderDecodedMap  map[string]interface{}
+	PayloadDecodedMap map[string]interface{}
+	SignatureDecoded  string
+	Disclosures       []string
 	//TODO add HolderBinding
 
 	//TODO ldp_vc
@@ -103,6 +110,7 @@ func (vp *VPToken) Validate(holderPublicKey interface{}) error {
 	return vp.validatePresentationRequirements()
 }
 
+// TODO döp om till något i stil med parseDecryptAndDecodeVPToken
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
 func (vp *VPToken) extractAndDecodeVPToken() error {
 	parsedToken, err := parseVPToken(vp.RawToken)
@@ -110,14 +118,20 @@ func (vp *VPToken) extractAndDecodeVPToken() error {
 		return err
 	}
 
-	headerDecoded, err := decodeBase64URL(parsedToken.header)
+	headerDecoded, err := decodeBase64URL(parsedToken.headerEncoded)
 	if err != nil {
 		return err
 	}
+	if !gjson.Valid(headerDecoded) {
+		return fmt.Errorf("Header is not valid json")
+	}
 
-	payloadDecoded, err := decodeBase64URL(parsedToken.payload)
+	payloadDecoded, err := decodeBase64URL(parsedToken.payloadEncoded)
 	if err != nil {
 		return err
+	}
+	if !gjson.Valid(payloadDecoded) {
+		return fmt.Errorf("Payload is not valid json")
 	}
 
 	headerMap := make(map[string]interface{})
@@ -130,7 +144,7 @@ func (vp *VPToken) extractAndDecodeVPToken() error {
 		return err
 	}
 
-	paddedSignature := parsedToken.signature
+	paddedSignature := parsedToken.signatureEncoded
 	switch len(paddedSignature) % 4 {
 	case 2:
 		paddedSignature += "=="
@@ -144,8 +158,10 @@ func (vp *VPToken) extractAndDecodeVPToken() error {
 	// convert byte-array till en string (if signature actually is a text)
 	signatureString := string(signatureBytes)
 
-	vp.HeaderDecoded = headerMap
-	vp.PayloadDecoded = payloadMap
+	vp.HeaderDecoded = headerDecoded
+	vp.HeaderDecodedMap = headerMap
+	vp.PayloadDecoded = payloadDecoded
+	vp.PayloadDecodedMap = payloadMap
 	vp.SignatureDecoded = signatureString
 
 	//TODO: hantera vad som ev. finns i parsedVPToken.disclosures - kan vara så att vissa disclosures i själva verket är en egen jwt (den sista i så fall?)
@@ -155,19 +171,14 @@ func (vp *VPToken) extractAndDecodeVPToken() error {
 
 func (vp *VPToken) extractAndDecodeVerifiableCredentials() error {
 
-	//TODO: ta in och använd https://github.com/tidwall/gjson för att suga ut nedan samt presentation_submission och dess delar för att veta vad för vc som finns
-
-	vpField, ok := vp.PayloadDecoded["vp"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("vp key in vp_token.payload is missing or har wrong format/name")
+	vcList := gjson.Get(vp.PayloadDecoded, "vp.verifiableCredential")
+	if !vcList.Exists() || !vcList.IsArray() {
+		return errors.New("verifiable credentials not found in vp_token payload")
 	}
 
-	vcList, ok := vpField["verifiableCredential"].([]interface{})
-	if !ok {
-		return fmt.Errorf("verifiableCredential key in vp_token.payload is missing or has wrong format/name")
-	}
+	//TODO ta ut presentation_submission för användning nedan samt för att avgöra om koden kan hantera denna typ av vc (och är samma som begärd från holdern i tidigare request)
 
-	for _, vc := range vcList {
+	for _, vc := range vcList.Array() {
 		fmt.Println(vc)
 
 		//TODO avgör för varje vc via payload.presentation_submission.descriptor_map.format om det är jwt_vc (jwt)eller ldp_vc (json-ld)
@@ -187,7 +198,7 @@ func (vp *VPToken) validateHolderSignature(holderPublicKey interface{}) error {
 
 	parsedToken, err := jwt.Parse(vp.RawToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
-		fmt.Printf("\n🔍 Found signing alg:: %s\n", alg)
+		fmt.Printf("\n🔍 Found vp_token signing alg: %s\n", alg)
 		return holderPublicKey, nil
 	})
 	if err != nil {
@@ -224,7 +235,7 @@ func (vp *VPToken) validateHolderSignature(holderPublicKey interface{}) error {
 		}
 	}
 
-	//TODO(mk): check revocation of the JWT
+	//TODO(mk): check revocation
 	//if jti, ok := claims["jti"].(string); ok {
 	//	if revokedTokens[jti] {
 	//		return fmt.Errorf("JWT is revoked")
@@ -283,14 +294,12 @@ func (vp *VPToken) decodeBase64URL(input string) ([]byte, error) {
 type parsedVPToken struct {
 	raw string
 
-	header    string
-	payload   string
-	signature string
+	headerEncoded    string
+	payloadEncoded   string
+	signatureEncoded string
 }
 
 func parseVPToken(vpToken string) (*parsedVPToken, error) {
-	//TODO: om vp_token är en JWE så dekryptera den först: JWS (header.payload.signature(~)) eller en JWE (x.x.x.x.x)
-
 	result := &parsedVPToken{
 		// just to simplify debug
 		raw: vpToken,
@@ -309,13 +318,13 @@ func parseVPToken(vpToken string) (*parsedVPToken, error) {
 		return nil, fmt.Errorf("invalid JWS/JWE-structure")
 	}
 	if len(parts) == 5 {
-		//TODO(mk): handle that the vp_token is a JWE
+		//TODO(mk): handle that the vp_token is a JWE (decrypt)
 		return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
 	}
 
-	result.header = tokenParts[0]
-	result.payload = tokenParts[1]
-	result.signature = tokenParts[2]
+	result.headerEncoded = tokenParts[0]
+	result.payloadEncoded = tokenParts[1]
+	result.signatureEncoded = tokenParts[2]
 
 	//TODO(mk): handle disclosures, holder bindings and other stuff??? if exist
 	//if len(parts) > 1 {

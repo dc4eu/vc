@@ -9,17 +9,23 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto" // For secp256k1 (ES256K)
 	"github.com/golang-jwt/jwt/v5"
+	"strings"
 	"testing"
 	"time"
 )
 
-func TestVPToken_Validate(t *testing.T) {
+const pid_sd_vc_jwt_with_selective_disclosures_and_holder_binding = "eyJ0eXAiOiJKV1QiLCJ2Y3RtIjpbImV5SjJZM1FpT2lKMWNtNDZZM0psWkdWdWRHbGhiRHAyYVdRaUxDSnVZVzFsSWpvaVVFbEVJaXdpWkdWelkzSnBjSFJwYjI0aU9pSlVhR2x6SUdseklHRWdVRWxFSUdSdlkzVnRaVzUwSUdsemMzVmxaQ0JpZVNCMGFHVWdkMlZzYkNCcmJtOTNiaUJXU1VRZ1NYTnpkV1Z5SWl3aVpHbHpjR3hoZVNJNlczc2libUZ0WlNJNklsQkpSQ0lzSW5KbGJtUmxjbWx1WnlJNmV5SnphVzF3YkdVaU9uc2liRzluYnlJNmV5SjFjbWtpT2lKb2RIUndjem92TDNsdmRYSmxkV1JwTG1Sak5HVjFMbVYxTDJsdFlXZGxjeTkyYVdSRFlYSmtMbkJ1WnlJc0luVnlhU05wYm5SbFozSnBkSGtpT2lKemFHRXlOVFl0WVdOa1lUTTBNRFJqTW1ObU5EWmtZVEU1TW1ObU1qUTFZMk5qTm1JNU1XVmtZMlU0T0RZNU1USXlabUUxWVRZMk16WXlPRFJtTVdFMk1HWm1ZMlE0TmlJc0ltRnNkRjkwWlhoMElqb2lWa2xFSUVOaGNtUWlmU3dpWW1GamEyZHliM1Z1WkY5amIyeHZjaUk2SWlNeE1qRXdOMk1pTENKMFpYaDBYMk52Ykc5eUlqb2lJMFpHUmtaR1JpSjlMQ0p6ZG1kZmRHVnRjR3hoZEdWeklqcGJleUoxY21raU9pSm9kSFJ3Y3pvdkwzbHZkWEpsZFdScExtUmpOR1YxTG1WMUwybHRZV2RsY3k5cFpGUmxiWEJzWVhSbExuTjJaeUo5WFgxOVhTd2lZMnhoYVcxeklqcGJleUp3WVhSb0lqcGJJbWRwZG1WdVgyNWhiV1VpWFN3aVpHbHpjR3hoZVNJNmV5SmxiaTFWVXlJNmV5SnNZV0psYkNJNklrZHBkbVZ1SUU1aGJXVWlMQ0prWlhOamNtbHdkR2x2YmlJNklsUm9aU0JuYVhabGJpQnVZVzFsSUc5bUlIUm9aU0JXU1VRZ2FHOXNaR1Z5SW4xOUxDSjJaWEpwWm1sallYUnBiMjRpT2lKMlpYSnBabWxsWkNJc0luTmtJam9pWVd4c2IzZGxaQ0lzSW5OMloxOXBaQ0k2SW1kcGRtVnVYMjVoYldVaWZTeDdJbkJoZEdnaU9sc2labUZ0YVd4NVgyNWhiV1VpWFN3aVpHbHpjR3hoZVNJNmV5SmxiaTFWVXlJNmV5SnNZV0psYkNJNklrWmhiV2xzZVNCT1lXMWxJaXdpWkdWelkzSnBjSFJwYjI0aU9pSlVhR1VnWm1GdGFXeDVJRzVoYldVZ2IyWWdkR2hsSUZaSlJDQm9iMnhrWlhJaWZYMHNJblpsY21sbWFXTmhkR2x2YmlJNkluWmxjbWxtYVdWa0lpd2ljMlFpT2lKaGJHeHZkMlZrSWl3aWMzWm5YMmxrSWpvaVptRnRhV3g1WDI1aGJXVWlmU3g3SW5CaGRHZ2lPbHNpWW1seWRHaGZaR0YwWlNKZExDSmthWE53YkdGNUlqcDdJbVZ1TFZWVElqcDdJbXhoWW1Wc0lqb2lRbWx5ZEdnZ1JHRjBaU0lzSW1SbGMyTnlhWEIwYVc5dUlqb2lWR2hsSUdKcGNuUm9JR1JoZEdVZ2IyWWdkR2hsSUZaSlJDQm9iMnhrWlhJaWZYMHNJblpsY21sbWFXTmhkR2x2YmlJNkluWmxjbWxtYVdWa0lpd2ljMlFpT2lKaGJHeHZkMlZrSWl3aWMzWm5YMmxrSWpvaVltbHlkR2hmWkdGMFpTSjlMSHNpY0dGMGFDSTZXeUpwYzNOMWFXNW5YMkYxZEdodmNtbDBlU0pkTENKa2FYTndiR0Y1SWpwN0ltVnVMVlZUSWpwN0lteGhZbVZzSWpvaVNYTnpkV2x1WnlCQmRYUm9iM0pwZEhraUxDSmtaWE5qY21sd2RHbHZiaUk2SWxSb1pTQmpiM1Z1ZEhKNUlHTnZaR1VnYjJZZ2RHaGxJR0YxZEdodmNtbDBlU0IwYUdGMElHbHpjM1ZsWkNCMGFHbHpJR055WldSbGJuUnBZV3dpZlgwc0luWmxjbWxtYVdOaGRHbHZiaUk2SW1GMWRHaHZjbWwwWVhScGRtVWlMQ0p6WkNJNkltRnNiRzkzWldRaUxDSnpkbWRmYVdRaU9pSnBjM04xYVc1blgyRjFkR2h2Y21sMGVTSjlMSHNpY0dGMGFDSTZXeUpwYzNOMVlXNWpaVjlrWVhSbElsMHNJbVJwYzNCc1lYa2lPbnNpWlc0dFZWTWlPbnNpYkdGaVpXd2lPaUpKYzNOMVlXNWpaU0JFWVhSbElpd2laR1Z6WTNKcGNIUnBiMjRpT2lKVWFHVWdaR0YwWlNCaGJtUWdkR2x0WlNCcGMzTjFaV1FnZEdocGN5QmpjbVZrWlc1MGFXRnNJbjE5TENKMlpYSnBabWxqWVhScGIyNGlPaUpoZFhSb2IzSnBkR0YwYVhabElpd2ljMlFpT2lKaGJHeHZkMlZrSWl3aWMzWm5YMmxrSWpvaWFYTnpkV0Z1WTJWZlpHRjBaU0o5TEhzaWNHRjBhQ0k2V3lKbGVIQnBjbmxmWkdGMFpTSmRMQ0prYVhOd2JHRjVJanA3SW1WdUxWVlRJanA3SW14aFltVnNJam9pUlhod2FYSjVJRVJoZEdVaUxDSmtaWE5qY21sd2RHbHZiaUk2SWxSb1pTQmtZWFJsSUdGdVpDQjBhVzFsSUdWNGNHbHlaV1FnZEdocGN5QmpjbVZrWlc1MGFXRnNJbjE5TENKMlpYSnBabWxqWVhScGIyNGlPaUpoZFhSb2IzSnBkR0YwYVhabElpd2ljMlFpT2lKaGJHeHZkMlZrSWl3aWMzWm5YMmxrSWpvaVpYaHdhWEo1WDJSaGRHVWlmVjBzSW5OamFHVnRZU0k2ZXlJa2MyTm9aVzFoSWpvaWFIUjBjRG92TDJwemIyNHRjMk5vWlcxaExtOXlaeTlrY21GbWRDMHdOeTl6WTJobGJXRWpJaXdpZEhsd1pTSTZJbTlpYW1WamRDSXNJbkJ5YjNCbGNuUnBaWE1pT25zaVoybDJaVzVmYm1GdFpTSTZleUowZVhCbElqb2ljM1J5YVc1bkluMHNJbVpoYldsc2VWOXVZVzFsSWpwN0luUjVjR1VpT2lKemRISnBibWNpZlN3aVltbHlkR2hmWkdGMFpTSTZleUowZVhCbElqb2ljM1J5YVc1bkluMHNJbWx6YzNWcGJtZGZZWFYwYUc5eWFYUjVJanA3SW5SNWNHVWlPaUp6ZEhKcGJtY2lmU3dpYVhOemRXRnVZMlZmWkdGMFpTSTZleUowZVhCbElqb2ljM1J5YVc1bkluMHNJbVY0Y0dseWVWOWtZWFJsSWpwN0luUjVjR1VpT2lKemRISnBibWNpZlgwc0luSmxjWFZwY21Wa0lqcGJYU3dpWVdSa2FYUnBiMjVoYkZCeWIzQmxjblJwWlhNaU9uUnlkV1Y5ZlEiXSwieDVjIjpbIk1JSUIzRENDQVlFQ0ZIQkRXcGtMaTY0ZjVackYweHV5dGo1UElyYnFNQW9HQ0NxR1NNNDlCQU1DTUhBeEN6QUpCZ05WQkFZVEFrZFNNUTh3RFFZRFZRUUlEQVpCZEdobGJuTXhFREFPQmdOVkJBY01CMGxzYkdsemFXRXhFVEFQQmdOVkJBb01DSGQzVjJGc2JHVjBNUkV3RHdZRFZRUUxEQWhKWkdWdWRHbDBlVEVZTUJZR0ExVUVBd3dQZDNkM1lXeHNaWFF0YVhOemRXVnlNQjRYRFRJME1Ea3lOakE0TVRReE1sb1hEVE0wTURreU5EQTRNVFF4TWxvd2NERUxNQWtHQTFVRUJoTUNSMUl4RHpBTkJnTlZCQWdNQmtGMGFHVnVjekVRTUE0R0ExVUVCd3dIU1d4c2FYTnBZVEVSTUE4R0ExVUVDZ3dJZDNkWFlXeHNaWFF4RVRBUEJnTlZCQXNNQ0Vsa1pXNTBhWFI1TVJnd0ZnWURWUVFEREE5M2QzZGhiR3hsZEMxcGMzTjFaWEl3V1RBVEJnY3Foa2pPUFFJQkJnZ3Foa2pPUFFNQkJ3TkNBQVF0WTlrVVFGZkRmNmlvY0ZFNHJSdnkzR015WXlwcW1YM1pqbXdVZVhKeTBra2dSVDczQzgrV1BrV05nL3lkSkhDRURETzVYdVJhSWFPSGM5RHBMcE5TTUFvR0NDcUdTTTQ5QkFNQ0Ewa0FNRVlDSVFEencyN25CcjdFOE42R3FjODN2LzYrOWl6aS9ORVhCS2xvandMSkFlU2xzQUloQU8ySmRqUEV6M2JEMHN0b1dFZzdSRHRyQW04ZHNncnlDeTFXNUJER0NWZE4iXSwiYWxnIjoiRVMyNTYifQ.eyJjbmYiOnsiandrIjp7ImNydiI6IlAtMjU2IiwiZXh0Ijp0cnVlLCJrZXlfb3BzIjpbInZlcmlmeSJdLCJrdHkiOiJFQyIsIngiOiJvdy0tc1EwTERHYWxEMEJtZ2VmeWtnOTBJT2FKX1lHZ0RyZTNLMUtwNkY4IiwieSI6Ikp1SjBOX3ZNQ3NrNkdsTVd1SEpVMXlsNVRDQkp0dnpNWjlEMjU3UkJmUFUifX0sInZjdCI6InVybjpjcmVkZW50aWFsOnZpZCIsImp0aSI6InVybjp2aWQ6YjBmNzE3MzgtYzI0Zi00OWVjLThkZTMtOWJhN2YyN2FlYWMyIiwiaXNzdWFuY2VfZGF0ZSI6IjIwMjUtMDEtMjRUMTI6NDc6NDMuMjI4WiIsImV4cGlyeV9kYXRlIjoiMjAyNi0wNC0yMVQwMDowMDowMC4wMDBaIiwiaWF0IjoxNzM3NzIyODYzLCJleHAiOjE3NzY3Mjk2MDAsImlzcyI6Imh0dHBzOi8veW91cmV1ZGkuZGM0ZXUuZXUiLCJzdWIiOiJWckdRbUlYa1pZNVktOUxCWG43TUduU01DT1NOSnVIaTRjSUJHZ01QNkdrIiwiX3NkX2FsZyI6InNoYS0yNTYiLCJfc2QiOlsiQjJPRWsxalNweS02Z0Fmc21pb2Z2ZFZqeFgzSlBoZ0pmQXJLdXdpaXNCQSIsIlNVUnhpMjc3VzlzeWVlY2FHMWZIVDFyUTVCYnhQZkJBYkdpbjRRNDBHT28iLCJmZm9wSTlRczRFZDVFR3o5bm5RbGFfazZ6MnJWODNMXzYxRTNjWXA2OWtjIiwidk5kUWRCTlEyODFpb3N4S204SzB4NzV5WlMybGI1MEtRTndlOVVMNlRHOCIsIncwMzU3YV9uV2ZHaFlpR3ZvVGVTaXhSZzNzRzd0X3hQNmhEQjBaeGRNYkEiXX0.qVUfsWRZxMQsbzMR5kYNvNikJNEBjuEPMQ6npjRRAZrYz_-egFBVq0TivIOHfJ0hcYxIJh3kxIUzHBWjLV9yFQ~WyJyOWtyS1J6S3JVTU5TSXViTlJQOWp3IiwiZ2l2ZW5fbmFtZSIsIlNjYXJsZXR0Il0~WyJOQ2lYekI5ZjJYRWlwU2xtc0dPRWFRIiwiZmFtaWx5X25hbWUiLCJKb2hhbnNzb24iXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJub25jZSI6IjA2NWY0NTQ4LTM3NzQtNDJhNS04MjYyLWU5NDhiMjIyNDhkMCIsImF1ZCI6InlvdXJmcmllbmRseXZlcmlmaWVyLmRjNGV1LmV1Iiwic2RfaGFzaCI6ImlfdjJQbUg5NnZ4eGJfbXQ3RmtIdkQ1aEdXeENOamhIdlpzYXlUSlA1alUiLCJpYXQiOjE3Mzc5Njk3Mzl9.4cJbdod2KnKoNAsaIyGlw4ehNl4JAEk9fw6lJqW8Kdq2a65iL9qsVgRSVGO11OuSKX663lUdjnAWA9_glnDUIQ"
 
+func TestVPToken_Validate(t *testing.T) {
 	ecdsaP256Private, ecdsaP256Public, err := generateECDSAKeyPair(elliptic.P256())
 	if err != nil {
 		t.Fatal(err)
 	}
-	vp_token, err := build_vp_jws_token_with_ldp_vc_credentials(jwt.SigningMethodES256, ecdsaP256Private, "did:example:issuer#key-1")
+	vp_token_with_1_jwt_vc, err := build_vp_jws_token_with_jwt_vc_credentials(pid_sd_vc_jwt_with_selective_disclosures_and_holder_binding, jwt.SigningMethodES256, ecdsaP256Private, "did:example:issuer#key-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	vp_token_with_2_ldp_vc, err := build_vp_jws_token_with_ldp_vc_credentials(jwt.SigningMethodES256, ecdsaP256Private, "did:example:issuer#key-1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,13 +42,22 @@ func TestVPToken_Validate(t *testing.T) {
 	}{
 		//TODO bryt ut till till en testcase builder för att enkelt testa massa olika varianter
 		{
-			name: "Generated vp token",
+			name: "Generated vp token with 1 hardcoded jwt_vc",
 			fields: fields{
-				RawToken: vp_token,
+				RawToken: vp_token_with_1_jwt_vc,
 			},
 			holderPublicKey: ecdsaP256Public,
 			wantErr:         false,
 		},
+		{
+			name: "Generated vp token with 2 ldp_vc",
+			fields: fields{
+				RawToken: vp_token_with_2_ldp_vc,
+			},
+			holderPublicKey: ecdsaP256Public,
+			wantErr:         false,
+		},
+
 		//{
 		//	name: "Hardcoded vp_token_1",
 		//	fields: fields{
@@ -66,6 +81,49 @@ func TestVPToken_Validate(t *testing.T) {
 	}
 }
 
+func build_vp_jws_token_with_jwt_vc_credentials(vcJWT string, signingMethod jwt.SigningMethod, holderPublicKey interface{}, keyID string) (string, error) {
+	now := time.Now()
+
+	var vcList []string
+	if strings.TrimSpace(vcJWT) == "" {
+		vcList = []string{}
+	} else {
+		vcList = []string{vcJWT}
+	}
+
+	claims := jwt.MapClaims{
+		"iss": "did:example:issuer",
+		"aud": "did:example:verifier",
+		"iat": now.Unix(),
+		"exp": now.Add(time.Minute * 5).Unix(),
+		"vp": map[string]interface{}{
+			"@context": []string{
+				"https://www.w3.org/2018/credentials/v1",
+				"https://w3id.org/security/v2",
+			},
+			"type":                 []string{"VerifiablePresentation"},
+			"verifiableCredential": vcList,
+		},
+		"presentation_submission": map[string]interface{}{
+			"id":            "ae1773e-3e19-4032-a1c2-a6b69087e5b2",
+			"definition_id": "vp_definition_1",
+			"descriptor_map": []map[string]interface{}{
+				{
+					"id":     "pid_input",
+					"path":   "$.vp.verifiableCredential[0]",
+					"format": "jwt_vc",
+				},
+			},
+		},
+	}
+
+	token := jwt.NewWithClaims(signingMethod, claims)
+	token.Header["kid"] = keyID
+	token.Header["typ"] = "JWS"
+
+	return signJWT(signingMethod, token, holderPublicKey)
+}
+
 func build_vp_jws_token_with_ldp_vc_credentials(signingMethod jwt.SigningMethod, holderPublicKey interface{}, keyID string) (string, error) {
 	now := time.Now()
 
@@ -80,9 +138,6 @@ func build_vp_jws_token_with_ldp_vc_credentials(signingMethod jwt.SigningMethod,
 				"https://w3id.org/security/v2",
 			},
 			"type": []string{"VerifiablePresentation"},
-			//	"verifiableCredential": []string{
-			//		"eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0...", //TODO(mk): use this for jwt and replace with generated credential (vc+sd-jwt with and without disclosures (and holder sign?)). Also change format in presentation_submission to "jwt_vc"
-			//	},
 			"verifiableCredential": []interface{}{
 				map[string]interface{}{
 					"@context": []string{
@@ -132,8 +187,8 @@ func build_vp_jws_token_with_ldp_vc_credentials(signingMethod jwt.SigningMethod,
 			},
 		},
 		"presentation_submission": map[string]interface{}{
-			"id":            "ae73773e-3e39-4032-a1c2-a6b69087e5b6",
-			"definition_id": "vp_definition_1",
+			"id":            "ae23773e-3e39-4032-a1c2-a6b69087e5b6",
+			"definition_id": "vp_definition_2",
 			"descriptor_map": []map[string]interface{}{
 				{
 					"id":     "degree_input",
@@ -153,6 +208,10 @@ func build_vp_jws_token_with_ldp_vc_credentials(signingMethod jwt.SigningMethod,
 	token.Header["kid"] = keyID
 	token.Header["typ"] = "JWS"
 
+	return signJWT(signingMethod, token, holderPublicKey)
+}
+
+func signJWT(signingMethod jwt.SigningMethod, token *jwt.Token, holderPublicKey interface{}) (string, error) {
 	switch signingMethod.(type) {
 	case *jwt.SigningMethodECDSA:
 		return token.SignedString(holderPublicKey.(*ecdsa.PrivateKey))

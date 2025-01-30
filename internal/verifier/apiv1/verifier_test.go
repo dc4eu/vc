@@ -55,7 +55,7 @@ func TestVPToken_Validate(t *testing.T) {
 				RawToken: vp_token_with_2_ldp_vc,
 			},
 			holderPublicKey: ecdsaP256Public,
-			wantErr:         false,
+			wantErr:         true,
 		},
 
 		//{

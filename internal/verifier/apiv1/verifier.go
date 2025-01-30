@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+//TODO(mk): remove all fmt.println etc with better debug log or remove them before merge to main
+
 // NewVPToken initializes a new VPToken instance from a raw token.
 func NewVPToken(vp_token string) (*VPToken, error) {
 	if vp_token == "" {
@@ -34,9 +36,9 @@ type VPToken struct {
 	HeaderDecodedMap  map[string]interface{}
 	PayloadDecoded    string
 	PayloadDecodedMap map[string]interface{}
-	SignatureDecoded  string
+	SignatureBytes    []byte
 
-	VerifiableCredentialList *[]VC
+	VerifiableCredentials []*VC
 
 	//TODO ta fram och lägg in presentation submission som en struct
 
@@ -46,27 +48,29 @@ type VPToken struct {
 	ValidationResults map[string]bool // Validation results for different steps
 }
 
-// VC represents the structure for validating a Verifiable Credential.
+// VC represents the structure for validating a Verifiable Credential inside a Verifiable Presentation.
 type VC struct {
-	//if jwt_vc or ldp_vc
+	// from presentation_submission in vp_token.payload for this vc (for example: jwt_vc or ldp_vc or other)
 	Format string
-	Typ    string
 
-	// jwt_vc
-	RawToken          string
-	HeaderDecodedMap  map[string]interface{}
-	PayloadDecodedMap map[string]interface{}
-	SignatureDecoded  string
-	Disclosures       []string
-	//TODO add HolderBinding
+	// jwt_vc fields
+	RawToken                    string
+	JWTTyp                      string //for example: "vc+sd-jwt" (set by the credential issuer)
+	HeaderDecoded               string
+	HeaderDecodedMap            map[string]interface{}
+	PayloadDecoded              string
+	PayloadDecodedMap           map[string]interface{}
+	SignatureBytes              []byte
+	SelectiveDisclosuresDecoded []string
+	HolderBindingJWT            string
 
 	//TODO ldp_vc
 }
 
 // Validate runs the full validation process including extract and decode of all data in the vp_token.
 func (vp *VPToken) Validate(holderPublicKey interface{}) error {
-	// 1. Extracts And decodes the VP token into its components (top level jwt only)
-	if err := vp.extractAndDecodeVPToken(); err != nil {
+	// top level jwt only
+	if err := vp.parseDecryptAndDecodeVPToken(); err != nil {
 		return err
 	}
 
@@ -77,7 +81,7 @@ func (vp *VPToken) Validate(holderPublicKey interface{}) error {
 		return err
 	}
 
-	if err := vp.extractAndDecodeVerifiableCredentials(); err != nil {
+	if err := vp.parseDecodeVerifiableCredentials(); err != nil {
 		return err
 	}
 
@@ -110,9 +114,8 @@ func (vp *VPToken) Validate(holderPublicKey interface{}) error {
 	return vp.validatePresentationRequirements()
 }
 
-// TODO döp om till något i stil med parseDecryptAndDecodeVPToken
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
-func (vp *VPToken) extractAndDecodeVPToken() error {
+func (vp *VPToken) parseDecryptAndDecodeVPToken() error {
 	parsedToken, err := parseVPToken(vp.RawToken)
 	if err != nil {
 		return err
@@ -144,48 +147,108 @@ func (vp *VPToken) extractAndDecodeVPToken() error {
 		return err
 	}
 
-	paddedSignature := parsedToken.signatureEncoded
-	switch len(paddedSignature) % 4 {
-	case 2:
-		paddedSignature += "=="
-	case 3:
-		paddedSignature += "="
-	}
-	signatureBytes, err := base64.URLEncoding.DecodeString(paddedSignature)
+	signatureBytes, err := base64.RawURLEncoding.DecodeString(parsedToken.signatureEncoded)
 	if err != nil {
 		return err
 	}
-	// convert byte-array till en string (if signature actually is a text)
-	signatureString := string(signatureBytes)
 
 	vp.HeaderDecoded = headerDecoded
 	vp.HeaderDecodedMap = headerMap
 	vp.PayloadDecoded = payloadDecoded
 	vp.PayloadDecodedMap = payloadMap
-	vp.SignatureDecoded = signatureString
-
-	//TODO: hantera vad som ev. finns i parsedVPToken.disclosures - kan vara så att vissa disclosures i själva verket är en egen jwt (den sista i så fall?)
+	vp.SignatureBytes = signatureBytes
+	//TODO: handle remainingParts (if exists), see parse func for more info
 
 	return nil
 }
 
-func (vp *VPToken) extractAndDecodeVerifiableCredentials() error {
-
-	vcList := gjson.Get(vp.PayloadDecoded, "vp.verifiableCredential")
-	if !vcList.Exists() || !vcList.IsArray() {
-		return errors.New("verifiable credentials not found in vp_token payload")
+func (vp *VPToken) parseDecodeVerifiableCredentials() error {
+	vcResult := gjson.Get(vp.PayloadDecoded, "vp.verifiableCredential")
+	if !vcResult.Exists() || !vcResult.IsArray() {
+		return errors.New("verifiable credentials key not found in vp_token payload")
+	}
+	vcList := vcResult.Array()
+	if len(vcList) == 0 {
+		return errors.New("zero verifiable credentials in vp_token payload")
 	}
 
-	//TODO ta ut presentation_submission för användning nedan samt för att avgöra om koden kan hantera denna typ av vc (och är samma som begärd från holdern i tidigare request)
+	psResult := gjson.Get(vp.PayloadDecoded, "presentation_submission")
+	if !psResult.Exists() {
+		return errors.New("presentation_submission not found in vp_token payload")
+	}
+	descriptorMap := gjson.Get(vp.PayloadDecoded, "presentation_submission.descriptor_map")
+	if !descriptorMap.Exists() || !descriptorMap.IsArray() {
+		return errors.New("descriptor_map not found or invalid format")
+	}
+	var descriptors []struct {
+		ID     string
+		Format string
+		Path   string
+	}
+	for _, descriptor := range descriptorMap.Array() {
+		descID := descriptor.Get("id").String()
+		format := descriptor.Get("format").String()
+		path := descriptor.Get("path").String()
+		if descID != "" && format != "" && path != "" {
+			descriptors = append(descriptors, struct {
+				ID     string
+				Format string
+				Path   string
+			}{ID: descID, Format: format, Path: path})
+		}
+	}
 
-	for _, vc := range vcList.Array() {
-		fmt.Println(vc)
+	vp.VerifiableCredentials = make([]*VC, 0)
 
-		//TODO avgör för varje vc via payload.presentation_submission.descriptor_map.format om det är jwt_vc (jwt)eller ldp_vc (json-ld)
+	for i, vcInPayload := range vcList {
+		vcString := vcInPayload.String()
 
-		//TODO: parsa och extrahera varje vc -> VC
+		//Try to match VC with descriptor_map using path
+		var matchedDescriptor *struct {
+			ID     string
+			Format string
+			Path   string
+		}
+		for _, d := range descriptors {
+			if d.Path == fmt.Sprintf("$.vp.verifiableCredential[%d]", i) { // Dynamic matching
+				matchedDescriptor = &d
+				break
+			}
+		}
 
-		//TODO: tilldela alla till vp.VerifiableCredentials
+		// No match found, set  "unknown"
+		format := "unknown"
+		path := "unknown"
+		if matchedDescriptor != nil {
+			format = matchedDescriptor.Format
+			path = matchedDescriptor.Path
+		}
+
+		fmt.Printf("\n✅ Credential [%d]:\n", i+1)
+		fmt.Printf("  Descriptor ID: %s\n", matchedDescriptor.ID)
+		fmt.Printf("  Format: %s\n", format)
+		fmt.Printf("  Path: %s\n", path)
+		fmt.Printf("  Data: %s\n", vcString)
+
+		vc := &VC{
+			RawToken: vcString,
+		}
+
+		switch format {
+		case "jwt_vc":
+			err := vc.parseAndDecodeJWTVC()
+			if err != nil {
+				return err
+			}
+		case "ldp_vc":
+			// TODO: Implement JSON-LD VC parsing
+			return fmt.Errorf("not supported VC-format: %s", format)
+		default:
+			return fmt.Errorf("unknown VC-format:" + format)
+			//continue //TODO: ska vi se okänt format som ett fel eller ska vi jobba vidare med de vc's vi kan?
+		}
+
+		vp.VerifiableCredentials = append(vp.VerifiableCredentials, vc)
 	}
 
 	return nil
@@ -300,7 +363,7 @@ type parsedVPToken struct {
 }
 
 func parseVPToken(vpToken string) (*parsedVPToken, error) {
-	result := &parsedVPToken{
+	parsedVPToken := &parsedVPToken{
 		// just to simplify debug
 		raw: vpToken,
 	}
@@ -318,30 +381,141 @@ func parseVPToken(vpToken string) (*parsedVPToken, error) {
 		return nil, fmt.Errorf("invalid JWS/JWE-structure")
 	}
 	if len(parts) == 5 {
-		//TODO(mk): handle that the vp_token is a JWE (decrypt)
+		//TODO(mk): handle that the vp_token is a JWE (decrypt it)
 		return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
 	}
 
-	result.headerEncoded = tokenParts[0]
-	result.payloadEncoded = tokenParts[1]
-	result.signatureEncoded = tokenParts[2]
+	parsedVPToken.headerEncoded = tokenParts[0]
+	parsedVPToken.payloadEncoded = tokenParts[1]
+	parsedVPToken.signatureEncoded = tokenParts[2]
 
-	//TODO(mk): handle disclosures, holder bindings and other stuff??? if exist
-	//if len(parts) > 1 {
-	//	disclosureParts := strings.Split(parts[1], "~")
-	//	//TODO(mk): check if any disclosePart is another jwt etc
-	//	result.disclosures = disclosureParts
-	//}
+	if len(parts) > 1 {
+		//TODO: handle remainingParts := parts[1:] ie what is after the jws parts in the vp_token
+	}
 
-	return result, nil
+	return parsedVPToken, nil
 }
 
 type parsedVC struct {
 	raw string
 
-	header        string
-	payload       string
-	signature     string
-	disclosures   []string
-	holderBinding string
+	headerEncoded               string
+	payloadEncoded              string
+	signatureEncoded            string
+	selectiveDisclosuresEncoded []string
+	holderBindingJWT            string
+}
+
+// parseAndDecodeJWTVC func to parse and handle JWT VC with if exists: Selective Disclosures and/or Holder Binding
+func (vc *VC) parseAndDecodeJWTVC() error {
+	if vc.RawToken == "" {
+		return fmt.Errorf("jwtVC parse and decode failed: empty VC")
+	}
+
+	parsedVC := &parsedVC{
+		raw: vc.RawToken, // For debugging
+	}
+
+	parts := strings.Split(vc.RawToken, "~")
+	tokenPart := parts[0]
+	tokenParts := strings.Split(tokenPart, ".")
+
+	if len(tokenParts) == 2 {
+		return fmt.Errorf("the VC has to be a JWS (signed) or a JWE")
+	}
+	if len(tokenParts) != 3 && len(tokenParts) != 5 {
+		return fmt.Errorf("the VC has an invalid JWS/JWE-structure")
+	}
+	if len(tokenParts) == 5 {
+		return fmt.Errorf("the VC is a JWE (encrypted) – not supported yet")
+	}
+
+	parsedVC.headerEncoded = tokenParts[0]
+	parsedVC.payloadEncoded = tokenParts[1]
+	parsedVC.signatureEncoded = tokenParts[2]
+
+	// Handle Selective Disclosures and Holder Binding
+	if len(parts) > 1 {
+		remainingParts := parts[1:] // all parts after jws
+		for _, part := range remainingParts {
+			if isJWT(part) {
+				parsedVC.holderBindingJWT = part
+				fmt.Println("holder binding on vc detected:", part)
+			} else {
+				parsedVC.selectiveDisclosuresEncoded = append(parsedVC.selectiveDisclosuresEncoded, part)
+			}
+		}
+	}
+
+	fmt.Println("parsedVC:", parsedVC)
+
+	//TODO bryt ut - nedan är i princip samma kod som för vp_token nivån (standard jws delen)
+	headerDecoded, err := decodeBase64URL(parsedVC.headerEncoded)
+	if err != nil {
+		return err
+	}
+	if !gjson.Valid(headerDecoded) {
+		return fmt.Errorf("Header is not valid json in the vc")
+	}
+
+	payloadDecoded, err := decodeBase64URL(parsedVC.payloadEncoded)
+	if err != nil {
+		return err
+	}
+	if !gjson.Valid(payloadDecoded) {
+		return fmt.Errorf("Payload is not valid json")
+	}
+
+	headerMap := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(headerDecoded), &headerMap); err != nil {
+		return err
+	}
+
+	payloadMap := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(payloadDecoded), &payloadMap); err != nil {
+		return err
+	}
+
+	signatureBytes, err := base64.RawURLEncoding.DecodeString(parsedVC.signatureEncoded)
+	if err != nil {
+		return err
+	}
+
+	selectiveDisclosuresDecoded, err := decodeSelectiveDisclosures(parsedVC.selectiveDisclosuresEncoded)
+	if err != nil {
+		return err
+	}
+
+	//TODO ta fram och sätt vc.Format (från descriptor i vc_token.payload som pekar ut denna vc, dvs skicka in som paramter till dennna func
+	//TODO ta fram och sätt vc.JWTTyp (från vc.header.typ om existerar)
+
+	vc.HeaderDecoded = headerDecoded
+	vc.HeaderDecodedMap = headerMap
+	vc.PayloadDecoded = payloadDecoded
+	vc.PayloadDecodedMap = payloadMap
+	vc.SignatureBytes = signatureBytes
+	vc.SelectiveDisclosuresDecoded = selectiveDisclosuresDecoded
+	//TODO: packa upp HolderBindingJWT
+	vc.HolderBindingJWT = parsedVC.holderBindingJWT
+
+	return nil
+}
+
+func isJWT(token string) bool {
+	parts := strings.Split(token, ".")
+	return len(parts) == 3 || len(parts) == 5
+}
+
+func decodeSelectiveDisclosures(encodedDisclosures []string) ([]string, error) {
+	var decodedDisclosures []string
+
+	for _, encoded := range encodedDisclosures {
+		decodedBytes, err := base64.RawURLEncoding.DecodeString(encoded)
+		if err != nil {
+			return nil, fmt.Errorf("failed to base64url decode selective disclosure: %v", err)
+		}
+		decodedDisclosures = append(decodedDisclosures, string(decodedBytes))
+	}
+
+	return decodedDisclosures, nil
 }

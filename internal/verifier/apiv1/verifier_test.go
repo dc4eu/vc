@@ -73,7 +73,7 @@ func TestVPToken_Validate(t *testing.T) {
 				t.Fatal(err)
 			}
 			//TODO: ta in en configuration till validate som styr vilka kontroller som ska göras för att kunna testa specifika delar enklare.
-			if err := vp.Validate(tt.holderPublicKey); (err != nil) != tt.wantErr {
+			if err := vp.Process(FULL_VALIDATION, tt.holderPublicKey); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			//TODO lägg till asserts

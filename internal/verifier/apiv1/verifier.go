@@ -7,12 +7,33 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tidwall/gjson"
-
 	"strings"
 	"time"
 )
 
 //TODO(mk): remove all fmt.println etc with better debug log or remove them before merge to main
+
+type ProcessType int
+
+const (
+	FULL_VALIDATION ProcessType = iota
+	ONLY_EXTRACT_JSON
+)
+
+func (p ProcessType) String() string {
+	switch p {
+	case FULL_VALIDATION:
+		return "FULL_VALIDATION"
+	case ONLY_EXTRACT_JSON:
+		return "ONLY_EXTRACT_JSON"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func isValidProcessType(p ProcessType) bool {
+	return p == FULL_VALIDATION || p == ONLY_EXTRACT_JSON
+}
 
 // NewVPToken initializes a new VPToken instance from a raw token.
 func NewVPToken(vp_token string) (*VPToken, error) {
@@ -32,15 +53,15 @@ func NewVPToken(vp_token string) (*VPToken, error) {
 type VPToken struct {
 	RawToken string // The raw input token
 
-	HeaderDecoded     string
-	HeaderDecodedMap  map[string]interface{}
-	PayloadDecoded    string
-	PayloadDecodedMap map[string]interface{}
-	SignatureBytes    []byte
+	HeaderDecoded        string
+	HeaderDecodedMap     map[string]interface{}
+	PayloadDecoded       string
+	PayloadDecodedMap    map[string]interface{}
+	HolderSignatureBytes []byte
 
 	VerifiableCredentials []*VC
 
-	//TODO ta fram och lägg in presentation submission som en struct
+	//TODO ta fram och lägg in presentation submission som en struct (extraheras inom extractVerifiableCredentials)
 
 	//DisclosedClaims []string // Claims disclosed by the Holder
 
@@ -48,42 +69,59 @@ type VPToken struct {
 	ValidationResults map[string]bool // Validation results for different steps
 }
 
-// VC represents the structure for validating a Verifiable Credential inside a Verifiable Presentation.
+// VC represents the structure for validating a Verifiable Credential inside a Verifiable Presentation (vp_token).
 type VC struct {
+	RawToken string
+
 	// from presentation_submission in vp_token.payload for this vc (for example: jwt_vc or ldp_vc or other)
 	Format string
 
 	// jwt_vc fields
-	RawToken                    string
 	JWTTyp                      string //for example: "vc+sd-jwt" (set by the credential issuer)
 	HeaderDecoded               string
 	HeaderDecodedMap            map[string]interface{}
+	HeaderVCTMDecoded           string
+	HeaderVCTMDecodedMap        map[string]interface{}
 	PayloadDecoded              string
 	PayloadDecodedMap           map[string]interface{}
-	SignatureBytes              []byte
+	IssuerSignatureBytes        []byte
 	SelectiveDisclosuresDecoded []string
 	HolderBindingJWT            string
 
 	//TODO ldp_vc
 }
 
-// Validate runs the full validation process including extract and decode of all data in the vp_token.
-func (vp *VPToken) Validate(holderPublicKey interface{}) error {
+// Validate process the vp_token depending on selected ProcessType.
+func (vp *VPToken) Process(processType ProcessType, holderPublicKey interface{}) error {
+	if !isValidProcessType(processType) {
+		return errors.New("invalid process type")
+	}
+
 	// top level jwt only
-	if err := vp.parseDecryptAndDecodeVPToken(); err != nil {
+	if err := vp.extractVPToken(); err != nil {
 		return err
+	}
+
+	if processType == FULL_VALIDATION {
+		//TODO(mk): find and extract the holders public key instead of param
+
+		// 2. Verify the signature of the outer JWT (VP) using the Holder's public key.
+		if err := vp.validateHolderSignature(holderPublicKey); err != nil {
+			return err
+		}
+
+	}
+
+	if err := vp.extractVerifiableCredentials(); err != nil {
+		return err
+	}
+
+	if processType == ONLY_EXTRACT_JSON {
+		// Break here to display decoded vp_token
+		return nil
 	}
 
 	//TODO(mk): find and extract the holders public key instead of param
-
-	// 2. Verify the signature of the outer JWT (VP) using the Holder's public key.
-	if err := vp.validateHolderSignature(holderPublicKey); err != nil {
-		return err
-	}
-
-	if err := vp.parseDecodeVerifiableCredentials(); err != nil {
-		return err
-	}
 
 	// 3. Validate Issuer's Signatures on Embedded VC's
 	// Extract and verify the signatures of all Verifiable Credentials using the Issuer's public key.
@@ -93,7 +131,7 @@ func (vp *VPToken) Validate(holderPublicKey interface{}) error {
 
 	// 4. Check Credential Validity for each VC
 	// Ensure that credentials are not expired, revoked, or issued by untrusted issuers.
-	if err := vp.validateCredentials(); err != nil {
+	if err := vp.validateVerifiableCredentials(); err != nil {
 		return err
 	}
 
@@ -115,54 +153,33 @@ func (vp *VPToken) Validate(holderPublicKey interface{}) error {
 }
 
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
-func (vp *VPToken) parseDecryptAndDecodeVPToken() error {
-	parsedToken, err := parseVPToken(vp.RawToken)
+func (vp *VPToken) extractVPToken() error {
+	parsedVP, err := parseVPToken(vp.RawToken)
 	if err != nil {
 		return err
 	}
 
-	headerDecoded, err := decodeBase64URL(parsedToken.headerEncoded)
-	if err != nil {
-		return err
-	}
-	if !gjson.Valid(headerDecoded) {
-		return fmt.Errorf("Header is not valid json")
-	}
-
-	payloadDecoded, err := decodeBase64URL(parsedToken.payloadEncoded)
-	if err != nil {
-		return err
-	}
-	if !gjson.Valid(payloadDecoded) {
-		return fmt.Errorf("Payload is not valid json")
-	}
-
-	headerMap := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(headerDecoded), &headerMap); err != nil {
-		return err
-	}
-
-	payloadMap := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(payloadDecoded), &payloadMap); err != nil {
-		return err
-	}
-
-	signatureBytes, err := base64.RawURLEncoding.DecodeString(parsedToken.signatureEncoded)
+	vp.HeaderDecoded, vp.HeaderDecodedMap, err = decodeAndValidateJSON(parsedVP.headerEncoded, "Header")
 	if err != nil {
 		return err
 	}
 
-	vp.HeaderDecoded = headerDecoded
-	vp.HeaderDecodedMap = headerMap
-	vp.PayloadDecoded = payloadDecoded
-	vp.PayloadDecodedMap = payloadMap
-	vp.SignatureBytes = signatureBytes
-	//TODO: handle remainingParts (if exists), see parse func for more info
+	vp.PayloadDecoded, vp.PayloadDecodedMap, err = decodeAndValidateJSON(parsedVP.payloadEncoded, "Payload")
+	if err != nil {
+		return err
+	}
+
+	vp.HolderSignatureBytes, err = base64.RawURLEncoding.DecodeString(parsedVP.signatureEncoded)
+	if err != nil {
+		return err
+	}
+
+	//TODO: handle remainingParts (if exists), see parseVPToken func for more info
 
 	return nil
 }
 
-func (vp *VPToken) parseDecodeVerifiableCredentials() error {
+func (vp *VPToken) extractVerifiableCredentials() error {
 	vcResult := gjson.Get(vp.PayloadDecoded, "vp.verifiableCredential")
 	if !vcResult.Exists() || !vcResult.IsArray() {
 		return errors.New("verifiable credentials key not found in vp_token payload")
@@ -172,6 +189,7 @@ func (vp *VPToken) parseDecodeVerifiableCredentials() error {
 		return errors.New("zero verifiable credentials in vp_token payload")
 	}
 
+	//TODO(mk): set as a presentation_submission field in VPToken ---------------
 	psResult := gjson.Get(vp.PayloadDecoded, "presentation_submission")
 	if !psResult.Exists() {
 		return errors.New("presentation_submission not found in vp_token payload")
@@ -197,11 +215,12 @@ func (vp *VPToken) parseDecodeVerifiableCredentials() error {
 			}{ID: descID, Format: format, Path: path})
 		}
 	}
+	//----------------------------------------------------------------------
 
 	vp.VerifiableCredentials = make([]*VC, 0)
 
 	for i, vcInPayload := range vcList {
-		vcString := vcInPayload.String()
+		vcToken := vcInPayload.String()
 
 		//Try to match VC with descriptor_map using path
 		var matchedDescriptor *struct {
@@ -225,18 +244,22 @@ func (vp *VPToken) parseDecodeVerifiableCredentials() error {
 		}
 
 		fmt.Printf("\n✅ Credential [%d]:\n", i+1)
-		fmt.Printf("  Descriptor ID: %s\n", matchedDescriptor.ID)
+		descriptorID := "unknown"
+		if matchedDescriptor != nil {
+			descriptorID = matchedDescriptor.ID
+		}
+		fmt.Printf("  Descriptor ID: %s\n", descriptorID)
 		fmt.Printf("  Format: %s\n", format)
 		fmt.Printf("  Path: %s\n", path)
-		fmt.Printf("  Data: %s\n", vcString)
+		fmt.Printf("  Data: %s\n", vcToken)
 
 		vc := &VC{
-			RawToken: vcString,
+			RawToken: vcToken,
+			Format:   format,
 		}
-
 		switch format {
 		case "jwt_vc":
-			err := vc.parseAndDecodeJWTVC()
+			err := vc.extractJWTVC()
 			if err != nil {
 				return err
 			}
@@ -247,9 +270,10 @@ func (vp *VPToken) parseDecodeVerifiableCredentials() error {
 			return fmt.Errorf("unknown VC-format:" + format)
 			//continue //TODO: ska vi se okänt format som ett fel eller ska vi jobba vidare med de vc's vi kan?
 		}
-
 		vp.VerifiableCredentials = append(vp.VerifiableCredentials, vc)
 	}
+
+	fmt.Println("vp_token extracted:", vp)
 
 	return nil
 }
@@ -317,8 +341,8 @@ func (vp *VPToken) validateIssuerSignatures() error {
 	return nil
 }
 
-// validateCredentials checks the validity of the credentials.
-func (vp *VPToken) validateCredentials() error {
+// validateVerifiableCredentials checks the validity of the credentials.
+func (vp *VPToken) validateVerifiableCredentials() error {
 	// Placeholder for checking credential validity (e.g., expiration, revocation).
 	vp.ValidationResults["Credentials"] = true
 	return nil
@@ -406,116 +430,158 @@ type parsedVC struct {
 	holderBindingJWT            string
 }
 
-// parseAndDecodeJWTVC func to parse and handle JWT VC with if exists: Selective Disclosures and/or Holder Binding
-func (vc *VC) parseAndDecodeJWTVC() error {
+// extractJWTVC func to parse and handle JWT VC with if exists: Selective Disclosures and/or Holder Binding
+func (vc *VC) extractJWTVC() error {
 	if vc.RawToken == "" {
 		return fmt.Errorf("jwtVC parse and decode failed: empty VC")
 	}
 
-	parsedVC := &parsedVC{
-		raw: vc.RawToken, // For debugging
-	}
-
-	parts := strings.Split(vc.RawToken, "~")
-	tokenPart := parts[0]
-	tokenParts := strings.Split(tokenPart, ".")
-
-	if len(tokenParts) == 2 {
-		return fmt.Errorf("the VC has to be a JWS (signed) or a JWE")
-	}
-	if len(tokenParts) != 3 && len(tokenParts) != 5 {
-		return fmt.Errorf("the VC has an invalid JWS/JWE-structure")
-	}
-	if len(tokenParts) == 5 {
-		return fmt.Errorf("the VC is a JWE (encrypted) – not supported yet")
-	}
-
-	parsedVC.headerEncoded = tokenParts[0]
-	parsedVC.payloadEncoded = tokenParts[1]
-	parsedVC.signatureEncoded = tokenParts[2]
-
-	// Handle Selective Disclosures and Holder Binding
-	if len(parts) > 1 {
-		remainingParts := parts[1:] // all parts after jws
-		for _, part := range remainingParts {
-			if isJWT(part) {
-				parsedVC.holderBindingJWT = part
-				fmt.Println("holder binding on vc detected:", part)
-			} else {
-				parsedVC.selectiveDisclosuresEncoded = append(parsedVC.selectiveDisclosuresEncoded, part)
-			}
-		}
+	parsedVC, err := parseJWTVC(vc.RawToken)
+	if err != nil {
+		return err
 	}
 
 	fmt.Println("parsedVC:", parsedVC)
 
-	//TODO bryt ut - nedan är i princip samma kod som för vp_token nivån (standard jws delen)
-	headerDecoded, err := decodeBase64URL(parsedVC.headerEncoded)
+	vc.HeaderDecoded, vc.HeaderDecodedMap, err = decodeAndValidateJSON(parsedVC.headerEncoded, "Header")
 	if err != nil {
 		return err
 	}
-	if !gjson.Valid(headerDecoded) {
-		return fmt.Errorf("Header is not valid json in the vc")
+	headerTypResult := gjson.Get(vc.HeaderDecoded, "typ")
+	if headerTypResult.Exists() {
+		// ex: "vc+sd-jwt"
+		vc.JWTTyp = headerTypResult.String()
 	}
 
-	payloadDecoded, err := decodeBase64URL(parsedVC.payloadEncoded)
-	if err != nil {
-		return err
-	}
-	if !gjson.Valid(payloadDecoded) {
-		return fmt.Errorf("Payload is not valid json")
-	}
-
-	headerMap := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(headerDecoded), &headerMap); err != nil {
-		return err
-	}
-
-	payloadMap := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(payloadDecoded), &payloadMap); err != nil {
-		return err
-	}
-
-	signatureBytes, err := base64.RawURLEncoding.DecodeString(parsedVC.signatureEncoded)
-	if err != nil {
-		return err
-	}
-
-	selectiveDisclosuresDecoded, err := decodeSelectiveDisclosures(parsedVC.selectiveDisclosuresEncoded)
-	if err != nil {
-		return err
-	}
-
-	//TODO ta fram och sätt vc.Format (från descriptor i vc_token.payload som pekar ut denna vc, dvs skicka in som paramter till dennna func
 	//TODO ta fram och sätt vc.JWTTyp (från vc.header.typ om existerar)
 
-	vc.HeaderDecoded = headerDecoded
-	vc.HeaderDecodedMap = headerMap
-	vc.PayloadDecoded = payloadDecoded
-	vc.PayloadDecodedMap = payloadMap
-	vc.SignatureBytes = signatureBytes
-	vc.SelectiveDisclosuresDecoded = selectiveDisclosuresDecoded
-	//TODO: packa upp HolderBindingJWT
+	vc.PayloadDecoded, vc.PayloadDecodedMap, err = decodeAndValidateJSON(parsedVC.payloadEncoded, "Payload")
+	if err != nil {
+		return err
+	}
+
+	vc.IssuerSignatureBytes, err = base64.RawURLEncoding.DecodeString(parsedVC.signatureEncoded)
+	if err != nil {
+		return err
+	}
+
+	vc.SelectiveDisclosuresDecoded, err = decodeSDs(parsedVC.selectiveDisclosuresEncoded)
+	if err != nil {
+		return err
+	}
+
+	//TODO: extract HolderBindingJWT string to its parts
 	vc.HolderBindingJWT = parsedVC.holderBindingJWT
+
+	headerVCTMResult := gjson.Get(vc.HeaderDecoded, "vctm")
+	if headerVCTMResult.Exists() && headerVCTMResult.IsArray() {
+		headerVCTMArray := headerVCTMResult.Array()
+		if len(headerVCTMArray) > 1 {
+			return errors.New("Only one vctm string i vc.header.vctm (array) is currently supported")
+		}
+		vctmEncoded := headerVCTMArray[0].String()
+		vctmDecoded, vctmMap, err := decodeVCTM(vctmEncoded)
+		if err != nil {
+			return err
+		}
+		vc.HeaderVCTMDecoded = vctmDecoded
+		vc.HeaderVCTMDecodedMap = vctmMap
+	}
 
 	return nil
 }
 
+func parseJWTVC(rawJWTVCToken string) (*parsedVC, error) {
+	parts := strings.Split(rawJWTVCToken, "~")
+	tokenPart := parts[0]
+	tokenParts := strings.Split(tokenPart, ".")
+
+	if len(tokenParts) == 2 {
+		return nil, errors.New("the VC has to be a JWS (signed) or a JWE")
+	}
+	if len(tokenParts) != 3 && len(tokenParts) != 5 {
+		return nil, errors.New("the VC has an invalid JWS/JWE-structure")
+	}
+	if len(tokenParts) == 5 {
+		return nil, errors.New("the VC is a JWE (encrypted) – not supported yet")
+	}
+
+	parsed := &parsedVC{
+		raw:              rawJWTVCToken,
+		headerEncoded:    tokenParts[0],
+		payloadEncoded:   tokenParts[1],
+		signatureEncoded: tokenParts[2],
+	}
+
+	// Handle Selective Disclosures and Holder Binding
+	if len(parts) > 1 {
+		for _, part := range parts[1:] {
+			if isJWT(part) {
+				parsed.holderBindingJWT = part
+			} else {
+				parsed.selectiveDisclosuresEncoded = append(parsed.selectiveDisclosuresEncoded, part)
+			}
+		}
+	}
+
+	return parsed, nil
+}
+
+func decodeAndValidateJSON(encodedJSONString, field string) (string, map[string]interface{}, error) {
+	decoded, err := decodeBase64URL(encodedJSONString)
+	if err != nil {
+		return "", nil, fmt.Errorf("%s decoding failed: %v", field, err)
+	}
+
+	if !gjson.Valid(decoded) {
+		return "", nil, fmt.Errorf("%s is not valid JSON", field)
+	}
+
+	var jsonMap map[string]interface{}
+	if err := json.Unmarshal([]byte(decoded), &jsonMap); err != nil {
+		return "", nil, fmt.Errorf("%s JSON unmarshal failed: %v", field, err)
+	}
+
+	return decoded, jsonMap, nil
+}
+
+func decodeVCTM(vctmEncoded string) (string, map[string]interface{}, error) {
+	vctmEncoded = strings.TrimRight(vctmEncoded, "=")
+
+	decodedBytes, err := base64.RawURLEncoding.DecodeString(vctmEncoded)
+	if err != nil {
+		return "", nil, fmt.Errorf("base64 decode failed: %v", err)
+	}
+
+	vctmDecoded := string(decodedBytes)
+	if !gjson.Valid(vctmDecoded) {
+		return "", nil, errors.New("vctm is not valid JSON")
+	}
+
+	var jsonMap map[string]interface{}
+	if err := json.Unmarshal(decodedBytes, &jsonMap); err != nil {
+		return vctmDecoded, nil, fmt.Errorf("json unmarshal failed: %v", err)
+	}
+
+	return vctmDecoded, jsonMap, nil
+}
+
 func isJWT(token string) bool {
 	parts := strings.Split(token, ".")
+	// jws or jwe
 	return len(parts) == 3 || len(parts) == 5
 }
 
-func decodeSelectiveDisclosures(encodedDisclosures []string) ([]string, error) {
-	var decodedDisclosures []string
+func decodeSDs(encodedSDs []string) ([]string, error) {
+	var decodedSDs []string
 
-	for _, encoded := range encodedDisclosures {
-		decodedBytes, err := base64.RawURLEncoding.DecodeString(encoded)
+	for _, encodedSD := range encodedSDs {
+		decodedBytes, err := base64.RawURLEncoding.DecodeString(encodedSD)
 		if err != nil {
 			return nil, fmt.Errorf("failed to base64url decode selective disclosure: %v", err)
 		}
-		decodedDisclosures = append(decodedDisclosures, string(decodedBytes))
+		decodedSDs = append(decodedSDs, string(decodedBytes))
 	}
 
-	return decodedDisclosures, nil
+	return decodedSDs, nil
 }

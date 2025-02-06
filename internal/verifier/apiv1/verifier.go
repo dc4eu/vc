@@ -75,74 +75,73 @@ type VPToken struct {
 
 	//TODO(mk): gör en struct istället för bool med fält för utfall, error, mm.
 	ValidationResults map[string]bool // Validation results for different steps
+
+	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
+	holderPublicKey interface{}
+	jwePrivateKey   interface{}
+	issuerPublicKey interface{} //All embedded VC's must for now be signed by the same key
 }
 
 // VC represents the structure for validating a Verifiable Credential inside a Verifiable Presentation (vp_token).
 type VC struct {
-	RawToken string
+	RawToken          string // header.payload.signature(~sd1~sd2~holderbinding~)
+	RawJWSPartOfToken string // only header.payload.signature
 
-	// from presentation_submission in vp_token.payload for this vc (for example: jwt_vc or ldp_vc or other)
+	//Format from presentation_submission in vp_token.payload for this vc (for example: jwt_vc, ldp_vc or other)
 	Format string
 
 	// jwt_vc fields
-	JWTTyp               string //for example: "vc+sd-jwt" (set by the credential issuer)
-	HeaderDecoded        string
-	HeaderDecodedMap     map[string]interface{}
-	HeaderVCTMDecoded    string
-	HeaderVCTMDecodedMap map[string]interface{}
-	PayloadDecoded       string
-	PayloadDecodedMap    map[string]interface{}
-	IssuerSignatureBytes []byte
-	//TODO: döp om till RevealedDisclosuresDecoded
-	SelectiveDisclosuresDecoded []string
-	HolderBindingJWT            string
+	JWTTyp                              string //for example: "vc+sd-jwt" (set by the credential issuer)
+	HeaderDecoded                       string
+	HeaderDecodedMap                    map[string]interface{}
+	HeaderVCTMDecoded                   string
+	HeaderVCTMDecodedMap                map[string]interface{}
+	PayloadDecoded                      string
+	PayloadDecodedMap                   map[string]interface{}
+	IssuerSignatureBytes                []byte
+	RevealedSelectiveDisclosuresDecoded []string
+	HolderBindingJWT                    string
 
 	//TODO ldp_vc
 }
 
 // Validate process the vp_token depending on selected ProcessType.
-func (vp *VPToken) Process(processType ProcessType, holderPublicKey interface{}, jwePrivateKey interface{}) error {
+func (vp *VPToken) Process(processType ProcessType) error {
 	if !isValidProcessType(processType) {
 		return errors.New("invalid process type")
 	}
 
-	// 1. top level jwt only
+	// 1. parse, decrypt and decode top level jwt only (the vp token level)
 	//TODO(mk): find and extract jwePrivateKey instead of param
-	if err := vp.extractVPToken(jwePrivateKey); err != nil {
+	if err := vp.extractVPToken(); err != nil {
 		return err
 	}
 
 	if processType == FULL_VALIDATION {
 		//TODO(mk): find and extract holderPublicKey instead of param
 
-		// 2. Verify the signature of the outer JWT (VP) using the Holder's public key.
-		if err := vp.verifyHolderSignature(holderPublicKey); err != nil {
+		// 2. verify the signature of the outer JWT (VP) using the Holder's public key.
+		if err := vp.verifyHolderSignature(); err != nil {
 			return err
 		}
 	}
 
+	// 3. parse, decrypt and decode every embedded VC
 	if err := vp.extractVerifiableCredentials(); err != nil {
 		return err
 	}
 
 	if processType == ONLY_EXTRACT_JSON {
-		// Break here to display extracted and decoded vp_token
+		// Break here to display extracted and decoded vp_token incl. vc's
 		return nil
 	}
 
 	//TODO(mk): find and extract the holders public key instead of param
 
-	//TODO: slå ihop 3 och 4 nedan till en func med namn verifyIssuerSignature
-
-	// 3. Validate Issuer's Signatures on Embedded VC's
+	// 4. Validate Issuer's Signatures on Embedded VC's
 	// Extract and verify the signatures of all Verifiable Credentials using the Issuer's public key.
-	if err := vp.verifyIssuerSignatures(); err != nil {
-		return err
-	}
-
-	// 4. Check Credential Validity for each VC
 	// Ensure that credentials are not expired, revoked, or issued by untrusted issuers, etc.
-	if err := vp.verifyVerifiableCredentials(); err != nil {
+	if err := vp.verifyIssuersSignaturesInVerifyableCredentials(); err != nil {
 		return err
 	}
 
@@ -162,12 +161,13 @@ func (vp *VPToken) Process(processType ProcessType, holderPublicKey interface{},
 	// Ensure the VP matches the verifier's requirements.
 	return vp.verifyPresentationRequirements()
 
-	//TODO: analysera utfall och om allt är OK, persistera/lägg på en kö; alla vc's inkl. nödvändigt metadata för ev. konsumtion av en authentic_source (import)
+	// 8.
+	//TODO: analysera utfall och om allt är OK, persistera/lägg på en kö; alla vc's inkl. nödvändiga metadata för ev. konsumtion av en authentic_source (import)
 }
 
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
-func (vp *VPToken) extractVPToken(jwePrivateKey interface{}) error {
-	parsedVP, err := vp.parseVPToken(jwePrivateKey)
+func (vp *VPToken) extractVPToken() error {
+	parsedVP, err := vp.parseVPToken(vp.jwePrivateKey)
 	if err != nil {
 		return err
 	}
@@ -193,6 +193,8 @@ func (vp *VPToken) extractVPToken(jwePrivateKey interface{}) error {
 }
 
 func (vp *VPToken) extractVerifiableCredentials() error {
+
+	//TODO: Behöver egentligen först ta ut presentation_submission för att se om och i så fall vilka VCs som finns, vilka typer de är samt var de finns (kanske bara vissa som är av intresse?)
 	vcResult := gjson.Get(vp.PayloadDecoded, "vp.verifiableCredential")
 	if !vcResult.Exists() || !vcResult.IsArray() {
 		return errors.New("verifiable credentials key not found in vp_token payload")
@@ -291,85 +293,102 @@ func (vp *VPToken) extractVerifiableCredentials() error {
 	return nil
 }
 
-// verifyHolderSignature verifies the signature of the outer JWT.
-func (vp *VPToken) verifyHolderSignature(holderPublicKey interface{}) error {
-	// Placeholder for holder signature validation logic.
-	// Typically involves extracting JWK from payload and verifying signature.
-
+// verifyHolderSignature verifies the signature of the outer JWT (vp_token jws).
+func (vp *VPToken) verifyHolderSignature() error {
 	parsedToken, err := jwt.Parse(vp.RawToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\n🔍 Found vp_token signing alg: %s\n", alg)
-		return holderPublicKey, nil
+		return vp.holderPublicKey, nil
 	})
 	if err != nil {
-		return fmt.Errorf("JWT-verification failed: %w", err)
+		return fmt.Errorf("VP JWT-verification failed: %w", err)
 	}
 
 	if !parsedToken.Valid {
-		return fmt.Errorf("JWT not valid")
+		return fmt.Errorf("VP JWT not valid")
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return fmt.Errorf("could not read JWR claims")
+		return fmt.Errorf("VP could not read JWR claims")
 	}
 
 	if exp, ok := claims["exp"].(float64); ok {
 		expTime := time.Unix(int64(exp), 0)
 		if time.Now().After(expTime) {
-			return fmt.Errorf("JWT has expired")
+			return fmt.Errorf("VP JWT has expired")
 		}
 	}
 
 	if nbf, ok := claims["nbf"].(float64); ok {
 		nbfTime := time.Unix(int64(nbf), 0)
 		if time.Now().Before(nbfTime) {
-			return fmt.Errorf("JWT not valid yet (will be valid in the feature)")
+			return fmt.Errorf("VP JWT not valid yet (will be valid in the feature)")
 		}
 	}
 
 	if iat, ok := claims["iat"].(float64); ok {
 		iatTime := time.Unix(int64(iat), 0)
 		if time.Now().Before(iatTime) {
-			return fmt.Errorf("JWT has a iat-value in the future")
+			return fmt.Errorf("VP JWT has a iat-value in the future")
 		}
 	}
 
-	//TODO(mk): check revocation
-	//if jti, ok := claims["jti"].(string); ok {
-	//	if revokedTokens[jti] {
-	//		return fmt.Errorf("JWT is revoked")
-	//	}
-	//}
+	if iss, ok := claims["iss"].(string); ok {
+		//TODO: Hårdkodad expectedIssuer "did:example:myprivatewallet" - ta in via config
+		expectedIssuer := "did:example:myprivatewallet"
+		if iss != expectedIssuer {
+			return fmt.Errorf("VP JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
+		}
+	}
+
+	if audClaim, ok := claims["aud"]; ok {
+		//TODO: Hårdkodad expectedAudience - ta in via config
+		expectedAudience := "did:example:sunetverifier"
+		switch aud := audClaim.(type) {
+		case string:
+			if aud != expectedAudience {
+				return fmt.Errorf("VP JWT audience mismatch: expected %s, got %s", expectedAudience, aud)
+			}
+		case []interface{}:
+			found := false
+			for _, a := range aud {
+				if audStr, ok := a.(string); ok && audStr == expectedAudience {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return fmt.Errorf("VP JWT audience mismatch: expected %s, got %v", expectedAudience, aud)
+			}
+		default:
+			return fmt.Errorf("VP JWT audience claim has an unexpected type: %T", audClaim)
+		}
+	}
+
+	//TODO(mk): check more claims: nonce, revocation etc
 
 	vp.ValidationResults["HolderSignature"] = true
 	return nil
 }
 
-// verifyIssuerSignatures validates signatures of all embedded Verifiable Credentials.
-func (vp *VPToken) verifyIssuerSignatures() error {
-	// Placeholder for issuer signature validation logic.
-	// Extract VCs and validate their signatures using Issuer public keys.
-	vp.ValidationResults["IssuerSignatures"] = true
-	return nil
-}
-
-// verifyVerifiableCredentials checks the validity of the credentials.
-func (vp *VPToken) verifyVerifiableCredentials() error {
-	// Placeholder for checking credential validity (e.g., expiration, revocation).
-	vp.ValidationResults["Credentials"] = true
-	return nil
-}
-
-// verifySelectiveDisclosure validates selective disclosure claims.
+// verifySelectiveDisclosure validates revealed selective disclosure claims.
 func (vp *VPToken) verifySelectiveDisclosures() error {
 	for _, vc := range vp.VerifiableCredentials {
 		//if vc.JWTTyp != "vc+sd-jwt" {
 		//	return errors.New("jwt verifier only supports vc+sd-jwt as credential")
 		//}
 
-		//TODO läs ut nedan från vc.payload._sd_alg
-		hashAlg := "sha-256"
+		if len(vc.RevealedSelectiveDisclosuresDecoded) == 0 {
+			continue
+		}
+
+		//hashAlg := "sha-256"
+		sdAlgResults := gjson.Get(vc.PayloadDecoded, "_sd_alg")
+		if !sdAlgResults.Exists() {
+			return fmt.Errorf("_sd_alg not found in VC")
+		}
+		sdHashAlg := sdAlgResults.String()
 
 		sdList := []string{}
 		sdResults := gjson.Get(vc.PayloadDecoded, "_sd")
@@ -380,29 +399,26 @@ func (vp *VPToken) verifySelectiveDisclosures() error {
 			})
 		}
 
-		err := vc.validateSelectiveDisclosures(sdList, vc.SelectiveDisclosuresDecoded, hashAlg)
+		err := vc.validateSelectiveDisclosures(sdList, sdHashAlg)
 		if err != nil {
-			log.Fatalf("Validation failed: %v", err)
-		} else {
-			fmt.Println("All disclosures are valid.")
+			return fmt.Errorf("Validation of selective disclosures in a vc failed: %v", err)
 		}
-
 	}
 
 	vp.ValidationResults["SelectiveDisclosure"] = true
 	return nil
 }
 
-// verifyHolderBinding ensures the Holder is bound to the credential.
+// verifyHolderBinding ensures the Holder is bound to each embedded vc
 func (vp *VPToken) verifyHolderBinding() error {
-	// Placeholder for validating Holder binding logic.
+	//TODO impl verifyHolderBinding
 	vp.ValidationResults["HolderBinding"] = true
 	return nil
 }
 
 // verifyPresentationRequirements ensures the VP matches the verifier's requirements.
 func (vp *VPToken) verifyPresentationRequirements() error {
-	// Placeholder for matching claims with verifier requirements.
+	//TODO impl verifyPresentationRequirements
 	vp.ValidationResults["PresentationRequirements"] = true
 	return nil
 }
@@ -468,6 +484,74 @@ func (vpToken *VPToken) parseVPToken(jwePrivateKey interface{}) (*parsedVPToken,
 	return parsedVPToken, nil
 }
 
+func (vp *VPToken) verifyIssuersSignaturesInVerifyableCredentials() error {
+	for _, vc := range vp.VerifiableCredentials {
+		parsedToken, _ := jwt.Parse(vc.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
+			alg := token.Method.Alg()
+			fmt.Printf("\n🔍 Found vc_token signing alg: %s\n", alg)
+			return vp.issuerPublicKey, nil
+		})
+
+		//TODO: TA UT err i jwt.Parse samt KOMMENTERA FRAM NEDAN NÄR ÄKTA issuerPublicKey FINNS TILLGÄNGLIG
+		//if err != nil {
+		//	return fmt.Errorf("VC JWS-verification failed: %w", err)
+		//}
+		//if !parsedToken.Valid {
+		//	return fmt.Errorf("VC JWS not valid")
+		//}
+
+		claims, ok := parsedToken.Claims.(jwt.MapClaims)
+		if !ok {
+			return fmt.Errorf("VC could not read JWT claims")
+		}
+
+		if exp, ok := claims["exp"].(float64); ok {
+			expTime := time.Unix(int64(exp), 0)
+			if time.Now().After(expTime) {
+				return fmt.Errorf("VC JWT has expired")
+			}
+		}
+
+		if nbf, ok := claims["nbf"].(float64); ok {
+			nbfTime := time.Unix(int64(nbf), 0)
+			if time.Now().Before(nbfTime) {
+				return fmt.Errorf("VC JWT not valid yet (will be valid in the feature)")
+			}
+		}
+
+		if iat, ok := claims["iat"].(float64); ok {
+			iatTime := time.Unix(int64(iat), 0)
+			if time.Now().Before(iatTime) {
+				return fmt.Errorf("VC JWT has a iat-value in the future")
+			}
+		}
+
+		if iss, ok := claims["iss"].(string); ok {
+			//TODO: Hårdkodad expectedIssuer "https://issuer.sunet.se" - ta in via config
+			expectedIssuer := "https://issuer.sunet.se"
+			if iss != expectedIssuer {
+				return fmt.Errorf("VC JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
+			}
+		}
+
+		if vct, ok := claims["vct"].(string); ok {
+			//TODO: Hårdkodad expectedVCT "EHICCredential"
+			expectedVCT := "EHICCredential"
+			if vct != expectedVCT {
+				return fmt.Errorf("VC JWT vct mismatch: expected %s, got %s", expectedVCT, vct)
+			}
+		}
+
+		//TODO(mk): check more claims: revocation mm
+
+		//TODO: REFACTORISERA: kanske kontrollera _sd här, då de finns i claims???
+
+	}
+
+	vp.ValidationResults["IssuersSignaturesInVerifyableCredentials"] = true
+	return nil
+}
+
 func decryptJWE(jweStr string, key interface{}) ([]byte, error) {
 	//TODO: hardcoded supported JWE key alg and content encryption
 	keyEncryptionAlgorithms := []jose.KeyAlgorithm{
@@ -504,7 +588,8 @@ func unmarshalJWKFromJSON(jsonStr string) *jwk.Key {
 }
 
 type parsedVC struct {
-	raw string
+	raw               string
+	rawJWSPartOfToken string
 
 	headerEncoded               string
 	payloadEncoded              string
@@ -523,6 +608,10 @@ func (vc *VC) extractJWTVC() error {
 	if err != nil {
 		return err
 	}
+	if parsedVC.rawJWSPartOfToken == "" {
+		return fmt.Errorf("failed to extract JWS part of vcToken")
+	}
+	vc.RawJWSPartOfToken = parsedVC.rawJWSPartOfToken
 
 	//fmt.Println("parsedVC:", parsedVC)
 
@@ -548,7 +637,7 @@ func (vc *VC) extractJWTVC() error {
 		return err
 	}
 
-	vc.SelectiveDisclosuresDecoded, err = decodeSDs(parsedVC.selectiveDisclosuresEncoded)
+	vc.RevealedSelectiveDisclosuresDecoded, err = decodeRevealedSelectiveDisclosures(parsedVC.selectiveDisclosuresEncoded)
 	if err != nil {
 		return err
 	}
@@ -590,10 +679,11 @@ func parseJWTVC(rawJWTVCToken string) (*parsedVC, error) {
 	}
 
 	parsed := &parsedVC{
-		raw:              rawJWTVCToken,
-		headerEncoded:    tokenParts[0],
-		payloadEncoded:   tokenParts[1],
-		signatureEncoded: tokenParts[2],
+		raw:               rawJWTVCToken,
+		rawJWSPartOfToken: tokenPart,
+		headerEncoded:     tokenParts[0],
+		payloadEncoded:    tokenParts[1],
+		signatureEncoded:  tokenParts[2],
 	}
 
 	// Handle Selective Disclosures and Holder Binding
@@ -659,7 +749,7 @@ func isJWT(token string) bool {
 	return len(parts) == 3 || len(parts) == 5
 }
 
-func decodeSDs(encodedSDs []string) ([]string, error) {
+func decodeRevealedSelectiveDisclosures(encodedSDs []string) ([]string, error) {
 	var decodedSDs []string
 
 	for _, encodedSD := range encodedSDs {
@@ -700,20 +790,19 @@ func unmarshalDisclosure(encoded string) (*Disclosure, error) {
 	return d, nil
 }
 
-// validateSelectiveDisclosures verifies disclosures against `_sd` list
-func (vc *VC) validateSelectiveDisclosures(sdList []string, disclosures []string, hashAlg string) error {
+// validateSelectiveDisclosures verifies revealed selective disclosures against `_sd` list for a vc
+func (vc *VC) validateSelectiveDisclosures(sdList []string, hashAlg string) error {
 	hashFunc, err := getHashFunc(hashAlg)
 	if err != nil {
 		return err
 	}
 
-	for _, encodedDisclosure := range disclosures {
+	for _, encodedDisclosure := range vc.RevealedSelectiveDisclosuresDecoded {
 		d, err := unmarshalDisclosure(encodedDisclosure)
 		if err != nil {
 			return fmt.Errorf("failed to decode disclosure: %w", err)
 		}
 
-		//calculatedHash, err := computeDisclosureHash(d, hashFunc)
 		calculatedHash, err := computeDisclosureHashUsingSUNETIssuerAlg(d, hashFunc)
 		if err != nil {
 			return fmt.Errorf("failed to compute hash for disclosure: %w", err)

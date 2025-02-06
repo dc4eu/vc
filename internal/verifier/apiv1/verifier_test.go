@@ -48,6 +48,7 @@ func TestVPToken_Process(t *testing.T) {
 		fields          fields
 		holderPublicKey interface{}
 		jwePrivateKey   interface{}
+		issuerPublicKey interface{}
 		wantErr         bool
 	}{
 		//TODO bryt ut till till en testcase builder för att enkelt testa massa olika varianter
@@ -58,6 +59,7 @@ func TestVPToken_Process(t *testing.T) {
 			},
 			holderPublicKey: ecdsaP256Public,
 			jwePrivateKey:   ecdsaP256Private,
+			issuerPublicKey: ecdsaP256Public,
 			wantErr:         false,
 		},
 		{
@@ -69,22 +71,21 @@ func TestVPToken_Process(t *testing.T) {
 			wantErr:         false,
 		},
 		{
-			name: "Generated vp token with 1 hardcoded jwt_vc",
+			name: "Generated vp token with 1 hardcoded jwt_vc (has wrong issuer)",
 			fields: fields{
 				RawToken: vp_token_with_1_jwt_vc,
 			},
 			holderPublicKey: ecdsaP256Public,
-			wantErr:         false,
+			wantErr:         true,
 		},
 		{
-			name: "Generated vp token with 2 ldp_vc",
+			name: "Generated vp token with 2 ldp_vc (format not supported yet)",
 			fields: fields{
 				RawToken: vp_token_with_2_ldp_vc,
 			},
 			holderPublicKey: ecdsaP256Public,
 			wantErr:         true,
 		},
-
 		{
 			name: "Hardcoded vp_token_1",
 			fields: fields{
@@ -96,11 +97,14 @@ func TestVPToken_Process(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			vp, err := NewVPToken(tt.fields.RawToken)
+			vp.holderPublicKey = tt.holderPublicKey
+			vp.jwePrivateKey = tt.jwePrivateKey
+			vp.issuerPublicKey = tt.issuerPublicKey
 			if err != nil {
 				t.Fatal(err)
 			}
-			//TODO: ta in en configuration till validate som styr vilka kontroller som ska göras för att kunna testa specifika delar enklare.
-			if err := vp.Process(FULL_VALIDATION, tt.holderPublicKey, tt.jwePrivateKey); (err != nil) != tt.wantErr {
+
+			if err := vp.Process(FULL_VALIDATION); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			//TODO lägg till asserts
@@ -119,8 +123,8 @@ func build_vp_jws_token_with_jwt_vc_credentials(vcJWT string, signingMethod jwt.
 	}
 
 	claims := jwt.MapClaims{
-		"iss": "did:example:issuer",
-		"aud": "did:example:verifier",
+		"iss": "did:example:myprivatewallet",
+		"aud": "did:example:sunetverifier",
 		"iat": now.Unix(),
 		"exp": now.Add(time.Minute * 5).Unix(),
 		"vp": map[string]interface{}{

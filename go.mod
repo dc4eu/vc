@@ -11,6 +11,7 @@ require (
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.3.0
 	github.com/go-playground/validator/v10 v10.22.1

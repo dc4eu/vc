@@ -8,6 +8,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto" // For secp256k1 (ES256K)
+	"github.com/go-jose/go-jose/v4"
 	"github.com/golang-jwt/jwt/v5"
 	"strings"
 	"testing"
@@ -27,6 +28,8 @@ func TestVPToken_Process(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	vp_token_ehic_adam_driver_JWE, err := encryptToJWE([]byte(vp_token_ehic_adam_driver), ecdsaP256Public)
+
 	vp_token_with_1_jwt_vc, err := build_vp_jws_token_with_jwt_vc_credentials(pid_sd_vc_jwt_with_selective_disclosures_and_holder_binding, jwt.SigningMethodES256, ecdsaP256Private, "did:example:issuer#key-1")
 	if err != nil {
 		t.Fatal(err)
@@ -44,9 +47,19 @@ func TestVPToken_Process(t *testing.T) {
 		name            string
 		fields          fields
 		holderPublicKey interface{}
+		jwePrivateKey   interface{}
 		wantErr         bool
 	}{
 		//TODO bryt ut till till en testcase builder för att enkelt testa massa olika varianter
+		{
+			name: "Generated vp token ehic adam driver as JWE",
+			fields: fields{
+				RawToken: vp_token_ehic_adam_driver_JWE,
+			},
+			holderPublicKey: ecdsaP256Public,
+			jwePrivateKey:   ecdsaP256Private,
+			wantErr:         false,
+		},
 		{
 			name: "Generated vp token ehic adam driver",
 			fields: fields{
@@ -87,7 +100,7 @@ func TestVPToken_Process(t *testing.T) {
 				t.Fatal(err)
 			}
 			//TODO: ta in en configuration till validate som styr vilka kontroller som ska göras för att kunna testa specifika delar enklare.
-			if err := vp.Process(FULL_VALIDATION, tt.holderPublicKey); (err != nil) != tt.wantErr {
+			if err := vp.Process(FULL_VALIDATION, tt.holderPublicKey, tt.jwePrivateKey); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			//TODO lägg till asserts
@@ -279,6 +292,29 @@ func generateHMACKey() ([]byte, error) {
 		return nil, err
 	}
 	return hmacKey, nil
+}
+
+func encryptToJWE(jwtString []byte, publicKey *ecdsa.PublicKey) (string, error) {
+	encrypter, err := jose.NewEncrypter(
+		jose.A256GCM, // content encryption alg
+		jose.Recipient{
+			Algorithm: jose.ECDH_ES_A256KW, // key encryption
+			Key:       publicKey,
+		},
+		&jose.EncrypterOptions{
+			Compression: jose.DEFLATE,
+		},
+	)
+	if err != nil {
+		return "", fmt.Errorf("Failed to create JWE encrypter: %w", err)
+	}
+
+	jwe, err := encrypter.Encrypt(jwtString)
+	if err != nil {
+		return "", fmt.Errorf("Failed to encrypt JWT to JWE: %w", err)
+	}
+
+	return jwe.CompactSerialize()
 }
 
 /* Below is a readable form for vp_token_1 in the test:

@@ -8,10 +8,14 @@ import (
 	"fmt"
 	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/tidwall/gjson"
 	"log"
 	"strings"
 	"time"
+
+	jose "github.com/go-jose/go-jose/v4"
+	//"github.com/go-jose/go-jose/v4/jwk"
 )
 
 //TODO(mk): remove all fmt.println etc and implement "vettig" loggning
@@ -54,7 +58,8 @@ func NewVPToken(vp_token string) (*VPToken, error) {
 
 // VPToken represents the structure for validating a Verifiable Presentation token.
 type VPToken struct {
-	RawToken string // The raw input token
+	RawToken                        string // The raw input token
+	RawTokenHasBeenEncryptedFromJWE bool
 
 	HeaderDecoded        string
 	HeaderDecodedMap     map[string]interface{}
@@ -96,24 +101,24 @@ type VC struct {
 }
 
 // Validate process the vp_token depending on selected ProcessType.
-func (vp *VPToken) Process(processType ProcessType, holderPublicKey interface{}) error {
+func (vp *VPToken) Process(processType ProcessType, holderPublicKey interface{}, jwePrivateKey interface{}) error {
 	if !isValidProcessType(processType) {
 		return errors.New("invalid process type")
 	}
 
 	// 1. top level jwt only
-	if err := vp.extractVPToken(); err != nil {
+	//TODO(mk): find and extract jwePrivateKey instead of param
+	if err := vp.extractVPToken(jwePrivateKey); err != nil {
 		return err
 	}
 
 	if processType == FULL_VALIDATION {
-		//TODO(mk): find and extract the holders public key instead of param
+		//TODO(mk): find and extract holderPublicKey instead of param
 
 		// 2. Verify the signature of the outer JWT (VP) using the Holder's public key.
 		if err := vp.verifyHolderSignature(holderPublicKey); err != nil {
 			return err
 		}
-
 	}
 
 	if err := vp.extractVerifiableCredentials(); err != nil {
@@ -161,8 +166,8 @@ func (vp *VPToken) Process(processType ProcessType, holderPublicKey interface{})
 }
 
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
-func (vp *VPToken) extractVPToken() error {
-	parsedVP, err := parseVPToken(vp.RawToken)
+func (vp *VPToken) extractVPToken(jwePrivateKey interface{}) error {
+	parsedVP, err := vp.parseVPToken(jwePrivateKey)
 	if err != nil {
 		return err
 	}
@@ -419,14 +424,14 @@ type parsedVPToken struct {
 	signatureEncoded string
 }
 
-func parseVPToken(vpToken string) (*parsedVPToken, error) {
+func (vpToken *VPToken) parseVPToken(jwePrivateKey interface{}) (*parsedVPToken, error) {
 	parsedVPToken := &parsedVPToken{
 		// just to simplify debug
-		raw: vpToken,
+		raw: vpToken.RawToken,
 	}
 
 	// Split token at the first `~` to separate first token from disclosures and other stuff (if exists)
-	parts := strings.SplitN(vpToken, "~", 2)
+	parts := strings.SplitN(vpToken.RawToken, "~", 2)
 	tokenPart := parts[0]
 
 	tokenParts := strings.Split(tokenPart, ".")
@@ -437,9 +442,19 @@ func parseVPToken(vpToken string) (*parsedVPToken, error) {
 	if len(tokenParts) != 3 && len(tokenParts) != 5 {
 		return nil, fmt.Errorf("invalid JWS/JWE-structure")
 	}
-	if len(parts) == 5 {
-		//TODO(mk): handle that the vp_token is a JWE (decrypt it)
-		return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
+	if len(tokenParts) == 5 {
+		// vp_token is a JWE (decrypt it first)
+		fmt.Println("vp_token is a JWE - decrypting it to a JWT!")
+		jwtBytes, err := decryptJWE(vpToken.RawToken, jwePrivateKey)
+		if err != nil {
+			return nil, err
+		}
+
+		// Replace raw token with decrypted jwt (the readable vp_token)
+		vpToken.RawToken = string(jwtBytes)
+		vpToken.RawTokenHasBeenEncryptedFromJWE = true
+		return vpToken.parseVPToken(nil)
+		//return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
 	}
 
 	parsedVPToken.headerEncoded = tokenParts[0]
@@ -451,6 +466,41 @@ func parseVPToken(vpToken string) (*parsedVPToken, error) {
 	}
 
 	return parsedVPToken, nil
+}
+
+func decryptJWE(jweStr string, key interface{}) ([]byte, error) {
+	//TODO: hardcoded supported JWE key alg and content encryption
+	keyEncryptionAlgorithms := []jose.KeyAlgorithm{
+		jose.ECDH_ES_A256KW,
+	}
+
+	contentEncryption := []jose.ContentEncryption{
+		jose.A256GCM,
+	}
+
+	fmt.Println("Supported JWE key encryption algorithms:", keyEncryptionAlgorithms)
+	fmt.Println("Supported JWE content encryption algorithms:", contentEncryption)
+
+	jwe, err := jose.ParseEncrypted(jweStr, keyEncryptionAlgorithms, contentEncryption)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to parse JWE: %w", err)
+	}
+
+	jwtBytes, err := jwe.Decrypt(key)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to decrypt JWE: %w", err)
+	}
+
+	return jwtBytes, nil
+}
+
+func unmarshalJWKFromJSON(jsonStr string) *jwk.Key {
+	var key jwk.Key
+	err := json.Unmarshal([]byte(jsonStr), &key)
+	if err != nil {
+		log.Fatalf("Failed to load JWK: %v", err)
+	}
+	return &key
 }
 
 type parsedVC struct {

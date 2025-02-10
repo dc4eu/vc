@@ -1,4 +1,4 @@
-package apiv1
+package openid4vp
 
 import (
 	"crypto/ecdsa"

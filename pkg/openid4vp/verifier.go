@@ -60,7 +60,8 @@ func NewVPToken(vp_token string) (*VPToken, error) {
 // VPToken represents the structure for validating a Verifiable Presentation token (vp_token).
 type VPToken struct {
 	RawToken                        string // The raw input token
-	RawTokenHasBeenEncryptedFromJWE bool
+	RawTokenHasBeenDecryptedFromJWE bool
+	RawJWSPartOfToken               string //only header.payload.signature without any ~
 
 	HeaderDecoded        string
 	HeaderDecodedMap     map[string]interface{}
@@ -91,7 +92,7 @@ type VCToken struct {
 	Format string
 
 	// jwt_vc fields
-	RawJWSPartOfToken                   string // only header.payload.signature
+	RawJWSPartOfToken                   string //only header.payload.signature without any ~
 	JWTTyp                              string //for example: "vc+sd-jwt" (set by the credential issuer)
 	HeaderDecoded                       string
 	HeaderDecodedMap                    map[string]interface{}
@@ -106,7 +107,7 @@ type VCToken struct {
 	//TODO ldp_vc
 }
 
-// Validate process the vp_token depending on selected ProcessType.
+// Process process the vp_token depending on selected ProcessType.
 func (vp *VPToken) Process(processType ProcessType) error {
 	if !isValidProcessType(processType) {
 		return errors.New("invalid process type")
@@ -120,6 +121,7 @@ func (vp *VPToken) Process(processType ProcessType) error {
 
 	if processType == FULL_VALIDATION {
 		// 2. verify the signature of the outer JWT (VP) using the Holder's public key.
+		// Ensure that it's not expired, revoked, or issued by untrusted holder (wallet), etc.
 		if err := vp.checkVPTokenIntegrity(); err != nil {
 			return err
 		}
@@ -158,7 +160,7 @@ func (vp *VPToken) Process(processType ProcessType) error {
 	// Ensure the VP matches the verifier's requirements.
 	return vp.checkPresentationRequirements()
 
-	// 8.
+	// 8. Persist verified credentials
 	//TODO: analysera utfall och om allt är OK, persistera/lägg på en kö; alla vc's inkl. nödvändiga metadata för ev. konsumtion av en authentic_source men även stöd för att kunna ta emot revokeringsinfo(?) (import)
 }
 
@@ -168,6 +170,8 @@ func (vp *VPToken) extractVPToken() error {
 	if err != nil {
 		return err
 	}
+
+	vp.RawJWSPartOfToken = parsedVP.rawJWSPartOfToken
 
 	vp.HeaderDecoded, vp.HeaderDecodedMap, err = decodeValidateAndUnmarshalJSON(parsedVP.headerEncoded, "Header")
 	if err != nil {
@@ -255,7 +259,7 @@ func (vp *VPToken) extractVerifiableCredentials() error {
 			path = matchedDescriptor.Path
 		}
 
-		fmt.Printf("\n✅ Credential [%d]:\n", i+1)
+		fmt.Printf("\nCredential [%d]:\n", i+1)
 		descriptorID := "unknown"
 		if matchedDescriptor != nil {
 			descriptorID = matchedDescriptor.ID
@@ -292,9 +296,9 @@ func (vp *VPToken) extractVerifiableCredentials() error {
 
 // checkVPTokenIntegrity verifies the signature of the outer JWT (vp_token jws).
 func (vp *VPToken) checkVPTokenIntegrity() error {
-	parsedToken, err := jwt.Parse(vp.RawToken, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.Parse(vp.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
-		fmt.Printf("\n🔍 Found vp_token signing alg: %s\n", alg)
+		fmt.Printf("\nFound vp_token signing alg: %s\n", alg)
 		//TODO(mk): find and extract holderPublicKey from the real source
 		return vp.holderPublicKey, nil
 	})
@@ -434,7 +438,8 @@ func (vp *VPToken) decodeBase64URL(input string) ([]byte, error) {
 }
 
 type parsedVPToken struct {
-	raw string
+	raw               string
+	rawJWSPartOfToken string
 
 	headerEncoded    string
 	payloadEncoded   string
@@ -450,6 +455,8 @@ func (vp *VPToken) parseVPToken() (*parsedVPToken, error) {
 	// Split token at the first `~` to separate first token from disclosures and other stuff (if exists)
 	parts := strings.SplitN(vp.RawToken, "~", 2)
 	tokenPart := parts[0]
+
+	parsedVPToken.rawJWSPartOfToken = tokenPart
 
 	tokenParts := strings.Split(tokenPart, ".")
 
@@ -470,7 +477,7 @@ func (vp *VPToken) parseVPToken() (*parsedVPToken, error) {
 
 		// Replace raw token with decrypted jwt (the readable vp_token)
 		vp.RawToken = string(jwtBytes)
-		vp.RawTokenHasBeenEncryptedFromJWE = true
+		vp.RawTokenHasBeenDecryptedFromJWE = true
 		return vp.parseVPToken()
 		//return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
 	}
@@ -501,7 +508,7 @@ func (vp *VPToken) checkVerifiableCredentialsIntegrity() error {
 func (vc *VCToken) checkIntegrity(issuerPublicKey interface{}) error {
 	parsedToken, _ := jwt.Parse(vc.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
-		fmt.Printf("\n🔍 Found vc_token signing alg: %s\n", alg)
+		fmt.Printf("\nFound vc_token signing alg: %s\n", alg)
 		//TODO(mk): find and extract the issuer public key from the real source instead of param
 		return issuerPublicKey, nil
 	})
@@ -650,7 +657,7 @@ func (vc *VCToken) extractJWTVC() error {
 		return err
 	}
 
-	//TODO: extract HolderBindingJWT string to its parts
+	//TODO: extract HolderBindingJWT string to its parts?
 	vc.HolderBindingJWT = parsedVC.holderBindingJWT
 
 	headerVCTMResult := gjson.Get(vc.HeaderDecoded, "vctm")
@@ -796,14 +803,14 @@ func (vc *VCToken) validateSelectiveDisclosures(sdList []string, hashAlg string)
 			return fmt.Errorf("failed to decode disclosure: %w", err)
 		}
 
-		calculatedHash, err := vc.computeDisclosureHashUsingSUNETIssuerAlg(d, hashFunc)
+		computedHash, err := vc.computeDisclosureHash(d, hashFunc)
 		if err != nil {
 			return fmt.Errorf("failed to compute hash for disclosure: %w", err)
 		}
 
 		found := false
 		for _, sd := range sdList {
-			if sd == calculatedHash {
+			if sd == computedHash {
 				found = true
 				break
 			}
@@ -811,6 +818,8 @@ func (vc *VCToken) validateSelectiveDisclosures(sdList []string, hashAlg string)
 
 		if !found {
 			return fmt.Errorf("invalid disclosure: %s", d.Key)
+		} else {
+			fmt.Println("disclosure found and valid:", d)
 		}
 	}
 
@@ -841,7 +850,7 @@ func (vc *VCToken) getHashFunc(hashAlg string) (crypto.Hash, error) {
 	return 0, fmt.Errorf("unsupported hash algorithm: %s", hashAlg)
 }
 
-func (vc *VCToken) computeDisclosureHashUsingSUNETIssuerAlg(d *Disclosure, hashFunc crypto.Hash) (string, error) {
+func (vc *VCToken) computeDisclosureHash(d *Disclosure, hashFunc crypto.Hash) (string, error) {
 	selectiveDisclosure, err := disclosure.NewFromObject(d.Key, d.Value, &d.Salt)
 	if err != nil {
 		return "", err

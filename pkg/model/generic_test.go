@@ -42,7 +42,7 @@ func TestQRGenerator(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			got, err := tt.have.QRGenerator(ctx, "issuer.sunet.se", 2, 256)
+			got, err := tt.have.QRGenerator(ctx, "issuer.sunet.se", "wallet.sunet.se", 2, 256)
 			assert.NoError(t, err)
 
 			t.Run("Check CredentialOffer", func(t *testing.T) {
@@ -151,7 +151,7 @@ func TestCSV(t *testing.T) {
 					DocumentDataValidationRef: "",
 				},
 			},
-			wantCSV: "test_authentic_source_person_id,John,Doe,1970-01-01,schema_identity_name,test_authentic_source,collect_id_1,PDA1,document_id_1,https://wallet.dc4eu.eu/cb?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fwallet.dc4eu.eu%22%2C%22credential_configuration_ids%22%3A%5B%22PDA1Credential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_1%5Cu0026document_type%3DPDA1%5Cu0026authentic_source%3Dtest_authentic_source%22%7D%7D%7D",
+			wantCSV: "test_authentic_source_person_id,John,Doe,1970-01-01,schema_identity_name,test_authentic_source,collect_id_1,PDA1,document_id_1,https://wallet.sunet.se/cb?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.sunet.se%22%2C%22credential_configuration_ids%22%3A%5B%22PDA1Credential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_1%5Cu0026document_type%3DPDA1%5Cu0026authentic_source%3Dtest_authentic_source%22%7D%7D%7D",
 			wantArray: []string{
 				"test_authentic_source_person_id",
 				"John",
@@ -162,14 +162,14 @@ func TestCSV(t *testing.T) {
 				"collect_id_1",
 				"PDA1",
 				"document_id_1",
-				"https://wallet.dc4eu.eu/cb?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fwallet.dc4eu.eu%22%2C%22credential_configuration_ids%22%3A%5B%22PDA1Credential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_1%5Cu0026document_type%3DPDA1%5Cu0026authentic_source%3Dtest_authentic_source%22%7D%7D%7D",
+				"https://wallet.sunet.se/cb?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fissuer.sunet.se%22%2C%22credential_configuration_ids%22%3A%5B%22PDA1Credential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_1%5Cu0026document_type%3DPDA1%5Cu0026authentic_source%3Dtest_authentic_source%22%7D%7D%7D",
 			},
 		},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			csvString, csvArray, err := tt.have.CSV()
+			csvString, csvArray, err := tt.have.CSV("https://issuer.sunet.se", "https://wallet.sunet.se/cb")
 			assert.NoError(t, err)
 
 			assert.Equal(t, tt.wantCSV, csvString)

@@ -47,14 +47,14 @@ type IDMapping struct {
 }
 
 // QRGenerator generates a QR code
-func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recoveryLevel, size int) (*QR, error) {
-	credentialOfferURL, err := url.Parse("https://wallet.dc4eu.eu/cb")
+func (m *MetaData) QRGenerator(ctx context.Context, issuerURL, credentialOfferURL string, recoveryLevel, size int) (*QR, error) {
+	credentialOfferParsedURL, err := url.Parse(credentialOfferURL)
 	if err != nil {
 		return nil, err
 	}
 	issuerState := fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", m.Collect.ID, m.DocumentType, m.AuthenticSource)
 
-	query := credentialOfferURL.Query()
+	query := credentialOfferParsedURL.Query()
 
 	var credentialConfigurationID string
 	switch m.DocumentType {
@@ -65,7 +65,7 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recove
 	}
 
 	credentialOffer := &CredentialOffer{
-		CredentialIssuer:           issuerBaseURL,
+		CredentialIssuer:           issuerURL,
 		CredentialConfigurationIDs: []string{credentialConfigurationID},
 		Grants: map[string]map[string]string{
 			"authorization_code": {
@@ -80,9 +80,9 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recove
 	}
 
 	query.Add("credential_offer", string(credentialOfferByte))
-	credentialOfferURL.RawQuery = query.Encode()
+	credentialOfferParsedURL.RawQuery = query.Encode()
 
-	qrPNG, err := qrcode.Encode(credentialOfferURL.String(), qrcode.RecoveryLevel(recoveryLevel), size)
+	qrPNG, err := qrcode.Encode(credentialOfferParsedURL.String(), qrcode.RecoveryLevel(recoveryLevel), size)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recove
 	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
 
 	qr := &QR{
-		CredentialOfferURL: credentialOfferURL.String(),
+		CredentialOfferURL: credentialOfferParsedURL.String(),
 		Base64Image:        qrBase64,
 	}
 
@@ -98,7 +98,7 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerBaseURL string, recove
 }
 
 // CSV returns the document as a CSV
-func (c *CompleteDocument) CSV() (string, []string, error) {
+func (c *CompleteDocument) CSV(issuerURL, credentialOfferURL string) (string, []string, error) {
 	if len(c.Identities) == 0 {
 		return "", nil, errors.New("no identities found")
 	}
@@ -107,7 +107,7 @@ func (c *CompleteDocument) CSV() (string, []string, error) {
 		return "", nil, errors.New("no metadata found")
 	}
 
-	qr, err := c.Meta.QRGenerator(context.Background(), "https://satosa-test-1.sunet.se", 2, 256)
+	qr, err := c.Meta.QRGenerator(context.Background(), issuerURL, credentialOfferURL, 2, 256)
 	if err != nil {
 		return "", nil, err
 	}
@@ -129,7 +129,7 @@ func (c *CompleteDocument) CSV() (string, []string, error) {
 }
 
 // CSV return CompleteDocuments as a CSV, string array
-func (c *CompleteDocuments) CSV() ([]string, [][]string, error) {
+func (c *CompleteDocuments) CSV(issuerURL, credentialOfferURL string) ([]string, [][]string, error) {
 	if len(*c) == 0 {
 		return nil, nil, errors.New("no documents found")
 	}
@@ -137,7 +137,7 @@ func (c *CompleteDocuments) CSV() ([]string, [][]string, error) {
 	var csvResult []string
 	var csvRaw [][]string
 	for _, doc := range *c {
-		csvRow, raw, err := doc.CSV()
+		csvRow, raw, err := doc.CSV(issuerURL, credentialOfferURL)
 		if err != nil {
 			return nil, nil, err
 		}

@@ -76,9 +76,8 @@ type PDF struct {
 
 // QRCfg holds the qr configuration
 type QRCfg struct {
-	RecoveryLevel  int    `yaml:"recovery_level" validate:"required,min=0,max=3"`
-	Size           int    `yaml:"size" validate:"required"`
-	IssuingBaseURL string `yaml:"issuing_base_url" validate:"required"`
+	RecoveryLevel int `yaml:"recovery_level" validate:"required,min=0,max=3"`
+	Size          int `yaml:"size" validate:"required"`
 }
 
 // JWTAttribute holds the jwt attribute configuration.
@@ -108,11 +107,13 @@ type JWTAttribute struct {
 
 // Issuer holds the issuer configuration
 type Issuer struct {
-	APIServer      APIServer    `yaml:"api_server" validate:"required"`
-	Identifier     string       `yaml:"identifier" validate:"required"`
-	GRPCServer     GRPCServer   `yaml:"grpc_server" validate:"required"`
-	SigningKeyPath string       `yaml:"signing_key_path" validate:"required"`
-	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
+	APIServer          APIServer    `yaml:"api_server" validate:"required"`
+	Identifier         string       `yaml:"identifier" validate:"required"`
+	GRPCServer         GRPCServer   `yaml:"grpc_server" validate:"required"`
+	SigningKeyPath     string       `yaml:"signing_key_path" validate:"required"`
+	JWTAttribute       JWTAttribute `yaml:"jwt_attribute" validate:"required"`
+	IssuerURL          string       `yaml:"issuing_base_url" validate:"required"`
+	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
 }
 
 // Registry holds the registry configuration

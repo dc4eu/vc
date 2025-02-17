@@ -1,7 +1,7 @@
 package scanner
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 	"strings"
 	"sync"
@@ -11,22 +11,28 @@ import (
 
 // Context context at scanning
 type Context struct {
-	idx                      int
-	size                     int
-	notSpaceCharPos          int
-	notSpaceOrgCharPos       int
-	src                      []rune
-	buf                      []rune
-	obuf                     []rune
-	tokens                   token.Tokens
-	isRawFolded              bool
-	isLiteral                bool
-	isFolded                 bool
-	docOpt                   string
-	docFirstLineIndentColumn int
-	docPrevLineIndentColumn  int
-	docLineIndentColumn      int
-	docFoldedNewLine         bool
+	idx                int
+	size               int
+	notSpaceCharPos    int
+	notSpaceOrgCharPos int
+	src                []rune
+	buf                []rune
+	obuf               []rune
+	tokens             token.Tokens
+	mstate             *MultiLineState
+}
+
+type MultiLineState struct {
+	opt                              string
+	firstLineIndentColumn            int
+	prevLineIndentColumn             int
+	lineIndentColumn                 int
+	lastNotSpaceOnlyLineIndentColumn int
+	spaceOnlyIndentColumn            int
+	foldedNewLine                    bool
+	isRawFolded                      bool
+	isLiteral                        bool
+	isFolded                         bool
 }
 
 var (
@@ -56,14 +62,7 @@ func (c *Context) release() {
 
 func (c *Context) clear() {
 	c.resetBuffer()
-	c.isRawFolded = false
-	c.isLiteral = false
-	c.isFolded = false
-	c.docOpt = ""
-	c.docFirstLineIndentColumn = 0
-	c.docLineIndentColumn = 0
-	c.docPrevLineIndentColumn = 0
-	c.docFoldedNewLine = false
+	c.mstate = nil
 }
 
 func (c *Context) reset(src []rune) {
@@ -72,10 +71,7 @@ func (c *Context) reset(src []rune) {
 	c.src = src
 	c.tokens = c.tokens[:0]
 	c.resetBuffer()
-	c.isRawFolded = false
-	c.isLiteral = false
-	c.isFolded = false
-	c.docOpt = ""
+	c.mstate = nil
 }
 
 func (c *Context) resetBuffer() {
@@ -85,26 +81,47 @@ func (c *Context) resetBuffer() {
 	c.notSpaceOrgCharPos = 0
 }
 
-func (c *Context) breakDocument() {
-	c.isLiteral = false
-	c.isRawFolded = false
-	c.isFolded = false
-	c.docOpt = ""
-	c.docFirstLineIndentColumn = 0
-	c.docLineIndentColumn = 0
-	c.docPrevLineIndentColumn = 0
-	c.docFoldedNewLine = false
+func (c *Context) breakMultiLine() {
+	c.mstate = nil
 }
 
-func (c *Context) updateDocumentIndentColumn() {
-	indent := c.docFirstLineIndentColumnByDocOpt()
-	if indent > 0 {
-		c.docFirstLineIndentColumn = indent + 1
+func (c *Context) getMultiLineState() *MultiLineState {
+	return c.mstate
+}
+
+func (c *Context) setLiteral(lastDelimColumn int, opt string) {
+	mstate := &MultiLineState{
+		isLiteral: true,
+		opt:       opt,
 	}
+	indent := firstLineIndentColumnByOpt(opt)
+	if indent > 0 {
+		mstate.firstLineIndentColumn = lastDelimColumn + indent
+	}
+	c.mstate = mstate
 }
 
-func (c *Context) docFirstLineIndentColumnByDocOpt() int {
-	opt := c.docOpt
+func (c *Context) setFolded(lastDelimColumn int, opt string) {
+	mstate := &MultiLineState{
+		isFolded: true,
+		opt:      opt,
+	}
+	indent := firstLineIndentColumnByOpt(opt)
+	if indent > 0 {
+		mstate.firstLineIndentColumn = lastDelimColumn + indent
+	}
+	c.mstate = mstate
+}
+
+func (c *Context) setRawFolded(column int) {
+	mstate := &MultiLineState{
+		isRawFolded: true,
+	}
+	mstate.updateIndentColumn(column)
+	c.mstate = mstate
+}
+
+func firstLineIndentColumnByOpt(opt string) int {
 	opt = strings.TrimPrefix(opt, "-")
 	opt = strings.TrimPrefix(opt, "+")
 	opt = strings.TrimSuffix(opt, "-")
@@ -113,65 +130,136 @@ func (c *Context) docFirstLineIndentColumnByDocOpt() int {
 	return int(i)
 }
 
-func (c *Context) updateDocumentLineIndentColumn(column int) {
-	if c.docFirstLineIndentColumn == 0 {
-		c.docFirstLineIndentColumn = column
+func (s *MultiLineState) lastDelimColumn() int {
+	if s.firstLineIndentColumn == 0 {
+		return 0
 	}
-	if c.docLineIndentColumn == 0 {
-		c.docLineIndentColumn = column
+	return s.firstLineIndentColumn - 1
+}
+
+func (s *MultiLineState) updateIndentColumn(column int) {
+	if s.firstLineIndentColumn == 0 {
+		s.firstLineIndentColumn = column
+	}
+	if s.lineIndentColumn == 0 {
+		s.lineIndentColumn = column
 	}
 }
 
-func (c *Context) validateDocumentLineIndentColumn() error {
-	if c.docFirstLineIndentColumnByDocOpt() == 0 {
+func (s *MultiLineState) updateSpaceOnlyIndentColumn(column int) {
+	if s.firstLineIndentColumn != 0 {
+		return
+	}
+	s.spaceOnlyIndentColumn = column
+}
+
+func (s *MultiLineState) validateIndentAfterSpaceOnly(column int) error {
+	if s.firstLineIndentColumn != 0 {
 		return nil
 	}
-	if c.docFirstLineIndentColumn > c.docLineIndentColumn {
-		return fmt.Errorf("invalid number of indent is specified in the document header")
+	if s.spaceOnlyIndentColumn > column {
+		return errors.New("invalid number of indent is specified after space only")
 	}
 	return nil
 }
 
-func (c *Context) updateDocumentNewLineState() {
-	c.docPrevLineIndentColumn = c.docLineIndentColumn
-	c.docFoldedNewLine = true
-	c.docLineIndentColumn = 0
+func (s *MultiLineState) validateIndentColumn() error {
+	if firstLineIndentColumnByOpt(s.opt) == 0 {
+		return nil
+	}
+	if s.firstLineIndentColumn > s.lineIndentColumn {
+		return errors.New("invalid number of indent is specified in the multi-line header")
+	}
+	return nil
 }
 
-func (c *Context) addDocumentIndent(column int) {
-	if c.docFirstLineIndentColumn == 0 {
+func (s *MultiLineState) updateNewLineState() {
+	s.prevLineIndentColumn = s.lineIndentColumn
+	if s.lineIndentColumn != 0 {
+		s.lastNotSpaceOnlyLineIndentColumn = s.lineIndentColumn
+	}
+	s.foldedNewLine = true
+	s.lineIndentColumn = 0
+}
+
+func (s *MultiLineState) isIndentColumn(column int) bool {
+	if s.firstLineIndentColumn == 0 {
+		return column == 1
+	}
+	return s.firstLineIndentColumn > column
+}
+
+func (s *MultiLineState) addIndent(ctx *Context, column int) {
+	if s.firstLineIndentColumn == 0 {
 		return
 	}
 
-	// If the first line of the document has already been evaluated, the number is treated as the threshold, since the `docFirstLineIndentColumn` is a positive number.
-	if c.docFirstLineIndentColumn <= column {
-		// `c.docFoldedNewLine` is a variable that is set to true for every newline.
-		if (c.isFolded || c.isRawFolded) && c.docFoldedNewLine {
-			c.docFoldedNewLine = false
-		}
-		// Since addBuf ignore space character, add to the buffer directly.
-		c.buf = append(c.buf, ' ')
+	// If the first line of the document has already been evaluated, the number is treated as the threshold, since the `firstLineIndentColumn` is a positive number.
+	if column < s.firstLineIndentColumn {
+		return
 	}
+
+	// `c.foldedNewLine` is a variable that is set to true for every newline.
+	if !s.isLiteral && s.foldedNewLine {
+		s.foldedNewLine = false
+	}
+	// Since addBuf ignore space character, add to the buffer directly.
+	ctx.buf = append(ctx.buf, ' ')
+	ctx.notSpaceCharPos = len(ctx.buf)
 }
 
-// updateDocumentNewLineInFolded if Folded or RawFolded context and the content on the current line starts at the same column as the previous line,
+// updateNewLineInFolded if Folded or RawFolded context and the content on the current line starts at the same column as the previous line,
 // treat the new-line-char as a space.
-func (c *Context) updateDocumentNewLineInFolded(column int) {
-	if c.isLiteral {
+func (s *MultiLineState) updateNewLineInFolded(ctx *Context, column int) {
+	if s.isLiteral {
 		return
 	}
 
 	// Folded or RawFolded.
 
-	if !c.docFoldedNewLine {
+	if !s.foldedNewLine {
 		return
 	}
-	if c.docLineIndentColumn == c.docPrevLineIndentColumn {
-		if c.buf[len(c.buf)-1] == '\n' {
-			c.buf[len(c.buf)-1] = ' '
+	var (
+		lastChar     rune
+		prevLastChar rune
+	)
+	if len(ctx.buf) != 0 {
+		lastChar = ctx.buf[len(ctx.buf)-1]
+	}
+	if len(ctx.buf) > 1 {
+		prevLastChar = ctx.buf[len(ctx.buf)-2]
+	}
+	if s.lineIndentColumn == s.prevLineIndentColumn {
+		// ---
+		// >
+		//  a
+		//  b
+		if lastChar == '\n' {
+			ctx.buf[len(ctx.buf)-1] = ' '
+		}
+	} else if s.prevLineIndentColumn == 0 && s.lastNotSpaceOnlyLineIndentColumn == column {
+		// if previous line is indent-space and new-line-char only, prevLineIndentColumn is zero.
+		// In this case, last new-line-char is removed.
+		// ---
+		// >
+		//  a
+		//
+		//  b
+		if lastChar == '\n' && prevLastChar == '\n' {
+			ctx.buf = ctx.buf[:len(ctx.buf)-1]
+			ctx.notSpaceCharPos = len(ctx.buf)
 		}
 	}
-	c.docFoldedNewLine = false
+	s.foldedNewLine = false
+}
+
+func (s *MultiLineState) hasTrimAllEndNewlineOpt() bool {
+	return strings.HasPrefix(s.opt, "-") || strings.HasSuffix(s.opt, "-") || s.isRawFolded
+}
+
+func (s *MultiLineState) hasKeepAllEndNewlineOpt() bool {
+	return strings.HasPrefix(s.opt, "+") || strings.HasSuffix(s.opt, "+")
 }
 
 func (c *Context) addToken(tk *token.Token) {
@@ -182,11 +270,21 @@ func (c *Context) addToken(tk *token.Token) {
 }
 
 func (c *Context) addBuf(r rune) {
-	if len(c.buf) == 0 && r == ' ' {
+	if len(c.buf) == 0 && (r == ' ' || r == '\t') {
 		return
 	}
 	c.buf = append(c.buf, r)
 	if r != ' ' && r != '\t' {
+		c.notSpaceCharPos = len(c.buf)
+	}
+}
+
+func (c *Context) addBufWithTab(r rune) {
+	if len(c.buf) == 0 && r == ' ' {
+		return
+	}
+	c.buf = append(c.buf, r)
+	if r != ' ' {
 		c.notSpaceCharPos = len(c.buf)
 	}
 }
@@ -198,7 +296,7 @@ func (c *Context) addOriginBuf(r rune) {
 	}
 }
 
-func (c *Context) removeRightSpaceFromBuf() int {
+func (c *Context) removeRightSpaceFromBuf() {
 	trimmedBuf := c.obuf[:c.notSpaceOrgCharPos]
 	buflen := len(trimmedBuf)
 	diff := len(c.obuf) - buflen
@@ -206,11 +304,6 @@ func (c *Context) removeRightSpaceFromBuf() int {
 		c.obuf = c.obuf[:buflen]
 		c.buf = c.bufferedSrc()
 	}
-	return diff
-}
-
-func (c *Context) isDocument() bool {
-	return c.isLiteral || c.isFolded || c.isRawFolded
 }
 
 func (c *Context) isEOS() bool {
@@ -270,15 +363,20 @@ func (c *Context) existsBuffer() bool {
 	return len(c.bufferedSrc()) != 0
 }
 
+func (c *Context) isMultiLine() bool {
+	return c.mstate != nil
+}
+
 func (c *Context) bufferedSrc() []rune {
 	src := c.buf[:c.notSpaceCharPos]
-	if c.isDocument() {
+	if c.isMultiLine() {
+		mstate := c.getMultiLineState()
 		// remove end '\n' character and trailing empty lines.
 		// https://yaml.org/spec/1.2.2/#8112-block-chomping-indicator
-		if c.hasTrimAllEndNewlineOpt() {
+		if mstate.hasTrimAllEndNewlineOpt() {
 			// If the '-' flag is specified, all trailing newline characters will be removed.
 			src = []rune(strings.TrimRight(string(src), "\n"))
-		} else {
+		} else if !mstate.hasKeepAllEndNewlineOpt() {
 			// Normally, all but one of the trailing newline characters are removed.
 			var newLineCharCount int
 			for i := len(src) - 1; i >= 0; i-- {
@@ -296,19 +394,20 @@ func (c *Context) bufferedSrc() []rune {
 		}
 
 		// If the text ends with a space character, remove all of them.
-		src = []rune(strings.TrimRight(string(src), " "))
+		if mstate.hasTrimAllEndNewlineOpt() {
+			src = []rune(strings.TrimRight(string(src), " "))
+		}
 		if string(src) == "\n" {
 			// If the content consists only of a newline,
 			// it can be considered as the document ending without any specified value,
 			// so it is treated as an empty string.
 			src = []rune{}
 		}
+		if mstate.hasKeepAllEndNewlineOpt() && len(src) == 0 {
+			src = []rune{'\n'}
+		}
 	}
 	return src
-}
-
-func (c *Context) hasTrimAllEndNewlineOpt() bool {
-	return strings.HasPrefix(c.docOpt, "-") || strings.HasSuffix(c.docOpt, "-") || c.isRawFolded
 }
 
 func (c *Context) bufferedToken(pos *token.Position) *token.Token {
@@ -317,16 +416,32 @@ func (c *Context) bufferedToken(pos *token.Position) *token.Token {
 	}
 	source := c.bufferedSrc()
 	if len(source) == 0 {
+		c.buf = c.buf[:0] // clear value's buffer only.
 		return nil
 	}
 	var tk *token.Token
-	if c.isDocument() {
+	if c.isMultiLine() {
 		tk = token.String(string(source), string(c.obuf), pos)
 	} else {
 		tk = token.New(string(source), string(c.obuf), pos)
 	}
+	c.setTokenTypeByPrevTag(tk)
 	c.resetBuffer()
 	return tk
+}
+
+func (c *Context) setTokenTypeByPrevTag(tk *token.Token) {
+	lastTk := c.lastToken()
+	if lastTk == nil {
+		return
+	}
+	if lastTk.Type != token.TagType {
+		return
+	}
+	tag := token.ReservedTagKeyword(lastTk.Value)
+	if _, exists := token.ReservedTagKeywordMap[tag]; !exists {
+		tk.Type = token.StringType
+	}
 }
 
 func (c *Context) lastToken() *token.Token {

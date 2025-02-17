@@ -33,7 +33,7 @@ func TestMake(t *testing.T) {
 
 func TestCSV(t *testing.T) {
 	storage := Make("testdata/users_paris.xlsx")
-	csv, _, err := CSV(storage)
+	csv, _, err := CSV(storage, "https://issuer.sunet.se", "https://wallet.sunet.se")
 	assert.NoError(t, err)
 
 	fmt.Printf("\nauthentic_source_person_id,given_name,family_name,birth_date,identity schema name,authentic_source,collect_id,document_type\n")
@@ -43,7 +43,7 @@ func TestCSV(t *testing.T) {
 
 func TestSaveCSVToDisk(t *testing.T) {
 	storage := Make("testdata/users_paris.xlsx")
-	_, records, err := CSV(storage)
+	_, records, err := CSV(storage, "https://issuer.sunet.se", "https://wallet.sunet.se")
 	assert.NoError(t, err)
 
 	err = saveCSVToDisk(records, "../../../users_paris.csv")

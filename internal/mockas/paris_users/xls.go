@@ -294,14 +294,14 @@ func Make(filePath string) []model.CompleteDocument {
 }
 
 // CSV converts a list of CompleteDocument to CSV and writes it to a file
-func CSV(docs model.CompleteDocuments) ([]string, [][]string, error) {
-	fs, err := os.Create("pda1_users.csv")
+func CSV(docs model.CompleteDocuments, issuerURL, credentialOfferURL string) ([]string, [][]string, error) {
+	fs, err := os.Create(fmt.Sprintf("pda1_users_%s_%s.csv", issuerURL, credentialOfferURL))
 	if err != nil {
 		return nil, nil, err
 	}
 	defer fs.Close()
 
-	return docs.CSV()
+	return docs.CSV(issuerURL, credentialOfferURL)
 
 }
 

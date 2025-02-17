@@ -9,9 +9,10 @@ import (
 )
 
 type documentHandler struct {
-	client  *Client
-	service string
-	log     *logger.Log
+	client             *Client
+	service            string
+	log                *logger.Log
+	defaultContentType string
 }
 
 // DocumentGetQuery is the query for GetDocument
@@ -25,7 +26,7 @@ type DocumentGetQuery struct {
 func (s *documentHandler) Get(ctx context.Context, query *DocumentGetQuery) (*model.Document, *http.Response, error) {
 	url := fmt.Sprintf("%s", s.service)
 	reply := &model.Document{}
-	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply, true)
+	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, nil, reply, true)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -46,7 +47,7 @@ func (s *documentHandler) List(ctx context.Context, query *DocumentListQuery) ([
 
 	url := fmt.Sprintf("%s/%s", s.service, "list")
 	reply := []model.DocumentList{}
-	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply, true)
+	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, nil, reply, true)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -71,7 +72,7 @@ func (s *documentHandler) CollectID(ctx context.Context, query *DocumentCollectI
 
 	url := fmt.Sprintf("%s/%s", s.service, "collect_id")
 	reply := &model.Document{}
-	resp, err := s.client.call(ctx, http.MethodPost, url, query, reply, true)
+	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, query, reply, true)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -85,7 +86,7 @@ func (s *documentHandler) Search(ctx context.Context, query *model.SearchDocumen
 	reply := &model.SearchDocumentsReply{
 		Documents: []*model.CompleteDocument{},
 	}
-	resp, err := s.client.call(ctx, http.MethodPost, url, query, reply, false)
+	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, query, reply, false)
 	if err != nil {
 		return nil, resp, err
 	}

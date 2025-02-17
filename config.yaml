@@ -58,6 +58,7 @@ issuer:
   grpc_server:
     addr: vc_dev_issuer:8090
   signing_key_path: "/private_ec256.pem"
+  metadata_path: "/metadata.golden"
   jwt_attribute:
     issuer: https://issuer.sunet.se
     enable_not_before: true
@@ -95,7 +96,10 @@ apigw:
     basic_auth:
       enabled: false
       users:
-        admin: "secret123"
+        client_1: "secret_1"
+        client_2: "secret_2"
+        client_3: "secret_3"
+        client_4: "secret_4"
 
 mock_as:
   api_server:
@@ -125,3 +129,7 @@ portal:
     addr: :8080
   apigw_api_server:
     addr: http://vc_dev_apigw:8080
+
+wallet:
+  api_server:
+    addr: :8080

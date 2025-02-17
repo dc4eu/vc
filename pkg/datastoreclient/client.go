@@ -20,6 +20,7 @@ type Client struct {
 
 	Document *documentHandler
 	Identity *identityHandler
+	OIDC     *oidcHandler
 }
 
 // Config is the configuration for the client
@@ -40,14 +41,17 @@ func New(config *Config) (*Client, error) {
 		log: logger.NewSimple("datastoreclient"),
 	}
 
-	c.Document = &documentHandler{client: c, service: "api/v1/document", log: c.log.New("document")}
-	c.Identity = &identityHandler{client: c, service: "api/v1/identity", log: c.log.New("identity")}
+	defaultContentType := "application/json"
+
+	c.Document = &documentHandler{client: c, service: "api/v1/document", defaultContentType: defaultContentType, log: c.log.New("document")}
+	c.Identity = &identityHandler{client: c, service: "api/v1/identity", defaultContentType: defaultContentType, log: c.log.New("identity")}
+	c.OIDC = &oidcHandler{client: c, defaultContentType: defaultContentType, log: c.log.New("oidc")}
 
 	return c, nil
 }
 
 // NewRequest make a new request
-func (c *Client) newRequest(ctx context.Context, method, path string, body any) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, method, path, contentType string, body any) (*http.Request, error) {
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, err
@@ -58,12 +62,14 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 		return nil, err
 	}
 	url := u.ResolveReference(rel)
+	c.log.Debug("request", "url", url.String())
 
 	var buf io.ReadWriter
 	if body != nil {
 		buf = new(bytes.Buffer)
 		err = json.NewEncoder(buf).Encode(body)
 		if err != nil {
+			c.log.Error(err, "failed to encode body")
 			return nil, err
 		}
 	}
@@ -74,14 +80,15 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 	}
 
 	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Content-Type", contentType)
+		c.log.Debug("request", "CT", req.Header.Get("Content-Type"))
 	}
 	req.Header.Set("Accept", "application/json")
 	return req, nil
 }
 
 // Do does the new request
-func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixReplyJsonWithData bool) (*http.Response, error) {
+func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixReplyJSONWithData bool) (*http.Response, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -101,7 +108,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 	}
 
 	var r any
-	if prefixReplyJsonWithData {
+	if prefixReplyJSONWithData {
 		r = &struct {
 			Data any `json:"data"`
 		}{
@@ -142,18 +149,19 @@ func checkResponse(r *http.Response) error {
 	return ErrInvalidRequest
 }
 
-func (c *Client) call(ctx context.Context, method, url string, body, reply any, prefixReplyJsonWithData bool) (*http.Response, error) {
+func (c *Client) call(ctx context.Context, method, path, contentType string, body, reply any, prefixReplyJSONWithData bool) (*http.Response, error) {
 	request, err := c.newRequest(
 		ctx,
 		method,
-		url,
+		path,
+		contentType,
 		body,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.do(ctx, request, reply, prefixReplyJsonWithData)
+	resp, err := c.do(ctx, request, reply, prefixReplyJSONWithData)
 	if err != nil {
 		return resp, err
 	}

@@ -2,10 +2,12 @@ package apiv1
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"vc/internal/apigw/db"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
+	"vc/pkg/openid4vci"
 
 	"go.opentelemetry.io/otel/codes"
 )
@@ -32,9 +34,32 @@ type UploadRequest struct {
 //	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
-	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Common.QR.IssuingBaseURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
+	var credentialConfigurationID string
+	switch req.Meta.DocumentType {
+	case "PDA1":
+		credentialConfigurationID = "PDA1Credential"
+	case "EHIC":
+		credentialConfigurationID = "EHICCredential"
+	}
+
+	credentialOfferParameter := openid4vci.CredentialOfferParameters{
+		CredentialIssuer: c.cfg.Common.QR.IssuingBaseURL,
+		CredentialConfigurationIDs: []string{
+			credentialConfigurationID,
+		},
+		Grants: map[string]any{
+			"authorization_code": openid4vci.GrantAuthorizationCode{
+				IssuerState: fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", req.Meta.Collect.ID, req.Meta.DocumentType, req.Meta.AuthenticSource),
+			},
+		},
+	}
+	credentialOffer, err := credentialOfferParameter.CredentialOffer()
 	if err != nil {
-		c.log.Debug("QR code generation failed", "error", err)
+		return err
+	}
+
+	qr, err := credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Common.QR.IssuingBaseURL)
+	if err != nil {
 		return err
 	}
 
@@ -90,7 +115,7 @@ type NotificationRequest struct {
 
 // NotificationReply is the reply for a Notification
 type NotificationReply struct {
-	Data *model.QR `json:"data"`
+	Data *openid4vci.QR `json:"data"`
 }
 
 // Notification return QR code and DeepLink for a document

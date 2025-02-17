@@ -113,6 +113,9 @@ type Issuer struct {
 	GRPCServer     GRPCServer   `yaml:"grpc_server" validate:"required"`
 	SigningKeyPath string       `yaml:"signing_key_path" validate:"required"`
 	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
+
+	// MetadataPath path to the metadata file
+	MetadataPath string `yaml:"metadata_path" validate:"required"`
 }
 
 // Registry holds the registry configuration
@@ -153,6 +156,11 @@ type BasicAuth struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
+	APIServer APIServer `yaml:"api_server" validate:"required"`
+}
+
+// Wallet holds the wallet configuration
+type Wallet struct {
 	APIServer APIServer `yaml:"api_server" validate:"required"`
 }
 
@@ -238,6 +246,7 @@ type Cfg struct {
 	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
 	UI               UI                         `yaml:"ui" validate:"omitempty"`
 	Portal           Portal                     `yaml:"portal" validate:"omitempty"`
+	Wallet           Wallet                     `yaml:"wallet" validate:"omitempty"`
 }
 
 // IsAsyncEnabled checks if the async is enabled

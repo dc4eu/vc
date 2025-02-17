@@ -25,23 +25,74 @@ func (b *bindingHandler) FastAndSimple(ctx context.Context, c *gin.Context, v an
 	return json.NewDecoder(c.Request.Body).Decode(&v)
 }
 
-// Request binds the request body to a map structure
 func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) error {
-	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindRequest")
+	if err := c.ShouldBind(v); err != nil {
+		b.log.Debug("error", "error", err)
+		return err
+	}
+
+	if err := b.BindMultiPart(ctx, c, v); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Request binds the request body to a map structure
+//func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) error {
+//	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindRequest")
+//	defer span.End()
+//
+//	if c.ContentType() == gin.MIMEJSON {
+//		if err := c.ShouldBindJSON(v); err != nil {
+//			return err
+//		}
+//	}
+//
+//	if err := b.bindRequestQuery(ctx, c, v); err != nil {
+//		return err
+//	}
+//
+//	//if err := b.bindMultiPart(ctx, c, v); err != nil {
+//	//	return err
+//	//}
+//
+//
+//
+//	if err := c.ShouldBindQuery(v); err != nil {
+//		return err
+//	}
+//
+//	return c.ShouldBindUri(v)
+//}
+
+func (b *bindingHandler) BindMultiPart(ctx context.Context, c *gin.Context, v any) error {
+	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindMultiPart")
 	defer span.End()
 
-	if c.ContentType() == gin.MIMEJSON {
-		if err := c.ShouldBindJSON(v); err != nil {
-			return err
+	//refV := reflect.ValueOf(v).Elem()
+	refT := reflect.ValueOf(v).Elem().Type()
+	for i := 0; i < refT.NumField(); i++ {
+		field := refT.Field(i)
+		fieldType := field.Type
+		fieldKey := field.Tag.Get("mura")
+		//if fieldKey != "" {
+		//	refV.FieldByName(field.Name).Set(reflect.ValueOf(v))
+		//	b.log.Debug("fieldkey", "fk", fieldKey, "type", fieldType.String(), "field", field.Name, "refV", refV)
+		//}
+		if fieldKey == "" {
+			continue
+		}
+
+		fmt.Println("MURA", fieldType.String())
+
+		switch fieldType.String() {
+		case "string":
+			fmt.Println("STRIIIING")
+		case "struct":
+			fmt.Println("STRUUUUCT")
 		}
 	}
-	if err := b.bindRequestQuery(ctx, c, v); err != nil {
-		return err
-	}
-	if err := c.ShouldBindQuery(v); err != nil {
-		return err
-	}
-	return c.ShouldBindUri(v)
+	return nil
 }
 
 func (b *bindingHandler) bindRequestQuery(ctx context.Context, c *gin.Context, v any) error {

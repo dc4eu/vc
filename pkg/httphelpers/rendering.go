@@ -2,6 +2,7 @@ package httphelpers
 
 import (
 	"context"
+	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 
@@ -15,6 +16,9 @@ type renderingHandler struct {
 
 // Content renders the content
 func (r *renderingHandler) Content(ctx context.Context, c *gin.Context, code int, data any) {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	ctx, span := r.client.tracer.Start(ctx, "httphelpers:Render:Content")
 	defer span.End()
 

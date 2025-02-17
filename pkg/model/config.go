@@ -112,7 +112,7 @@ type Issuer struct {
 	GRPCServer         GRPCServer   `yaml:"grpc_server" validate:"required"`
 	SigningKeyPath     string       `yaml:"signing_key_path" validate:"required"`
 	JWTAttribute       JWTAttribute `yaml:"jwt_attribute" validate:"required"`
-	IssuerURL          string       `yaml:"issuing_base_url" validate:"required"`
+	IssuerURL          string       `yaml:"issuer_url" validate:"required"`
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
 }
 

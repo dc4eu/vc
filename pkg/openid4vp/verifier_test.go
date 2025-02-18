@@ -21,6 +21,70 @@ const ehic_sd_jwt_adam_driver = "eyJhbGciOiJFUzI1NiIsImtpZCI6ImRlZmF1bHRfc2lnbml
 
 const sphereon_vp_token = "eyJ0eXAiOiJ2YytzZC1qd3QiLCJraWQiOiJkaWQ6d2ViOmFnZW50LmZpbmR5bmV0LmRlbW8uc3BoZXJlb24uY29tIzAzYzk4NTNmMTAzNjhiMDU3ZjAzM2FmMTU2OGI1MmIyNGVlMzg5MDU1YjczMTYyZjhmNGFlZjdkMDBhZmQ5ZTRkNyIsImFsZyI6IkVTMjU2In0.eyJ2Y3QiOiJQZW5zaW9uU2RKd3QiLCJQZW5zaW9uIjp7Il9zZCI6WyI0Vk9xMjhVaFREenMzeXk0M082UnFHbU9SRWpFVEJxdVZzNTBiaVZVVnZzIiwiTWh2YlVjNEtyQ3RKZU93a2U5Q05IYkVhbUhPYVZSRkxGempGVUhMc0doZyIsImVxOVNkcGY5MUdzZDgtcmhmcmZwTmJwZjl3VUF5bm1rNHl0WFZqaW1pNnciLCJuR2xpejc5cWo3dGgwajFubjJHa0pETUFkZTBMRThuVWtFcy1qbHk4aXdrIiwibzZXc3A3UEtGbEJLSVlxakxZU3Znc1pXUWxwNUNTQ1c0TGxlQzd0eGhQQSJdfSwiUGVyc29uIjp7Il9zZCI6WyI0TDBzTmVSa1FLeVdiWTB3amlETU9QUWFiUXJfNWhMVEtCdGFmTkFxQWZjIiwiRjZsM0Q1UWIzQkd6eEpHdC1Qc285dDBxbFdoRWU0ZDlzNW9RLTNGMXlCWSIsIkZiR0xNMnFpeHNoMGdLZ21qbFZRQUctRFRqdV9fblZoQmgzZUJoX2x1TXciLCJJNGxMOExaLVZsdTB1MVVlLU9oTjZoTzFNYW1GMVZvUXRkNk1YWTR5YzdRIl19LCJleHBpcmF0aW9uRGF0ZSI6IjIwMjYtMDItMTJUMDA6MDM6NDMuNzc4WiIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJ1cmkiOiJodHRwczovL2FnZW50LmZpbmR5bmV0LmRlbW8uc3BoZXJlb24uY29tL3ZjL3N0YXR1cy1saXN0cy9wZW5zaW9uY3JlZGVudGlhbC1vYXV0aCIsImlkeCI6ODAwODV9fSwiY25mIjp7ImtpZCI6ImRpZDpqd2s6ZXlKaGJHY2lPaUpGVXpJMU5pSXNJblZ6WlNJNkluTnBaeUlzSW10MGVTSTZJa1ZESWl3aVkzSjJJam9pVUMweU5UWWlMQ0o0SWpvaVdHazBhMXBUWW1OaWRYVnZUMDh3ZVhoNWNESm9TUzA0TVZCemQzRjFUSEJ0U2xveVIybHhWM0pLZHlJc0lua2lPaUpVTTFSMVlXSjBhMFYwWDNkcGJGaHBVRTFEZWxCWk4zSnVNVWxIVUZjMlRpMXNORUZhUTE5VE9GaDNJbjAjMCJ9LCJpc3MiOiJkaWQ6d2ViOmFnZW50LmZpbmR5bmV0LmRlbW8uc3BoZXJlb24uY29tIiwiaWF0IjoxNzM5MzE1MDIzLCJfc2RfYWxnIjoic2hhLTI1NiJ9.7Sdid1hKMaYAWVJE3GldqT0fHK-koGSghSE0Lws0DOI6Dez-P5Vxfj2nFYnsDSjubNelP4DgzGLIlBjNFloLtA~WyJjZmY0NjYxNy1iYzhiLTQ1MDgtODc1Ny0zY2ZkYmJjYmE4ZjYiLCJlbmREYXRlIiwiMjA3MC0wNS0xMCJd~WyI0MzEzMWRhNy1mOTZlLTQ0MGItODRlMC1jNzEwYTJmNjc4ZWUiLCJwcm92aXNpb25hbCIsIiJd~WyIyZWUyZWMwNS1mN2IwLTQ2NTgtODBkNS05ZjUzM2RjODhhZTYiLCJzdGFydERhdGUiLCIyMDQwLTAxLTAxIl0~WyI0MzA2OTg5Mi0zMjRkLTQzZjAtOWQ1Ny0zNWJmMGY2YjYxZTAiLCJ0eXBlQ29kZSIsIlBSRSJd~WyI4ZGE3ZGNlMS1kMDUyLTRlYzgtYmM4MC03NDY2ZDAxZGRkOTAiLCJmYW1pbHlfbmFtZSIsIkRvZSJd~WyI4OWI5OTY5Yi04Y2I1LTQ5NGMtODc2Ny1hZGY1MDFlMTZjNjciLCJwZXJzb25hbF9hZG1pbmlzdHJhdGl2ZV9udW1iZXIiLCIxMjM0NTY3OCJd~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3MzkzMjM1MTcsIm5vbmNlIjoiYWJlYmM0MWUtZDU4Ni00N2E0LTg2NzYtNTdjOGQ0OGZiODhiIiwic2RfaGFzaCI6IjhTTnhvY3Y4bmZCbURZdHR1b2IyWXlNTldrT0pTQ2hMNnJBbTFXSDNpRzQiLCJhdWQiOiJkaWQ6d2ViOmFnZW50LmZpbmR5bmV0LmRlbW8uc3BoZXJlb24uY29tIn0.Hv_klG1XNl6ws0zyK951GQBar5dQiyW1QPEtP6bThAhJ5VSoGcYd7lFJT5ss35lqIcr6G-DfN743zi8QcM-9lA"
 
+func TestAuthorizationResponseWrapper_Process(t *testing.T) {
+	ecdsaP256Private, ecdsaP256Public, err := generateECDSAKeyPair(elliptic.P256())
+	if err != nil {
+		t.Fatal(err)
+	}
+	vp_token_ehic_adam_driver, err := build_vp_jws_token_with_jwt_vc_credentials(ehic_sd_jwt_adam_driver, jwt.SigningMethodES256, ecdsaP256Private, "did:example:issuer#key-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ar := buildAuthorizationResponse(vp_token_ehic_adam_driver)
+
+	testCases := []struct {
+		name            string
+		as              AuthorizationResponse
+		holderPublicKey interface{}
+		wantErr         bool
+	}{
+		{"AuthorizationResponse for adam driver with one jwt vc", ar, ecdsaP256Public, false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			asw, err := NewAuthorizationResponseWrapper(&tc.as)
+			asw.holderPublicKey = tc.holderPublicKey
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = asw.Process(FULL_VALIDATION)
+			if err != nil && !tc.wantErr {
+				t.Errorf("Process() error = %v, wantErr %v", err, tc.wantErr)
+			}
+			if err == nil && tc.wantErr {
+				t.Errorf("Process() error = nil, but want error")
+			}
+		})
+	}
+}
+
+func buildAuthorizationResponse(jwtVC string) AuthorizationResponse {
+	presentationSubmission := &PresentationSubmission{
+		ID:           "submission1",
+		DefinitionID: "vp-request-1",
+		DescriptorMap: []Descriptor{
+			{
+				ID:     "credential-1",
+				Format: "jwt_vc",
+				Path:   "$.vp_token[0].verifiablePresentation.verifiableCredential[0]",
+			},
+		},
+	}
+
+	authResponse := AuthorizationResponse{
+		IDToken:                nil,
+		VPTokens:               []VPTokenRaw{{JWT: &jwtVC}},
+		PresentationSubmission: presentationSubmission,
+		State:                  nil,
+		Error:                  nil,
+		ErrorDescription:       nil,
+		ErrorURI:               nil,
+	}
+
+	return authResponse
+}
+
 func TestVPToken_Process(t *testing.T) {
 	ecdsaP256Private, ecdsaP256Public, err := generateECDSAKeyPair(elliptic.P256())
 	if err != nil {
@@ -148,6 +212,7 @@ func build_vp_jws_token_with_jwt_vc_credentials(vcJWT string, signingMethod jwt.
 			"type":                 []string{"VerifiablePresentation"},
 			"verifiableCredential": vcList,
 		},
+		//TODO: presentation_submission ligger inte på denna nivån utan ska tas bort?
 		"presentation_submission": map[string]interface{}{
 			"id":            "ae1773e-3e19-4032-a1c2-a6b69087e5b2",
 			"definition_id": "vp_definition_1",

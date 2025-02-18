@@ -6,109 +6,129 @@ import (
 	"log"
 )
 
-//======================================== PRESENTATION DEFINITION START ========================================
-
-//Generated from schema: https://identity.foundation/presentation-exchange/spec/v2.1.1/#presentation-definition-in-an-envelope
-
-// StatusDirective represents the status directive schema.
-type StatusDirective struct {
-	Directive string   `json:"directive"`
-	Type      []string `json:"type,minItems=1"`
+type AuthorizationResponse struct {
+	IDToken                *string                 `json:"id_token,omitempty"`
+	VPTokens               []VPTokenRaw            `json:"vp_token,omitempty"`
+	PresentationSubmission *PresentationSubmission `json:"presentation_submission,omitempty"`
+	State                  *string                 `json:"state,omitempty"`
+	Error                  *string                 `json:"error,omitempty"`
+	ErrorDescription       *string                 `json:"error_description,omitempty"`
+	ErrorURI               *string                 `json:"error_uri,omitempty"`
 }
 
-// Field represents a field constraint.
+type VPTokenRaw struct {
+	JWT  *string                 `json:"jwt,omitempty"`
+	JSON *map[string]interface{} `json:"json,omitempty"`
+}
+
+func (vp *VPTokenRaw) isJWTBased() bool {
+	return vp.JWT != nil
+}
+
+func (vp *VPTokenRaw) isJSONBased() bool {
+	return vp.JSON != nil
+}
+
+func (vp *VPTokenRaw) UnmarshalJSON(data []byte) error {
+	var jwt string
+	if err := json.Unmarshal(data, &jwt); err == nil {
+		vp.JWT = &jwt
+		return nil
+	}
+
+	var jsonObj map[string]interface{}
+	if err := json.Unmarshal(data, &jsonObj); err == nil {
+		vp.JSON = &jsonObj
+		return nil
+	}
+
+	return fmt.Errorf("vp_token has unknown format: %s", string(data))
+}
+
+// === Below: generated based on all schemas found under header https://identity.foundation/presentation-exchange/spec/v2.0.0/#json-schemas (oid4vp20 points to v2.0.0)
+
+type StatusDirective struct {
+	Directive string   `json:"directive" validate:"oneof=required allowed disallowed"`
+	Type      []string `json:"type" validate:"min=1,dive,required"`
+}
+
 type Field struct {
 	ID             string          `json:"id,omitempty"`
 	Optional       bool            `json:"optional,omitempty"`
-	Path           []string        `json:"path,minItems=1"`
+	Path           []string        `json:"path" validate:"required,dive,required"`
 	Purpose        string          `json:"purpose,omitempty"`
-	Name           string          `json:"name,omitempty"`
 	IntentToRetain bool            `json:"intent_to_retain,omitempty"`
+	Name           string          `json:"name,omitempty"`
 	Filter         json.RawMessage `json:"filter,omitempty"`
-	Predicate      string          `json:"predicate,omitempty"`
+	Predicate      string          `json:"predicate,omitempty" validate:"omitempty,oneof=required preferred"`
 }
 
-// InputDescriptorFormat represents the allowed format types for InputDescriptor.
-type InputDescriptorFormat struct {
-	JWT     *AlgorithmConstraints `json:"jwt,omitempty"`
-	JWTVc   *AlgorithmConstraints `json:"jwt_vc,omitempty"`
-	JWTVp   *AlgorithmConstraints `json:"jwt_vp,omitempty"`
-	LDPVc   *ProofConstraints     `json:"ldp_vc,omitempty"`
-	LDPVp   *ProofConstraints     `json:"ldp_vp,omitempty"`
-	LDP     *ProofConstraints     `json:"ldp,omitempty"`
-	ACVc    *ProofConstraints     `json:"ac_vc,omitempty"`
-	ACVp    *ProofConstraints     `json:"ac_vp,omitempty"`
-	MSOMdoc *struct{}             `json:"mso_mdoc,omitempty"`
-	SDJWT   *AlgorithmConstraints `json:"sd_jwt,omitempty"`
-}
-
-type AlgorithmConstraints struct {
-	Alg []string `json:"alg,minItems=1"`
-}
-
-type ProofConstraints struct {
-	ProofType []string `json:"proof_type,minItems=1"`
-}
-
-// InputDescriptor represents an input descriptor.
-type InputDescriptor struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name,omitempty"`
-	Purpose     string                 `json:"purpose,omitempty"`
-	Format      *InputDescriptorFormat `json:"format,omitempty"`
-	Group       []string               `json:"group,omitempty"`
-	Constraints *Constraints           `json:"constraints"`
-}
-
-// Constraints represents input constraints.
 type Constraints struct {
-	LimitDisclosure string             `json:"limit_disclosure,omitempty"`
-	Statuses        *StatusConstraints `json:"statuses,omitempty"`
-	Fields          []Field            `json:"fields,minItems=1,omitempty"`
-	SubjectIsIssuer string             `json:"subject_is_issuer,omitempty"`
-	IsHolder        []HolderConstraint `json:"is_holder,minItems=1,omitempty"`
-	SameSubject     []HolderConstraint `json:"same_subject,minItems=1,omitempty"`
+	LimitDisclosure string                     `json:"limit_disclosure,omitempty" validate:"omitempty,oneof=required preferred"`
+	Statuses        map[string]StatusDirective `json:"statuses,omitempty"`
+	Fields          []Field                    `json:"fields,omitempty"`
+	SubjectIsIssuer string                     `json:"subject_is_issuer,omitempty" validate:"omitempty,oneof=required preferred"`
+	IsHolder        []HolderDirective          `json:"is_holder,omitempty"`
+	SameSubject     []HolderDirective          `json:"same_subject,omitempty"`
 }
 
-// StatusConstraints represents status constraints.
-type StatusConstraints struct {
-	Active    *StatusDirective `json:"active,omitempty"`
-	Suspended *StatusDirective `json:"suspended,omitempty"`
-	Revoked   *StatusDirective `json:"revoked,omitempty"`
+type HolderDirective struct {
+	FieldID   []string `json:"field_id" validate:"required,dive,required"`
+	Directive string   `json:"directive" validate:"oneof=required preferred"`
 }
 
-// HolderConstraint represents a holder constraint.
-type HolderConstraint struct {
-	FieldID   []string `json:"field_id,minItems=1"`
-	Directive string   `json:"directive"`
+type ClaimFormatDesignations struct {
+	JWT     *AlgorithmDefinition `json:"jwt,omitempty"`
+	JWTVc   *AlgorithmDefinition `json:"jwt_vc,omitempty"`
+	JWTVp   *AlgorithmDefinition `json:"jwt_vp,omitempty"`
+	LDPVc   *ProofTypeDefinition `json:"ldp_vc,omitempty"`
+	LDPVp   *ProofTypeDefinition `json:"ldp_vp,omitempty"`
+	LDP     *ProofTypeDefinition `json:"ldp,omitempty"`
+	ACVc    *ProofTypeDefinition `json:"ac_vc,omitempty"`
+	ACVp    *ProofTypeDefinition `json:"ac_vp,omitempty"`
+	MSOMdoc json.RawMessage      `json:"mso_mdoc,omitempty"`
+	SDJWT   *AlgorithmDefinition `json:"sd_jwt,omitempty"`
 }
 
-// SubmissionRequirement represents submission requirement rules.
+type AlgorithmDefinition struct {
+	Alg []string `json:"alg" validate:"min=1,dive,required"`
+}
+
+type ProofTypeDefinition struct {
+	ProofType []string `json:"proof_type" validate:"min=1,dive,required"`
+}
+
+type InputDescriptor struct {
+	ID          string      `json:"id" validate:"required"`
+	Name        string      `json:"name,omitempty"`
+	Purpose     string      `json:"purpose,omitempty"`
+	Group       []string    `json:"group,omitempty"`
+	Constraints Constraints `json:"constraints" validate:"required"`
+}
+
 type SubmissionRequirement struct {
 	Name       string                  `json:"name,omitempty"`
 	Purpose    string                  `json:"purpose,omitempty"`
-	Rule       string                  `json:"rule"`
-	Count      int                     `json:"count,omitempty"`
-	Min        int                     `json:"min,omitempty"`
-	Max        int                     `json:"max,omitempty"`
+	Rule       string                  `json:"rule" validate:"oneof=all pick"`
+	Count      *int                    `json:"count,omitempty" validate:"omitempty,min=1"`
+	Min        *int                    `json:"min,omitempty" validate:"omitempty,min=0"`
+	Max        *int                    `json:"max,omitempty" validate:"omitempty,min=0"`
 	From       string                  `json:"from,omitempty"`
-	FromNested []SubmissionRequirement `json:"from_nested,minItems=1,omitempty"`
+	FromNested []SubmissionRequirement `json:"from_nested,omitempty" validate:"omitempty,dive"`
 }
 
-// PresentationDefinition represents the main presentation definition.
 type PresentationDefinition struct {
-	ID                     string                  `json:"id"`
+	ID                     string                  `json:"id" validate:"required"`
 	Name                   string                  `json:"name,omitempty"`
 	Purpose                string                  `json:"purpose,omitempty"`
-	Format                 json.RawMessage         `json:"format,omitempty"`
+	Format                 ClaimFormatDesignations `json:"format" validate:"required"`
 	Frame                  map[string]interface{}  `json:"frame,omitempty"`
-	SubmissionRequirements []SubmissionRequirement `json:"submission_requirements,minItems=1,omitempty"`
-	InputDescriptors       []InputDescriptor       `json:"input_descriptors,minItems=1"`
+	SubmissionRequirements []SubmissionRequirement `json:"submission_requirements,omitempty"`
+	InputDescriptors       []InputDescriptor       `json:"input_descriptors" validate:"required,dive,required"`
 }
 
-// PresentationDefinitionEnvelope wraps the PresentationDefinition.
 type PresentationDefinitionEnvelope struct {
-	PresentationDefinition PresentationDefinition `json:"presentation_definition"`
+	PresentationDefinition PresentationDefinition `json:"presentation_definition" validate:"required"`
 }
 
 // ToJSON converts the struct into a JSON string
@@ -120,69 +140,129 @@ func (pde *PresentationDefinitionEnvelope) ToJSON() (string, error) {
 	return string(data), nil
 }
 
-// FromJSON loads JSON data into a struct
-func (pde *PresentationDefinitionEnvelope) FromJSON(jsonData string) (*PresentationDefinitionEnvelope, error) {
-	var p PresentationDefinitionEnvelope
-	err := json.Unmarshal([]byte(jsonData), &p)
-	if err != nil {
-		return nil, err
-	}
-	return &p, nil
-}
-
 // Example usage
 func ExamplePresentationDefinition() {
 	exampleJSON := `{
 	  "presentation_definition": {
 		"id": "12345",
 		"name": "Example Presentation Definition",
-		"purpose": "To validate credentials",
+		"purpose": "To verify credentials",
 		"format": {
 		  "jwt": {
-			"alg": ["ES256", "RS256"]
+			"alg": ["RS256", "ES256"]
+		  },
+		  "jwt_vc": {
+			"alg": ["RS512"]
+		  },
+		  "jwt_vp": {
+			"alg": ["ES384"]
+		  },
+		  "ldp_vc": {
+			"proof_type": ["Ed25519Signature2018"]
+		  },
+		  "ldp_vp": {
+			"proof_type": ["RsaSignature2018"]
+		  },
+		  "ldp": {
+			"proof_type": ["BbsBlsSignature2020"]
+		  },
+		  "ac_vc": {
+			"proof_type": ["CLSignature"]
+		  },
+		  "ac_vp": {
+			"proof_type": ["CLSignature"]
+		  },
+		  "mso_mdoc": {},
+		  "sd_jwt": {
+			"alg": ["HS256"]
 		  }
 		},
 		"frame": {
-		  "type": "VerifiableCredential",
-		  "credentialSubject": {
-			"id": "did:example:123"
-		  }
+		  "example_frame_key": "example_value"
 		},
 		"submission_requirements": [
 		  {
-			"name": "Example Requirement",
-			"purpose": "Ensure validity",
+			"name": "SR1",
+			"purpose": "Ensure specific claims are included",
 			"rule": "all",
-			"from": "A"
+			"from": "groupA"
+		  },
+		  {
+			"name": "SR2",
+			"purpose": "Allow pick of some credentials",
+			"rule": "pick",
+			"min": 1,
+			"max": 3,
+			"from_nested": [
+			  {
+				"rule": "all",
+				"from": "groupB"
+			  }
+			]
 		  }
 		],
 		"input_descriptors": [
 		  {
 			"id": "input-1",
-			"name": "Example Descriptor",
-			"purpose": "Provide proof of identity",
-			"format": {
-			  "jwt_vc": {
-				"alg": ["ES256"]
-			  }
-			},
-			"group": ["A"],
+			"name": "Driver's License",
+			"purpose": "Verify identity",
+			"group": ["groupA"],
 			"constraints": {
-			  "limit_disclosure": "required",
+			  "limit_disclosure": "preferred",
+			  "statuses": {
+				"active": {
+				  "directive": "required",
+				  "type": ["active"]
+				},
+				"revoked": {
+				  "directive": "disallowed",
+				  "type": ["revoked"]
+				}
+			  },
 			  "fields": [
 				{
 				  "id": "field-1",
 				  "path": ["$.credentialSubject.id"],
-				  "name": "Credential Subject ID",
-				  "intent_to_retain": true
+				  "name": "Subject ID",
+				  "purpose": "Unique identifier",
+				  "optional": false,
+				  "intent_to_retain": true,
+				  "filter": {
+					"type": "string",
+					"pattern": "^[0-9a-fA-F]{24}$"
+				  }
+				},
+				{
+				  "id": "field-2",
+				  "path": ["$.credentialSubject.age"],
+				  "name": "Age",
+				  "purpose": "Verify age",
+				  "filter": {
+					"type": "integer",
+					"minimum": 18
+				  },
+				  "predicate": "required"
 				}
 			  ],
-			  "subject_is_issuer": "required"
+			  "subject_is_issuer": "preferred",
+			  "is_holder": [
+				{
+				  "field_id": ["field-1"],
+				  "directive": "required"
+				}
+			  ],
+			  "same_subject": [
+				{
+				  "field_id": ["field-2"],
+				  "directive": "preferred"
+				}
+			  ]
 			}
 		  }
 		]
 	  }
-	}`
+	}
+	`
 
 	pde, err := FromJSON[PresentationDefinitionEnvelope](exampleJSON)
 	if err != nil {
@@ -202,42 +282,25 @@ func ExamplePresentationDefinition() {
 
 //======================================== PRESENTATION SUBMISSION START ========================================
 
-//Generated from schema https://identity.foundation/presentation-exchange/spec/v2.1.1/#presentation-submission-2
-
-// DescriptorFormat represents the allowed format types.
-type DescriptorFormat string
-
-const (
-	JWT     DescriptorFormat = "jwt"
-	JWTVc   DescriptorFormat = "jwt_vc"
-	JWTVp   DescriptorFormat = "jwt_vp"
-	LDP     DescriptorFormat = "ldp"
-	LDPVc   DescriptorFormat = "ldp_vc"
-	LDPVp   DescriptorFormat = "ldp_vp"
-	MSOMdoc DescriptorFormat = "mso_mdoc"
-	ACVc    DescriptorFormat = "ac_vc"
-	ACVp    DescriptorFormat = "ac_vp"
-	SDJWT   DescriptorFormat = "sd_jwt"
-)
-
-// Descriptor represents a descriptor in submission.
 type Descriptor struct {
-	ID         string           `json:"id"`
-	Path       string           `json:"path"`
-	PathNested *Descriptor      `json:"path_nested,omitempty"`
-	Format     DescriptorFormat `json:"format"`
+	ID         string      `json:"id" validate:"required"`
+	Path       string      `json:"path" validate:"required"`
+	PathNested *Descriptor `json:"path_nested,omitempty"`
+	Format     string      `json:"format" validate:"required,oneof=jwt jwt_vc jwt_vp ldp ldp_vc ldp_vp mso_mdoc ac_vc ac_vp sd_jwt"`
 }
 
-// PresentationSubmission represents a presentation submission.
 type PresentationSubmission struct {
-	ID            string       `json:"id"`
-	DefinitionID  string       `json:"definition_id"`
-	DescriptorMap []Descriptor `json:"descriptor_map,minItems=1"`
+	ID            string       `json:"id" validate:"required"`
+	DefinitionID  string       `json:"definition_id" validate:"required"`
+	DescriptorMap []Descriptor `json:"descriptor_map" validate:"required,dive,required"`
 }
 
-// PresentationSubmissionEnvelope wraps the PresentationSubmission.
 type PresentationSubmissionEnvelope struct {
-	PresentationSubmission PresentationSubmission `json:"presentation_submission"`
+	PresentationSubmission PresentationSubmission `json:"presentation_submission" validate:"required"`
+}
+
+type SubmissionRequirementsEnvelope struct {
+	SubmissionRequirements []SubmissionRequirement `json:"submission_requirements" validate:"required,dive,required"`
 }
 
 // ToJSON converts the struct into a JSON string
@@ -252,22 +315,27 @@ func (pse *PresentationSubmissionEnvelope) ToJSON() (string, error) {
 // Example usage
 func ExamplePresentationSubmission() {
 	exampleJSON := `{
-	  "presentation_submission": {
+		"presentation_submission": {
 		"id": "submission-123",
-		"definition_id": "12345",
+		"definition_id": "def-456",
 		"descriptor_map": [
 		  {
-			"id": "input-1",
+			"id": "desc-1",
 			"path": "$.verifiableCredential[0]",
-			"format": "jwt_vc",
+			"format": "jwt_vc"
+		  },
+		  {
+			"id": "desc-2",
+			"path": "$.verifiablePresentation",
+			"format": "ldp_vp",
 			"path_nested": {
-			  "id": "nested-1",
-			  "path": "$.credentialSubject.id",
-			  "format": "jwt_vc"
+			  "id": "desc-nested-1",
+			  "path": "$.nestedField",
+			  "format": "sd_jwt"
 			}
 		  }
 		]
-	  }
+		}
 	}`
 
 	pse, err := FromJSON[PresentationSubmissionEnvelope](exampleJSON)
@@ -286,7 +354,7 @@ func ExamplePresentationSubmission() {
 	fmt.Println(jsonOutput)
 }
 
-//======================================== COMMON ==================================================
+//======================================== GENERIC ==================================================
 
 func FromJSON[T any](jsonData string) (*T, error) {
 	var obj T

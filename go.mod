@@ -5,6 +5,7 @@ go 1.23.2
 require (
 	github.com/IBM/sarama v1.43.3
 	github.com/MichaelFraser99/go-sd-jwt v1.3.0
+	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/creasty/defaults v1.8.0
 	github.com/ethereum/go-ethereum v1.14.12
@@ -49,6 +50,7 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/PaesslerAG/gval v1.0.0 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect

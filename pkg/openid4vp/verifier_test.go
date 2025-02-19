@@ -36,15 +36,19 @@ func TestAuthorizationResponseWrapper_Process(t *testing.T) {
 		name            string
 		as              AuthorizationResponse
 		holderPublicKey interface{}
+		jwePrivateKey   interface{}
+		issuerPublicKey interface{}
 		wantErr         bool
 	}{
-		{"AuthorizationResponse for adam driver with one jwt vc", ar, ecdsaP256Public, false},
+		{"AuthorizationResponse for adam driver with one jwt vc", ar, ecdsaP256Public, nil, nil, false},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			asw, err := NewAuthorizationResponseWrapper(&tc.as)
 			asw.holderPublicKey = tc.holderPublicKey
+			asw.jwePrivateKey = tc.jwePrivateKey
+			asw.issuerPublicKey = tc.issuerPublicKey
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -173,7 +177,7 @@ func TestVPToken_Process(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			vp, err := NewVPToken(tt.fields.RawToken)
+			vp, err := NewVerifiablePresentationWrapper(tt.fields.RawToken)
 			vp.holderPublicKey = tt.holderPublicKey
 			vp.jwePrivateKey = tt.jwePrivateKey
 			vp.issuerPublicKey = tt.issuerPublicKey

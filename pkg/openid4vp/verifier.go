@@ -58,10 +58,12 @@ type ValidationOptions struct {
 
 type AuthorizationResponseWrapper struct {
 	authorizationResponse *AuthorizationResponse
-	vpList                []VPWrapper
+	vpList                []*VerifiablePresentationWrapper
 
 	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
 	holderPublicKey interface{}
+	jwePrivateKey   interface{}
+	issuerPublicKey interface{}
 }
 
 func NewAuthorizationResponseWrapper(authorizationResponse *AuthorizationResponse) (*AuthorizationResponseWrapper, error) {
@@ -95,7 +97,7 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) e
 		return errors.New("no presentation_submission found in response")
 	}
 
-	if err := arw.extractVPTokens(); err != nil {
+	if err := arw.extractAllVPTokens(); err != nil {
 		return err
 	}
 
@@ -109,30 +111,40 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) e
 		return err
 	}
 
+	if processConfig.ProcessType == ONLY_EXTRACT_JSON {
+		// break here since everything now is extracted
+		return nil
+	}
+
+	if err := arw.checkAllVCsIntegrity(); err != nil {
+		return err
+	}
+
 	//TODO: fortsätt refact av process här....
 
 	return nil
 
 }
 
-func (arw *AuthorizationResponseWrapper) extractVPTokens() error {
+func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 	if arw.authorizationResponse.VPTokens == nil || len(arw.authorizationResponse.VPTokens) == 0 {
 		return errors.New("no vp_token found in response")
 	}
 
-	arw.vpList = make([]VPWrapper, 0)
-	for _, vpTokenRaw := range arw.authorizationResponse.VPTokens {
+	arw.vpList = make([]*VerifiablePresentationWrapper, 0)
+	for index, vpTokenRaw := range arw.authorizationResponse.VPTokens {
 		if vpTokenRaw.isJWTBased() {
 			//TODO skicka in en *vpTokenRaw istället när testet är reviderat
-			vpTokenWrapper, err := NewVPToken(vpTokenRaw.JWT)
+			vp, err := NewVerifiablePresentationWrapper(vpTokenRaw.JWT)
 			if err != nil {
 				return err
 			}
-			if err := vpTokenWrapper.extractVPToken(); err != nil {
+			if err := vp.extractVPToken(); err != nil {
 				return err
 			}
-			vpTokenWrapper.holderPublicKey = arw.holderPublicKey
-			arw.vpList = append(arw.vpList, *vpTokenWrapper)
+			vp.IndexInVPTokenArray = index
+			vp.holderPublicKey = arw.holderPublicKey
+			arw.vpList = append(arw.vpList, vp)
 		} else if vpTokenRaw.isJSONBased() {
 			return errors.New("vp_token (one element in vp_token array) has json format and is not yet supported!")
 		} else {
@@ -155,18 +167,31 @@ func (arw *AuthorizationResponseWrapper) checkAllVPsIntegrity() error {
 
 func (arw *AuthorizationResponseWrapper) extractAllEmbeddedVCs() error {
 	for _, vp := range arw.vpList {
-		vp.extractVerifiableCredentials()
+		err := vp.extractVerifiableCredentials()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-// NewVPToken initializes a new VPWrapper instance from a raw token.
-func NewVPToken(vp_token string) (*VPWrapper, error) {
+func (arw *AuthorizationResponseWrapper) checkAllVCsIntegrity() error {
+	for _, vp := range arw.vpList {
+		err := vp.checkVerifiableCredentialsIntegrity()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// NewVerifiablePresentationWrapper initializes a new VerifiablePresentationWrapper instance from a raw token.
+func NewVerifiablePresentationWrapper(vp_token string) (*VerifiablePresentationWrapper, error) {
 	if vp_token == "" {
 		return nil, errors.New("empty vp_token provided")
 	}
 
-	vp := &VPWrapper{
+	vp := &VerifiablePresentationWrapper{
 		RawToken:          vp_token,
 		ValidationResults: make(map[string]bool),
 	}
@@ -174,11 +199,11 @@ func NewVPToken(vp_token string) (*VPWrapper, error) {
 	return vp, nil
 }
 
-// VPWrapper represents the structure for validating a Verifiable Presentation
-type VPWrapper struct {
-	//TODO: JSON-based vp_token
+// VerifiablePresentationWrapper represents the structure for validating a Verifiable Presentation
+type VerifiablePresentationWrapper struct {
+	//TODO: JSON-structure based vp_token
 
-	//JWT-based vp_token
+	//JWT-based vp
 	RawToken                        string // The raw input token
 	RawTokenHasBeenDecryptedFromJWE bool
 	RawJWSPartOfToken               string //only header.payload.signature without any ~
@@ -189,9 +214,10 @@ type VPWrapper struct {
 	PayloadDecodedMap    map[string]interface{}
 	HolderSignatureBytes []byte
 
-	//Common for both JWT and JSON based vp_token
+	//Common for both JWT and JSON based vp
+	IndexInVPTokenArray    int
 	PresentationSubmission PresentationSubmission
-	VerifiableCredentials  []*VCWrapper
+	vcList                 []VerifiableCredentialWrapper
 
 	//DisclosedClaims []string // Claims disclosed by the Holder
 
@@ -205,13 +231,12 @@ type VPWrapper struct {
 
 }
 
-// VCWrapper represents the structure for validating a Verifiable Credential (can be used both as is and within a verifiable presentation)
-type VCWrapper struct {
-
+// VerifiableCredentialWrapper represents the structure for validating a Verifiable Credential (can be used both as is and within a verifiable presentation)
+type VerifiableCredentialWrapper struct {
 	//Format from presentation_submission for this vc (for example: jwt_vc, ldp_vc or other)
 	Format string
 
-	// jwt_vc fields
+	//jwt based vc
 	RawToken                            string // as sent from client; can for example be; header.payload.signature(~sd1~sd2~holderbinding~) or header.encrypted_key.iv.ciphertext.tag
 	RawJWSPartOfToken                   string //only header.payload.signature without any ~
 	JWTTyp                              string //for example: "vc+sd-jwt" (set by the credential issuer)
@@ -225,11 +250,13 @@ type VCWrapper struct {
 	RevealedSelectiveDisclosuresDecoded []string
 	HolderBindingJWT                    string
 
-	//TODO ldp_vc
+	//TODO: ldp_vc based vc
+
 }
 
+// DEPRECATED: replaced by AuthorizationResponseWrapper.Process
 // Process process the vp_token depending on selected ProcessType.
-func (vp *VPWrapper) Process(processType ProcessType) error {
+func (vp *VerifiablePresentationWrapper) Process(processType ProcessType) error {
 	if !isValidProcessType(processType) {
 		return errors.New("invalid process type")
 	}
@@ -258,7 +285,7 @@ func (vp *VPWrapper) Process(processType ProcessType) error {
 		return nil
 	}
 
-	// 4. Validate Issuer's Signatures on Embedded VCWrapper's
+	// 4. Validate Issuer's Signatures on Embedded VerifiableCredentialWrapper's
 	// Extract and verify the signatures of all Verifiable Credentials using the Issuer's public key.
 	// Ensure that credentials are not expired, revoked, or issued by untrusted issuers, etc.
 	if err := vp.checkVerifiableCredentialsIntegrity(); err != nil {
@@ -286,7 +313,7 @@ func (vp *VPWrapper) Process(processType ProcessType) error {
 }
 
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
-func (vp *VPWrapper) extractVPToken() error {
+func (vp *VerifiablePresentationWrapper) extractVPToken() error {
 	parsedVP, err := vp.parseVPToken()
 	if err != nil {
 		return err
@@ -314,7 +341,8 @@ func (vp *VPWrapper) extractVPToken() error {
 	return nil
 }
 
-func (vp *VPWrapper) extractVerifiableCredentials() error {
+func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
+
 	psResult := gjson.Get(vp.PayloadDecoded, "presentation_submission")
 	if !psResult.Exists() {
 		return errors.New("presentation_submission not found in vp_token payload")
@@ -348,8 +376,8 @@ func (vp *VPWrapper) extractVerifiableCredentials() error {
 	if !vcResult.Exists() || !vcResult.IsArray() {
 		return errors.New("verifiable credentials key not found in vp_token payload")
 	}
-	vcList := vcResult.Array()
-	if len(vcList) == 0 {
+	vcListFromPayloadDecoded := vcResult.Array()
+	if len(vcListFromPayloadDecoded) == 0 {
 		return errors.New("zero verifiable credentials in vp_token payload")
 	}
 
@@ -376,12 +404,12 @@ func (vp *VPWrapper) extractVerifiableCredentials() error {
 	}
 	//----------------------------------------------------------------------
 
-	vp.VerifiableCredentials = make([]*VCWrapper, 0)
+	vp.vcList = make([]VerifiableCredentialWrapper, 0)
 
-	for i, vcInPayload := range vcList {
+	for i, vcInPayload := range vcListFromPayloadDecoded {
 		vcToken := vcInPayload.String()
 
-		//Try to match VCWrapper with descriptor_map using path
+		//Try to match VerifiableCredentialWrapper with descriptor_map using path
 		var matchedDescriptor *struct {
 			ID     string
 			Format string
@@ -412,7 +440,7 @@ func (vp *VPWrapper) extractVerifiableCredentials() error {
 		fmt.Printf("  Path: %s\n", path)
 		//fmt.Printf("  Data: %s\n", vcToken)
 
-		vc := &VCWrapper{
+		vc := &VerifiableCredentialWrapper{
 			RawToken: vcToken,
 			Format:   format,
 		}
@@ -423,13 +451,13 @@ func (vp *VPWrapper) extractVerifiableCredentials() error {
 				return err
 			}
 		case "ldp_vc":
-			// TODO: Implement JSON-LD VCWrapper parsing
-			return fmt.Errorf("not supported VCWrapper-format: %s", format)
+			// TODO: Implement JSON-LD VerifiableCredentialWrapper parsing
+			return fmt.Errorf("not supported VerifiableCredentialWrapper-format: %s", format)
 		default:
-			return fmt.Errorf("unknown VCWrapper-format:" + format)
+			return fmt.Errorf("unknown VerifiableCredentialWrapper-format:" + format)
 			//continue //TODO: ska vi se okänt format som ett fel eller ska vi jobba vidare med de vc's vi kan om allt finns med som presentation definition uppfylls?
 		}
-		vp.VerifiableCredentials = append(vp.VerifiableCredentials, vc)
+		vp.vcList = append(vp.vcList, *vc)
 	}
 
 	//fmt.Println("vp_token extracted:", vp)
@@ -438,7 +466,7 @@ func (vp *VPWrapper) extractVerifiableCredentials() error {
 }
 
 // checkVPTokenIntegrity verifies the signature of the outer JWT (vp_token jws).
-func (vp *VPWrapper) checkVPTokenIntegrity() error {
+func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
 	parsedToken, err := jwt.Parse(vp.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vp_token signing alg: %s\n", alg)
@@ -518,8 +546,8 @@ func (vp *VPWrapper) checkVPTokenIntegrity() error {
 }
 
 // verifySelectiveDisclosure validates revealed selective disclosure claims.
-func (vp *VPWrapper) checkSelectiveDisclosures() error {
-	for _, vc := range vp.VerifiableCredentials {
+func (vp *VerifiablePresentationWrapper) checkSelectiveDisclosures() error {
+	for _, vc := range vp.vcList {
 		if len(vc.RevealedSelectiveDisclosuresDecoded) == 0 {
 			continue
 		}
@@ -534,10 +562,10 @@ func (vp *VPWrapper) checkSelectiveDisclosures() error {
 	return nil
 }
 
-func (vc *VCWrapper) checkRevealedSelectiveDisclosures() error {
+func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error {
 	sdAlgResults := gjson.Get(vc.PayloadDecoded, "_sd_alg")
 	if !sdAlgResults.Exists() {
-		return fmt.Errorf("_sd_alg not found in VCWrapper")
+		return fmt.Errorf("_sd_alg not found in VerifiableCredentialWrapper")
 	}
 	sdHashAlg := sdAlgResults.String()
 
@@ -558,21 +586,21 @@ func (vc *VCWrapper) checkRevealedSelectiveDisclosures() error {
 }
 
 // checkHolderBindingsInEmbeddedVCs ensures the Holder is bound to each embedded vc
-func (vp *VPWrapper) checkHolderBindingsInEmbeddedVCs() error {
+func (vp *VerifiablePresentationWrapper) checkHolderBindingsInEmbeddedVCs() error {
 	//TODO impl checkHolderBindingsInEmbeddedVCs
 	vp.ValidationResults["HolderBinding"] = true
 	return nil
 }
 
 // checkPresentationRequirements ensures the VP matches the verifier's requirements.
-func (vp *VPWrapper) checkPresentationRequirements() error {
+func (vp *VerifiablePresentationWrapper) checkPresentationRequirements() error {
 	//TODO impl checkPresentationRequirements
 	vp.ValidationResults["PresentationRequirements"] = true
 	return nil
 }
 
 // decodeBase64URL decodes a Base64URL-encoded string.
-func (vp *VPWrapper) decodeBase64URL(input string) ([]byte, error) {
+func (vp *VerifiablePresentationWrapper) decodeBase64URL(input string) ([]byte, error) {
 	decoded, err := base64.RawURLEncoding.DecodeString(input)
 	if err != nil {
 		return nil, err
@@ -589,7 +617,7 @@ type parsedVPToken struct {
 	signatureEncoded string
 }
 
-func (vp *VPWrapper) parseVPToken() (*parsedVPToken, error) {
+func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) {
 	parsedVPToken := &parsedVPToken{
 		// just to simplify debug
 		raw: vp.RawToken,
@@ -636,8 +664,8 @@ func (vp *VPWrapper) parseVPToken() (*parsedVPToken, error) {
 	return parsedVPToken, nil
 }
 
-func (vp *VPWrapper) checkVerifiableCredentialsIntegrity() error {
-	for _, vc := range vp.VerifiableCredentials {
+func (vp *VerifiablePresentationWrapper) checkVerifiableCredentialsIntegrity() error {
+	for _, vc := range vp.vcList {
 		err := vc.checkIntegrity(vp.issuerPublicKey)
 		if err != nil {
 			return err
@@ -648,7 +676,7 @@ func (vp *VPWrapper) checkVerifiableCredentialsIntegrity() error {
 	return nil
 }
 
-func (vc *VCWrapper) checkIntegrity(issuerPublicKey interface{}) error {
+func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{}) error {
 	parsedToken, _ := jwt.Parse(vc.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vc_token signing alg: %s\n", alg)
@@ -658,35 +686,35 @@ func (vc *VCWrapper) checkIntegrity(issuerPublicKey interface{}) error {
 
 	//TODO: TA UT err i jwt.Parse samt KOMMENTERA FRAM NEDAN NÄR ÄKTA issuerPublicKey FINNS TILLGÄNGLIG
 	//if err != nil {
-	//	return fmt.Errorf("VCWrapper JWS-verification failed: %w", err)
+	//	return fmt.Errorf("VerifiableCredentialWrapper JWS-verification failed: %w", err)
 	//}
 	//if !parsedToken.Valid {
-	//	return fmt.Errorf("VCWrapper JWS not valid")
+	//	return fmt.Errorf("VerifiableCredentialWrapper JWS not valid")
 	//}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return fmt.Errorf("VCWrapper could not read JWT claims")
+		return fmt.Errorf("VerifiableCredentialWrapper could not read JWT claims")
 	}
 
 	if exp, ok := claims["exp"].(float64); ok {
 		expTime := time.Unix(int64(exp), 0)
 		if time.Now().After(expTime) {
-			return fmt.Errorf("VCWrapper JWT has expired")
+			return fmt.Errorf("VerifiableCredentialWrapper JWT has expired")
 		}
 	}
 
 	if nbf, ok := claims["nbf"].(float64); ok {
 		nbfTime := time.Unix(int64(nbf), 0)
 		if time.Now().Before(nbfTime) {
-			return fmt.Errorf("VCWrapper JWT not valid yet (will be valid in the feature)")
+			return fmt.Errorf("VerifiableCredentialWrapper JWT not valid yet (will be valid in the feature)")
 		}
 	}
 
 	if iat, ok := claims["iat"].(float64); ok {
 		iatTime := time.Unix(int64(iat), 0)
 		if time.Now().Before(iatTime) {
-			return fmt.Errorf("VCWrapper JWT has a iat-value in the future")
+			return fmt.Errorf("VerifiableCredentialWrapper JWT has a iat-value in the future")
 		}
 	}
 
@@ -694,7 +722,7 @@ func (vc *VCWrapper) checkIntegrity(issuerPublicKey interface{}) error {
 		//TODO: Hårdkodad expectedIssuer "https://issuer.sunet.se" - ta in via config
 		expectedIssuer := "https://issuer.sunet.se"
 		if iss != expectedIssuer {
-			return fmt.Errorf("VCWrapper JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
+			return fmt.Errorf("VerifiableCredentialWrapper JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
 		}
 	}
 
@@ -702,7 +730,7 @@ func (vc *VCWrapper) checkIntegrity(issuerPublicKey interface{}) error {
 		//TODO: Hårdkodad expectedVCT "EHICCredential"
 		expectedVCT := "EHICCredential"
 		if vct != expectedVCT {
-			return fmt.Errorf("VCWrapper JWT vct mismatch: expected %s, got %s", expectedVCT, vct)
+			return fmt.Errorf("VerifiableCredentialWrapper JWT vct mismatch: expected %s, got %s", expectedVCT, vct)
 		}
 	}
 
@@ -758,10 +786,10 @@ type parsedVC struct {
 	holderBindingJWT            string
 }
 
-// extractJWTVC func to parse and handle JWT VCWrapper with if exists: Selective Disclosures and/or Holder Binding
-func (vc *VCWrapper) extractJWTVC() error {
+// extractJWTVC func to parse and handle JWT VerifiableCredentialWrapper with if exists: Selective Disclosures and/or Holder Binding
+func (vc *VerifiableCredentialWrapper) extractJWTVC() error {
 	if vc.RawToken == "" {
-		return fmt.Errorf("jwtVC parse and decode failed: empty VCWrapper")
+		return fmt.Errorf("jwtVC parse and decode failed: empty VerifiableCredentialWrapper")
 	}
 
 	parsedVC, err := vc.parseJWTVC(vc.RawToken)
@@ -821,19 +849,19 @@ func (vc *VCWrapper) extractJWTVC() error {
 	return nil
 }
 
-func (vc *VCWrapper) parseJWTVC(rawJWTVCToken string) (*parsedVC, error) {
+func (vc *VerifiableCredentialWrapper) parseJWTVC(rawJWTVCToken string) (*parsedVC, error) {
 	parts := strings.Split(rawJWTVCToken, "~")
 	tokenPart := parts[0]
 	tokenParts := strings.Split(tokenPart, ".")
 
 	if len(tokenParts) == 2 {
-		return nil, errors.New("the VCWrapper has to be a JWS (signed) or a JWE")
+		return nil, errors.New("the VerifiableCredentialWrapper has to be a JWS (signed) or a JWE")
 	}
 	if len(tokenParts) != 3 && len(tokenParts) != 5 {
-		return nil, errors.New("the VCWrapper has an invalid JWS/JWE-structure")
+		return nil, errors.New("the VerifiableCredentialWrapper has an invalid JWS/JWE-structure")
 	}
 	if len(tokenParts) == 5 {
-		return nil, errors.New("the VCWrapper is a JWE (encrypted) – not supported yet")
+		return nil, errors.New("the VerifiableCredentialWrapper is a JWE (encrypted) – not supported yet")
 	}
 
 	parsed := &parsedVC{
@@ -914,7 +942,7 @@ type Disclosure struct {
 }
 
 // unmarshalDisclosure unmarshals a JSON-encoded disclosure string
-func (vc *VCWrapper) unmarshalDisclosure(encoded string) (*Disclosure, error) {
+func (vc *VerifiableCredentialWrapper) unmarshalDisclosure(encoded string) (*Disclosure, error) {
 	var elements []any
 	if err := json.Unmarshal([]byte(encoded), &elements); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal disclosure JSON: %w", err)
@@ -934,7 +962,7 @@ func (vc *VCWrapper) unmarshalDisclosure(encoded string) (*Disclosure, error) {
 }
 
 // validateSelectiveDisclosures verifies revealed selective disclosures against `_sd` list for a vc
-func (vc *VCWrapper) validateSelectiveDisclosures(sdList []string, hashAlg string) error {
+func (vc *VerifiableCredentialWrapper) validateSelectiveDisclosures(sdList []string, hashAlg string) error {
 	hashFunc, err := vc.getHashFunc(hashAlg)
 	if err != nil {
 		return err
@@ -970,7 +998,7 @@ func (vc *VCWrapper) validateSelectiveDisclosures(sdList []string, hashAlg strin
 }
 
 // getHashFunc returns a crypto.Hash function based on algorithm name
-func (vc *VCWrapper) getHashFunc(hashAlg string) (crypto.Hash, error) {
+func (vc *VerifiableCredentialWrapper) getHashFunc(hashAlg string) (crypto.Hash, error) {
 	hashAlg = strings.ToLower(hashAlg)
 	hashes := map[string]crypto.Hash{
 		"sha-224":     crypto.SHA224,
@@ -993,7 +1021,7 @@ func (vc *VCWrapper) getHashFunc(hashAlg string) (crypto.Hash, error) {
 	return 0, fmt.Errorf("unsupported hash algorithm: %s", hashAlg)
 }
 
-func (vc *VCWrapper) computeDisclosureHash(d *Disclosure, hashFunc crypto.Hash) (string, error) {
+func (vc *VerifiableCredentialWrapper) computeDisclosureHash(d *Disclosure, hashFunc crypto.Hash) (string, error) {
 	selectiveDisclosure, err := disclosure.NewFromObject(d.Key, d.Value, &d.Salt)
 	if err != nil {
 		return "", err

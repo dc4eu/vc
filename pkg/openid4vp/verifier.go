@@ -23,6 +23,11 @@ import (
 
 //TODO(mk): remove all fmt.println etc and implement "vettig" loggning
 
+type ProcessConfig struct {
+	ProcessType       ProcessType
+	ValidationOptions ValidationOptions
+}
+
 type ProcessType int
 
 const (
@@ -45,9 +50,15 @@ func isValidProcessType(p ProcessType) bool {
 	return p == FULL_VALIDATION || p == ONLY_EXTRACT_JSON
 }
 
+type ValidationOptions struct {
+	SkipAllSignatureChecks   bool `json:"skip_all_signature_checks,omitempty"`
+	SkipHolderSignatureCheck bool `json:"skip_holder_signature_check,omitempty"`
+	SkipIssuerSignatureCheck bool `json:"skip_issuer_signature_check,omitempty"`
+}
+
 type AuthorizationResponseWrapper struct {
 	authorizationResponse *AuthorizationResponse
-	vpTokens              []VPTokenWrapper
+	vpList                []VPWrapper
 
 	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
 	holderPublicKey interface{}
@@ -66,14 +77,19 @@ func NewAuthorizationResponseWrapper(authorizationResponse *AuthorizationRespons
 }
 
 // TODO: en till returntyp ska till här för utfall när mer blivit klart
-func (arw *AuthorizationResponseWrapper) Process(processType ProcessType) error {
-	if !isValidProcessType(processType) {
+func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) error {
+	if processConfig == nil {
+		return errors.New("no processConfig provided")
+	}
+	if !isValidProcessType(processConfig.ProcessType) {
 		return errors.New("invalid process type")
 	}
 
-	if arw.authorizationResponse.Error != nil {
-		return fmt.Errorf("error recieved from holder: %s", *arw.authorizationResponse.Error)
+	if arw.authorizationResponse.Error != "" {
+		return fmt.Errorf("error recieved from holder: %s", arw.authorizationResponse.Error)
 	}
+
+	//TODO: check id_token here or before (if exists)
 
 	if arw.authorizationResponse.PresentationSubmission == nil {
 		return errors.New("no presentation_submission found in response")
@@ -83,10 +99,14 @@ func (arw *AuthorizationResponseWrapper) Process(processType ProcessType) error 
 		return err
 	}
 
-	if processType == FULL_VALIDATION {
-		if err := arw.checkVPTokensIntegrity(); err != nil {
+	if processConfig.ProcessType == FULL_VALIDATION {
+		if err := arw.checkAllVPsIntegrity(); err != nil {
 			return err
 		}
+	}
+
+	if err := arw.extractAllEmbeddedVCs(); err != nil {
+		return err
 	}
 
 	//TODO: fortsätt refact av process här....
@@ -100,11 +120,11 @@ func (arw *AuthorizationResponseWrapper) extractVPTokens() error {
 		return errors.New("no vp_token found in response")
 	}
 
-	arw.vpTokens = make([]VPTokenWrapper, 0)
+	arw.vpList = make([]VPWrapper, 0)
 	for _, vpTokenRaw := range arw.authorizationResponse.VPTokens {
 		if vpTokenRaw.isJWTBased() {
 			//TODO skicka in en *vpTokenRaw istället när testet är reviderat
-			vpTokenWrapper, err := NewVPToken(*vpTokenRaw.JWT)
+			vpTokenWrapper, err := NewVPToken(vpTokenRaw.JWT)
 			if err != nil {
 				return err
 			}
@@ -112,7 +132,7 @@ func (arw *AuthorizationResponseWrapper) extractVPTokens() error {
 				return err
 			}
 			vpTokenWrapper.holderPublicKey = arw.holderPublicKey
-			arw.vpTokens = append(arw.vpTokens, *vpTokenWrapper)
+			arw.vpList = append(arw.vpList, *vpTokenWrapper)
 		} else if vpTokenRaw.isJSONBased() {
 			return errors.New("vp_token (one element in vp_token array) has json format and is not yet supported!")
 		} else {
@@ -123,9 +143,9 @@ func (arw *AuthorizationResponseWrapper) extractVPTokens() error {
 	return nil
 }
 
-func (arw *AuthorizationResponseWrapper) checkVPTokensIntegrity() error {
-	for _, vpTokenWrapper := range arw.vpTokens {
-		err := vpTokenWrapper.checkVPTokenIntegrity()
+func (arw *AuthorizationResponseWrapper) checkAllVPsIntegrity() error {
+	for _, vp := range arw.vpList {
+		err := vp.checkVPTokenIntegrity()
 		if err != nil {
 			return fmt.Errorf("failed vp token integrity check: %w", err)
 		}
@@ -133,13 +153,20 @@ func (arw *AuthorizationResponseWrapper) checkVPTokensIntegrity() error {
 	return nil
 }
 
-// NewVPToken initializes a new VPTokenWrapper instance from a raw token.
-func NewVPToken(vp_token string) (*VPTokenWrapper, error) {
+func (arw *AuthorizationResponseWrapper) extractAllEmbeddedVCs() error {
+	for _, vp := range arw.vpList {
+		vp.extractVerifiableCredentials()
+	}
+	return nil
+}
+
+// NewVPToken initializes a new VPWrapper instance from a raw token.
+func NewVPToken(vp_token string) (*VPWrapper, error) {
 	if vp_token == "" {
 		return nil, errors.New("empty vp_token provided")
 	}
 
-	vp := &VPTokenWrapper{
+	vp := &VPWrapper{
 		RawToken:          vp_token,
 		ValidationResults: make(map[string]bool),
 	}
@@ -147,8 +174,11 @@ func NewVPToken(vp_token string) (*VPTokenWrapper, error) {
 	return vp, nil
 }
 
-// VPTokenWrapper represents the structure for validating a Verifiable Presentation token (vp_token).
-type VPTokenWrapper struct {
+// VPWrapper represents the structure for validating a Verifiable Presentation
+type VPWrapper struct {
+	//TODO: JSON-based vp_token
+
+	//JWT-based vp_token
 	RawToken                        string // The raw input token
 	RawTokenHasBeenDecryptedFromJWE bool
 	RawJWSPartOfToken               string //only header.payload.signature without any ~
@@ -159,8 +189,9 @@ type VPTokenWrapper struct {
 	PayloadDecodedMap    map[string]interface{}
 	HolderSignatureBytes []byte
 
+	//Common for both JWT and JSON based vp_token
 	PresentationSubmission PresentationSubmission
-	VerifiableCredentials  []*VCToken
+	VerifiableCredentials  []*VCWrapper
 
 	//DisclosedClaims []string // Claims disclosed by the Holder
 
@@ -174,14 +205,14 @@ type VPTokenWrapper struct {
 
 }
 
-// VCToken represents the structure for validating a Verifiable Credential (can be used both as is and within a vp_token)
-type VCToken struct {
-	RawToken string // as sent from client; can for example be; header.payload.signature(~sd1~sd2~holderbinding~) or header.encrypted_key.iv.ciphertext.tag
+// VCWrapper represents the structure for validating a Verifiable Credential (can be used both as is and within a verifiable presentation)
+type VCWrapper struct {
 
 	//Format from presentation_submission for this vc (for example: jwt_vc, ldp_vc or other)
 	Format string
 
 	// jwt_vc fields
+	RawToken                            string // as sent from client; can for example be; header.payload.signature(~sd1~sd2~holderbinding~) or header.encrypted_key.iv.ciphertext.tag
 	RawJWSPartOfToken                   string //only header.payload.signature without any ~
 	JWTTyp                              string //for example: "vc+sd-jwt" (set by the credential issuer)
 	HeaderDecoded                       string
@@ -198,7 +229,7 @@ type VCToken struct {
 }
 
 // Process process the vp_token depending on selected ProcessType.
-func (vp *VPTokenWrapper) Process(processType ProcessType) error {
+func (vp *VPWrapper) Process(processType ProcessType) error {
 	if !isValidProcessType(processType) {
 		return errors.New("invalid process type")
 	}
@@ -227,7 +258,7 @@ func (vp *VPTokenWrapper) Process(processType ProcessType) error {
 		return nil
 	}
 
-	// 4. Validate Issuer's Signatures on Embedded VCToken's
+	// 4. Validate Issuer's Signatures on Embedded VCWrapper's
 	// Extract and verify the signatures of all Verifiable Credentials using the Issuer's public key.
 	// Ensure that credentials are not expired, revoked, or issued by untrusted issuers, etc.
 	if err := vp.checkVerifiableCredentialsIntegrity(); err != nil {
@@ -255,7 +286,7 @@ func (vp *VPTokenWrapper) Process(processType ProcessType) error {
 }
 
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
-func (vp *VPTokenWrapper) extractVPToken() error {
+func (vp *VPWrapper) extractVPToken() error {
 	parsedVP, err := vp.parseVPToken()
 	if err != nil {
 		return err
@@ -283,7 +314,7 @@ func (vp *VPTokenWrapper) extractVPToken() error {
 	return nil
 }
 
-func (vp *VPTokenWrapper) extractVerifiableCredentials() error {
+func (vp *VPWrapper) extractVerifiableCredentials() error {
 	psResult := gjson.Get(vp.PayloadDecoded, "presentation_submission")
 	if !psResult.Exists() {
 		return errors.New("presentation_submission not found in vp_token payload")
@@ -345,12 +376,12 @@ func (vp *VPTokenWrapper) extractVerifiableCredentials() error {
 	}
 	//----------------------------------------------------------------------
 
-	vp.VerifiableCredentials = make([]*VCToken, 0)
+	vp.VerifiableCredentials = make([]*VCWrapper, 0)
 
 	for i, vcInPayload := range vcList {
 		vcToken := vcInPayload.String()
 
-		//Try to match VCToken with descriptor_map using path
+		//Try to match VCWrapper with descriptor_map using path
 		var matchedDescriptor *struct {
 			ID     string
 			Format string
@@ -381,7 +412,7 @@ func (vp *VPTokenWrapper) extractVerifiableCredentials() error {
 		fmt.Printf("  Path: %s\n", path)
 		//fmt.Printf("  Data: %s\n", vcToken)
 
-		vc := &VCToken{
+		vc := &VCWrapper{
 			RawToken: vcToken,
 			Format:   format,
 		}
@@ -392,10 +423,10 @@ func (vp *VPTokenWrapper) extractVerifiableCredentials() error {
 				return err
 			}
 		case "ldp_vc":
-			// TODO: Implement JSON-LD VCToken parsing
-			return fmt.Errorf("not supported VCToken-format: %s", format)
+			// TODO: Implement JSON-LD VCWrapper parsing
+			return fmt.Errorf("not supported VCWrapper-format: %s", format)
 		default:
-			return fmt.Errorf("unknown VCToken-format:" + format)
+			return fmt.Errorf("unknown VCWrapper-format:" + format)
 			//continue //TODO: ska vi se okänt format som ett fel eller ska vi jobba vidare med de vc's vi kan om allt finns med som presentation definition uppfylls?
 		}
 		vp.VerifiableCredentials = append(vp.VerifiableCredentials, vc)
@@ -407,7 +438,7 @@ func (vp *VPTokenWrapper) extractVerifiableCredentials() error {
 }
 
 // checkVPTokenIntegrity verifies the signature of the outer JWT (vp_token jws).
-func (vp *VPTokenWrapper) checkVPTokenIntegrity() error {
+func (vp *VPWrapper) checkVPTokenIntegrity() error {
 	parsedToken, err := jwt.Parse(vp.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vp_token signing alg: %s\n", alg)
@@ -487,7 +518,7 @@ func (vp *VPTokenWrapper) checkVPTokenIntegrity() error {
 }
 
 // verifySelectiveDisclosure validates revealed selective disclosure claims.
-func (vp *VPTokenWrapper) checkSelectiveDisclosures() error {
+func (vp *VPWrapper) checkSelectiveDisclosures() error {
 	for _, vc := range vp.VerifiableCredentials {
 		if len(vc.RevealedSelectiveDisclosuresDecoded) == 0 {
 			continue
@@ -503,10 +534,10 @@ func (vp *VPTokenWrapper) checkSelectiveDisclosures() error {
 	return nil
 }
 
-func (vc *VCToken) checkRevealedSelectiveDisclosures() error {
+func (vc *VCWrapper) checkRevealedSelectiveDisclosures() error {
 	sdAlgResults := gjson.Get(vc.PayloadDecoded, "_sd_alg")
 	if !sdAlgResults.Exists() {
-		return fmt.Errorf("_sd_alg not found in VCToken")
+		return fmt.Errorf("_sd_alg not found in VCWrapper")
 	}
 	sdHashAlg := sdAlgResults.String()
 
@@ -527,21 +558,21 @@ func (vc *VCToken) checkRevealedSelectiveDisclosures() error {
 }
 
 // checkHolderBindingsInEmbeddedVCs ensures the Holder is bound to each embedded vc
-func (vp *VPTokenWrapper) checkHolderBindingsInEmbeddedVCs() error {
+func (vp *VPWrapper) checkHolderBindingsInEmbeddedVCs() error {
 	//TODO impl checkHolderBindingsInEmbeddedVCs
 	vp.ValidationResults["HolderBinding"] = true
 	return nil
 }
 
 // checkPresentationRequirements ensures the VP matches the verifier's requirements.
-func (vp *VPTokenWrapper) checkPresentationRequirements() error {
+func (vp *VPWrapper) checkPresentationRequirements() error {
 	//TODO impl checkPresentationRequirements
 	vp.ValidationResults["PresentationRequirements"] = true
 	return nil
 }
 
 // decodeBase64URL decodes a Base64URL-encoded string.
-func (vp *VPTokenWrapper) decodeBase64URL(input string) ([]byte, error) {
+func (vp *VPWrapper) decodeBase64URL(input string) ([]byte, error) {
 	decoded, err := base64.RawURLEncoding.DecodeString(input)
 	if err != nil {
 		return nil, err
@@ -558,7 +589,7 @@ type parsedVPToken struct {
 	signatureEncoded string
 }
 
-func (vp *VPTokenWrapper) parseVPToken() (*parsedVPToken, error) {
+func (vp *VPWrapper) parseVPToken() (*parsedVPToken, error) {
 	parsedVPToken := &parsedVPToken{
 		// just to simplify debug
 		raw: vp.RawToken,
@@ -605,7 +636,7 @@ func (vp *VPTokenWrapper) parseVPToken() (*parsedVPToken, error) {
 	return parsedVPToken, nil
 }
 
-func (vp *VPTokenWrapper) checkVerifiableCredentialsIntegrity() error {
+func (vp *VPWrapper) checkVerifiableCredentialsIntegrity() error {
 	for _, vc := range vp.VerifiableCredentials {
 		err := vc.checkIntegrity(vp.issuerPublicKey)
 		if err != nil {
@@ -617,7 +648,7 @@ func (vp *VPTokenWrapper) checkVerifiableCredentialsIntegrity() error {
 	return nil
 }
 
-func (vc *VCToken) checkIntegrity(issuerPublicKey interface{}) error {
+func (vc *VCWrapper) checkIntegrity(issuerPublicKey interface{}) error {
 	parsedToken, _ := jwt.Parse(vc.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vc_token signing alg: %s\n", alg)
@@ -627,35 +658,35 @@ func (vc *VCToken) checkIntegrity(issuerPublicKey interface{}) error {
 
 	//TODO: TA UT err i jwt.Parse samt KOMMENTERA FRAM NEDAN NÄR ÄKTA issuerPublicKey FINNS TILLGÄNGLIG
 	//if err != nil {
-	//	return fmt.Errorf("VCToken JWS-verification failed: %w", err)
+	//	return fmt.Errorf("VCWrapper JWS-verification failed: %w", err)
 	//}
 	//if !parsedToken.Valid {
-	//	return fmt.Errorf("VCToken JWS not valid")
+	//	return fmt.Errorf("VCWrapper JWS not valid")
 	//}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return fmt.Errorf("VCToken could not read JWT claims")
+		return fmt.Errorf("VCWrapper could not read JWT claims")
 	}
 
 	if exp, ok := claims["exp"].(float64); ok {
 		expTime := time.Unix(int64(exp), 0)
 		if time.Now().After(expTime) {
-			return fmt.Errorf("VCToken JWT has expired")
+			return fmt.Errorf("VCWrapper JWT has expired")
 		}
 	}
 
 	if nbf, ok := claims["nbf"].(float64); ok {
 		nbfTime := time.Unix(int64(nbf), 0)
 		if time.Now().Before(nbfTime) {
-			return fmt.Errorf("VCToken JWT not valid yet (will be valid in the feature)")
+			return fmt.Errorf("VCWrapper JWT not valid yet (will be valid in the feature)")
 		}
 	}
 
 	if iat, ok := claims["iat"].(float64); ok {
 		iatTime := time.Unix(int64(iat), 0)
 		if time.Now().Before(iatTime) {
-			return fmt.Errorf("VCToken JWT has a iat-value in the future")
+			return fmt.Errorf("VCWrapper JWT has a iat-value in the future")
 		}
 	}
 
@@ -663,7 +694,7 @@ func (vc *VCToken) checkIntegrity(issuerPublicKey interface{}) error {
 		//TODO: Hårdkodad expectedIssuer "https://issuer.sunet.se" - ta in via config
 		expectedIssuer := "https://issuer.sunet.se"
 		if iss != expectedIssuer {
-			return fmt.Errorf("VCToken JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
+			return fmt.Errorf("VCWrapper JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
 		}
 	}
 
@@ -671,7 +702,7 @@ func (vc *VCToken) checkIntegrity(issuerPublicKey interface{}) error {
 		//TODO: Hårdkodad expectedVCT "EHICCredential"
 		expectedVCT := "EHICCredential"
 		if vct != expectedVCT {
-			return fmt.Errorf("VCToken JWT vct mismatch: expected %s, got %s", expectedVCT, vct)
+			return fmt.Errorf("VCWrapper JWT vct mismatch: expected %s, got %s", expectedVCT, vct)
 		}
 	}
 
@@ -727,10 +758,10 @@ type parsedVC struct {
 	holderBindingJWT            string
 }
 
-// extractJWTVC func to parse and handle JWT VCToken with if exists: Selective Disclosures and/or Holder Binding
-func (vc *VCToken) extractJWTVC() error {
+// extractJWTVC func to parse and handle JWT VCWrapper with if exists: Selective Disclosures and/or Holder Binding
+func (vc *VCWrapper) extractJWTVC() error {
 	if vc.RawToken == "" {
-		return fmt.Errorf("jwtVC parse and decode failed: empty VCToken")
+		return fmt.Errorf("jwtVC parse and decode failed: empty VCWrapper")
 	}
 
 	parsedVC, err := vc.parseJWTVC(vc.RawToken)
@@ -790,19 +821,19 @@ func (vc *VCToken) extractJWTVC() error {
 	return nil
 }
 
-func (vc *VCToken) parseJWTVC(rawJWTVCToken string) (*parsedVC, error) {
+func (vc *VCWrapper) parseJWTVC(rawJWTVCToken string) (*parsedVC, error) {
 	parts := strings.Split(rawJWTVCToken, "~")
 	tokenPart := parts[0]
 	tokenParts := strings.Split(tokenPart, ".")
 
 	if len(tokenParts) == 2 {
-		return nil, errors.New("the VCToken has to be a JWS (signed) or a JWE")
+		return nil, errors.New("the VCWrapper has to be a JWS (signed) or a JWE")
 	}
 	if len(tokenParts) != 3 && len(tokenParts) != 5 {
-		return nil, errors.New("the VCToken has an invalid JWS/JWE-structure")
+		return nil, errors.New("the VCWrapper has an invalid JWS/JWE-structure")
 	}
 	if len(tokenParts) == 5 {
-		return nil, errors.New("the VCToken is a JWE (encrypted) – not supported yet")
+		return nil, errors.New("the VCWrapper is a JWE (encrypted) – not supported yet")
 	}
 
 	parsed := &parsedVC{
@@ -883,7 +914,7 @@ type Disclosure struct {
 }
 
 // unmarshalDisclosure unmarshals a JSON-encoded disclosure string
-func (vc *VCToken) unmarshalDisclosure(encoded string) (*Disclosure, error) {
+func (vc *VCWrapper) unmarshalDisclosure(encoded string) (*Disclosure, error) {
 	var elements []any
 	if err := json.Unmarshal([]byte(encoded), &elements); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal disclosure JSON: %w", err)
@@ -903,7 +934,7 @@ func (vc *VCToken) unmarshalDisclosure(encoded string) (*Disclosure, error) {
 }
 
 // validateSelectiveDisclosures verifies revealed selective disclosures against `_sd` list for a vc
-func (vc *VCToken) validateSelectiveDisclosures(sdList []string, hashAlg string) error {
+func (vc *VCWrapper) validateSelectiveDisclosures(sdList []string, hashAlg string) error {
 	hashFunc, err := vc.getHashFunc(hashAlg)
 	if err != nil {
 		return err
@@ -939,7 +970,7 @@ func (vc *VCToken) validateSelectiveDisclosures(sdList []string, hashAlg string)
 }
 
 // getHashFunc returns a crypto.Hash function based on algorithm name
-func (vc *VCToken) getHashFunc(hashAlg string) (crypto.Hash, error) {
+func (vc *VCWrapper) getHashFunc(hashAlg string) (crypto.Hash, error) {
 	hashAlg = strings.ToLower(hashAlg)
 	hashes := map[string]crypto.Hash{
 		"sha-224":     crypto.SHA224,
@@ -962,7 +993,7 @@ func (vc *VCToken) getHashFunc(hashAlg string) (crypto.Hash, error) {
 	return 0, fmt.Errorf("unsupported hash algorithm: %s", hashAlg)
 }
 
-func (vc *VCToken) computeDisclosureHash(d *Disclosure, hashFunc crypto.Hash) (string, error) {
+func (vc *VCWrapper) computeDisclosureHash(d *Disclosure, hashFunc crypto.Hash) (string, error) {
 	selectiveDisclosure, err := disclosure.NewFromObject(d.Key, d.Value, &d.Salt)
 	if err != nil {
 		return "", err

@@ -7,22 +7,22 @@ import (
 )
 
 type AuthorizationResponse struct {
-	IDToken                *string                 `json:"id_token,omitempty"`
-	VPTokens               []VPTokenRaw            `json:"vp_token,omitempty"`
-	PresentationSubmission *PresentationSubmission `json:"presentation_submission,omitempty"`
-	State                  *string                 `json:"state,omitempty"`
-	Error                  *string                 `json:"error,omitempty"`
-	ErrorDescription       *string                 `json:"error_description,omitempty"`
-	ErrorURI               *string                 `json:"error_uri,omitempty"`
+	IDToken                string                  `json:"id_token,omitempty"`                //JWT
+	VPTokens               []VPTokenRaw            `json:"vp_token,omitempty"`                //JWT or JSON
+	PresentationSubmission *PresentationSubmission `json:"presentation_submission,omitempty"` //JSON
+	State                  string                  `json:"state,omitempty"`                   //Must exist if existed in AuthorizationRequest
+	Error                  string                  `json:"error,omitempty"`                   //Must exist if error occured on the holder side
+	ErrorDescription       string                  `json:"error_description,omitempty"`       //Optional on error
+	ErrorURI               string                  `json:"error_uri,omitempty"`               //Optional on error
 }
 
 type VPTokenRaw struct {
-	JWT  *string                 `json:"jwt,omitempty"`
-	JSON *map[string]interface{} `json:"json,omitempty"`
+	JWT  string                 `json:"jwt,omitempty"`
+	JSON map[string]interface{} `json:"json,omitempty"`
 }
 
 func (vp *VPTokenRaw) isJWTBased() bool {
-	return vp.JWT != nil
+	return vp.JWT != ""
 }
 
 func (vp *VPTokenRaw) isJSONBased() bool {
@@ -32,13 +32,13 @@ func (vp *VPTokenRaw) isJSONBased() bool {
 func (vp *VPTokenRaw) UnmarshalJSON(data []byte) error {
 	var jwt string
 	if err := json.Unmarshal(data, &jwt); err == nil {
-		vp.JWT = &jwt
+		vp.JWT = jwt
 		return nil
 	}
 
 	var jsonObj map[string]interface{}
 	if err := json.Unmarshal(data, &jsonObj); err == nil {
-		vp.JSON = &jsonObj
+		vp.JSON = jsonObj
 		return nil
 	}
 

@@ -48,7 +48,11 @@ func TestAuthorizationResponseWrapper_Process(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = asw.Process(FULL_VALIDATION)
+			processConfig := &ProcessConfig{
+				ProcessType:       FULL_VALIDATION,
+				ValidationOptions: ValidationOptions{},
+			}
+			err = asw.Process(processConfig)
 			if err != nil && !tc.wantErr {
 				t.Errorf("Process() error = %v, wantErr %v", err, tc.wantErr)
 			}
@@ -73,13 +77,9 @@ func buildAuthorizationResponse(jwtVC string) AuthorizationResponse {
 	}
 
 	authResponse := AuthorizationResponse{
-		IDToken:                nil,
-		VPTokens:               []VPTokenRaw{{JWT: &jwtVC}},
+		VPTokens:               []VPTokenRaw{{JWT: jwtVC}},
 		PresentationSubmission: presentationSubmission,
-		State:                  nil,
-		Error:                  nil,
-		ErrorDescription:       nil,
-		ErrorURI:               nil,
+		State:                  "state123",
 	}
 
 	return authResponse

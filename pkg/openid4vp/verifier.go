@@ -217,7 +217,7 @@ type VerifiablePresentationWrapper struct {
 	//Common for both JWT and JSON based vp
 	IndexInVPTokenArray    int
 	PresentationSubmission PresentationSubmission
-	vcList                 []VerifiableCredentialWrapper
+	vcList                 []*VerifiableCredentialWrapper
 
 	//DisclosedClaims []string // Claims disclosed by the Holder
 
@@ -404,7 +404,7 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 	}
 	//----------------------------------------------------------------------
 
-	vp.vcList = make([]VerifiableCredentialWrapper, 0)
+	vp.vcList = make([]*VerifiableCredentialWrapper, 0)
 
 	for i, vcInPayload := range vcListFromPayloadDecoded {
 		vcToken := vcInPayload.String()
@@ -457,7 +457,7 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 			return fmt.Errorf("unknown VerifiableCredentialWrapper-format:" + format)
 			//continue //TODO: ska vi se okänt format som ett fel eller ska vi jobba vidare med de vc's vi kan om allt finns med som presentation definition uppfylls?
 		}
-		vp.vcList = append(vp.vcList, *vc)
+		vp.vcList = append(vp.vcList, vc)
 	}
 
 	//fmt.Println("vp_token extracted:", vp)

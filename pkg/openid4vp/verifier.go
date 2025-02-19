@@ -120,7 +120,11 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) e
 		return err
 	}
 
-	//TODO: fortsätt refact av process här....
+	if err := arw.checkAllSelectiveDisclosures(); err != nil {
+		return err
+	}
+
+	//TODO: fortsätt refact/impl av process här....
 
 	return nil
 
@@ -139,11 +143,15 @@ func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 			if err != nil {
 				return err
 			}
+
+			vp.IndexInVPTokenArray = index
+			vp.holderPublicKey = arw.holderPublicKey
+			vp.jwePrivateKey = arw.jwePrivateKey
+
 			if err := vp.extractVPToken(); err != nil {
 				return err
 			}
-			vp.IndexInVPTokenArray = index
-			vp.holderPublicKey = arw.holderPublicKey
+
 			arw.vpList = append(arw.vpList, vp)
 		} else if vpTokenRaw.isJSONBased() {
 			return errors.New("vp_token (one element in vp_token array) has json format and is not yet supported!")
@@ -185,14 +193,24 @@ func (arw *AuthorizationResponseWrapper) checkAllVCsIntegrity() error {
 	return nil
 }
 
+func (arw *AuthorizationResponseWrapper) checkAllSelectiveDisclosures() error {
+	for _, vp := range arw.vpList {
+		err := vp.checkSelectiveDisclosures()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // NewVerifiablePresentationWrapper initializes a new VerifiablePresentationWrapper instance from a raw token.
-func NewVerifiablePresentationWrapper(vp_token string) (*VerifiablePresentationWrapper, error) {
-	if vp_token == "" {
+func NewVerifiablePresentationWrapper(jwt_based_vp_token string) (*VerifiablePresentationWrapper, error) {
+	if jwt_based_vp_token == "" {
 		return nil, errors.New("empty vp_token provided")
 	}
 
 	vp := &VerifiablePresentationWrapper{
-		RawToken:          vp_token,
+		RawToken:          jwt_based_vp_token,
 		ValidationResults: make(map[string]bool),
 	}
 

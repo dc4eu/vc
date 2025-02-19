@@ -30,7 +30,11 @@ func TestAuthorizationResponseWrapper_Process(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ar := buildAuthorizationResponse(vp_token_ehic_adam_driver)
+	vp_token_ehic_adam_driver_JWE, err := encryptToJWE([]byte(vp_token_ehic_adam_driver), ecdsaP256Public)
+	if err != nil {
+		t.Fatal(err)
+	}
+	authorizationResponse := buildAuthorizationResponse(vp_token_ehic_adam_driver_JWE)
 
 	testCases := []struct {
 		name            string
@@ -40,7 +44,7 @@ func TestAuthorizationResponseWrapper_Process(t *testing.T) {
 		issuerPublicKey interface{}
 		wantErr         bool
 	}{
-		{"AuthorizationResponse for adam driver with one jwt vc", ar, ecdsaP256Public, nil, nil, false},
+		{"AuthorizationResponse for adam driver with one jwt vc that then encrypted in a jwe vp_token", authorizationResponse, ecdsaP256Public, ecdsaP256Private, nil, false},
 	}
 
 	for _, tc := range testCases {
@@ -100,6 +104,9 @@ func TestVPToken_Process(t *testing.T) {
 		t.Fatal(err)
 	}
 	vp_token_ehic_adam_driver_JWE, err := encryptToJWE([]byte(vp_token_ehic_adam_driver), ecdsaP256Public)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	vp_token_with_1_jwt_vc, err := build_vp_jws_token_with_jwt_vc_credentials(pid_sd_vc_jwt_with_selective_disclosures_and_holder_binding, jwt.SigningMethodES256, ecdsaP256Private, "did:example:issuer#key-1")
 	if err != nil {

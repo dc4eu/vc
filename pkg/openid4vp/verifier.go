@@ -78,7 +78,7 @@ func NewAuthorizationResponseWrapper(authorizationResponse *AuthorizationRespons
 	return arw, nil
 }
 
-// TODO: en till returntyp ska till här för utfall när mer blivit klart
+// Process TODO: en till returntyp ska till här för utfall när mer blivit klart
 func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) error {
 	if processConfig == nil {
 		return errors.New("no processConfig provided")
@@ -138,7 +138,6 @@ func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 	arw.vpList = make([]*VerifiablePresentationWrapper, 0)
 	for index, vpTokenRaw := range arw.authorizationResponse.VPTokens {
 		if vpTokenRaw.isJWTBased() {
-			//TODO skicka in en *vpTokenRaw istället när testet är reviderat
 			vp, err := NewVerifiablePresentationWrapper(vpTokenRaw.JWT)
 			if err != nil {
 				return err
@@ -154,7 +153,7 @@ func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 
 			arw.vpList = append(arw.vpList, vp)
 		} else if vpTokenRaw.isJSONBased() {
-			return errors.New("vp_token (one element in vp_token array) has json format and is not yet supported!")
+			return errors.New("vp_token (one element in vp_token array) has json-stucture format and is not yet supported!")
 		} else {
 			return errors.New("unknown format of vp_token (one element in vp_token array)")
 		}
@@ -210,8 +209,7 @@ func NewVerifiablePresentationWrapper(jwt_based_vp_token string) (*VerifiablePre
 	}
 
 	vp := &VerifiablePresentationWrapper{
-		RawToken:          jwt_based_vp_token,
-		ValidationResults: make(map[string]bool),
+		RawToken: jwt_based_vp_token,
 	}
 
 	return vp, nil
@@ -219,8 +217,6 @@ func NewVerifiablePresentationWrapper(jwt_based_vp_token string) (*VerifiablePre
 
 // VerifiablePresentationWrapper represents the structure for validating a Verifiable Presentation
 type VerifiablePresentationWrapper struct {
-	//TODO: JSON-structure based vp_token
-
 	//JWT-based vp
 	RawToken                        string // The raw input token
 	RawTokenHasBeenDecryptedFromJWE bool
@@ -232,15 +228,12 @@ type VerifiablePresentationWrapper struct {
 	PayloadDecodedMap    map[string]interface{}
 	HolderSignatureBytes []byte
 
+	//TODO: JSON-structure based vp_token
+
 	//Common for both JWT and JSON based vp
 	IndexInVPTokenArray    int
 	PresentationSubmission PresentationSubmission
 	vcList                 []*VerifiableCredentialWrapper
-
-	//DisclosedClaims []string // Claims disclosed by the Holder
-
-	//TODO(mk): gör en struct istället för bool med fält för utfall, error, mm.
-	ValidationResults map[string]bool // Validation results for different steps
 
 	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
 	holderPublicKey interface{}
@@ -272,8 +265,8 @@ type VerifiableCredentialWrapper struct {
 
 }
 
-// DEPRECATED: replaced by AuthorizationResponseWrapper.Process
 // Process process the vp_token depending on selected ProcessType.
+// DEPRECATED: replaced by AuthorizationResponseWrapper.Process
 func (vp *VerifiablePresentationWrapper) Process(processType ProcessType) error {
 	if !isValidProcessType(processType) {
 		return errors.New("invalid process type")
@@ -558,8 +551,6 @@ func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
 	}
 
 	//TODO(mk): check more claims: nonce, revocation etc
-
-	vp.ValidationResults["HolderSignature"] = true
 	return nil
 }
 
@@ -575,8 +566,6 @@ func (vp *VerifiablePresentationWrapper) checkSelectiveDisclosures() error {
 			return err
 		}
 	}
-
-	vp.ValidationResults["SelectiveDisclosures"] = true
 	return nil
 }
 
@@ -587,7 +576,7 @@ func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error
 	}
 	sdHashAlg := sdAlgResults.String()
 
-	sdList := []string{}
+	var sdList []string
 	sdResults := gjson.Get(vc.PayloadDecoded, "_sd")
 	if sdResults.Exists() && sdResults.IsArray() {
 		sdResults.ForEach(func(_, value gjson.Result) bool {
@@ -606,14 +595,12 @@ func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error
 // checkHolderBindingsInEmbeddedVCs ensures the Holder is bound to each embedded vc
 func (vp *VerifiablePresentationWrapper) checkHolderBindingsInEmbeddedVCs() error {
 	//TODO impl checkHolderBindingsInEmbeddedVCs
-	vp.ValidationResults["HolderBinding"] = true
 	return nil
 }
 
 // checkPresentationRequirements ensures the VP matches the verifier's requirements.
 func (vp *VerifiablePresentationWrapper) checkPresentationRequirements() error {
 	//TODO impl checkPresentationRequirements
-	vp.ValidationResults["PresentationRequirements"] = true
 	return nil
 }
 
@@ -689,8 +676,6 @@ func (vp *VerifiablePresentationWrapper) checkVerifiableCredentialsIntegrity() e
 			return err
 		}
 	}
-
-	vp.ValidationResults["IssuersSignaturesInVerifiableCredentials"] = true
 	return nil
 }
 

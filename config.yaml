@@ -58,6 +58,8 @@ issuer:
   grpc_server:
     addr: vc_dev_issuer:8090
   signing_key_path: "/private_ec256.pem"
+  issuer_url: "https://www.sunet.se"
+  credential_offer_url: "https://www.sunet.se"
   jwt_attribute:
     issuer: https://issuer.sunet.se
     enable_not_before: true

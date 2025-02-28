@@ -48,6 +48,11 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	}
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
+
+	//openid4vp
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qrcode", s.endpointQRCode)
+
+	//deprecated: to be removed later
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", s.endpointVerifyCredential)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "decode", s.endpointDecodeCredential)
 

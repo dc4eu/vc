@@ -9,12 +9,11 @@ import (
 
 type Entry[T any] struct {
 	ID   string
-	Data T
+	Data *T
 }
 
 var (
-	ErrIDExists   = errors.New("entry with given ID already exists")
-	ErrIDNotFound = errors.New("entry with given ID not found")
+	ErrIDExists = errors.New("entry with given ID already exists")
 )
 
 type Repository[T any] interface {
@@ -22,21 +21,22 @@ type Repository[T any] interface {
 	Read(id string) (*Entry[T], bool)
 	ReadAll() []*Entry[T]
 	Delete(id string) bool
+	Clear()
 }
 
-const maxEntries = 100
-
-// InMemoryRepo to be used during dev. until api including endpoints are more stable/fixed
+// InMemoryRepo to be used during dev. until api including endpoints are more stable/fixed (use: mongodb, redis or other in production)
 type InMemoryRepo[T any] struct {
-	mu      sync.Mutex
-	entries []*Entry[T]
-	index   map[string]int // ID -> position i slice
+	mu         sync.Mutex
+	entries    []*Entry[T]
+	index      map[string]int // ID -> position i slice
+	maxEntries int
 }
 
-func NewInMemoryRepo[T any]() *InMemoryRepo[T] {
+func NewInMemoryRepo[T any](maxEntries int) *InMemoryRepo[T] {
 	return &InMemoryRepo[T]{
-		entries: make([]*Entry[T], 0, maxEntries),
-		index:   make(map[string]int),
+		entries:    make([]*Entry[T], 0, maxEntries),
+		index:      make(map[string]int),
+		maxEntries: maxEntries,
 	}
 }
 
@@ -52,7 +52,7 @@ func (r *InMemoryRepo[T]) Create(entry *Entry[T]) (*Entry[T], error) {
 		return nil, ErrIDExists
 	}
 
-	if len(r.entries) >= maxEntries {
+	if len(r.entries) >= r.maxEntries {
 		oldestID := r.entries[0].ID
 		r.entries = r.entries[1:]
 		delete(r.index, oldestID)
@@ -109,7 +109,7 @@ func (r *InMemoryRepo[T]) Clear() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	r.entries = make([]*Entry[T], 0, maxEntries)
+	r.entries = make([]*Entry[T], 0, r.maxEntries)
 	r.index = make(map[string]int)
 }
 
@@ -119,9 +119,10 @@ type ExempleStruct struct {
 }
 
 func Exemple_usage() error {
-	repo := NewInMemoryRepo[ExempleStruct]()
+	//var repo Repository[ExempleStruct]
+	repo := NewInMemoryRepo[ExempleStruct](5)
 
-	u1, err := repo.Create(&Entry[ExempleStruct]{Data: ExempleStruct{Name: "Alice", Email: "alice@example.com"}})
+	u1, err := repo.Create(&Entry[ExempleStruct]{Data: &ExempleStruct{Name: "Alice", Email: "alice@example.com"}})
 	if err != nil {
 		return err
 	}
@@ -157,7 +158,7 @@ func Exemple_usage() error {
 func addAnother(name string, email string, repository Repository[ExempleStruct]) error {
 	_, err := repository.Create(&Entry[ExempleStruct]{
 		ID: uuid.New().String(),
-		Data: ExempleStruct{
+		Data: &ExempleStruct{
 			Name: name, Email: email,
 		},
 	})

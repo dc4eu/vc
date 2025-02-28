@@ -10,12 +10,6 @@ import (
 	"net/url"
 )
 
-// QR is a collection of fields representing a QR code
-type QR struct {
-	Base64Image string `json:"base64_image" bson:"base64_image" validate:"required"`
-	URL         string `json:"url" bson:"url" validate:"required"`
-}
-
 func GenerateQR(inputURL string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR, error) {
 	parsedURL, err := url.ParseRequestURI(inputURL)
 	if err != nil || parsedURL.Scheme == "" || parsedURL.Host == "" {

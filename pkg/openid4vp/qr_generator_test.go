@@ -15,7 +15,6 @@ func TestGenerateQR(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *QR
 		wantErr bool
 	}{
 		{
@@ -25,7 +24,6 @@ func TestGenerateQR(t *testing.T) {
 				recoveryLevel: qrcode.Medium,
 				size:          256,
 			},
-			want:    nil,
 			wantErr: false,
 		},
 	}

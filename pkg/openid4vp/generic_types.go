@@ -19,12 +19,21 @@ type DocumentTypeEnvelope struct {
 
 // TODO: lagra med sessionID som nyckel
 type VPInteractionSession struct {
-	SessionID                 string    `json:"session_id"`    //key == must be unique i coll (UUID1)
-	DocumentType              string    `json:"document_type"` //type of document the presentation_definition will request from the holder
-	State                     string    `json:"state"`         //~UUID2
-	Nonce                     string    `json:"nonce"`         //~UUID3
-	CreatedAt                 time.Time `json:"created_at"`
-	ExpiresAt                 time.Time `json:"expires_at"`
-	PresentationDefinitionURI string    `json:"presentation_definition_uri"` // .../{SessionID}
-	RedirectURI               string    `json:"redirect_uri"`                //.../{SessionID}
+	SessionID            string    `json:"session_id"` //key == must be unique i coll (UUID1)
+	SessionCreated       time.Time `json:"session_created"`
+	SessionExpires       time.Time `json:"session_expires"`
+	Status               string    `json:"status"`
+	DocumentType         string    `json:"document_type"` //type of document (vc) the presentation_definition will request from the holder
+	Nonce                string    `json:"nonce"`
+	State                string    `json:"state"` //UUID2
+	RequestObjectFetched bool      `json:"request_object_fetched"`
+}
+
+type AuthorizationRequest struct {
+	RequestURI string `json:"request_uri"`
+	Nonce      string `json:"nonce"`
+}
+
+type RequestObjectResponse struct {
+	RequestObjectJWS string `json:"request_object"`
 }

@@ -51,6 +51,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	//openid4vp
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qrcode", s.endpointQRCode)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", s.endpointAuthorize)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "request-object/:session_id", s.endpointGetRequestObject)
+	//TODO: impl s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback", s.endpointCallback)
 
 	//deprecated: to be removed later
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", s.endpointVerifyCredential)

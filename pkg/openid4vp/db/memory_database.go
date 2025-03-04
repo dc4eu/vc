@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"fmt"
 	"github.com/google/uuid"
 	"sync"
 )
@@ -18,13 +17,13 @@ var (
 
 type Repository[T any] interface {
 	Create(entry *Entry[T]) (*Entry[T], error)
-	Read(id string) (*Entry[T], bool)
+	Read(id string) *Entry[T]
 	ReadAll() []*Entry[T]
 	Delete(id string) bool
 	Clear()
 }
 
-// InMemoryRepo to be used during dev. until api including endpoints are more stable/fixed (use: mongodb, redis or other in production)
+// InMemoryRepo to be used during dev. until api including endpoints are more stable/fixed (use: mongodb in production, and with TTL-index for stored sessions)
 type InMemoryRepo[T any] struct {
 	mu         sync.Mutex
 	entries    []*Entry[T]
@@ -45,7 +44,7 @@ func (r *InMemoryRepo[T]) Create(entry *Entry[T]) (*Entry[T], error) {
 	defer r.mu.Unlock()
 
 	if entry.ID == "" {
-		entry.ID = uuid.New().String()
+		entry.ID = uuid.NewString()
 	}
 
 	if _, exists := r.index[entry.ID]; exists {
@@ -64,15 +63,15 @@ func (r *InMemoryRepo[T]) Create(entry *Entry[T]) (*Entry[T], error) {
 	return entry, nil
 }
 
-func (r *InMemoryRepo[T]) Read(id string) (*Entry[T], bool) {
+func (r *InMemoryRepo[T]) Read(id string) *Entry[T] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	pos, exists := r.index[id]
 	if !exists {
-		return nil, false
+		return nil
 	}
-	return r.entries[pos], true
+	return r.entries[pos]
 }
 
 func (r *InMemoryRepo[T]) ReadAll() []*Entry[T] {
@@ -111,59 +110,4 @@ func (r *InMemoryRepo[T]) Clear() {
 
 	r.entries = make([]*Entry[T], 0, r.maxEntries)
 	r.index = make(map[string]int)
-}
-
-type ExempleStruct struct {
-	Name  string
-	Email string
-}
-
-func Exemple_usage() error {
-	//var repo Repository[ExempleStruct]
-	repo := NewInMemoryRepo[ExempleStruct](5)
-
-	u1, err := repo.Create(&Entry[ExempleStruct]{Data: &ExempleStruct{Name: "Alice", Email: "alice@example.com"}})
-	if err != nil {
-		return err
-	}
-
-	u1.Data.Email = "alice@newdomain.com"
-
-	fmt.Println(repo.Read(u1.ID))
-
-	err = addAnother("Benny", "bennylennykenny@example.com", repo)
-	if err != nil {
-		return err
-	}
-
-	for _, user := range repo.ReadAll() {
-		fmt.Println(*user)
-	}
-
-	repo.Delete(u1.ID)
-
-	for _, user := range repo.ReadAll() {
-		fmt.Println(*user)
-	}
-
-	repo.Clear()
-
-	for _, user := range repo.ReadAll() {
-		fmt.Println(*user)
-	}
-
-	return nil
-}
-
-func addAnother(name string, email string, repository Repository[ExempleStruct]) error {
-	_, err := repository.Create(&Entry[ExempleStruct]{
-		ID: uuid.New().String(),
-		Data: &ExempleStruct{
-			Name: name, Email: email,
-		},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
 }

@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"errors"
 	"go.opentelemetry.io/otel/codes"
 	"vc/internal/verifier/apiv1"
 	"vc/pkg/openid4vp"
@@ -63,10 +64,49 @@ func (s *Service) endpointQRCode(ctx context.Context, c *gin.Context) (any, erro
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.QRCode(ctx, request)
+	reply, err := s.apiv1.GenerateQRCode(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return reply, nil
+}
+
+func (s *Service) endpointAuthorize(ctx context.Context, g *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAuthorize")
+	defer span.End()
+
+	sessionID := g.Query("session_id")
+	nonce := g.Query("nonce")
+	state := g.Query("state")
+
+	if sessionID == "" || nonce == "" || state == "" {
+		return nil, errors.New("sessionID or nonce or state is empty")
+	}
+
+	reply, err := s.apiv1.Authorize(ctx, sessionID, nonce, state)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointGetRequestObject(ctx context.Context, g *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointRequestObject")
+	defer span.End()
+
+	sessionID := g.Param("session_id")
+	if sessionID == "" {
+		return nil, errors.New("session_id is empty")
+	}
+
+	reply, err := s.apiv1.GetRequestObject(ctx, sessionID)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+
+	return nil, nil
 }

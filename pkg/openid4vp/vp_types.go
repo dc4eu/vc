@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// TODO: flytta nedan struct till generic_types
 type AuthorizationResponse struct {
 	IDToken                string                  `json:"id_token,omitempty"`                //JWT
 	VPTokens               []VPTokenRaw            `json:"vp_token,omitempty"`                //JWT or JSON

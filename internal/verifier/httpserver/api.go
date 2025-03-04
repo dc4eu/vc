@@ -10,7 +10,9 @@ import (
 type Apiv1 interface {
 
 	// openid4vp
-	QRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error)
+	GenerateQRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error)
+	Authorize(ctx context.Context, sessionID string, nonce string, state string) (*openid4vp.AuthorizationRequest, error)
+	GetRequestObject(ctx context.Context, sessionID string) (*openid4vp.RequestObjectResponse, error)
 
 	// misc
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)

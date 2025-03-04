@@ -2,6 +2,9 @@ package apiv1
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
@@ -9,44 +12,85 @@ import (
 	"vc/pkg/openid4vp"
 )
 
-// QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request incl. presentation definition
-func (c *Client) QRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error) {
-	if request.DocumentType != "EHIC" {
+// QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request
+func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error) {
+	if request.DocumentType != openid4vp.DocumentTypeEHIC {
 		return nil, fmt.Errorf("document type not handled (yet!): %s", request.DocumentType)
 	}
 
-	//TODO: red ut allt nedan - dvs vad ska qr-koden ha för uri?
-	//https://wallet.example.com/auth?
-	//	response_type=vp_token&
-	//		client_id=https://verifier.sunet.se&
-	//	redirect_uri=https://verifier.sunet.se/callback/{session_id}&
-	//	scope=openid&
-	//		nonce=550e8400-e29b-41d4-a716-446655440000&
-	//		state=79a1df2b-87ee-4ff8-a2bc-d5a59b9bece4&
-	//		presentation_definition_uri=https://verifier.sunet.se/presentation-definition/{session_id}&
-	//	response_mode=form_post
+	//OBS!! se filen "vp endpoints.txt" på skrivbordet
 
 	sessionID := uuid.NewString()
+	now := time.Now()
+	nonce := generateNonce()
+	state := uuid.NewString()
 	vpSession := &openid4vp.VPInteractionSession{
-		SessionID:                 sessionID,
-		DocumentType:              request.DocumentType,
-		State:                     uuid.NewString(),
-		Nonce:                     uuid.NewString(),
-		CreatedAt:                 time.Now(),
-		ExpiresAt:                 time.Now().Add(5 * time.Minute),
-		PresentationDefinitionURI: "https://verifier.sunet.se/presentation_definition/" + sessionID, //TODO: PresentationDefinitionURI
-		RedirectURI:               "https://verifier.sunet.se/callback/" + sessionID,                //TODO: RedirectURI (endpoint vp'n ska postad till)
+		SessionID:            sessionID,
+		SessionCreated:       now,
+		SessionExpires:       now.Add(5 * time.Minute),
+		Status:               "pending",
+		DocumentType:         request.DocumentType,
+		Nonce:                nonce,
+		State:                state,
+		RequestObjectFetched: false,
 	}
+
+	//TODO: skapa och använd property i Verifier för baseUrl
+	baseUrl := "http://172.16.50.6:8080"
+	authorizeURL := fmt.Sprintf("%s/authorize?session_id=%s&scope=openid&nonce=%s&state=%s", baseUrl, sessionID, nonce, state)
 
 	err := c.db.VPInteractionSessionColl.Create(ctx, vpSession)
 	if err != nil {
 		return nil, err
 	}
 
-	qrCode, err := openid4vp.GenerateQR(vpSession.PresentationDefinitionURI, qrcode.Medium, 256)
+	qrCode, err := openid4vp.GenerateQR(authorizeURL, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}
 
 	return qrCode, nil
+}
+
+func generateNonce() string {
+	nonce := make([]byte, 32)
+	_, err := rand.Read(nonce)
+	if err != nil {
+		return uuid.NewString()
+	}
+	return base64.RawURLEncoding.EncodeToString(nonce)
+}
+
+func (c *Client) Authorize(ctx context.Context, sessionID string, nonce string, state string) (*openid4vp.AuthorizationRequest, error) {
+	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	if vpSession.Nonce != nonce || vpSession.State != state {
+		return nil, errors.New("nonce or state does not match session")
+	}
+
+	//TODO: kolla så det bara tillåts en enda gång per session samt lagra att steget är genomfört
+
+	//TODO: add auth here if needed
+	//TODO: log that the QR has been followed
+
+	//TODO: skapa och använd property i Verifier för baseUrl
+	baseUrl := "http://172.16.50.6:8080"
+	requestURI := fmt.Sprintf("%s/request-object/%s", baseUrl, sessionID)
+
+	return &openid4vp.AuthorizationRequest{
+		RequestURI: requestURI,
+		Nonce:      vpSession.Nonce,
+	}, nil
+}
+
+func (c *Client) GetRequestObject(ctx context.Context, sessionID string) (*openid4vp.RequestObjectResponse, error) {
+
+	//TODO kolla att auth steget är OK
+	//TODO fortsätt impl - glöm ej bort att sätta att request object är fetched i sessionen + kolla inledningsvis att den ej redan blivit hämtad
+
+	//TODO: returnera en signerad jws
+
+	return nil, nil
 }

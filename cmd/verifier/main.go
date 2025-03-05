@@ -7,6 +7,7 @@ import (
 	"sync"
 	"syscall"
 	"vc/internal/verifier/apiv1"
+	"vc/internal/verifier/db"
 	"vc/internal/verifier/httpserver"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
@@ -43,7 +44,13 @@ func main() {
 		panic(err)
 	}
 
-	apiv1, err := apiv1.New(ctx, cfg, log)
+	dbService, err := db.New(ctx, cfg, tracer, log)
+	services["dbService"] = dbService
+	if err != nil {
+		panic(err)
+	}
+
+	apiv1, err := apiv1.New(ctx, dbService, cfg, log)
 	if err != nil {
 		panic(err)
 	}

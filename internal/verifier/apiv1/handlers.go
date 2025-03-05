@@ -24,6 +24,12 @@ const (
 	MsgInvalidToken         = "invalid JWT: token is expired, has invalid claims, or is not valid. Check its content and validity."
 )
 
+// Status returns the status for each instance.
+func (c *Client) Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
+	probes := model.Probes{}
+	return probes.Check("verifier"), nil
+}
+
 type Credential struct {
 	// min 20 is the ~ teoretical minimum for a non-signed jwt encoded in base64
 	Credential string `json:"credential" validate:"required,min=20"`
@@ -61,12 +67,7 @@ type JWK struct {
 	Y   string `json:"y"`
 }
 
-// Status returns the status for each instance.
-func (c *Client) Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
-	probes := model.Probes{}
-	return probes.Check("verifier"), nil
-}
-
+// Deprecated: use verifier in pkg.openid4vp instead
 // DecodeCredential for raw but human-readable viewing (ie, jwt: header, payload and signature and also all selective disclosures)
 func (c *Client) DecodeCredential(ctx context.Context, request *Credential) (*DecodedCredential, error) {
 	//TODO(mk): impl DecodeCredential for raw but readable presentation in UI
@@ -84,6 +85,7 @@ func (c *Client) DecodeCredential(ctx context.Context, request *Credential) (*De
 	 if vp+sd-jwt: a second signature may exist as holderProof (if exists, its found in the last ~disclosure~ so check if its the last one is a disclosure or a holderProof)
 */
 
+// Deprecated: use verifier in pkg.openid4vp instead
 // VerifyCredential verifies a credential (only sd-jwt or sd-jwt-vc signed with ES256 is currently supported)
 func (c *Client) VerifyCredential(ctx context.Context, request *Credential) (*VerifyCredentialReply, error) {
 	if request == nil || strings.TrimSpace(request.Credential) == "" {

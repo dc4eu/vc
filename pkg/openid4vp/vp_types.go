@@ -89,6 +89,8 @@ type ClaimFormatDesignations struct {
 	ACVp    *ProofTypeDefinition `json:"ac_vp,omitempty"`
 	MSOMdoc json.RawMessage      `json:"mso_mdoc,omitempty"`
 	SDJWT   *AlgorithmDefinition `json:"sd_jwt,omitempty"`
+	//TODO vc+sd-jwt har i senare specifikationer blivit ersatt av sd_jwt???
+	VCSDJWT *AlgorithmDefinition `json:"vc+sd-jwt,omitempty"`
 }
 
 type AlgorithmDefinition struct {

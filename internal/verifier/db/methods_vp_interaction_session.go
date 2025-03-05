@@ -37,3 +37,8 @@ func (c *VPInteractionSessionColl) Delete(ctx context.Context, sessionID string)
 	c.repo.Delete(sessionID)
 	return nil
 }
+
+func (c *VPInteractionSessionColl) Update(ctx context.Context, vpSession *openid4vp.VPInteractionSession) error {
+	//Nothing to do since it's an in memory db
+	return nil
+}

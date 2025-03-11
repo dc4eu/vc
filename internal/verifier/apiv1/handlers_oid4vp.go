@@ -71,6 +71,9 @@ func (c *Client) Authorize(ctx context.Context, sessionID string, nonce string, 
 	if err != nil {
 		return nil, err
 	}
+	if vpSession.SessionExpires.Before(time.Now()) {
+		return nil, errors.New("session expired")
+	}
 	if vpSession.Nonce != nonce || vpSession.State != state {
 		return nil, errors.New("nonce or state does not match session")
 	}
@@ -101,6 +104,9 @@ func (c *Client) GetRequestObject(ctx context.Context, sessionID string) (*openi
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
 		return nil, err
+	}
+	if vpSession.SessionExpires.Before(time.Now()) {
+		return nil, errors.New("session expired")
 	}
 	if !vpSession.Authorized {
 		return nil, errors.New("not authorized in session")
@@ -189,7 +195,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	//TODO: replace with the verifier real keys where the public is exposed at some endpoint?
 	ecdsaP256Private, _, err := generateECDSAKeyPair(elliptic.P256())
 
-	jws, err := createJWS(ecdsaP256Private, jwt.SigningMethodES256, claims)
+	jws, err := createAndSignJWS(ecdsaP256Private, jwt.SigningMethodES256, claims)
 	if err != nil {
 		return "", err
 	}
@@ -205,7 +211,7 @@ func generateECDSAKeyPair(curve elliptic.Curve) (*ecdsa.PrivateKey, *ecdsa.Publi
 	return privateKey, &privateKey.PublicKey, nil
 }
 
-func createJWS(privateKey interface{}, signingMethod jwt.SigningMethod, claims *CustomClaims) (string, error) {
+func createAndSignJWS(privateKey interface{}, signingMethod jwt.SigningMethod, claims *CustomClaims) (string, error) {
 	claims.IssuedAt = jwt.NewNumericDate(time.Now())
 	token := jwt.NewWithClaims(signingMethod, claims)
 	signedToken, err := token.SignedString(privateKey)
@@ -219,6 +225,9 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
 		return nil, err
+	}
+	if vpSession.SessionExpires.Before(time.Now()) {
+		return nil, errors.New("session expired")
 	}
 	if !vpSession.Authorized {
 		return nil, errors.New("not authorized in session")

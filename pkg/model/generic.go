@@ -200,7 +200,7 @@ type MetaData struct {
 
 	// required: true
 	// example: PDA1
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=PDA1 EHIC"`
+	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=PDA1 EHIC ELM"`
 
 	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9

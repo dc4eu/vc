@@ -6,6 +6,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/ehic"
+	"vc/pkg/elm"
 	"vc/pkg/helpers"
 	"vc/pkg/pda1"
 
@@ -74,6 +75,16 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 		token, err = c.ehicClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
+
+	case "ELM":
+		doc := &elm.Document{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.elmClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
 			return nil, err
 		}

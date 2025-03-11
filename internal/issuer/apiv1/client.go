@@ -35,6 +35,7 @@ type Client struct {
 
 	ehicClient *ehicClient
 	pda1Client *pda1Client
+	elmClient  *elmClient
 }
 
 // New creates a new instance of the public api
@@ -55,6 +56,11 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	c.pda1Client, err = newPDA1Client(c, tracer, c.log.New("pda1"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.elmClient, err = newElmClient(c, tracer, c.log.New("elm"))
 	if err != nil {
 		return nil, err
 	}

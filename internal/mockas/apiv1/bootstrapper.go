@@ -2,11 +2,14 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 	"vc/pkg/ehic"
+	"vc/pkg/elm"
 	"vc/pkg/model"
 	"vc/pkg/pda1"
 )
@@ -119,8 +122,18 @@ func (p *person) bootstrapEHIC() (map[string]any, error) {
 			InstitutionCountry: p.WorkAddress.Country,
 		},
 	}
-	return doc.Marshal()
 
+	return doc.Marshal()
+}
+
+func (p *person) bootstrapELM() (map[string]any, error) {
+	doc := elm.Document{
+		"firstName":   p.FirstName,
+		"lastName":    p.LastName,
+		"dateOfBirth": p.DateOfBirth,
+	}
+
+	return doc.Marshal()
 }
 
 var persons = map[string][]person{
@@ -239,6 +252,15 @@ var persons = map[string][]person{
 			EmploymentAddress:       &address{Street: "Franz-Josef-Platz 3", PostCode: "4810", Town: "Gmunden", Country: "AT"},
 		},
 	},
+	"ELM": {
+		{
+			AuthenticSourcePersonID: "30",
+			FirstName:               "Magnus",
+			LastName:                "Svensson",
+			DateOfBirth:             "1983-03-27",
+			Nationality:             []string{"SE"},
+		},
+	},
 }
 
 func (c *Client) bootstrapperConstructor(ctx context.Context) error {
@@ -261,6 +283,18 @@ func (c *Client) bootstrapperConstructor(ctx context.Context) error {
 				if err != nil {
 					return err
 				}
+			case "ELM":
+				b, err := os.ReadFile("standards/elm_3_2.json")
+				if err != nil {
+					return err
+				}
+
+				doc := map[string]any{}
+				if err := json.Unmarshal(b, &doc); err != nil {
+					return err
+				}
+
+				documentData = doc
 			}
 			meta := &model.MetaData{
 				AuthenticSource: fmt.Sprintf("authentic_source_%s", strings.ToLower(p.Nationality[0])),

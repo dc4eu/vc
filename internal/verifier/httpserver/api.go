@@ -11,8 +11,7 @@ type Apiv1 interface {
 
 	// openid4vp
 	GenerateQRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error)
-	Authorize(ctx context.Context, sessionID string, nonce string, state string) (*openid4vp.AuthorizationRequest, error)
-	GetRequestObject(ctx context.Context, sessionID string) (*openid4vp.RequestObjectResponse, error)
+	GetAuthorizationRequest(ctx context.Context, sessionID string) (*openid4vp.AuthorizationRequest, error)
 	Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (any, error)
 
 	// misc

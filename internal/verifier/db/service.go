@@ -48,7 +48,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	}
 
 	service.VPInteractionSessionColl = &VPInteractionSessionColl{
-		repo: db.NewInMemoryRepo[openid4vp.VPInteractionSession](10),
+		repo: db.NewInMemoryRepo[openid4vp.VPInteractionSession](50),
 	}
 
 	service.log.Info("Started")

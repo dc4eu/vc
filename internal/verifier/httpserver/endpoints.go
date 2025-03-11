@@ -72,36 +72,17 @@ func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, erro
 	return reply, nil
 }
 
-func (s *Service) endpointAuthorize(ctx context.Context, gc *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAuthorize")
+func (s *Service) endpointGetAuthorizationRequest(ctx context.Context, gc *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetAuthorizationRequest")
 	defer span.End()
 
-	sessionID := gc.Query("session_id")
-	nonce := gc.Query("nonce")
-	state := gc.Query("state")
+	sessionID := gc.Query("id")
 
-	if sessionID == "" || nonce == "" || state == "" {
-		return nil, errors.New("sessionID or nonce or state is empty")
-	}
-
-	reply, err := s.apiv1.Authorize(ctx, sessionID, nonce, state)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointGetRequestObject(ctx context.Context, gc *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetRequestObject")
-	defer span.End()
-
-	sessionID := gc.Param("session_id")
 	if sessionID == "" {
-		return nil, errors.New("session_id is empty")
+		return nil, errors.New("id is empty")
 	}
 
-	reply, err := s.apiv1.GetRequestObject(ctx, sessionID)
+	reply, err := s.apiv1.GetAuthorizationRequest(ctx, sessionID)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

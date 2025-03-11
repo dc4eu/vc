@@ -21,35 +21,42 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		return nil, fmt.Errorf("document type not handled: %s", request.DocumentType)
 	}
 
-	//OBS!! se filen "vp endpoints.txt" på skrivbordet
-
+	clientID := "verifier.sunet.se" //TODO: ta in clientID via config
 	sessionID := uuid.NewString()
 	now := time.Now()
-	nonce := generateNonce()
-	state := uuid.NewString()
-	vpSession := &openid4vp.VPInteractionSession{
-		SessionID:            sessionID,
-		SessionCreated:       now,
-		SessionExpires:       now.Add(5 * time.Minute),
-		Status:               "pending",
-		DocumentType:         request.DocumentType,
-		Nonce:                nonce,
-		State:                state,
-		Authorized:           false,
-		RequestObjectFetched: false,
-		CallbackID:           generateNonce(),
-	}
-
-	//TODO: skapa och använd property i Verifier för baseUrl
-	baseUrl := "http://172.16.50.6:8080"
-	authorizeURL := fmt.Sprintf("%s/authorize?session_id=%s&scope=openid&nonce=%s&state=%s", baseUrl, sessionID, nonce, state)
-
-	err := c.db.VPInteractionSessionColl.Create(ctx, vpSession)
+	ecdsaP256Private, ecdsaP256Public, err := generateECDSAKeyPair(elliptic.P256())
 	if err != nil {
 		return nil, err
 	}
 
-	qrCode, err := openid4vp.GenerateQR(authorizeURL, qrcode.Medium, 256)
+	//TODO: vpSession ska/får inte lagras i någon db utan i sessionen - fixa senare när mer stabilt
+	vpSession := &openid4vp.VPInteractionSession{
+		SessionID: sessionID,
+		SessionEphemeralKeyPair: &openid4vp.SessionEphemeralKeyPair{
+			PrivateKey:         ecdsaP256Private,
+			PublicKey:          ecdsaP256Public,
+			SigningMethodToUse: jwt.SigningMethodES256,
+		},
+		SessionCreated: now,
+		SessionExpires: now.Add(5 * time.Minute),
+		DocumentType:   request.DocumentType,
+		Nonce:          generateNonce(),
+		State:          uuid.NewString(),
+		JTI:            uuid.NewString(),
+		Authorized:     false,
+	}
+
+	err = c.db.VPInteractionSessionColl.Create(ctx, vpSession)
+	if err != nil {
+		return nil, err
+	}
+
+	//TODO: skapa och använd property i Verifier för baseUrl
+	verifierBaseUrl := "http://172.16.50.6:8080"
+	requestURI := fmt.Sprintf("%s/authorize?id=%s", verifierBaseUrl, sessionID)
+	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURI)
+
+	qrCode, err := openid4vp.GenerateQR(qrURI, requestURI, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +73,7 @@ func generateNonce() string {
 	return base64.RawURLEncoding.EncodeToString(nonce)
 }
 
-func (c *Client) Authorize(ctx context.Context, sessionID string, nonce string, state string) (*openid4vp.AuthorizationRequest, error) {
+func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) (*openid4vp.AuthorizationRequest, error) {
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
 		return nil, err
@@ -74,59 +81,24 @@ func (c *Client) Authorize(ctx context.Context, sessionID string, nonce string, 
 	if vpSession.SessionExpires.Before(time.Now()) {
 		return nil, errors.New("session expired")
 	}
-	if vpSession.Nonce != nonce || vpSession.State != state {
-		return nil, errors.New("nonce or state does not match session")
-	}
 	if vpSession.Authorized {
-		return nil, errors.New("authorize has already been performed")
+		return nil, errors.New("authorization request has already been requested for this session")
 	}
 
 	vpSession.Authorized = true
-	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
-	if err != nil {
-		return nil, err
-	}
-
-	//TODO: add auth here if needed
-	//TODO: log that the QR has been followed
-
-	//TODO: skapa och använd property i Verifier för baseUrl
-	baseUrl := "http://172.16.50.6:8080"
-	requestURI := fmt.Sprintf("%s/request-object/%s", baseUrl, sessionID)
-
-	return &openid4vp.AuthorizationRequest{
-		RequestURI: requestURI,
-		Nonce:      vpSession.Nonce,
-	}, nil
-}
-
-func (c *Client) GetRequestObject(ctx context.Context, sessionID string) (*openid4vp.RequestObjectResponse, error) {
-	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
-	if err != nil {
-		return nil, err
-	}
-	if vpSession.SessionExpires.Before(time.Now()) {
-		return nil, errors.New("session expired")
-	}
-	if !vpSession.Authorized {
-		return nil, errors.New("not authorized in session")
-	}
-	if vpSession.RequestObjectFetched {
-		return nil, errors.New("request object has already been fetched once in session")
-	}
-
-	vpSession.RequestObjectFetched = true
-	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
-	if err != nil {
-		return nil, err
-	}
+	vpSession.CallbackID = generateNonce() //make it impossible to guess the complete uri to do the callback (the holders https post of the vp_tokens)
 
 	requestObjectJWS, err := c.createRequestObjectJWS(ctx, vpSession)
 	if err != nil {
 		return nil, err
 	}
 
-	return &openid4vp.RequestObjectResponse{
+	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
+	if err != nil {
+		return nil, err
+	}
+
+	return &openid4vp.AuthorizationRequest{
 		RequestObjectJWS: requestObjectJWS,
 	}, nil
 }
@@ -141,7 +113,7 @@ type CustomClaims struct {
 	State                  string                            `json:"state"`
 	Nonce                  string                            `json:"nonce"`
 	PresentationDefinition *openid4vp.PresentationDefinition `json:"presentation_definition,omitempty"`
-	//TODO: add "client_metadata"
+	//TODO: add "client_metadata"?
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
@@ -172,30 +144,31 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	}
 
 	//TODO: skapa och använd property i Verifier för baseUrl
-	baseUrl := "http://172.16.50.6:8080"
-	responseURI := fmt.Sprintf("%s/callback/%s/%s", baseUrl, vpSession.SessionID, vpSession.CallbackID)
+	verifierBaseUrl := "http://172.16.50.6:8080"
+	responseURI := fmt.Sprintf("%s/callback/%s/%s", verifierBaseUrl, vpSession.SessionID, vpSession.CallbackID)
 
+	now := jwt.NewNumericDate(time.Now())
 	claims := &CustomClaims{
 		ResponseURI:            responseURI,
 		ResponseType:           "vp_token",
 		ResponseMode:           "direct_post.jwt",
+		State:                  vpSession.State,
 		Nonce:                  vpSession.Nonce,
 		PresentationDefinition: presentationDefinition,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "verifier.sunet.se",
-			Subject:   "user123", //TODO vilket värde här för sub?
-			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"},
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ID:        uuid.NewString(),
+			Issuer:    "verifier.sunet.se",                           //TODO ta in iss via config
+			Subject:   "set_sub_value_here",                          //TODO vilket värde här för sub?
+			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"}, //TODO korrekt aud?
+			ExpiresAt: jwt.NewNumericDate(vpSession.SessionExpires),
+			IssuedAt:  now,
+			NotBefore: now,
+			ID:        vpSession.JTI,
 		},
 	}
 
 	//TODO: replace with the verifier real keys where the public is exposed at some endpoint?
-	ecdsaP256Private, _, err := generateECDSAKeyPair(elliptic.P256())
-
-	jws, err := createAndSignJWS(ecdsaP256Private, jwt.SigningMethodES256, claims)
+	//TODO: BUGG: NEDAN SKA SIGNERAS AV RP LONG TERM KEY
+	jws, err := createAndSignJWS(vpSession.SessionEphemeralKeyPair.PrivateKey, vpSession.SessionEphemeralKeyPair.SigningMethodToUse, claims)
 	if err != nil {
 		return "", err
 	}
@@ -232,14 +205,12 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	if !vpSession.Authorized {
 		return nil, errors.New("not authorized in session")
 	}
-	if !vpSession.RequestObjectFetched {
-		return nil, errors.New("request object has not been fetched in session")
-	}
 	if vpSession.CallbackID != callbackID {
 		return nil, errors.New("callback ID does not match the one in session")
 	}
 
-	//TODO: skicka in ref till db för att lagra "verified credentials" om allt är ok
+	//TODO: skicka in ref till "db" för att lagra "verified credentials" om allt är ok
+	//TODO: skicka in ref till "vpSession" för att kontrollera värden mot (nonce, osv)
 	arw, err := openid4vp.NewAuthorizationResponseWrapper(request)
 	if err != nil {
 		return nil, err

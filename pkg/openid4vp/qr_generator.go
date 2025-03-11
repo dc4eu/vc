@@ -10,8 +10,8 @@ import (
 	"net/url"
 )
 
-func GenerateQR(inputURL string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR, error) {
-	parsedURL, err := url.ParseRequestURI(inputURL)
+func GenerateQR(qrURI, requestURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR, error) {
+	parsedURL, err := url.ParseRequestURI(qrURI)
 	if err != nil || parsedURL.Scheme == "" || parsedURL.Host == "" {
 		return nil, errors.New("invalid URL format")
 	}
@@ -21,12 +21,12 @@ func GenerateQR(inputURL string, recoveryLevel qrcode.RecoveryLevel, size int) (
 	}
 
 	maxChars := getMaxChars(recoveryLevel)
-	if len(inputURL) > maxChars {
+	if len(qrURI) > maxChars {
 		return nil, fmt.Errorf("URL is too long, max allowed: %d characters for this error correction level", maxChars)
 	}
 
 	var buf bytes.Buffer
-	qrCode, err := qrcode.New(inputURL, recoveryLevel)
+	qrCode, err := qrcode.New(qrURI, recoveryLevel)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create QR-code: %w", err)
 	}
@@ -40,7 +40,8 @@ func GenerateQR(inputURL string, recoveryLevel qrcode.RecoveryLevel, size int) (
 
 	return &QR{
 		Base64Image: buf.String(),
-		URL:         inputURL,
+		URI:         qrURI,
+		RequestURI:  requestURI,
 	}, nil
 }
 

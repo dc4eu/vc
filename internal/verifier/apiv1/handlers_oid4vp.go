@@ -5,12 +5,15 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
+	"math/big"
 	"time"
 	"vc/pkg/openid4vp"
 )
@@ -21,20 +24,30 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		return nil, fmt.Errorf("document type not handled: %s", request.DocumentType)
 	}
 
-	clientID := "verifier.sunet.se" //TODO: ta in clientID via config
-	sessionID := uuid.NewString()
-	now := time.Now()
-	ecdsaP256Private, ecdsaP256Public, err := generateECDSAKeyPair(elliptic.P256())
+	//---key+cert gen----------
+	//TODO: read from config/file and store in a secure memory keystore in Client
+	veriferLongLivedEcdsaP256Private, err := generateECDSAKey("P256")
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO: vpSession ska/får inte lagras i någon db utan i sessionen - fixa senare när mer stabilt
+	certDER, err := generateSelfSignedX509CertDER(veriferLongLivedEcdsaP256Private)
+	//-------------------------
+
+	clientID := "verifier.sunet.se" //TODO: ta in clientID via config
+	sessionID := uuid.NewString()
+	now := time.Now()
+	ecdsaP256Private, err := generateECDSAKey("P256")
+	if err != nil {
+		return nil, err
+	}
+
+	//TODO: vpSession ska/får inte lagras i någon db utan måste lagra i sessionen - fixa senare när mer stabilt
 	vpSession := &openid4vp.VPInteractionSession{
 		SessionID: sessionID,
-		SessionEphemeralKeyPair: &openid4vp.SessionEphemeralKeyPair{
+		SessionEphemeralKeyPair: &openid4vp.KeyPair{
 			PrivateKey:         ecdsaP256Private,
-			PublicKey:          ecdsaP256Public,
+			PublicKey:          ecdsaP256Private.PublicKey,
 			SigningMethodToUse: jwt.SigningMethodES256,
 		},
 		SessionCreated: now,
@@ -44,6 +57,14 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		State:          uuid.NewString(),
 		JTI:            uuid.NewString(),
 		Authorized:     false,
+
+		//TODO: nedan ska inte vara här men läggs här tillsvidare
+		VerifierKeyPair: &openid4vp.KeyPair{
+			PrivateKey:         veriferLongLivedEcdsaP256Private,
+			PublicKey:          veriferLongLivedEcdsaP256Private.PublicKey,
+			SigningMethodToUse: jwt.SigningMethodES256,
+		},
+		VerifierX509CertDER: certDER,
 	}
 
 	err = c.db.VPInteractionSessionColl.Create(ctx, vpSession)
@@ -117,24 +138,35 @@ type CustomClaims struct {
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
-
 	if vpSession.DocumentType != openid4vp.DocumentTypeEHIC {
 		return "", errors.New("only EHIC document is currently supported")
 	}
 
 	presentationDefinition := &openid4vp.PresentationDefinition{
-		//TODO fyll nedan baserat på documentType samt red ut vilket schema som gäller för grekerna???
-		ID:      "EuropeanHealthInsuranceCard",
-		Name:    "",
-		Purpose: "",
-		Format: openid4vp.ClaimFormatDesignations{
-			VCSDJWT: &openid4vp.AlgorithmDefinition{
-				Alg: []string{"ES256"},
+		ID:          "VCEuropeanHealthInsuranceCard",
+		Title:       "VC EHIC",
+		Description: "Required Fields: VC type, SSN, Forename, Family Name, Birthdate",
+		InputDescriptors: []openid4vp.InputDescriptor{
+			{
+				ID: "VCEHIC",
+				Format: map[string]openid4vp.Format{
+					"vc+sd-jwt": {Alg: []string{"ES256"}},
+				},
+				Constraints: openid4vp.Constraints{
+					Fields: []openid4vp.Field{
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: []string{"https://vc-interop-1.sunet.se/credential/ehic/1.0", "https://vc-interop-2.sunet.se/credential/ehic/1.0", "https://satosa-test-1.sunet.se/credential/ehic/1.0", "https://satosa-test-2.sunet.se/credential/ehic/1.0", "https://satosa-dev-1.sunet.se/credential/ehic/1.0", "https://satosa-dev-2.sunet.se/credential/ehic/1.0", "EHICCredential"}}},
+						{Name: "Subject", Path: []string{"$.subject"}},
+						{Name: "Forename", Path: []string{"$.subject.forename"}},
+						{Name: "Family name", Path: []string{"$.subject.family_name"}},
+						{Name: "Date of birth", Path: []string{"$.subject.date_of_birth"}},
+						{Name: "Social security pin", Path: []string{"$.social_security_pin"}},
+						//{Name: "Period entitlement", Path: []string{"$.period_entitlement"}},
+						{Name: "Document ID", Path: []string{"$.document_id"}},
+						//{Name: "Competent Institution", Path: []string{"$.competent_institution.institution_name"}},
+					},
+				},
 			},
 		},
-		Frame:                  nil,
-		SubmissionRequirements: nil,
-		InputDescriptors:       nil,
 	}
 
 	vpSession.PresentationDefinition = presentationDefinition
@@ -166,9 +198,8 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		},
 	}
 
-	//TODO: replace with the verifier real keys where the public is exposed at some endpoint?
-	//TODO: BUGG: NEDAN SKA SIGNERAS AV RP LONG TERM KEY
-	jws, err := createAndSignJWS(vpSession.SessionEphemeralKeyPair.PrivateKey, vpSession.SessionEphemeralKeyPair.SigningMethodToUse, claims)
+	certBase64 := base64.StdEncoding.EncodeToString(vpSession.VerifierX509CertDER)
+	jws, err := createAndSignJWS(vpSession.VerifierKeyPair.PrivateKey, vpSession.VerifierKeyPair.SigningMethodToUse, certBase64, claims)
 	if err != nil {
 		return "", err
 	}
@@ -176,22 +207,88 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	return jws, nil
 }
 
-func generateECDSAKeyPair(curve elliptic.Curve) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
-	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
-	if err != nil {
-		return nil, nil, err
+//TODO: flytta all generering av nycklar och cert till något i stil med CryptoFactory
+
+func getCurve(curveName string) (elliptic.Curve, error) {
+	switch curveName {
+	case "P256":
+		return elliptic.P256(), nil
+	case "P384":
+		return elliptic.P384(), nil
+	case "P521":
+		return elliptic.P521(), nil
+	default:
+		return nil, errors.New("unsupported curve: choose P256, P384, or P521")
 	}
-	return privateKey, &privateKey.PublicKey, nil
 }
 
-func createAndSignJWS(privateKey interface{}, signingMethod jwt.SigningMethod, claims *CustomClaims) (string, error) {
-	claims.IssuedAt = jwt.NewNumericDate(time.Now())
-	token := jwt.NewWithClaims(signingMethod, claims)
-	signedToken, err := token.SignedString(privateKey)
+func generateECDSAKey(curveName string) (*ecdsa.PrivateKey, error) {
+	curve, err := getCurve(curveName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return signedToken, nil
+
+	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
+	if err != nil {
+		return nil, err
+	}
+
+	if privateKey.D.Sign() <= 0 {
+		return nil, errors.New("generated private key is invalid")
+	}
+
+	return privateKey, nil
+}
+
+func generateSelfSignedX509CertDER(privateKey *ecdsa.PrivateKey) ([]byte, error) {
+	subject := pkix.Name{
+		Country:      []string{"SE"},
+		Organization: []string{"SUNET"},
+		Locality:     []string{"Stockholm"},
+		SerialNumber: uuid.NewString(),
+		CommonName:   "verifier.sunet.se",
+	}
+
+	serialNumber, err := generateSerialNumber()
+	if err != nil {
+		return nil, err
+	}
+
+	template := x509.Certificate{
+		SerialNumber: serialNumber,
+		Subject:      subject,
+		NotBefore:    time.Now(),
+		NotAfter:     time.Now().Add(4383 * time.Hour), //~6 months
+		KeyUsage:     x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	}
+
+	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return certDER, nil
+}
+
+func generateSerialNumber() (*big.Int, error) {
+	u := uuid.New() // Skapa ett nytt UUID (version 4)
+	uBytes, err := u.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+
+	serialNumber := new(big.Int).SetBytes(uBytes)
+	return serialNumber, nil
+}
+
+func createAndSignJWS(privateKey interface{}, signingMethod jwt.SigningMethod, x5cCertBase64 string, claims *CustomClaims) (string, error) {
+	token := jwt.NewWithClaims(signingMethod, claims)
+	if x5cCertBase64 != "" {
+		token.Header["x5c"] = []string{x5cCertBase64}
+	}
+	return token.SignedString(privateKey)
+
 }
 
 func (c *Client) Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (any, error) {

@@ -8,7 +8,8 @@ import (
 
 func TestGenerateQR(t *testing.T) {
 	type args struct {
-		url           string
+		uri           string
+		requestURI    string
 		recoveryLevel qrcode.RecoveryLevel
 		size          int
 	}
@@ -20,21 +21,46 @@ func TestGenerateQR(t *testing.T) {
 		{
 			name: "Simple qr code",
 			args: args{
-				url:           "https://www.someexampledomain.com/path1/path2/path3?value=Hello",
+				uri:           "openid4vp://authorize?key=val",
+				requestURI:    "https://www.someexampledomain12345.com/key2=val2",
 				recoveryLevel: qrcode.Medium,
 				size:          256,
 			},
 			wantErr: false,
 		},
+		{
+			name: "Simple qr code with error",
+			args: args{
+				uri:           "ej_en_uri",
+				requestURI:    "ej_en_uri2",
+				recoveryLevel: qrcode.Medium,
+				size:          256,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GenerateQR(tt.args.url, tt.args.recoveryLevel, tt.args.size)
+			got, err := GenerateQR(tt.args.uri, tt.args.requestURI, tt.args.recoveryLevel, tt.args.size)
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GenerateQR() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if err != nil && !tt.wantErr {
+				t.Errorf("GenerateQR() returned unexpected error: %v", err)
+			}
+
+			if err == nil && tt.wantErr {
+				t.Errorf("GenerateQR() expected an error but got none")
+			}
+
+			if err != nil && tt.wantErr {
 				return
 			}
-			assert.Equal(t, tt.args.url, got.URL)
+
+			assert.Equal(t, tt.args.uri, got.URI)
+			assert.Equal(t, tt.args.requestURI, got.RequestURI)
 			assert.NotEmpty(t, got.Base64Image)
 		})
 	}

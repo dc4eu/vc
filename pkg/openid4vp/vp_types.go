@@ -2,6 +2,7 @@ package openid4vp
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 )
@@ -46,88 +47,60 @@ func (vp *VPTokenRaw) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("vp_token has unknown format: %s", string(data))
 }
 
-// === Below: generated based on all schemas found under header https://identity.foundation/presentation-exchange/spec/v2.0.0/#json-schemas (oid4vp20 points to v2.0.0)
+// === Below: generated based on differens schemas and examples
 
-type StatusDirective struct {
-	Directive string   `json:"directive" validate:"oneof=required allowed disallowed"`
-	Type      []string `json:"type" validate:"min=1,dive,required"`
-}
-
-type Field struct {
-	ID             string          `json:"id,omitempty"`
-	Optional       bool            `json:"optional,omitempty"`
-	Path           []string        `json:"path" validate:"required,dive,required"`
-	Purpose        string          `json:"purpose,omitempty"`
-	IntentToRetain bool            `json:"intent_to_retain,omitempty"`
-	Name           string          `json:"name,omitempty"`
-	Filter         json.RawMessage `json:"filter,omitempty"`
-	Predicate      string          `json:"predicate,omitempty" validate:"omitempty,oneof=required preferred"`
-}
-
-type Constraints struct {
-	LimitDisclosure string                     `json:"limit_disclosure,omitempty" validate:"omitempty,oneof=required preferred"`
-	Statuses        map[string]StatusDirective `json:"statuses,omitempty"`
-	Fields          []Field                    `json:"fields,omitempty"`
-	SubjectIsIssuer string                     `json:"subject_is_issuer,omitempty" validate:"omitempty,oneof=required preferred"`
-	IsHolder        []HolderDirective          `json:"is_holder,omitempty"`
-	SameSubject     []HolderDirective          `json:"same_subject,omitempty"`
-}
-
-type HolderDirective struct {
-	FieldID   []string `json:"field_id" validate:"required,dive,required"`
-	Directive string   `json:"directive" validate:"oneof=required preferred"`
-}
-
-type ClaimFormatDesignations struct {
-	JWT     *AlgorithmDefinition `json:"jwt,omitempty"`
-	JWTVc   *AlgorithmDefinition `json:"jwt_vc,omitempty"`
-	JWTVp   *AlgorithmDefinition `json:"jwt_vp,omitempty"`
-	LDPVc   *ProofTypeDefinition `json:"ldp_vc,omitempty"`
-	LDPVp   *ProofTypeDefinition `json:"ldp_vp,omitempty"`
-	LDP     *ProofTypeDefinition `json:"ldp,omitempty"`
-	ACVc    *ProofTypeDefinition `json:"ac_vc,omitempty"`
-	ACVp    *ProofTypeDefinition `json:"ac_vp,omitempty"`
-	MSOMdoc json.RawMessage      `json:"mso_mdoc,omitempty"`
-	SDJWT   *AlgorithmDefinition `json:"sd_jwt,omitempty"`
-	//TODO vc+sd-jwt har i senare specifikationer blivit ersatt av sd_jwt???
-	VCSDJWT *AlgorithmDefinition `json:"vc+sd-jwt,omitempty"`
-}
-
-type AlgorithmDefinition struct {
-	Alg []string `json:"alg" validate:"min=1,dive,required"`
-}
-
-type ProofTypeDefinition struct {
-	ProofType []string `json:"proof_type" validate:"min=1,dive,required"`
+type PresentationDefinition struct {
+	ID                     string                  `json:"id"`
+	Title                  string                  `json:"title,omitempty"`
+	Description            string                  `json:"description,omitempty"`
+	InputDescriptors       []InputDescriptor       `json:"input_descriptors"`
+	SubmissionRequirements []SubmissionRequirement `json:"submission_requirements,omitempty"`
 }
 
 type InputDescriptor struct {
-	ID          string      `json:"id" validate:"required"`
-	Name        string      `json:"name,omitempty"`
-	Purpose     string      `json:"purpose,omitempty"`
-	Group       []string    `json:"group,omitempty"`
-	Constraints Constraints `json:"constraints" validate:"required"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name,omitempty"`
+	Purpose     string            `json:"purpose,omitempty"`
+	Format      map[string]Format `json:"format,omitempty"`
+	Group       []string          `json:"group,omitempty"`
+	Constraints Constraints       `json:"constraints"`
+}
+
+type Format struct {
+	Alg []string `json:"alg"`
+}
+
+type Constraints struct {
+	LimitDisclosure string  `json:"limit_disclosure,omitempty"`
+	Fields          []Field `json:"fields,omitempty"`
+}
+
+type Field struct {
+	Name   string   `json:"name,omitempty"`
+	Path   []string `json:"path"`
+	Filter Filter   `json:"filter,omitempty"`
+}
+
+type Filter struct {
+	Type string   `json:"type"`
+	Enum []string `json:"enum,omitempty"`
 }
 
 type SubmissionRequirement struct {
-	Name       string                  `json:"name,omitempty"`
-	Purpose    string                  `json:"purpose,omitempty"`
-	Rule       string                  `json:"rule" validate:"oneof=all pick"`
-	Count      *int                    `json:"count,omitempty" validate:"omitempty,min=1"`
-	Min        *int                    `json:"min,omitempty" validate:"omitempty,min=0"`
-	Max        *int                    `json:"max,omitempty" validate:"omitempty,min=0"`
-	From       string                  `json:"from,omitempty"`
-	FromNested []SubmissionRequirement `json:"from_nested,omitempty" validate:"omitempty,dive"`
+	Name  string `json:"name,omitempty"`
+	Rule  string `json:"rule"`
+	Count int    `json:"count,omitempty"`
+	From  string `json:"from"`
 }
 
-type PresentationDefinition struct {
-	ID                     string                  `json:"id" validate:"required"`
-	Name                   string                  `json:"name,omitempty"`
-	Purpose                string                  `json:"purpose,omitempty"`
-	Format                 ClaimFormatDesignations `json:"format" validate:"required"`
-	Frame                  map[string]interface{}  `json:"frame,omitempty"`
-	SubmissionRequirements []SubmissionRequirement `json:"submission_requirements,omitempty"`
-	InputDescriptors       []InputDescriptor       `json:"input_descriptors" validate:"required,dive,required"`
+func (sr SubmissionRequirement) Validate() error {
+	if sr.Rule != "pick" {
+		return errors.New("invalid rule, only 'pick' is allowed")
+	}
+	if sr.From == "" {
+		return errors.New("'from' field is required")
+	}
+	return nil
 }
 
 type PresentationDefinitionEnvelope struct {
@@ -144,143 +117,40 @@ func (pde *PresentationDefinitionEnvelope) ToJSON() (string, error) {
 }
 
 // Example usage
-func ExamplePresentationDefinition() {
-	exampleJSON := `{
-	  "presentation_definition": {
-		"id": "12345",
-		"name": "Example Presentation Definition",
-		"purpose": "To verify credentials",
-		"format": {
-		  "jwt": {
-			"alg": ["RS256", "ES256"]
-		  },
-		  "jwt_vc": {
-			"alg": ["RS512"]
-		  },
-		  "jwt_vp": {
-			"alg": ["ES384"]
-		  },
-		  "ldp_vc": {
-			"proof_type": ["Ed25519Signature2018"]
-		  },
-		  "ldp_vp": {
-			"proof_type": ["RsaSignature2018"]
-		  },
-		  "ldp": {
-			"proof_type": ["BbsBlsSignature2020"]
-		  },
-		  "ac_vc": {
-			"proof_type": ["CLSignature"]
-		  },
-		  "ac_vp": {
-			"proof_type": ["CLSignature"]
-		  },
-		  "mso_mdoc": {},
-		  "sd_jwt": {
-			"alg": ["HS256"]
-		  }
-		},
-		"frame": {
-		  "example_frame_key": "example_value"
-		},
-		"submission_requirements": [
-		  {
-			"name": "SR1",
-			"purpose": "Ensure specific claims are included",
-			"rule": "all",
-			"from": "groupA"
-		  },
-		  {
-			"name": "SR2",
-			"purpose": "Allow pick of some credentials",
-			"rule": "pick",
-			"min": 1,
-			"max": 3,
-			"from_nested": [
-			  {
-				"rule": "all",
-				"from": "groupB"
-			  }
-			]
-		  }
-		],
-		"input_descriptors": [
-		  {
-			"id": "input-1",
-			"name": "Driver's License",
-			"purpose": "Verify identity",
-			"group": ["groupA"],
-			"constraints": {
-			  "limit_disclosure": "preferred",
-			  "statuses": {
-				"active": {
-				  "directive": "required",
-				  "type": ["active"]
+func ExamplePresentationDefinition() error {
+	pde := PresentationDefinitionEnvelope{
+		PresentationDefinition: PresentationDefinition{
+			ID:          "SatosaEuropeanHealthInsuranceCard",
+			Title:       "SATOSA EHIC",
+			Description: "Required Fields: VC type, SSN, Forename, Family Name, Birthdate",
+			InputDescriptors: []InputDescriptor{
+				{
+					ID: "SatosaEHIC",
+					Format: map[string]Format{
+						"vc+sd-jwt": {Alg: []string{"ES256"}},
+					},
+					Constraints: Constraints{
+						Fields: []Field{
+							{Name: "VC type", Path: []string{"$.vct"}, Filter: Filter{Type: "string", Enum: []string{"https://vc-interop-1.sunet.se/credential/ehic/1.0", "https://satosa-test-1.sunet.se/credential/ehic/1.0", "https://satosa-dev-1.sunet.se/credential/ehic/1.0", "EHICCredential"}}},
+							{Name: "SSN", Path: []string{"$.social_security_pin"}},
+							{Name: "Forename", Path: []string{"$.subject.forename"}},
+							{Name: "Family Name", Path: []string{"$.subject.family_name"}},
+							{Name: "Birthdate", Path: []string{"$.subject.date_of_birth"}},
+							{Name: "Document ID", Path: []string{"$.document_id"}},
+							{Name: "Competent Institution", Path: []string{"$.competent_institution.institution_name"}},
+						},
+					},
 				},
-				"revoked": {
-				  "directive": "disallowed",
-				  "type": ["revoked"]
-				}
-			  },
-			  "fields": [
-				{
-				  "id": "field-1",
-				  "path": ["$.credentialSubject.id"],
-				  "name": "Subject ID",
-				  "purpose": "Unique identifier",
-				  "optional": false,
-				  "intent_to_retain": true,
-				  "filter": {
-					"type": "string",
-					"pattern": "^[0-9a-fA-F]{24}$"
-				  }
-				},
-				{
-				  "id": "field-2",
-				  "path": ["$.credentialSubject.age"],
-				  "name": "Age",
-				  "purpose": "Verify age",
-				  "filter": {
-					"type": "integer",
-					"minimum": 18
-				  },
-				  "predicate": "required"
-				}
-			  ],
-			  "subject_is_issuer": "preferred",
-			  "is_holder": [
-				{
-				  "field_id": ["field-1"],
-				  "directive": "required"
-				}
-			  ],
-			  "same_subject": [
-				{
-				  "field_id": ["field-2"],
-				  "directive": "preferred"
-				}
-			  ]
-			}
-		  }
-		]
-	  }
+			},
+		},
 	}
-	`
 
-	pde, err := FromJSON[PresentationDefinitionEnvelope](exampleJSON)
+	jsonData, err := pde.ToJSON()
 	if err != nil {
-		log.Fatalf("Error parsing JSON: %v", err)
+		return err
 	}
-
-	//TODO: impl validate?
-
-	jsonOutput, err := pde.ToJSON()
-	if err != nil {
-		log.Fatalf("Error converting to JSON: %v", err)
-	}
-
-	fmt.Println("JSON Output:")
-	fmt.Println(jsonOutput)
+	fmt.Println(string(jsonData))
+	return nil
 }
 
 //======================================== PRESENTATION SUBMISSION START ========================================

@@ -27,7 +27,6 @@ type KeyPair struct {
 	SigningMethodToUse jwt.SigningMethod
 }
 
-// TODO: lagra med sessionID som nyckel
 type VPInteractionSession struct {
 	SessionID               string `json:"session_id"` //key == must be unique i coll (UUID1)
 	SessionEphemeralKeyPair *KeyPair
@@ -41,8 +40,9 @@ type VPInteractionSession struct {
 	JTI                     string    `json:"jti"`
 	PresentationDefinition  *PresentationDefinition
 	//---------------
-	VerifierKeyPair     *KeyPair
-	VerifierX509CertDER []byte
+	VerifierKeyPair *KeyPair
+	//VerifierX509CertDER []byte
+	VerifierX5cCertDERBase64 string
 }
 
 type AuthorizationRequest struct {

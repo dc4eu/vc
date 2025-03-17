@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC verifier</title>
+    <script src="/static/verifier.js"></script>
+    <!--    <link rel="stylesheet" href="/static/bulma.min.css">-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <!--TODO(mk): create and add favico to /static/ -->
+    <!--    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">-->
+    <!--    <link rel="stylesheet" href="/static/font-awesome.min.css">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+<section class="section">
+    <div class="container">
+
+        <h1 class="title has-text-centered has-text-weight-bold is-size-2">VC Verifier</h1>
+
+        <div id="indexContainer" class="box">
+            <p class="subtitle">Select a document type to start the process.</p>
+            <div class="field">
+                <label class="label">Document type</label>
+                <div class="control">
+                    <div class="select">
+                        <select id="credential_type">
+                            <option value="EHIC">EHIC</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="button is-primary" onclick="startVPFlow()">Start the verification process</button>
+        </div>
+
+        <!--TODO: <div id="qrContainer" class="box" style="display: none;">-->
+        <div id="qrContainer" class="box" style="display: block;">
+            <p class="subtitle">QR code</p>
+            <!--TODO: <p id="qrErrorMessage" class="notification is-danger is-hidden"></p>-->
+            <p id="qrErrorMessage" class="notification is-danger">An error occured: ...</p>
+            <img id="qrImage" alt="<The QR code is displayed here>">
+            <p class="mt-2">Scan the QR code with a device containing a wallet Or click the button below to use a browser
+                wallet.</p>
+            <button id="openInWWWallet" class="button is-link mt-2">Open in wwWallet (opens in a new tab or window)
+            </button>
+            <button class="button is-warning mt-2" onclick="checkVPVerification()">Check verification result</button>
+            <button class="button is-danger mt-2" onclick="resetVPFlow()">Quit and return to start page</button>
+        </div>
+
+        <!--TODO: <div id="verificationContainer" class="box" style="display: none;">-->
+        <div id="verificationContainer" class="box" style="display: block;">
+            <p class="subtitle">Verification result</p>
+            <!--TODO: <p id="verificationErrorMessage" class="notification is-danger is-hidden"></p>-->
+            <p id="verificationErrorMessage" class="notification is-danger">An error occured: ...</p>
+            <div class="icons-container">
+                <span id="spinnerIcon" class="icon has-text-warning"><i class="fas fa-spinner fa-spin fa-3x"></i></span>
+                <span id="okIcon" class="icon has-text-success"><i class="fas fa-check-circle fa-3x"></i></span>
+                <span id="errorIcon" class="icon has-text-danger"><i class="fas fa-times-circle fa-3x"></i></span>
+            </div>
+            <br>
+            <label class="label">Valid claims</label>
+            <textarea id="claimsDisplay" class="textarea is-small" readonly placeholder="No valid claims yet..."></textarea>
+            <br>
+            <button class="button is-danger" onclick="resetVPFlow()">Quit and return to start page</button>
+        </div>
+
+    </div>
+</section>
+
+</body>
+
+</html>

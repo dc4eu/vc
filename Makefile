@@ -84,11 +84,11 @@ docker-build-gobuild:
 
 docker-build-verifier:
 	$(info Docker Building verifier with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/worker .
+	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker .
 
 docker-build-verifier-debug:
 	$(info Docker Building verifier with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/worker_debug .
+	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker_debug .
 
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))

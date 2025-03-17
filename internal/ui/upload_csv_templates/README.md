@@ -1,13 +1,13 @@
-# Upload documents using a csv file
+# Upload documents using a CSV file
 
 A csv file can be used to bulk upload documents for test purposes. 
 
 1. Select type of document to upload (currently only EHIC is supported).
 2. Choose a csv file containing the documents to upload.
 3. Press Upload
-4. For each post (row in the csv-sheet), a Upload status is displayed, along with Upload data (the actual JSON being uploaded to the server) and More information.
+4. For each post (row in the CSV sheet), an Upload status is displayed, along with Upload data (the actual JSON being uploaded to the server) and More information.
 
-It's important to check that both the **Upload status** is "SUCCESS" and there are no **More information** that contradicts that. 
+It's important to check that both the **Upload status** is "SUCCESS" and there is no **More information** that contradicts that. 
 
 **Known issue/bug:** For a duplicate document, SUCCESS is returned from the server but also More information with a JSON containing "DOCUMENT_ALREADY_EXISTS".
 
@@ -19,7 +19,7 @@ See [ehic_upload_template.csv](ehic_upload_template.csv) for an example
 
 | Field | Type | Required | Example | Comments |
 |--|--|--|--|--|
-| authentic_source | string | yes | SWEDEN:SUNET:EHIC | The authentic source to simultate in the test, make it unique for your organisation |
+| authentic_source | string | yes | SWEDEN:SUNET:EHIC | The authentic source to simulate in the test, make it unique for your organisation |
 | authentic_source_person_id | string | yes | authentic_source_person_id_70 | Must be selected from [file](https://github.com/dc4eu/vc/blob/main/users_paris.csv) |
 | family_name |string | yes | De Niro | Must be selected from [file](https://github.com/dc4eu/vc/blob/main/users_paris.csv) |	
 | given_name |string | yes | Robert | Must be selected from [file](https://github.com/dc4eu/vc/blob/main/users_paris.csv) |
@@ -36,8 +36,8 @@ See [ehic_upload_template.csv](ehic_upload_template.csv) for an example
 
 ### Other rules/logic
 - **authentic_source_person_id, family_name, given_name and birth_date must be selected and combined exactly as in [file](https://github.com/dc4eu/vc/blob/main/users_paris.csv)**
-  - other values may be used BUT the identity then won't be found in any IdP in later stages.
-- all the ehic fields including social_security_pin is validated againt the rules in [schema](https://github.com/dc4eu/vc/blob/main/standards/schema_ehic.json)
+  - other values may be used BUT the identity then won't be found in an IdP in later stages.
+- all the ehic fields including social_security_pin is validated against the rules in [schema](https://github.com/dc4eu/vc/blob/main/standards/schema_ehic.json)
 - document_id must be unique together with authentic_source and document_type
 - document_version is always given the value "1.0.0"
 - collect.id is given the same value as document_id

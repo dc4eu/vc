@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
+	"net/url"
 	"time"
 	"vc/pkg/openid4vp"
 	"vc/pkg/openid4vp/cryptohelpers"
@@ -72,9 +73,10 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 	//TODO: skapa och använd property i Verifier för baseUrl
 	verifierBaseUrl := "http://172.16.50.6:8080"
 	requestURI := fmt.Sprintf("%s/authorize?id=%s", verifierBaseUrl, sessionID)
-	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURI)
+	requestURIEncoded := url.QueryEscape(requestURI)
+	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURIEncoded)
 
-	qrCode, err := openid4vp.GenerateQR(qrURI, requestURI, qrcode.Medium, 256)
+	qrCode, err := openid4vp.GenerateQR(qrURI, requestURI, clientID, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}

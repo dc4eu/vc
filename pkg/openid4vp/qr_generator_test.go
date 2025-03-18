@@ -41,7 +41,7 @@ func TestGenerateQR(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GenerateQR(tt.args.uri, tt.args.requestURI, tt.args.recoveryLevel, tt.args.size)
+			got, err := GenerateQR(tt.args.uri, tt.args.requestURI, "vcverifier.sunet.se", tt.args.recoveryLevel, tt.args.size)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GenerateQR() error = %v, wantErr %v", err, tt.wantErr)

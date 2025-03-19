@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-	"vc/pkg/pda1"
+	"vc/pkg/socialsecurity"
 
 	"github.com/brianvoe/gofakeit/v6"
 )
@@ -19,20 +19,20 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	doc := pda1.Document{
+	doc := socialsecurity.PDA1Document{
 		SocialSecurityPin: gofakeit.Numerify("##########"),
 		Nationality:       []string{s.Client.randomISO31661Alpha2EU()},
-		DetailsOfEmployment: []pda1.DetailsOfEmployment{
+		DetailsOfEmployment: []socialsecurity.DetailsOfEmployment{
 			{
 				TypeOfEmployment: gofakeit.RandomString([]string{"01", "02"}),
 				Name:             gofakeit.Company(),
-				Address: pda1.AddressWithCountry{
+				Address: socialsecurity.AddressWithCountry{
 					Street:   gofakeit.Street(),
 					PostCode: gofakeit.Zip(),
 					Town:     gofakeit.City(),
 					Country:  s.Client.randomISO31661Alpha2EU(),
 				},
-				IDsOfEmployer: []pda1.IDsOfEmployer{
+				IDsOfEmployer: []socialsecurity.IDsOfEmployer{
 					{
 						EmployerID: gofakeit.UUID(),
 						TypeOfID:   gofakeit.RandomString([]string{"01", "02", "03", "98"}),
@@ -40,21 +40,21 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 				},
 			},
 		},
-		PlacesOfWork: []pda1.PlacesOfWork{
+		PlacesOfWork: []socialsecurity.PlacesOfWork{
 			{
 				AFixedPlaceOfWorkExist: false,
 				CountryWork:            s.Client.randomISO31661Alpha2EU(),
-				PlaceOfWork: []pda1.PlaceOfWork{
+				PlaceOfWork: []socialsecurity.PlaceOfWork{
 					{
 						CompanyVesselName: gofakeit.Company(),
 						FlagStateHomeBase: gofakeit.Country(),
-						IDsOfCompany: []pda1.IDsOfCompany{
+						IDsOfCompany: []socialsecurity.IDsOfCompany{
 							{
 								CompanyID: gofakeit.UUID(),
 								TypeOfID:  gofakeit.RandomString([]string{"01", "02", "03", "98"}),
 							},
 						},
-						Address: pda1.Address{
+						Address: socialsecurity.Address{
 							Street:   gofakeit.Street(),
 							PostCode: gofakeit.Zip(),
 							Town:     gofakeit.City(),
@@ -63,7 +63,7 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 				},
 			},
 		},
-		DecisionLegislationApplicable: pda1.DecisionLegislationApplicable{
+		DecisionLegislationApplicable: socialsecurity.DecisionLegislationApplicable{
 			MemberStateWhichLegislationApplies: s.Client.randomISO31661Alpha2EU(),
 			TransitionalRuleApply:              false,
 			StartingDate:                       "1970-01-01",
@@ -71,7 +71,7 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 		},
 		StatusConfirmation:           "01",
 		UniqueNumberOfIssuedDocument: "asd123",
-		CompetentInstitution: pda1.CompetentInstitution{
+		CompetentInstitution: socialsecurity.PDA1CompetentInstitution{
 			InstitutionID:   fmt.Sprintf("%s:%s", s.Client.randomISO31661Alpha2EU(), gofakeit.Numerify("####")),
 			InstitutionName: gofakeit.Company(),
 			CountryCode:     s.Client.randomISO31661Alpha2EU(),

@@ -1,11 +1,11 @@
-package elm
+package education
 
 import "encoding/json"
 
-type Document map[string]any
+type ELMDocument map[string]any
 
 // Marshal marshals the document to a map
-func (d *Document) Marshal() (map[string]any, error) {
+func (d *ELMDocument) Marshal() (map[string]any, error) {
 	data, err := json.Marshal(d)
 	if err != nil {
 		return nil, err

@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
-	"vc/pkg/elm"
+	"vc/pkg/education"
 	"vc/pkg/logger"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
@@ -30,7 +30,7 @@ func newElmClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*elmCl
 	return c, nil
 }
 
-func (c *elmClient) sdjwt(ctx context.Context, doc *elm.Document, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+func (c *elmClient) sdjwt(ctx context.Context, doc *education.ELMDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 

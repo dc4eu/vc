@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"vc/pkg/ehic"
 	"vc/pkg/model"
-	"vc/pkg/pda1"
+	"vc/pkg/socialsecurity"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -88,19 +87,19 @@ func EHIC(sourceFilePath string) []model.CompleteDocument {
 			panic("no user found for pid " + pid)
 		}
 
-		document := &ehic.Document{
-			Subject: ehic.Subject{
+		document := &socialsecurity.EHICDocument{
+			Subject: socialsecurity.Subject{
 				Forename:    user.Identities[0].GivenName,
 				FamilyName:  user.Identities[0].FamilyName,
 				DateOfBirth: user.Identities[0].BirthDate,
 			},
 			SocialSecurityPin: SocialSecurityPin,
-			PeriodEntitlement: ehic.PeriodEntitlement{
+			PeriodEntitlement: socialsecurity.PeriodEntitlement{
 				StartingDate: startDate,
 				EndingDate:   endDate,
 			},
 			DocumentID: CardNumber,
-			CompetentInstitution: ehic.CompetentInstitution{
+			CompetentInstitution: socialsecurity.CompetentInstitution{
 				InstitutionID:      InstitutionID,
 				InstitutionName:    InstitutionName,
 				InstitutionCountry: InstitutionCountry,
@@ -184,20 +183,20 @@ func PDA1(sourceFilePath string) []model.CompleteDocument {
 			panic("no user found for pid " + pid)
 		}
 
-		document := &pda1.Document{
+		document := &socialsecurity.PDA1Document{
 			SocialSecurityPin: row[6],
 			Nationality:       []string{row[7]},
-			DetailsOfEmployment: []pda1.DetailsOfEmployment{
+			DetailsOfEmployment: []socialsecurity.DetailsOfEmployment{
 				{
 					TypeOfEmployment: row[8],
 					Name:             row[9],
-					Address: pda1.AddressWithCountry{
+					Address: socialsecurity.AddressWithCountry{
 						Street:   row[12],
 						PostCode: row[14],
 						Town:     row[13],
 						Country:  row[15],
 					},
-					IDsOfEmployer: []pda1.IDsOfEmployer{
+					IDsOfEmployer: []socialsecurity.IDsOfEmployer{
 						{
 							EmployerID: row[10],
 							TypeOfID:   row[11],
@@ -205,21 +204,21 @@ func PDA1(sourceFilePath string) []model.CompleteDocument {
 					},
 				},
 			},
-			PlacesOfWork: []pda1.PlacesOfWork{
+			PlacesOfWork: []socialsecurity.PlacesOfWork{
 				{
 					AFixedPlaceOfWorkExist: false,
 					CountryWork:            row[16],
-					PlaceOfWork: []pda1.PlaceOfWork{
+					PlaceOfWork: []socialsecurity.PlaceOfWork{
 						{
 							CompanyVesselName: "",
 							FlagStateHomeBase: row[21],
-							IDsOfCompany: []pda1.IDsOfCompany{
+							IDsOfCompany: []socialsecurity.IDsOfCompany{
 								{
 									CompanyID: row[18],
 									TypeOfID:  row[19],
 								},
 							},
-							Address: pda1.Address{
+							Address: socialsecurity.Address{
 								Street:   row[22],
 								PostCode: row[24],
 								Town:     row[23],
@@ -228,7 +227,7 @@ func PDA1(sourceFilePath string) []model.CompleteDocument {
 					},
 				},
 			},
-			DecisionLegislationApplicable: pda1.DecisionLegislationApplicable{
+			DecisionLegislationApplicable: socialsecurity.DecisionLegislationApplicable{
 				MemberStateWhichLegislationApplies: row[26],
 				TransitionalRuleApply:              false,
 				StartingDate:                       row[28],
@@ -236,7 +235,7 @@ func PDA1(sourceFilePath string) []model.CompleteDocument {
 			},
 			StatusConfirmation:           row[30],
 			UniqueNumberOfIssuedDocument: "",
-			CompetentInstitution: pda1.CompetentInstitution{
+			CompetentInstitution: socialsecurity.PDA1CompetentInstitution{
 				InstitutionID:   row[32],
 				InstitutionName: row[33],
 				CountryCode:     row[34],

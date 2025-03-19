@@ -1,4 +1,4 @@
-package pda1
+package socialsecurity
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 //{"location":"/places_of_work", "message":map[string]interface {}{"item_mismatch":"Item at index 0 does not match the schema"}}}})
 
 func GenerateDocument(t *testing.T) map[string]any {
-	document := Document{
+	document := PDA1Document{
 		SocialSecurityPin: "12345",
 		Nationality:       []string{"SE"},
 		DetailsOfEmployment: []DetailsOfEmployment{
@@ -67,7 +67,7 @@ func GenerateDocument(t *testing.T) map[string]any {
 		},
 		StatusConfirmation:           "02",
 		UniqueNumberOfIssuedDocument: "SE1234",
-		CompetentInstitution: CompetentInstitution{
+		CompetentInstitution: PDA1CompetentInstitution{
 			InstitutionID:   "SE:12345",
 			InstitutionName: "test",
 			CountryCode:     "SE",

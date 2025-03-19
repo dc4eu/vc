@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
-	"vc/pkg/ehic"
 	"vc/pkg/logger"
 	"vc/pkg/sdjwt3"
+	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
 	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
@@ -30,7 +30,7 @@ func newEHICClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*ehic
 	return c, nil
 }
 
-func (c *ehicClient) sdjwt(ctx context.Context, doc *ehic.Document, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 

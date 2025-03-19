@@ -1,9 +1,9 @@
-package pda1
+package socialsecurity
 
 import "encoding/json"
 
-// Document model for PDA1
-type Document struct {
+// PDA1Document model for PDA1
+type PDA1Document struct {
 	SocialSecurityPin             string                        `json:"social_security_pin" bson:"social_security_pin"`
 	Nationality                   []string                      `json:"nationality" bson:"nationality"`
 	DetailsOfEmployment           []DetailsOfEmployment         `json:"details_of_employment" bson:"details_of_employment"`
@@ -11,11 +11,11 @@ type Document struct {
 	DecisionLegislationApplicable DecisionLegislationApplicable `json:"decision_legislation_applicable" bson:"decision_legislation_applicable"`
 	StatusConfirmation            string                        `json:"status_confirmation" bson:"status_confirmation"`
 	UniqueNumberOfIssuedDocument  string                        `json:"unique_number_of_issued_document" bson:"unique_number_of_issued_document"`
-	CompetentInstitution          CompetentInstitution          `json:"competent_institution" bson:"competent_institution"`
+	CompetentInstitution          PDA1CompetentInstitution      `json:"competent_institution" bson:"competent_institution"`
 }
 
 // Marshal marshals the document to a map
-func (d *Document) Marshal() (map[string]any, error) {
+func (d *PDA1Document) Marshal() (map[string]any, error) {
 	data, err := json.Marshal(d)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ type DecisionLegislationApplicable struct {
 	EndingDate                         string `json:"ending_date" bson:"ending_date"`
 }
 
-type CompetentInstitution struct {
+type PDA1CompetentInstitution struct {
 	InstitutionID   string `json:"institution_id" bson:"institution_id"`
 	InstitutionName string `json:"institution_name" bson:"institution_name"`
 	CountryCode     string `json:"country_code" bson:"country_code"`

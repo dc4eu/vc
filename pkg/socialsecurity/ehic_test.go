@@ -1,4 +1,4 @@
-package ehic
+package socialsecurity
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 )
 
 func generateDocument(t *testing.T) map[string]any {
-	document := Document{
+	document := EHICDocument{
 		Subject: Subject{
 			Forename:    "Magnus",
 			FamilyName:  "Svensson",
@@ -45,7 +45,7 @@ func generateDocument(t *testing.T) map[string]any {
 	return docMap
 }
 
-var mockPDA1JSON = `{
+var mockEHICJSON = `{
     "subject": {
         "forename": "Magnus",
         "family_name": "Svensson",
@@ -69,7 +69,7 @@ var mockPDA1JSON = `{
     }
 }`
 
-func mockPDA1Map(t *testing.T) map[string]any {
+func mockEHICMap(t *testing.T) map[string]any {
 	docMap := map[string]any{}
 
 	err := json.Unmarshal([]byte(mockPDA1JSON), &docMap)
@@ -78,7 +78,7 @@ func mockPDA1Map(t *testing.T) map[string]any {
 	return docMap
 }
 
-func TestSchemaValidation(t *testing.T) {
+func TestEHICSchemaValidation(t *testing.T) {
 	tts := []struct {
 		name    string
 		payload *model.CompleteDocument
@@ -100,7 +100,7 @@ func TestSchemaValidation(t *testing.T) {
 				Meta: &model.MetaData{
 					DocumentDataValidationRef: "file://../../standards/schema_ehic.json",
 				},
-				DocumentData: mockPDA1Map(t),
+				DocumentData: mockEHICMap(t),
 			},
 			want: nil,
 		},

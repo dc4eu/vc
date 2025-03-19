@@ -1,9 +1,9 @@
-package ehic
+package socialsecurity
 
 import "encoding/json"
 
-// Document is the EHIC model
-type Document struct {
+// EHICDocument is the EHIC model
+type EHICDocument struct {
 	Subject              Subject              `json:"subject" bson:"subject" validate:"required"`
 	SocialSecurityPin    string               `json:"social_security_pin" bson:"socialSecurityPin" validate:"required"`
 	PeriodEntitlement    PeriodEntitlement    `json:"period_entitlement" bson:"periodOfEntitlement" validate:"required"`
@@ -12,9 +12,9 @@ type Document struct {
 }
 
 type Subject struct {
-	Forename      string        `json:"forename" bson:"forename" validate:"required"`
-	FamilyName    string        `json:"family_name" bson:"familyName" validate:"required"`
-	DateOfBirth   string        `json:"date_of_birth" bson:"dateOfBirth" validate:"required"`
+	Forename    string `json:"forename" bson:"forename" validate:"required"`
+	FamilyName  string `json:"family_name" bson:"familyName" validate:"required"`
+	DateOfBirth string `json:"date_of_birth" bson:"dateOfBirth" validate:"required"`
 }
 
 type OtherElements struct {
@@ -35,7 +35,7 @@ type CompetentInstitution struct {
 }
 
 // Marshal marshals the document to a map
-func (d *Document) Marshal() (map[string]any, error) {
+func (d *EHICDocument) Marshal() (map[string]any, error) {
 	data, err := json.Marshal(d)
 	if err != nil {
 		return nil, err

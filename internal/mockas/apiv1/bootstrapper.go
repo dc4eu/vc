@@ -8,10 +8,9 @@ import (
 	"os"
 	"strings"
 	"time"
-	"vc/pkg/ehic"
-	"vc/pkg/elm"
+	"vc/pkg/education"
 	"vc/pkg/model"
-	"vc/pkg/pda1"
+	"vc/pkg/socialsecurity"
 )
 
 type person struct {
@@ -41,20 +40,20 @@ type address struct {
 }
 
 func (p *person) bootstrapPDA1() (map[string]any, error) {
-	doc := pda1.Document{
+	doc := socialsecurity.PDA1Document{
 		SocialSecurityPin: p.SocialSecurityPin,
 		Nationality:       p.Nationality,
-		DetailsOfEmployment: []pda1.DetailsOfEmployment{
+		DetailsOfEmployment: []socialsecurity.DetailsOfEmployment{
 			{
 				TypeOfEmployment: "01",
 				Name:             "Corp inc.",
-				Address: pda1.AddressWithCountry{
+				Address: socialsecurity.AddressWithCountry{
 					Street:   p.EmploymentAddress.Street,
 					PostCode: p.EmploymentAddress.PostCode,
 					Town:     p.EmploymentAddress.Town,
 					Country:  p.EmploymentAddress.Country,
 				},
-				IDsOfEmployer: []pda1.IDsOfEmployer{
+				IDsOfEmployer: []socialsecurity.IDsOfEmployer{
 					{
 						EmployerID: "f7c317dc",
 						TypeOfID:   "01",
@@ -62,21 +61,21 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 				},
 			},
 		},
-		PlacesOfWork: []pda1.PlacesOfWork{
+		PlacesOfWork: []socialsecurity.PlacesOfWork{
 			{
 				AFixedPlaceOfWorkExist: false,
 				CountryWork:            p.WorkAddress.Country,
-				PlaceOfWork: []pda1.PlaceOfWork{
+				PlaceOfWork: []socialsecurity.PlaceOfWork{
 					{
 						CompanyVesselName: fmt.Sprintf("vessel_name_%s", strings.ToLower(p.Nationality[0])),
 						FlagStateHomeBase: p.WorkAddress.Country,
-						IDsOfCompany: []pda1.IDsOfCompany{
+						IDsOfCompany: []socialsecurity.IDsOfCompany{
 							{
 								CompanyID: "3615c840",
 								TypeOfID:  "01",
 							},
 						},
-						Address: pda1.Address{
+						Address: socialsecurity.Address{
 							Street:   p.WorkAddress.Street,
 							PostCode: p.WorkAddress.PostCode,
 							Town:     p.WorkAddress.Town,
@@ -85,7 +84,7 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 				},
 			},
 		},
-		DecisionLegislationApplicable: pda1.DecisionLegislationApplicable{
+		DecisionLegislationApplicable: socialsecurity.DecisionLegislationApplicable{
 			MemberStateWhichLegislationApplies: p.WorkAddress.Country,
 			TransitionalRuleApply:              false,
 			StartingDate:                       "1970-01-01",
@@ -93,7 +92,7 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 		},
 		StatusConfirmation:           "01",
 		UniqueNumberOfIssuedDocument: "asd123",
-		CompetentInstitution: pda1.CompetentInstitution{
+		CompetentInstitution: socialsecurity.PDA1CompetentInstitution{
 			InstitutionID:   fmt.Sprintf("%s:1234", p.Nationality[0]),
 			InstitutionName: fmt.Sprintf("institution_name_%s", strings.ToLower(p.Nationality[0])),
 			CountryCode:     p.WorkAddress.Country,
@@ -104,19 +103,19 @@ func (p *person) bootstrapPDA1() (map[string]any, error) {
 }
 
 func (p *person) bootstrapEHIC() (map[string]any, error) {
-	doc := ehic.Document{
-		Subject: ehic.Subject{
+	doc := socialsecurity.EHICDocument{
+		Subject: socialsecurity.Subject{
 			Forename:    p.FirstName,
 			FamilyName:  p.LastName,
 			DateOfBirth: p.DateOfBirth,
 		},
 		SocialSecurityPin: p.SocialSecurityPin,
-		PeriodEntitlement: ehic.PeriodEntitlement{
+		PeriodEntitlement: socialsecurity.PeriodEntitlement{
 			StartingDate: "1970-01-01",
 			EndingDate:   "2038-01-19",
 		},
 		DocumentID: fmt.Sprintf("document_id_%s", p.AuthenticSourcePersonID),
-		CompetentInstitution: ehic.CompetentInstitution{
+		CompetentInstitution: socialsecurity.CompetentInstitution{
 			InstitutionID:      fmt.Sprintf("%s:1234", p.WorkAddress.Country),
 			InstitutionName:    fmt.Sprintf("institution_name_%s", strings.ToLower(p.Nationality[0])),
 			InstitutionCountry: p.WorkAddress.Country,
@@ -127,7 +126,7 @@ func (p *person) bootstrapEHIC() (map[string]any, error) {
 }
 
 func (p *person) bootstrapELM() (map[string]any, error) {
-	doc := elm.Document{
+	doc := education.ELMDocument{
 		"firstName":   p.FirstName,
 		"lastName":    p.LastName,
 		"dateOfBirth": p.DateOfBirth,

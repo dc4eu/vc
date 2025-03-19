@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
-	"vc/pkg/ehic"
-	"vc/pkg/elm"
+	"vc/pkg/education"
 	"vc/pkg/helpers"
-	"vc/pkg/pda1"
+	"vc/pkg/socialsecurity"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -60,7 +59,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	var err error
 	switch req.DocumentType {
 	case "PDA1":
-		doc := &pda1.Document{}
+		doc := &socialsecurity.PDA1Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
@@ -70,7 +69,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 
 	case "EHIC":
-		doc := &ehic.Document{}
+		doc := &socialsecurity.EHICDocument{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
@@ -80,7 +79,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 
 	case "ELM":
-		doc := &elm.Document{}
+		doc := &education.ELMDocument{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}

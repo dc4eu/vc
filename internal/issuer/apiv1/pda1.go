@@ -6,8 +6,8 @@ import (
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
-	"vc/pkg/pda1"
 	"vc/pkg/sdjwt3"
+	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
 	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
@@ -30,7 +30,7 @@ func newPDA1Client(client *Client, tracer *trace.Tracer, log *logger.Log) (*pda1
 	return c, nil
 }
 
-func (c *pda1Client) sdjwt(ctx context.Context, doc *pda1.Document, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 

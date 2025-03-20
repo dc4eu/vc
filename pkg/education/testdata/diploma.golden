@@ -11,5 +11,14 @@
   "name_of_qualification_study_field": "test-name-of-qualification-study-field",
   "other_information": "test-other-information",
   "overall_classification_of_the_academic_qualification": "test-overall-classification-of-the-academic-qualification",
-  "personal_identifier": "test-personal-identifier"
+  "personal_identifier": {
+    "citizenship": "test-citizenship",
+    "date_of_birth": "test-date-of-birth",
+    "gender": "test-gender",
+    "group_member_of": "test-group-member-of",
+    "has_claim": "test-has-claim",
+    "has_credential": "test-has-credential",
+    "national_id_number": "test-national-id-number",
+    "place_of_birth": "test-place-of-birth"
+  }
 }

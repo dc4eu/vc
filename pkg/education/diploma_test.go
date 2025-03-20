@@ -17,10 +17,19 @@ func TestDiplomaMarshal(t *testing.T) {
 		{
 			name: "success",
 			have: &DiplomaDocument{
-				DataOfBirth:        "test-date-of-birth",
-				FamilyName:         "test-family-name",
-				GivenName:          "test-given-name",
-				PersonalIdentifier: "test-personal-identifier",
+				DataOfBirth: "test-date-of-birth",
+				FamilyName:  "test-family-name",
+				GivenName:   "test-given-name",
+				PersonalIdentifier: PersonalIdentifier{
+					NationalIDNumber: "test-national-id-number",
+					Citizenship:      "test-citizenship",
+					DateOfBirth:      "test-date-of-birth",
+					Gender:           "test-gender",
+					GroupMemberOf:    "test-group-member-of",
+					HasClaim:         "test-has-claim",
+					HasCredential:    "test-has-credential",
+					PlaceOfBirth:     "test-place-of-birth",
+				},
 				NameOfAwardingTertiaryEducationInstitution:      "test-name-of-awarding-tertiary-education-institution",
 				NameOfQualification:                             "test-name-of-qualification",
 				DateOfAward:                                     "test-date-of-award",

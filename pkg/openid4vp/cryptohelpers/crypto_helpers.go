@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/pem"
 	"errors"
 	"github.com/google/uuid"
 	"math/big"
@@ -25,7 +26,14 @@ func GenerateECDSAKey(curve elliptic.Curve) (*ecdsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
-func GenerateSelfSignedX509CertDER(privateKey *ecdsa.PrivateKey) ([]byte, error) {
+type CertData struct {
+	CertDER []byte
+	CertPEM []byte
+}
+
+func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error) {
+	//x509_san_dns
+
 	subject := pkix.Name{
 		Country:      []string{"SE"},
 		Organization: []string{"SUNET"},
@@ -39,14 +47,16 @@ func GenerateSelfSignedX509CertDER(privateKey *ecdsa.PrivateKey) ([]byte, error)
 		return nil, err
 	}
 
+	now := time.Now()
 	template := x509.Certificate{
-		SerialNumber: serialNumber,
-		DNSNames:     []string{"vcverifier.sunet.se"}, //TODO vad ska dns names sättas till?
-		Subject:      subject,
-		NotBefore:    time.Now(),
-		NotAfter:     time.Now().Add(4383 * time.Hour),                             //~6 months
-		KeyUsage:     x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment, //TODO: vad ska KeyUsage sättas till?
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},               //TODO: vad ska ExtKeyUsage sättas till?
+		SerialNumber:          serialNumber,
+		Subject:               subject,
+		NotBefore:             now,
+		NotAfter:              now.Add(1 * time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageKeyAgreement, //TODO: vad ska KeyUsage sättas till?
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},                                           //TODO: vad ska ExtKeyUsage sättas till?
+		BasicConstraintsValid: true,
+		DNSNames:              []string{"vcverifier.sunet.se"}, //TODO vad ska dns names sättas till?
 	}
 
 	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
@@ -54,7 +64,12 @@ func GenerateSelfSignedX509CertDER(privateKey *ecdsa.PrivateKey) ([]byte, error)
 		return nil, err
 	}
 
-	return certDER, nil
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
+
+	return &CertData{
+		CertDER: certDER,
+		CertPEM: certPEM,
+	}, nil
 }
 
 func generateSerialNumber() (*big.Int, error) {

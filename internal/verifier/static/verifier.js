@@ -64,14 +64,32 @@ function resetAndHideIndexContainer() {
 
 function resetAndHideQRContainer() {
     clearAndHideError("qrErrorMessage");
-    //TODO rensa ev. data inom containern (qr och knapp-data) samt återställ knappar som dolda igen
+
+    const qrImage = getElementById("qrImage");
+    qrImage.src = "";
+    qrImage.title = "";
+    qrImage.classList.add("is-hidden");
+
+    const qrInfoText = getElementById("qrInfoText");
+    qrInfoText.classList.add("is-hidden");
+
+    const openInDemoWWWalletButton = getElementById("openInDemoWWWalletButton");
+    openInDemoWWWalletButton.title = "";
+    openInDemoWWWalletButton.onclick = null;
+    openInDemoWWWalletButton.classList.add("is-hidden");
+
+    const checkVerificationResultButton = getElementById("checkVerificationResultButton");
+    checkVerificationResultButton.title = "";
+    checkVerificationResultButton.onclick = null;
+    checkVerificationResultButton.classList.add("is-hidden");
+
     hideElement("qrContainer");
 }
 
 function resetAndHideVerificationContainer() {
     clearAndHideError("verificationErrorMessage");
     showIcon("spinnerIcon");
-    //TODO rensa ev. data inom containern (claims)
+    //TODO rensa ev. data inom containern (claims, etc) samt återställ element till standarvärden och standardsynlighet
     hideElement("verificationContainer");
 }
 
@@ -81,6 +99,7 @@ async function startVPFlow() {
     console.log("documentTypeElement", documentTypeElement.value);
 
     resetAndHideIndexContainer();
+    resetAndHideQRContainer();
     showElement("qrContainer");
 
     try {
@@ -121,6 +140,9 @@ async function startVPFlow() {
         qrImage.title = data.uri;
         qrImage.classList.remove("is-hidden");
 
+        const qrInfoText = document.getElementById("qrInfoText");
+        qrInfoText.classList.remove("is-hidden");
+
         const openInDemoWWWalletButton = document.getElementById("openInDemoWWWalletButton");
         //example: https://demo.wwwallet.org/cb?client_id=verifier.wwwallet.org&request_uri=https%3A%2F%2Fverifier.wwwallet.org%2Fverification%2Frequest-object%3Fid%3D2f96a24e-90cc-4b30-a904-912e9980df10
         const demoWWWalletBaseUrl = "https://demo.wwwallet.org/cb";
@@ -128,7 +150,7 @@ async function startVPFlow() {
             client_id: data.client_id,
             request_uri: encodeURIComponent(data.request_uri)
         });
-        const demoWWWalletURL =  `${demoWWWalletBaseUrl}?${params.toString()}`;
+        const demoWWWalletURL = `${demoWWWalletBaseUrl}?${params.toString()}`;
         openInDemoWWWalletButton.onclick = () => window.open(demoWWWalletURL, "_blank");
         openInDemoWWWalletButton.title = demoWWWalletURL;
         openInDemoWWWalletButton.classList.remove("is-hidden");
@@ -136,27 +158,43 @@ async function startVPFlow() {
         const checkVerificationResultButton = document.getElementById("checkVerificationResultButton");
         checkVerificationResultButton.onclick = () => checkVPVerification();
         checkVerificationResultButton.classList.remove("is-hidden");
-
-        const qrInfoText = document.getElementById("qrInfoText");
-        qrInfoText.classList.remove("is-hidden");
     }
 }
 
 
-function checkVPVerification() {
+async function checkVPVerification() {
     console.log("checkVPVerification");
     resetAndHideQRContainer();
+    resetAndHideVerificationContainer();
     showElement("verificationContainer");
+
+    //TODO: impl verification result
 }
 
-function resetVPFlow() {
+async function resetVPFlow() {
     console.log("resetVPFlow");
 
     resetAndHideQRContainer();
     resetAndHideVerificationContainer();
     showElement("indexContainer");
 
-    //TODO: ta bort sessionen (cookie) + begär även på serversidan
+    try {
+        const response = await fetch(new URL("/quitvpflow", baseUrl), {
+            method: "DELETE",
+            //credentials: "include", //If frontend and backend have different origin or subdomains
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json; charset=utf-8',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Error during quitvpflow:", error);
+        //TODO: ska man och i så fall var ska man visa detta i GUI't?
+    }
 }
 
 

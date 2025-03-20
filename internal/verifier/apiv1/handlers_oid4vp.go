@@ -29,7 +29,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		return nil, err
 	}
 
-	certDER, err := cryptohelpers.GenerateSelfSignedX509CertDER(veriferLongLivedEcdsaP256Private)
+	certData, err := cryptohelpers.GenerateSelfSignedX509Cert(veriferLongLivedEcdsaP256Private)
 	//-------------------------
 
 	clientID := "vcverifier.sunet.se" //TODO: ta in clientID via config
@@ -62,7 +62,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 			PublicKey:          veriferLongLivedEcdsaP256Private.PublicKey,
 			SigningMethodToUse: jwt.SigningMethodES256,
 		},
-		VerifierX5cCertDERBase64: base64.StdEncoding.EncodeToString(certDER),
+		VerifierX5cCertDERBase64: base64.StdEncoding.EncodeToString(certData.CertDER),
 	}
 
 	err = c.db.VPInteractionSessionColl.Create(ctx, vpSession)
@@ -73,10 +73,10 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 	//TODO: skapa och använd property i Verifier för baseUrl
 	verifierBaseUrl := "http://172.16.50.6:8080"
 	requestURI := fmt.Sprintf("%s/authorize?id=%s", verifierBaseUrl, sessionID)
-	requestURIEncoded := url.QueryEscape(requestURI)
-	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURIEncoded)
+	requestURIQueryEscaped := url.QueryEscape(requestURI)
+	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURIQueryEscaped)
 
-	qrCode, err := openid4vp.GenerateQR(qrURI, requestURI, clientID, qrcode.Medium, 256)
+	qrCode, err := openid4vp.GenerateQR(qrURI, requestURI, clientID, sessionID, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}

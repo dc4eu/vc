@@ -2,6 +2,8 @@ package httpserver
 
 import (
 	"context"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
@@ -44,9 +46,19 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	VerifierWebEnabled := true //TODO: läs in via cfg
 	if VerifierWebEnabled {
-		// extra middlewares (must be declared before Server.Default)
+		// extra middlewares (MUST be declared before Server.Default)
 		s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
-		//TODO: s.gin.Use(s.middlewareSession(ctx, s.cfg))
+
+		//TODO: refactorisera och flytta in nedan till någon middleware struct inkl. fixa egna properties för allt som ska vara dynamiskt
+		store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
+		store.Options(sessions.Options{
+			Path:     "/",
+			MaxAge:   300,
+			Secure:   cfg.UI.APIServer.TLS.Enabled,
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		})
+		s.gin.Use(sessions.Sessions("vp_flow_web_session", store))
 	}
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.Verifier.APIServer.Addr)
@@ -69,8 +81,12 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", s.endpointGetAuthorizationRequest)
 	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "request-object/:session_id", s.endpointGetRequestObject)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/:session_id/:callback_id", s.endpointCallback)
-	//TODO: status/resultat endpoint för en pågående verifiering
+
+	//TODO: behövs även en mer allmän status endpoint för en pågående verifiering som inte bara stödjer web session
 	//TODO: behövs https://<domain>/.well-known/openid-configuration + "jwks_uri:":"https://<domain>/oauth/jwks" endpoints???
+
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", s.endpointGetVerificationResult)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", s.endpointQuitVPFlow)
 
 	//deprecated: to be removed later
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", s.endpointVerifyCredential)

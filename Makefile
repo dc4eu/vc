@@ -29,6 +29,14 @@ stop:
 
 restart: stop start
 
+docker-build-and-restart-verifier:
+	$(info docker-build-verifier)
+	$(MAKE) docker-build-verifier
+	$(info stop-verifier)
+	docker compose -f docker-compose.yaml rm -s -f verifier
+	$(info start-verifier)
+	docker compose -f docker-compose.yaml up -d --remove-orphans verifier
+
 get_release-tag:
 	@date +'%Y%m%d%H%M%S%9N'
 

@@ -1,0 +1,24 @@
+{
+  "country_of_award_of_academic_qualification": "test-country-of-award-of-academic-qualification",
+  "date_of_award": "test-date-of-award",
+  "date_of_birth": "test-date-of-birth",
+  "degree_project_title": "test-degree-project-title",
+  "entitlement": "test-entitlement",
+  "family_name": "test-family-name",
+  "given_name": "test-given-name",
+  "name_of_awarding_tertiary_education_institution": "test-name-of-awarding-tertiary-education-institution",
+  "name_of_qualification": "test-name-of-qualification",
+  "name_of_qualification_study_field": "test-name-of-qualification-study-field",
+  "other_information": "test-other-information",
+  "overall_classification_of_the_academic_qualification": "test-overall-classification-of-the-academic-qualification",
+  "personal_identifier": {
+    "citizenship": "test-citizenship",
+    "date_of_birth": "test-date-of-birth",
+    "gender": "test-gender",
+    "group_member_of": "test-group-member-of",
+    "has_claim": "test-has-claim",
+    "has_credential": "test-has-credential",
+    "national_id_number": "test-national-id-number",
+    "place_of_birth": "test-place-of-birth"
+  }
+}

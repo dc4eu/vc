@@ -28,8 +28,6 @@ const (
 type Encoder struct {
 	writer                     io.Writer
 	opts                       []EncodeOption
-	indent                     int
-	indentSequence             bool
 	singleQuote                bool
 	isFlowStyle                bool
 	isJSONStyle                bool
@@ -41,11 +39,12 @@ type Encoder struct {
 	commentMap                 map[*Path][]*Comment
 	written                    bool
 
-	line        int
-	column      int
-	offset      int
-	indentNum   int
-	indentLevel int
+	line           int
+	column         int
+	offset         int
+	indentNum      int
+	indentLevel    int
+	indentSequence bool
 }
 
 // NewEncoder returns a new encoder that writes to w.
@@ -54,12 +53,12 @@ func NewEncoder(w io.Writer, opts ...EncodeOption) *Encoder {
 	return &Encoder{
 		writer:             w,
 		opts:               opts,
-		indent:             DefaultIndentSpaces,
 		anchorPtrToNameMap: map[uintptr]string{},
 		customMarshalerMap: map[reflect.Type]func(interface{}) ([]byte, error){},
 		line:               1,
 		column:             1,
 		offset:             0,
+		indentNum:          DefaultIndentSpaces,
 	}
 }
 
@@ -500,12 +499,12 @@ func (e *Encoder) encodeNil() *ast.NullNode {
 }
 
 func (e *Encoder) encodeInt(v int64) *ast.IntegerNode {
-	value := fmt.Sprint(v)
+	value := strconv.FormatInt(v, 10)
 	return ast.Integer(token.New(value, value, e.pos(e.column)))
 }
 
 func (e *Encoder) encodeUint(v uint64) *ast.IntegerNode {
-	value := fmt.Sprint(v)
+	value := strconv.FormatUint(v, 10)
 	return ast.Integer(token.New(value, value, e.pos(e.column)))
 }
 
@@ -538,6 +537,17 @@ func (e *Encoder) isNeedQuoted(v string) bool {
 	if e.isFlowStyle && strings.ContainsAny(v, `]},'"`) {
 		return true
 	}
+	if e.isFlowStyle {
+		for i := 0; i < len(v); i++ {
+			if v[i] != ':' {
+				continue
+			}
+			if i+1 < len(v) && v[i+1] == '/' {
+				continue
+			}
+			return true
+		}
+	}
 	if token.IsNeedQuoted(v) {
 		return true
 	}
@@ -556,14 +566,19 @@ func (e *Encoder) encodeString(v string, column int) *ast.StringNode {
 }
 
 func (e *Encoder) encodeBool(v bool) *ast.BoolNode {
-	value := fmt.Sprint(v)
+	value := strconv.FormatBool(v)
 	return ast.Bool(token.New(value, value, e.pos(e.column)))
 }
 
 func (e *Encoder) encodeSlice(ctx context.Context, value reflect.Value) (*ast.SequenceNode, error) {
 	if e.indentSequence {
-		e.column += e.indent
+		e.column += e.indentNum
 	}
+	defer func() {
+		if e.indentSequence {
+			e.column -= e.indentNum
+		}
+	}()
 	column := e.column
 	sequence := ast.Sequence(token.New("-", "-", e.pos(column)), e.isFlowStyle)
 	for i := 0; i < value.Len(); i++ {
@@ -572,17 +587,19 @@ func (e *Encoder) encodeSlice(ctx context.Context, value reflect.Value) (*ast.Se
 			return nil, err
 		}
 		sequence.Values = append(sequence.Values, node)
-	}
-	if e.indentSequence {
-		e.column -= e.indent
 	}
 	return sequence, nil
 }
 
 func (e *Encoder) encodeArray(ctx context.Context, value reflect.Value) (*ast.SequenceNode, error) {
 	if e.indentSequence {
-		e.column += e.indent
+		e.column += e.indentNum
 	}
+	defer func() {
+		if e.indentSequence {
+			e.column -= e.indentNum
+		}
+	}()
 	column := e.column
 	sequence := ast.Sequence(token.New("-", "-", e.pos(column)), e.isFlowStyle)
 	for i := 0; i < value.Len(); i++ {
@@ -591,9 +608,6 @@ func (e *Encoder) encodeArray(ctx context.Context, value reflect.Value) (*ast.Se
 			return nil, err
 		}
 		sequence.Values = append(sequence.Values, node)
-	}
-	if e.indentSequence {
-		e.column -= e.indent
 	}
 	return sequence, nil
 }
@@ -606,7 +620,10 @@ func (e *Encoder) encodeMapItem(ctx context.Context, item MapItem, column int) (
 		return nil, err
 	}
 	if e.isMapNode(value) {
-		value.AddColumn(e.indent)
+		value.AddColumn(e.indentNum)
+	}
+	if e.isTagAndMapNode(value) {
+		value.AddColumn(e.indentNum)
 	}
 	return ast.MappingValue(
 		token.New("", "", e.pos(column)),
@@ -632,6 +649,11 @@ func (e *Encoder) isMapNode(node ast.Node) bool {
 	return ok
 }
 
+func (e *Encoder) isTagAndMapNode(node ast.Node) bool {
+	tn, ok := node.(*ast.TagNode)
+	return ok && e.isMapNode(tn.Value)
+}
+
 func (e *Encoder) encodeMap(ctx context.Context, value reflect.Value, column int) ast.Node {
 	node := ast.Mapping(token.New("", "", e.pos(column)), e.isFlowStyle)
 	keys := make([]interface{}, len(value.MapKeys()))
@@ -649,7 +671,10 @@ func (e *Encoder) encodeMap(ctx context.Context, value reflect.Value, column int
 			return nil
 		}
 		if e.isMapNode(value) {
-			value.AddColumn(e.indent)
+			value.AddColumn(e.indentNum)
+		}
+		if e.isTagAndMapNode(value) {
+			value.AddColumn(e.indentNum)
 		}
 		node.Values = append(node.Values, ast.MappingValue(
 			nil,
@@ -772,46 +797,31 @@ func (e *Encoder) encodeStruct(ctx context.Context, value reflect.Value, column 
 			return nil, err
 		}
 		if e.isMapNode(value) {
-			value.AddColumn(e.indent)
+			value.AddColumn(e.indentNum)
 		}
 		var key ast.MapKeyNode = e.encodeString(structField.RenderName, column)
 		switch {
+		case value.Type() == ast.AliasType:
+			if aliasName := structField.AliasName; aliasName != "" {
+				alias, ok := value.(*ast.AliasNode)
+				if !ok {
+					return nil, errors.ErrUnexpectedNodeType(value.Type(), ast.AliasType, value.GetToken())
+				}
+				got := alias.Value.String()
+				if aliasName != got {
+					return nil, fmt.Errorf("expected alias name is %q but got %q", aliasName, got)
+				}
+			}
+			if structField.IsInline {
+				// if both used alias and inline, output `<<: *alias`
+				key = ast.MergeKey(token.New("<<", "<<", e.pos(column)))
+			}
 		case structField.AnchorName != "":
 			anchorNode, err := e.encodeAnchor(structField.AnchorName, value, fieldValue, column)
 			if err != nil {
 				return nil, err
 			}
 			value = anchorNode
-		case structField.IsAutoAlias:
-			if fieldValue.Kind() != reflect.Ptr {
-				return nil, fmt.Errorf(
-					"%s in struct is not pointer type. but required automatically alias detection",
-					structField.FieldName,
-				)
-			}
-			anchorName := e.anchorPtrToNameMap[fieldValue.Pointer()]
-			if anchorName == "" {
-				return nil, errors.New(
-					"cannot find anchor name from pointer address for automatically alias detection",
-				)
-			}
-			aliasName := anchorName
-			alias := ast.Alias(token.New("*", "*", e.pos(column)))
-			alias.Value = ast.String(token.New(aliasName, aliasName, e.pos(column)))
-			value = alias
-			if structField.IsInline {
-				// if both used alias and inline, output `<<: *alias`
-				key = ast.MergeKey(token.New("<<", "<<", e.pos(column)))
-			}
-		case structField.AliasName != "":
-			aliasName := structField.AliasName
-			alias := ast.Alias(token.New("*", "*", e.pos(column)))
-			alias.Value = ast.String(token.New(aliasName, aliasName, e.pos(column)))
-			value = alias
-			if structField.IsInline {
-				// if both used alias and inline, output `<<: *alias`
-				key = ast.MergeKey(token.New("<<", "<<", e.pos(column)))
-			}
 		case structField.IsInline:
 			isAutoAnchor := structField.IsAutoAnchor
 			if !hasInlineAnchorField {
@@ -837,8 +847,8 @@ func (e *Encoder) encodeStruct(ctx context.Context, value reflect.Value, column 
 					// if declared same key name, skip encoding this field
 					continue
 				}
-				key.AddColumn(-e.indent)
-				value.AddColumn(-e.indent)
+				key.AddColumn(-e.indentNum)
+				value.AddColumn(-e.indentNum)
 				node.Values = append(node.Values, ast.MappingValue(nil, key, value))
 			}
 			continue
@@ -852,7 +862,7 @@ func (e *Encoder) encodeStruct(ctx context.Context, value reflect.Value, column 
 		node.Values = append(node.Values, ast.MappingValue(nil, key, value))
 	}
 	if hasInlineAnchorField {
-		node.AddColumn(e.indent)
+		node.AddColumn(e.indentNum)
 		anchorName := "anchor"
 		anchorNode := ast.Anchor(token.New("&", "&", e.pos(column)))
 		anchorNode.Name = ast.String(token.New(anchorName, anchorName, e.pos(column)))

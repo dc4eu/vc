@@ -1,9 +1,11 @@
 package token
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Character type for character
@@ -217,7 +219,7 @@ func (c CharacterType) String() string {
 	case CharacterTypeIndicator:
 		return "Indicator"
 	case CharacterTypeWhiteSpace:
-		return "WhiteSpcae"
+		return "WhiteSpace"
 	case CharacterTypeMiscellaneous:
 		return "Miscellaneous"
 	case CharacterTypeEscaped:
@@ -401,6 +403,10 @@ const (
 	SetTag ReservedTagKeyword = "!!set"
 	// TimestampTag `!!timestamp` tag
 	TimestampTag ReservedTagKeyword = "!!timestamp"
+	// BooleanTag `!!bool` tag
+	BooleanTag ReservedTagKeyword = "!!bool"
+	// MergeTag `!!merge` tag
+	MergeTag ReservedTagKeyword = "!!merge"
 )
 
 var (
@@ -506,6 +512,26 @@ var (
 				Position:      pos,
 			}
 		},
+		BooleanTag: func(value, org string, pos *Position) *Token {
+			return &Token{
+				Type:          TagType,
+				CharacterType: CharacterTypeIndicator,
+				Indicator:     NodePropertyIndicator,
+				Value:         value,
+				Origin:        org,
+				Position:      pos,
+			}
+		},
+		MergeTag: func(value, org string, pos *Position) *Token {
+			return &Token{
+				Type:          TagType,
+				CharacterType: CharacterTypeIndicator,
+				Indicator:     NodePropertyIndicator,
+				Value:         value,
+				Origin:        org,
+				Position:      pos,
+			}
+		},
 	}
 )
 
@@ -526,15 +552,35 @@ type NumberValue struct {
 }
 
 func ToNumber(value string) *NumberValue {
-	if len(value) == 0 {
+	num, err := toNumber(value)
+	if err != nil {
 		return nil
 	}
+	return num
+}
+
+func isNumber(value string) bool {
+	num, err := toNumber(value)
+	if err != nil {
+		var numErr *strconv.NumError
+		if errors.As(err, &numErr) && errors.Is(numErr.Err, strconv.ErrRange) {
+			return true
+		}
+		return false
+	}
+	return num != nil
+}
+
+func toNumber(value string) (*NumberValue, error) {
+	if len(value) == 0 {
+		return nil, nil
+	}
 	if strings.HasPrefix(value, "_") {
-		return nil
+		return nil, nil
 	}
 	dotCount := strings.Count(value, ".")
 	if dotCount > 1 {
-		return nil
+		return nil, nil
 	}
 
 	isNegative := strings.HasPrefix(value, "-")
@@ -576,19 +622,19 @@ func ToNumber(value string) *NumberValue {
 	if typ == NumberTypeFloat {
 		f, err := strconv.ParseFloat(text, 64)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		v = f
 	} else if isNegative {
 		i, err := strconv.ParseInt(text, base, 64)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		v = i
 	} else {
 		u, err := strconv.ParseUint(text, base, 64)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		v = u
 	}
@@ -597,26 +643,32 @@ func ToNumber(value string) *NumberValue {
 		Type:  typ,
 		Value: v,
 		Text:  text,
-	}
+	}, nil
 }
 
-func looksLikeTimeValue(value string) bool {
-	for i, c := range value {
-		switch c {
-		case ':', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			continue
-		case '0':
-			if i == 0 {
-				return false
-			}
-			continue
+// This is a subset of the formats permitted by the regular expression
+// defined at http://yaml.org/type/timestamp.html. Note that time.Parse
+// cannot handle: "2001-12-14 21:59:43.10 -5" from the examples.
+var timestampFormats = []string{
+	time.RFC3339Nano,
+	"2006-01-02t15:04:05.999999999Z07:00", // RFC3339Nano with lower-case "t".
+	time.DateTime,
+	time.DateOnly,
+
+	// Not in examples, but to preserve backward compatibility by quoting time values.
+	"15:4",
+}
+
+func isTimestamp(value string) bool {
+	for _, format := range timestampFormats {
+		if _, err := time.Parse(format, value); err == nil {
+			return true
 		}
-		return false
 	}
-	return true
+	return false
 }
 
-// IsNeedQuoted whether need quote for passed string or not
+// IsNeedQuoted checks whether the value needs quote for passed string or not
 func IsNeedQuoted(value string) bool {
 	if value == "" {
 		return true
@@ -624,7 +676,10 @@ func IsNeedQuoted(value string) bool {
 	if _, exists := reservedEncKeywordMap[value]; exists {
 		return true
 	}
-	if num := ToNumber(value); num != nil {
+	if isNumber(value) {
+		return true
+	}
+	if value == "-" {
 		return true
 	}
 	first := value[0]
@@ -637,14 +692,14 @@ func IsNeedQuoted(value string) bool {
 	case ':', ' ':
 		return true
 	}
-	if looksLikeTimeValue(value) {
+	if isTimestamp(value) {
 		return true
 	}
 	for i, c := range value {
 		switch c {
 		case '#', '\\':
 			return true
-		case ':':
+		case ':', '-':
 			if i+1 < len(value) && value[i+1] == ' ' {
 				return true
 			}
@@ -715,14 +770,24 @@ func (p *Position) String() string {
 
 // Token type for token
 type Token struct {
-	Type          Type
+	// Type is a token type.
+	Type Type
+	// CharacterType is a character type.
 	CharacterType CharacterType
-	Indicator     Indicator
-	Value         string
-	Origin        string
-	Position      *Position
-	Next          *Token
-	Prev          *Token
+	// Indicator is a indicator type.
+	Indicator Indicator
+	// Value is a string extracted with only meaningful characters, with spaces and such removed.
+	Value string
+	// Origin is a string that stores the original text as-is.
+	Origin string
+	// Error keeps error message for InvalidToken.
+	Error string
+	// Position is a token position.
+	Position *Position
+	// Next is a next token reference.
+	Next *Token
+	// Prev is a previous token reference.
+	Prev *Token
 }
 
 // PreviousType previous token type
@@ -765,8 +830,8 @@ func (t *Token) Clone() *Token {
 // Dump outputs token information to stdout for debugging.
 func (t *Token) Dump() {
 	fmt.Printf(
-		"[TYPE]:%q [CHARTYPE]:%q [INDICATOR]:%q [VALUE]:%q [ORG]:%q [POS(line:column:level)]: %d:%d:%d\n",
-		t.Type, t.CharacterType, t.Indicator, t.Value, t.Origin, t.Position.Line, t.Position.Column, t.Position.IndentLevel,
+		"[TYPE]:%q [CHARTYPE]:%q [INDICATOR]:%q [VALUE]:%q [ORG]:%q [POS(line:column:level:offset)]: %d:%d:%d:%d\n",
+		t.Type, t.CharacterType, t.Indicator, t.Value, t.Origin, t.Position.Line, t.Position.Column, t.Position.IndentLevel, t.Position.Offset,
 	)
 }
 
@@ -1078,13 +1143,14 @@ func DocumentEnd(org string, pos *Position) *Token {
 	}
 }
 
-func Invalid(org string, pos *Position) *Token {
+func Invalid(err string, org string, pos *Position) *Token {
 	return &Token{
 		Type:          InvalidType,
 		CharacterType: CharacterTypeInvalid,
 		Indicator:     NotIndicator,
 		Value:         org,
 		Origin:        org,
+		Error:         err,
 		Position:      pos,
 	}
 }

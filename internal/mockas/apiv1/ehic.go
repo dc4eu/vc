@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-	"vc/pkg/ehic"
+	"vc/pkg/socialsecurity"
 
 	"github.com/brianvoe/gofakeit/v6"
 )
@@ -19,19 +19,19 @@ func (s *EHICService) random(ctx context.Context, person *gofakeit.PersonInfo) m
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	doc := ehic.Document{
-		Subject: ehic.Subject{
+	doc := socialsecurity.EHICDocument{
+		Subject: socialsecurity.Subject{
 			Forename:    person.FirstName,
 			FamilyName:  person.LastName,
 			DateOfBirth: gofakeit.Date().String(),
 		},
 		SocialSecurityPin: gofakeit.Numerify("##########"),
-		PeriodEntitlement: ehic.PeriodEntitlement{
+		PeriodEntitlement: socialsecurity.PeriodEntitlement{
 			StartingDate: gofakeit.Date().String(),
 			EndingDate:   gofakeit.Date().String(),
 		},
 		DocumentID: gofakeit.UUID(),
-		CompetentInstitution: ehic.CompetentInstitution{
+		CompetentInstitution: socialsecurity.CompetentInstitution{
 			InstitutionID:      fmt.Sprintf("%s:%s", gofakeit.RandomString([]string{"SE", "DK", "NO", "FI"}), gofakeit.Numerify("####")),
 			InstitutionName:    gofakeit.Company(),
 			InstitutionCountry: gofakeit.RandomString([]string{"SE", "DK", "NO", "FI"}),

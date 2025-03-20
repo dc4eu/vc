@@ -7,14 +7,14 @@
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"cSpell.language": "en-GB,en,sv"
+				"cSpell.language": "en-GB,en,sv",
+				"dev.containers.mountWaylandSocket": false
 			},
 			"extensions": [
 				"GitHub.vscode-pull-request-github",
 				"streetsidesoftware.code-spell-checker",
 				"DavidAnson.vscode-markdownlint",
 				"zenor.makefile-creator",
-				"bungcip.better-toml",
 				"Plex.vscode-protolint",
 				"ms-azuretools.vscode-docker",
 				"zenghongtu.vscode-asciiflow2"
@@ -22,9 +22,9 @@
 		}
 	},
 	"mounts": [
-		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-		"source=${localEnv:HOME}/work/SUNET/gosdjwt/,target=/workspaces/gosdjwt,type=bind,consistency=cached",
-		"source=${localEnv:HOME}/work/SUNET/goretask/,target=/workspaces/goretask,type=bind,consistency=cached"
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+		//"source=${localEnv:HOME}/work/SUNET/gosdjwt/,target=/workspaces/gosdjwt,type=bind,consistency=cached",
+		//"source=${localEnv:HOME}/work/SUNET/goretask/,target=/workspaces/goretask,type=bind,consistency=cached"
 	],
 	"postCreateCommand": "make vscode",
 	"remoteUser": "vscode"

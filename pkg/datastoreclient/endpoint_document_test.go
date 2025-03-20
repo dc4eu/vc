@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
-	"vc/pkg/ehic"
 	"vc/pkg/model"
+	"vc/pkg/socialsecurity"
 
 	"github.com/stretchr/testify/assert"
 	"gotest.tools/v3/golden"
@@ -52,7 +52,7 @@ func TestGet(t *testing.T) {
 		name                 string
 		query                *DocumentGetQuery
 		expected             *model.Document
-		expectedDocumentData *ehic.Document
+		expectedDocumentData *socialsecurity.EHICDocument
 	}{
 		{
 			name: "success",
@@ -88,19 +88,19 @@ func TestGet(t *testing.T) {
 					DocumentDataValidationRef: "",
 				},
 			},
-			expectedDocumentData: &ehic.Document{
-				Subject: ehic.Subject{
+			expectedDocumentData: &socialsecurity.EHICDocument{
+				Subject: socialsecurity.Subject{
 					Forename:    "test_forename",
 					FamilyName:  "test_family_name",
 					DateOfBirth: "1986-02-23",
 				},
 				SocialSecurityPin: "1234",
-				PeriodEntitlement: ehic.PeriodEntitlement{
+				PeriodEntitlement: socialsecurity.PeriodEntitlement{
 					StartingDate: "1970-01-01",
 					EndingDate:   "2038-01-19",
 				},
 				DocumentID: "test_document_id",
-				CompetentInstitution: ehic.CompetentInstitution{
+				CompetentInstitution: socialsecurity.CompetentInstitution{
 					InstitutionID:      "SE:1234",
 					InstitutionName:    "Myndigheten",
 					InstitutionCountry: "SE",

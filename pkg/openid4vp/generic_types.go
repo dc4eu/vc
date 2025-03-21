@@ -7,6 +7,7 @@ import (
 
 const (
 	DocumentTypeEHIC = "EHIC"
+	DocumentTypeELM  = "ELM"
 	DocumentTypePDA1 = "PDA1"
 )
 
@@ -22,7 +23,7 @@ type QR struct {
 }
 
 type DocumentTypeEnvelope struct {
-	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=PDA1 EHIC"`
+	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=EHIC ELM PDA1 "`
 }
 
 type KeyPair struct {
@@ -51,4 +52,12 @@ type VPInteractionSession struct {
 
 type AuthorizationRequest struct {
 	RequestObjectJWS string `json:"request_object"`
+}
+
+type VerificationResult struct {
+	Status string `json:"status,omitempty"`
+	//TODO: add verified credentials here (valid claims etc)
+}
+
+type CallbackReply struct {
 }

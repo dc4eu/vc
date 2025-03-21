@@ -18,7 +18,7 @@ import (
 
 // QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request
 func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error) {
-	if !(request.DocumentType == openid4vp.DocumentTypeEHIC || request.DocumentType == openid4vp.DocumentTypePDA1) {
+	if !(request.DocumentType == openid4vp.DocumentTypeEHIC || request.DocumentType == openid4vp.DocumentTypePDA1 || request.DocumentType == openid4vp.DocumentTypeELM) {
 		return nil, fmt.Errorf("document type not handled: %s", request.DocumentType)
 	}
 
@@ -181,7 +181,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	return jws, nil
 }
 
-func (c *Client) Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (any, error) {
+func (c *Client) Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (*openid4vp.CallbackReply, error) {
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
 		return nil, err
@@ -196,8 +196,6 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, errors.New("callback ID does not match the one in session")
 	}
 
-	//TODO: skicka in ref till "db" för att lagra "verified credentials" om allt är ok
-	//TODO: skicka in ref till "vpSession" för att kontrollera värden mot (nonce, osv)
 	arw, err := openid4vp.NewAuthorizationResponseWrapper(request)
 	if err != nil {
 		return nil, err
@@ -206,7 +204,10 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		ProcessType:       openid4vp.FULL_VALIDATION,
 		ValidationOptions: openid4vp.ValidationOptions{},
 	}
+	//TODO: skicka in ref till "db" för att lagra "verified credentials" om allt är ok
+	//TODO: skicka in ref till "vpSession" för att kontrollera värden mot (nonce, osv)
 	//TODO: från process ska ett valideringsresultat erhållas som kan presenteras när allt blir mer klart, nu blir det bara ett err om något går fel
+	//TODO: skicka in en ~crypto-store (lång och kortlivade egna nyckar och cert)
 	err = arw.Process(processConfig)
 	if err != nil {
 		return nil, err
@@ -218,5 +219,10 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	}
 
 	//TODO: vad ska returneras om validering: 1) allt OK 2) något gick fel eller ej ok
-	return nil, nil
+	return &openid4vp.CallbackReply{}, nil
+}
+
+func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*openid4vp.VerificationResult, error) {
+	//TODO: impl
+	return &openid4vp.VerificationResult{}, nil
 }

@@ -59,6 +59,12 @@ function hideIcons() {
 }
 
 function resetAndHideIndexContainer() {
+    const documentTypeSelect = document.getElementById("documentTypeSelect");
+    const defaultOption = Array.from(documentTypeSelect.options).find(opt => opt.defaultSelected);
+    if (defaultOption) {
+        documentTypeSelect.value = defaultOption.value;
+    }
+    
     hideElement("indexContainer");
 }
 
@@ -130,7 +136,7 @@ async function startVPFlow() {
         });
     } catch (error) {
         console.error("Error fetching QR code:", error);
-        qrErrorMessage = `An error occurred: ${error.message}`;
+        const qrErrorMessage = `An error occurred: ${error.message}`;
         showError("qrErrorMessage", qrErrorMessage);
     }
 
@@ -162,13 +168,37 @@ async function startVPFlow() {
 }
 
 
-async function checkVPVerification() {
+function checkVPVerification() {
     console.log("checkVPVerification");
     resetAndHideQRContainer();
     resetAndHideVerificationContainer();
     showElement("verificationContainer");
 
     //TODO: impl verification result
+}
+
+async function refreshVerificationResult() {
+    //TODO: rensa ev. felmeddelande
+    try {
+        const response = await fetch(new URL("/verificationresult", baseUrl), {
+            method: "GET",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json; charset=utf-8',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        //TODO: const data = await response.json();
+
+    } catch (error) {
+        console.error("Error fetching and displaying verification result:", error);
+        const verificationResultErrorMessage = `An error occurred: ${error.message}`;
+        showError("verificationErrorMessage", verificationResultErrorMessage);
+    }
 }
 
 async function resetVPFlow() {

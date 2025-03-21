@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VC verifier</title>
-        <script src="/static/verifier.js"></script>
-<!--    <script src="verifier.js"></script>-->
+    <script src="/static/verifier.js"></script>
+    <!--    <script src="verifier.js"></script>-->
     <!--    <link rel="stylesheet" href="/static/bulma.min.css">-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
     <!--TODO(mk): create and add favico to /static/ -->
@@ -29,7 +29,10 @@
                 <div class="control">
                     <div class="select">
                         <select id="documentTypeSelect">
-                            <option value="EHIC">EHIC</option>
+                            <!--                            <option value="" selected disabled hidden>Select document type</option>-->
+                            <option value="EHIC" selected>EHIC</option>
+                            <option value="ELM">ELM</option>
+                            <option value="PDA1">PDA1</option>
                         </select>
                     </div>
                 </div>
@@ -41,10 +44,12 @@
             <p class="subtitle">QR code</p>
             <p id="qrErrorMessage" class="notification is-danger is-hidden">An error occured: ...</p>
             <img id="qrImage" class="is-hidden" alt="QR code">
-            <p id="qrInfoText" class="mt-2 is-hidden">Scan the QR code with a device containing a wallet Or click the button below to use a
+            <p id="qrInfoText" class="mt-2 is-hidden">Scan the QR code with a device containing a wallet Or click the
+                button below to use a
                 browser
                 wallet.</p>
-            <button id="openInDemoWWWalletButton" class="button is-link mt-2 is-hidden">Open in demo wwWallet (opens in a new tab
+            <button id="openInDemoWWWalletButton" class="button is-link mt-2 is-hidden">Open in demo wwWallet (opens in
+                a new tab
                 or window)
             </button>
             <button id="checkVerificationResultButton" class="button is-warning mt-2 is-hidden"
@@ -68,7 +73,10 @@
             <textarea id="claimsDisplay" class="textarea is-small" readonly rows="30"
                       placeholder="No valid claims yet..."></textarea>
             <br>
-            <button class="button is-danger" onclick="resetVPFlow()">Quit and return to start page</button>
+            <button id="refreshVerificationResult" onclick="refreshVerificationResult()" class="button is-link mt-2">
+                Refresh (just for dev)
+            </button>
+            <button class="button is-danger mt-2" onclick="resetVPFlow()">Quit and return to start page</button>
         </div>
 
     </div>

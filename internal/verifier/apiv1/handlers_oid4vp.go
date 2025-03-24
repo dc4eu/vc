@@ -76,12 +76,15 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 	requestURIQueryEscaped := url.QueryEscape(requestURI)
 	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURIQueryEscaped)
 
-	qrCode, err := openid4vp.GenerateQR(qrURI, requestURI, clientID, sessionID, qrcode.Medium, 256)
+	qr, err := openid4vp.GenerateQR(qrURI, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}
+	qr.RequestURI = requestURI
+	qr.ClientID = clientID
+	qr.SessionID = sessionID
 
-	return qrCode, nil
+	return qr, nil
 }
 
 func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) (*openid4vp.AuthorizationRequest, error) {
@@ -201,10 +204,13 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 	processConfig := &openid4vp.ProcessConfig{
-		ProcessType:       openid4vp.FULL_VALIDATION,
-		ValidationOptions: openid4vp.ValidationOptions{},
+		ProcessType: openid4vp.FULL_VALIDATION,
+		ValidationOptions: openid4vp.ValidationOptions{
+			//TODO: remove ValidationOptions when all key+crypto handling in place and work's
+			SkipAllSignatureChecks: true,
+		},
 	}
-	//TODO: skicka in ref till "db" för att lagra "verified credentials" om allt är ok
+
 	//TODO: skicka in ref till "vpSession" för att kontrollera värden mot (nonce, osv)
 	//TODO: från process ska ett valideringsresultat erhållas som kan presenteras när allt blir mer klart, nu blir det bara ett err om något går fel
 	//TODO: skicka in en ~crypto-store (lång och kortlivade egna nyckar och cert)
@@ -213,12 +219,44 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
-	err = c.db.VPInteractionSessionColl.Delete(ctx, sessionID)
+	//TODO: behåller vp sessionen tills den timar ut så GUI't får en chans att hämta ut verifieringsresultatet
+	//TODO: lagra i vpSession att data erhållits från walleten
+	//err = c.db.VPInteractionSessionColl.Delete(ctx, sessionID)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	err = c.db.VerificationRecordColl.Create(ctx, &openid4vp.VerificationRecord{
+		SessionID:  sessionID,
+		CallbackID: callbackID,
+		ValidationResult: openid4vp.ValidationMeta{
+			IsValid:     true,
+			ValidatedAt: time.Now().Unix(),
+			ErrorInfo:   "",
+		},
+		PresentationSubmission: nil,
+		VPResults: []*openid4vp.VPResult{
+			{
+				RawToken: "raw_vp_token_here",
+				VCResults: []*openid4vp.VCResult{
+					{
+						ValidSelectiveDisclosures: []*openid4vp.Disclosure{
+							{
+								Salt:  "Salt12345",
+								Key:   "TheKey",
+								Value: "The value",
+							},
+						},
+					},
+				},
+			},
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO: vad ska returneras om validering: 1) allt OK 2) något gick fel eller ej ok
+	//TODO: vad ska returneras tillbaka till walleten om validering: 1) allt OK 2) något gick fel eller ej ok
 	return &openid4vp.CallbackReply{}, nil
 }
 

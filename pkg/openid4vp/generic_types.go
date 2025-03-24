@@ -61,3 +61,26 @@ type VerificationResult struct {
 
 type CallbackReply struct {
 }
+
+type VerificationRecord struct {
+	SessionID              string                  `json:"session_id" bson:"session_id" validate:"required"` //Key
+	CallbackID             string                  `json:"callback_id" bson:"callback_id" validate:"required"`
+	ValidationResult       ValidationMeta          `json:"validation_meta" bson:"validation_meta" validate:"required"`
+	PresentationSubmission *PresentationSubmission `json:"presentation_submission" bson:"presentation_submission" validate:"required"`
+	VPResults              []*VPResult             `json:"vp_results" bson:"vp_results"`
+}
+
+type ValidationMeta struct {
+	IsValid     bool   `json:"is_valid" bson:"is_valid" validate:"required"`
+	ValidatedAt int64  `bson:"validated_at" json:"validated_at" validate:"required"` //Unix UTC
+	ErrorInfo   string `json:"error_info,omitempty" bson:"error_info,omitempty"`
+}
+
+type VPResult struct {
+	RawToken  string      `json:"raw_token" bson:"raw_token" validate:"required"`
+	VCResults []*VCResult `json:"vc_results" bson:"vc_results"`
+}
+
+type VCResult struct {
+	ValidSelectiveDisclosures []*Disclosure `json:"valid_selective_disclosures" bson:"valid_selective_disclosures"`
+}

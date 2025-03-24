@@ -29,6 +29,7 @@ type Service struct {
 	probeStore *apiv1_status.StatusProbeStore
 
 	VPInteractionSessionColl *VPInteractionSessionColl
+	VerificationRecordColl   *VerificationRecordColl
 }
 
 // New creates a new database service
@@ -49,6 +50,10 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 
 	service.VPInteractionSessionColl = &VPInteractionSessionColl{
 		repo: db.NewInMemoryRepo[openid4vp.VPInteractionSession](50),
+	}
+
+	service.VerificationRecordColl = &VerificationRecordColl{
+		repo: db.NewInMemoryRepo[openid4vp.VerificationRecord](100),
 	}
 
 	service.log.Info("Started")

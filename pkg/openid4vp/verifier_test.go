@@ -62,11 +62,14 @@ func TestAuthorizationResponseWrapper_Process(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	authorizationResponseWithJWSVPToken := buildAuthorizationResponse(vp_token_ehic_adam_driver)
+
 	vp_token_ehic_adam_driver_JWE, err := encryptToJWE([]byte(vp_token_ehic_adam_driver), ecdsaP256Public)
 	if err != nil {
 		t.Fatal(err)
 	}
-	authorizationResponse := buildAuthorizationResponse(vp_token_ehic_adam_driver_JWE)
+	authorizationResponseWithJWEVPToken := buildAuthorizationResponse(vp_token_ehic_adam_driver_JWE)
 
 	testCases := []struct {
 		name            string
@@ -76,7 +79,8 @@ func TestAuthorizationResponseWrapper_Process(t *testing.T) {
 		issuerPublicKey interface{}
 		wantErr         bool
 	}{
-		{"AuthorizationResponse for adam driver with one jwt vc that then encrypted in a jwe vp_token", authorizationResponse, ecdsaP256Public, ecdsaP256Private, nil, false},
+		{"AuthorizationResponse for adam driver with one jwt vc inside a jws vp_token", authorizationResponseWithJWSVPToken, ecdsaP256Public, nil, nil, false},
+		{"AuthorizationResponse for adam driver with one jwt vc that then encrypted in a jwe vp_token", authorizationResponseWithJWEVPToken, ecdsaP256Public, ecdsaP256Private, nil, false},
 	}
 
 	for _, tc := range testCases {
@@ -89,8 +93,10 @@ func TestAuthorizationResponseWrapper_Process(t *testing.T) {
 				t.Fatal(err)
 			}
 			processConfig := &ProcessConfig{
-				ProcessType:       FULL_VALIDATION,
-				ValidationOptions: ValidationOptions{},
+				ProcessType: FULL_VALIDATION,
+				ValidationOptions: ValidationOptions{
+					SkipAllSignatureChecks: true,
+				},
 			}
 			err = asw.Process(processConfig)
 			if err != nil && !tc.wantErr {

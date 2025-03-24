@@ -98,7 +98,8 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) e
 		return err
 	}
 
-	if processConfig.ProcessType == FULL_VALIDATION {
+	if processConfig.ProcessType == FULL_VALIDATION &&
+		processConfig.ValidationOptions.SkipAllSignatureChecks != true {
 		if err := arw.checkAllVPsIntegrity(); err != nil {
 			return err
 		}
@@ -113,8 +114,10 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) e
 		return nil
 	}
 
-	if err := arw.checkAllVCsIntegrity(); err != nil {
-		return err
+	if processConfig.ValidationOptions.SkipAllSignatureChecks != true {
+		if err := arw.checkAllVCsIntegrity(); err != nil {
+			return err
+		}
 	}
 
 	if err := arw.checkAllSelectiveDisclosures(); err != nil {
@@ -257,6 +260,8 @@ type VerifiableCredentialWrapper struct {
 	IssuerSignatureBytes                []byte
 	RevealedSelectiveDisclosuresDecoded []string
 	HolderBindingJWT                    string
+
+	ValidSelectiveDisclosures []*Disclosure
 
 	//TODO: ldp_vc based vc
 
@@ -939,9 +944,9 @@ func decodeRevealedSelectiveDisclosures(encodedSDs []string) ([]string, error) {
 
 // Disclosure represents a revealed selective disclosure
 type Disclosure struct {
-	Salt  string
-	Key   string
-	Value any
+	Salt  string `json:"salt" bson:"salt"`
+	Key   string `json:"key" bson:"key"`
+	Value any    `json:"value" bson:"value"`
 }
 
 // unmarshalDisclosure unmarshals a JSON-encoded disclosure string
@@ -994,7 +999,7 @@ func (vc *VerifiableCredentialWrapper) validateSelectiveDisclosures(sdList []str
 			return fmt.Errorf("invalid disclosure: %s", d.Key)
 		} else {
 			fmt.Println("disclosure found and valid:", d)
-			//TODO: spara undan alla dessa till db samt för senare presentation?
+			vc.ValidSelectiveDisclosures = append(vc.ValidSelectiveDisclosures, d)
 		}
 	}
 

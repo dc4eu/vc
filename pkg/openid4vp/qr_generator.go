@@ -10,10 +10,9 @@ import (
 	"net/url"
 )
 
-// TODO: REFACT: räcker om denna returnerar Base64Image, själva QR ska byggas senare då lite metadata behöver läggas till för att underlätta för GUI's
-func GenerateQR(qrURI, requestURI, clientID, sessionID string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR, error) {
-	parsedURL, err := url.ParseRequestURI(qrURI)
-	if err != nil || parsedURL.Scheme == "" || parsedURL.Host == "" {
+func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR, error) {
+	parsedURI, err := url.ParseRequestURI(qrURI)
+	if err != nil || parsedURI.Scheme == "" || parsedURI.Host == "" {
 		return nil, errors.New("invalid URL format")
 	}
 
@@ -42,9 +41,6 @@ func GenerateQR(qrURI, requestURI, clientID, sessionID string, recoveryLevel qrc
 	return &QR{
 		Base64Image: buf.String(),
 		URI:         qrURI,
-		RequestURI:  requestURI,
-		ClientID:    clientID,
-		SessionID:   sessionID,
 	}, nil
 }
 

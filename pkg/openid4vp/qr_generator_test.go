@@ -9,7 +9,6 @@ import (
 func TestGenerateQR(t *testing.T) {
 	type args struct {
 		uri           string
-		requestURI    string
 		recoveryLevel qrcode.RecoveryLevel
 		size          int
 	}
@@ -22,7 +21,6 @@ func TestGenerateQR(t *testing.T) {
 			name: "Simple qr code",
 			args: args{
 				uri:           "openid4vp://authorize?key=val",
-				requestURI:    "https://www.someexampledomain12345.com/key2=val2",
 				recoveryLevel: qrcode.Medium,
 				size:          256,
 			},
@@ -32,7 +30,6 @@ func TestGenerateQR(t *testing.T) {
 			name: "Simple qr code with error",
 			args: args{
 				uri:           "ej_en_uri",
-				requestURI:    "ej_en_uri2",
 				recoveryLevel: qrcode.Medium,
 				size:          256,
 			},
@@ -41,7 +38,7 @@ func TestGenerateQR(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GenerateQR(tt.args.uri, tt.args.requestURI, "vcverifier.sunet.se", tt.args.recoveryLevel, tt.args.size)
+			got, err := GenerateQR(tt.args.uri, tt.args.recoveryLevel, tt.args.size)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GenerateQR() error = %v, wantErr %v", err, tt.wantErr)
@@ -60,7 +57,6 @@ func TestGenerateQR(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.args.uri, got.URI)
-			assert.Equal(t, tt.args.requestURI, got.RequestURI)
 			assert.NotEmpty(t, got.Base64Image)
 		})
 	}

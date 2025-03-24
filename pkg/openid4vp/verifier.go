@@ -99,7 +99,7 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) e
 	}
 
 	if processConfig.ProcessType == FULL_VALIDATION &&
-		processConfig.ValidationOptions.SkipAllSignatureChecks != true {
+		!processConfig.ValidationOptions.SkipAllSignatureChecks {
 		if err := arw.checkAllVPsIntegrity(); err != nil {
 			return err
 		}
@@ -114,7 +114,7 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) e
 		return nil
 	}
 
-	if processConfig.ValidationOptions.SkipAllSignatureChecks != true {
+	if !processConfig.ValidationOptions.SkipAllSignatureChecks {
 		if err := arw.checkAllVCsIntegrity(); err != nil {
 			return err
 		}

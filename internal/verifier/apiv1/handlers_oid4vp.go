@@ -55,7 +55,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		State:          uuid.NewString(),
 		JTI:            uuid.NewString(),
 		Authorized:     false,
-
+		Status:         openid4vp.StatusQRDisplayed,
 		//TODO: nedan ska inte vara här men läggs här tillsvidare
 		VerifierKeyPair: &openid4vp.KeyPair{
 			PrivateKey:         veriferLongLivedEcdsaP256Private,
@@ -100,6 +100,7 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 	}
 
 	vpSession.Authorized = true
+	vpSession.Status = openid4vp.StatusQRScanned
 	vpSession.CallbackID = jwthelpers.GenerateNonce() //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
 
 	requestObjectJWS, err := c.createRequestObjectJWS(ctx, vpSession)
@@ -198,6 +199,14 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	if vpSession.CallbackID != callbackID {
 		return nil, errors.New("callback ID does not match the one in session")
 	}
+	if vpSession.Status == openid4vp.StatusVPTokenReceived {
+		return nil, errors.New("callback already performed in session")
+	}
+	vpSession.Status = openid4vp.StatusVPTokenReceived
+	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
+	if err != nil {
+		return nil, err
+	}
 
 	arw, err := openid4vp.NewAuthorizationResponseWrapper(request)
 	if err != nil {
@@ -218,13 +227,6 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	if err != nil {
 		return nil, err
 	}
-
-	//TODO: behåller vp sessionen tills den timar ut så GUI't får en chans att hämta ut verifieringsresultatet
-	//TODO: lagra i vpSession att data erhållits från walleten
-	//err = c.db.VPInteractionSessionColl.Delete(ctx, sessionID)
-	//if err != nil {
-	//	return nil, err
-	//}
 
 	err = c.db.VerificationRecordColl.Create(ctx, &openid4vp.VerificationRecord{
 		SessionID:  sessionID,
@@ -256,11 +258,35 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
+	err = c.db.VPInteractionSessionColl.Delete(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
 	//TODO: vad ska returneras tillbaka till walleten om validering: 1) allt OK 2) något gick fel eller ej ok
 	return &openid4vp.CallbackReply{}, nil
 }
 
 func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*openid4vp.VerificationResult, error) {
-	//TODO: impl
-	return &openid4vp.VerificationResult{}, nil
+	status := openid4vp.StatusUnknown
+	vpSession, _ := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
+	if vpSession != nil {
+		status = vpSession.Status
+	}
+
+	var data any
+	if vpSession == nil {
+		// The vp session is removed as the last backend step in the verify flow
+		verificationRecord, err := c.db.VerificationRecordColl.Read(ctx, sessionID)
+		if err == nil {
+			status = openid4vp.StatusCompleted
+			//TODO: filter what data in verificationRecord to expose
+			data = verificationRecord
+		}
+	}
+
+	return &openid4vp.VerificationResult{
+		Status: string(status),
+		Data:   data,
+	}, nil
 }

@@ -64,7 +64,7 @@ function resetAndHideIndexContainer() {
     if (defaultOption) {
         documentTypeSelect.value = defaultOption.value;
     }
-    
+
     hideElement("indexContainer");
 }
 
@@ -192,7 +192,9 @@ async function refreshVerificationResult() {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        //TODO: const data = await response.json();
+        const data = await response.json();
+        console.log("Verification Result: status=" + data.status + " with data=" + data.data);
+        //TODO: visa data som statusrad samt i valid claims området
 
     } catch (error) {
         console.error("Error fetching and displaying verification result:", error);

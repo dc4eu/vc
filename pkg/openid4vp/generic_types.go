@@ -9,6 +9,12 @@ const (
 	DocumentTypeEHIC = "EHIC"
 	DocumentTypeELM  = "ELM"
 	DocumentTypePDA1 = "PDA1"
+
+	StatusQRDisplayed     InteractionStatus = "qr_displayed"
+	StatusQRScanned       InteractionStatus = "qr_scanned"
+	StatusVPTokenReceived InteractionStatus = "vp_token_received"
+	StatusCompleted       InteractionStatus = "completed"
+	StatusUnknown         InteractionStatus = "unknown"
 )
 
 // QR is a collection of fields representing a QR code
@@ -44,11 +50,14 @@ type VPInteractionSession struct {
 	CallbackID              string    `json:"callback_id"`
 	JTI                     string    `json:"jti"`
 	PresentationDefinition  *PresentationDefinition
+	Status                  InteractionStatus `json:"status"`
 	//---------------
 	VerifierKeyPair *KeyPair
 	//VerifierX509CertDER []byte
 	VerifierX5cCertDERBase64 string
 }
+
+type InteractionStatus string
 
 type AuthorizationRequest struct {
 	RequestObjectJWS string `json:"request_object"`
@@ -56,7 +65,7 @@ type AuthorizationRequest struct {
 
 type VerificationResult struct {
 	Status string `json:"status,omitempty"`
-	//TODO: add verified credentials here (valid claims etc)
+	Data   any    `json:"data"`
 }
 
 type CallbackReply struct {

@@ -96,7 +96,7 @@ func (s *Service) endpointGetVerificationResult(ctx context.Context, g *gin.Cont
 	webSession := sessions.Default(g)
 	vpSessionID, err := s.extractVPSessionIDfrom(webSession)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("no web session found or has expired")
 	}
 
 	reply, err := s.apiv1.GetVerificationResult(ctx, vpSessionID)

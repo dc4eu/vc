@@ -228,7 +228,8 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
-	err = c.db.VerificationRecordColl.Create(ctx, &openid4vp.VerificationRecord{
+	//TODO: ersätt stora delar av nedan med värden från själva valideringen
+	record := &openid4vp.VerificationRecord{
 		SessionID:  sessionID,
 		CallbackID: callbackID,
 		ValidationResult: openid4vp.ValidationMeta{
@@ -253,7 +254,8 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 				},
 			},
 		},
-	})
+	}
+	err = c.db.VerificationRecordColl.Create(ctx, record)
 	if err != nil {
 		return nil, err
 	}

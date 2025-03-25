@@ -93,10 +93,15 @@ function resetAndHideQRContainer() {
 }
 
 function resetAndHideVerificationContainer() {
+    resetVerificationContainer();
+    hideElement("verificationContainer");
+}
+
+function resetVerificationContainer() {
     clearAndHideError("verificationErrorMessage");
     showIcon("spinnerIcon");
-    //TODO rensa ev. data inom containern (claims, etc) samt återställ element till standarvärden och standardsynlighet
-    hideElement("verificationContainer");
+    getElementById("statusValue").textContent = "Unknown";
+    getElementById("claimsDisplay").value = "";
 }
 
 async function startVPFlow() {
@@ -162,23 +167,22 @@ async function startVPFlow() {
         openInDemoWWWalletButton.classList.remove("is-hidden");
 
         const checkVerificationResultButton = document.getElementById("checkVerificationResultButton");
-        checkVerificationResultButton.onclick = () => checkVPVerification();
+        checkVerificationResultButton.onclick = () => checkVPVerificationResult();
         checkVerificationResultButton.classList.remove("is-hidden");
     }
 }
 
 
-function checkVPVerification() {
+function checkVPVerificationResult() {
     console.log("checkVPVerification");
     resetAndHideQRContainer();
     resetAndHideVerificationContainer();
     showElement("verificationContainer");
-
-    //TODO: impl verification result
+    refreshVerificationResult();
 }
 
 async function refreshVerificationResult() {
-    //TODO: rensa ev. felmeddelande
+    resetVerificationContainer();
     try {
         const response = await fetch(new URL("/verificationresult", baseUrl), {
             method: "GET",
@@ -189,13 +193,32 @@ async function refreshVerificationResult() {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            let errorBody = '';
+            try {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const json = await response.json();
+                    errorBody = JSON.stringify(json, null, 2);
+                } else {
+                    errorBody = await response.text();
+                }
+            } catch (e) {
+                errorBody = 'Kunde inte läsa felmeddelande från svaret.';
+            }
+            throw new Error(`HTTP error! Status ${response.status} ${response.statusText}\n\nBody:\n${errorBody}`);
         }
 
         const data = await response.json();
         console.log("Verification Result: status=" + data.status + " with data=" + data.data);
-        //TODO: visa data som statusrad samt i valid claims området
 
+        getElementById("statusValue").textContent = data.status;
+
+        const claimsDisplay = getElementById("claimsDisplay");
+        if (data && data.data && Object.keys(data.data).length > 0) {
+            claimsDisplay.value = JSON.stringify(data.data, null, 2);
+        } else {
+            claimsDisplay.value = '';
+        }
     } catch (error) {
         console.error("Error fetching and displaying verification result:", error);
         const verificationResultErrorMessage = `An error occurred: ${error.message}`;
@@ -203,7 +226,7 @@ async function refreshVerificationResult() {
     }
 }
 
-async function resetVPFlow() {
+async function quitVPFlow() {
     console.log("resetVPFlow");
 
     resetAndHideQRContainer();

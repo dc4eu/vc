@@ -53,9 +53,9 @@
                 or window)
             </button>
             <button id="checkVerificationResultButton" class="button is-warning mt-2 is-hidden"
-                    onclick="checkVPVerification()">Check verification result
+                    onclick="checkVPVerificationResult()">Check verification result
             </button>
-            <button class="button is-danger mt-2" onclick="resetVPFlow()">Quit and return to start page</button>
+            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit and return to start page</button>
         </div>
 
         <div id="verificationContainer" class="box is-hidden">
@@ -69,14 +69,16 @@
                         class="fas fa-times-circle fa-3x"></i></span>
             </div>
             <br>
+            <p><strong>Status:</strong> <span id="statusValue">Unknown</span></p>
+            <br>
+
             <label class="label">Claims</label>
-            <textarea id="claimsDisplay" class="textarea is-small" readonly rows="30"
-                      placeholder="No valid claims yet..."></textarea>
+            <textarea id="claimsDisplay" class="textarea is-small" readonly rows="30"></textarea>
             <br>
             <button id="refreshVerificationResult" onclick="refreshVerificationResult()" class="button is-link mt-2">
                 Refresh (just for dev)
             </button>
-            <button class="button is-danger mt-2" onclick="resetVPFlow()">Quit and return to start page</button>
+            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit and return to start page</button>
         </div>
 
     </div>

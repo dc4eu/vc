@@ -60,8 +60,20 @@ func (c *Client) OIDCBatchCredential(ctx context.Context, req *openid4vci.BatchC
 }
 
 // OIDCDeferredCredential https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoin
-func (c *Client) OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.DeferredCredentialResponse, error) {
+func (c *Client) OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.CredentialResponse, error) {
+	// run the same code as OIDCCredential
 	return nil, nil
+}
+
+// OIDCredentialOfferURI https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-14.html#name-sending-credential-offer-by-
+func (c *Client) OIDCredentialOfferURI(ctx context.Context, req *openid4vci.CredentialOfferURIRequest) (*openid4vci.CredentialOfferParameters, error) {
+	c.log.Debug("credential offer uri", "req", req.CredentialOfferUUID)
+	doc, err := c.db.VCCredentialOfferColl.Get(ctx, req.CredentialOfferUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &doc.CredentialOfferParameters, nil
 }
 
 // OIDCNotification https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-notification-endpoint

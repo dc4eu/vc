@@ -32,10 +32,11 @@ type Apiv1 interface {
 	OIDCToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error)
 	OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, error)
 	OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error)
-	OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.DeferredCredentialResponse, error)
+	OIDCBatchCredential(ctx context.Context, req *openid4vci.BatchCredentialRequest) (*openid4vci.BatchCredentialResponse, error)
+	OIDCredentialOfferURI(ctx context.Context, req *openid4vci.CredentialOfferURIRequest) (*openid4vci.CredentialOfferParameters, error)
+	OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.CredentialResponse, error)
 	OIDCNotification(ctx context.Context, req *openid4vci.NotificationRequest) error
 	OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error)
-	OIDCBatchCredential(ctx context.Context, req *openid4vci.BatchCredentialRequest) (*openid4vci.BatchCredentialResponse, error)
 
 	//JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)
 	//Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)

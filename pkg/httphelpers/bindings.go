@@ -19,7 +19,7 @@ type bindingHandler struct {
 
 // FastAndSimple binds the request body to the given struct without use of struct tags (except for json)
 func (b *bindingHandler) FastAndSimple(ctx context.Context, c *gin.Context, v any) error {
-	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindV2")
+	ctx, span := b.client.tracer.Start(ctx, "httpserver:bindFastAndSimple")
 	defer span.End()
 
 	return json.NewDecoder(c.Request.Body).Decode(&v)
@@ -32,6 +32,10 @@ func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) err
 	}
 
 	if err := b.BindMultiPart(ctx, c, v); err != nil {
+		return err
+	}
+
+	if err := c.BindUri(v); err != nil {
 		return err
 	}
 	return nil
@@ -82,8 +86,6 @@ func (b *bindingHandler) BindMultiPart(ctx context.Context, c *gin.Context, v an
 		if fieldKey == "" {
 			continue
 		}
-
-		fmt.Println("MURA", fieldType.String())
 
 		switch fieldType.String() {
 		case "string":

@@ -307,6 +307,24 @@ func (s *Service) endpointOIDCToken(ctx context.Context, c *gin.Context) (any, e
 	return reply, nil
 }
 
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-14.html#name-sending-credential-offer-by-
+func (s *Service) endpointOIDCredentialOfferURI(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
+	defer span.End()
+
+	request := &openid4vci.CredentialOfferURIRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.OIDCredentialOfferURI(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-endpoint
 func (s *Service) endpointOIDCCredential(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")

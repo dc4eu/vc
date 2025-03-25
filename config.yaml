@@ -7,15 +7,20 @@ common:
     addr: jaeger:4318
     type: jaeger
     #timeout: 10
+  credential_offer_type: "credential_offer_uri"
   qr:
     recovery_level: 2
     size: 256
-    issuing_base_url: https://satosa-test-1.sunet.se
   kafka:
     enabled: false
     brokers:
       - "kafka0:9092"
       - "kafka1:9092"
+
+credential_offer:
+  type: "credential_offer_uri"
+  issuer_url: "http://vc_dev_issuer:8080"
+
 
 authentic_sources:
   SUNET_v1:
@@ -58,6 +63,8 @@ issuer:
   grpc_server:
     addr: vc_dev_issuer:8090
   signing_key_path: "/private_ec256.pem"
+  issuer_url: "http://172.16.50.2:8080"
+  credential_offer_url: "http://www.sunet.se" # is this the wallet url?
   metadata_path: "/metadata.golden"
   jwt_attribute:
     issuer: https://issuer.sunet.se

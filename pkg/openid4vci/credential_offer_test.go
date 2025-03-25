@@ -158,6 +158,43 @@ func TestQR(t *testing.T) {
 	}
 }
 
+func TestCredentialOfferURIQR(t *testing.T) {
+	tts := []struct {
+		name                 string
+		parameters           *CredentialOfferParameters
+		credentialServerAddr string
+		want                 *QR
+	}{
+		{
+			name: "",
+			parameters: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.sunet.se",
+				CredentialConfigurationIDs: []string{
+					"PDA1Credential",
+				},
+				Grants: map[string]any{
+					"authorization_code": &GrantAuthorizationCode{
+						IssuerState: fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", "d779badf-f333-434a-8bdf-fc0d419231ef", "PDA1", "SUNET"),
+					},
+				},
+			},
+			want: &QR{},
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			p, err := tt.parameters.CredentialOfferURI()
+			assert.NoError(t, err)
+
+			qr, err := p.QR(0, 256, "https://wallet.dc4eu.eu/cb", "https://issuer.sunet.se")
+			assert.NoError(t, err)
+
+			assert.Equal(t, tt.want, qr)
+		})
+	}
+}
+
 func TestCredentialOfferURI(t *testing.T) {
 	tts := []struct {
 		name                 string
@@ -191,7 +228,7 @@ func TestCredentialOfferURI(t *testing.T) {
 			got, err := tt.parameters.CredentialOfferURI()
 			assert.NoError(t, err)
 
-			u, err := url.Parse(got)
+			u, err := url.Parse(got.String())
 			assert.NoError(t, err)
 
 			assert.Equal(t, tt.want.Scheme, u.Scheme)

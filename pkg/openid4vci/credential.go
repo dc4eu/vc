@@ -36,10 +36,13 @@ func (c *CredentialRequest) Validate(ctx context.Context, tokenResponse *TokenRe
 // CredentialResponse https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-response
 type CredentialResponse struct {
 	//Credential: OPTIONAL. Contains issued Credential. It MUST be present when transaction_id is not returned. It MAY be a string or an object, depending on the Credential format. See Appendix A for the Credential format specific encoding requirements.
-	Credential any `json:"credential,omitempty" validate:"required_without=TransactionID,required_without=NotificationID"`
+	Credential any `json:"credential,omitempty" validate:"required_without=TransactionID,required_without=NotificationID Credentials"`
+
+	// Credentials OPTIONAL. Contains an array of issued Credentials. It MUST NOT be used if credential or transaction_id parameter is present. The values in the array MAY be a string or an object, depending on the Credential Format. See Appendix A for the Credential Format-specific encoding requirements.
+	Credentials []any `json:"credentials,omitempty" validate:"required_without=TransactionID Credential"`
 
 	// TransactionID: OPTIONAL. String identifying a Deferred Issuance transaction. This claim is contained in the response if the Credential Issuer was unable to immediately issue the Credential. The value is subsequently used to obtain the respective Credential with the Deferred Credential Endpoint (see Section 9). It MUST be present when the credential parameter is not returned. It MUST be invalidated after the Credential for which it was meant has been obtained by the Wallet.
-	TransactionID string `json:"transaction_id,omitempty" validate:"required_without=Credentials"`
+	TransactionID string `json:"transaction_id,omitempty" validate:"required_without=Credentials Credential"`
 
 	// CNonce: OPTIONAL. String containing a nonce to be used to create a proof of possession of key material when requesting a Credential (see Section 7.2). When received, the Wallet MUST use this nonce value for its subsequent Credential Requests until the Credential Issuer provides a fresh nonce.
 	CNonce string `json:"c_nonce,omitempty"`

@@ -9,6 +9,7 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -43,7 +44,7 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	}
 
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{
-		CredentialIssuer: c.cfg.Common.QR.IssuingBaseURL,
+		CredentialIssuer: c.cfg.Issuer.IssuerURL,
 		CredentialConfigurationIDs: []string{
 			credentialConfigurationID,
 		},
@@ -53,14 +54,39 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 			},
 		},
 	}
-	credentialOffer, err := credentialOfferParameter.CredentialOffer()
-	if err != nil {
-		return err
-	}
 
-	qr, err := credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Common.QR.IssuingBaseURL)
-	if err != nil {
-		return err
+	var qr *openid4vci.QR
+	switch c.cfg.Common.CredentialOfferType {
+	case "credential_offer":
+		credentialOffer, err := credentialOfferParameter.CredentialOffer()
+		if err != nil {
+			return err
+		}
+
+		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Issuer.IssuerURL)
+		if err != nil {
+			return err
+		}
+
+	case "credential_offer_uri":
+		credentialOffer, err := credentialOfferParameter.CredentialOfferURI()
+		if err != nil {
+			return err
+		}
+
+		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, "", c.cfg.Issuer.IssuerURL)
+		if err != nil {
+			return err
+		}
+
+		doc := &db.CredentialOfferDocument{
+			UUID:                      uuid.NewString(),
+			CredentialOfferParameters: credentialOfferParameter,
+		}
+
+		if err := c.db.VCCredentialOfferColl.Save(ctx, doc); err != nil {
+			return err
+		}
 	}
 
 	if req.Meta.Collect == nil || req.Meta.Collect.ID == "" {

@@ -64,7 +64,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRestricted, http.MethodPost, "token", http.StatusOK, s.endpointOIDCToken)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "nonce", http.StatusOK, s.endpointOIDCNonce)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "credential", http.StatusOK, s.endpointOIDCCredential)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "credential_offer", http.StatusOK, s.endpointOIDCBatchCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "credential-offer/:credential_offer_uuid", http.StatusOK, s.endpointOIDCredentialOfferURI)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "deferred_credential", http.StatusOK, s.endpointOIDCDeferredCredential)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRestricted, http.MethodPost, "notification", http.StatusNoContent, s.endpointOIDCNotification)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/openid-credential-issuer", http.StatusOK, s.endpointOIDCMetadata)

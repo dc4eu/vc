@@ -35,12 +35,13 @@ type Service struct {
 	tracer     *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	VCDatastoreColl     *VCDatastoreColl
-	VCConsentColl       *VCConsentColl
-	VCAuthColl          *VCAuthzColl
-	VCTokenColl         *VCTokenColl
-	VCUsersColl         *VCUsersColl
-	VCCodeChallengeColl *VCCodeChallengeColl
+	VCDatastoreColl       *VCDatastoreColl
+	VCConsentColl         *VCConsentColl
+	VCAuthColl            *VCAuthzColl
+	VCTokenColl           *VCTokenColl
+	VCUsersColl           *VCUsersColl
+	VCCodeChallengeColl   *VCCodeChallengeColl
+	VCCredentialOfferColl *VCCredentialOfferColl
 }
 
 // New creates a new database service
@@ -98,6 +99,12 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	service.VCCodeChallengeColl, err = NewPkceColl(ctx, "code_challenge", service, log.New("VCCodeChallengeColl"))
 	if err != nil {
 		service.log.Error(err, "failed to create pkce collection")
+		return nil, err
+	}
+
+	service.VCCredentialOfferColl, err = NewCredentialOfferColl(ctx, "credential_offer", service, log.New("VCCredentialOfferColl"))
+	if err != nil {
+		service.log.Error(err, "failed to create credential offer collection")
 		return nil, err
 	}
 

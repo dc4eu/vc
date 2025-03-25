@@ -14,8 +14,8 @@ import (
 
 // CredentialOfferParameters https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-offer-parameters
 type CredentialOfferParameters struct {
-	CredentialIssuer           string         `json:"credential_issuer" validate:"required"`
-	CredentialConfigurationIDs []string       `json:"credential_configuration_ids" validate:"required"`
+	CredentialIssuer           string         `json:"credential_issuer" bson:"credential_issuer" validate:"required"`
+	CredentialConfigurationIDs []string       `json:"credential_configuration_ids" bson:"credential_configuration_ids" validate:"required"`
 	Grants                     map[string]any `json:"grants"`
 }
 
@@ -26,22 +26,65 @@ func (c *CredentialOfferParameters) Marshal() ([]byte, error) {
 
 // GrantAuthorizationCode authorization code grant
 type GrantAuthorizationCode struct {
-	IssuerState         string `json:"issuer_state"`
-	AuthorizationServer string `json:"authorization,omitempty"`
+	IssuerState         string `json:"issuer_state" bson:"issuer_state"`
+	AuthorizationServer string `json:"authorization,omitempty" bson:"authorization_server,omitempty"`
 }
 
 // GrantPreAuthorizedCode authorization code grant
 type GrantPreAuthorizedCode struct {
-	PreAuthorizedCode   string `json:"pre-authorized_code" validate:"required"`
-	TXCode              TXCode `json:"tx_code,omitempty"`
-	AuthorizationServer string `json:"authorization_server,omitempty"`
+	PreAuthorizedCode   string `json:"pre-authorized_code" bson:"pre-authorized_code" validate:"required"`
+	TXCode              TXCode `json:"tx_code,omitempty" bson:"tx_code,omitempty"`
+	AuthorizationServer string `json:"authorization_server,omitempty" bson:"authorization_server,omitempty"`
 }
 
 // TXCode Transaction Code
 type TXCode struct {
-	InputMode   string `json:"input_mode" validate:"oneof=numeric text"`
+	InputMode   string `json:"input_mode" bson:"input_mode" validate:"oneof=numeric text"`
 	Length      int    `json:"length"`
 	Description string `json:"description"`
+}
+
+type CredentialOfferURIRequest struct {
+	CredentialOfferUUID string `uri:"credential_offer_uuid" binding:"required"`
+}
+
+type CredentialOfferURIResponse struct{}
+
+type CredentialOfferURI string
+
+func (c *CredentialOfferURI) String() string {
+	return string(*c)
+}
+
+func (c *CredentialOfferURI) QR(recoveryLevel, size int, walletHost, issuerHost string) (*QR, error) {
+	qrURL := fmt.Sprintf("%s?%s", issuerHost, c.String())
+	u, err := url.Parse(issuerHost)
+	if err != nil {
+		return nil, err
+	}
+
+	q := u.Query()
+	q.Set("credential_offer_uri", c.String())
+
+	qrPNG, err := qrcode.Encode(qrURL, qrcode.RecoveryLevel(recoveryLevel), size)
+	if err != nil {
+		return nil, err
+	}
+
+	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
+
+	if walletHost == "" {
+		walletHost = "openid-credential-offer://"
+	}
+
+	credentialOfferURL := fmt.Sprintf("%s?%s", walletHost, q.Encode())
+
+	qr := &QR{
+		QRBase64:           qrBase64,
+		CredentialOfferURL: credentialOfferURL,
+	}
+
+	return qr, nil
 }
 
 // CredentialOffer URI
@@ -127,7 +170,7 @@ func (c *CredentialOffer) QR(recoveryLevel, size int, walletHost string) (*QR, e
 }
 
 // CredentialOfferURI https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-sending-credential-offer-by-uri
-func (c *CredentialOfferParameters) CredentialOfferURI() (string, error) {
+func (c *CredentialOfferParameters) CredentialOfferURI() (CredentialOfferURI, error) {
 	u, err := url.Parse(c.CredentialIssuer)
 	if err != nil {
 		return "", err
@@ -135,7 +178,7 @@ func (c *CredentialOfferParameters) CredentialOfferURI() (string, error) {
 
 	q := u.JoinPath("credential-offer", uuid.NewString())
 
-	return q.String(), nil
+	return CredentialOfferURI(q.String()), nil
 }
 
 // CredentialOffer creates a credential offer

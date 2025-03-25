@@ -115,17 +115,6 @@ services:
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
-  wallet:
-    container_name: "vc_dev_wallet"
-    image: docker.sunet.se/dc4eu/wallet:latest
-    restart: always
-    volumes:
-      - ./config.yaml:/config.yaml:ro
-    networks:
-      vc-dev-net:
-        ipv4_address: 172.16.50.14
-    environment:
-      - "VC_CONFIG_YAML=config.yaml"
 
   #  mockas2:
   #    container_name: "vc_dev_mockas2"

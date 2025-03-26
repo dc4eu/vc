@@ -27,13 +27,17 @@ const acme_vc_sd_jwt_with_holder_binding = "eyJ0eXAiOiJ2YytzZC1qd3QiLCJ2Y3RtIjpb
 // standardBase64Decode to decode a "base64:..." from acme verifier
 func standardBase64Decode(base64str string) (string, error) {
 	if strings.HasPrefix(base64str, "b64:") {
-		avkodadData, err := base64.StdEncoding.DecodeString(base64str[4:])
+		decoded, err := base64.StdEncoding.DecodeString(base64str[4:])
 		if err != nil {
-			return "", fmt.Errorf("error Base64-decode: %v", err)
+			return "", err
 		}
-		return string(avkodadData), nil
+		return string(decoded), nil
 	}
-	return "", fmt.Errorf("string not starting with  'b64:'")
+	decoded, err := base64.StdEncoding.DecodeString(base64str[4:])
+	if err != nil {
+		return "", err
+	}
+	return string(decoded), nil
 }
 
 func TestDecode(t *testing.T) {
@@ -44,7 +48,6 @@ func TestDecode(t *testing.T) {
 	} else {
 		fmt.Println("Decoded:", decoded)
 	}
-
 }
 
 //func TestDecodeString(t *testing.T) {

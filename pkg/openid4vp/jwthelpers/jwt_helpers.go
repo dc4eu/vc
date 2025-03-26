@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"vc/pkg/openid4vp"
+	"vc/pkg/openid4vp/cryptohelpers"
 )
 
 type CustomClaims struct {
@@ -18,7 +19,7 @@ type CustomClaims struct {
 	State                  string                            `json:"state"`
 	Nonce                  string                            `json:"nonce"`
 	PresentationDefinition *openid4vp.PresentationDefinition `json:"presentation_definition,omitempty"`
-	//TODO: add "client_metadata"?
+	ClientMetadata         *cryptohelpers.ClientMetadata     `json:"client_metadata,omitempty"`
 }
 
 func CreateAndSignJWS(privateKey interface{}, signingMethod jwt.SigningMethod, x5cCertDERBase64 string, claims *CustomClaims) (string, error) {

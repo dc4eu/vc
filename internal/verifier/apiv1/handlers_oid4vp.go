@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"crypto/elliptic"
 	"encoding/base64"
 	"errors"
@@ -107,6 +108,8 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 	if err != nil {
 		return nil, err
 	}
+	//Store in session just for dev/test purpose
+	vpSession.RequestObjectJWS = requestObjectJWS
 
 	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
 	if err != nil {
@@ -157,6 +160,10 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	responseURI := fmt.Sprintf("%s/callback/%s/%s", verifierBaseUrl, vpSession.SessionID, vpSession.CallbackID)
 
 	now := jwt.NewNumericDate(time.Now())
+	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
+	if err != nil {
+		return "", err
+	}
 	claims := &jwthelpers.CustomClaims{
 		ResponseURI:            responseURI,
 		ClientIdScheme:         "x509_san_dns",        //TODO: vad ska client_id_scheme sättas till?
@@ -175,6 +182,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 			NotBefore: now,
 			ID:        vpSession.JTI,
 		},
+		ClientMetadata: clientMetadata,
 	}
 
 	jws, err := jwthelpers.CreateAndSignJWS(vpSession.VerifierKeyPair.PrivateKey, vpSession.VerifierKeyPair.SigningMethodToUse, vpSession.VerifierX5cCertDERBase64, claims)
@@ -245,9 +253,9 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 					{
 						ValidSelectiveDisclosures: []*openid4vp.Disclosure{
 							{
-								Salt:  "Salt12345",
-								Key:   "TheKey",
-								Value: "The value",
+								Salt:  "123456789",
+								Key:   "ExampleKey",
+								Value: "Example value",
 							},
 						},
 					},

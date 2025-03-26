@@ -6,12 +6,75 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"github.com/google/uuid"
 	"math/big"
 	"time"
 )
+
+type ClientMetadata struct { //From: OpenID Connect Dynamic Client Registration
+	JWKS                              JWKS      `json:"jwks"`
+	AuthorizationEncryptedResponseAlg string    `json:"authorization_encrypted_response_alg"`
+	AuthorizationEncryptedResponseEnc string    `json:"authorization_encrypted_response_enc"`
+	VPFormats                         VPFormats `json:"vp_formats"`
+}
+
+type JWKS struct { //From: RFC 7517 (JWK)
+	Keys []JWK `json:"keys"`
+}
+
+type VPFormats struct {
+	VCSDJWT VCSDJWT `json:"vc+sd-jwt"`
+}
+
+type VCSDJWT struct {
+	SDJWTAlgValues []string `json:"sd-jwt_alg_values"`
+	KBJWTAlgValues []string `json:"kb-jwt_alg_values"`
+}
+
+func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey) (*ClientMetadata, error) {
+	//TODO: gör denna mer generisk samt bryt ev metadata till annan del av koden men behåll jwks här
+	crv := "P-256"
+	curveSize := 32 // byte-length for P-256
+	x := bigIntToBase64URL(privateEmpKey.X, curveSize)
+	y := bigIntToBase64URL(privateEmpKey.Y, curveSize)
+
+	jwk := JWK{
+		Kty: "EC",
+		Use: "enc",
+		Kid: uuid.NewString(), //Only for emp keys
+		Crv: crv,
+		X:   x,
+		Y:   y,
+	}
+
+	clientMetadata := &ClientMetadata{
+		JWKS: JWKS{
+			Keys: []JWK{jwk},
+		},
+		AuthorizationEncryptedResponseAlg: "ECDH-ES",
+		AuthorizationEncryptedResponseEnc: "A256GCM",
+		VPFormats: VPFormats{
+			VCSDJWT: VCSDJWT{
+				SDJWTAlgValues: []string{"ES256"},
+				KBJWTAlgValues: []string{"ES256"},
+			},
+		},
+	}
+
+	return clientMetadata, nil
+}
+
+func base64urlNoPad(b []byte) string {
+	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+func bigIntToBase64URL(i *big.Int, size int) string {
+	bytes := i.FillBytes(make([]byte, size))
+	return base64urlNoPad(bytes)
+}
 
 func GenerateECDSAKey(curve elliptic.Curve) (*ecdsa.PrivateKey, error) {
 	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)

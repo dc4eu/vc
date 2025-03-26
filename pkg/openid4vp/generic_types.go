@@ -51,10 +51,12 @@ type VPInteractionSession struct {
 	JTI                     string    `json:"jti"`
 	PresentationDefinition  *PresentationDefinition
 	Status                  InteractionStatus `json:"status"`
-	//---------------
+
+	//TODO: Below is just for dev/test purpose and must be removed before production
 	VerifierKeyPair *KeyPair
 	//VerifierX509CertDER []byte
 	VerifierX5cCertDERBase64 string
+	RequestObjectJWS         string
 }
 
 type InteractionStatus string

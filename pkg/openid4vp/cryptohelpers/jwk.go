@@ -1,4 +1,4 @@
-package openid4vp
+package cryptohelpers
 
 import (
 	"crypto/ecdsa"
@@ -16,13 +16,29 @@ import (
 
 // JWK represents a JSON Web Key
 type JWK struct {
-	Kty string   `json:"kty"`
-	Crv string   `json:"crv,omitempty"`
-	N   string   `json:"n,omitempty"`
-	E   string   `json:"e,omitempty"`
-	X   string   `json:"x,omitempty"`
-	Y   string   `json:"y,omitempty"`
 	X5C []string `json:"x5c,omitempty"`
+
+	Kty string `json:"kty"`           // Key Type, e.g., "EC", "RSA", "OKP"
+	Use string `json:"use,omitempty"` // Public Key Use, e.g., "sig", "enc"
+	Kid string `json:"kid,omitempty"` // Key ID
+
+	// EC fields
+	Crv string `json:"crv,omitempty"` // Curve, e.g., "P-256"
+	X   string `json:"x,omitempty"`
+	Y   string `json:"y,omitempty"`
+
+	// RSA fields
+	N string `json:"n,omitempty"` // Modulus
+	E string `json:"e,omitempty"` // Exponent
+
+	// OKP (Octet Key Pair) fields
+	XOKP string `json:"x,omitempty"` // X value for OKP keys (reuses `x`)
+
+	// Symmetric keys
+	K string `json:"k,omitempty"` // Symmetric key value (e.g., for "oct")
+
+	// Common optional fields
+	Alg string `json:"alg,omitempty"` // Algorithm (optional, but common)
 }
 
 type JWSHeader struct {

@@ -1,0 +1,456 @@
+{
+  "type": [
+    "VerifiableCredential",
+    "EuropeanDigitalCredential"
+  ],
+  "credentialProfiles": {
+    "id": "http://data.europa.eu/snb/credential/e34929035b",
+    "type": "Concept",
+    "inScheme": {
+      "id": "http://data.europa.eu/snb/credential/25831c2",
+      "type": "ConceptScheme"
+    },
+    "prefLabel": {
+      "en": "Generic"
+    }
+  },
+  "displayParameter": {
+    "id": "urn:epass:displayParameter:1",
+    "type": "DisplayParameter",
+    "individualDisplay": {
+      "id": "urn:epass:individualDisplay:7cc30e74-1b77-4531-81a7-05a60e85fb0e",
+      "type": "IndividualDisplay",
+      "displayDetail": {
+        "id": "urn:epass:displayDetail:3a6f4e07-4895-4145-a848-2caae219605f",
+        "type": "DisplayDetail",
+        "image": {
+          "id": "urn:epass:mediaObject:778676f2-9694-49d3-b169-4ffd68d9ab31",
+          "type": "MediaObject",
+          "content": "/9j/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/yQALCAABAAEBAREA/8wABgAQEAX/2gAIAQEAAD8A0s8g/9k=",
+          "contentEncoding": {
+            "id": "http://data.europa.eu/snb/encoding/6146cde7dd",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/encoding/25831c2",
+              "type": "ConceptScheme"
+            },
+            "prefLabel": {
+              "en": "base64"
+            }
+          },
+          "contentType": {
+            "id": "http://publications.europa.eu/resource/authority/file-type/JPEG",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://publications.europa.eu/resource/authority/file-type",
+              "type": "ConceptScheme"
+            },
+            "notation": "file-type",
+            "prefLabel": {
+              "en": "JPEG"
+            }
+          }
+        },
+        "page": 1
+      },
+      "language": {
+        "id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/language",
+          "type": "ConceptScheme"
+        },
+        "notation": "langugage",
+        "prefLabel": {
+          "en": "en"
+        }
+      }
+    },
+    "primaryLanguage": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "language": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "title": {
+      "en": "A converted document from ELMO:1.7"
+    }
+  },
+  "credentialSchema": {
+    "id": "http://data.europa.eu/snb/model/ap/edc-generic-full",
+    "type": "ShaclValidator2017"
+  },
+  "credentialSubject": {
+    "id": "urn:epass:person:c34b7659-3361-4296-90b7-b16216a2611a",
+    "type": "Person",
+    "dateOfBirth": "1966-07-18T00:00:00",
+    "gender": {
+      "id": "http://publications.europa.eu/resource/authority/human-sex/FEMALE",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/human-sex",
+        "type": "ConceptScheme"
+      },
+      "notation": "human-sex",
+      "prefLabel": {
+        "en": "female"
+      }
+    },
+    "hasClaim": {
+      "id": "urn:epass:learningAchievement:393640b6-9114-47ea-abff-3886b5ce62e0",
+      "type": "LearningAchievement",
+      "awardedBy": {
+        "id": "urn:epass:awardingProcess:885ac709-ec47-4394-b7ea-df36742acf8f",
+        "type": "AwardingProcess",
+        "awardingBody": {
+          "id": "urn:epass:org:35184f8f-c26f-4557-9282-5c6a86930f71",
+          "type": "Organisation",
+          "location": {
+            "id": "urn:epass:location:22bcea1c-1060-4935-8e4c-3d298062cf87",
+            "type": "Location",
+            "address": {
+              "id": "urn:epass:address:1761709c-abdd-41ad-b1f1-c666180df430",
+              "type": "Address",
+              "countryCode": {
+                "id": "http://publications.europa.eu/resource/authority/country/FIN",
+                "type": "Concept",
+                "inScheme": {
+                  "id": "http://publications.europa.eu/resource/authority/country",
+                  "type": "ConceptScheme"
+                },
+                "notation": "country",
+                "prefLabel": {
+                  "en": "Finland"
+                }
+              }
+            }
+          },
+          "identifier": {
+            "id": "urn:epass:identifier:fbbe0adf-a229-43c1-ae4b-feba904fc91a",
+            "type": "Identifier",
+            "schemeName": "SCHAC",
+            "notation": "centria.fi"
+          },
+          "legalName": {
+            "fi": "Centria-ammattikorkeakoulu"
+          },
+          "homepage": {
+            "id": "urn:epass:webResource:b5de207a-baf9-4f3d-aa1d-ec09bb076dab",
+            "type": "WebResource",
+            "contentURL": "https://centria.fi"
+          }
+        },
+        "awardingDate": "2015-07-31T00:00:00",
+        "used": {
+          "id": "converter:assessment:1",
+          "type": "LearningAssessment",
+          "assessedBy": {
+            "id": "urn:epass:org:97675aef-de03-48a8-80c0-eb0ad6cd5b92",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:05394fd5-16e2-482a-bdc9-3c8d890e3489",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:137a392a-3e71-426e-873e-4a8b03fa1411",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/FIN",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Finland"
+                  }
+                }
+              }
+            },
+            "identifier": {
+              "id": "urn:epass:identifier:12af3a87-af4a-4c31-a00e-17f109c51884",
+              "type": "Identifier",
+              "schemeName": "SCHAC",
+              "notation": "centria.fi"
+            },
+            "legalName": {
+              "fi": "Centria-ammattikorkeakoulu"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:9c68a2d6-4f4b-483e-b540-bc9481c15373",
+              "type": "WebResource",
+              "contentURL": "https://centria.fi"
+            }
+          },
+          "awardedBy": {
+            "id": "urn:epass:awardingProcess:e4ef2b4d-a173-4ec3-949b-8c3bdc3cc944",
+            "type": "AwardingProcess",
+            "awardingBody": {
+              "id": "urn:epass:org:4cf27a6b-21fb-4727-ba04-512f450a2daf",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:c2c47933-c2bb-4f48-96ba-c395cddba1fc",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:dfb10d28-bdb1-4844-86a2-32901c5b7dff",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/FIN",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Finland"
+                    }
+                  }
+                }
+              },
+              "identifier": {
+                "id": "urn:epass:identifier:9bebd968-c090-44ae-a32b-d09c634401d3",
+                "type": "Identifier",
+                "schemeName": "SCHAC",
+                "notation": "centria.fi"
+              },
+              "legalName": {
+                "fi": "Centria-ammattikorkeakoulu"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:00aadcdb-c985-4001-b7da-e6219dfdcc2d",
+                "type": "WebResource",
+                "contentURL": "https://centria.fi"
+              }
+            },
+            "awardingDate": "2015-07-31T00:00:00"
+          },
+          "grade": {
+            "id": "urn:epass:note:4efd2dad-85c6-4132-8c11-f597db845ed3",
+            "type": "Note",
+            "noteFormat": {
+              "id": "urn:epass:concept:cf240bbc-fa05-48a7-9b86-6b0dd2c2ebcf",
+              "type": "Concept",
+              "definition": {
+                "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+              },
+              "notation": "text/plain"
+            },
+            "noteLiteral": {
+              "und": "4"
+            }
+          },
+          "gradeStatus": {
+            "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/grade-status/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "grade-status",
+            "prefLabel": {
+              "en": "pass"
+            }
+          },
+          "specifiedBy": {
+            "id": "urn:epass:learningAssessmentSpec:14149840-9323-4c6e-a430-585a83b07e1e",
+            "type": "LearningAssessmentSpecification",
+            "language": {
+              "id": "http://publications.europa.eu/resource/authority/language/FIN",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://publications.europa.eu/resource/authority/language",
+                "type": "ConceptScheme"
+              },
+              "notation": "fi",
+              "prefLabel": {
+                "en": "Finnish"
+              }
+            },
+            "title": {
+              "fi": "Lääketieteellinen perusta"
+            }
+          },
+          "dateIssued": "2015-07-31T00:00:00",
+          "title": {
+            "fi": "Lääketieteellinen perusta"
+          },
+          "identifier": [
+            {
+              "id": "urn:epass:identifier:5ca2fc47-0cf5-441e-aac7-2a115389655e",
+              "type": "Identifier",
+              "schemeName": "koulutusmoduulitunniste",
+              "notation": "THHTN14A SH0303-148A3"
+            },
+            {
+              "id": "urn:epass:identifier:5b9229c8-862d-4e10-98a8-67225c6537e0",
+              "type": "Identifier",
+              "schemeName": "opintosuoritus_avain",
+              "notation": "1513132"
+            },
+            {
+              "id": "urn:epass:identifier:305da719-c6d7-424e-bad4-f3a4a9def0ee",
+              "type": "Identifier",
+              "schemeName": "elmo:type:los",
+              "notation": "Course"
+            }
+          ]
+        }
+      },
+      "creditReceived": {
+        "id": "urn:epass:creditPoint:ee11c2be-29b3-467b-9f7e-0fd8573c35a6",
+        "type": "CreditPoint",
+        "framework": {
+          "id": "http://data.europa.eu/snb/education-credit/6fcec5c5af",
+          "type": "Concept",
+          "inScheme": {
+            "id": "http://data.europa.eu/snb/education-credit/25831c2",
+            "type": "ConceptScheme"
+          },
+          "notation": "credit-point-framework",
+          "prefLabel": {
+            "en": "ECTS"
+          }
+        },
+        "point": "5"
+      },
+      "specifiedBy": {
+        "id": "urn:epass:qualification:82514d8a-e487-4bf5-9592-4e31e961637b",
+        "type": "Qualification",
+        "eqfLevel": {
+          "id": "http://data.europa.eu/snb/eqf/5",
+          "type": "Concept",
+          "inScheme": {
+            "id": "http://data.europa.eu/snb/eqf/25831c2",
+            "type": "ConceptScheme"
+          },
+          "notation": "eqf-level",
+          "prefLabel": {
+            "en": "Level 5"
+          }
+        },
+        "creditPoint": {
+          "id": "urn:epass:creditPoint:c92892d2-dce9-4ee8-a09f-c9a3b0b938f9",
+          "type": "CreditPoint",
+          "framework": {
+            "id": "http://data.europa.eu/snb/education-credit/6fcec5c5af",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/education-credit/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "credit-point-framework",
+            "prefLabel": {
+              "en": "ECTS"
+            }
+          },
+          "point": "5"
+        },
+        "educationLevel": {
+          "id": "http://data.europa.eu/snb/eqf/5",
+          "type": "Concept",
+          "inScheme": {
+            "id": "http://data.europa.eu/snb/eqf/25831c2",
+            "type": "ConceptScheme"
+          },
+          "notation": "eqf-level",
+          "prefLabel": {
+            "en": "Level 5"
+          }
+        },
+        "language": {
+          "id": "http://publications.europa.eu/resource/authority/language/FIN",
+          "type": "Concept",
+          "inScheme": {
+            "id": "http://publications.europa.eu/resource/authority/language",
+            "type": "ConceptScheme"
+          },
+          "notation": "fi",
+          "prefLabel": {
+            "en": "Finnish"
+          }
+        },
+        "title": {
+          "fi": "Lääketieteellinen perusta"
+        }
+      },
+      "title": {
+        "fi": "Lääketieteellinen perusta"
+      },
+      "identifier": [
+        {
+          "id": "urn:epass:identifier:7a927142-bf01-4797-ad07-bc9e06d791b2",
+          "type": "Identifier",
+          "schemeName": "koulutusmoduulitunniste",
+          "notation": "THHTN14A SH0303-148A3"
+        },
+        {
+          "id": "urn:epass:identifier:a66f5f50-1061-4ac5-b2e1-cbba71f04514",
+          "type": "Identifier",
+          "schemeName": "opintosuoritus_avain",
+          "notation": "1513132"
+        },
+        {
+          "id": "urn:epass:identifier:ae9c5d84-f1ee-4e1e-a580-e0748a1547b7",
+          "type": "Identifier",
+          "schemeName": "elmo:type:los",
+          "notation": "Course"
+        }
+      ]
+    },
+    "nationalID": {
+      "id": "urn:epass:legalIdentifier:180766-2213",
+      "type": "LegalIdentifier",
+      "spatial": {
+        "id": "http://publications.europa.eu/resource/authority/country/USA",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/country",
+          "type": "ConceptScheme"
+        },
+        "notation": "country",
+        "prefLabel": {
+          "en": "United States"
+        }
+      },
+      "notation": "nationalIdentifier"
+    },
+    "identifier": {
+      "id": "urn:epass:identifier:d732513e-7ef9-40bc-bc95-37a623139809",
+      "type": "Identifier",
+      "schemeName": "nationalIdentifier",
+      "notation": "180766-2213"
+    },
+    "familyName": {
+      "und": "Keränen"
+    },
+    "givenName": {
+      "und": "Kaisa Barbara"
+    }
+  },
+  "issuanceDate": "2025-03-25T09:39:29",
+  "issued": "2025-03-25T09:39:29",
+  "validFrom": "2025-03-25T09:39:29",
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "http://data.europa.eu/snb/model/context/edc-ap"
+  ]
+}

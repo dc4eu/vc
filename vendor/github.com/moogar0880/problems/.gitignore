@@ -24,4 +24,4 @@ _testmain.go
 *.prof
 
 # Coverage reports
-cover.out
+coverage.out

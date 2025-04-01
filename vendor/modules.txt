@@ -345,8 +345,8 @@ github.com/mohae/deepcopy
 # github.com/montanaflynn/stats v0.7.1
 ## explicit; go 1.13
 github.com/montanaflynn/stats
-# github.com/moogar0880/problems v1.0.0
-## explicit; go 1.24
+# github.com/moogar0880/problems v0.1.1
+## explicit; go 1.12
 github.com/moogar0880/problems
 # github.com/pelletier/go-toml/v2 v2.2.3
 ## explicit; go 1.21.0

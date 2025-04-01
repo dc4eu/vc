@@ -21,9 +21,11 @@ func (c *diplomaClient) MetadataClaim(vct string) ([]string, error) {
 				Name: "Diploma",
 				Rendering: Rendering{
 					SVGTemplates: []SVGTemplates{
+
 						{
-							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/diplomaTemplate.svg",
-							URLIntegrity: "sha256-20ca202ae2b3103b967d64483dee45ed10494e6de9f009b04e521a3a8e14d79d",
+
+							URI:          "https://raw.githubusercontent.com/dc4eu/vc/633940b0b00ab259af01cfbff958f1ffebf5176a/images/diplomaTemplate.svg",
+							URLIntegrity: "1acd4883826aba0318d219213bb75a9dfc858f926e93f576224412301fe3018a",
 							Properties:   SVGTemplateProperties{},
 						},
 					},

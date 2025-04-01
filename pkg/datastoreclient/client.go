@@ -20,6 +20,7 @@ type Client struct {
 
 	Document *documentHandler
 	Identity *identityHandler
+	Root     *rootHandler
 }
 
 // Config is the configuration for the client
@@ -37,11 +38,18 @@ func New(config *Config) (*Client, error) {
 			Timeout: 10 * time.Second,
 		},
 		url: config.URL,
-		log: logger.NewSimple("datastoreclient"),
+		//log: logger.NewSimple("datastoreclient"),
 	}
 
-	c.Document = &documentHandler{client: c, service: "api/v1/document", log: c.log.New("document")}
-	c.Identity = &identityHandler{client: c, service: "api/v1/identity", log: c.log.New("identity")}
+	var err error
+	c.log, err = logger.New("datastoreClient", "", false)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Document = &documentHandler{client: c, serviceBaseURL: "api/v1/document", log: c.log.New("document")}
+	c.Identity = &identityHandler{client: c, serviceBaseURL: "api/v1/identity", log: c.log.New("identity")}
+	c.Root = &rootHandler{client: c, serviceBaseURL: "api/v1", log: c.log.New("root")}
 
 	return c, nil
 }

@@ -1,0 +1,1817 @@
+{
+  "type": [
+    "VerifiableCredential",
+    "EuropeanDigitalCredential"
+  ],
+  "credentialProfiles": {
+    "id": "http://data.europa.eu/snb/credential/e34929035b",
+    "type": "Concept",
+    "inScheme": {
+      "id": "http://data.europa.eu/snb/credential/25831c2",
+      "type": "ConceptScheme"
+    },
+    "prefLabel": {
+      "en": "Generic"
+    }
+  },
+  "displayParameter": {
+    "id": "urn:epass:displayParameter:1",
+    "type": "DisplayParameter",
+    "individualDisplay": {
+      "id": "urn:epass:individualDisplay:c3688daa-b630-4d5d-bd39-f57297058a73",
+      "type": "IndividualDisplay",
+      "displayDetail": {
+        "id": "urn:epass:displayDetail:9ea07172-db0c-4054-a3a5-26e5d993a40c",
+        "type": "DisplayDetail",
+        "image": {
+          "id": "urn:epass:mediaObject:dba372aa-4745-495b-9e54-04250837e678",
+          "type": "MediaObject",
+          "content": "/9j/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/yQALCAABAAEBAREA/8wABgAQEAX/2gAIAQEAAD8A0s8g/9k=",
+          "contentEncoding": {
+            "id": "http://data.europa.eu/snb/encoding/6146cde7dd",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/encoding/25831c2",
+              "type": "ConceptScheme"
+            },
+            "prefLabel": {
+              "en": "base64"
+            }
+          },
+          "contentType": {
+            "id": "http://publications.europa.eu/resource/authority/file-type/JPEG",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://publications.europa.eu/resource/authority/file-type",
+              "type": "ConceptScheme"
+            },
+            "notation": "file-type",
+            "prefLabel": {
+              "en": "JPEG"
+            }
+          }
+        },
+        "page": 1
+      },
+      "language": {
+        "id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/language",
+          "type": "ConceptScheme"
+        },
+        "notation": "langugage",
+        "prefLabel": {
+          "en": "en"
+        }
+      }
+    },
+    "primaryLanguage": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "language": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "title": {
+      "en": "A converted document from ELMO:1.7"
+    }
+  },
+  "credentialSchema": {
+    "id": "http://data.europa.eu/snb/model/ap/edc-generic-full",
+    "type": "ShaclValidator2017"
+  },
+  "credentialSubject": {
+    "id": "urn:epass:person:4f49ce07-f0d0-46c2-8ec8-1b2edc277506",
+    "type": "Person",
+    "dateOfBirth": "1933-03-12T00:00:00",
+    "hasClaim": [
+      {
+        "id": "urn:epass:learningAchievement:4a893c81-8a4c-4aa2-b78a-610ae550531e",
+        "type": "LearningAchievement",
+        "awardedBy": {
+          "id": "urn:epass:awardingProcess:808af5a7-84aa-46b5-ba56-6ead2ce811d6",
+          "type": "AwardingProcess",
+          "awardingBody": {
+            "id": "urn:epass:org:67c276a1-d58f-440e-b250-374b639f81ff",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:0f95a733-c0f8-4608-ba84-a72a75e1faf2",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:a5647fd4-e90c-4965-a95f-48350be43405",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Sweden"
+                  }
+                }
+              }
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:ae4ca248-bed7-4425-9aef-adeea8da1b83",
+                "type": "Identifier",
+                "schemeName": "larosateID",
+                "notation": "96"
+              },
+              {
+                "id": "urn:epass:identifier:69e4e6c0-68a8-4c23-bcd5-5610488c3fd8",
+                "type": "Identifier",
+                "schemeName": "national",
+                "notation": "BLA"
+              },
+              {
+                "id": "urn:epass:identifier:7c806d2d-00f3-45a7-894a-25d6de612db4",
+                "type": "Identifier",
+                "schemeName": "schac",
+                "notation": "ladok.se/testhei/bla"
+              }
+            ],
+            "legalName": {
+              "en": "The Blue lärosäte",
+              "sv": "Blå Lärosätet"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:475576a0-310c-412f-bdd2-ac29bb06c60b",
+              "type": "WebResource",
+              "contentURL": "http://www.ladok.se/testhei/bla"
+            }
+          },
+          "awardingDate": "2019-12-11T00:00:00",
+          "used": {
+            "id": "converter:assessment:1",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:538e6cf7-a2a0-4db1-9b5e-c49abbe43173",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:0370fd90-bcce-4739-95e7-2c747bac14e2",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:5c4a1ac1-e51a-4be5-a1cc-e6b03b988164",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Sweden"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:c7c74351-25ba-4cdd-8b1c-0b1ab2278ff1",
+                  "type": "Identifier",
+                  "schemeName": "larosateID",
+                  "notation": "96"
+                },
+                {
+                  "id": "urn:epass:identifier:417127d2-6768-400a-b46e-1ba217561aeb",
+                  "type": "Identifier",
+                  "schemeName": "national",
+                  "notation": "BLA"
+                },
+                {
+                  "id": "urn:epass:identifier:171ae00b-9e1d-4a0e-b340-0558ccc7aac5",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "ladok.se/testhei/bla"
+                }
+              ],
+              "legalName": {
+                "en": "The Blue lärosäte",
+                "sv": "Blå Lärosätet"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:92ed25a0-7587-4f1a-a75c-aac0a28323be",
+                "type": "WebResource",
+                "contentURL": "http://www.ladok.se/testhei/bla"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:2e9c5c07-5707-457e-a13d-842c16882b33",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:bf611f01-3be7-44ea-9427-20b4a26408c7",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:8b276693-31e4-48f1-889e-a78e1970f273",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:40270c60-51e9-479c-a336-8e76149d8838",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Sweden"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:3800cef0-59c3-4f2a-8f9a-9118e4ecbd2e",
+                    "type": "Identifier",
+                    "schemeName": "larosateID",
+                    "notation": "96"
+                  },
+                  {
+                    "id": "urn:epass:identifier:c38bd568-607d-4eba-8597-4f6336aeb67b",
+                    "type": "Identifier",
+                    "schemeName": "national",
+                    "notation": "BLA"
+                  },
+                  {
+                    "id": "urn:epass:identifier:1b67dc27-dcb9-4dfb-8cba-6f1b0b6f2e87",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "ladok.se/testhei/bla"
+                  }
+                ],
+                "legalName": {
+                  "en": "The Blue lärosäte",
+                  "sv": "Blå Lärosätet"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:90115250-1517-4132-9061-5ae830913b70",
+                  "type": "WebResource",
+                  "contentURL": "http://www.ladok.se/testhei/bla"
+                }
+              },
+              "awardingDate": "2019-12-11T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:f6aa96d1-7529-453b-8596-9eb330601219",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:3ba1de84-9038-4802-982f-318df98c58c2",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "5"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:36bb885d-ac27-434c-99fd-ba9e870e8f32",
+              "type": "LearningAssessmentSpecification",
+              "title": {
+                "en": "External integration",
+                "sv": "Extern integration"
+              }
+            },
+            "dateIssued": "2019-12-11T00:00:00",
+            "title": {
+              "en": "External integration",
+              "sv": "Extern integration"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:a23b205a-02a5-48b9-9090-f3a992e2e1cc",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "EI0001"
+              },
+              {
+                "id": "urn:epass:identifier:3b6ed02b-1157-4d56-b4a0-9006fab9de32",
+                "type": "Identifier",
+                "schemeName": "utbildningsinstansUID",
+                "notation": "45e81a59-f803-11e9-b44c-aeba60d441fd"
+              },
+              {
+                "id": "urn:epass:identifier:b02c8918-a6d3-4e53-93dc-ceddf388b88e",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "3fa017f8-1c27-11ea-bdc8-e63beb2a4023"
+              },
+              {
+                "id": "urn:epass:identifier:f2b03aa0-4a1c-43dc-a37f-174e54fbdda6",
+                "type": "Identifier",
+                "schemeName": "resultatPaKursUID",
+                "notation": "3fa017f8-1c27-11ea-bdc8-e63beb2a4023"
+              },
+              {
+                "id": "urn:epass:identifier:c184c460-de05-41aa-a2fd-546090390c78",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              }
+            ]
+          }
+        },
+        "creditReceived": {
+          "id": "urn:epass:creditPoint:1b6560d9-7470-4048-a32e-c95ce1b4c54a",
+          "type": "CreditPoint",
+          "framework": {
+            "id": "urn:epass:concept:0f16f8b4-1036-46f4-b477-a7b92389b2b0",
+            "type": "Concept",
+            "prefLabel": {
+              "und": "ects"
+            }
+          },
+          "point": "30.0"
+        },
+        "specifiedBy": {
+          "id": "urn:epass:learningAchievementSpec:ccaa71bc-1094-4781-8079-655954b1eeca",
+          "type": "LearningAchievementSpecification",
+          "creditPoint": {
+            "id": "urn:epass:creditPoint:4cc068d3-268b-4283-b7fd-d68b43ed760c",
+            "type": "CreditPoint",
+            "framework": {
+              "id": "urn:epass:concept:36b05c36-be3d-42ee-8a14-54e877ef5788",
+              "type": "Concept",
+              "prefLabel": {
+                "und": "ects"
+              }
+            },
+            "point": "30.0"
+          },
+          "title": {
+            "en": "External integration",
+            "sv": "Extern integration"
+          }
+        },
+        "title": {
+          "en": "External integration",
+          "sv": "Extern integration"
+        },
+        "identifier": [
+          {
+            "id": "urn:epass:identifier:171e9ec6-0f4f-4104-a553-72c1df96b315",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "EI0001"
+          },
+          {
+            "id": "urn:epass:identifier:b17409a7-6724-4457-81d8-d9a4264b49de",
+            "type": "Identifier",
+            "schemeName": "utbildningsinstansUID",
+            "notation": "45e81a59-f803-11e9-b44c-aeba60d441fd"
+          },
+          {
+            "id": "urn:epass:identifier:bb4200d6-cd64-439b-9c2b-14f1bc53f58d",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "3fa017f8-1c27-11ea-bdc8-e63beb2a4023"
+          },
+          {
+            "id": "urn:epass:identifier:1f02ae4d-cf55-44fe-b68c-c09510187313",
+            "type": "Identifier",
+            "schemeName": "resultatPaKursUID",
+            "notation": "3fa017f8-1c27-11ea-bdc8-e63beb2a4023"
+          },
+          {
+            "id": "urn:epass:identifier:be5155a6-26ff-42b0-b9ee-42c33e94c339",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        ]
+      },
+      {
+        "id": "urn:epass:learningAchievement:2a74a980-bd9e-4e4f-b242-2398dd414218",
+        "type": "LearningAchievement",
+        "awardedBy": {
+          "id": "urn:epass:awardingProcess:ea51ea84-87c1-49fb-935d-0214c17a1170",
+          "type": "AwardingProcess",
+          "awardingBody": {
+            "id": "urn:epass:org:3c10041f-17ea-44ed-aa5c-1fabe5bd6b34",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:8c4a4909-a805-497c-a631-536aea0aedc8",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:6e63f427-2b9b-477a-8f5b-4f9083c6d380",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Sweden"
+                  }
+                }
+              }
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:9552ea81-200d-4695-8358-797e697de815",
+                "type": "Identifier",
+                "schemeName": "larosateID",
+                "notation": "96"
+              },
+              {
+                "id": "urn:epass:identifier:a5bc7849-16b9-4150-b1bd-b9f00ec0d29e",
+                "type": "Identifier",
+                "schemeName": "national",
+                "notation": "BLA"
+              },
+              {
+                "id": "urn:epass:identifier:ecb6b05f-16d7-4a5b-82ea-fffcb474105e",
+                "type": "Identifier",
+                "schemeName": "schac",
+                "notation": "ladok.se/testhei/bla"
+              }
+            ],
+            "legalName": {
+              "en": "The Blue lärosäte",
+              "sv": "Blå Lärosätet"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:4ac43211-be77-499d-8086-6c145b78ce25",
+              "type": "WebResource",
+              "contentURL": "http://www.ladok.se/testhei/bla"
+            }
+          },
+          "awardingDate": "2019-12-12T00:00:00",
+          "used": {
+            "id": "converter:assessment:2",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:bcffe439-5bde-4d77-9053-43c165d50dc9",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:90893871-dcf6-4e0a-9e34-23cd8da63353",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:0802339e-1ab4-4b97-9600-7a929d6c5e92",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Sweden"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:6f9fe444-defb-47ff-857b-080f107b891c",
+                  "type": "Identifier",
+                  "schemeName": "larosateID",
+                  "notation": "96"
+                },
+                {
+                  "id": "urn:epass:identifier:66c9c7b2-318c-4ec7-a25e-6af3a814c519",
+                  "type": "Identifier",
+                  "schemeName": "national",
+                  "notation": "BLA"
+                },
+                {
+                  "id": "urn:epass:identifier:a7b490c9-e8f3-42b4-8a4a-fae04a0922dd",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "ladok.se/testhei/bla"
+                }
+              ],
+              "legalName": {
+                "en": "The Blue lärosäte",
+                "sv": "Blå Lärosätet"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:72cf550a-ab1b-4a4f-a1d8-2561cb9774f4",
+                "type": "WebResource",
+                "contentURL": "http://www.ladok.se/testhei/bla"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:3714bce9-a731-473a-b6fd-cf874bbe2202",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:ec46f38a-a84c-48ad-ad73-9ad5f3276df7",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:45d6bb2d-279f-4d77-82c6-2117bf03fee8",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:090e1db3-0856-47e8-b084-ee2f7d5a3e85",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Sweden"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:3bb9f013-0fbb-4636-b14f-f8e5bd1ecf92",
+                    "type": "Identifier",
+                    "schemeName": "larosateID",
+                    "notation": "96"
+                  },
+                  {
+                    "id": "urn:epass:identifier:8d9825ff-0cf5-49d3-ac81-5a512a1a620c",
+                    "type": "Identifier",
+                    "schemeName": "national",
+                    "notation": "BLA"
+                  },
+                  {
+                    "id": "urn:epass:identifier:17cdc183-1d4e-4d40-900f-df9d3ede7101",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "ladok.se/testhei/bla"
+                  }
+                ],
+                "legalName": {
+                  "en": "The Blue lärosäte",
+                  "sv": "Blå Lärosätet"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:1d74c774-a2c6-46b0-bec2-01740fbee928",
+                  "type": "WebResource",
+                  "contentURL": "http://www.ladok.se/testhei/bla"
+                }
+              },
+              "awardingDate": "2019-12-12T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:4974f52b-8770-457a-b3bc-a4664ba91bb2",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:b4f71900-a4a8-45a7-adc7-1df97963a8c1",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "G"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:e9d0ea73-19de-4c6d-9dbd-6ba490cc7399",
+              "type": "LearningAssessmentSpecification",
+              "title": {
+                "en": "Axe making",
+                "sv": "Grundkurs i yxande"
+              }
+            },
+            "dateIssued": "2019-12-12T00:00:00",
+            "title": {
+              "en": "Axe making",
+              "sv": "Grundkurs i yxande"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:a8aaaa25-9099-4a64-875f-e2dae72c8c4b",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "HHYXA1"
+              },
+              {
+                "id": "urn:epass:identifier:e2333735-6fee-4050-b93c-da5492b105de",
+                "type": "Identifier",
+                "schemeName": "utbildningsinstansUID",
+                "notation": "66ca0603-1cb7-11ea-a48c-72c0d26b47b3"
+              },
+              {
+                "id": "urn:epass:identifier:7f549190-00ed-4099-87aa-03d504792885",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "8658bafc-1cbd-11ea-a48c-383a75f341e6"
+              },
+              {
+                "id": "urn:epass:identifier:567922d6-99cc-49f4-94ac-d40f14d80fa3",
+                "type": "Identifier",
+                "schemeName": "resultatPaKursUID",
+                "notation": "8658bafc-1cbd-11ea-a48c-383a75f341e6"
+              },
+              {
+                "id": "urn:epass:identifier:97ddd2b9-9497-4a33-9e5e-c9b42338a32d",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              }
+            ]
+          }
+        },
+        "creditReceived": {
+          "id": "urn:epass:creditPoint:f3dea674-511a-430c-8c0e-66763a35cb4b",
+          "type": "CreditPoint",
+          "framework": {
+            "id": "urn:epass:concept:4e6adaa3-53c0-48b1-9e71-5064b97eaaeb",
+            "type": "Concept",
+            "prefLabel": {
+              "und": "ects"
+            }
+          },
+          "point": "6.0"
+        },
+        "specifiedBy": {
+          "id": "urn:epass:learningAchievementSpec:572474d9-c800-4052-a2dc-b635a1cc1724",
+          "type": "LearningAchievementSpecification",
+          "creditPoint": {
+            "id": "urn:epass:creditPoint:a19c1de5-df70-4f1b-a8bc-2e00d9b2e63c",
+            "type": "CreditPoint",
+            "framework": {
+              "id": "urn:epass:concept:e4d227e0-a280-49d2-b023-307c56f1428f",
+              "type": "Concept",
+              "prefLabel": {
+                "und": "ects"
+              }
+            },
+            "point": "6.0"
+          },
+          "title": {
+            "en": "Axe making",
+            "sv": "Grundkurs i yxande"
+          }
+        },
+        "title": {
+          "en": "Axe making",
+          "sv": "Grundkurs i yxande"
+        },
+        "identifier": [
+          {
+            "id": "urn:epass:identifier:0ac9c8cb-bd67-458a-b0e3-60f97c8f359b",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "HHYXA1"
+          },
+          {
+            "id": "urn:epass:identifier:d39f21bb-db77-4996-ab81-39199251de46",
+            "type": "Identifier",
+            "schemeName": "utbildningsinstansUID",
+            "notation": "66ca0603-1cb7-11ea-a48c-72c0d26b47b3"
+          },
+          {
+            "id": "urn:epass:identifier:f159e169-9c69-42a7-a9b9-f82f6b7c8b83",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "8658bafc-1cbd-11ea-a48c-383a75f341e6"
+          },
+          {
+            "id": "urn:epass:identifier:82b6f2f0-540d-43dc-8922-b1cb15b34e83",
+            "type": "Identifier",
+            "schemeName": "resultatPaKursUID",
+            "notation": "8658bafc-1cbd-11ea-a48c-383a75f341e6"
+          },
+          {
+            "id": "urn:epass:identifier:dd5ec227-e900-4bf8-92bc-ebf24e5e2af7",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        ]
+      },
+      {
+        "id": "urn:epass:learningAchievement:71cbdd0a-a722-43b7-acdb-43521ab1f139",
+        "type": "LearningAchievement",
+        "awardedBy": {
+          "id": "urn:epass:awardingProcess:d56f2a5c-fc12-44e5-9969-40d7a22e612e",
+          "type": "AwardingProcess",
+          "awardingBody": {
+            "id": "urn:epass:org:0acfdb19-ae6e-4c07-88ad-b972f1041e79",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:e59711ce-06eb-48dc-9c61-ba0bb35e6aa1",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:6a38f2e2-e67e-4db9-ae5e-ef688875a4f8",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Sweden"
+                  }
+                }
+              }
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:ea2d7f9c-31f1-4bbe-8c16-d5c1bc0019a1",
+                "type": "Identifier",
+                "schemeName": "larosateID",
+                "notation": "96"
+              },
+              {
+                "id": "urn:epass:identifier:6bfa4bdd-eeac-4ebe-b283-a8a2d91036dd",
+                "type": "Identifier",
+                "schemeName": "national",
+                "notation": "BLA"
+              },
+              {
+                "id": "urn:epass:identifier:8ad0ccc2-bb31-4fb5-b0f5-ec5d37f282e1",
+                "type": "Identifier",
+                "schemeName": "schac",
+                "notation": "ladok.se/testhei/bla"
+              }
+            ],
+            "legalName": {
+              "en": "The Blue lärosäte",
+              "sv": "Blå Lärosätet"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:d5ce8cb4-c148-48dc-aa20-dc8d563f3df9",
+              "type": "WebResource",
+              "contentURL": "http://www.ladok.se/testhei/bla"
+            }
+          },
+          "awardingDate": "2019-12-16T00:00:00",
+          "used": {
+            "id": "converter:assessment:5",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:326fbf01-5904-4229-b868-fdb0aeaa709d",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:209fbd75-4a33-4a69-8bfe-a3276bdda8e0",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:62fb7dc0-0e72-4377-ba05-0ace5c755172",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Sweden"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:8f3ad90c-7415-43c2-bb23-65fe80c6aec9",
+                  "type": "Identifier",
+                  "schemeName": "larosateID",
+                  "notation": "96"
+                },
+                {
+                  "id": "urn:epass:identifier:0489ca4a-6799-4af9-bdac-82b1b2892aed",
+                  "type": "Identifier",
+                  "schemeName": "national",
+                  "notation": "BLA"
+                },
+                {
+                  "id": "urn:epass:identifier:78939c93-b6c7-4eba-9e8c-845528fde4ff",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "ladok.se/testhei/bla"
+                }
+              ],
+              "legalName": {
+                "en": "The Blue lärosäte",
+                "sv": "Blå Lärosätet"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:13c373e5-6e9d-4ba3-b082-5fa27fb7e688",
+                "type": "WebResource",
+                "contentURL": "http://www.ladok.se/testhei/bla"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:10b9dfe4-716b-4a13-ac8b-145844ff8add",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:ad849032-7d61-49fe-9d31-a6fec06e1558",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:ee6a6079-8731-42d0-b37e-12d368b78274",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:8943bee3-0b34-489c-837f-7fe2c4c79b82",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Sweden"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:c7c0e0c0-c38b-435c-8566-56658afd93e0",
+                    "type": "Identifier",
+                    "schemeName": "larosateID",
+                    "notation": "96"
+                  },
+                  {
+                    "id": "urn:epass:identifier:821b9962-58e5-4ea0-a807-bafcd5d2c00e",
+                    "type": "Identifier",
+                    "schemeName": "national",
+                    "notation": "BLA"
+                  },
+                  {
+                    "id": "urn:epass:identifier:0c723e08-6b47-4da6-97bd-6214c79847c3",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "ladok.se/testhei/bla"
+                  }
+                ],
+                "legalName": {
+                  "en": "The Blue lärosäte",
+                  "sv": "Blå Lärosätet"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:c0af276f-2ed1-4a4b-bb1b-059ada0954d1",
+                  "type": "WebResource",
+                  "contentURL": "http://www.ladok.se/testhei/bla"
+                }
+              },
+              "awardingDate": "2019-12-16T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:edfa06fd-5c35-4f44-b415-d165ac8f85d6",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:c33dfa19-4616-43eb-970a-1ab6b71868a9",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "5"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:9206af46-310f-44c7-97e3-fb242cf470d1",
+              "type": "LearningAssessmentSpecification",
+              "title": {
+                "en": "Trade in the west",
+                "sv": "Handel i västerled"
+              }
+            },
+            "dateIssued": "2019-12-16T00:00:00",
+            "title": {
+              "en": "Trade in the west",
+              "sv": "Handel i västerled"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:402afed1-46fb-47b0-9267-94f12114ae36",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "HHHDLV"
+              },
+              {
+                "id": "urn:epass:identifier:ea27853a-11ad-4233-8afd-4864bc3fbe6f",
+                "type": "Identifier",
+                "schemeName": "utbildningsinstansUID",
+                "notation": "76d2bc64-1fe7-11ea-a9e4-a8e1acca41df"
+              },
+              {
+                "id": "urn:epass:identifier:2e6a569f-245a-42c0-bebf-ff2a975b6bc0",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "8e9f7fd6-1fe9-11ea-8ff1-75c79a244b06"
+              },
+              {
+                "id": "urn:epass:identifier:a9181fa0-b2b0-4958-8b32-23d48317be9a",
+                "type": "Identifier",
+                "schemeName": "resultatPaKursUID",
+                "notation": "8e9f7fd6-1fe9-11ea-8ff1-75c79a244b06"
+              },
+              {
+                "id": "urn:epass:identifier:93bfee8c-a369-4996-bb02-e5bc9cc24f7b",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              }
+            ]
+          }
+        },
+        "creditReceived": {
+          "id": "urn:epass:creditPoint:716a9aa3-ceff-460d-b337-e794934da637",
+          "type": "CreditPoint",
+          "framework": {
+            "id": "urn:epass:concept:94024613-1263-42a1-8d06-518c062ac51c",
+            "type": "Concept",
+            "prefLabel": {
+              "und": "ects"
+            }
+          },
+          "point": "15.0"
+        },
+        "provenBy": [
+          {
+            "id": "converter:assessment:3",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:e880d17a-9a4d-47cc-a0fa-827db7925562",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:cefe8cec-5df1-48e9-8145-85b7b14e805c",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:ed19d222-1e5a-4c2e-b66d-ea719d65996d",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Sweden"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:8556f0ad-b1c4-4f24-b5f3-339d60ffdc82",
+                  "type": "Identifier",
+                  "schemeName": "larosateID",
+                  "notation": "96"
+                },
+                {
+                  "id": "urn:epass:identifier:a4579a01-98cc-49ec-b058-aa3a155a210e",
+                  "type": "Identifier",
+                  "schemeName": "national",
+                  "notation": "BLA"
+                },
+                {
+                  "id": "urn:epass:identifier:bf860538-5f6f-4669-8038-172af36d302c",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "ladok.se/testhei/bla"
+                }
+              ],
+              "legalName": {
+                "en": "The Blue lärosäte",
+                "sv": "Blå Lärosätet"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:ca272eaf-4112-4102-a892-3d485d6458dc",
+                "type": "WebResource",
+                "contentURL": "http://www.ladok.se/testhei/bla"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:bfd6a533-f146-42c6-b1cb-d2fdea5a3eab",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:1452f659-327c-4f64-8a16-b937bb6b424e",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:839a0b24-1989-46a3-bd79-31a2a6d196bc",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:bcfe7e19-7f4f-4f45-9036-8a936e06ef30",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Sweden"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:3568dbba-d2f5-43d9-ae20-8a1d08422e1c",
+                    "type": "Identifier",
+                    "schemeName": "larosateID",
+                    "notation": "96"
+                  },
+                  {
+                    "id": "urn:epass:identifier:a1af32ad-b6ac-4ae4-bcee-78eeefd6f657",
+                    "type": "Identifier",
+                    "schemeName": "national",
+                    "notation": "BLA"
+                  },
+                  {
+                    "id": "urn:epass:identifier:7077c631-5c83-4654-b98c-b0261fd788ff",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "ladok.se/testhei/bla"
+                  }
+                ],
+                "legalName": {
+                  "en": "The Blue lärosäte",
+                  "sv": "Blå Lärosätet"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:af3163be-d0d9-4ebf-95fb-741acbf080c4",
+                  "type": "WebResource",
+                  "contentURL": "http://www.ladok.se/testhei/bla"
+                }
+              },
+              "awardingDate": "2019-12-16T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:757efd2a-0bf3-4ffe-a386-56061328767b",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:6e2a284d-b88f-483e-bd63-beb87d6cbc43",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "5"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:c60694a0-5f99-4c75-9755-91a8c504ceb6",
+              "type": "LearningAssessmentSpecification",
+              "title": {
+                "en": "Slow Trade",
+                "sv": "Långsam handel"
+              }
+            },
+            "dateIssued": "2019-12-16T00:00:00",
+            "title": {
+              "en": "Slow Trade",
+              "sv": "Långsam handel"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:e72b614e-35bf-4a7f-ad37-6b595731102b",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "HHM1"
+              },
+              {
+                "id": "urn:epass:identifier:0c4de223-714c-44ed-a896-9791ab0f07f1",
+                "type": "Identifier",
+                "schemeName": "utbildningsinstansUID",
+                "notation": "4a66b551-1fe8-11ea-a9e4-a8e1acca41df"
+              },
+              {
+                "id": "urn:epass:identifier:f736f55b-07e4-40ec-b76e-edc19c317ad0",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "30295ea2-1fe9-11ea-8ff1-75c79a244b06"
+              },
+              {
+                "id": "urn:epass:identifier:64b8091f-8f57-4781-bbd6-5a63ba8e339c",
+                "type": "Identifier",
+                "schemeName": "resultatPaModulUID",
+                "notation": "30295ea2-1fe9-11ea-8ff1-75c79a244b06"
+              },
+              {
+                "id": "urn:epass:identifier:e310cf6d-d0f5-44ae-9c04-0d1c573f82de",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Class"
+              }
+            ]
+          },
+          {
+            "id": "converter:assessment:4",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:b9560ec8-1fd7-4f33-89d6-9e7f3798dbe8",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:b6007e68-7d58-476e-941d-187e74854a35",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:d703a431-1cb3-4e8e-98dc-b18bee6145f8",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Sweden"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:6fd7632e-b36c-4bcb-a73d-de62092baaea",
+                  "type": "Identifier",
+                  "schemeName": "larosateID",
+                  "notation": "96"
+                },
+                {
+                  "id": "urn:epass:identifier:ae714228-cb92-4229-856c-d649ec3ffb00",
+                  "type": "Identifier",
+                  "schemeName": "national",
+                  "notation": "BLA"
+                },
+                {
+                  "id": "urn:epass:identifier:8dd2cc1c-c6b3-4b69-a825-7814ef5d4d8f",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "ladok.se/testhei/bla"
+                }
+              ],
+              "legalName": {
+                "en": "The Blue lärosäte",
+                "sv": "Blå Lärosätet"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:ff4ec2b8-9c9c-435b-97de-52a0b441ed0c",
+                "type": "WebResource",
+                "contentURL": "http://www.ladok.se/testhei/bla"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:5b261b7f-f636-46d5-bf78-ce6b6224568a",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:c98c0107-e8b6-4cfc-9c98-9a55e230e99c",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:e0624f73-5a40-495c-9f05-839994d2033f",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:ee474c3c-696b-4995-882a-e3c94a7e7dce",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Sweden"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:99ce89fe-ac4a-42c9-8b13-e93c9957e4d1",
+                    "type": "Identifier",
+                    "schemeName": "larosateID",
+                    "notation": "96"
+                  },
+                  {
+                    "id": "urn:epass:identifier:c46173d2-3b1b-4c09-aefc-dbdaed82446e",
+                    "type": "Identifier",
+                    "schemeName": "national",
+                    "notation": "BLA"
+                  },
+                  {
+                    "id": "urn:epass:identifier:6244baf8-555f-484f-aab5-3f2a787a0321",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "ladok.se/testhei/bla"
+                  }
+                ],
+                "legalName": {
+                  "en": "The Blue lärosäte",
+                  "sv": "Blå Lärosätet"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:0e89ad6c-fdb2-45ab-9599-c98d2d41c57b",
+                  "type": "WebResource",
+                  "contentURL": "http://www.ladok.se/testhei/bla"
+                }
+              },
+              "awardingDate": "2019-12-16T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:1c641424-c8d9-418a-a27f-0e63ac2c66b9",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:3b452e3a-d23c-47ec-852b-327cd5034af6",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "5"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:5394b84e-0104-4e89-a8ab-b3452cdb2e5e",
+              "type": "LearningAssessmentSpecification",
+              "title": {
+                "en": "Fast Trade",
+                "sv": "Snabb handel"
+              }
+            },
+            "dateIssued": "2019-12-16T00:00:00",
+            "title": {
+              "en": "Fast Trade",
+              "sv": "Snabb handel"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:58fec1b0-195d-4de5-8682-b8390d75386b",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "HHM2"
+              },
+              {
+                "id": "urn:epass:identifier:45538636-dfa0-4d4d-a4d8-8dad833c14ed",
+                "type": "Identifier",
+                "schemeName": "utbildningsinstansUID",
+                "notation": "705c6ac4-1fe8-11ea-a9e4-a8e1acca41df"
+              },
+              {
+                "id": "urn:epass:identifier:61d3dfee-2217-45c4-800a-0bc3bd0dc210",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "696e03c2-1fe9-11ea-8ff1-75c79a244b06"
+              },
+              {
+                "id": "urn:epass:identifier:75db46da-9106-452f-a088-134cf340b023",
+                "type": "Identifier",
+                "schemeName": "resultatPaModulUID",
+                "notation": "696e03c2-1fe9-11ea-8ff1-75c79a244b06"
+              },
+              {
+                "id": "urn:epass:identifier:ea876c8e-cada-4de4-b3d0-58e10f13930d",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Class"
+              }
+            ]
+          }
+        ],
+        "specifiedBy": {
+          "id": "urn:epass:learningAchievementSpec:f4b4f6a7-65d9-4f31-8e43-0d8b83228e47",
+          "type": "LearningAchievementSpecification",
+          "creditPoint": {
+            "id": "urn:epass:creditPoint:87775754-fc6c-431e-95ef-3b598832886b",
+            "type": "CreditPoint",
+            "framework": {
+              "id": "urn:epass:concept:70812aa9-8162-4e87-bfd5-bce8a413f194",
+              "type": "Concept",
+              "prefLabel": {
+                "und": "ects"
+              }
+            },
+            "point": "15.0"
+          },
+          "title": {
+            "en": "Trade in the west",
+            "sv": "Handel i västerled"
+          }
+        },
+        "title": {
+          "en": "Trade in the west",
+          "sv": "Handel i västerled"
+        },
+        "identifier": [
+          {
+            "id": "urn:epass:identifier:8a6c19e1-b63e-44f6-8e76-327cf2ca1bd1",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "HHHDLV"
+          },
+          {
+            "id": "urn:epass:identifier:32763665-dc45-4f85-9fa5-de2f76942cc3",
+            "type": "Identifier",
+            "schemeName": "utbildningsinstansUID",
+            "notation": "76d2bc64-1fe7-11ea-a9e4-a8e1acca41df"
+          },
+          {
+            "id": "urn:epass:identifier:48f0fed7-c8a6-4cef-8e23-079c635d52ee",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "8e9f7fd6-1fe9-11ea-8ff1-75c79a244b06"
+          },
+          {
+            "id": "urn:epass:identifier:92b616f5-8afc-46b7-ba7a-1a1d42361ba5",
+            "type": "Identifier",
+            "schemeName": "resultatPaKursUID",
+            "notation": "8e9f7fd6-1fe9-11ea-8ff1-75c79a244b06"
+          },
+          {
+            "id": "urn:epass:identifier:8795a6f9-7375-4b93-bb8a-03077921ca5c",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        ]
+      },
+      {
+        "id": "urn:epass:learningAchievement:7f953584-c79c-4905-bf2a-7f7fa9800303",
+        "type": "LearningAchievement",
+        "awardedBy": {
+          "id": "urn:epass:awardingProcess:ae5e7219-35af-4353-b0a1-5603e074f121",
+          "type": "AwardingProcess",
+          "awardingBody": {
+            "id": "urn:epass:org:9ac09362-9993-4b81-8412-4250f162f115",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:8eab0aa5-20ff-4266-96b6-bc2e604b19fc",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:f1cf18b8-1a34-4505-87c9-c54f83a85d56",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Sweden"
+                  }
+                }
+              }
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:c2b546f0-0bd8-4b2a-87e7-4f87540797da",
+                "type": "Identifier",
+                "schemeName": "larosateID",
+                "notation": "96"
+              },
+              {
+                "id": "urn:epass:identifier:a753f55c-9206-4da2-8a06-a3aab5706715",
+                "type": "Identifier",
+                "schemeName": "national",
+                "notation": "BLA"
+              },
+              {
+                "id": "urn:epass:identifier:8efaa484-e0bb-41f5-bdd3-70ebe3e20e61",
+                "type": "Identifier",
+                "schemeName": "schac",
+                "notation": "ladok.se/testhei/bla"
+              }
+            ],
+            "legalName": {
+              "en": "The Blue lärosäte",
+              "sv": "Blå Lärosätet"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:76caa847-cb39-4b86-9140-d934ed54d7ea",
+              "type": "WebResource",
+              "contentURL": "http://www.ladok.se/testhei/bla"
+            }
+          },
+          "awardingDate": "2019-12-11T00:00:00",
+          "used": {
+            "id": "converter:assessment:6",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:1d0f3070-40bf-4e2f-97bc-2a82865af0c1",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:79eec7b3-d4e4-4329-84fd-90bf032367e2",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:3f0c4cb9-9f7d-4849-ab7d-b46733115677",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Sweden"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:7384b627-220e-4436-9171-8c0f2131aa14",
+                  "type": "Identifier",
+                  "schemeName": "larosateID",
+                  "notation": "96"
+                },
+                {
+                  "id": "urn:epass:identifier:97bcecff-247e-41fc-a88b-d4958ca92709",
+                  "type": "Identifier",
+                  "schemeName": "national",
+                  "notation": "BLA"
+                },
+                {
+                  "id": "urn:epass:identifier:e3e267fd-3308-4288-af6d-4c668d95a21b",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "ladok.se/testhei/bla"
+                }
+              ],
+              "legalName": {
+                "en": "The Blue lärosäte",
+                "sv": "Blå Lärosätet"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:6c2645f4-f956-488f-a08d-1cc6520709cf",
+                "type": "WebResource",
+                "contentURL": "http://www.ladok.se/testhei/bla"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:e7037600-6f3f-42bc-b14e-4ea60d7cf2ee",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:87cddfb1-ebee-4a48-972d-fbc6a97fd890",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:b9e54f43-0ef9-45ad-8fb0-4c11ec3dba03",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:af231b00-b298-49c1-8828-050af8163ee7",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/SWE",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Sweden"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:a05b1752-ffec-4e91-9435-f911d606d069",
+                    "type": "Identifier",
+                    "schemeName": "larosateID",
+                    "notation": "96"
+                  },
+                  {
+                    "id": "urn:epass:identifier:58b54122-319a-4e97-9dea-cb82ca2fab25",
+                    "type": "Identifier",
+                    "schemeName": "national",
+                    "notation": "BLA"
+                  },
+                  {
+                    "id": "urn:epass:identifier:57183250-19d6-465c-98fa-48c09a9029e0",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "ladok.se/testhei/bla"
+                  }
+                ],
+                "legalName": {
+                  "en": "The Blue lärosäte",
+                  "sv": "Blå Lärosätet"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:9ea1131b-1af0-40a4-90e8-b4c87f85c826",
+                  "type": "WebResource",
+                  "contentURL": "http://www.ladok.se/testhei/bla"
+                }
+              },
+              "awardingDate": "2019-12-11T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:5d6823f7-ece5-462f-80c9-152eb2cf819c",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:55db61df-63bb-48c9-981f-4d3b25369565",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "G"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:db9da595-6110-46d1-997f-9629f98eac00",
+              "type": "LearningAssessmentSpecification",
+              "title": {
+                "en": "External integration, conti",
+                "sv": "Extern integration, forts"
+              }
+            },
+            "dateIssued": "2019-12-11T00:00:00",
+            "title": {
+              "en": "External integration, conti",
+              "sv": "Extern integration, forts"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:ef703eda-8e8e-4a1a-a1e7-40bbbf2a8312",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "EIF001"
+              },
+              {
+                "id": "urn:epass:identifier:fcbb46ec-c006-4557-9513-7dca6e931e9c",
+                "type": "Identifier",
+                "schemeName": "utbildningsinstansUID",
+                "notation": "f6dd279d-f8ad-11e9-8a9c-1b461f684b6a"
+              },
+              {
+                "id": "urn:epass:identifier:fe214e5a-861e-4e43-9ad2-62cf029af52a",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "6606b8ae-1c27-11ea-bdc8-e63beb2a4023"
+              },
+              {
+                "id": "urn:epass:identifier:accae026-53a7-449f-b648-744d4dbbadfb",
+                "type": "Identifier",
+                "schemeName": "resultatPaKursUID",
+                "notation": "6606b8ae-1c27-11ea-bdc8-e63beb2a4023"
+              },
+              {
+                "id": "urn:epass:identifier:7a5cec56-f4c2-4cfd-a632-bdf4c7d472f3",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              }
+            ]
+          }
+        },
+        "creditReceived": {
+          "id": "urn:epass:creditPoint:6dfa4fb8-c1f1-48b0-8ab6-ab01bdbb7d16",
+          "type": "CreditPoint",
+          "framework": {
+            "id": "urn:epass:concept:735a581d-d6b7-4a15-83bc-594c2c1e7865",
+            "type": "Concept",
+            "prefLabel": {
+              "und": "ects"
+            }
+          },
+          "point": "30.0"
+        },
+        "specifiedBy": {
+          "id": "urn:epass:learningAchievementSpec:141f9ee3-985c-454d-a3cf-0790bcb82bb2",
+          "type": "LearningAchievementSpecification",
+          "creditPoint": {
+            "id": "urn:epass:creditPoint:5703ca11-e520-4aa2-9b87-97ed70d3d4a6",
+            "type": "CreditPoint",
+            "framework": {
+              "id": "urn:epass:concept:2c80da04-f6bf-452f-ad44-903e85c17a7f",
+              "type": "Concept",
+              "prefLabel": {
+                "und": "ects"
+              }
+            },
+            "point": "30.0"
+          },
+          "title": {
+            "en": "External integration, conti",
+            "sv": "Extern integration, forts"
+          }
+        },
+        "title": {
+          "en": "External integration, conti",
+          "sv": "Extern integration, forts"
+        },
+        "identifier": [
+          {
+            "id": "urn:epass:identifier:e9e67f62-65b2-4b1b-a62f-54674edaa227",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "EIF001"
+          },
+          {
+            "id": "urn:epass:identifier:cb8910e6-c6d2-4a64-9e67-2500e5b9bc65",
+            "type": "Identifier",
+            "schemeName": "utbildningsinstansUID",
+            "notation": "f6dd279d-f8ad-11e9-8a9c-1b461f684b6a"
+          },
+          {
+            "id": "urn:epass:identifier:9d090377-91b1-4f17-b08a-138c63646ccc",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "6606b8ae-1c27-11ea-bdc8-e63beb2a4023"
+          },
+          {
+            "id": "urn:epass:identifier:d0871456-7c8a-4a5d-9cfc-5594000ed2f6",
+            "type": "Identifier",
+            "schemeName": "resultatPaKursUID",
+            "notation": "6606b8ae-1c27-11ea-bdc8-e63beb2a4023"
+          },
+          {
+            "id": "urn:epass:identifier:238607a7-e3a3-4893-866e-658a29899cab",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        ]
+      }
+    ],
+    "nationalID": {
+      "id": "urn:epass:legalIdentifier:193303129096",
+      "type": "LegalIdentifier",
+      "spatial": {
+        "id": "http://publications.europa.eu/resource/authority/country/USA",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/country",
+          "type": "ConceptScheme"
+        },
+        "notation": "country",
+        "prefLabel": {
+          "en": "United States"
+        }
+      },
+      "notation": "nationalIdentifier"
+    },
+    "identifier": [
+      {
+        "id": "urn:epass:identifier:0bcb0d31-4bc8-47ee-b09f-a3586d28a29d",
+        "type": "Identifier",
+        "schemeName": "nationalIdentifier",
+        "notation": "193303129096"
+      },
+      {
+        "id": "urn:epass:identifier:45734543-7bb5-4d81-ac8f-9c7d974b10b0",
+        "type": "Identifier",
+        "schemeName": "studentUID",
+        "notation": "f426e399-1b59-11ea-9c64-74f58d2643bf"
+      }
+    ],
+    "familyName": {
+      "und": "Handfaste"
+    },
+    "givenName": {
+      "und": "Hagbard"
+    }
+  },
+  "issuanceDate": "2025-03-25T09:36:07",
+  "issued": "2025-03-25T09:36:07",
+  "issuer": {
+    "id": "urn:epass:org:dca42169-c579-4096-9084-37f96cd8ed39",
+    "type": "Organisation",
+    "eIDASIdentifier": {
+      "id": "urn:epass:legalIdentifier:338e3740-625c-49e1-81c4-39de6c910c5c",
+      "type": "LegalIdentifier",
+      "spatial": {
+        "id": "http://publications.europa.eu/resource/authority/country/SWE",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/country",
+          "type": "ConceptScheme"
+        },
+        "notation": "country",
+        "prefLabel": {
+          "en": "Sweden"
+        }
+      },
+      "notation": "Ladok3"
+    }
+  },
+  "validFrom": "2025-03-25T09:36:07",
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "http://data.europa.eu/snb/model/context/edc-ap"
+  ]
+}

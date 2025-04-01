@@ -13,11 +13,10 @@ import (
 	"testing"
 	"time"
 	"vc/internal/issuer/auditlog"
-	"vc/pkg/ehic"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/pda1"
 	"vc/pkg/sdjwt3"
+	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
 	"github.com/google/go-cmp/cmp"
@@ -82,20 +81,20 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 }
 
 func TestPDA1Credential(t *testing.T) {
-	doc := &pda1.Document{
+	doc := &socialsecurity.PDA1Document{
 		SocialSecurityPin: "1234",
 		Nationality:       []string{"SE"},
-		DetailsOfEmployment: []pda1.DetailsOfEmployment{
+		DetailsOfEmployment: []socialsecurity.DetailsOfEmployment{
 			{
 				TypeOfEmployment: "01",
 				Name:             "Corp inc.",
-				Address: pda1.AddressWithCountry{
+				Address: socialsecurity.AddressWithCountry{
 					Street:   "street",
 					PostCode: "12345",
 					Town:     "town",
 					Country:  "SE",
 				},
-				IDsOfEmployer: []pda1.IDsOfEmployer{
+				IDsOfEmployer: []socialsecurity.IDsOfEmployer{
 					{
 						EmployerID: "123",
 						TypeOfID:   "01",
@@ -103,21 +102,21 @@ func TestPDA1Credential(t *testing.T) {
 				},
 			},
 		},
-		PlacesOfWork: []pda1.PlacesOfWork{
+		PlacesOfWork: []socialsecurity.PlacesOfWork{
 			{
 				AFixedPlaceOfWorkExist: false,
 				CountryWork:            "SE",
-				PlaceOfWork: []pda1.PlaceOfWork{
+				PlaceOfWork: []socialsecurity.PlaceOfWork{
 					{
 						CompanyVesselName: "M/S Transpaper",
 						FlagStateHomeBase: "Göteborg",
-						IDsOfCompany: []pda1.IDsOfCompany{
+						IDsOfCompany: []socialsecurity.IDsOfCompany{
 							{
 								CompanyID: "123",
 								TypeOfID:  "01",
 							},
 						},
-						Address: pda1.Address{
+						Address: socialsecurity.Address{
 							Street:   "street",
 							PostCode: "1235",
 							Town:     "town",
@@ -126,7 +125,7 @@ func TestPDA1Credential(t *testing.T) {
 				},
 			},
 		},
-		DecisionLegislationApplicable: pda1.DecisionLegislationApplicable{
+		DecisionLegislationApplicable: socialsecurity.DecisionLegislationApplicable{
 			MemberStateWhichLegislationApplies: "",
 			TransitionalRuleApply:              false,
 			StartingDate:                       "1970-01-01",
@@ -134,7 +133,7 @@ func TestPDA1Credential(t *testing.T) {
 		},
 		StatusConfirmation:           "01",
 		UniqueNumberOfIssuedDocument: "asldmnjklh123laa123",
-		CompetentInstitution: pda1.CompetentInstitution{
+		CompetentInstitution: socialsecurity.PDA1CompetentInstitution{
 			InstitutionID:   "SE:123",
 			InstitutionName: "SUNET",
 			CountryCode:     "SE",
@@ -226,15 +225,15 @@ func TestPDA1Credential(t *testing.T) {
 }
 
 func TestEHICCredential(t *testing.T) {
-	doc := &ehic.Document{
-		Subject:           ehic.Subject{Forename: "kalle", FamilyName: "karlsson", DateOfBirth: "1980-01-01"},
+	doc := &socialsecurity.EHICDocument{
+		Subject:           socialsecurity.Subject{Forename: "kalle", FamilyName: "karlsson", DateOfBirth: "1980-01-01"},
 		SocialSecurityPin: "12334",
-		PeriodEntitlement: ehic.PeriodEntitlement{
+		PeriodEntitlement: socialsecurity.PeriodEntitlement{
 			StartingDate: "1970-01-01",
 			EndingDate:   "2038-01-19",
 		},
 		DocumentID: "7f87b4c4-9d0a-11ef-bc21-3b0ccffe7106",
-		CompetentInstitution: ehic.CompetentInstitution{
+		CompetentInstitution: socialsecurity.CompetentInstitution{
 			InstitutionID:      "SE:123",
 			InstitutionName:    "SUNET",
 			InstitutionCountry: "SE",

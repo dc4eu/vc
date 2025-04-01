@@ -33,8 +33,13 @@ type Client struct {
 	jwkProto   *apiv1_issuer.Jwk
 	kid        string
 
-	ehicClient *ehicClient
-	pda1Client *pda1Client
+	ehicClient                 *ehicClient
+	pda1Client                 *pda1Client
+	elmClient                  *elmClient
+	diplomaClient              *diplomaClient
+	openBadgeCompleteClient    *openbadgeCompleteClient
+	openBadgeBasicClient       *openbadgeBasicClient
+	OpenBadgeEndorsementClient *openbadgeEndorsementsClient
 }
 
 // New creates a new instance of the public api
@@ -55,6 +60,31 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	c.pda1Client, err = newPDA1Client(c, tracer, c.log.New("pda1"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.elmClient, err = newElmClient(c, tracer, c.log.New("elm"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.diplomaClient, err = newDiplomaClient(c, tracer, c.log.New("diploma"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.openBadgeCompleteClient, err = newOpenbadgeCompleteClient(c, tracer, c.log.New("openbadgeComplete"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.openBadgeBasicClient, err = newOpenbadgeBasicClient(c, tracer, c.log.New("openbadgeBasic"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.OpenBadgeEndorsementClient, err = newOpenbadgeEndorsementsClient(c, tracer, c.log.New("openbadgeEndorsement"))
 	if err != nil {
 		return nil, err
 	}

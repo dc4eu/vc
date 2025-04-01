@@ -9,9 +9,9 @@ import (
 )
 
 type documentHandler struct {
-	client  *Client
-	service string
-	log     *logger.Log
+	client         *Client
+	serviceBaseURL string
+	log            *logger.Log
 }
 
 // DocumentGetQuery is the query for GetDocument
@@ -23,9 +23,8 @@ type DocumentGetQuery struct {
 
 // Get gets a document
 func (s *documentHandler) Get(ctx context.Context, query *DocumentGetQuery) (*model.Document, *http.Response, error) {
-	url := fmt.Sprintf("%s", s.service)
 	reply := &model.Document{}
-	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply, true)
+	resp, err := s.client.call(ctx, http.MethodPost, s.serviceBaseURL, nil, reply, true)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -44,7 +43,7 @@ type DocumentListQuery struct {
 func (s *documentHandler) List(ctx context.Context, query *DocumentListQuery) ([]model.DocumentList, *http.Response, error) {
 	s.log.Info("List")
 
-	url := fmt.Sprintf("%s/%s", s.service, "list")
+	url := fmt.Sprintf("%s/%s", s.serviceBaseURL, "list")
 	reply := []model.DocumentList{}
 	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply, true)
 	if err != nil {
@@ -68,11 +67,13 @@ type DocumentCollectIDReply struct {
 
 func (s *documentHandler) CollectID(ctx context.Context, query *DocumentCollectIDQuery) (*model.Document, *http.Response, error) {
 	s.log.Info("CollectID")
+	s.log.Debug("CollectID", "query", query)
 
-	url := fmt.Sprintf("%s/%s", s.service, "collect_id")
+	url := fmt.Sprintf("%s/%s", s.serviceBaseURL, "collect_id")
 	reply := &model.Document{}
 	resp, err := s.client.call(ctx, http.MethodPost, url, query, reply, true)
 	if err != nil {
+		s.log.Error(err, "failed to call CollectID")
 		return nil, resp, err
 	}
 	return reply, resp, nil
@@ -81,7 +82,7 @@ func (s *documentHandler) CollectID(ctx context.Context, query *DocumentCollectI
 func (s *documentHandler) Search(ctx context.Context, query *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, *http.Response, error) {
 	s.log.Debug("Search (Documents)")
 
-	url := fmt.Sprintf("%s/%s", s.service, "search")
+	url := fmt.Sprintf("%s/%s", s.serviceBaseURL, "search")
 	reply := &model.SearchDocumentsReply{
 		Documents: []*model.CompleteDocument{},
 	}

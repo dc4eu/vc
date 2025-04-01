@@ -52,6 +52,8 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (*apiv1
 		return nil, helpers.ErrNoDocumentFound
 	}
 
+	c.log.Debug("document", "document", document)
+
 	documentData, err := json.Marshal(document.DocumentData)
 	if err != nil {
 		c.log.Debug("failed to marshal document data", "error", err)

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
-	"vc/pkg/ehic"
+	"vc/pkg/education"
 	"vc/pkg/helpers"
-	"vc/pkg/pda1"
+	"vc/pkg/socialsecurity"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -59,7 +59,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	var err error
 	switch req.DocumentType {
 	case "PDA1":
-		doc := &pda1.Document{}
+		doc := &socialsecurity.PDA1Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
@@ -69,11 +69,41 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 
 	case "EHIC":
-		doc := &ehic.Document{}
+		doc := &socialsecurity.EHICDocument{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
 		token, err = c.ehicClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
+
+	case "ELM":
+		doc := &education.ELMDocument{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.elmClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
+
+	case "Diploma":
+		doc := map[string]any{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.diplomaClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
+
+	case "open_badge":
+		doc := &education.OpenbadgeCompleteDocument{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.openBadgeCompleteClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
 			return nil, err
 		}

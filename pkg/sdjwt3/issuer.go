@@ -29,10 +29,13 @@ func Sign(header, body jwt.MapClaims, signingMethod jwt.SigningMethod, signingKe
 func Combine(token string, disclosures []string, keyBinding string) string {
 	if len(disclosures) > 0 {
 		token = fmt.Sprintf("%s~%s~", token, strings.Join(disclosures, "~"))
+	} else {
+		token = fmt.Sprintf("%s~", token)
 	}
 
 	if keyBinding != "" {
 		token = fmt.Sprintf("%s%s", token, keyBinding)
 	}
+
 	return token
 }

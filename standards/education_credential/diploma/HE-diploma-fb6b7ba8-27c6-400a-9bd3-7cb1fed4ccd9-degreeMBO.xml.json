@@ -1,0 +1,1022 @@
+{
+  "type": [
+    "VerifiableCredential",
+    "EuropeanDigitalCredential"
+  ],
+  "credentialProfiles": {
+    "id": "http://data.europa.eu/snb/credential/e34929035b",
+    "type": "Concept",
+    "inScheme": {
+      "id": "http://data.europa.eu/snb/credential/25831c2",
+      "type": "ConceptScheme"
+    },
+    "prefLabel": {
+      "en": "Generic"
+    }
+  },
+  "displayParameter": {
+    "id": "urn:epass:displayParameter:1",
+    "type": "DisplayParameter",
+    "individualDisplay": {
+      "id": "urn:epass:individualDisplay:5a808aab-3b1f-4300-ac9d-88ad948eac18",
+      "type": "IndividualDisplay",
+      "displayDetail": {
+        "id": "urn:epass:displayDetail:bbcdadf9-90e7-4af2-b6e5-8b9915cdf2c6",
+        "type": "DisplayDetail",
+        "image": {
+          "id": "urn:epass:mediaObject:2d8ca5e1-cf40-4a5e-a4da-3476b0f38b1c",
+          "type": "MediaObject",
+          "content": "/9j/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/yQALCAABAAEBAREA/8wABgAQEAX/2gAIAQEAAD8A0s8g/9k=",
+          "contentEncoding": {
+            "id": "http://data.europa.eu/snb/encoding/6146cde7dd",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/encoding/25831c2",
+              "type": "ConceptScheme"
+            },
+            "prefLabel": {
+              "en": "base64"
+            }
+          },
+          "contentType": {
+            "id": "http://publications.europa.eu/resource/authority/file-type/JPEG",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://publications.europa.eu/resource/authority/file-type",
+              "type": "ConceptScheme"
+            },
+            "notation": "file-type",
+            "prefLabel": {
+              "en": "JPEG"
+            }
+          }
+        },
+        "page": 1
+      },
+      "language": {
+        "id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/language",
+          "type": "ConceptScheme"
+        },
+        "notation": "langugage",
+        "prefLabel": {
+          "en": "en"
+        }
+      }
+    },
+    "primaryLanguage": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "language": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "title": {
+      "en": "A converted document from ELMO:1.7"
+    }
+  },
+  "credentialSchema": {
+    "id": "http://data.europa.eu/snb/model/ap/edc-generic-full",
+    "type": "ShaclValidator2017"
+  },
+  "credentialSubject": {
+    "id": "urn:epass:person:92494b66-1385-4450-8bbf-3a5be4027b2c",
+    "type": "Person",
+    "dateOfBirth": "1970-08-09T00:00:00",
+    "hasClaim": {
+      "id": "urn:epass:learningAchievement:110b0978-0c09-4a78-8028-b92d483e2f56",
+      "type": "LearningAchievement",
+      "awardedBy": {
+        "id": "urn:epass:awardingProcess:dcc80299-8551-420e-8386-68f7c4e10f6c",
+        "type": "AwardingProcess",
+        "awardingBody": {
+          "id": "urn:epass:org:0fb1d343-7e74-40ed-a0e3-8d2ee8ad5b82",
+          "type": "Organisation",
+          "location": {
+            "id": "urn:epass:location:adfe84bd-3fe5-4dda-8753-ce06f61725c1",
+            "type": "Location",
+            "address": {
+              "id": "urn:epass:address:f813e498-862f-4404-8be9-f242effebbc3",
+              "type": "Address",
+              "countryCode": {
+                "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                "type": "Concept",
+                "inScheme": {
+                  "id": "http://publications.europa.eu/resource/authority/country",
+                  "type": "ConceptScheme"
+                },
+                "notation": "country",
+                "prefLabel": {
+                  "en": "Netherlands"
+                }
+              }
+            }
+          },
+          "identifier": [
+            {
+              "id": "urn:epass:identifier:9744b096-167f-47c0-b11b-7523d641c2a2",
+              "type": "Identifier",
+              "schemeName": "schac",
+              "notation": "rocva.nl"
+            },
+            {
+              "id": "urn:epass:identifier:d6792cc8-2f0f-4306-bd05-4d38dfb3d143",
+              "type": "Identifier",
+              "schemeName": "BRIN",
+              "notation": "25PZ"
+            }
+          ],
+          "legalName": {
+            "nl": "ROC van Amsterdam"
+          },
+          "homepage": {
+            "id": "urn:epass:webResource:1dd3d84d-7402-43e3-8c4b-a5c4c14309a2",
+            "type": "WebResource",
+            "contentURL": "www.rocva.nl"
+          }
+        },
+        "awardingDate": "2018-09-12T00:00:00",
+        "used": {
+          "id": "converter:assessment:4",
+          "type": "LearningAssessment",
+          "assessedBy": {
+            "id": "urn:epass:org:2d7a6a3c-30ac-4d4e-ac44-639ba487d3ed",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:ac73cadc-5ba9-4691-99a2-3f6784d5ef07",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:508e1e91-b454-4f8b-b6d4-9850e7706f22",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Netherlands"
+                  }
+                }
+              }
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:7a3c44b0-c772-4b4b-a2ac-28e98d8f082f",
+                "type": "Identifier",
+                "schemeName": "schac",
+                "notation": "rocva.nl"
+              },
+              {
+                "id": "urn:epass:identifier:337ed778-c8e0-407e-8104-c5ecf278b9d5",
+                "type": "Identifier",
+                "schemeName": "BRIN",
+                "notation": "25PZ"
+              }
+            ],
+            "legalName": {
+              "nl": "ROC van Amsterdam"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:e5dfe9c1-2be7-4cc6-a41e-91917362c6d5",
+              "type": "WebResource",
+              "contentURL": "www.rocva.nl"
+            }
+          },
+          "awardedBy": {
+            "id": "urn:epass:awardingProcess:0417e59b-1412-4f10-834e-1487081c071b",
+            "type": "AwardingProcess",
+            "awardingBody": {
+              "id": "urn:epass:org:5b5ac24e-3134-491f-b021-be1a856d9b79",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:6b102a5d-910d-4cdd-8021-c294c181b177",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:750223bd-1af7-402f-b663-07830fee930b",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Netherlands"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:be9934e0-5ae8-494d-92fa-c20f7f494991",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "rocva.nl"
+                },
+                {
+                  "id": "urn:epass:identifier:2e7b300d-9190-43b2-98a9-15fce6270757",
+                  "type": "Identifier",
+                  "schemeName": "BRIN",
+                  "notation": "25PZ"
+                }
+              ],
+              "legalName": {
+                "nl": "ROC van Amsterdam"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:645ad026-b964-4b87-b47e-f627cc5d8201",
+                "type": "WebResource",
+                "contentURL": "www.rocva.nl"
+              }
+            },
+            "awardingDate": "2018-09-12T00:00:00"
+          },
+          "grade": {
+            "id": "urn:epass:note:7cf86e47-b2ea-43e0-a455-eb5f06f6c250",
+            "type": "Note",
+            "noteFormat": {
+              "id": "urn:epass:concept:53c5c8a3-235e-4bc5-b387-3480db1d780f",
+              "type": "Concept",
+              "definition": {
+                "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+              },
+              "notation": "text/plain"
+            },
+            "noteLiteral": {
+              "und": "passed"
+            }
+          },
+          "gradeStatus": {
+            "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/grade-status/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "grade-status",
+            "prefLabel": {
+              "en": "pass"
+            }
+          },
+          "specifiedBy": {
+            "id": "urn:epass:learningAssessmentSpec:b1caa5de-f391-4174-a0a0-e39f493c8558",
+            "type": "LearningAssessmentSpecification",
+            "title": {
+              "nl": "Mbo Sport en bewegen (Sport- en bewegingscoördinator/Operationeel sport- en bewegingsmanager)"
+            }
+          },
+          "description": {
+            "nl": "Mbo Sport en bewegen (Sport- en bewegingscoördinator/Operationeel sport- en bewegingsmanager)"
+          },
+          "dateIssued": "2018-09-12T00:00:00",
+          "title": {
+            "nl": "Mbo Sport en bewegen (Sport- en bewegingscoördinator/Operationeel sport- en bewegingsmanager)"
+          },
+          "identifier": [
+            {
+              "id": "urn:epass:identifier:9a00aa92-1a0f-4ee1-aebb-309d1add8f23",
+              "type": "Identifier",
+              "schemeName": "CREBO",
+              "notation": "95293"
+            },
+            {
+              "id": "urn:epass:identifier:2ececda1-94e0-41f0-ab05-9e283ddd62e5",
+              "type": "Identifier",
+              "schemeName": "elmo:type:los",
+              "notation": "Degree Programme"
+            }
+          ]
+        }
+      },
+      "hasPart": [
+        {
+          "id": "urn:epass:learningAchievement:5cf92cfd-ebab-4ed6-8a81-d83a2354c4a0",
+          "type": "LearningAchievement",
+          "awardedBy": {
+            "id": "urn:epass:awardingProcess:38f194a3-93b7-45df-805a-926f62f624c4",
+            "type": "AwardingProcess",
+            "awardingBody": {
+              "id": "urn:epass:org:1f790bab-9925-444b-b863-65ba8201c243",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:8a60073b-07c8-44b0-930f-9f28599190f4",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:948fa074-b3de-4f31-ab70-4063a86adae2",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Netherlands"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:0bf04448-b587-4186-9640-721df89b222f",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "rocva.nl"
+                },
+                {
+                  "id": "urn:epass:identifier:63459be3-f8e1-410a-975f-26b3d7a23a71",
+                  "type": "Identifier",
+                  "schemeName": "BRIN",
+                  "notation": "25PZ"
+                }
+              ],
+              "legalName": {
+                "nl": "ROC van Amsterdam"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:e9818c56-797d-42cf-86af-e592721d4f8b",
+                "type": "WebResource",
+                "contentURL": "www.rocva.nl"
+              }
+            },
+            "used": {
+              "id": "converter:assessment:1",
+              "type": "LearningAssessment",
+              "assessedBy": {
+                "id": "urn:epass:org:cdcbf93c-6dde-48b4-8d6f-8f711106e7bc",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:cf71d206-d766-4f93-a3c1-d7a7f8aa3037",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:885203ed-df0c-40a5-89f2-1232a6d027ff",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Netherlands"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:6af307c1-0451-4151-8fe6-3f4d2a0a91a0",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "rocva.nl"
+                  },
+                  {
+                    "id": "urn:epass:identifier:53c8e40f-06aa-40a6-9034-8b7840cec62c",
+                    "type": "Identifier",
+                    "schemeName": "BRIN",
+                    "notation": "25PZ"
+                  }
+                ],
+                "legalName": {
+                  "nl": "ROC van Amsterdam"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:b4d7a25d-a749-472a-99e1-251227f1280b",
+                  "type": "WebResource",
+                  "contentURL": "www.rocva.nl"
+                }
+              },
+              "awardedBy": {
+                "id": "urn:epass:awardingProcess:137b9f22-d80f-4de2-a03d-7506cc3e89c1",
+                "type": "AwardingProcess",
+                "awardingBody": {
+                  "id": "urn:epass:org:ef101014-2a73-460c-b111-551bdde8a7ce",
+                  "type": "Organisation",
+                  "location": {
+                    "id": "urn:epass:location:fa662593-027d-485f-84f4-3eb119edb9b1",
+                    "type": "Location",
+                    "address": {
+                      "id": "urn:epass:address:0024c0f0-f771-4c4b-8e11-12bb1a5eb465",
+                      "type": "Address",
+                      "countryCode": {
+                        "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                        "type": "Concept",
+                        "inScheme": {
+                          "id": "http://publications.europa.eu/resource/authority/country",
+                          "type": "ConceptScheme"
+                        },
+                        "notation": "country",
+                        "prefLabel": {
+                          "en": "Netherlands"
+                        }
+                      }
+                    }
+                  },
+                  "identifier": [
+                    {
+                      "id": "urn:epass:identifier:628d6950-9f39-4088-b85b-e73495606a9e",
+                      "type": "Identifier",
+                      "schemeName": "schac",
+                      "notation": "rocva.nl"
+                    },
+                    {
+                      "id": "urn:epass:identifier:146fdf1f-a24f-4115-b481-ddfac1e6b9c7",
+                      "type": "Identifier",
+                      "schemeName": "BRIN",
+                      "notation": "25PZ"
+                    }
+                  ],
+                  "legalName": {
+                    "nl": "ROC van Amsterdam"
+                  },
+                  "homepage": {
+                    "id": "urn:epass:webResource:a1c60cf1-f33b-40a7-9cb9-522e34f582f3",
+                    "type": "WebResource",
+                    "contentURL": "www.rocva.nl"
+                  }
+                }
+              },
+              "grade": {
+                "id": "urn:epass:note:4c91c508-abfd-4476-9218-4e31525d1166",
+                "type": "Note",
+                "noteFormat": {
+                  "id": "urn:epass:concept:5cd72193-7574-47c0-a754-50ca551bde24",
+                  "type": "Concept",
+                  "definition": {
+                    "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                  },
+                  "notation": "text/plain"
+                },
+                "noteLiteral": {
+                  "und": "8"
+                }
+              },
+              "gradeStatus": {
+                "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+                "type": "Concept",
+                "inScheme": {
+                  "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                  "type": "ConceptScheme"
+                },
+                "notation": "grade-status",
+                "prefLabel": {
+                  "en": "pass"
+                }
+              },
+              "specifiedBy": {
+                "id": "urn:epass:learningAssessmentSpec:6e13c875-d857-48e0-ac46-9fed43daee24",
+                "type": "LearningAssessmentSpecification",
+                "title": {
+                  "nl": "Engels"
+                }
+              },
+              "title": {
+                "nl": "Engels"
+              },
+              "identifier": {
+                "id": "urn:epass:identifier:183af24c-1916-4314-b0eb-d6a1054adb3b",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              }
+            }
+          },
+          "specifiedBy": {
+            "id": "urn:epass:learningAchievementSpec:2fc958cd-e338-4408-b33a-6d6d6e99b046",
+            "type": "LearningAchievementSpecification",
+            "title": {
+              "nl": "Engels"
+            }
+          },
+          "title": {
+            "nl": "Engels"
+          },
+          "identifier": {
+            "id": "urn:epass:identifier:a616ff2f-d789-444f-89a0-7aee3ceaaba0",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        },
+        {
+          "id": "urn:epass:learningAchievement:26103bc6-8bdb-4a95-9816-19253fe9a0e2",
+          "type": "LearningAchievement",
+          "awardedBy": {
+            "id": "urn:epass:awardingProcess:8f4cd349-a7e1-47ec-a212-e93c4a5c593e",
+            "type": "AwardingProcess",
+            "awardingBody": {
+              "id": "urn:epass:org:2be229be-1d72-40d7-a6f3-f8d02d3bcafe",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:0ed841ea-9733-4e2a-bf3d-11b74642c9a4",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:b4892bdf-a274-4a83-aef4-924f01267fd9",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Netherlands"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:77c9dd7d-a670-4cd4-ab1e-8f263da9e866",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "rocva.nl"
+                },
+                {
+                  "id": "urn:epass:identifier:6dbceb3c-24d4-49b4-94cd-93bfebfa948c",
+                  "type": "Identifier",
+                  "schemeName": "BRIN",
+                  "notation": "25PZ"
+                }
+              ],
+              "legalName": {
+                "nl": "ROC van Amsterdam"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:20167270-a745-4538-9cf4-cb05e3a4ee08",
+                "type": "WebResource",
+                "contentURL": "www.rocva.nl"
+              }
+            },
+            "used": {
+              "id": "converter:assessment:2",
+              "type": "LearningAssessment",
+              "assessedBy": {
+                "id": "urn:epass:org:9bda63e0-2010-40a3-b9bf-4de2eeb2cf6e",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:7c4bc2d3-ae17-49b3-aa33-5477e772005c",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:137ec55b-8bcc-4ed7-b2be-91472e570a74",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Netherlands"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:d7a64d54-441a-4d01-b64f-cf0fc59fd424",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "rocva.nl"
+                  },
+                  {
+                    "id": "urn:epass:identifier:1c3fedbf-7a8e-4033-b3e8-078641c8030c",
+                    "type": "Identifier",
+                    "schemeName": "BRIN",
+                    "notation": "25PZ"
+                  }
+                ],
+                "legalName": {
+                  "nl": "ROC van Amsterdam"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:ce3df364-c550-41e2-b15c-73e876ca9973",
+                  "type": "WebResource",
+                  "contentURL": "www.rocva.nl"
+                }
+              },
+              "awardedBy": {
+                "id": "urn:epass:awardingProcess:13ab42d2-6ecc-48be-9fce-dec7f5b9e0bd",
+                "type": "AwardingProcess",
+                "awardingBody": {
+                  "id": "urn:epass:org:c322973e-05c5-4ad8-a251-71f776369723",
+                  "type": "Organisation",
+                  "location": {
+                    "id": "urn:epass:location:4286c2c7-877f-447e-b953-86c0f7272ad6",
+                    "type": "Location",
+                    "address": {
+                      "id": "urn:epass:address:b45e449a-e810-4420-87b5-ac0c17ca30d8",
+                      "type": "Address",
+                      "countryCode": {
+                        "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                        "type": "Concept",
+                        "inScheme": {
+                          "id": "http://publications.europa.eu/resource/authority/country",
+                          "type": "ConceptScheme"
+                        },
+                        "notation": "country",
+                        "prefLabel": {
+                          "en": "Netherlands"
+                        }
+                      }
+                    }
+                  },
+                  "identifier": [
+                    {
+                      "id": "urn:epass:identifier:da2d014f-4bb3-42a5-89e4-13c818637d8b",
+                      "type": "Identifier",
+                      "schemeName": "schac",
+                      "notation": "rocva.nl"
+                    },
+                    {
+                      "id": "urn:epass:identifier:412b18e0-b29b-41f9-b761-f8b8d7a10f01",
+                      "type": "Identifier",
+                      "schemeName": "BRIN",
+                      "notation": "25PZ"
+                    }
+                  ],
+                  "legalName": {
+                    "nl": "ROC van Amsterdam"
+                  },
+                  "homepage": {
+                    "id": "urn:epass:webResource:fe8fff54-53bc-4d31-bb7a-352da11db9f8",
+                    "type": "WebResource",
+                    "contentURL": "www.rocva.nl"
+                  }
+                }
+              },
+              "grade": {
+                "id": "urn:epass:note:957ff5f7-54c7-475b-981b-70ddf04813e3",
+                "type": "Note",
+                "noteFormat": {
+                  "id": "urn:epass:concept:9f5dcb32-f67e-44a1-b163-cec88fb15d9b",
+                  "type": "Concept",
+                  "definition": {
+                    "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                  },
+                  "notation": "text/plain"
+                },
+                "noteLiteral": {
+                  "und": "7"
+                }
+              },
+              "gradeStatus": {
+                "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+                "type": "Concept",
+                "inScheme": {
+                  "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                  "type": "ConceptScheme"
+                },
+                "notation": "grade-status",
+                "prefLabel": {
+                  "en": "pass"
+                }
+              },
+              "specifiedBy": {
+                "id": "urn:epass:learningAssessmentSpec:7c22b4fd-1d44-4a3a-bf5a-fc8f2df57248",
+                "type": "LearningAssessmentSpecification",
+                "title": {
+                  "nl": "Nederlandse taal 3F"
+                }
+              },
+              "title": {
+                "nl": "Nederlandse taal 3F"
+              },
+              "identifier": {
+                "id": "urn:epass:identifier:1d2515e1-4bfb-4133-9336-314d09bb8528",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              }
+            }
+          },
+          "specifiedBy": {
+            "id": "urn:epass:learningAchievementSpec:8e690b9f-bd7e-45d1-8453-56a4cd983b93",
+            "type": "LearningAchievementSpecification",
+            "title": {
+              "nl": "Nederlandse taal 3F"
+            }
+          },
+          "title": {
+            "nl": "Nederlandse taal 3F"
+          },
+          "identifier": {
+            "id": "urn:epass:identifier:0568cb8c-6267-4e07-899d-32d1ca1c9b7c",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        },
+        {
+          "id": "urn:epass:learningAchievement:d1ef0df0-b507-497a-84c7-0165746ffec7",
+          "type": "LearningAchievement",
+          "awardedBy": {
+            "id": "urn:epass:awardingProcess:f692cade-f36c-4f63-86ad-61e09405ae32",
+            "type": "AwardingProcess",
+            "awardingBody": {
+              "id": "urn:epass:org:c68239cc-4be2-492f-b14a-7ae07ed7046b",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:855bb420-5375-44b1-b5ca-4434406fe2f1",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:841c914d-a6a1-420a-956d-5abf5587e1c9",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Netherlands"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:61b91e55-bbf3-4ae2-a5f6-33c4cb152f4a",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "rocva.nl"
+                },
+                {
+                  "id": "urn:epass:identifier:7ac541a7-4497-4618-b600-7400025b10d0",
+                  "type": "Identifier",
+                  "schemeName": "BRIN",
+                  "notation": "25PZ"
+                }
+              ],
+              "legalName": {
+                "nl": "ROC van Amsterdam"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:f6b9ddbc-22c8-46f7-84d5-6852ffaf982e",
+                "type": "WebResource",
+                "contentURL": "www.rocva.nl"
+              }
+            },
+            "used": {
+              "id": "converter:assessment:3",
+              "type": "LearningAssessment",
+              "assessedBy": {
+                "id": "urn:epass:org:6cc5dc4e-bcd2-40fe-9792-1274d963051b",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:6ff23fbe-72c9-43ed-86d0-ed8f02d56e83",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:22a609c7-2895-4028-b1ed-96d086240b9f",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Netherlands"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:8d12d061-0774-480d-af2b-23b3f3f76a95",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "rocva.nl"
+                  },
+                  {
+                    "id": "urn:epass:identifier:a72dd41d-4e98-42eb-a9a8-e2cc0359e935",
+                    "type": "Identifier",
+                    "schemeName": "BRIN",
+                    "notation": "25PZ"
+                  }
+                ],
+                "legalName": {
+                  "nl": "ROC van Amsterdam"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:e19601af-2d90-41ab-97d2-d6c235375c0a",
+                  "type": "WebResource",
+                  "contentURL": "www.rocva.nl"
+                }
+              },
+              "awardedBy": {
+                "id": "urn:epass:awardingProcess:d1f6fe21-a76b-4b83-91a4-5a0a473d12c3",
+                "type": "AwardingProcess",
+                "awardingBody": {
+                  "id": "urn:epass:org:8528a044-a4ba-4802-b4ae-6b315adcd073",
+                  "type": "Organisation",
+                  "location": {
+                    "id": "urn:epass:location:3d1bdcdd-936b-475b-94a7-5df813a686ec",
+                    "type": "Location",
+                    "address": {
+                      "id": "urn:epass:address:ec5038e2-b1b4-48c3-8fc3-634ed1a13f85",
+                      "type": "Address",
+                      "countryCode": {
+                        "id": "http://publications.europa.eu/resource/authority/country/NLD",
+                        "type": "Concept",
+                        "inScheme": {
+                          "id": "http://publications.europa.eu/resource/authority/country",
+                          "type": "ConceptScheme"
+                        },
+                        "notation": "country",
+                        "prefLabel": {
+                          "en": "Netherlands"
+                        }
+                      }
+                    }
+                  },
+                  "identifier": [
+                    {
+                      "id": "urn:epass:identifier:3163cbe7-dc65-4b68-8fb9-8e7c5aef437f",
+                      "type": "Identifier",
+                      "schemeName": "schac",
+                      "notation": "rocva.nl"
+                    },
+                    {
+                      "id": "urn:epass:identifier:daf8d911-a067-4ec6-9603-ec44ff9692db",
+                      "type": "Identifier",
+                      "schemeName": "BRIN",
+                      "notation": "25PZ"
+                    }
+                  ],
+                  "legalName": {
+                    "nl": "ROC van Amsterdam"
+                  },
+                  "homepage": {
+                    "id": "urn:epass:webResource:ebf2d51b-3fa3-4d26-841e-859f65fb86b1",
+                    "type": "WebResource",
+                    "contentURL": "www.rocva.nl"
+                  }
+                }
+              },
+              "grade": {
+                "id": "urn:epass:note:5942825d-6ff9-4a4e-bfab-2a97066841f0",
+                "type": "Note",
+                "noteFormat": {
+                  "id": "urn:epass:concept:178056e3-666d-4d90-af43-77c0fe4514cf",
+                  "type": "Concept",
+                  "definition": {
+                    "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                  },
+                  "notation": "text/plain"
+                },
+                "noteLiteral": {
+                  "und": "6"
+                }
+              },
+              "gradeStatus": {
+                "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+                "type": "Concept",
+                "inScheme": {
+                  "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                  "type": "ConceptScheme"
+                },
+                "notation": "grade-status",
+                "prefLabel": {
+                  "en": "pass"
+                }
+              },
+              "specifiedBy": {
+                "id": "urn:epass:learningAssessmentSpec:4acccc82-686d-418e-883c-f464423c137c",
+                "type": "LearningAssessmentSpecification",
+                "title": {
+                  "nl": "rekenen 3F"
+                }
+              },
+              "title": {
+                "nl": "rekenen 3F"
+              },
+              "identifier": {
+                "id": "urn:epass:identifier:a4cbc4f2-a963-418f-a9e5-b2a7145a98e6",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              }
+            }
+          },
+          "specifiedBy": {
+            "id": "urn:epass:learningAchievementSpec:c2fab82b-b96d-4f51-9fe4-2f244f1bdea0",
+            "type": "LearningAchievementSpecification",
+            "title": {
+              "nl": "rekenen 3F"
+            }
+          },
+          "title": {
+            "nl": "rekenen 3F"
+          },
+          "identifier": {
+            "id": "urn:epass:identifier:e3615344-730f-488b-a347-4aa163d00435",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        }
+      ],
+      "specifiedBy": {
+        "id": "urn:epass:qualification:369f41f1-1e8f-40f5-bba5-b8d274c47cdf",
+        "type": "Qualification",
+        "eqfLevel": {
+          "id": "http://data.europa.eu/snb/eqf/4",
+          "type": "Concept",
+          "inScheme": {
+            "id": "http://data.europa.eu/snb/eqf/25831c2",
+            "type": "ConceptScheme"
+          },
+          "notation": "eqf-level",
+          "prefLabel": {
+            "en": "Level 4"
+          }
+        },
+        "educationLevel": {
+          "id": "http://data.europa.eu/snb/eqf/4",
+          "type": "Concept",
+          "inScheme": {
+            "id": "http://data.europa.eu/snb/eqf/25831c2",
+            "type": "ConceptScheme"
+          },
+          "notation": "eqf-level",
+          "prefLabel": {
+            "en": "Level 4"
+          }
+        },
+        "title": {
+          "nl": "Mbo Sport en bewegen (Sport- en bewegingscoördinator/Operationeel sport- en bewegingsmanager)"
+        }
+      },
+      "description": {
+        "nl": "Mbo Sport en bewegen (Sport- en bewegingscoördinator/Operationeel sport- en bewegingsmanager)"
+      },
+      "title": {
+        "nl": "Mbo Sport en bewegen (Sport- en bewegingscoördinator/Operationeel sport- en bewegingsmanager)"
+      },
+      "identifier": [
+        {
+          "id": "urn:epass:identifier:150b2e0a-3c9d-4fec-84ac-078b29ca15b5",
+          "type": "Identifier",
+          "schemeName": "CREBO",
+          "notation": "95293"
+        },
+        {
+          "id": "urn:epass:identifier:0268efa6-314b-4e3c-840e-4ae1d0517ec4",
+          "type": "Identifier",
+          "schemeName": "elmo:type:los",
+          "notation": "Degree Programme"
+        }
+      ]
+    },
+    "familyName": {
+      "und": "Orsel"
+    },
+    "givenName": {
+      "und": "Stefen Willibrordus"
+    }
+  },
+  "issuanceDate": "2025-03-25T09:37:33",
+  "issued": "2025-03-25T09:37:33",
+  "validFrom": "2025-03-25T09:37:33",
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "http://data.europa.eu/snb/model/context/edc-ap"
+  ]
+}

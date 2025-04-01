@@ -417,6 +417,7 @@ func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentColle
 
 	doc, err := c.db.VCDatastoreColl.GetDocumentCollectID(ctx, query)
 	if err != nil {
+		c.log.Error(err, "failed to get document")
 		return nil, err
 	}
 

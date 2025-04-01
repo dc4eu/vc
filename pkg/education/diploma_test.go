@@ -2,6 +2,8 @@ package education
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,30 +18,7 @@ func TestDiplomaMarshal(t *testing.T) {
 	}{
 		{
 			name: "success",
-			have: &DiplomaDocument{
-				DataOfBirth: "test-date-of-birth",
-				FamilyName:  "test-family-name",
-				GivenName:   "test-given-name",
-				PersonalIdentifier: PersonalIdentifier{
-					NationalIDNumber: "test-national-id-number",
-					Citizenship:      "test-citizenship",
-					DateOfBirth:      "test-date-of-birth",
-					Gender:           "test-gender",
-					GroupMemberOf:    "test-group-member-of",
-					HasClaim:         "test-has-claim",
-					HasCredential:    "test-has-credential",
-					PlaceOfBirth:     "test-place-of-birth",
-				},
-				NameOfAwardingTertiaryEducationInstitution:      "test-name-of-awarding-tertiary-education-institution",
-				NameOfQualification:                             "test-name-of-qualification",
-				DateOfAward:                                     "test-date-of-award",
-				CountryOfAwardOfAcademicQualification:           "test-country-of-award-of-academic-qualification",
-				OverallClassificationOfTheAcademicQualification: "test-overall-classification-of-the-academic-qualification",
-				NameOfQualificationStudyField:                   "test-name-of-qualification-study-field",
-				DegreeProjectTitle:                              "test-degree-project-title",
-				Entitlement:                                     "test-entitlement",
-				OtherInformation:                                "test-other-information",
-			},
+			have: &DiplomaDocument{},
 			want: "diploma.golden",
 		},
 	}
@@ -56,6 +35,69 @@ func TestDiplomaMarshal(t *testing.T) {
 			assert.NoError(t, err)
 
 			assert.Equal(t, wantMap, got)
+		})
+	}
+}
+
+func TestDiplomaCredential(t *testing.T) {
+	tts := []struct {
+		name  string
+		abort bool
+	}{
+		{
+			name:  "1.json",
+			abort: false,
+		},
+		{
+			name:  "2.json",
+			abort: true,
+		},
+		{
+			name:  "3.json",
+			abort: true,
+		},
+		{
+			name:  "4.json",
+			abort: true,
+		},
+		{
+			name:  "5.json",
+			abort: true,
+		},
+		{
+			name:  "6.json",
+			abort: true,
+		},
+		{
+			name:  "7.json",
+			abort: true,
+		},
+		{
+			name:  "8.json",
+			abort: true,
+		},
+		{
+			name:  "9.json",
+			abort: true,
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.abort {
+				t.SkipNow()
+			}
+			f, err := os.ReadFile(fmt.Sprintf("../../standards/education_credential/diploma/%s", tt.name))
+			assert.NoError(t, err)
+
+			doc := &DiplomaDocument{}
+			if err := json.Unmarshal(f, doc); err != nil {
+				t.Fatal(err)
+			}
+
+			diploma := NewDiploma()
+
+			assert.Equal(t, doc, diploma)
 		})
 	}
 }

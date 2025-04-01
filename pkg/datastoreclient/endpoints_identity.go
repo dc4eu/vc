@@ -9,9 +9,9 @@ import (
 )
 
 type identityHandler struct {
-	client  *Client
-	service string
-	log     *logger.Log
+	client         *Client
+	serviceBaseURL string
+	log            *logger.Log
 }
 
 // IdentityMappingQuery is the query for IdentityMapping
@@ -24,7 +24,7 @@ type IdentityMappingQuery struct {
 func (s *identityHandler) Mapping(ctx context.Context, query *IdentityMappingQuery) (string, *http.Response, error) {
 	s.log.Info("Mapping")
 
-	url := fmt.Sprintf("%s/%s", s.service, "mapping")
+	url := fmt.Sprintf("%s/%s", s.serviceBaseURL, "mapping")
 	reply := ""
 	resp, err := s.client.call(ctx, http.MethodPost, url, nil, reply, true)
 	if err != nil {

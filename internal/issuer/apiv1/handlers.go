@@ -87,6 +87,26 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		if err != nil {
 			return nil, err
 		}
+
+	case "Diploma":
+		doc := map[string]any{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.diplomaClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
+
+	case "open_badge":
+		doc := &education.OpenbadgeCompleteDocument{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.openBadgeCompleteClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	//c.auditLog.AddAuditLog(ctx, "create_credential", signedCredential.PresentationFlat())

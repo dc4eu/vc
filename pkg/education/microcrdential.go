@@ -2,92 +2,101 @@ package education
 
 import "encoding/json"
 
-type MicrocredentialDocument struct {
-	IdentificationOfTheLearner IdentificationOfTheLearner `json:"identification_of_the_learner" validate:"required"`
-	TitleOfTheMicroCredential  TitleOfTheMicroCredential  `json:"title_of_the_micro_credential" validate:"required"`
-	CountryOrRegionOfTheIssuer CountryOrRegionOfTheIssuer `json:"country_or_region_of_the_issuer" validate:"required"`
-	AwardingBody               AwardingBody               `json:"awarding_body" validate:"required"`
-	DateOfIssuing              string                     `json:"dateOfIssuing" validate:"required"`
-	LearningOutcomes           LearningOutcomes           `json:"learning_outcomes" validate:"required"`
-	EducationLevel             EducationLevel             `json:"education_level" validate:"required"`
-	TypeOfAssessment           TypeOfAssessment           `json:"type_of_assessment" validate:"required"`
-	FormOfParticipation        FormOfParticipation        `json:"form_of_participation" validate:"required"`
-	QualityAssurance           QualityAssurance           `json:"quality_assurance" validate:"required"`
-
-	NotionalWorkload string `json:"notionalWorkload" validate:"required"`
-
-	Prerequisites                      string `json:"prerequisites"`
-	SupervisionAndIdentityVerification string `json:"supervisionAndIdentityVerification" validate:"required"`
-	GradeAchieved                      string `json:"gradeAchieved" validate:"required"`
-	IntegrationStackabilityOptions     string `json:"integrationStackabilityOptions" validate:"required"`
-	Link                               string `json:"link" validate:"required"`
+type MicroCredentialDocument struct {
+	Context           []string             `json:"@context" validate:"required"`
+	ID                string               `json:"id" validate:"required"`
+	Type              []string             `json:"type" validate:"required"`
+	Issuer            MCIssuer             `json:"issuer" validate:"required"`
+	ValidFrom         string               `json:"validFrom" validate:"required"`
+	ValidUntil        string               `json:"validUntil" validate:"required"`
+	CredentialSubject MCCredentialSubject  `json:"credentialSubject" validate:"required"`
+	CredentialSchema  []MCCredentialSchema `json:"credentialSchema" validate:"required"`
 }
 
-type IdentificationOfTheLearner struct {
-	Citizenship        string `json:"citizenship" validate:"required"`
-	GivenNames         string `json:"givenNames" validate:"required"`
-	FamilyName         string `json:"familyName" validate:"required"`
-	NationalId         string `json:"nationalId" validate:"required"`
-	DateOfBirth        string `json:"dateOfBirth" validate:"required"`
-	ContactInformation string `json:"contactInformation" validate:"required"`
-}
-
-type TitleOfTheMicroCredential struct {
-	ISCEDCode string `json:"iscedCode" validate:"required"`
-	Title     string `json:"title" validate:"required"`
-}
-
-type CountryOrRegionOfTheIssuer struct {
-	Country string `json:"country" validate:"required"`
-}
-
-type AwardingBody struct {
-	TaxIdentifier string `json:"taxIdentifier" validate:"required"`
-	Title         string `json:"title" validate:"required"`
-	LegalName     string `json:"legalName" validate:"required"`
-	URL           string `json:"url" validate:"required"`
-}
-
-type LearningOutcomes struct {
-	MoreInformation   string `json:"moreInformation" validate:"required"`
-	RelatedESCOSkills string `json:"relatedESCOskills" validate:"required"`
-	RelatedSkills     string `json:"relatedSkills" validate:"required"`
-	ReusabilityLevel  string `json:"reusabilityLevel" validate:"required"`
-	Title             string `json:"title" validate:"required"`
-	Type              string `json:"type" validate:"required"`
-}
-
-type EducationLevel struct {
-	EducationSubject string `json:"educationSubject" validate:"required"`
-	EducationLevel   string `json:"educationLevel" validate:"required"`
-	EQFLevel         string `json:"eqfLevel" validate:"required"`
-	QFLevel          string `json:"qfLevel" validate:"required"`
-}
-
-type TypeOfAssessment struct {
-	Type        string `json:"type" validate:"required"`
-	Description string `json:"description" validate:"required"`
-	Grade       string `json:"grade" validate:"required"`
-}
-
-type FormOfParticipation struct {
+type MCCredentialSchema struct {
+	ID   string `json:"id" validate:"required"`
 	Type string `json:"type" validate:"required"`
-	Mode string `json:"mode" validate:"required"`
 }
 
-type QualityAssurance struct {
-	Identifier string `json:"identifier" validate:"required"`
-	Title      string `json:"title" validate:"required"`
-	Type       string `json:"type" validate:"required"`
+type MCResult struct {
+	Type              []string `json:"type" validate:"required"`
+	ResultDescription string   `json:"resultDescription" validate:"required"`
+	Value             string   `json:"value" validate:"required"`
 }
 
-func (d *MicrocredentialDocument) Marshal() (map[string]any, error) {
+type MCCredentialSubject struct {
+	ID          string        `json:"id" validate:"required"`
+	Type        []string      `json:"type" validate:"required"`
+	Achievement MCAchievement `json:"achievement" validate:"required"`
+	Result      []MCResult    `json:"result" validate:"required"`
+}
+
+type MCAchievement struct {
+	ID                         string                `json:"id" validate:"required"`
+	Type                       []string              `json:"type" validate:"required"`
+	Criteria                   MCCriteria            `json:"criteria" validate:"required"`
+	Description                string                `json:"description" validate:"required"`
+	Name                       string                `json:"name" validate:"required"`
+	Image                      MCImage               `json:"image" validate:"required"`
+	InLanguage                 string                `json:"inLanguage" validate:"required"`
+	EducationProgramIdentifier int                   `json:"educationProgramIdentifier" validate:"required"`
+	SBU                        int                   `json:"sbu" validate:"required"`
+	Alignment                  []MCAlignment         `json:"alignment" validate:"required"`
+	ParticipationType          string                `json:"participationType" validate:"required"`
+	AssessmentType             string                `json:"assessmentType" validate:"required"`
+	IdentityChecked            bool                  `json:"identityChecked" validate:"required"`
+	SupervisionType            string                `json:"supervisionType" validate:"required"`
+	ResultDescription          []MCResultDescription `json:"resultDescription" validate:"required"`
+}
+
+type MCResultDescription struct {
+	ID            string   `json:"id" validate:"required"`
+	Type          []string `json:"type" validate:"required"`
+	ValueMax      string   `json:"valueMax" validate:"required"`
+	ValueMin      string   `json:"valueMin" validate:"required"`
+	Name          string   `json:"name" validate:"required"`
+	RequiredValue string   `json:"requiredValue" validate:"required"`
+	ResultType    string   `json:"resultType" validate:"required"`
+}
+
+type MCAlignment struct {
+	Type       []string `json:"type" validate:"required"`
+	TargetType string   `json:"targetType" validate:"required"`
+	TargetName string   `json:"targetName" validate:"required"`
+	TargetURL  string   `json:"targetURL" validate:"required"`
+}
+
+type MCImage struct {
+	ID   string `json:"id" validate:"required"`
+	Type string `json:"type" validate:"required"`
+}
+
+type MCCriteria struct {
+	Narrative string `json:"narrative" validate:"required"`
+}
+
+type MCIssuer struct {
+	ID      string          `json:"id" validate:"required"`
+	Type    []string        `json:"type" validate:"required"`
+	Name    string          `json:"name" validate:"required"`
+	Address MCIssuerAddress `json:"address" validate:"required"`
+}
+
+type MCIssuerAddress struct {
+	Type               []string `json:"type" validate:"required"`
+	AddressCountry     string   `json:"addressCountry" validate:"required"`
+	AddressCountryCode string   `json:"addressCountryCode" validate:"required"`
+	StreetAddress      string   `json:"streetAddress" validate:"required"`
+	PostalCode         string   `json:"postalCode" validate:"required"`
+}
+
+func (d *MicroCredentialDocument) Marshal() (map[string]any, error) {
 	data, err := json.Marshal(d)
 	if err != nil {
 		return nil, err
 	}
 
-	var doc map[string]interface{}
+	var doc map[string]any
 	err = json.Unmarshal(data, &doc)
 	if err != nil {
 		return nil, err

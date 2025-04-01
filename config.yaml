@@ -7,6 +7,7 @@ common:
     addr: jaeger:4318
     type: jaeger
     #timeout: 10
+  credential_offer_type: "credential_offer_uri"
   qr:
     recovery_level: 2
     size: 256

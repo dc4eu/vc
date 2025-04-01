@@ -20,6 +20,7 @@ type Client struct {
 
 	Document *documentHandler
 	Identity *identityHandler
+	Root     *rootHandler
 	OIDC     *oidcHandler
 }
 
@@ -48,9 +49,9 @@ func New(config *Config) (*Client, error) {
 
 	defaultContentType := "application/json"
 
-	c.Document = &documentHandler{client: c, service: "api/v1/document", defaultContentType: defaultContentType, log: c.log.New("document")}
-	c.Identity = &identityHandler{client: c, service: "api/v1/identity", defaultContentType: defaultContentType, log: c.log.New("identity")}
-	c.Root = &rootHandler{client: c, serviceBaseURL: "api/v1", log: c.log.New("root")}	
+	c.Document = &documentHandler{client: c, serviceBaseURL: "api/v1/document", defaultContentType: defaultContentType, log: c.log.New("document")}
+	c.Identity = &identityHandler{client: c, serviceBaseURL: "api/v1/identity", defaultContentType: defaultContentType, log: c.log.New("identity")}
+	c.Root = &rootHandler{client: c, serviceBaseURL: "api/v1", defaultContentType: defaultContentType, log: c.log.New("root")}
 	c.OIDC = &oidcHandler{client: c, defaultContentType: defaultContentType, log: c.log.New("oidc")}
 
 	return c, nil

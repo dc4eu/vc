@@ -9,9 +9,9 @@ import (
 )
 
 type documentHandler struct {
-	client  *Client
-	serviceBaseURL string
-	log     *logger.Log
+	client             *Client
+	serviceBaseURL     string
+	log                *logger.Log
 	defaultContentType string
 }
 
@@ -24,7 +24,6 @@ type DocumentGetQuery struct {
 
 // Get gets a document
 func (s *documentHandler) Get(ctx context.Context, query *DocumentGetQuery) (*model.Document, *http.Response, error) {
-	url := fmt.Sprintf("%s", s.service)
 	reply := &model.Document{}
 	resp, err := s.client.call(ctx, http.MethodPost, s.serviceBaseURL, s.defaultContentType, nil, reply, true)
 	if err != nil {

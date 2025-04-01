@@ -39,7 +39,8 @@ type KeyPair struct {
 }
 
 type VPInteractionSession struct {
-	SessionID               string `json:"session_id"` //key == must be unique i coll (UUID1)
+	SessionID               string            `json:"session_id"` //key == must be unique i coll (UUID1)
+	Status                  InteractionStatus `json:"status"`
 	SessionEphemeralKeyPair *KeyPair
 	SessionCreated          time.Time `json:"session_created"`
 	SessionExpires          time.Time `json:"session_expires"`
@@ -50,13 +51,41 @@ type VPInteractionSession struct {
 	CallbackID              string    `json:"callback_id"`
 	JTI                     string    `json:"jti"`
 	PresentationDefinition  *PresentationDefinition
-	Status                  InteractionStatus `json:"status"`
 
 	//TODO: Below is just for dev/test purpose and must be removed before production
-	VerifierKeyPair *KeyPair
+	VerifierKeyPair *KeyPair `json:"verifier_key_pair,omitempty"`
 	//VerifierX509CertDER []byte
-	VerifierX5cCertDERBase64 string
-	RequestObjectJWS         string
+	VerifierX5cCertDERBase64       string           `json:"verifier_x509_cert_base64,omitempty"`
+	RequestObjectJWS               string           `json:"request_object_jws,omitempty"`
+	AuthorisationResponseDebugData *JsonRequestData `json:"authorisation_response_debug_data,omitempty"`
+}
+
+type JsonRequestData struct {
+	Method           string                 `json:"method"`
+	URL              string                 `json:"url"`
+	Proto            string                 `json:"proto"`
+	ProtoMajor       int                    `json:"proto_major"`
+	ProtoMinor       int                    `json:"proto_minor"`
+	Header           map[string][]string    `json:"header"`
+	Body             []byte                 `json:"body"`
+	ContentLength    int64                  `json:"content_length"`
+	TransferEncoding []string               `json:"transfer_encoding"`
+	Close            bool                   `json:"close"`
+	Host             string                 `json:"host"`
+	Form             map[string][]string    `json:"form"`
+	PostForm         map[string][]string    `json:"post_form"`
+	MultipartForm    map[string][]string    `json:"multipart_form"`
+	Trailer          map[string][]string    `json:"trailer"`
+	RemoteAddr       string                 `json:"remote_addr"`
+	RequestURI       string                 `json:"request_uri"`
+	TLS              map[string]interface{} `json:"tls"`
+	ClientIP         string                 `json:"client_ip"`
+	ContentType      string                 `json:"content_type"`
+	UserAgent        string                 `json:"user_agent"`
+	Referer          string                 `json:"referer"`
+	Cookies          []map[string]string    `json:"cookies"`
+	FullPath         string                 `json:"full_path"`
+	Handler          string                 `json:"handler"`
 }
 
 type InteractionStatus string

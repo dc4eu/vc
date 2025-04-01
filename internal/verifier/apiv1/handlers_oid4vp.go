@@ -19,6 +19,8 @@ import (
 
 // QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request
 func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error) {
+	//TODO: Inspect user-agent type to detect cross device or same device
+
 	if !(request.DocumentType == openid4vp.DocumentTypeEHIC || request.DocumentType == openid4vp.DocumentTypePDA1 || request.DocumentType == openid4vp.DocumentTypeELM) {
 		return nil, fmt.Errorf("document type not handled: %s", request.DocumentType)
 	}
@@ -36,17 +38,17 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 	clientID := "vcverifier.sunet.se" //TODO: ta in clientID via config
 	sessionID := uuid.NewString()
 	now := time.Now()
-	ecdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
+	verifierEmpEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO: vpSession ska/får mest troligt inte lagras i någon db utan måste lagra i sessionen - fixa senare när mer stabilt
+	//TODO: vpSession får inte lagras i någon db utan måste lagra i sessionen (memmory db) - fixa senare när mer stabilt
 	vpSession := &openid4vp.VPInteractionSession{
 		SessionID: sessionID,
 		SessionEphemeralKeyPair: &openid4vp.KeyPair{
-			PrivateKey:         ecdsaP256Private,
-			PublicKey:          ecdsaP256Private.PublicKey,
+			PrivateKey:         verifierEmpEcdsaP256Private,
+			PublicKey:          verifierEmpEcdsaP256Private.PublicKey,
 			SigningMethodToUse: jwt.SigningMethodES256,
 		},
 		SessionCreated: now,
@@ -157,7 +159,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 
 	//TODO: skapa och använd property i Verifier för baseUrl
 	verifierBaseUrl := "http://172.16.50.6:8080"
-	responseURI := fmt.Sprintf("%s/callback/%s/%s", verifierBaseUrl, vpSession.SessionID, vpSession.CallbackID)
+	responseURI := fmt.Sprintf("%s/callback/direct_post_jwt/%s/%s", verifierBaseUrl, vpSession.SessionID, vpSession.CallbackID)
 
 	now := jwt.NewNumericDate(time.Now())
 	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
@@ -194,21 +196,19 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 }
 
 func (c *Client) Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (*openid4vp.CallbackReply, error) {
+	//TODO: OBS! ändra signauren på endpointen till https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html#name-response-mode-direct_postjw
+	//TODO: denna kan också vara i form av en JWE
+	//TODO:
+	//	21 Evaluate the Verifiable Presentation token
+	//	22 Validate the Wallet Attestation.Attest the Wallet Provideris part of the Federation and the Wallet Instance is not revoked.
+	//	23 Attest Credential Issuer Trust and Validate JWT Signature
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
 		return nil, err
 	}
-	if vpSession.SessionExpires.Before(time.Now()) {
-		return nil, errors.New("session expired")
-	}
-	if !vpSession.Authorized {
-		return nil, errors.New("not authorized in session")
-	}
-	if vpSession.CallbackID != callbackID {
-		return nil, errors.New("callback ID does not match the one in session")
-	}
-	if vpSession.Status == openid4vp.StatusVPTokenReceived {
-		return nil, errors.New("callback already performed in session")
+	err = validateCallbackPreconditions(vpSession, callbackID)
+	if err != nil {
+		return nil, err
 	}
 	vpSession.Status = openid4vp.StatusVPTokenReceived
 	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
@@ -268,13 +268,49 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
-	err = c.db.VPInteractionSessionColl.Delete(ctx, sessionID)
-	if err != nil {
-		return nil, err
-	}
+	//TODO: ta bort VPInteractionSession när utvecklingen börjar vara mer klar
+	//err = c.db.VPInteractionSessionColl.Delete(ctx, sessionID)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	//TODO: vad ska returneras tillbaka till walleten om validering: 1) allt OK 2) något gick fel eller ej ok
 	return &openid4vp.CallbackReply{}, nil
+}
+
+func (c *Client) SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) error {
+	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+	err = validateCallbackPreconditions(vpSession, callbackID)
+	if err != nil {
+		return err
+	}
+
+	vpSession.AuthorisationResponseDebugData = request
+	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateCallbackPreconditions(vpSession *openid4vp.VPInteractionSession, callbackID string) error {
+	if vpSession.SessionExpires.Before(time.Now()) {
+		return errors.New("session expired")
+	}
+	if !vpSession.Authorized {
+		return errors.New("not authorized in session")
+	}
+	if vpSession.CallbackID != callbackID {
+		return errors.New("callback ID does not match the one in session")
+	}
+	if vpSession.Status == openid4vp.StatusVPTokenReceived {
+		return errors.New("callback already performed in session")
+	}
+	return nil
 }
 
 func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*openid4vp.VerificationResult, error) {
@@ -298,5 +334,34 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 	return &openid4vp.VerificationResult{
 		Status: string(status),
 		Data:   data,
+	}, nil
+}
+
+type VPFlowDebugInfo struct {
+	SessionID                   string                          `json:"session_id"`
+	TimestampUTC                time.Time                       `json:"timestamp_utc"`
+	VPSession                   *openid4vp.VPInteractionSession `json:"vp_session,omitempty"`
+	RawAuthenticationResponse   string                          `json:"authentication_response,omitempty"`
+	VPSessionReadError          error                           `json:"vp_session_read_error,omitempty"`
+	VerificationRecord          *openid4vp.VerificationRecord   `json:"verification_record,omitempty"`
+	VerificationRecordReadError error                           `json:"verification_record_read_error,omitempty"`
+}
+
+func (c *Client) GetVPFlowDebugInfo(ctx context.Context, sessionID string) (*VPFlowDebugInfo, error) {
+	if c.cfg.Common.Production {
+		return nil, errors.New("endpoint disabled in production")
+	}
+
+	vpSession, errVPSession := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
+	verificationRecord, errVerRec := c.db.VerificationRecordColl.Read(ctx, sessionID)
+
+	return &VPFlowDebugInfo{
+		SessionID:                   sessionID,
+		TimestampUTC:                time.Now().UTC(),
+		VPSession:                   vpSession,
+		VPSessionReadError:          errVPSession,
+		RawAuthenticationResponse:   "",
+		VerificationRecord:          verificationRecord,
+		VerificationRecordReadError: errVerRec,
 	}, nil
 }

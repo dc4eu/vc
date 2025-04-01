@@ -102,7 +102,7 @@ func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error)
 		Organization: []string{"SUNET"},
 		Locality:     []string{"Stockholm"},
 		SerialNumber: uuid.NewString(),
-		CommonName:   "vcverifier.sunet.se",
+		CommonName:   "vc-interop-1.sunet.se", //TODO: ändra till samma som DNSNames
 	}
 
 	serialNumber, err := generateSerialNumber()
@@ -119,7 +119,12 @@ func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error)
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageKeyAgreement, //TODO: vad ska KeyUsage sättas till?
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},                                           //TODO: vad ska ExtKeyUsage sättas till?
 		BasicConstraintsValid: true,
-		DNSNames:              []string{"vcverifier.sunet.se"}, //TODO vad ska dns names sättas till?
+		DNSNames: []string{"vc-interop-1.sunet.se",
+			"vc-interop-2.sunet.se",
+			"satosa-test-1.sunet.se",
+			"satosa-test-2.sunet.se",
+			"satosa-dev-1.sunet.se",
+			"satosa-dev-2.sunet.se"}, //TODO vad ska dns names sättas till; vc-interop-1.sunet.se OR vc-interop-2.sunet.se ?
 	}
 
 	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)

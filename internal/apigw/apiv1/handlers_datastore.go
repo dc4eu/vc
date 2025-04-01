@@ -32,10 +32,58 @@ type UploadRequest struct {
 //	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
-	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Issuer.IssuerURL, c.cfg.Issuer.CredentialOfferURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
-	if err != nil {
-		c.log.Debug("QR code generation failed", "error", err)
-		return err
+	var credentialConfigurationID string
+	switch req.Meta.DocumentType {
+	case "PDA1":
+		credentialConfigurationID = "PDA1Credential"
+	case "EHIC":
+		credentialConfigurationID = "EHICCredential"
+	}
+
+	credentialOfferParameter := openid4vci.CredentialOfferParameters{
+		CredentialIssuer: c.cfg.Issuer.IssuerURL,
+		CredentialConfigurationIDs: []string{
+			credentialConfigurationID,
+		},
+		Grants: map[string]any{
+			"authorization_code": openid4vci.GrantAuthorizationCode{
+				IssuerState: fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", req.Meta.Collect.ID, req.Meta.DocumentType, req.Meta.AuthenticSource),
+			},
+		},
+	}
+
+	var qr *openid4vci.QR
+	switch c.cfg.Common.CredentialOfferType {
+	case "credential_offer":
+		credentialOffer, err := credentialOfferParameter.CredentialOffer()
+		if err != nil {
+			return err
+		}
+
+		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Issuer.IssuerURL)
+		if err != nil {
+			return err
+		}
+
+	case "credential_offer_uri":
+		credentialOffer, err := credentialOfferParameter.CredentialOfferURI()
+		if err != nil {
+			return err
+		}
+
+		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, "", c.cfg.Issuer.IssuerURL)
+		if err != nil {
+			return err
+		}
+
+		doc := &db.CredentialOfferDocument{
+			UUID:                      uuid.NewString(),
+			CredentialOfferParameters: credentialOfferParameter,
+		}
+
+		if err := c.db.VCCredentialOfferColl.Save(ctx, doc); err != nil {
+			return err
+		}
 	}
 
 	if req.Meta.Collect == nil || req.Meta.Collect.ID == "" {
@@ -90,7 +138,7 @@ type NotificationRequest struct {
 
 // NotificationReply is the reply for a Notification
 type NotificationReply struct {
-	Data *model.QR `json:"data"`
+	Data *openid4vci.QR `json:"data"`
 }
 
 // Notification return QR code and DeepLink for a document

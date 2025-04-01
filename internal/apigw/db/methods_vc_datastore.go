@@ -6,6 +6,7 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/openid4vci"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -269,7 +270,7 @@ func (c *VCDatastoreColl) DocumentList(ctx context.Context, query *DocumentListQ
 }
 
 // GetQR return matching document and return its QR code, else error
-func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*model.QR, error) {
+func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*openid4vci.QR, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": attr.AuthenticSource},
 		"meta.document_type":    bson.M{"$eq": attr.DocumentType},

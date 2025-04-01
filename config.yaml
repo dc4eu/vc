@@ -16,6 +16,11 @@ common:
       - "kafka0:9092"
       - "kafka1:9092"
 
+credential_offer:
+  type: "credential_offer_uri"
+  issuer_url: "http://vc_dev_issuer:8080"
+
+
 authentic_sources:
   SUNET_v1:
     country_code: "SE"
@@ -57,8 +62,9 @@ issuer:
   grpc_server:
     addr: vc_dev_issuer:8090
   signing_key_path: "/private_ec256.pem"
-  issuer_url: "https://www.sunet.se"
-  credential_offer_url: "https://www.sunet.se"
+  issuer_url: "http://172.16.50.2:8080"
+  credential_offer_url: "http://www.sunet.se" # is this the wallet url?
+  metadata_path: "/metadata.golden"
   jwt_attribute:
     issuer: https://issuer.sunet.se
     enable_not_before: true
@@ -96,7 +102,10 @@ apigw:
     basic_auth:
       enabled: false
       users:
-        admin: "secret123"
+        client_1: "secret_1"
+        client_2: "secret_2"
+        client_3: "secret_3"
+        client_4: "secret_4"
 
 mock_as:
   api_server:

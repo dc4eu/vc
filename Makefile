@@ -46,6 +46,7 @@ DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
 DOCKER_TAG_PORTAL 		:= docker.sunet.se/dc4eu/portal:$(VERSION)
+DOCKER_TAG_WALLET 		:= docker.sunet.se/dc4eu/wallet:$(VERSION)
 
 
 build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui
@@ -73,6 +74,10 @@ build-apigw:
 build-ui:
 	$(info Building ui)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_ui ${LDFLAGS} ./cmd/ui/main.go
+
+build-wallet:
+	$(info Building wallet)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_wallet ${LDFLAGS} ./cmd/wallet/main.go
 
 docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui docker-build-portal
 
@@ -121,6 +126,10 @@ docker-build-portal:
 docker-build-portal-debug:
 	$(info Docker building portal with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=portal --tag $(DOCKER_TAG_PORTAL) --file dockerfiles/web_worker_debug .
+
+docker-build-wallet:
+	$(info Docker building wallet with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=wallet --tag $(DOCKER_TAG_WALLET) --file dockerfiles/worker .
 
 docker-push-gobuild:
 	$(info Pushing docker images)

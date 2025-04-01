@@ -5,6 +5,7 @@ import (
 	"vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
+	"vc/pkg/openid4vci"
 
 	"go.opentelemetry.io/otel/codes"
 
@@ -249,16 +250,56 @@ func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, erro
 	return reply, nil
 }
 
-func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-nonce-endpoint
+func (s *Service) endpointOIDCNonce(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointNonce")
 	defer span.End()
 
-	request := &apiv1.CredentialRequest{}
+	reply, err := s.apiv1.OIDCNonce(ctx)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointOIDCAuth(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAuthPar")
+	defer span.End()
+
+	s.log.Debug("OIDCAuth endpoint")
+
+	s.log.Debug("OIDCAuth", "content-type", c.ContentType(), "body", c.Request.Body)
+
+	request := &openid4vci.AuthorizationRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		//request, err := openid4vci.BindAuthorizationRequest(c.Request.Body)
+		//if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "binding error")
+		return nil, err
+	}
+	reply, err := s.apiv1.OIDCAuth(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "OIDCAuth error")
+		return nil, err
+	}
+	s.log.Debug("OIDCAuth", "reply", reply)
+	c.Redirect(302, reply)
+	return reply, nil
+}
+
+func (s *Service) endpointOIDCToken(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointToken")
+	defer span.End()
+
+	request := &openid4vci.TokenRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.Credential(ctx, request)
+	reply, err := s.apiv1.OIDCToken(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
@@ -266,14 +307,117 @@ func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, 
 	return reply, nil
 }
 
-func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-14.html#name-sending-credential-offer-by-
+func (s *Service) endpointOIDCredentialOfferURI(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
 	defer span.End()
 
-	reply, err := s.apiv1.JWKS(ctx)
+	request := &openid4vci.CredentialOfferURIRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.OIDCredentialOfferURI(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return reply, nil
 }
+
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-endpoint
+func (s *Service) endpointOIDCCredential(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
+	defer span.End()
+
+	request := &openid4vci.CredentialRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.OIDCCredential(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (s *Service) endpointOIDCBatchCredential(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointBatchCredential")
+	defer span.End()
+
+	request := &openid4vci.BatchCredentialRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.OIDCBatchCredential(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoint
+func (s *Service) endpointOIDCDeferredCredential(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointDeferredCredential")
+	defer span.End()
+
+	request := &openid4vci.DeferredCredentialRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.OIDCDeferredCredential(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-notification-endpoint
+func (s *Service) endpointOIDCNotification(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointNotification")
+	defer span.End()
+
+	request := &openid4vci.NotificationRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	err := s.apiv1.OIDCNotification(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	c.Status(204)
+	return nil, nil
+}
+
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID1.html#name-credential-issuer-metadata-
+func (s *Service) endpointOIDCMetadata(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointMetadata")
+	defer span.End()
+
+	reply, err := s.apiv1.OIDCMetadata(ctx)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
+//func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
+//	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")
+//	defer span.End()
+//
+//	reply, err := s.apiv1.JWKS(ctx)
+//	if err != nil {
+//		span.SetStatus(codes.Error, err.Error())
+//		return nil, err
+//	}
+//	return reply, nil
+//}

@@ -40,3 +40,11 @@ func (c *VerifierClient) Decode(req *apiv1_verifier.DecodeCredentialRequest) (an
 	}
 	return reply, nil
 }
+
+func (c *VerifierClient) GetVPFlowDebugInfo(req *apiv1_verifier.VPFlowDebugInfoRequest) (any, error) {
+	reply, err := c.DoPostJSON("/debug/vp-flow", req)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}

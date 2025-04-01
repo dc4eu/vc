@@ -92,6 +92,8 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "verify", s.endpointVerifyCredential)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "decode", s.endpointDecodeCredential)
 
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "debug/vp-flow", s.endpointGetVPFlowDebugInfo)
+
 	rgMockAS := rgRoot.Group("mockas")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgMockAS, http.MethodGet, "health", s.endpointHealthMockAS)
 

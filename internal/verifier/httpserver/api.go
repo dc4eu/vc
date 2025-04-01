@@ -17,7 +17,8 @@ type Apiv1 interface {
 	// openid4vp-web
 	GetVerificationResult(ctx context.Context, sessionID string) (*openid4vp.VerificationResult, error)
 
-	GetVPFlowDebugInfo(ctx context.Context, sessionID string) (*apiv1.VPFlowDebugInfo, error)
+	//ui-web dev support
+	GetVPFlowDebugInfo(ctx context.Context, request *apiv1.VPFlowDebugInfoRequest) (*apiv1.VPFlowDebugInfoReply, error)
 	SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) error
 
 	// misc

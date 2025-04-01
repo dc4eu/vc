@@ -68,7 +68,8 @@
                             Create credential
                         </a>
                         <a id="display-verify-form-btn"
-                           onclick="addVerifyFormArticleToContainer()"
+                           style="text-decoration: line-through;"
+                           onclick="return false;"
                            class="navbar-item">
                             Verify credential
                         </a>
@@ -97,6 +98,12 @@
                            onclick="getAndDisplayInArticleContainerFor('/mockas/health','Health MockAS')"
                            class="navbar-item">
                             Health MockAS
+                        </a>
+                        <hr class="navbar-divider">
+                        <a id="display-view-vpflow-debug-info-btn"
+                           onclick="addViewVPFlowDebugInfoFormArticleToContainer()"
+                           class="navbar-item">
+                            VP-flow debug info
                         </a>
                         <hr class="navbar-divider">
                         <a id="fetch-user-btn" onclick="getAndDisplayInArticleContainerFor('/secure/user','User')"

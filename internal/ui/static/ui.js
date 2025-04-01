@@ -446,6 +446,38 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
     document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
 };
 
+const addViewVPFlowDebugInfoFormArticleToContainer = () => {
+    const buildFormElements = () => {
+        const sessionIDElement = createInputElement('session id');
+
+        const viewButton = document.createElement('button');
+        viewButton.id = generateUUID();
+        viewButton.classList.add('button', 'is-link');
+        viewButton.textContent = 'View';
+        viewButton.onclick = () => {
+            viewButton.disabled = true;
+
+            const requestBody = {
+                session_id: sessionIDElement.value,
+            };
+
+            disableElements([sessionIDElement]);
+
+            postAndDisplayInArticleContainerFor("/verifier/debug/vp-flow", requestBody, "VP-flow debug info");
+        };
+
+        return [sessionIDElement, viewButton];
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    const articleDiv = buildArticle(articleIdBasis.articleID, "View vp-flow debug info", buildFormElements());
+    const articleContainer = document.getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+
+    document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
+
+};
+
 const addVerifyFormArticleToContainer = () => {
     const textareaId = generateUUID();
     const buildVerifyCredentialFormElements = (textareaId) => {

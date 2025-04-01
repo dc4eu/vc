@@ -89,7 +89,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	// for dev purpose only
 	//TODO: OBS! nedan endpoint behöver säkerhet innan mer känsliga nycklar och/eller data börjar användas (tillåts dock ej redan om vc satt till production)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "debug/vp-flow/:session_id", s.endpointGetVPFlowDebugInfo)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "debug/vp-flow", s.endpointGetVPFlowDebugInfo)
 
 	//deprecated: to be removed later
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", s.endpointVerifyCredential)

@@ -243,12 +243,13 @@ func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, g *gin.Context
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetVPFlowDebugInfo")
 	defer span.End()
 
-	sessionID := g.Param("session_id")
-	if sessionID == "" {
-		return nil, errors.New("session_id is empty")
+	request := &apiv1.VPFlowDebugInfoRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 
-	reply, err := s.apiv1.GetVPFlowDebugInfo(ctx, sessionID)
+	reply, err := s.apiv1.GetVPFlowDebugInfo(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

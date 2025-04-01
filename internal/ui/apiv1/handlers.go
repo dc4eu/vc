@@ -191,6 +191,18 @@ func (c *Client) DecodeCredential(ctx context.Context, req *apiv1_verifier.Decod
 	return reply, nil
 }
 
+type VPFlowDebugInfoRequest struct {
+	SessionID string `json:"session_id" binding:"required,uuid"`
+}
+
+func (c *Client) GetVPFlowDebugInfo(ctx context.Context, req *apiv1_verifier.VPFlowDebugInfoRequest) (any, error) {
+	reply, err := c.verifierClient.GetVPFlowDebugInfo(req)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (c *Client) SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error) {
 	reply, err := c.apigwClient.SearchDocuments(req)
 	if err != nil {

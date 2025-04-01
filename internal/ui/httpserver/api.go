@@ -35,4 +35,5 @@ type Apiv1 interface {
 	HealthVerifier(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)
 	Verify(ctx context.Context, request *apiv1_verifier.VerifyCredentialRequest) (any, error)
 	DecodeCredential(ctx context.Context, request *apiv1_verifier.DecodeCredentialRequest) (any, error)
+	GetVPFlowDebugInfo(ctx context.Context, request *apiv1_verifier.VPFlowDebugInfoRequest) (any, error)
 }

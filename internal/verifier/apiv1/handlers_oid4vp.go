@@ -321,14 +321,10 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 	}
 
 	var data any
-	if vpSession == nil {
-		// The vp session is removed as the last backend step in the verify flow
-		verificationRecord, err := c.db.VerificationRecordColl.Read(ctx, sessionID)
-		if err == nil {
-			status = openid4vp.StatusCompleted
-			//TODO: filter what data in verificationRecord to expose
-			data = verificationRecord
-		}
+	if vpSession == nil || vpSession.Status == openid4vp.StatusVPTokenReceived || vpSession.Status == openid4vp.StatusCompleted {
+		verificationRecord, _ := c.db.VerificationRecordColl.Read(ctx, sessionID)
+		//TODO: filter what data in verificationRecord to expose (if not nil or any error)
+		data = verificationRecord
 	}
 
 	return &openid4vp.VerificationResult{
@@ -337,30 +333,36 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 	}, nil
 }
 
-type VPFlowDebugInfo struct {
+type VPFlowDebugInfoReply struct {
 	SessionID                   string                          `json:"session_id"`
 	TimestampUTC                time.Time                       `json:"timestamp_utc"`
 	VPSession                   *openid4vp.VPInteractionSession `json:"vp_session,omitempty"`
-	RawAuthenticationResponse   string                          `json:"authentication_response,omitempty"`
 	VPSessionReadError          error                           `json:"vp_session_read_error,omitempty"`
 	VerificationRecord          *openid4vp.VerificationRecord   `json:"verification_record,omitempty"`
 	VerificationRecordReadError error                           `json:"verification_record_read_error,omitempty"`
 }
 
-func (c *Client) GetVPFlowDebugInfo(ctx context.Context, sessionID string) (*VPFlowDebugInfo, error) {
+type VPFlowDebugInfoRequest struct {
+	SessionID string `json:"session_id" validate:"required,uuid"`
+}
+
+func (c *Client) GetVPFlowDebugInfo(ctx context.Context, request *VPFlowDebugInfoRequest) (*VPFlowDebugInfoReply, error) {
 	if c.cfg.Common.Production {
 		return nil, errors.New("endpoint disabled in production")
 	}
 
-	vpSession, errVPSession := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
-	verificationRecord, errVerRec := c.db.VerificationRecordColl.Read(ctx, sessionID)
+	vpSession, errVPSession := c.db.VPInteractionSessionColl.Read(ctx, request.SessionID)
+	verificationRecord, errVerRec := c.db.VerificationRecordColl.Read(ctx, request.SessionID)
 
-	return &VPFlowDebugInfo{
-		SessionID:                   sessionID,
+	if vpSession != nil && vpSession.AuthorisationResponseDebugData != nil && len(vpSession.AuthorisationResponseDebugData.Body) != 0 {
+		fmt.Println(string(vpSession.AuthorisationResponseDebugData.Body))
+	}
+
+	return &VPFlowDebugInfoReply{
+		SessionID:                   request.SessionID,
 		TimestampUTC:                time.Now().UTC(),
 		VPSession:                   vpSession,
 		VPSessionReadError:          errVPSession,
-		RawAuthenticationResponse:   "",
 		VerificationRecord:          verificationRecord,
 		VerificationRecordReadError: errVerRec,
 	}, nil

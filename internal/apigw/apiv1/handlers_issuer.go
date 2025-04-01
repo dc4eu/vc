@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/openid4vci"
 
@@ -91,8 +90,6 @@ func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuer
 		c.log.Error(err, "Failed to connect to issuer")
 		return nil, err
 	}
-	defer conn.Close()
-	client := apiv1_issuer.NewIssuerServiceClient(conn)
 
 	metadata := &openid4vci.CredentialIssuerMetadataParameters{}
 	err = json.Unmarshal(data, metadata)
@@ -156,34 +153,4 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 		},
 	}
 	return reply, nil
-}
-
-// JWKS returns the public key in JWK format
-//
-//	@Summary		JWKS
-//	@ID				issuer-JWKS
-//	@Description	JWKS endpoint
-//	@Tags			dc4eu
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	apiv1_issuer.JwksReply	"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Router			/credential/.well-known/jwks [get]
-func (c *Client) JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error) {
-	c.log.Debug("jwk")
-	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
-
-	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, optInsecure)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	client := apiv1_issuer.NewIssuerServiceClient(conn)
-	resp, err := client.JWKS(ctx, &apiv1_issuer.Empty{})
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
 }

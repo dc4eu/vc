@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"vc/internal/apigw/apiv1"
+	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
@@ -24,6 +25,10 @@ type Apiv1 interface {
 	AddConsent(ctx context.Context, req *apiv1.AddConsentRequest) error
 	GetConsent(ctx context.Context, req *apiv1.GetConsentRequest) (*model.Consent, error)
 
+	// SatosaCredential endpoints, remove after transition from Satosa to OIDC4VCI
+	SatosaCredential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error)
+	JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)
+
 	// datastore endpoints - disabled in production
 	SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error)
 
@@ -38,7 +43,6 @@ type Apiv1 interface {
 	OIDCNotification(ctx context.Context, req *openid4vci.NotificationRequest) error
 	OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error)
 
-	//JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)
 	//Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 
 	// misc endpoints

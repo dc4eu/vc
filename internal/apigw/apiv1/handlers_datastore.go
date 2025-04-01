@@ -2,11 +2,14 @@ package apiv1
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"vc/internal/apigw/db"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
+	"vc/pkg/openid4vci"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -38,6 +41,8 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		credentialConfigurationID = "PDA1Credential"
 	case "EHIC":
 		credentialConfigurationID = "EHICCredential"
+	case "Diploma":
+		credentialConfigurationID = "DiplomaCredential"
 	}
 
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{

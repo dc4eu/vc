@@ -327,7 +327,7 @@ func (s *Service) endpointOIDCredentialOfferURI(ctx context.Context, c *gin.Cont
 
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-endpoint
 func (s *Service) endpointOIDCCredential(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOIDCredential")
 	defer span.End()
 
 	request := &openid4vci.CredentialRequest{}

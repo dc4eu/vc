@@ -7,6 +7,7 @@ import (
 	"sync"
 	"syscall"
 	"vc/internal/mockas/apiv1"
+	"vc/internal/mockas/education"
 	"vc/internal/mockas/httpserver"
 	"vc/internal/mockas/inbound"
 	"vc/pkg/configuration"
@@ -40,6 +41,12 @@ func main() {
 	mainLog := log.New("main")
 
 	tracer, err := trace.New(ctx, cfg, serviceName, log)
+	if err != nil {
+		panic(err)
+	}
+
+	eduClient, err := education.New(ctx, cfg.MockAS.DatastoreURL, log.New("education"))
+	services["eduClient"] = eduClient
 	if err != nil {
 		panic(err)
 	}

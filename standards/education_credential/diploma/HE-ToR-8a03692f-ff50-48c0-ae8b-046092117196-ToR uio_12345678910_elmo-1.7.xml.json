@@ -1,0 +1,1033 @@
+{
+  "type": [
+    "VerifiableCredential",
+    "EuropeanDigitalCredential"
+  ],
+  "credentialProfiles": {
+    "id": "http://data.europa.eu/snb/credential/e34929035b",
+    "type": "Concept",
+    "inScheme": {
+      "id": "http://data.europa.eu/snb/credential/25831c2",
+      "type": "ConceptScheme"
+    },
+    "prefLabel": {
+      "en": "Generic"
+    }
+  },
+  "displayParameter": {
+    "id": "urn:epass:displayParameter:1",
+    "type": "DisplayParameter",
+    "individualDisplay": {
+      "id": "urn:epass:individualDisplay:6be7b152-fb81-4d06-842a-da0140b2714f",
+      "type": "IndividualDisplay",
+      "displayDetail": {
+        "id": "urn:epass:displayDetail:e9f269f7-f16e-47b9-86e2-f5e80e07ea90",
+        "type": "DisplayDetail",
+        "image": {
+          "id": "urn:epass:mediaObject:58e61212-e6e7-4d72-b2f6-9a22d6bdea71",
+          "type": "MediaObject",
+          "content": "/9j/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/yQALCAABAAEBAREA/8wABgAQEAX/2gAIAQEAAD8A0s8g/9k=",
+          "contentEncoding": {
+            "id": "http://data.europa.eu/snb/encoding/6146cde7dd",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/encoding/25831c2",
+              "type": "ConceptScheme"
+            },
+            "prefLabel": {
+              "en": "base64"
+            }
+          },
+          "contentType": {
+            "id": "http://publications.europa.eu/resource/authority/file-type/JPEG",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://publications.europa.eu/resource/authority/file-type",
+              "type": "ConceptScheme"
+            },
+            "notation": "file-type",
+            "prefLabel": {
+              "en": "JPEG"
+            }
+          }
+        },
+        "page": 1
+      },
+      "language": {
+        "id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/language",
+          "type": "ConceptScheme"
+        },
+        "notation": "langugage",
+        "prefLabel": {
+          "en": "en"
+        }
+      }
+    },
+    "primaryLanguage": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "language": {
+      "id": "http://publications.europa.eu/resource/authority/language/ENG",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/language",
+        "type": "ConceptScheme"
+      },
+      "notation": "langugage",
+      "prefLabel": {
+        "en": "en"
+      }
+    },
+    "title": {
+      "en": "A converted document from ELMO:1.7"
+    }
+  },
+  "credentialSchema": {
+    "id": "http://data.europa.eu/snb/model/ap/edc-generic-full",
+    "type": "ShaclValidator2017"
+  },
+  "credentialSubject": {
+    "id": "urn:epass:person:354435c0-3e8e-4478-9fc7-ec53ed371eae",
+    "type": "Person",
+    "citizenshipCountry": {
+      "id": "http://publications.europa.eu/resource/authority/country/NOR",
+      "type": "Concept",
+      "inScheme": {
+        "id": "http://publications.europa.eu/resource/authority/country",
+        "type": "ConceptScheme"
+      },
+      "notation": "country",
+      "prefLabel": {
+        "en": "Norway"
+      }
+    },
+    "dateOfBirth": "1991-01-20T00:00:00",
+    "hasClaim": [
+      {
+        "id": "urn:epass:learningAchievement:f2067882-75a1-4629-9027-a21bb4a3bd07",
+        "type": "LearningAchievement",
+        "awardedBy": {
+          "id": "urn:epass:awardingProcess:28df391d-1ec2-4a1b-a4dc-d9f8451b6caf",
+          "type": "AwardingProcess",
+          "awardingBody": {
+            "id": "urn:epass:org:3cb3d0bb-7e92-4522-9306-9c837d91bae3",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:7f2a14b4-5b4b-4d6c-b3ab-0db89b22baae",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:640663a9-986e-459b-ab42-1fa7ad3468d7",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/NOR",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Norway"
+                  }
+                }
+              }
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:a999b8ed-d028-40bc-9d03-241193a16479",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "185"
+              },
+              {
+                "id": "urn:epass:identifier:f2fad3af-30c1-4fc7-a385-ede2eb0fd102",
+                "type": "Identifier",
+                "schemeName": "erasmus",
+                "notation": "N OSLO01"
+              },
+              {
+                "id": "urn:epass:identifier:08679c16-492e-46f2-a1c7-e6b5d3a14f3e",
+                "type": "Identifier",
+                "schemeName": "schac",
+                "notation": "uio.no"
+              },
+              {
+                "id": "urn:epass:identifier:24f437cd-d303-4be4-90b9-e8524b7da0c9",
+                "type": "Identifier",
+                "schemeName": "pic",
+                "notation": "999975814"
+              }
+            ],
+            "legalName": {
+              "no": "Universitetet i Oslo",
+              "en": "University of Oslo"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:b4590053-2630-4150-b87f-3e1b14b30110",
+              "type": "WebResource",
+              "contentURL": "https://www.uio.no/"
+            }
+          },
+          "awardingDate": "2019-07-15T00:00:00",
+          "used": {
+            "id": "converter:assessment:1",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:d4ab8da5-3547-40ca-aecc-581318862aa0",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:2e6c3df7-f2b7-4679-9661-ea4890ed0908",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:471ca009-83db-4be8-ba98-fd2546ec454e",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/NOR",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Norway"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:5c858798-0b80-4b45-993a-3fd24490f28b",
+                  "type": "Identifier",
+                  "schemeName": "local",
+                  "notation": "185"
+                },
+                {
+                  "id": "urn:epass:identifier:6f4442d0-1c08-45f2-8e13-0edb64f0adde",
+                  "type": "Identifier",
+                  "schemeName": "erasmus",
+                  "notation": "N OSLO01"
+                },
+                {
+                  "id": "urn:epass:identifier:3b74bff0-b699-46f8-8470-7402a4d4da95",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "uio.no"
+                },
+                {
+                  "id": "urn:epass:identifier:67794ea6-8f96-4ed6-9790-beeb4a542223",
+                  "type": "Identifier",
+                  "schemeName": "pic",
+                  "notation": "999975814"
+                }
+              ],
+              "legalName": {
+                "no": "Universitetet i Oslo",
+                "en": "University of Oslo"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:d4f2687e-9255-4038-a20a-862073b9463b",
+                "type": "WebResource",
+                "contentURL": "https://www.uio.no/"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:1c5148e8-806f-4841-b3c6-1b6a822eaf26",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:dc2a1d1f-9175-44f8-a2ae-6a0b936dc04c",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:7bbfb1ea-ad21-4dda-bd6a-1ec223e1e926",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:bbf019ec-9b3b-44b9-b90c-b4359a07b606",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/NOR",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Norway"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:cdbc1751-b0f2-4be2-86f8-2c96ee1345bd",
+                    "type": "Identifier",
+                    "schemeName": "local",
+                    "notation": "185"
+                  },
+                  {
+                    "id": "urn:epass:identifier:dba64032-b88f-4258-b434-becf0e52d54d",
+                    "type": "Identifier",
+                    "schemeName": "erasmus",
+                    "notation": "N OSLO01"
+                  },
+                  {
+                    "id": "urn:epass:identifier:46ddb529-c4b6-4e64-9052-13bb5a53fd60",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "uio.no"
+                  },
+                  {
+                    "id": "urn:epass:identifier:11d293f9-886f-4800-bc93-d05563037e4d",
+                    "type": "Identifier",
+                    "schemeName": "pic",
+                    "notation": "999975814"
+                  }
+                ],
+                "legalName": {
+                  "no": "Universitetet i Oslo",
+                  "en": "University of Oslo"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:5a1d0ce1-7147-4ec9-ade8-56764888c114",
+                  "type": "WebResource",
+                  "contentURL": "https://www.uio.no/"
+                }
+              },
+              "awardingDate": "2019-07-15T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:1d17581d-4abb-4f05-8da8-99af1225f863",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:be8989c5-00a3-4785-adaa-a05e254dcee8",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "A"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "resultDistribution": {
+              "id": "urn:epass:resultDistribution:e602cda1-3e39-43f3-aada-d4824282d873",
+              "type": "ResultDistribution",
+              "resultCategory": [
+                {
+                  "id": "urn:epass:resultCategory:ac45f385-3fc4-497f-8ffb-29e8e2b5ce3d",
+                  "type": "ResultCategory",
+                  "count": 63,
+                  "label": "A"
+                },
+                {
+                  "id": "urn:epass:resultCategory:1695ed16-3ed8-4ccb-b8f3-b3209df73606",
+                  "type": "ResultCategory",
+                  "count": 24,
+                  "label": "B"
+                },
+                {
+                  "id": "urn:epass:resultCategory:338a85e0-a557-4225-a7ed-2e4cb23fc62f",
+                  "type": "ResultCategory",
+                  "count": 3,
+                  "label": "C"
+                },
+                {
+                  "id": "urn:epass:resultCategory:634e4efc-a373-4b06-8d19-8ca31199577a",
+                  "type": "ResultCategory",
+                  "count": 1,
+                  "label": "D"
+                },
+                {
+                  "id": "urn:epass:resultCategory:496501c4-c4a5-4108-a633-d47570f3f3de",
+                  "type": "ResultCategory",
+                  "count": 2,
+                  "label": "E"
+                }
+              ]
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:fadb1aad-02ac-4221-93e7-256e2d17deaf",
+              "type": "LearningAssessmentSpecification",
+              "gradingScheme": {
+                "id": "urn:epass:gradingScheme:a7fa1f0c-1c2a-4392-ae23-0392a06189b5",
+                "type": "GradingScheme",
+                "description": {
+                  "en": "A – Excellent An excellent performance, clearly outstanding. The candidate demonstrates excellent judgement and a high degree of independent thinking. B – Very good A very good performance. The candidate demonstrates sound judgement and a very good degree of independent thinking. C – Good A good performance in most areas. The candidate demonstrates a reasonable degree of judgement and independent thinking in the most important areas. D – Satisfactory A satisfactory performance, but with significant shortcomings. The candidate demonstrates a limited degree of judgement and independent thinking. E – Sufficient A performance that meets the minimum criteria, but no more. The candidate demonstrates a very limited degree of judgement and independent thinking. F – Fail A performance that does not meet the minimum academic criteria. The candidate demonstrates an absence of both judgement and independent thinking."
+                },
+                "title": {
+                  "und": "30"
+                }
+              },
+              "title": {
+                "no": "Testing",
+                "en": "Testing"
+              }
+            },
+            "dateIssued": "2019-07-15T00:00:00",
+            "title": {
+              "no": "Testing",
+              "en": "Testing"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:95d1b0c2-3918-4131-accd-82f346222940",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "INF4000-1"
+              },
+              {
+                "id": "urn:epass:identifier:5609fabf-0b44-411c-84a5-850c0343f674",
+                "type": "Identifier",
+                "schemeName": "elmo",
+                "notation": "638263636656537"
+              },
+              {
+                "id": "urn:epass:identifier:ab752cb3-3f6d-4113-b06d-599f3b8f4eca",
+                "type": "Identifier",
+                "schemeName": "nus",
+                "notation": "754115"
+              },
+              {
+                "id": "urn:epass:identifier:bb4e486e-5f35-46aa-9032-4aa87becdd0a",
+                "type": "Identifier",
+                "schemeName": "courseCode",
+                "notation": "INF4000"
+              },
+              {
+                "id": "urn:epass:identifier:2bbfecc2-891c-4d54-8314-b71875cb4690",
+                "type": "Identifier",
+                "schemeName": "courseVersion",
+                "notation": "1"
+              },
+              {
+                "id": "urn:epass:identifier:894f747b-d9c7-43c0-99ce-e285319ef442",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              },
+              {
+                "id": "urn:epass:identifier:52ad74a3-208b-45a5-9290-9c42e2620ac1",
+                "type": "Identifier",
+                "schemeName": "elmo:isced",
+                "notation": "0613"
+              }
+            ]
+          }
+        },
+        "creditReceived": {
+          "id": "urn:epass:creditPoint:226067d7-9edf-476b-86d9-6b4170918fe1",
+          "type": "CreditPoint",
+          "framework": {
+            "id": "http://data.europa.eu/snb/education-credit/6fcec5c5af",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/education-credit/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "credit-point-framework",
+            "prefLabel": {
+              "en": "ECTS"
+            }
+          },
+          "point": "20"
+        },
+        "specifiedBy": {
+          "id": "urn:epass:qualification:057e26be-7bf9-4d6b-a739-d09eff227681",
+          "type": "Qualification",
+          "eqfLevel": {
+            "id": "http://data.europa.eu/snb/eqf/7",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/eqf/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "eqf-level",
+            "prefLabel": {
+              "en": "Level 7"
+            }
+          },
+          "thematicArea": {
+            "id": "http://data.europa.eu/snb/isced-f/0613",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/isced-f/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "0613",
+            "prefLabel": {
+              "en": "Software and applications development and analysis"
+            }
+          },
+          "creditPoint": {
+            "id": "urn:epass:creditPoint:a0ee6cd5-cf7f-4963-a3fb-c13f291d64d3",
+            "type": "CreditPoint",
+            "framework": {
+              "id": "http://data.europa.eu/snb/education-credit/6fcec5c5af",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/education-credit/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "credit-point-framework",
+              "prefLabel": {
+                "en": "ECTS"
+              }
+            },
+            "point": "20"
+          },
+          "educationLevel": {
+            "id": "http://data.europa.eu/snb/eqf/7",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/eqf/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "eqf-level",
+            "prefLabel": {
+              "en": "Level 7"
+            }
+          },
+          "maximumDuration": "P6M1D",
+          "title": {
+            "no": "Testing",
+            "en": "Testing"
+          }
+        },
+        "title": {
+          "no": "Testing",
+          "en": "Testing"
+        },
+        "identifier": [
+          {
+            "id": "urn:epass:identifier:4caaed4d-1e72-4207-a407-99b942a4086c",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "INF4000-1"
+          },
+          {
+            "id": "urn:epass:identifier:c5495edf-4de9-4c54-9860-6e3dcdcf548b",
+            "type": "Identifier",
+            "schemeName": "elmo",
+            "notation": "638263636656537"
+          },
+          {
+            "id": "urn:epass:identifier:7bf17cda-3a50-4590-a23b-e9494aec5ca3",
+            "type": "Identifier",
+            "schemeName": "nus",
+            "notation": "754115"
+          },
+          {
+            "id": "urn:epass:identifier:195d2433-6744-4dc1-8879-ee3bca66450a",
+            "type": "Identifier",
+            "schemeName": "courseCode",
+            "notation": "INF4000"
+          },
+          {
+            "id": "urn:epass:identifier:e34d0dde-783d-4850-a188-a024a38bbf5f",
+            "type": "Identifier",
+            "schemeName": "courseVersion",
+            "notation": "1"
+          },
+          {
+            "id": "urn:epass:identifier:1382b28f-1b8b-4093-ac63-a0cd51877252",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        ]
+      },
+      {
+        "id": "urn:epass:learningAchievement:3860cbe1-9dae-4782-a878-45c4bfba94db",
+        "type": "LearningAchievement",
+        "awardedBy": {
+          "id": "urn:epass:awardingProcess:e589c981-f189-4c6a-99a2-8dd61c051a01",
+          "type": "AwardingProcess",
+          "awardingBody": {
+            "id": "urn:epass:org:cdfbb2c8-ef2d-4caa-9289-c4b118b82574",
+            "type": "Organisation",
+            "location": {
+              "id": "urn:epass:location:723e1ea5-8e0e-4e4f-aa1c-37d31bfd477a",
+              "type": "Location",
+              "address": {
+                "id": "urn:epass:address:8cca99db-b28c-46c2-b09b-1a01f900d236",
+                "type": "Address",
+                "countryCode": {
+                  "id": "http://publications.europa.eu/resource/authority/country/NOR",
+                  "type": "Concept",
+                  "inScheme": {
+                    "id": "http://publications.europa.eu/resource/authority/country",
+                    "type": "ConceptScheme"
+                  },
+                  "notation": "country",
+                  "prefLabel": {
+                    "en": "Norway"
+                  }
+                }
+              }
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:8977ff45-74ec-4cfa-8436-c5f0a1a15718",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "185"
+              },
+              {
+                "id": "urn:epass:identifier:45c53e86-4861-407b-8ac4-8afb8abe9cde",
+                "type": "Identifier",
+                "schemeName": "erasmus",
+                "notation": "N OSLO01"
+              },
+              {
+                "id": "urn:epass:identifier:ac22490b-132c-4a4a-833a-00dc5a3825ab",
+                "type": "Identifier",
+                "schemeName": "schac",
+                "notation": "uio.no"
+              },
+              {
+                "id": "urn:epass:identifier:baad0beb-897e-4151-afd9-ee1710843e9d",
+                "type": "Identifier",
+                "schemeName": "pic",
+                "notation": "999975814"
+              }
+            ],
+            "legalName": {
+              "no": "Universitetet i Oslo",
+              "en": "University of Oslo"
+            },
+            "homepage": {
+              "id": "urn:epass:webResource:7b7208cd-807f-484b-87cb-73a352fb3bdc",
+              "type": "WebResource",
+              "contentURL": "https://www.uio.no/"
+            }
+          },
+          "awardingDate": "2015-12-15T00:00:00",
+          "used": {
+            "id": "converter:assessment:2",
+            "type": "LearningAssessment",
+            "assessedBy": {
+              "id": "urn:epass:org:fdf83868-d135-44b1-a4b4-8bb46c5c1721",
+              "type": "Organisation",
+              "location": {
+                "id": "urn:epass:location:38647c23-9b86-4316-8a3b-742e0ec85672",
+                "type": "Location",
+                "address": {
+                  "id": "urn:epass:address:0d258c5a-8d7b-40b6-b050-a73d6e778b1d",
+                  "type": "Address",
+                  "countryCode": {
+                    "id": "http://publications.europa.eu/resource/authority/country/NOR",
+                    "type": "Concept",
+                    "inScheme": {
+                      "id": "http://publications.europa.eu/resource/authority/country",
+                      "type": "ConceptScheme"
+                    },
+                    "notation": "country",
+                    "prefLabel": {
+                      "en": "Norway"
+                    }
+                  }
+                }
+              },
+              "identifier": [
+                {
+                  "id": "urn:epass:identifier:30f10cc7-3069-4f95-818b-96fb8ef80171",
+                  "type": "Identifier",
+                  "schemeName": "local",
+                  "notation": "185"
+                },
+                {
+                  "id": "urn:epass:identifier:605cc20e-5870-4d7a-9ce6-4071038bbccf",
+                  "type": "Identifier",
+                  "schemeName": "erasmus",
+                  "notation": "N OSLO01"
+                },
+                {
+                  "id": "urn:epass:identifier:23daafa2-c8f2-4e37-9b9c-5226e12f1713",
+                  "type": "Identifier",
+                  "schemeName": "schac",
+                  "notation": "uio.no"
+                },
+                {
+                  "id": "urn:epass:identifier:d09f74a7-831e-47c8-ae6a-eab143faf2da",
+                  "type": "Identifier",
+                  "schemeName": "pic",
+                  "notation": "999975814"
+                }
+              ],
+              "legalName": {
+                "no": "Universitetet i Oslo",
+                "en": "University of Oslo"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:cee57d5e-ea3c-4944-88dd-9eea69a25616",
+                "type": "WebResource",
+                "contentURL": "https://www.uio.no/"
+              }
+            },
+            "awardedBy": {
+              "id": "urn:epass:awardingProcess:b771fc08-7cf6-4ec4-8bde-d473b1a84a47",
+              "type": "AwardingProcess",
+              "awardingBody": {
+                "id": "urn:epass:org:e67ea633-6e0d-46f3-8635-a20a1e0f2d8d",
+                "type": "Organisation",
+                "location": {
+                  "id": "urn:epass:location:ba49b784-d321-4e0b-920b-b99102451a92",
+                  "type": "Location",
+                  "address": {
+                    "id": "urn:epass:address:5cb91ece-e0eb-4cf3-8998-a4ad5ad8475a",
+                    "type": "Address",
+                    "countryCode": {
+                      "id": "http://publications.europa.eu/resource/authority/country/NOR",
+                      "type": "Concept",
+                      "inScheme": {
+                        "id": "http://publications.europa.eu/resource/authority/country",
+                        "type": "ConceptScheme"
+                      },
+                      "notation": "country",
+                      "prefLabel": {
+                        "en": "Norway"
+                      }
+                    }
+                  }
+                },
+                "identifier": [
+                  {
+                    "id": "urn:epass:identifier:d2567105-d9b2-433c-9b7e-2cc635d11ee8",
+                    "type": "Identifier",
+                    "schemeName": "local",
+                    "notation": "185"
+                  },
+                  {
+                    "id": "urn:epass:identifier:ce01104c-b496-48fa-b00e-9a74ff24d821",
+                    "type": "Identifier",
+                    "schemeName": "erasmus",
+                    "notation": "N OSLO01"
+                  },
+                  {
+                    "id": "urn:epass:identifier:f6b4999b-9ec6-4aca-a2a7-dd12541832f9",
+                    "type": "Identifier",
+                    "schemeName": "schac",
+                    "notation": "uio.no"
+                  },
+                  {
+                    "id": "urn:epass:identifier:130dabe6-6ce3-42c0-a888-938e3accae26",
+                    "type": "Identifier",
+                    "schemeName": "pic",
+                    "notation": "999975814"
+                  }
+                ],
+                "legalName": {
+                  "no": "Universitetet i Oslo",
+                  "en": "University of Oslo"
+                },
+                "homepage": {
+                  "id": "urn:epass:webResource:f385430c-8a80-4bee-a6d1-7317465fbd23",
+                  "type": "WebResource",
+                  "contentURL": "https://www.uio.no/"
+                }
+              },
+              "awardingDate": "2015-12-15T00:00:00"
+            },
+            "grade": {
+              "id": "urn:epass:note:12dab5dd-f38b-4b93-96bd-f7d2a1f105cc",
+              "type": "Note",
+              "noteFormat": {
+                "id": "urn:epass:concept:494330df-92bb-4d9a-8ade-2ae1f9b06acb",
+                "type": "Concept",
+                "definition": {
+                  "und": "http://data.europa.eu/snb/model/elm/noteFormat"
+                },
+                "notation": "text/plain"
+              },
+              "noteLiteral": {
+                "und": "Bestått"
+              }
+            },
+            "gradeStatus": {
+              "id": "http://data.europa.eu/snb/grade-status/c_60a1cf9a",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/grade-status/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "grade-status",
+              "prefLabel": {
+                "en": "pass"
+              }
+            },
+            "specifiedBy": {
+              "id": "urn:epass:learningAssessmentSpec:50ec8a25-1cbc-4de6-a270-661176a392a8",
+              "type": "LearningAssessmentSpecification",
+              "title": {
+                "no": "Brannsikkerhet",
+                "en": "Fire Safety"
+              },
+              "homepage": {
+                "id": "urn:epass:webResource:5849616c-fac0-429f-a9fe-6db9355843eb",
+                "type": "WebResource",
+                "contentURL": "http://www.uio.no/studier/emner/matnat/kjemi/HMS0507/"
+              }
+            },
+            "dateIssued": "2015-12-15T00:00:00",
+            "title": {
+              "no": "Brannsikkerhet",
+              "en": "Fire Safety"
+            },
+            "identifier": [
+              {
+                "id": "urn:epass:identifier:56a94ca3-1634-4748-a5e6-ed6ba645c8bf",
+                "type": "Identifier",
+                "schemeName": "local",
+                "notation": "HMS0507-1"
+              },
+              {
+                "id": "urn:epass:identifier:5ad4808f-0579-4b25-9a2e-7c7f503bfbcd",
+                "type": "Identifier",
+                "schemeName": "elmo",
+                "notation": "435414743477582"
+              },
+              {
+                "id": "urn:epass:identifier:13319006-5583-4df3-9152-5081ece8f3e2",
+                "type": "Identifier",
+                "schemeName": "nus",
+                "notation": "659999"
+              },
+              {
+                "id": "urn:epass:identifier:b8c2e3e2-a1cf-41e8-b111-d735f820f9ad",
+                "type": "Identifier",
+                "schemeName": "courseCode",
+                "notation": "HMS0507"
+              },
+              {
+                "id": "urn:epass:identifier:f85c5a77-5920-4151-8e8e-a522ca5e237a",
+                "type": "Identifier",
+                "schemeName": "courseVersion",
+                "notation": "1"
+              },
+              {
+                "id": "urn:epass:identifier:14141fde-058a-434e-b23a-5bedd3f8c79f",
+                "type": "Identifier",
+                "schemeName": "elmo:type:los",
+                "notation": "Course"
+              },
+              {
+                "id": "urn:epass:identifier:b8934060-e830-4bcf-a71f-435924bbccb2",
+                "type": "Identifier",
+                "schemeName": "elmo:isced",
+                "notation": "0588"
+              }
+            ]
+          }
+        },
+        "creditReceived": {
+          "id": "urn:epass:creditPoint:507e7774-c2ef-481c-83a7-d129e2c4dbc5",
+          "type": "CreditPoint",
+          "framework": {
+            "id": "http://data.europa.eu/snb/education-credit/6fcec5c5af",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/education-credit/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "credit-point-framework",
+            "prefLabel": {
+              "en": "ECTS"
+            }
+          },
+          "point": "0"
+        },
+        "specifiedBy": {
+          "id": "urn:epass:qualification:52ebe09d-53be-43d3-b76a-bcf95470b2b7",
+          "type": "Qualification",
+          "eqfLevel": {
+            "id": "http://data.europa.eu/snb/eqf/6",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/eqf/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "eqf-level",
+            "prefLabel": {
+              "en": "Level 6"
+            }
+          },
+          "thematicArea": {
+            "id": "http://data.europa.eu/snb/isced-f/0588",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/isced-f/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "0588",
+            "prefLabel": {
+              "en": "Inter-disciplinary programmes and qualifications involving natural sciences, mathematics and statistics"
+            }
+          },
+          "creditPoint": {
+            "id": "urn:epass:creditPoint:e7b3eb01-896e-47f7-a90a-cbfc62a30e61",
+            "type": "CreditPoint",
+            "framework": {
+              "id": "http://data.europa.eu/snb/education-credit/6fcec5c5af",
+              "type": "Concept",
+              "inScheme": {
+                "id": "http://data.europa.eu/snb/education-credit/25831c2",
+                "type": "ConceptScheme"
+              },
+              "notation": "credit-point-framework",
+              "prefLabel": {
+                "en": "ECTS"
+              }
+            },
+            "point": "0"
+          },
+          "educationLevel": {
+            "id": "http://data.europa.eu/snb/eqf/6",
+            "type": "Concept",
+            "inScheme": {
+              "id": "http://data.europa.eu/snb/eqf/25831c2",
+              "type": "ConceptScheme"
+            },
+            "notation": "eqf-level",
+            "prefLabel": {
+              "en": "Level 6"
+            }
+          },
+          "maximumDuration": "P4M2D",
+          "title": {
+            "no": "Brannsikkerhet",
+            "en": "Fire Safety"
+          },
+          "homepage": {
+            "id": "urn:epass:webResource:b322362c-b2bb-4723-a022-42fcfc57b87f",
+            "type": "WebResource",
+            "contentURL": "http://www.uio.no/studier/emner/matnat/kjemi/HMS0507/"
+          }
+        },
+        "title": {
+          "no": "Brannsikkerhet",
+          "en": "Fire Safety"
+        },
+        "identifier": [
+          {
+            "id": "urn:epass:identifier:54b3623a-431e-4b71-9b96-5398ca363a57",
+            "type": "Identifier",
+            "schemeName": "local",
+            "notation": "HMS0507-1"
+          },
+          {
+            "id": "urn:epass:identifier:7aeb7aff-1e69-435b-b385-f0c16c39c2c1",
+            "type": "Identifier",
+            "schemeName": "elmo",
+            "notation": "435414743477582"
+          },
+          {
+            "id": "urn:epass:identifier:1fbb8ffd-203c-4a21-bfd9-2a65d57e3159",
+            "type": "Identifier",
+            "schemeName": "nus",
+            "notation": "659999"
+          },
+          {
+            "id": "urn:epass:identifier:64ee7a76-4f45-4ded-ace6-5cae0ffc9dbd",
+            "type": "Identifier",
+            "schemeName": "courseCode",
+            "notation": "HMS0507"
+          },
+          {
+            "id": "urn:epass:identifier:1ddd3e58-f239-4a03-96f6-dfa08f065456",
+            "type": "Identifier",
+            "schemeName": "courseVersion",
+            "notation": "1"
+          },
+          {
+            "id": "urn:epass:identifier:f218171f-8cb2-4608-a86a-066b971be723",
+            "type": "Identifier",
+            "schemeName": "elmo:type:los",
+            "notation": "Course"
+          }
+        ]
+      }
+    ],
+    "nationalID": {
+      "id": "urn:epass:legalIdentifier:12345678910",
+      "type": "LegalIdentifier",
+      "spatial": {
+        "id": "http://publications.europa.eu/resource/authority/country/NOR",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/country",
+          "type": "ConceptScheme"
+        },
+        "notation": "country",
+        "prefLabel": {
+          "en": "Norway"
+        }
+      },
+      "notation": "nationalIdentifier"
+    },
+    "identifier": {
+      "id": "urn:epass:identifier:5ce05e9e-f8bd-465a-9b0a-9b1ae6d7d3a9",
+      "type": "Identifier",
+      "schemeName": "nationalIdentifier",
+      "notation": "12345678910"
+    },
+    "familyName": {
+      "no": "Testesen"
+    },
+    "givenName": {
+      "no": "Test"
+    }
+  },
+  "issuanceDate": "2025-03-25T12:49:03",
+  "issued": "2025-03-25T12:49:03",
+  "issuer": {
+    "id": "urn:epass:org:77c756a4-671a-469d-bcb1-8751693faab2",
+    "type": "Organisation",
+    "eIDASIdentifier": {
+      "id": "urn:epass:legalIdentifier:439e11c1-7b81-4887-8adb-c944bcf2c8b3",
+      "type": "LegalIdentifier",
+      "spatial": {
+        "id": "http://publications.europa.eu/resource/authority/country/NOR",
+        "type": "Concept",
+        "inScheme": {
+          "id": "http://publications.europa.eu/resource/authority/country",
+          "type": "ConceptScheme"
+        },
+        "notation": "country",
+        "prefLabel": {
+          "en": "Norway"
+        }
+      },
+      "notation": "Sikt - Kunnskapssektorens\n          tjenesteleverandør"
+    }
+  },
+  "validFrom": "2025-03-25T12:49:03",
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "http://data.europa.eu/snb/model/context/edc-ap"
+  ]
+}

@@ -10,7 +10,6 @@ common:
   qr:
     recovery_level: 2
     size: 256
-    issuing_base_url: https://satosa-test-1.sunet.se
   kafka:
     enabled: false
     brokers:

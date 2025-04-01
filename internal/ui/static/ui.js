@@ -1132,7 +1132,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
         const documentTypeSelectWithinDivElement = createSelectElement([{
             value: '',
             label: 'Document type (optional)'
-        }, {value: 'EHIC', label: 'EHIC'}, {value: 'PDA1', label: 'PDA1'}]);
+        }, {value: 'EHIC', label: 'EHIC'}, {value: 'PDA1', label: 'PDA1'},{value: 'ELM', label: 'ELM'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
         const documentTypeSelect = documentTypeSelectWithinDivElement[1];
 

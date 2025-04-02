@@ -355,7 +355,13 @@ func (c *Client) GetVPFlowDebugInfo(ctx context.Context, request *VPFlowDebugInf
 	verificationRecord, errVerRec := c.db.VerificationRecordColl.Read(ctx, request.SessionID)
 
 	if vpSession != nil && vpSession.AuthorisationResponseDebugData != nil && len(vpSession.AuthorisationResponseDebugData.Body) != 0 {
-		fmt.Println(string(vpSession.AuthorisationResponseDebugData.Body))
+		fmt.Println("vpSession.AuthorisationResponseDebugData.Body as string:", string(vpSession.AuthorisationResponseDebugData.Body))
+		//var generic map[string]interface{}
+		//err := json.Unmarshal(vpSession.AuthorisationResponseDebugData.Body, &generic)
+		//if err != nil {
+		//	return nil, fmt.Errorf("Failed to parse JSON: %w", err)
+		//}
+		//fmt.Println("Body as generic struct:", generic)
 	}
 
 	return &VPFlowDebugInfoReply{

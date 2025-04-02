@@ -29,6 +29,14 @@ stop:
 
 restart: stop start
 
+docker-build-and-restart-verifier:
+	$(info docker-build-verifier)
+	$(MAKE) docker-build-verifier
+	$(info stop-verifier)
+	docker compose -f docker-compose.yaml rm -s -f verifier
+	$(info start-verifier)
+	docker compose -f docker-compose.yaml up -d --remove-orphans verifier
+
 get_release-tag:
 	@date +'%Y%m%d%H%M%S%9N'
 
@@ -89,7 +97,11 @@ docker-build-gobuild:
 
 docker-build-verifier:
 	$(info Docker Building verifier with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/worker .
+	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker .
+
+docker-build-verifier-debug:
+	$(info Docker Building verifier with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker_debug .
 
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
@@ -99,17 +111,33 @@ docker-build-persistent:
 	$(info Docker Building persistent with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=persistent --tag $(DOCKER_TAG_PERSISTENT) --file dockerfiles/worker .
 
+docker-build-persistent-debug:
+	$(info Docker Building persistent with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=persistent --tag $(DOCKER_TAG_PERSISTENT) --file dockerfiles/worker_debug .
+
 docker-build-mockas:
 	$(info Docker Building mockas with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=mockas --tag $(DOCKER_TAG_MOCKAS) --file dockerfiles/worker .
+
+docker-build-mockas-debug:
+	$(info Docker Building mockas with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=mockas --tag $(DOCKER_TAG_MOCKAS) --file dockerfiles/worker_debug .
 
 docker-build-apigw:
 	$(info Docker building apigw with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=apigw --build-arg VERSION=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
 
+docker-build-apigw-debug:
+	$(info Docker building apigw with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg VERSION=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker_debug .
+
 docker-build-issuer:
 	$(info Docker building issuer with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker .
+
+docker-build-issuer-debug:
+	$(info Docker building issuer with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker_debug .
 
 docker-build-ui:
 	$(info Docker building ui with tag: $(VERSION))

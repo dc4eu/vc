@@ -9,6 +9,8 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/trace"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -43,15 +45,55 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
+	VerifierWebEnabled := true //TODO: läs in via cfg
+	if VerifierWebEnabled {
+		// extra middlewares (MUST be declared before Server.Default)
+		s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
+
+		//TODO: refactorisera och flytta in nedan till någon middleware struct inkl. fixa egna properties för allt som ska vara dynamiskt
+		store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
+		store.Options(sessions.Options{
+			Path:     "/",
+			MaxAge:   300,
+			Secure:   cfg.UI.APIServer.TLS.Enabled,
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		})
+		s.gin.Use(sessions.Sessions("vp_flow_web_session", store))
+	}
+
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.Verifier.APIServer.Addr)
 	if err != nil {
 		return nil, err
 	}
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", http.StatusOK, s.endpointVerifyCredential)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "decode", http.StatusOK, s.endpointDecodeCredential)
+	if VerifierWebEnabled {
+		s.gin.Static("/static", "./static")
+		s.gin.LoadHTMLFiles("./static/index.html")
+		s.gin.GET("/", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "index.html", nil)
+		})
+	}
 
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
+
+	//openid4vp
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qrcode", s.endpointQRCode)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", s.endpointGetAuthorizationRequest)
+	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "request-object/:session_id", s.endpointGetRequestObject)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/:session_id/:callback_id", s.endpointCallback)
+
+	//TODO: behövs även en mer allmän status endpoint för en pågående verifiering som inte bara stödjer web session
+	//TODO: behövs https://<domain>/.well-known/openid-configuration + "jwks_uri:":"https://<domain>/oauth/jwks" endpoints???
+
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", s.endpointGetVerificationResult)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", s.endpointQuitVPFlow)
+
+	//deprecated: to be removed later
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", s.endpointVerifyCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "decode", s.endpointDecodeCredential)
+
+	//TODO: swagger är inte aktiverat i web_worker för docker - hantera att verifier lär behöva swagger samtidigt som den stödjer web (OBS! ui samt portal har ingen swagger alls)
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

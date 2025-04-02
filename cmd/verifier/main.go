@@ -2,16 +2,24 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 	"vc/internal/verifier/apiv1"
+	"vc/internal/verifier/db"
 	"vc/internal/verifier/httpserver"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
 )
+
+func init() {
+	// Needed to serialize/deserialize time.Time in the session and cookie
+	gob.Register(time.Time{})
+}
 
 type service interface {
 	Close(ctx context.Context) error
@@ -43,7 +51,13 @@ func main() {
 		panic(err)
 	}
 
-	apiv1, err := apiv1.New(ctx, cfg, log)
+	dbService, err := db.New(ctx, cfg, tracer, log)
+	services["dbService"] = dbService
+	if err != nil {
+		panic(err)
+	}
+
+	apiv1, err := apiv1.New(ctx, dbService, cfg, log)
 	if err != nil {
 		panic(err)
 	}

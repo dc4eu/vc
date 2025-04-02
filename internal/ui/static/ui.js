@@ -450,23 +450,45 @@ const addViewVPFlowDebugInfoFormArticleToContainer = () => {
     const buildFormElements = () => {
         const sessionIDElement = createInputElement('session id');
 
+        const divResultContainer = document.createElement("div");
+        divResultContainer.id = generateUUID();
+
         const viewButton = document.createElement('button');
         viewButton.id = generateUUID();
         viewButton.classList.add('button', 'is-link');
         viewButton.textContent = 'View';
         viewButton.onclick = () => {
-            viewButton.disabled = true;
+            divResultContainer.innerHTML = '';
 
-            const requestBody = {
-                session_id: sessionIDElement.value,
-            };
-
-            disableElements([sessionIDElement]);
-
-            postAndDisplayInArticleContainerFor("/verifier/debug/vp-flow", requestBody, "VP-flow debug info");
+            fetchData(new URL("/verifier/debug/vp-flow", baseUrl), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                body: JSON.stringify({session_id: sessionIDElement.value}),
+            }).then(data => {
+                console.log(data);
+                divResultContainer.appendChild(document.createElement("br"));
+                divResultContainer.appendChild(document.createElement("br"));
+                let debugData
+                if (data && typeof data === 'object') {
+                    debugData = JSON.stringify(data, null, 2);
+                } else if (data === null) {
+                    debugData = 'No debug data to display';
+                } else {
+                    debugData = String(data);
+                }
+                preElement = document.createElement("pre");
+                preElement.innerText = debugData;
+                divResultContainer.appendChild(preElement);
+            }).catch(err => {
+                console.debug("Unexpected error:", err);
+                displayErrorTag("Failed to fetch vp-flow debug info: ", divResultContainer, err);
+            });
         };
 
-        return [sessionIDElement, viewButton];
+        return [sessionIDElement, viewButton, divResultContainer];
     };
 
     const articleIdBasis = generateArticleIDBasis();
@@ -1131,7 +1153,6 @@ function displayDocumentsTable(data, divResultContainer) {
 function exportTableToCSV(table) {
     const rows = table.querySelectorAll('tr');
     let csvContent = "";
-
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('th, td');

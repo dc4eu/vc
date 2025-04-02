@@ -39,18 +39,18 @@ type KeyPair struct {
 }
 
 type VPInteractionSession struct {
-	SessionID               string            `json:"session_id"` //key == must be unique i coll (UUID1)
-	Status                  InteractionStatus `json:"status"`
-	SessionEphemeralKeyPair *KeyPair
-	SessionCreated          time.Time `json:"session_created"`
-	SessionExpires          time.Time `json:"session_expires"`
-	DocumentType            string    `json:"document_type"` //type of document (vc) the presentation_definition will request from the holder
-	Nonce                   string    `json:"nonce"`
-	State                   string    `json:"state"` //UUID2
-	Authorized              bool      `json:"authorized"`
-	CallbackID              string    `json:"callback_id"`
-	JTI                     string    `json:"jti"`
-	PresentationDefinition  *PresentationDefinition
+	SessionID               string                  `json:"session_id"` //key == must be unique i coll (UUID1)
+	Status                  InteractionStatus       `json:"status"`
+	SessionEphemeralKeyPair *KeyPair                `json:"session_ephemeral_key_pair"`
+	SessionCreated          time.Time               `json:"session_created"`
+	SessionExpires          time.Time               `json:"session_expires"`
+	DocumentType            string                  `json:"document_type"` //type of document (vc) the presentation_definition will request from the holder
+	Nonce                   string                  `json:"nonce"`
+	State                   string                  `json:"state"` //UUID2
+	Authorized              bool                    `json:"authorized"`
+	CallbackID              string                  `json:"callback_id"`
+	JTI                     string                  `json:"jti"`
+	PresentationDefinition  *PresentationDefinition `json:"presentation_definition"`
 
 	//TODO: Below is just for dev/test purpose and must be removed before production
 	VerifierKeyPair *KeyPair `json:"verifier_key_pair,omitempty"`

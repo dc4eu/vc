@@ -65,7 +65,7 @@ func (s *Service) endpointGetAuthorizationRequest(ctx context.Context, g *gin.Co
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	return reply, nil
+	return reply.RequestObjectJWS, nil
 }
 
 func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, error) {

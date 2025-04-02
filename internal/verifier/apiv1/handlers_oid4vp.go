@@ -52,7 +52,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 			SigningMethodToUse: jwt.SigningMethodES256,
 		},
 		SessionCreated: now,
-		SessionExpires: now.Add(5 * time.Minute),
+		SessionExpires: now.Add(10 * time.Minute),
 		DocumentType:   request.DocumentType,
 		Nonce:          jwthelpers.GenerateNonce(),
 		State:          uuid.NewString(),
@@ -176,8 +176,8 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		Nonce:                  vpSession.Nonce,
 		PresentationDefinition: presentationDefinition,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "vcverifier.sunet.se",                         //TODO ta in iss via config
-			Subject:   "todo_set_sub_value_here",                     //TODO vilket värde här för sub?
+			Issuer: "vcverifier.sunet.se", //TODO ta in iss via config
+			//Subject:   "todo_set_sub_value_here",                     //TODO vilket värde här för sub, behövs det?
 			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"}, //TODO korrekt aud?
 			ExpiresAt: jwt.NewNumericDate(vpSession.SessionExpires),
 			IssuedAt:  now,

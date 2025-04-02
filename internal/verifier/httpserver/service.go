@@ -53,7 +53,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
 		store.Options(sessions.Options{
 			Path:     "/",
-			MaxAge:   300,
+			MaxAge:   600,
 			Secure:   cfg.UI.APIServer.TLS.Enabled,
 			HttpOnly: true,
 			SameSite: http.SameSiteStrictMode,

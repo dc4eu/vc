@@ -119,7 +119,8 @@ func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error)
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageKeyAgreement, //TODO: vad ska KeyUsage sättas till?
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},                                           //TODO: vad ska ExtKeyUsage sättas till?
 		BasicConstraintsValid: true,
-		DNSNames: []string{"vc-interop-1.sunet.se",
+		DNSNames: []string{
+			"vc-interop-1.sunet.se",
 			"vc-interop-2.sunet.se",
 			"satosa-test-1.sunet.se",
 			"satosa-test-2.sunet.se",

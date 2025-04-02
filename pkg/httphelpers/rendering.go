@@ -18,12 +18,14 @@ func (r *renderingHandler) Content(ctx context.Context, c *gin.Context, code int
 	ctx, span := r.client.tracer.Start(ctx, "httphelpers:Render:Content")
 	defer span.End()
 
-	switch c.NegotiateFormat(gin.MIMEJSON, "*/*") {
+	switch c.NegotiateFormat(gin.MIMEJSON, gin.MIMEPlain, gin.MIMEHTML, "*/*") {
 	case gin.MIMEJSON:
 		c.JSON(code, data)
+	case gin.MIMEPlain, gin.MIMEHTML:
+		c.String(code, "%v", data)
 	case "*/*": // curl
 		c.JSON(code, data)
 	default:
-		c.JSON(406, gin.H{"error": helpers.NewErrorDetails("not_acceptable", "Accept header is invalid. It should be \"application/json\".")})
+		c.JSON(406, gin.H{"error": helpers.NewErrorDetails("not_acceptable", "Accept header is not supported. Supported types: application/json (text/plain, text/html).")})
 	}
 }

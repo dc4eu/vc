@@ -75,23 +75,23 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		})
 	}
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
 	//openid4vp
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qrcode", s.endpointQRCode)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", s.endpointGetAuthorizationRequest)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qrcode", http.StatusOK, s.endpointQRCode)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
 	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "request-object/:session_id", s.endpointGetRequestObject)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/:session_id/:callback_id", s.endpointCallback)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
 
 	//TODO: behövs även en mer allmän status endpoint för en pågående verifiering som inte bara stödjer web session
 	//TODO: behövs https://<domain>/.well-known/openid-configuration + "jwks_uri:":"https://<domain>/oauth/jwks" endpoints???
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", s.endpointGetVerificationResult)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", s.endpointQuitVPFlow)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", http.StatusOK, s.endpointQuitVPFlow)
 
 	//deprecated: to be removed later
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", s.endpointVerifyCredential)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "decode", s.endpointDecodeCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", http.StatusOK, s.endpointVerifyCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "decode", http.StatusOK, s.endpointDecodeCredential)
 
 	//TODO: swagger är inte aktiverat i web_worker för docker - hantera att verifier lär behöva swagger samtidigt som den stödjer web (OBS! ui samt portal har ingen swagger alls)
 	rgDocs := rgRoot.Group("/swagger")

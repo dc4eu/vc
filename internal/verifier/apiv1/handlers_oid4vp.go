@@ -251,11 +251,29 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 				RawToken: "raw_vp_token_here",
 				VCResults: []*openid4vp.VCResult{
 					{
+						VCT: "TheVerifiableCredentialType",
 						ValidSelectiveDisclosures: []*openid4vp.Disclosure{
 							{
-								Salt:  "123456789",
-								Key:   "ExampleKey",
-								Value: "Example value",
+								Salt:  "123",
+								Key:   "ExampleKey1Here",
+								Value: "Example value 1 here",
+							},
+							{
+								Salt: "456",
+								Key:  "ExampleKey2Here",
+								Value: map[string]interface{}{
+									"foo": "NestedValue1",
+									"bar": 111,
+								},
+							},
+						},
+						Claims: map[string]interface{}{
+							"claim1": "Value1",
+							"claim2": "Value2",
+							"claim3": 3,
+							"claim4": map[string]interface{}{
+								"foo": "NestedValue2",
+								"bar": 222,
 							},
 						},
 					},

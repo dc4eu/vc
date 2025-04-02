@@ -944,9 +944,9 @@ func decodeRevealedSelectiveDisclosures(encodedSDs []string) ([]string, error) {
 
 // Disclosure represents a revealed selective disclosure
 type Disclosure struct {
-	Salt  string `json:"salt" bson:"salt"`
-	Key   string `json:"key" bson:"key"`
-	Value any    `json:"value" bson:"value"`
+	Salt  string      `json:"salt" bson:"salt"`
+	Key   string      `json:"key" bson:"key"`
+	Value interface{} `json:"value" bson:"value"`
 }
 
 // unmarshalDisclosure unmarshals a JSON-encoded disclosure string

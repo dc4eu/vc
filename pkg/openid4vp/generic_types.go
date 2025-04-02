@@ -122,5 +122,7 @@ type VPResult struct {
 }
 
 type VCResult struct {
-	ValidSelectiveDisclosures []*Disclosure `json:"valid_selective_disclosures" bson:"valid_selective_disclosures"`
+	VCT                       string                 `json:"vct" bson:"vct" validate:"required"`
+	ValidSelectiveDisclosures []*Disclosure          `json:"valid_selective_disclosures" bson:"valid_selective_disclosures"`
+	Claims                    map[string]interface{} `json:"claims" bson:"claims"`
 }

@@ -500,88 +500,6 @@ const addViewVPFlowDebugInfoFormArticleToContainer = () => {
 
 };
 
-const addVerifyFormArticleToContainer = () => {
-    const textareaId = generateUUID();
-    const buildVerifyCredentialFormElements = (textareaId) => {
-        const textarea = document.createElement("textarea");
-        textarea.id = textareaId;
-        textarea.classList.add("textarea");
-        textarea.rows = 20;
-        textarea.placeholder = "Base64 encoded vc+sd-jwt string";
-
-        const submitButton = document.createElement('button');
-        submitButton.id = generateUUID();
-        submitButton.classList.add('button', 'is-link');
-        submitButton.textContent = 'Verify';
-
-        const doVerify = (textarea, submitButton) => {
-            submitButton.disabled = true;
-            const text = textarea.value;
-            textarea.disabled = true;
-            const requestBody = {
-                "credential": text
-            };
-            postAndDisplayInArticleContainerFor("/verifier/verify", requestBody, "Verify credential result");
-        };
-        submitButton.onclick = () => doVerify(textarea, submitButton);
-
-        const buttonControl = document.createElement('div');
-        buttonControl.classList.add('control');
-        buttonControl.appendChild(submitButton);
-
-        return [textarea, buttonControl];
-    };
-
-    const articleIdBasis = generateArticleIDBasis();
-    const articleDiv = buildArticle(articleIdBasis.articleID, "Verify credential", buildVerifyCredentialFormElements(textareaId));
-    const articleContainer = getElementById('article-container');
-    articleContainer.prepend(articleDiv);
-
-    getElementById(textareaId).focus();
-};
-
-const addDecodeCredentialFormArticleToContainer = () => {
-    const textareaId = generateUUID();
-    const buildDecodeCredentialFormElements = (textareaId) => {
-        const textarea = document.createElement("textarea");
-        textarea.id = textareaId;
-        textarea.classList.add("textarea");
-        textarea.rows = 10;
-        textarea.placeholder = "Base64 encoded vc+sd-jwt string";
-
-        const submitButton = document.createElement('button');
-        submitButton.id = generateUUID();
-        submitButton.classList.add('button', 'is-link');
-        submitButton.textContent = 'Decode';
-
-        const doDecode = (textarea, submitButton) => {
-            submitButton.disabled = true;
-            const text = textarea.value;
-            textarea.disabled = true;
-            const requestBody = {
-                "credential": text
-            };
-            postAndDisplayInArticleContainerFor("/verifier/decode", requestBody, "Decode credential result");
-        };
-        submitButton.onclick = () => doDecode(textarea, submitButton);
-
-        const buttonControl = document.createElement('div');
-        buttonControl.classList.add('control');
-        buttonControl.appendChild(submitButton);
-
-        return [textarea, buttonControl];
-    };
-
-    const articleIdBasis = generateArticleIDBasis();
-    let bodyChildrenElementArray = buildDecodeCredentialFormElements(textareaId);
-    const articleDiv = buildArticle(articleIdBasis.articleID, "Decode credential", bodyChildrenElementArray);
-    const articleContainer = getElementById('article-container');
-    articleContainer.prepend(articleDiv);
-
-    getElementById(textareaId).focus();
-};
-
-
 const createInputElement = (placeholder, value = '', type = 'text', disabled = false) => {
     const input = document.createElement('input');
     input.id = generateUUID();
@@ -611,7 +529,6 @@ function createCheckboxElement(labelText, disabled = false) {
     return {label, input};
 }
 
-
 const createSelectElement = (options = [], disabled = false) => {
     const div = document.createElement('div');
     div.classList.add('select');
@@ -632,11 +549,9 @@ const createSelectElement = (options = [], disabled = false) => {
     return [div, select];
 };
 
-
 const disableElements = (elements) => {
     elements.forEach(el => el.disabled = true);
 };
-
 
 const addViewDocumentFormArticleToContainer = () => {
     const buildFormElements = () => {

@@ -151,14 +151,6 @@ func (c *Client) MockNext(ctx context.Context, req *apiv1_mockas.MockNextRequest
 	return reply, nil
 }
 
-func (c *Client) Verify(ctx context.Context, req *apiv1_verifier.VerifyCredentialRequest) (any, error) {
-	reply, err := c.verifierClient.Verify(req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
 func (c *Client) HealthAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
 	reply, err := c.apigwClient.Health()
 	if err != nil {
@@ -177,14 +169,6 @@ func (c *Client) HealthVerifier(ctx context.Context, req *apiv1_status.StatusReq
 
 func (c *Client) HealthMockAS(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
 	reply, err := c.mockasClient.Health()
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (c *Client) DecodeCredential(ctx context.Context, req *apiv1_verifier.DecodeCredentialRequest) (any, error) {
-	reply, err := c.verifierClient.Decode(req)
 	if err != nil {
 		return nil, err
 	}

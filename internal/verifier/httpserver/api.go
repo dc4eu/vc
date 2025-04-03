@@ -23,8 +23,4 @@ type Apiv1 interface {
 
 	// misc
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
-
-	// deprecated
-	VerifyCredential(ctx context.Context, request *apiv1.Credential) (*apiv1.VerifyCredentialReply, error)
-	DecodeCredential(ctx context.Context, request *apiv1.Credential) (*apiv1.DecodedCredential, error)
 }

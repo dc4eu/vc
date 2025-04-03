@@ -203,42 +203,6 @@ func (s *Service) endpointHealth(ctx context.Context, g *gin.Context) (any, erro
 	return reply, nil
 }
 
-// endpointVerifyCredential deprecated - to be removed (after removal in vc ui)
-func (s *Service) endpointVerifyCredential(ctx context.Context, g *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointVerifyCredential")
-	defer span.End()
-
-	request := &apiv1.Credential{}
-	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.VerifyCredential(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
-// endpointDecodeCredential deprecated - to be removed (after removal in vc ui)
-func (s *Service) endpointDecodeCredential(ctx context.Context, g *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointDecodeCredential")
-	defer span.End()
-
-	request := &apiv1.Credential{}
-	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.DecodeCredential(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
 func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, g *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetVPFlowDebugInfo")
 	defer span.End()

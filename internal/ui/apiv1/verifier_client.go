@@ -25,22 +25,6 @@ func (c *VerifierClient) Health() (any, error) {
 	return reply, nil
 }
 
-func (c *VerifierClient) Verify(req *apiv1_verifier.VerifyCredentialRequest) (any, error) {
-	reply, err := c.DoPostJSON("/verify", req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (c *VerifierClient) Decode(req *apiv1_verifier.DecodeCredentialRequest) (any, error) {
-	reply, err := c.DoPostJSON("/decode", req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
 func (c *VerifierClient) GetVPFlowDebugInfo(req *apiv1_verifier.VPFlowDebugInfoRequest) (any, error) {
 	reply, err := c.DoPostJSON("/debug/vp-flow", req)
 	if err != nil {

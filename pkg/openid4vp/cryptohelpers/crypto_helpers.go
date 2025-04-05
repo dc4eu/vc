@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"net"
 	"time"
+	"vc/pkg/openid4vp"
 )
 
 type ClientMetadata struct { //From: OpenID Connect Dynamic Client Registration
@@ -90,12 +91,7 @@ func GenerateECDSAKey(curve elliptic.Curve) (*ecdsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
-type CertData struct {
-	CertDER []byte
-	CertPEM []byte
-}
-
-func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error) {
+func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*openid4vp.CertData, error) {
 	//x509_san_dns
 
 	//TODO: CONFIG - LÄS IN
@@ -141,7 +137,7 @@ func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error)
 
 	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
 
-	return &CertData{
+	return &openid4vp.CertData{
 		CertDER: certDER,
 		CertPEM: certPEM,
 	}, nil

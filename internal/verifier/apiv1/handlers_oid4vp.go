@@ -26,13 +26,19 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 	}
 
 	//---key+cert gen----------
-	//TODO: read from config/file and store in a secure memory keystore in Client
-	veriferLongLivedEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
-	if err != nil {
-		return nil, err
-	}
-
-	certData, err := cryptohelpers.GenerateSelfSignedX509Cert(veriferLongLivedEcdsaP256Private)
+	//veriferLongLivedEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//veriferLongLivedEcdsaP256Private, ok := c.verifierKeyPair.PrivateKey.(*ecdsa.PrivateKey)
+	//if !ok {
+	//	return nil, errors.New("expected *ecdsa.PrivateKey")
+	//}
+	//certData, err := cryptohelpers.GenerateSelfSignedX509Cert(veriferLongLivedEcdsaP256Private)
+	//if err != nil {
+	//	c.log.Error(err, "Failed to generate SelfSignedX509Cert")
+	//	return nil, err
+	//}
 	//-------------------------
 
 	clientID := "vcverifier.sunet.se" //TODO: ta in clientID via config
@@ -40,6 +46,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 	now := time.Now()
 	verifierEmpEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
 	if err != nil {
+		c.log.Error(err, "Failed to generate verifier ephemeral private key")
 		return nil, err
 	}
 
@@ -59,12 +66,13 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		Authorized:     false,
 		Status:         openid4vp.StatusQRDisplayed,
 		//TODO: nedan ska inte vara här men läggs här tillsvidare
-		VerifierKeyPair: &openid4vp.KeyPair{
-			PrivateKey:         veriferLongLivedEcdsaP256Private,
-			PublicKey:          veriferLongLivedEcdsaP256Private.PublicKey,
-			SigningMethodToUse: jwt.SigningMethodES256,
-		},
-		VerifierX5cCertDERBase64: base64.StdEncoding.EncodeToString(certData.CertDER),
+		VerifierKeyPair: c.verifierKeyPair,
+		//VerifierKeyPair: &openid4vp.KeyPair{
+		//	PrivateKey:         c.veriferLongLivedEcdsaP256Private,
+		//	PublicKey:          veriferLongLivedEcdsaP256Private.PublicKey,
+		//	SigningMethodToUse: jwt.SigningMethodES256,
+		//},
+		VerifierX5cCertDERBase64: base64.StdEncoding.EncodeToString(c.verifierX509Cert.CertDER),
 	}
 
 	err = c.db.VPInteractionSessionColl.Create(ctx, vpSession)
@@ -107,6 +115,7 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 
 	requestObjectJWS, err := c.createRequestObjectJWS(ctx, vpSession)
 	if err != nil {
+		c.log.Error(err, "Failed to create request object")
 		return nil, err
 	}
 	//Store in session just for dev/test purpose
@@ -163,6 +172,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	now := jwt.NewNumericDate(time.Now())
 	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
 	if err != nil {
+		c.log.Error(err, "Failed to build client metadata")
 		return "", err
 	}
 	claims := &jwthelpers.CustomClaims{
@@ -188,6 +198,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 
 	jws, err := jwthelpers.CreateAndSignJWS(vpSession.VerifierKeyPair.PrivateKey, vpSession.VerifierKeyPair.SigningMethodToUse, vpSession.VerifierX5cCertDERBase64, claims)
 	if err != nil {
+		c.log.Error(err, "failed to create and sign response object jws")
 		return "", err
 	}
 

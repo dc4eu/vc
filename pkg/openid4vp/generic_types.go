@@ -38,6 +38,11 @@ type KeyPair struct {
 	SigningMethodToUse jwt.SigningMethod
 }
 
+type CertData struct {
+	CertDER []byte
+	CertPEM []byte
+}
+
 type VPInteractionSession struct {
 	SessionID               string                  `json:"session_id"` //key == must be unique i coll (UUID1)
 	Status                  InteractionStatus       `json:"status"`

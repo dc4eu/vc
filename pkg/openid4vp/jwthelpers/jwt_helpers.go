@@ -3,6 +3,7 @@ package jwthelpers
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"vc/pkg/openid4vp"
@@ -23,6 +24,15 @@ type CustomClaims struct {
 }
 
 func CreateAndSignJWS(privateKey interface{}, signingMethod jwt.SigningMethod, x5cCertDERBase64 string, claims *CustomClaims) (string, error) {
+	if privateKey == nil {
+		return "", errors.New("private key is nil")
+	}
+	if signingMethod == nil {
+		return "", errors.New("signing method is nil")
+	}
+	if claims == nil {
+		return "", errors.New("claims is nil")
+	}
 	token := jwt.NewWithClaims(signingMethod, claims)
 	if x5cCertDERBase64 != "" {
 		token.Header["x5c"] = []string{x5cCertDERBase64}

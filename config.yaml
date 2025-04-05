@@ -72,6 +72,8 @@ verifier:
     addr: :8080
   grpc_server:
     addr: vc_dev_verifier:8090
+  #Replace fqdn with same as in x5c_san_dns cert (used to build web-links etc. example: "vcverifier.sunet.se") - ip is only used when working in local dev env.
+  fqdn: "172.16.50.6"
 
 registry:
   api_server:

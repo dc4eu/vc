@@ -138,6 +138,7 @@ type MockAS struct {
 type Verifier struct {
 	APIServer  APIServer  `yaml:"api_server" validate:"required"`
 	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
+	FQDN       string     `yaml:"fqdn" validate:"required"`
 }
 
 // Datastore holds the datastore configuration

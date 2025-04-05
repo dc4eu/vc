@@ -110,9 +110,7 @@ function resetVerificationContainer() {
 }
 
 async function startVPFlow() {
-    console.log("startVPFlow");
-    const documentTypeElement = getElementById("documentTypeSelect");
-    console.log("documentTypeElement", documentTypeElement.value);
+    const documentTypeValue = getElementById("documentTypeSelect").value;
 
     resetAndHideIndexContainer();
     resetAndHideQRContainer();
@@ -125,7 +123,7 @@ async function startVPFlow() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json; charset=utf-8',
             },
-            body: JSON.stringify({document_type: documentTypeElement.value})
+            body: JSON.stringify({document_type: documentTypeValue})
         });
 
         if (!response.ok) {

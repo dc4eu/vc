@@ -41,7 +41,6 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 	//}
 	//-------------------------
 
-	clientID := "vcverifier.sunet.se" //TODO: ta in clientID via config
 	sessionID := uuid.NewString()
 	now := time.Now()
 	verifierEmpEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
@@ -80,10 +79,15 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		return nil, err
 	}
 
-	//TODO: skapa och använd property i Verifier för baseUrl
-	verifierBaseUrl := "http://172.16.50.6:8080"
-	requestURI := fmt.Sprintf("%s/authorize?id=%s", verifierBaseUrl, sessionID)
+	//verifierBaseUrl := "http://172.16.50.6:8080"
+	schema := "http://"
+	if c.cfg.Verifier.APIServer.TLS.Enabled {
+		schema = "https://"
+	}
+
+	requestURI := fmt.Sprintf("%s%s%s/authorize?id=%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.Addr, sessionID)
 	requestURIQueryEscaped := url.QueryEscape(requestURI)
+	clientID := c.cfg.Verifier.FQDN
 	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURIQueryEscaped)
 
 	qr, err := openid4vp.GenerateQR(qrURI, qrcode.Medium, 256)
@@ -136,6 +140,18 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		return "", errors.New("only EHIC document is currently supported")
 	}
 
+	ehicVCTs := []string{
+		"https://vc-interop-1.sunet.se/credential/ehic/1.0",
+		"https://vc-interop-2.sunet.se/credential/ehic/1.0",
+		"https://vc-interop-3.sunet.se/credential/ehic/1.0",
+		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
+		"https://satosa-test-2.sunet.se/credential/ehic/1.0",
+		"https://satosa-test-3.sunet.se/credential/ehic/1.0",
+		"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
+		"https://satosa-dev-2.sunet.se/credential/ehic/1.0",
+		"https://satosa-dev-3.sunet.se/credential/ehic/1.0",
+		"EHICCredential",
+		"SatosaEHICCredential"}
 	presentationDefinition := &openid4vp.PresentationDefinition{
 		ID:          "VCEuropeanHealthInsuranceCard",
 		Title:       "VC EHIC",
@@ -148,7 +164,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 				},
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: []string{"https://vc-interop-1.sunet.se/credential/ehic/1.0", "https://vc-interop-2.sunet.se/credential/ehic/1.0", "https://satosa-test-1.sunet.se/credential/ehic/1.0", "https://satosa-test-2.sunet.se/credential/ehic/1.0", "https://satosa-dev-1.sunet.se/credential/ehic/1.0", "https://satosa-dev-2.sunet.se/credential/ehic/1.0", "EHICCredential"}}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: ehicVCTs}},
 						{Name: "Subject", Path: []string{"$.subject"}},
 						{Name: "Given Name", Path: []string{"$.subject.forename"}},
 						{Name: "Family Name", Path: []string{"$.subject.family_name"}},
@@ -165,9 +181,12 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 
 	vpSession.PresentationDefinition = presentationDefinition
 
-	//TODO: skapa och använd property i Verifier för baseUrl
-	verifierBaseUrl := "http://172.16.50.6:8080"
-	responseURI := fmt.Sprintf("%s/callback/direct_post_jwt/%s/%s", verifierBaseUrl, vpSession.SessionID, vpSession.CallbackID)
+	//verifierBaseUrl := "http://172.16.50.6:8080"
+	schema := "http://"
+	if c.cfg.Verifier.APIServer.TLS.Enabled {
+		schema = "https://"
+	}
+	responseURI := fmt.Sprintf("%s%s%s/callback/direct_post_jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.Addr, vpSession.SessionID, vpSession.CallbackID)
 
 	now := jwt.NewNumericDate(time.Now())
 	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
@@ -175,17 +194,18 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		c.log.Error(err, "Failed to build client metadata")
 		return "", err
 	}
+	fqdn := c.cfg.Verifier.FQDN
 	claims := &jwthelpers.CustomClaims{
 		ResponseURI:            responseURI,
-		ClientIdScheme:         "x509_san_dns",        //TODO: vad ska client_id_scheme sättas till?
-		ClientId:               "vcverifier.sunet.se", //TODO vad ska client_id sättas till?
+		ClientIdScheme:         "x509_san_dns", //TODO: vad ska client_id_scheme sättas till?
+		ClientId:               fqdn,           //TODO: vad ska client_id sättas till?
 		ResponseType:           "vp_token",
 		ResponseMode:           "direct_post.jwt",
 		State:                  vpSession.State,
 		Nonce:                  vpSession.Nonce,
 		PresentationDefinition: presentationDefinition,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer: "vcverifier.sunet.se", //TODO ta in iss via config
+			Issuer: fqdn, //TODO: vad ska iss sättas till?
 			//Subject:   "todo_set_sub_value_here",                     //TODO vilket värde här för sub, behövs det?
 			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"}, //TODO korrekt aud?
 			ExpiresAt: jwt.NewNumericDate(vpSession.SessionExpires),

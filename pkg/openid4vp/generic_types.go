@@ -24,8 +24,8 @@ type QR struct {
 	RequestURI  string `json:"request_uri" bson:"request_uri" validate:"required"`
 	ClientID    string `json:"client_id" bson:"client_id" validate:"required"`
 
-	//only for internal use
-	SessionID string `json:"-"`
+	//Only to simplify dev and test
+	SessionID string `json:"session_id" bson:"session_id" validate:"required"`
 }
 
 type DocumentTypeEnvelope struct {

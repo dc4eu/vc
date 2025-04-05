@@ -39,7 +39,7 @@ func (s *serverHandler) ListenAndServe(ctx context.Context, server *http.Server,
 }
 
 // RegEndpoint registers an endpoint with the gin router
-func (s *serverHandler) RegEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, handler func(context.Context, *gin.Context) (any, error)) {
+func (s *serverHandler) RegEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, defaultStatus int, handler func(context.Context, *gin.Context) (any, error)) {
 	rg.Handle(method, path, func(c *gin.Context) {
 		k := fmt.Sprintf("api_endpoint %s:%s%s", method, rg.BasePath(), path)
 		ctx, span := s.client.tracer.Start(ctx, k)
@@ -48,11 +48,12 @@ func (s *serverHandler) RegEndpoint(ctx context.Context, rg *gin.RouterGroup, me
 		res, err := handler(ctx, c)
 		if err != nil {
 			s.log.Debug("RegEndpoint", "err", err)
-			s.client.Rendering.Content(ctx, c, 400, gin.H{"error": helpers.NewErrorFromError(err)})
+			statusCode := StatusCode(ctx, err)
+			s.client.Rendering.Content(ctx, c, statusCode, gin.H{"error": helpers.NewErrorFromError(err)})
 			return
 		}
 
-		s.client.Rendering.Content(ctx, c, 200, res)
+		s.client.Rendering.Content(ctx, c, defaultStatus, res)
 	})
 }
 

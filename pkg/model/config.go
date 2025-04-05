@@ -46,14 +46,15 @@ type Log struct {
 
 // Common holds the common configuration
 type Common struct {
-	HTTPProxy  string   `yaml:"http_proxy"`
-	Production bool     `yaml:"production"`
-	Log        Log      `yaml:"log"`
-	Mongo      Mongo    `yaml:"mongo" validate:"omitempty"`
-	Tracing    OTEL     `yaml:"tracing" validate:"required"`
-	KeyValue   KeyValue `yaml:"key_value" validate:"omitempty"`
-	QR         QRCfg    `yaml:"qr" validate:"omitempty"`
-	Kafka      Kafka    `yaml:"kafka" validate:"omitempty"`
+	HTTPProxy           string   `yaml:"http_proxy"`
+	Production          bool     `yaml:"production"`
+	Log                 Log      `yaml:"log"`
+	Mongo               Mongo    `yaml:"mongo" validate:"omitempty"`
+	Tracing             OTEL     `yaml:"tracing" validate:"required"`
+	KeyValue            KeyValue `yaml:"key_value" validate:"omitempty"`
+	QR                  QRCfg    `yaml:"qr" validate:"omitempty"`
+	Kafka               Kafka    `yaml:"kafka" validate:"omitempty"`
+	CredentialOfferType string   `yaml:"credential_offer_type" validate:"required,oneof=credential_offer_uri credential_offer"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -114,6 +115,9 @@ type Issuer struct {
 	JWTAttribute       JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 	IssuerURL          string       `yaml:"issuer_url" validate:"required"`
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
+
+	// MetadataPath path to the metadata file, OpenID
+	MetadataPath string `yaml:"metadata_path" validate:"required"`
 }
 
 // Registry holds the registry configuration

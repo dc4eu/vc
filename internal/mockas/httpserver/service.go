@@ -45,12 +45,12 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
 	rgAPIv1 := rgRoot.Group("api/v1")
 	rgMock := rgAPIv1.Group("/mock")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgMock, http.MethodPost, "/next", s.endpointMockNext)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgMock, http.MethodPost, "/bulk", s.endpointMockBulk)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgMock, http.MethodPost, "/next", http.StatusOK, s.endpointMockNext)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgMock, http.MethodPost, "/bulk", http.StatusOK, s.endpointMockBulk)
 
 	// Run http server
 	go func() {

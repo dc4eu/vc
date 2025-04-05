@@ -7,6 +7,7 @@ services:
     volumes:
       - ./config.yaml:/config.yaml:ro
       - /var/log/sunet:/var/log/sunet
+      - ./pkg/openid4vci/testdata/metadata_response.golden:/metadata.golden:ro
     depends_on:
       - mongo
     networks:
@@ -113,6 +114,7 @@ services:
         ipv4_address: 172.16.50.13
     environment:
       - "VC_CONFIG_YAML=config.yaml"
+
 
   #  mockas2:
   #    container_name: "vc_dev_mockas2"

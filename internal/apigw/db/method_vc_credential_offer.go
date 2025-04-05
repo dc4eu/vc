@@ -1,0 +1,99 @@
+package db
+
+import (
+	"context"
+	"vc/pkg/logger"
+	"vc/pkg/openid4vci"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel/codes"
+)
+
+type VCCredentialOfferColl struct {
+	Service *Service
+	Coll    *mongo.Collection
+	log     *logger.Log
+}
+
+func NewCredentialOfferColl(ctx context.Context, collName string, service *Service, log *logger.Log) (*VCCredentialOfferColl, error) {
+	c := &VCCredentialOfferColl{
+		log:     log,
+		Service: service,
+	}
+
+	c.Coll = c.Service.dbClient.Database("vc").Collection(collName)
+
+	if err := c.createIndex(ctx); err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func (c *VCCredentialOfferColl) createIndex(ctx context.Context) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:pkce:createIndex")
+	defer span.End()
+
+	indexCodeChallengeUniq := mongo.IndexModel{
+		Keys: bson.D{
+			primitive.E{Key: "uuid", Value: 1},
+		},
+		Options: options.Index().SetName("credential_offer_uuid_uniq").SetUnique(true),
+	}
+	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexCodeChallengeUniq})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type CredentialOfferDocument struct {
+	UUID                      string                               `bson:"uuid"`
+	CredentialOfferParameters openid4vci.CredentialOfferParameters `bson:"credential_offer_parameters"`
+}
+
+func (c *VCCredentialOfferColl) Save(ctx context.Context, doc *CredentialOfferDocument) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:credential_offer:save")
+	defer span.End()
+
+	_, err := c.Coll.InsertOne(ctx, doc)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+	return nil
+}
+
+// Delete deletes one code_challenge
+func (c *VCCredentialOfferColl) Delete(ctx context.Context, codeChallenge string) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:credential_offer:delete")
+	defer span.End()
+
+	filter := bson.M{
+		"code_challenge": bson.M{"$eq": codeChallenge},
+	}
+
+	_, err := c.Coll.DeleteOne(ctx, filter)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (c *VCCredentialOfferColl) Get(ctx context.Context, uuid string) (*CredentialOfferDocument, error) {
+	filter := bson.M{
+		"uuid": bson.M{"$eq": uuid},
+	}
+
+	credentialOffer := &CredentialOfferDocument{}
+	if err := c.Coll.FindOne(ctx, filter).Decode(credentialOffer); err != nil {
+		return nil, err
+	}
+
+	return credentialOffer, nil
+}

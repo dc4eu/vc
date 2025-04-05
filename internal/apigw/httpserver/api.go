@@ -6,6 +6,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
+	"vc/pkg/openid4vci"
 )
 
 // Apiv1 interface
@@ -24,13 +25,25 @@ type Apiv1 interface {
 	AddConsent(ctx context.Context, req *apiv1.AddConsentRequest) error
 	GetConsent(ctx context.Context, req *apiv1.GetConsentRequest) (*model.Consent, error)
 
+	// SatosaCredential endpoints, remove after transition from Satosa to OIDC4VCI
+	SatosaCredential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error)
+	JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)
+
 	// datastore endpoints - disabled in production
 	SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error)
 
-	// credential endpoints
-	Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
-	Credential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error)
-	JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)
+	// OpenID4VCI endpoints
+	OIDCAuth(ctx context.Context, req *openid4vci.AuthorizationRequest) (string, error)
+	OIDCToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error)
+	OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, error)
+	OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error)
+	OIDCBatchCredential(ctx context.Context, req *openid4vci.BatchCredentialRequest) (*openid4vci.BatchCredentialResponse, error)
+	OIDCredentialOfferURI(ctx context.Context, req *openid4vci.CredentialOfferURIRequest) (*openid4vci.CredentialOfferParameters, error)
+	OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.CredentialResponse, error)
+	OIDCNotification(ctx context.Context, req *openid4vci.NotificationRequest) error
+	OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error)
+
+	//Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 
 	// misc endpoints
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)

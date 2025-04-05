@@ -80,36 +80,36 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "login", s.endpointLogin)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "login", http.StatusOK, s.endpointLogin)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
 	rgAPIGW := rgRoot.Group("apigw")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodGet, "health", s.endpointHealthAPIGW)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGW, http.MethodGet, "health", http.StatusOK, s.endpointHealthAPIGW)
 
 	rgVerifier := rgRoot.Group("verifier")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodGet, "health", s.endpointHealthVerifier)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodGet, "health", http.StatusOK, s.endpointHealthVerifier)
 	// No auth is needed to verify or decode a credential
-	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "verify", s.endpointVerifyCredential)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "decode", s.endpointDecodeCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "verify", http.StatusOK, s.endpointVerifyCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "decode", http.StatusOK, s.endpointDecodeCredential)
 
 	rgMockAS := rgRoot.Group("mockas")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgMockAS, http.MethodGet, "health", s.endpointHealthMockAS)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgMockAS, http.MethodGet, "health", http.StatusOK, s.endpointHealthMockAS)
 
 	rgSecure := rgRoot.Group("secure", s.middlewareAuthRequired(ctx))
-	s.httpHelpers.Server.RegEndpoint(ctx, rgSecure, http.MethodDelete, "logout", s.endpointLogout)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgSecure, http.MethodGet, "user", s.endpointUser)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgSecure, http.MethodDelete, "logout", http.StatusOK, s.endpointLogout)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgSecure, http.MethodGet, "user", http.StatusOK, s.endpointUser)
 
 	rgMockASSecure := rgSecure.Group("mockas")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgMockASSecure, http.MethodPost, "mock/next", s.endpointMockNext)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgMockASSecure, http.MethodPost, "mock/next", http.StatusOK, s.endpointMockNext)
 
 	rgAPIGWSecure := rgSecure.Group("apigw")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/list", s.endpointDocumentList)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "upload", s.endpointUpload)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "credential", s.endpointCredential)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document", s.endpointGetDocument)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "notification", s.endpointNotification)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/search", s.endpointSearchDocuments)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodDelete, "document", s.endpointDeleteDocument)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/list", http.StatusOK, s.endpointDocumentList)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "upload", http.StatusOK, s.endpointUpload)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "credential", http.StatusOK, s.endpointCredential)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document", http.StatusOK, s.endpointGetDocument)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "notification", http.StatusOK, s.endpointNotification)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/search", http.StatusOK, s.endpointSearchDocuments)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodDelete, "document", http.StatusOK, s.endpointDeleteDocument)
 
 	// Run http server
 	go func() {

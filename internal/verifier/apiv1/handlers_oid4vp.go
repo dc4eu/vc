@@ -43,7 +43,6 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.Document
 		return nil, err
 	}
 
-	//TODO: vpSession får inte lagras i någon db utan måste lagra i sessionen (memmory db) - fixa senare när mer stabilt
 	vpSession := &openid4vp.VPInteractionSession{
 		SessionID: sessionID,
 		SessionEphemeralKeyPair: &openid4vp.KeyPair{
@@ -238,6 +237,7 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 
 	//TODO: ersätt stora delar av nedan med värden från själva valideringen
 	record := &openid4vp.VerificationRecord{
+		Sequence:   1,
 		SessionID:  sessionID,
 		CallbackID: callbackID,
 		ValidationResult: openid4vp.ValidationMeta{

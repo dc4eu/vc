@@ -11,6 +11,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"math/big"
+	"net"
 	"time"
 )
 
@@ -97,12 +98,14 @@ type CertData struct {
 func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error) {
 	//x509_san_dns
 
+	//TODO: CONFIG - LÄS IN
+
 	subject := pkix.Name{
 		Country:      []string{"SE"},
 		Organization: []string{"SUNET"},
 		Locality:     []string{"Stockholm"},
 		SerialNumber: uuid.NewString(),
-		CommonName:   "vc-interop-1.sunet.se", //TODO: ändra till samma som DNSNames
+		CommonName:   "vc-interop-1.sunet.se", //TODO: normalt samma som DNSNames[0]
 	}
 
 	serialNumber, err := generateSerialNumber()
@@ -126,6 +129,9 @@ func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error)
 			"satosa-test-2.sunet.se",
 			"satosa-dev-1.sunet.se",
 			"satosa-dev-2.sunet.se"}, //TODO vad ska dns names sättas till; vc-interop-1.sunet.se OR vc-interop-2.sunet.se ?
+		IPAddresses: []net.IP{ //TODO: läs in som properties
+			net.ParseIP("172.16.50.24"), //TODO: specialare för att kanske få det att fungera med bara ip-adress i utvecklings/testmiljöer (men verkar inte räknas till x509_san_dns utan x509_san_ip)?
+		},
 	}
 
 	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)

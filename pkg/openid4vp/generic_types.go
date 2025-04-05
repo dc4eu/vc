@@ -53,9 +53,9 @@ type VPInteractionSession struct {
 	PresentationDefinition  *PresentationDefinition `json:"presentation_definition"`
 
 	//TODO: Below is just for dev/test purpose and must be removed before production
-	VerifierKeyPair *KeyPair `json:"verifier_key_pair,omitempty"`
+	VerifierKeyPair *KeyPair `json:"-"`
 	//VerifierX509CertDER []byte
-	VerifierX5cCertDERBase64       string           `json:"verifier_x509_cert_base64,omitempty"`
+	VerifierX5cCertDERBase64       string           `json:"-"`
 	RequestObjectJWS               string           `json:"request_object_jws,omitempty"`
 	AuthorisationResponseDebugData *JsonRequestData `json:"authorisation_response_debug_data,omitempty"`
 }
@@ -103,6 +103,7 @@ type CallbackReply struct {
 }
 
 type VerificationRecord struct {
+	Sequence               int64                   `json:"sequence" bson:"sequence" validate:"required"`
 	SessionID              string                  `json:"session_id" bson:"session_id" validate:"required"` //Key
 	CallbackID             string                  `json:"callback_id" bson:"callback_id" validate:"required"`
 	ValidationResult       ValidationMeta          `json:"validation_meta" bson:"validation_meta" validate:"required"`

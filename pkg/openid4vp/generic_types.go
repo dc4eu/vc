@@ -17,8 +17,8 @@ const (
 	StatusUnknown         InteractionStatus = "unknown"
 )
 
-// QR is a collection of fields representing a QR code
-type QR struct {
+// QRReply is a collection of fields representing a QRReply code
+type QRReply struct {
 	Base64Image string `json:"base64_image" bson:"base64_image" validate:"required"`
 	URI         string `json:"uri" bson:"uri" validate:"required"`
 	RequestURI  string `json:"request_uri" bson:"request_uri" validate:"required"`
@@ -28,7 +28,7 @@ type QR struct {
 	SessionID string `json:"session_id" bson:"session_id" validate:"required"`
 }
 
-type DocumentTypeEnvelope struct {
+type QRRequest struct {
 	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=EHIC ELM PDA1 "`
 }
 

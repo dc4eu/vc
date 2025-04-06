@@ -18,7 +18,7 @@ import (
 )
 
 // QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request
-func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.DocumentTypeEnvelope) (*openid4vp.QR, error) {
+func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRRequest) (*openid4vp.QRReply, error) {
 	//TODO: Inspect user-agent type to detect cross device or same device
 
 	if !(request.DocumentType == openid4vp.DocumentTypeEHIC || request.DocumentType == openid4vp.DocumentTypePDA1 || request.DocumentType == openid4vp.DocumentTypeELM) {
@@ -227,9 +227,9 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 
 func (c *Client) Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (*openid4vp.CallbackReply, error) {
 	//TODO: OBS! ändra signauren på endpointen till https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html#name-response-mode-direct_postjw
-	//TODO: denna kan också vara i form av en JWE
+	//TODO: denna kan också vara i form av en JWE om ej redan hanterat i endpointen???
 	//TODO:
-	//	21 Evaluate the Verifiable Presentation token
+	//	21 Evaluate each Verifiable Presentation token
 	//	22 Validate the Wallet Attestation.Attest the Wallet Provideris part of the Federation and the Wallet Instance is not revoked.
 	//	23 Attest Credential Issuer Trust and Validate JWT Signature
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)

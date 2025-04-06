@@ -23,7 +23,7 @@ func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, erro
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQRCode")
 	defer span.End()
 
-	request := &openid4vp.DocumentTypeEnvelope{}
+	request := &openid4vp.QRRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
@@ -125,7 +125,7 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 	}
 	//-----------
 
-	//TODO: hantera att request kan vara en JWE
+	//TODO: hantera att request.body kan vara en JWE
 	request := &openid4vp.AuthorizationResponse{}
 	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())

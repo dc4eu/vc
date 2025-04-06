@@ -10,7 +10,7 @@ import (
 	"net/url"
 )
 
-func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR, error) {
+func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QRReply, error) {
 	parsedURI, err := url.ParseRequestURI(qrURI)
 	if err != nil || parsedURI.Scheme == "" || parsedURI.Host == "" {
 		return nil, errors.New("invalid URL format")
@@ -28,17 +28,17 @@ func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR
 	var buf bytes.Buffer
 	qrCode, err := qrcode.New(qrURI, recoveryLevel)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create QR-code: %w", err)
+		return nil, fmt.Errorf("failed to create QRReply-code: %w", err)
 	}
 
 	encoder := base64.NewEncoder(base64.StdEncoding, &buf)
 	err = png.Encode(encoder, qrCode.Image(size))
 	encoder.Close()
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert QR-code to PNG: %w", err)
+		return nil, fmt.Errorf("failed to convert QRReply-code to PNG: %w", err)
 	}
 
-	return &QR{
+	return &QRReply{
 		Base64Image: buf.String(),
 		URI:         qrURI,
 	}, nil

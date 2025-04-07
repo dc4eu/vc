@@ -168,7 +168,6 @@ func formatJSONUnmarshalTypeError(err *json.UnmarshalTypeError) []map[string]any
 
 func Problem404() *problems.Problem {
 	problem := problems.NewStatusProblem(404)
-	problem.Type = "Not a valid endpoint"
 
 	return problem
 }

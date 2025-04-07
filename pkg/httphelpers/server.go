@@ -88,10 +88,7 @@ func (s *serverHandler) Default(ctx context.Context, serverHTTP *http.Server, se
 	serverGin.Use(s.client.Middleware.Duration(ctx))
 	serverGin.Use(s.client.Middleware.Logger(ctx))
 	serverGin.Use(s.client.Middleware.Crash(ctx))
-	problem404, err := helpers.Problem404()
-	if err != nil {
-		return nil, err
-	}
+	problem404 := helpers.Problem404()
 	serverGin.NoRoute(func(c *gin.Context) { c.JSON(http.StatusNotFound, problem404) })
 
 	rgRoot := serverGin.Group("/")

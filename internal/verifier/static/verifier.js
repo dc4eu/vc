@@ -84,6 +84,11 @@ function resetAndHideQRContainer() {
     openInDemoWWWalletButton.onclick = null;
     openInDemoWWWalletButton.classList.add("is-hidden");
 
+    const openInDC4EUWWWalletButton = getElementById("openInDC4EUWWWalletButton");
+    openInDC4EUWWWalletButton.title = "";
+    openInDC4EUWWWalletButton.onclick = null;
+    openInDC4EUWWWalletButton.classList.add("is-hidden");
+
     const checkVerificationResultButton = getElementById("checkVerificationResultButton");
     checkVerificationResultButton.title = "";
     checkVerificationResultButton.onclick = null;
@@ -105,9 +110,7 @@ function resetVerificationContainer() {
 }
 
 async function startVPFlow() {
-    console.log("startVPFlow");
-    const documentTypeElement = getElementById("documentTypeSelect");
-    console.log("documentTypeElement", documentTypeElement.value);
+    const documentTypeValue = getElementById("documentTypeSelect").value;
 
     resetAndHideIndexContainer();
     resetAndHideQRContainer();
@@ -120,7 +123,7 @@ async function startVPFlow() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json; charset=utf-8',
             },
-            body: JSON.stringify({document_type: documentTypeElement.value})
+            body: JSON.stringify({document_type: documentTypeValue})
         });
 
         if (!response.ok) {
@@ -154,14 +157,20 @@ async function startVPFlow() {
         const qrInfoText = document.getElementById("qrInfoText");
         qrInfoText.classList.remove("is-hidden");
 
-        const openInDemoWWWalletButton = document.getElementById("openInDemoWWWalletButton");
         //example: https://demo.wwwallet.org/cb?client_id=verifier.wwwallet.org&request_uri=https%3A%2F%2Fverifier.wwwallet.org%2Fverification%2Frequest-object%3Fid%3D2f96a24e-90cc-4b30-a904-912e9980df10
-        const demoWWWalletBaseUrl = "https://demo.wwwallet.org/cb";
         const params = new URLSearchParams({
             client_id: data.client_id,
             request_uri: encodeURIComponent(data.request_uri)
         });
-        const demoWWWalletURL = `${demoWWWalletBaseUrl}?${params.toString()}`;
+
+        const openInDC4EUWWWalletButton = document.getElementById("openInDC4EUWWWalletButton");
+        const dc4euWWWalletURL = `https://dc4eu.wwwallet.org/cb?${params.toString()}`;
+        openInDC4EUWWWalletButton.onclick = () => window.open(dc4euWWWalletURL, "_blank");
+        openInDC4EUWWWalletButton.title = dc4euWWWalletURL;
+        openInDC4EUWWWalletButton.classList.remove("is-hidden");
+
+        const openInDemoWWWalletButton = document.getElementById("openInDemoWWWalletButton");
+        const demoWWWalletURL = `https://demo.wwwallet.org/cb?${params.toString()}`;
         openInDemoWWWalletButton.onclick = () => window.open(demoWWWalletURL, "_blank");
         openInDemoWWWalletButton.title = demoWWWalletURL;
         openInDemoWWWalletButton.classList.remove("is-hidden");

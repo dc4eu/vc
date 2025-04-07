@@ -151,14 +151,6 @@ func (c *Client) MockNext(ctx context.Context, req *apiv1_mockas.MockNextRequest
 	return reply, nil
 }
 
-func (c *Client) Verify(ctx context.Context, req *apiv1_verifier.VerifyCredentialRequest) (any, error) {
-	reply, err := c.verifierClient.Verify(req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
 func (c *Client) HealthAPIGW(ctx context.Context, req *apiv1_status.StatusRequest) (any, error) {
 	reply, err := c.apigwClient.Health()
 	if err != nil {
@@ -183,8 +175,12 @@ func (c *Client) HealthMockAS(ctx context.Context, req *apiv1_status.StatusReque
 	return reply, nil
 }
 
-func (c *Client) DecodeCredential(ctx context.Context, req *apiv1_verifier.DecodeCredentialRequest) (any, error) {
-	reply, err := c.verifierClient.Decode(req)
+type VPFlowDebugInfoRequest struct {
+	SessionID string `json:"session_id" binding:"required,uuid"`
+}
+
+func (c *Client) GetVPFlowDebugInfo(ctx context.Context, req *apiv1_verifier.VPFlowDebugInfoRequest) (any, error) {
+	reply, err := c.verifierClient.GetVPFlowDebugInfo(req)
 	if err != nil {
 		return nil, err
 	}

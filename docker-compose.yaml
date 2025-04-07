@@ -64,6 +64,9 @@ services:
     volumes:
       - ./cert:/cert:ro
       - ./config.yaml:/config.yaml:ro
+      - ./developer_tools/private_verifier_ec256.pem:/private_verifier_ec256.pem:ro
+      - ./developer_tools/public_verifier_ec256.pem:/public_verifier_ec256.pem:ro
+      - ./developer_tools/verifier_x509_cert.pem:/verifier_x509_cert.pem:ro
     depends_on:
       - mongo
     networks:
@@ -270,7 +273,7 @@ networks:
         - subnet: 172.16.50.0/24
 volumes:
   mongo_data:
-    #  kraft0-data:
-    #    driver: local
-    #  kraft1-data:
-    #    driver: local
+  #  kraft0-data:
+  #    driver: local
+  #  kraft1-data:
+  #    driver: local

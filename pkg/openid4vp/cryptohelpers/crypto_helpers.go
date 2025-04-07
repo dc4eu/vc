@@ -11,7 +11,9 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"math/big"
+	"net"
 	"time"
+	"vc/pkg/openid4vp"
 )
 
 type ClientMetadata struct { //From: OpenID Connect Dynamic Client Registration
@@ -89,20 +91,17 @@ func GenerateECDSAKey(curve elliptic.Curve) (*ecdsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
-type CertData struct {
-	CertDER []byte
-	CertPEM []byte
-}
-
-func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error) {
+func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*openid4vp.CertData, error) {
 	//x509_san_dns
+
+	//TODO: CONFIG - LÄS IN
 
 	subject := pkix.Name{
 		Country:      []string{"SE"},
 		Organization: []string{"SUNET"},
 		Locality:     []string{"Stockholm"},
 		SerialNumber: uuid.NewString(),
-		CommonName:   "vcverifier.sunet.se",
+		CommonName:   "vc-interop-1.sunet.se", //TODO: normalt samma som DNSNames[0]
 	}
 
 	serialNumber, err := generateSerialNumber()
@@ -119,7 +118,16 @@ func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error)
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageKeyAgreement, //TODO: vad ska KeyUsage sättas till?
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},                                           //TODO: vad ska ExtKeyUsage sättas till?
 		BasicConstraintsValid: true,
-		DNSNames:              []string{"vcverifier.sunet.se"}, //TODO vad ska dns names sättas till?
+		DNSNames: []string{
+			"vc-interop-1.sunet.se",
+			"vc-interop-2.sunet.se",
+			"satosa-test-1.sunet.se",
+			"satosa-test-2.sunet.se",
+			"satosa-dev-1.sunet.se",
+			"satosa-dev-2.sunet.se"}, //TODO vad ska dns names sättas till; vc-interop-1.sunet.se OR vc-interop-2.sunet.se ?
+		IPAddresses: []net.IP{ //TODO: läs in som properties
+			net.ParseIP("172.16.50.24"), //TODO: specialare för att kanske få det att fungera med bara ip-adress i utvecklings/testmiljöer (men verkar inte räknas till x509_san_dns utan x509_san_ip)?
+		},
 	}
 
 	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
@@ -129,7 +137,7 @@ func GenerateSelfSignedX509Cert(privateKey *ecdsa.PrivateKey) (*CertData, error)
 
 	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
 
-	return &CertData{
+	return &openid4vp.CertData{
 		CertDER: certDER,
 		CertPEM: certPEM,
 	}, nil

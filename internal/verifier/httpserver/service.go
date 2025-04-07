@@ -54,7 +54,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
 		store.Options(sessions.Options{
 			Path:     "/",
-			MaxAge:   300,
+			MaxAge:   600,
 			Secure:   cfg.UI.APIServer.TLS.Enabled,
 			HttpOnly: true,
 			SameSite: http.SameSiteStrictMode,
@@ -80,7 +80,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	//openid4vp
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qrcode", http.StatusOK, s.endpointQRCode)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
-	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "request-object/:session_id", s.endpointGetRequestObject)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
 
 	//TODO: behövs även en mer allmän status endpoint för en pågående verifiering som inte bara stödjer web session
@@ -89,9 +88,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", http.StatusOK, s.endpointQuitVPFlow)
 
-	//deprecated: to be removed later
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verify", http.StatusOK, s.endpointVerifyCredential)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "decode", http.StatusOK, s.endpointDecodeCredential)
+	// for dev purpose only
+	//TODO: OBS! nedan endpoint behöver säkerhet innan mer känsliga nycklar och/eller data börjar användas (tillåts dock ej redan om vc satt till production)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "debug/vp-flow", http.StatusOK, s.endpointGetVPFlowDebugInfo)
 
 	//TODO: swagger är inte aktiverat i web_worker för docker - hantera att verifier lär behöva swagger samtidigt som den stödjer web (OBS! ui samt portal har ingen swagger alls)
 	rgDocs := rgRoot.Group("/swagger")

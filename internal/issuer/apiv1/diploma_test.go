@@ -6,19 +6,23 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func mockX509KeyPair(t *testing.T) string {
+func mockECKeyPair(t *testing.T) (string, *ecdsa.PrivateKey, string, *ecdsa.PublicKey) {
 	p, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	assert.NoError(t, err)
 
@@ -32,27 +36,80 @@ func mockX509KeyPair(t *testing.T) string {
 
 	privateFS, err := os.CreateTemp("", "private.pem")
 	assert.NoError(t, err)
-	//defer os.Remove(privateFS.Name())
 	err = pem.Encode(privateFS, privateBlock)
 	assert.NoError(t, err)
 
-	//publicFS, err := os.CreateTemp("", "public.pem")
-	//assert.NoError(t, err)
-	//defer os.Remove(publicFS.Name())
-	//_, err = publicFS.WriteString("public key")
-	//assert.NoError(t, err)
-	//err = publicFS.Close()
-	//assert.NoError(t, err)
+	publicRaw, err := x509.MarshalECPrivateKey(p)
+	assert.NoError(t, err)
 
-	return privateFS.Name()
+	publicBlock := &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicRaw,
+	}
+
+	publicFS, err := os.CreateTemp("", "public.pem")
+	assert.NoError(t, err)
+	err = pem.Encode(publicFS, publicBlock)
+	assert.NoError(t, err)
+
+	return privateFS.Name(), p, publicFS.Name(), &p.PublicKey
 }
 
 func TestDiploma(t *testing.T) {
+	type want struct {
+		vctm           *VCTM
+		validSignature bool
+	}
 	tts := []struct {
-		name string
+		name          string
+		document_type string
+		want          want
 	}{
 		{
-			name: "Diploma",
+			name:          "Diploma",
+			document_type: "Diploma",
+			want: want{
+				vctm: &VCTM{
+					VCT:         "DiplomaCredential",
+					Name:        "",
+					Description: "",
+					Display: []VCTMDisplay{
+						{
+							Lang:        "",
+							Name:        "",
+							Description: "",
+							Rendering: Rendering{
+								Simple: SimpleRendering{
+									Logo: Logo{
+										URI:          "",
+										URIIntegrity: "",
+										AltText:      "",
+									},
+									BackgroundColor: "",
+									TextColor:       "",
+								},
+								SVGTemplates: []SVGTemplates{
+									{
+										URI:          "",
+										URLIntegrity: "",
+										Properties: SVGTemplateProperties{
+											Orientation: "",
+											ColorScheme: "",
+											Contrast:    "",
+										},
+									},
+								},
+							},
+						},
+					},
+					Claims:             []Claim{},
+					SchemaURL:          "",
+					SchemaURLIntegrity: "",
+					Extends:            "",
+					ExtendsIntegrity:   "",
+				},
+				validSignature: true,
+			},
 		},
 	}
 
@@ -60,28 +117,9 @@ func TestDiploma(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 
-			privPath := mockX509KeyPair(t)
-			cfg := &model.Cfg{
-				Common:           model.Common{},
-				AuthenticSources: map[string]model.AuthenticSource{},
-				APIGW:            model.APIGW{},
-				Issuer: model.Issuer{
-					APIServer:          model.APIServer{},
-					Identifier:         "",
-					GRPCServer:         model.GRPCServer{},
-					SigningKeyPath:     privPath,
-					JWTAttribute:       model.JWTAttribute{},
-					IssuerURL:          "",
-					CredentialOfferURL: "",
-				},
-				Verifier:   model.Verifier{},
-				Datastore:  model.Datastore{},
-				Registry:   model.Registry{},
-				Persistent: model.Persistent{},
-				MockAS:     model.MockAS{},
-				UI:         model.UI{},
-				Portal:     model.Portal{},
-			}
+			signingKey, _, _, publicKey := mockECKeyPair(t)
+
+			cfg := &model.Cfg{Issuer: model.Issuer{SigningKeyPath: signingKey}}
 
 			log := logger.NewSimple("test")
 
@@ -90,11 +128,6 @@ func TestDiploma(t *testing.T) {
 
 			client, err := New(ctx, nil, cfg, tp, log)
 			assert.NoError(t, err)
-
-			diplomaClient, err := newDiplomaClient(client, tp, log)
-			if err != nil {
-				t.Fatalf("newDiplomaClient() error = %v", err)
-			}
 
 			var salt string = "salt_1234"
 
@@ -109,10 +142,56 @@ func TestDiploma(t *testing.T) {
 
 			body := map[string]any{}
 
-			signedJWT, err := diplomaClient.sdjwt(ctx, body, jwk, &salt)
+			signedJWT := ""
+
+			switch tt.document_type {
+			case "Diploma":
+				signedJWT, err = client.diplomaClient.sdjwt(ctx, body, jwk, &salt)
+				assert.NoError(t, err)
+
+			default:
+				assert.Fail(t, "unknown document type")
+			}
+
+			valid, err := sdjwt3.Validate(signedJWT, publicKey)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want.validSignature, valid)
+
+			//header := strings.Split(signedJWT, ".")[0]
+			header, err := base64.RawStdEncoding.DecodeString(strings.Split(signedJWT, ".")[0])
+			assert.NoError(t, err)
+			assert.NotEmpty(t, header)
+
+			fmt.Println("header: ", string(header))
+
+			headerMap := map[string]any{}
+			err = json.Unmarshal(header, &headerMap)
 			assert.NoError(t, err)
 
-			fmt.Println(signedJWT)
+			vctm := headerMap["vctm"]
+			fmt.Println("vctm raw: ", vctm)
+
+			vctmStr, ok := vctm.([]string)
+			if !ok {
+				assert.Fail(t, "vctm is not a string")
+			}
+
+			v, err := base64.RawStdEncoding.DecodeString(vctmStr[0])
+			assert.NoError(t, err)
+
+			t.Logf("vctm: %s", string(v))
+			//
+			//			vctmT := &VCTM{}
+			//			err = json.Unmarshal(v, &vctmT)
+			//			assert.NoError(t, err)
+			//
+			//			assert.Equal(t, tt.want.vctm, vctmT)
+			//
+			//			fmt.Println("header: ", headerMap)
+
+			//assert.Equal(t, tt.want.vctm, gotVCTM)
+
+			//fmt.Println(signedJWT)
 
 		})
 	}

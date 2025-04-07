@@ -78,9 +78,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
 	//openid4vp
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qrcode", http.StatusOK, s.endpointQRCode)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qr-code", http.StatusOK, s.endpointQRCode)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/direct-post-jwt/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
 
 	//TODO: behövs även en mer allmän status endpoint för en pågående verifiering som inte bara stödjer web session
 	//TODO: behövs https://<domain>/.well-known/openid-configuration + "jwks_uri:":"https://<domain>/oauth/jwks" endpoints???

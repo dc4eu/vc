@@ -186,7 +186,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	if c.cfg.Verifier.APIServer.TLS.Enabled {
 		schema = "https://"
 	}
-	responseURI := fmt.Sprintf("%s%s%s/callback/direct_post_jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.Addr, vpSession.SessionID, vpSession.CallbackID)
+	responseURI := fmt.Sprintf("%s%s%s/callback/direct-post-jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.Addr, vpSession.SessionID, vpSession.CallbackID)
 
 	now := jwt.NewNumericDate(time.Now())
 	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
@@ -226,7 +226,6 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 }
 
 func (c *Client) Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (*openid4vp.CallbackReply, error) {
-	//TODO: OBS! ändra signauren på endpointen till https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html#name-response-mode-direct_postjw
 	//TODO: denna kan också vara i form av en JWE om ej redan hanterat i endpointen???
 	//TODO:
 	//	21 Evaluate each Verifiable Presentation token

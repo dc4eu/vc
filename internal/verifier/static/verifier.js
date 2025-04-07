@@ -117,7 +117,7 @@ async function startVPFlow() {
     showElement("qrContainer");
 
     try {
-        const response = await fetch(new URL("/qrcode", baseUrl), {
+        const response = await fetch(new URL("/qr-code", baseUrl), {
             method: "POST",
             headers: {
                 'Accept': 'application/json',

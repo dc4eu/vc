@@ -221,6 +221,24 @@ func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, g *gin.Context
 	return reply, nil
 }
 
+func (s *Service) endpointPaginatedVerificationRecords(ctx context.Context, g *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointPaginatedVerificationRecords")
+	defer span.End()
+
+	request := &apiv1.PaginatedVerificationRecordsRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	reply, err := s.apiv1.PaginatedVerificationRecords(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
 type RequestData struct {
 	Method           string
 	URL              *url.URL

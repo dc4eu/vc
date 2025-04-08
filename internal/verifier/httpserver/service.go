@@ -82,11 +82,12 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/direct-post-jwt/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
 
-	//TODO: behövs även en mer allmän status endpoint för en pågående verifiering som inte bara stödjer web session
-	//TODO: behövs https://<domain>/.well-known/openid-configuration + "jwks_uri:":"https://<domain>/oauth/jwks" endpoints???
-
+	//openid4vp-web
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", http.StatusOK, s.endpointQuitVPFlow)
+
+	//vp-datastore
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "verification-records", http.StatusOK, s.endpointPaginatedVerificationRecords)
 
 	// for dev purpose only
 	//TODO: OBS! nedan endpoint behöver säkerhet innan mer känsliga nycklar och/eller data börjar användas (tillåts dock ej redan om vc satt till production)

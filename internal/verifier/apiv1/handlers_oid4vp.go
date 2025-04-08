@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
 	"net/url"
+	"sync/atomic"
 	"time"
 	"vc/pkg/openid4vp"
 	"vc/pkg/openid4vp/cryptohelpers"
@@ -267,7 +268,7 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 
 	//TODO: ersätt stora delar av nedan med värden från själva valideringen
 	record := &openid4vp.VerificationRecord{
-		Sequence:   1,
+		Sequence:   c.nextSequence(),
 		SessionID:  sessionID,
 		CallbackID: callbackID,
 		ValidationResult: openid4vp.ValidationMeta{
@@ -324,6 +325,13 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 
 	//TODO: vad ska returneras tillbaka till walleten om validering: 1) allt OK 2) något gick fel eller ej ok
 	return &openid4vp.CallbackReply{}, nil
+}
+
+var currentSequence int64 = 0
+
+func (c *Client) nextSequence() int64 {
+	//TODO workaround until mongodb is used
+	return atomic.AddInt64(&c.currentSequence, 1)
 }
 
 func (c *Client) SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) error {

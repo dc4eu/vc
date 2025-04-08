@@ -23,6 +23,7 @@ type Client struct {
 	log              *logger.Log
 	verifierKeyPair  *openid4vp.KeyPair
 	verifierX509Cert *openid4vp.CertData
+	currentSequence  int64
 }
 
 // New creates a new instance of the public api

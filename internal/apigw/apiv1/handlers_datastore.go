@@ -32,12 +32,6 @@ type UploadRequest struct {
 //	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
-	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Issuer.IssuerURL, c.cfg.Issuer.CredentialOfferURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
-	if err != nil {
-		c.log.Debug("QR code generation failed", "error", err)
-		return err
-	}
-
 	if req.Meta.Collect == nil || req.Meta.Collect.ID == "" {
 		collect := &model.Collect{
 			ID: req.Meta.DocumentID,
@@ -54,6 +48,12 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		if req.Meta.Revocation.ID == "" {
 			req.Meta.Revocation.ID = req.Meta.DocumentID
 		}
+	}
+
+	qr, err := req.Meta.QRGenerator(ctx, c.cfg.Issuer.IssuerURL, c.cfg.Issuer.CredentialOfferURL, c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size)
+	if err != nil {
+		c.log.Debug("QR code generation failed", "error", err)
+		return err
 	}
 
 	upload := &model.CompleteDocument{

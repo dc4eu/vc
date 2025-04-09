@@ -34,7 +34,7 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		log: log.New("apiv1"),
 	}
 
-	keyPair, err := loadKeyPair("/", "private_verifier_ec256.pem", "public_verifier_ec256.pem")
+	keyPair, err := loadKeyPair("/", "private_verifier_ec256.pem")
 	if err != nil {
 		c.log.Error(err, "Failed to load verifier key pair")
 		return nil, err
@@ -67,23 +67,23 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 	return c, nil
 }
 
-func loadKeyPair(relativeBasePath, privateFilename, publicFilename string) (*openid4vp.KeyPair, error) {
+func loadKeyPair(relativeBasePath, privateFilename string) (*openid4vp.KeyPair, error) {
 	privatePath := filepath.Join(relativeBasePath, privateFilename)
-	publicPath := filepath.Join(relativeBasePath, publicFilename)
+	//publicPath := filepath.Join(relativeBasePath, publicFilename)
 
 	privateKey, err := loadPrivateKey(privatePath)
 	if err != nil {
 		return nil, fmt.Errorf("load private key: %w", err)
 	}
 
-	publicKey, err := loadPublicKey(publicPath)
+	//publicKey, err := loadPublicKey(publicPath)
 	if err != nil {
 		return nil, fmt.Errorf("load public key: %w", err)
 	}
 
 	return &openid4vp.KeyPair{
 		PrivateKey: privateKey,
-		PublicKey:  publicKey,
+		PublicKey:  &privateKey.PublicKey,
 	}, nil
 }
 
@@ -103,25 +103,25 @@ func loadPrivateKey(path string) (*ecdsa.PrivateKey, error) {
 	return key, nil
 }
 
-func loadPublicKey(path string) (*ecdsa.PublicKey, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	block, _ := pem.Decode(data)
-	if block == nil || block.Type != "PUBLIC KEY" {
-		return nil, errors.New("invalid PEM block for public key")
-	}
-	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	ecdsaPub, ok := pub.(*ecdsa.PublicKey)
-	if !ok {
-		return nil, errors.New("not an ECDSA public key")
-	}
-	return ecdsaPub, nil
-}
+//func loadPublicKey(path string) (*ecdsa.PublicKey, error) {
+//	data, err := os.ReadFile(path)
+//	if err != nil {
+//		return nil, err
+//	}
+//	block, _ := pem.Decode(data)
+//	if block == nil || block.Type != "PUBLIC KEY" {
+//		return nil, errors.New("invalid PEM block for public key")
+//	}
+//	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+//	if err != nil {
+//		return nil, err
+//	}
+//	ecdsaPub, ok := pub.(*ecdsa.PublicKey)
+//	if !ok {
+//		return nil, errors.New("not an ECDSA public key")
+//	}
+//	return ecdsaPub, nil
+//}
 
 func loadCert(path string) (*openid4vp.CertData, error) {
 	pemData, err := os.ReadFile(path)

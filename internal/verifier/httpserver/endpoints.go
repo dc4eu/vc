@@ -15,6 +15,7 @@ import (
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/verifier/apiv1"
 	"vc/pkg/openid4vp"
+	"vc/pkg/trace"
 
 	"github.com/gin-gonic/gin"
 )
@@ -86,6 +87,10 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 	if err != nil {
 		return nil, err
 	}
+
+	span.SetAttributes(
+		trace.SafeAttr("request.body", &body),
+	)
 
 	requestData := &RequestData{
 		Method:           g.Request.Method,
@@ -236,6 +241,10 @@ func (s *Service) endpointPaginatedVerificationRecords(ctx context.Context, g *g
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+
+	g.Header("Cache-Control", "no-store")
+	g.Header("Pragma", "no-cache")
+
 	return reply, nil
 }
 

@@ -33,8 +33,8 @@ func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *Pagi
 			request.RequestedSequenceStart,
 		)
 	}
-	//TODO: Ta in max antal tillåtna items per "reply" via config
-	maxAllowedItems := int64(10)
+	//TODO: Ta in max antal tillåtna items per "reply" via config, satt till 3 för att underlätta utveckingsarbetet
+	maxAllowedItems := int64(3)
 	requestedNumOfItems := (request.RequestedSequenceEnd - request.RequestedSequenceStart) + 1
 	if requestedNumOfItems > maxAllowedItems {
 		return nil, fmt.Errorf("max allowed sequence range is (%d), requested was (%d)", maxAllowedItems, requestedNumOfItems)

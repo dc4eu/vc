@@ -62,7 +62,6 @@ services:
     image: docker.sunet.se/dc4eu/verifier:latest
     restart: always
     volumes:
-      - ./cert:/cert:ro
       - ./config.yaml:/config.yaml:ro
       - ./developer_tools/private_verifier_ec256.pem:/private_verifier_ec256.pem:ro
       - ./developer_tools/public_verifier_ec256.pem:/public_verifier_ec256.pem:ro

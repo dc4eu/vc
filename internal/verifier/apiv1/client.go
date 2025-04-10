@@ -10,13 +10,14 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"os"
 	"strings"
 	"vc/internal/verifier/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/openid4vp"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Client holds the public api object

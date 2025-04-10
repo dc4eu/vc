@@ -2,14 +2,17 @@ package apiv1
 
 import (
 	"context"
+	"crypto"
 	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"os"
-	"path/filepath"
+	"strings"
 	"vc/internal/verifier/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -23,7 +26,9 @@ type Client struct {
 	log              *logger.Log
 	verifierKeyPair  *openid4vp.KeyPair
 	verifierX509Cert *openid4vp.CertData
-	currentSequence  int64
+
+	//TODO: remove after mongodb is being used
+	currentSequence int64
 }
 
 // New creates a new instance of the public api
@@ -34,28 +39,15 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		log: log.New("apiv1"),
 	}
 
-	keyPair, err := loadKeyPair("/", "private_verifier_ec256.pem")
+	//TODO: Change filename/config value for private key file path
+	keyPair, err := LoadKeyPairFromPEMFile("/private_verifier_rsa.pem")
 	if err != nil {
 		c.log.Error(err, "Failed to load verifier key pair")
 		return nil, err
-	} else {
-		_, ok := keyPair.PrivateKey.(*ecdsa.PrivateKey)
-		if !ok {
-			err := errors.New("expected *ecdsa.PrivateKey")
-			c.log.Error(err, "Wrong type of private key")
-			return nil, err
-		}
-		_, ok = keyPair.PublicKey.(*ecdsa.PublicKey)
-		if !ok {
-			err := errors.New("expected *ecdsa.PrivateKey")
-			c.log.Error(err, "Wrong type of public key")
-			return nil, err
-		}
 	}
 	c.verifierKeyPair = keyPair
-	c.verifierKeyPair.SigningMethodToUse = jwt.SigningMethodES256
 
-	cert, err := loadCert("/verifier_x509_cert.pem")
+	cert, err := loadCertFromPEMFile("/verifier_x509_cert.pem")
 	if err != nil {
 		c.log.Error(err, "Failed to load x509 certificate")
 		return nil, err
@@ -67,64 +59,81 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 	return c, nil
 }
 
-func loadKeyPair(relativeBasePath, privateFilename string) (*openid4vp.KeyPair, error) {
-	privatePath := filepath.Join(relativeBasePath, privateFilename)
-	//publicPath := filepath.Join(relativeBasePath, publicFilename)
-
-	privateKey, err := loadPrivateKey(privatePath)
+func LoadKeyPairFromPEMFile(filepath string) (*openid4vp.KeyPair, error) {
+	data, err := os.ReadFile(filepath)
 	if err != nil {
-		return nil, fmt.Errorf("load private key: %w", err)
+		return nil, fmt.Errorf("unable to read key file: %w", err)
 	}
 
-	//publicKey, err := loadPublicKey(publicPath)
-	if err != nil {
-		return nil, fmt.Errorf("load public key: %w", err)
-	}
-
-	return &openid4vp.KeyPair{
-		PrivateKey: privateKey,
-		PublicKey:  &privateKey.PublicKey,
-	}, nil
-}
-
-func loadPrivateKey(path string) (*ecdsa.PrivateKey, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
 	block, _ := pem.Decode(data)
-	if block == nil || block.Type != "EC PRIVATE KEY" {
-		return nil, errors.New("invalid PEM block for EC private key")
+	if block == nil || !strings.Contains(block.Type, "PRIVATE KEY") {
+		return nil, errors.New("no valid private key found in PEM")
 	}
-	key, err := x509.ParseECPrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
+
+	var privKey crypto.PrivateKey
+
+	// === Try PKCS#8 ===
+	privKey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err == nil {
+		return buildKeyPair(privKey)
 	}
-	return key, nil
+
+	// === Try RSA PKCS#1 ===
+	if rsaKey, err2 := x509.ParsePKCS1PrivateKey(block.Bytes); err2 == nil {
+		return buildKeyPair(rsaKey)
+	}
+
+	// === Try EC SEC1 ===
+	if ecKey, err3 := x509.ParseECPrivateKey(block.Bytes); err3 == nil {
+		return buildKeyPair(ecKey)
+	}
+
+	// === Try raw Ed25519 ===
+	if edKey, ok := parseRawEd25519(block.Bytes); ok {
+		return buildKeyPair(edKey)
+	}
+
+	return nil, errors.New("unsupported or unknown private key format: tried PKCS#8, PKCS#1 (RSA), SEC1 (EC), raw Ed25519")
 }
 
-//func loadPublicKey(path string) (*ecdsa.PublicKey, error) {
-//	data, err := os.ReadFile(path)
-//	if err != nil {
-//		return nil, err
-//	}
-//	block, _ := pem.Decode(data)
-//	if block == nil || block.Type != "PUBLIC KEY" {
-//		return nil, errors.New("invalid PEM block for public key")
-//	}
-//	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
-//	if err != nil {
-//		return nil, err
-//	}
-//	ecdsaPub, ok := pub.(*ecdsa.PublicKey)
-//	if !ok {
-//		return nil, errors.New("not an ECDSA public key")
-//	}
-//	return ecdsaPub, nil
-//}
+func buildKeyPair(privKey crypto.PrivateKey) (*openid4vp.KeyPair, error) {
+	switch key := privKey.(type) {
+	case *rsa.PrivateKey:
+		return &openid4vp.KeyPair{
+			PrivateKey:         key,
+			PublicKey:          &key.PublicKey,
+			SigningMethodToUse: jwt.SigningMethodRS256,
+			KeyType:            openid4vp.KeyTypeRSA,
+		}, nil
+	case *ecdsa.PrivateKey:
+		return &openid4vp.KeyPair{
+			PrivateKey:         key,
+			PublicKey:          &key.PublicKey,
+			SigningMethodToUse: jwt.SigningMethodES256,
+			KeyType:            openid4vp.KeyTypeEC,
+		}, nil
+	case ed25519.PrivateKey:
+		return &openid4vp.KeyPair{
+			PrivateKey:         key,
+			PublicKey:          key.Public(),
+			SigningMethodToUse: jwt.SigningMethodEdDSA,
+			KeyType:            openid4vp.KeyTypeEd25519,
+		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported private key type: %T", key)
+	}
+}
 
-func loadCert(path string) (*openid4vp.CertData, error) {
-	pemData, err := os.ReadFile(path)
+func parseRawEd25519(b []byte) (ed25519.PrivateKey, bool) {
+	// A raw Ed25519 private key should be 64 bytes (private + public part)
+	if len(b) == ed25519.PrivateKeySize {
+		return ed25519.PrivateKey(b), true
+	}
+	return nil, false
+}
+
+func loadCertFromPEMFile(filepath string) (*openid4vp.CertData, error) {
+	pemData, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("could not read cert file: %w", err)
 	}

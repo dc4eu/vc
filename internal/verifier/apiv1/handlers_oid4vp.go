@@ -53,6 +53,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 	vpSession := &openid4vp.VPInteractionSession{
 		SessionID: sessionID,
 		SessionEphemeralKeyPair: &openid4vp.KeyPair{
+			KeyType:            openid4vp.KeyTypeEC,
 			PrivateKey:         verifierEmpEcdsaP256Private,
 			PublicKey:          verifierEmpEcdsaP256Private.PublicKey,
 			SigningMethodToUse: jwt.SigningMethodES256,

@@ -1,6 +1,7 @@
 package openid4vp
 
 import (
+	"crypto"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -32,12 +33,27 @@ type QRRequest struct {
 	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=EHIC ELM PDA1 "`
 }
 
+type KeyType string
+
+const (
+	KeyTypeRSA     KeyType = "RSA"
+	KeyTypeRSAPSS  KeyType = "RSAPSS"
+	KeyTypeEC      KeyType = "EC"
+	KeyTypeOKP     KeyType = "OKP"
+	KeyTypeEd25519 KeyType = "Ed25519"
+	KeyTypeEd448   KeyType = "Ed448"
+	KeyTypeX25519  KeyType = "X25519"
+	KeyTypeX448    KeyType = "X448"
+	KeyTypeDSA     KeyType = "DSA"
+	KeyTypeUnknown KeyType = "UNKNOWN"
+)
+
 type KeyPair struct {
-	PrivateKey         interface{} `json:"private_key" bson:"private_key" validate:"required"`
-	PublicKey          interface{} `json:"public_key" bson:"public_key" validate:"required"`
+	KeyType            KeyType
+	PrivateKey         crypto.PrivateKey `json:"private_key" bson:"private_key" validate:"required"`
+	PublicKey          crypto.PublicKey  `json:"public_key" bson:"public_key" validate:"required"`
 	SigningMethodToUse jwt.SigningMethod
 }
-
 type CertData struct {
 	CertDER []byte
 	CertPEM []byte
@@ -112,7 +128,7 @@ type VerificationRecord struct {
 	SessionID              string                  `json:"session_id" bson:"session_id" validate:"required"` //Key
 	CallbackID             string                  `json:"callback_id" bson:"callback_id" validate:"required"`
 	ValidationResult       ValidationMeta          `json:"validation_meta" bson:"validation_meta" validate:"required"`
-	PresentationSubmission *PresentationSubmission `json:"presentation_submission" bson:"presentation_submission" validate:"required"`
+	PresentationSubmission *PresentationSubmission `json:"presentation_submission,omitempty" bson:"presentation_submission"`
 	VPResults              []*VPResult             `json:"vp_results" bson:"vp_results"`
 }
 
@@ -128,6 +144,7 @@ type VPResult struct {
 }
 
 type VCResult struct {
+	RawJWT                    string                 `json:"raw_jwt" bson:"raw_jwt" validate:"required"`
 	VCT                       string                 `json:"vct" bson:"vct" validate:"required"`
 	ValidSelectiveDisclosures []*Disclosure          `json:"valid_selective_disclosures" bson:"valid_selective_disclosures"`
 	Claims                    map[string]interface{} `json:"claims" bson:"claims"`

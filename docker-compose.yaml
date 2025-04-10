@@ -134,7 +134,7 @@ services:
   #      - "VC_CONFIG_YAML=config.yaml"
 
   mongo:
-    image: mongo:4.0.10
+    image: mongo:7.0
     container_name: "vc_dev_mongo"
     restart: always
     expose:

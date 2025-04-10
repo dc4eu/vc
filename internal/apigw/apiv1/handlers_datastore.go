@@ -35,6 +35,24 @@ type UploadRequest struct {
 //	@Param			req	body		UploadRequest			true	" "
 //	@Router			/upload [post]
 func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
+	if req.Meta.Collect == nil || req.Meta.Collect.ID == "" {
+		collect := &model.Collect{
+			ID: req.Meta.DocumentID,
+		}
+
+		req.Meta.Collect = collect
+	}
+
+	if req.Meta.Revocation == nil {
+		req.Meta.Revocation = &model.Revocation{
+			ID: req.Meta.DocumentID,
+		}
+	} else {
+		if req.Meta.Revocation.ID == "" {
+			req.Meta.Revocation.ID = req.Meta.DocumentID
+		}
+	}
+
 	var credentialConfigurationID string
 	switch req.Meta.DocumentType {
 	case "PDA1":

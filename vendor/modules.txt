@@ -375,7 +375,7 @@ github.com/montanaflynn/stats
 # github.com/moogar0880/problems v1.0.0
 ## explicit; go 1.24
 github.com/moogar0880/problems
-# github.com/pelletier/go-toml/v2 v2.2.3
+# github.com/pelletier/go-toml/v2 v2.2.4
 ## explicit; go 1.21.0
 github.com/pelletier/go-toml/v2
 github.com/pelletier/go-toml/v2/internal/characters

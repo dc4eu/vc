@@ -4,6 +4,7 @@ NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 CURRENT_BRANCH 			:= $(shell git rev-parse --abbrev-ref HEAD)
+SERVICES 				:= verifier registry persistent mockas apigw issuer ui portal wallet
 
 test: test-verifier
 
@@ -125,7 +126,7 @@ docker-build-mockas-debug:
 
 docker-build-apigw:
 	$(info Docker building apigw with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=apigw --build-arg VERSION=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
+	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
 
 docker-build-apigw-debug:
 	$(info Docker building apigw with tag: $(VERSION))

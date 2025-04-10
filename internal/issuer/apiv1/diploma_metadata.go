@@ -2,13 +2,8 @@ package apiv1
 
 func (c *diplomaClient) MetadataClaim(vct string) ([]string, error) {
 	var (
-	//	socialSecurityPin    = "social_security_pin"
-	//	competentInstitution = "competent_institution"
-	//	institutionCountry   = "institution_country"
-	//	institutionID        = "institution_id"
-	//	documentID           = "document_id"
-	//	periodEntitlement    = "period_entitlement"
-	//	endingDate           = "ending_date"
+		credentialSubject = "credentialSubject"
+		dateOfBirth       = "dateOfBirth"
 	)
 
 	vctm := VCTM{
@@ -32,16 +27,29 @@ func (c *diplomaClient) MetadataClaim(vct string) ([]string, error) {
 				},
 			},
 		},
-		Claims:             []Claim{},
+		Claims: []Claim{
+			{
+				Path: []*string{&credentialSubject, &dateOfBirth},
+				Display: []ClaimDisplay{
+					{
+						Lang:        "en-US",
+						Label:       "Birthdate",
+						Description: "Birthdate of the subject",
+					},
+				},
+				SD:    "",
+				SVGID: "birthdate",
+			},
+		},
 		SchemaURL:          "",
 		SchemaURLIntegrity: "",
 		Extends:            "",
 		ExtendsIntegrity:   "",
 	}
 
-	e, err := vctm.encode()
+	encodedVctm, err := vctm.encode()
 	if err != nil {
 		return nil, err
 	}
-	return []string{e}, nil
+	return []string{encodedVctm}, nil
 }

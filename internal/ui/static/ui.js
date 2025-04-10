@@ -446,87 +446,59 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
     document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
 };
 
-const addVerifyFormArticleToContainer = () => {
-    const textareaId = generateUUID();
-    const buildVerifyCredentialFormElements = (textareaId) => {
-        const textarea = document.createElement("textarea");
-        textarea.id = textareaId;
-        textarea.classList.add("textarea");
-        textarea.rows = 20;
-        textarea.placeholder = "Base64 encoded vc+sd-jwt string";
+const addViewVPFlowDebugInfoFormArticleToContainer = () => {
+    const buildFormElements = () => {
+        const sessionIDElement = createInputElement('session id');
 
-        const submitButton = document.createElement('button');
-        submitButton.id = generateUUID();
-        submitButton.classList.add('button', 'is-link');
-        submitButton.textContent = 'Verify';
+        const divResultContainer = document.createElement("div");
+        divResultContainer.id = generateUUID();
 
-        const doVerify = (textarea, submitButton) => {
-            submitButton.disabled = true;
-            const text = textarea.value;
-            textarea.disabled = true;
-            const requestBody = {
-                "credential": text
-            };
-            postAndDisplayInArticleContainerFor("/verifier/verify", requestBody, "Verify credential result");
+        const viewButton = document.createElement('button');
+        viewButton.id = generateUUID();
+        viewButton.classList.add('button', 'is-link');
+        viewButton.textContent = 'View';
+        viewButton.onclick = () => {
+            divResultContainer.innerHTML = '';
+
+            fetchData(new URL("/verifier/debug/vp-flow", baseUrl), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                body: JSON.stringify({session_id: sessionIDElement.value}),
+            }).then(data => {
+                console.log(data);
+                divResultContainer.appendChild(document.createElement("br"));
+                divResultContainer.appendChild(document.createElement("br"));
+                let debugData
+                if (data && typeof data === 'object') {
+                    debugData = JSON.stringify(data, null, 2);
+                } else if (data === null) {
+                    debugData = 'No debug data to display';
+                } else {
+                    debugData = String(data);
+                }
+                preElement = document.createElement("pre");
+                preElement.innerText = debugData;
+                divResultContainer.appendChild(preElement);
+            }).catch(err => {
+                console.debug("Unexpected error:", err);
+                displayErrorTag("Failed to fetch vp-flow debug info: ", divResultContainer, err);
+            });
         };
-        submitButton.onclick = () => doVerify(textarea, submitButton);
 
-        const buttonControl = document.createElement('div');
-        buttonControl.classList.add('control');
-        buttonControl.appendChild(submitButton);
-
-        return [textarea, buttonControl];
+        return [sessionIDElement, viewButton, divResultContainer];
     };
 
     const articleIdBasis = generateArticleIDBasis();
-    const articleDiv = buildArticle(articleIdBasis.articleID, "Verify credential", buildVerifyCredentialFormElements(textareaId));
-    const articleContainer = getElementById('article-container');
+    const articleDiv = buildArticle(articleIdBasis.articleID, "View vp-flow debug info", buildFormElements());
+    const articleContainer = document.getElementById('article-container');
     articleContainer.prepend(articleDiv);
 
-    getElementById(textareaId).focus();
+    document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
+
 };
-
-const addDecodeCredentialFormArticleToContainer = () => {
-    const textareaId = generateUUID();
-    const buildDecodeCredentialFormElements = (textareaId) => {
-        const textarea = document.createElement("textarea");
-        textarea.id = textareaId;
-        textarea.classList.add("textarea");
-        textarea.rows = 10;
-        textarea.placeholder = "Base64 encoded vc+sd-jwt string";
-
-        const submitButton = document.createElement('button');
-        submitButton.id = generateUUID();
-        submitButton.classList.add('button', 'is-link');
-        submitButton.textContent = 'Decode';
-
-        const doDecode = (textarea, submitButton) => {
-            submitButton.disabled = true;
-            const text = textarea.value;
-            textarea.disabled = true;
-            const requestBody = {
-                "credential": text
-            };
-            postAndDisplayInArticleContainerFor("/verifier/decode", requestBody, "Decode credential result");
-        };
-        submitButton.onclick = () => doDecode(textarea, submitButton);
-
-        const buttonControl = document.createElement('div');
-        buttonControl.classList.add('control');
-        buttonControl.appendChild(submitButton);
-
-        return [textarea, buttonControl];
-    };
-
-    const articleIdBasis = generateArticleIDBasis();
-    let bodyChildrenElementArray = buildDecodeCredentialFormElements(textareaId);
-    const articleDiv = buildArticle(articleIdBasis.articleID, "Decode credential", bodyChildrenElementArray);
-    const articleContainer = getElementById('article-container');
-    articleContainer.prepend(articleDiv);
-
-    getElementById(textareaId).focus();
-};
-
 
 const createInputElement = (placeholder, value = '', type = 'text', disabled = false) => {
     const input = document.createElement('input');
@@ -557,7 +529,6 @@ function createCheckboxElement(labelText, disabled = false) {
     return {label, input};
 }
 
-
 const createSelectElement = (options = [], disabled = false) => {
     const div = document.createElement('div');
     div.classList.add('select');
@@ -578,11 +549,9 @@ const createSelectElement = (options = [], disabled = false) => {
     return [div, select];
 };
 
-
 const disableElements = (elements) => {
     elements.forEach(el => el.disabled = true);
 };
-
 
 const addViewDocumentFormArticleToContainer = () => {
     const buildFormElements = () => {
@@ -1099,7 +1068,6 @@ function displayDocumentsTable(data, divResultContainer) {
 function exportTableToCSV(table) {
     const rows = table.querySelectorAll('tr');
     let csvContent = "";
-
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('th, td');

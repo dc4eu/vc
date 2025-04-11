@@ -48,7 +48,7 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 	}
 	c.verifierKeyPair = keyPair
 
-	cert, err := loadCertFromPEMFile("/verifier_x509_cert.pem")
+	cert, err := c.loadCertFromPEMFile("/verifier_x509_cert.pem")
 	if err != nil {
 		c.log.Error(err, "Failed to load x509 certificate")
 		return nil, err
@@ -73,23 +73,19 @@ func LoadKeyPairFromPEMFile(filepath string) (*openid4vp.KeyPair, error) {
 
 	var privKey crypto.PrivateKey
 
-	// === Try PKCS#8 ===
 	privKey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err == nil {
 		return buildKeyPair(privKey)
 	}
 
-	// === Try RSA PKCS#1 ===
 	if rsaKey, err2 := x509.ParsePKCS1PrivateKey(block.Bytes); err2 == nil {
 		return buildKeyPair(rsaKey)
 	}
 
-	// === Try EC SEC1 ===
 	if ecKey, err3 := x509.ParseECPrivateKey(block.Bytes); err3 == nil {
 		return buildKeyPair(ecKey)
 	}
 
-	// === Try raw Ed25519 ===
 	if edKey, ok := parseRawEd25519(block.Bytes); ok {
 		return buildKeyPair(edKey)
 	}
@@ -133,24 +129,45 @@ func parseRawEd25519(b []byte) (ed25519.PrivateKey, bool) {
 	return nil, false
 }
 
-func loadCertFromPEMFile(filepath string) (*openid4vp.CertData, error) {
-	pemData, err := os.ReadFile(filepath)
+func (c *Client) loadCertFromPEMFile(path string) (*openid4vp.CertData, error) {
+	pemData, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("could not read cert file: %w", err)
+		return nil, fmt.Errorf("failed to read cert PEM file: %w", err)
 	}
 
-	block, _ := pem.Decode(pemData)
-	if block == nil || block.Type != "CERTIFICATE" {
-		return nil, fmt.Errorf("failed to decode PEM block containing certificate")
+	var (
+		block         *pem.Block
+		restOfPEMdata = pemData
+		parseErrors   []error
+	)
+
+	for {
+		block, restOfPEMdata = pem.Decode(restOfPEMdata)
+		if block == nil {
+			break
+		}
+
+		if block.Type != "CERTIFICATE" {
+			continue
+		}
+
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			parseErrors = append(parseErrors, fmt.Errorf("failed to parse cert: %w", err))
+			continue
+		}
+
+		if !cert.IsCA {
+			return &openid4vp.CertData{
+				CertPEM: pem.EncodeToMemory(block),
+				CertDER: cert.Raw,
+			}, nil
+		}
 	}
 
-	_, err = x509.ParseCertificate(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("invalid certificate: %w", err)
+	if len(parseErrors) > 0 {
+		return nil, fmt.Errorf("no valid leaf certificate found, parse errors: %v", parseErrors)
 	}
 
-	return &openid4vp.CertData{
-		CertPEM: pemData,
-		CertDER: block.Bytes,
-	}, nil
+	return nil, errors.New("no leaf certificate found in PEM file")
 }

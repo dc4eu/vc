@@ -49,31 +49,13 @@ func New(ctx context.Context, datastoreURL string, log *logger.Log) (*Service, e
 					document_data_path: "../../../standards/education_credential/diploma/HE-diploma-fb6b7ba8-27c6-400a-9bd3-7cb1fed4ccd9-degreeMBO.xml.json",
 				},
 			},
-			"openbadge_basic": {
+			"microcredential": {
 				{
 					firstName:          "Helen",
 					lastName:           "Mirren",
 					dateOfBirth:        "1996-01-30",
 					number:             "100",
-					document_data_path: "../../../standards/education_credential/openbadge/basic.json",
-				},
-			},
-			"openbadge_complete": {
-				{
-					firstName:          "Helen",
-					lastName:           "Mirren",
-					dateOfBirth:        "1996-01-30",
-					number:             "100",
-					document_data_path: "../../../standards/education_credential/openbadge/complete.json",
-				},
-			},
-			"openbadge_endorsements": {
-				{
-					firstName:          "Helen",
-					lastName:           "Mirren",
-					dateOfBirth:        "1996-01-30",
-					number:             "100",
-					document_data_path: "../../../standards/education_credential/openbadge/endorsements.json",
+					document_data_path: "../../../standards/education_credential/micro_credential/mbob_eo_eov_microcredential_full.json",
 				},
 			},
 		},

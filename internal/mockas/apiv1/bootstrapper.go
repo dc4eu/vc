@@ -2,10 +2,8 @@ package apiv1
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 	"vc/pkg/education"
@@ -251,15 +249,24 @@ var persons = map[string][]person{
 			EmploymentAddress:       &address{Street: "Franz-Josef-Platz 3", PostCode: "4810", Town: "Gmunden", Country: "AT"},
 		},
 	},
-	"ELM": {
-		{
-			AuthenticSourcePersonID: "30",
-			FirstName:               "Helen",
-			LastName:                "Mirren",
-			DateOfBirth:             "1996-01-30",
-			Nationality:             []string{"FR"},
-		},
-	},
+	//"ELM": {
+	//	{
+	//		AuthenticSourcePersonID: "30",
+	//		FirstName:               "Helen",
+	//		LastName:                "Mirren",
+	//		DateOfBirth:             "1996-01-30",
+	//		Nationality:             []string{"FR"},
+	//	},
+	//},
+	//"Microcredential": {
+	//	{
+	//		AuthenticSourcePersonID: "30",
+	//		FirstName:               "Helen",
+	//		LastName:                "Mirren",
+	//		DateOfBirth:             "1996-01-30",
+	//		Nationality:             []string{"FR"},
+	//	},
+	//},
 }
 
 func (c *Client) bootstrapperConstructor(ctx context.Context) error {
@@ -282,18 +289,19 @@ func (c *Client) bootstrapperConstructor(ctx context.Context) error {
 				if err != nil {
 					return err
 				}
-			case "ELM":
-				b, err := os.ReadFile("standards/elm_3_2.json")
-				if err != nil {
-					return err
-				}
+				//case "ELM":
+				//	b, err := os.ReadFile("standards/elm_3_2.json")
+				//	if err != nil {
+				//		return err
+				//	}
 
-				doc := map[string]any{}
-				if err := json.Unmarshal(b, &doc); err != nil {
-					return err
-				}
+				//	doc := map[string]any{}
+				//	if err := json.Unmarshal(b, &doc); err != nil {
+				//		return err
+				//	}
 
-				documentData = doc
+				//	documentData = doc
+
 			}
 			meta := &model.MetaData{
 				AuthenticSource: fmt.Sprintf("authentic_source_%s", strings.ToLower(p.Nationality[0])),

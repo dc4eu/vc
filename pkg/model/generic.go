@@ -64,6 +64,8 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerURL, credentialOfferUR
 		credentialConfigurationID = "EHICCredential"
 	case "Diploma":
 		credentialConfigurationID = "DiplomaCredential"
+	case "MicroCredential":
+		credentialConfigurationID = "MicroCredential"
 	}
 
 	credentialOffer := &CredentialOffer{
@@ -202,7 +204,7 @@ type MetaData struct {
 
 	// required: true
 	// example: PDA1
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=PDA1 EHIC ELM Diploma Openbadge_basic Openbadge_endorsements Openbadge_complete"`
+	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=PDA1 EHIC ELM Diploma Microcredential"`
 
 	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9

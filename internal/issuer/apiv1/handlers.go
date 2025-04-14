@@ -98,6 +98,16 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
+	case "Microcredential":
+		doc := map[string]any{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.microCredentialClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
+
 	case "open_badge":
 		doc := &education.OpenbadgeCompleteDocument{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {

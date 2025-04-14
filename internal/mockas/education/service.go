@@ -58,6 +58,15 @@ func New(ctx context.Context, datastoreURL string, log *logger.Log) (*Service, e
 					document_data_path: "../../../standards/education_credential/micro_credential/mbob_eo_eov_microcredential_full.json",
 				},
 			},
+			"elm": {
+				{
+					firstName:          "Helen",
+					lastName:           "Mirren",
+					dateOfBirth:        "1996-01-30",
+					number:             "100",
+					document_data_path: "../../../standards/elm_3_2.json",
+				},
+			},
 		},
 	}
 

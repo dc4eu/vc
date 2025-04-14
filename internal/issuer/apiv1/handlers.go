@@ -78,7 +78,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case "ELM":
+	case "Elm":
 		doc := &education.ELMDocument{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err

@@ -40,17 +40,17 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		log: log.New("apiv1"),
 	}
 
-	//TODO: Change filename/config value for private key file path
+	//TODO: config value for private key file path + cert file path
 	keyPair, err := LoadKeyPairFromPEMFile("/private_verifier_rsa.pem")
 	if err != nil {
-		c.log.Error(err, "Failed to load verifier key pair")
+		c.log.Error(err, "Failed to load verifier key pair from pem file")
 		return nil, err
 	}
 	c.verifierKeyPair = keyPair
 
 	cert, err := c.loadCertFromPEMFile("/verifier_x509_cert.pem")
 	if err != nil {
-		c.log.Error(err, "Failed to load x509 certificate")
+		c.log.Error(err, "Failed to load x509 certificate from pem file")
 		return nil, err
 	}
 	c.verifierX509Cert = cert

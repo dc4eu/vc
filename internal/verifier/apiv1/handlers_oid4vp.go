@@ -87,7 +87,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		schema = "https://"
 	}
 
-	requestURI := fmt.Sprintf("%s%s%s/authorize?id=%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.Addr, sessionID)
+	requestURI := fmt.Sprintf("%s%s%s/authorize?id=%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, sessionID)
 	requestURIQueryEscaped := url.QueryEscape(requestURI)
 	clientID := c.cfg.Verifier.FQDN
 	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURIQueryEscaped)
@@ -155,26 +155,26 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		"EHICCredential",
 		"SatosaEHICCredential"}
 	presentationDefinition := &openid4vp.PresentationDefinition{
-		ID:          "VCEuropeanHealthInsuranceCard",
-		Title:       "VC EHIC",
-		Description: "Required Fields: VC type, SSN, Given Name, Family Name, Birthdate",
+		ID:          "SatosaEuropeanHealthInsuranceCard",
+		Title:       "SATOSA EHIC",
+		Description: "Required Fields: VC type, SSN, Forename, Family Name, Birthdate",
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID: "VCEHIC",
+				ID: "SatosaEHIC",
 				Format: map[string]openid4vp.Format{
 					"vc+sd-jwt": {Alg: []string{"ES256"}},
 				},
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
 						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: ehicVCTs}},
-						{Name: "Subject", Path: []string{"$.subject"}},
+						//{Name: "Subject", Path: []string{"$.subject"}},
 						{Name: "Given Name", Path: []string{"$.subject.forename"}},
 						{Name: "Family Name", Path: []string{"$.subject.family_name"}},
 						{Name: "Birthdate", Path: []string{"$.subject.date_of_birth"}},
 						{Name: "SSN", Path: []string{"$.social_security_pin"}},
 						//TODO: {Name: "Period entitlement", Path: []string{"$.period_entitlement"}},
 						{Name: "Document ID", Path: []string{"$.document_id"}},
-						//TODO: {Name: "Competent Institution", Path: []string{"$.competent_institution.institution_name"}},
+						{Name: "Competent Institution", Path: []string{"$.competent_institution.institution_name"}},
 					},
 				},
 			},
@@ -188,7 +188,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	if c.cfg.Verifier.APIServer.TLS.Enabled {
 		schema = "https://"
 	}
-	responseURI := fmt.Sprintf("%s%s%s/callback/direct-post-jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.Addr, vpSession.SessionID, vpSession.CallbackID)
+	responseURI := fmt.Sprintf("%s%s%s/callback/direct-post-jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, vpSession.SessionID, vpSession.CallbackID)
 
 	now := jwt.NewNumericDate(time.Now())
 	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))

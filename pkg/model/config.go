@@ -6,10 +6,11 @@ import (
 
 // APIServer holds the api server configuration
 type APIServer struct {
-	Addr       string            `yaml:"addr" validate:"required"`
-	PublicKeys map[string]string `yaml:"public_keys"`
-	TLS        TLS               `yaml:"tls" validate:"omitempty"`
-	BasicAuth  BasicAuth         `yaml:"basic_auth"`
+	Addr         string            `yaml:"addr" validate:"required"`
+	ExternalPort string            `yaml:"external_port,omitempty" validate:"omitempty"`
+	PublicKeys   map[string]string `yaml:"public_keys"`
+	TLS          TLS               `yaml:"tls" validate:"omitempty"`
+	BasicAuth    BasicAuth         `yaml:"basic_auth"`
 }
 
 // TLS holds the tls configuration

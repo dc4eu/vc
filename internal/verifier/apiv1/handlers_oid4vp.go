@@ -61,10 +61,12 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		SessionExpires: now.Add(10 * time.Minute),
 		DocumentType:   request.DocumentType,
 		Nonce:          jwthelpers.GenerateNonce(),
-		State:          uuid.NewString(),
-		JTI:            uuid.NewString(),
-		Authorized:     false,
-		Status:         openid4vp.StatusQRDisplayed,
+		//TODO: flytta nedan till auth request hämtningen istället när wwW anpassat
+		CallbackID: jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
+		State:      uuid.NewString(),
+		JTI:        uuid.NewString(),
+		Authorized: false,
+		Status:     openid4vp.StatusQRDisplayed,
 		//TODO: nedan ska inte vara här men läggs här tillsvidare
 		VerifierKeyPair: c.verifierKeyPair,
 		//VerifierKeyPair: &openid4vp.KeyPair{
@@ -110,13 +112,14 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 	if vpSession.SessionExpires.Before(time.Now()) {
 		return nil, errors.New("session expired")
 	}
-	if vpSession.Authorized {
-		return nil, errors.New("authorization request has already been requested for this session")
-	}
+	//TODO: kommentera fram när wwW bara gör ett enda anrop för GetAuthorizationRequest (nu gör de minst två)...
+	//if vpSession.Authorized {
+	//	return nil, errors.New("authorization request has already been requested for this session")
+	//}
 
 	vpSession.Authorized = true
 	vpSession.Status = openid4vp.StatusQRScanned
-	vpSession.CallbackID = jwthelpers.GenerateNonce() //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
+	//vpSession.CallbackID = jwthelpers.GenerateNonce() //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
 
 	requestObjectJWS, err := c.createRequestObjectJWS(ctx, vpSession)
 	if err != nil {

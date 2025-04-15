@@ -81,7 +81,7 @@ type Field struct {
 }
 
 type Filter struct {
-	Type string   `json:"type"`
+	Type string   `json:"type,omitempty"`
 	Enum []string `json:"enum,omitempty"`
 }
 

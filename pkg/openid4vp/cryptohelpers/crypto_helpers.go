@@ -40,8 +40,8 @@ func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey) (*ClientMe
 	//TODO: gör denna mer generisk samt bryt ev metadata till annan del av koden men behåll jwks här
 	crv := "P-256"
 	curveSize := 32 // byte-length for P-256
-	x := bigIntToBase64URL(privateEmpKey.X, curveSize)
-	y := bigIntToBase64URL(privateEmpKey.Y, curveSize)
+	x := bigIntToBase64URL(privateEmpKey.PublicKey.X, curveSize)
+	y := bigIntToBase64URL(privateEmpKey.PublicKey.Y, curveSize)
 
 	jwk := JWK{
 		Kty: "EC",

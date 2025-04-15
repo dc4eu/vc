@@ -10,7 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
-	"net/url"
 	"sync/atomic"
 	"time"
 	"vc/pkg/openid4vp"
@@ -88,9 +87,9 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 	}
 
 	requestURI := fmt.Sprintf("%s%s%s/authorize?id=%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, sessionID)
-	requestURIQueryEscaped := url.QueryEscape(requestURI)
+	//requestURIQueryEscaped := url.QueryEscape(requestURI)
 	clientID := c.cfg.Verifier.FQDN
-	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURIQueryEscaped)
+	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURI)
 
 	qr, err := openid4vp.GenerateQR(qrURI, qrcode.Medium, 256)
 	if err != nil {
@@ -143,17 +142,21 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	}
 
 	ehicVCTs := []string{
+		//"https://vc-interop-1.sunet.se/credential/ehic/1.0",
+		//"https://vc-interop-2.sunet.se/credential/ehic/1.0",
+		//"https://vc-interop-3.sunet.se/credential/ehic/1.0",
+		//"https://satosa-test-1.sunet.se/credential/ehic/1.0",
+		//"https://satosa-test-2.sunet.se/credential/ehic/1.0",
+		//"https://satosa-test-3.sunet.se/credential/ehic/1.0",
+		//"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
+		//"https://satosa-dev-2.sunet.se/credential/ehic/1.0",
+		//"https://satosa-dev-3.sunet.se/credential/ehic/1.0",
+		//"EHICCredential",
+		//"SatosaEHICCredential"}
 		"https://vc-interop-1.sunet.se/credential/ehic/1.0",
-		"https://vc-interop-2.sunet.se/credential/ehic/1.0",
-		"https://vc-interop-3.sunet.se/credential/ehic/1.0",
 		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
-		"https://satosa-test-2.sunet.se/credential/ehic/1.0",
-		"https://satosa-test-3.sunet.se/credential/ehic/1.0",
 		"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
-		"https://satosa-dev-2.sunet.se/credential/ehic/1.0",
-		"https://satosa-dev-3.sunet.se/credential/ehic/1.0",
-		"EHICCredential",
-		"SatosaEHICCredential"}
+		"EHICCredential"}
 	presentationDefinition := &openid4vp.PresentationDefinition{
 		ID:          "SatosaEuropeanHealthInsuranceCard",
 		Title:       "SATOSA EHIC",
@@ -190,13 +193,13 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	}
 	responseURI := fmt.Sprintf("%s%s%s/callback/direct-post-jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, vpSession.SessionID, vpSession.CallbackID)
 
-	now := jwt.NewNumericDate(time.Now())
 	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
 	if err != nil {
 		c.log.Error(err, "Failed to build client metadata")
 		return "", err
 	}
 	fqdn := c.cfg.Verifier.FQDN
+	now := jwt.NewNumericDate(time.Now())
 	claims := &jwthelpers.CustomClaims{
 		ResponseURI:            responseURI,
 		ClientIdScheme:         "x509_san_dns", //TODO: vad ska client_id_scheme sättas till?

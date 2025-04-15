@@ -31,9 +31,6 @@ type JWK struct {
 	N string `json:"n,omitempty"` // Modulus
 	E string `json:"e,omitempty"` // Exponent
 
-	// OKP (Octet Key Pair) fields
-	XOKP string `json:"x,omitempty"` // X value for OKP keys (reuses `x`)
-
 	// Symmetric keys
 	K string `json:"k,omitempty"` // Symmetric key value (e.g., for "oct")
 

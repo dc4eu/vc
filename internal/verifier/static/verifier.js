@@ -160,7 +160,8 @@ async function startVPFlow() {
         //example: https://demo.wwwallet.org/cb?client_id=verifier.wwwallet.org&request_uri=https%3A%2F%2Fverifier.wwwallet.org%2Fverification%2Frequest-object%3Fid%3D2f96a24e-90cc-4b30-a904-912e9980df10
         const params = new URLSearchParams({
             client_id: data.client_id,
-            request_uri: encodeURIComponent(data.request_uri)
+            //request_uri: encodeURIComponent(data.request_uri)
+            request_uri: data.request_uri
         });
 
         const openInDC4EUWWWalletButton = document.getElementById("openInDC4EUWWWalletButton");

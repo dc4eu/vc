@@ -10,6 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
+	"math/big"
 	"sync/atomic"
 	"time"
 	"vc/pkg/openid4vp"
@@ -77,6 +78,13 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		VerifierX5cCertDERBase64: base64.StdEncoding.EncodeToString(c.verifierX509Cert.CertDER),
 	}
 
+	if !c.cfg.Common.Production {
+		//To support dev and test
+		vpSession.SessionEphemeralKeyPair.XBase64URLEncoded = bigIntToBase64URL(verifierEmpEcdsaP256Private.X, 32)
+		vpSession.SessionEphemeralKeyPair.YBase64URLEncoded = bigIntToBase64URL(verifierEmpEcdsaP256Private.Y, 32)
+		vpSession.SessionEphemeralKeyPair.DBase64URLEncoded = bigIntToBase64URL(verifierEmpEcdsaP256Private.D, 32)
+	}
+
 	err = c.db.VPInteractionSessionColl.Create(ctx, vpSession)
 	if err != nil {
 		return nil, err
@@ -102,6 +110,15 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 	qr.SessionID = sessionID
 
 	return qr, nil
+}
+
+func bigIntToBase64URL(i *big.Int, size int) string {
+	buf := i.Bytes()
+	if len(buf) < size {
+		pad := make([]byte, size-len(buf))
+		buf = append(pad, buf...)
+	}
+	return base64.RawURLEncoding.EncodeToString(buf)
 }
 
 func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) (*openid4vp.AuthorizationRequest, error) {

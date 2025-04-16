@@ -18,8 +18,8 @@ import (
 
 type ClientMetadata struct { //From: OpenID Connect Dynamic Client Registration
 	JWKS                              JWKS      `json:"jwks"`
-	AuthorizationEncryptedResponseAlg string    `json:"authorization_encrypted_response_alg"`
-	AuthorizationEncryptedResponseEnc string    `json:"authorization_encrypted_response_enc"`
+	AuthorizationEncryptedResponseAlg string    `json:"authorization_encrypted_response_alg,omitempty"`
+	AuthorizationEncryptedResponseEnc string    `json:"authorization_encrypted_response_enc,omitempty"`
 	VPFormats                         VPFormats `json:"vp_formats"`
 }
 
@@ -56,8 +56,9 @@ func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey) (*ClientMe
 		JWKS: JWKS{
 			Keys: []JWK{jwk},
 		},
-		AuthorizationEncryptedResponseAlg: "ECDH-ES",
-		AuthorizationEncryptedResponseEnc: "A256GCM",
+		//TODO: VIKTIGT: aktivera kryptering av direct_post.jwt responsen från walleten när verifiern är mer stabil (aktivera nedan två bortkommenterade rader)
+		//AuthorizationEncryptedResponseAlg: "ECDH-ES",
+		//AuthorizationEncryptedResponseEnc: "A256GCM",
 		VPFormats: VPFormats{
 			VCSDJWT: VCSDJWT{
 				SDJWTAlgValues: []string{"ES256"},

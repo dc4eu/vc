@@ -53,6 +53,11 @@ type KeyPair struct {
 	PrivateKey         crypto.PrivateKey `json:"private_key" bson:"private_key" validate:"required"`
 	PublicKey          crypto.PublicKey  `json:"public_key" bson:"public_key" validate:"required"`
 	SigningMethodToUse jwt.SigningMethod
+
+	//not to be used in production
+	XBase64URLEncoded string `json:"x_as_base64_url,omitempty" bson:"x_as_base64_url" validate:"optional"`
+	YBase64URLEncoded string `json:"y_as_base64_url,omitempty" bson:"y_as_base64_url" validate:"optional"`
+	DBase64URLEncoded string `json:"d_as_base64_url,omitempty" bson:"d_as_base64_url" validate:"optional"`
 }
 type CertData struct {
 	CertDER []byte

@@ -69,6 +69,10 @@ func (s *Service) endpointGetAuthorizationRequest(ctx context.Context, g *gin.Co
 	return reply.RequestObjectJWS, nil
 }
 
+type ResponseBody struct {
+	Response string `json:"response"`
+}
+
 func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCallback")
 	defer span.End()

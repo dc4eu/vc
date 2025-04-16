@@ -192,26 +192,13 @@ func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, er
 	return reply, nil
 }
 
-func (s *Service) endpointVerifyCredential(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1_verifier.VerifyCredentialRequest{}
+func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, c *gin.Context) (any, error) {
+	request := &apiv1_verifier.VPFlowDebugInfoRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}
 
-	reply, err := s.apiv1.Verify(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointDecodeCredential(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1_verifier.DecodeCredentialRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		return nil, err
-	}
-
-	reply, err := s.apiv1.DecodeCredential(ctx, request)
+	reply, err := s.apiv1.GetVPFlowDebugInfo(ctx, request)
 	if err != nil {
 		return nil, err
 	}

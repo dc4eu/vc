@@ -9,9 +9,10 @@ import (
 )
 
 type rootHandler struct {
-	client         *Client
-	serviceBaseURL string
-	log            *logger.Log
+	client             *Client
+	serviceBaseURL     string
+	log                *logger.Log
+	defaultContentType string
 }
 
 type UploadRequest struct {
@@ -27,7 +28,7 @@ func (s *rootHandler) Upload(ctx context.Context, body *UploadRequest) (*http.Re
 
 	url := fmt.Sprintf("%s/%s", s.serviceBaseURL, "upload")
 
-	resp, err := s.client.call(ctx, http.MethodPost, url, body, nil, false)
+	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, nil, false)
 	if err != nil {
 		return resp, err
 	}

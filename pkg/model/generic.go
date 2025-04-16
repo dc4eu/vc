@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"vc/pkg/openid4vci"
 
 	"github.com/skip2/go-qrcode"
 )
@@ -21,8 +22,8 @@ type CompleteDocument struct {
 
 	// required: true
 	// example: "1.0.0"
-	DocumentDataVersion string `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required,semver"`
-	QR                  *QR    `json:"qr,omitempty" bson:"qr"`
+	DocumentDataVersion string         `json:"document_data_version,omitempty" bson:"document_data_version" validate:"required,semver"`
+	QR                  *openid4vci.QR `json:"qr,omitempty" bson:"qr"`
 }
 
 // CompleteDocuments is a array of CompleteDocument

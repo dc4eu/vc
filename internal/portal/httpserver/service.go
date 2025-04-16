@@ -54,13 +54,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", s.endpointHealth)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
 	//TODO(mk): impl auth and replace below with //rgSecure := rgRoot.Group("secure", s.middlewareAuthRequired(ctx))
 	rgSecure := rgRoot.Group("secure")
 
 	rgAPIGWSecure := rgSecure.Group("apigw")
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/search", s.endpointSearchDocuments)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/search", http.StatusOK, s.endpointSearchDocuments)
 
 	// Run http server
 	go func() {

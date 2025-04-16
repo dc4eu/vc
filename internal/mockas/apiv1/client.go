@@ -59,17 +59,6 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	return c, nil
 }
 
-func (c *Client) randomISO31661Alpha3EU() string {
-	return gofakeit.RandomString([]string{
-		"AUT", "BEL", "BGR", "HRV", "CYP",
-		"CZE", "DNK", "EST", "FIN", "FRA",
-		"DEU", "GRC", "HUN", "IRL", "ITA",
-		"LVA", "LTU", "LUX", "MLT", "NLD",
-		"POL", "PRT", "ROU", "SVK", "SVN",
-		"ESP", "SWE",
-	})
-}
-
 func (c *Client) randomISO31661Alpha2EU() string {
 	return gofakeit.RandomString([]string{
 		"AT", "BE", "BG", "HR", "CY",

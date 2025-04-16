@@ -13,7 +13,7 @@ import (
 	"gotest.tools/v3/golden"
 )
 
-func mockHappyHttServer(t *testing.T, serverReply []byte) *httptest.Server {
+func mockHappyHttServer(t *testing.T) *httptest.Server {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/v1/document", func(rw http.ResponseWriter, req *http.Request) {
@@ -26,6 +26,22 @@ func mockHappyHttServer(t *testing.T, serverReply []byte) *httptest.Server {
 		assert.Equal(t, req.URL.Path, "/api/v1/document/list")
 		assert.Equal(t, req.Method, http.MethodPost)
 		rw.Write(golden.Get(t, "documentListReplyOK.golden"))
+	})
+
+	mux.HandleFunc("/authorize", func(rw http.ResponseWriter, req *http.Request) {
+		assert.Equal(t, req.URL.Path, "/authorize")
+		assert.Equal(t, req.Method, http.MethodGet)
+		rw.WriteHeader(http.StatusFound)
+		//assert.Equal(t, req.Header.Get("Content-Type"), "application/json")
+		rw.Write(golden.Get(t, "oidcAuthorizeReplyOK.golden"))
+	})
+
+	mux.HandleFunc("/op/par", func(rw http.ResponseWriter, req *http.Request) {
+		assert.Equal(t, req.URL.Path, "/op/par")
+		assert.Equal(t, req.Method, http.MethodPost)
+		//rw.WriteHeader(http.StatusFound)
+		//assert.Equal(t, req.Header.Get("Content-Type"), "application/json")
+		rw.Write(golden.Get(t, "oidcAuthorizeReplyOK.golden"))
 	})
 
 	server := httptest.NewServer(mux)
@@ -112,9 +128,8 @@ func TestGet(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			serverReply := golden.Get(t, "documentGetReplyOK.golden")
 
-			httpServer := mockHappyHttServer(t, serverReply)
+			httpServer := mockHappyHttServer(t)
 			defer httpServer.Close()
 
 			client := mockClient(ctx, t, httpServer.URL)

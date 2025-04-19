@@ -133,6 +133,35 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		return nil, err
 	}
 	//-----------
+	//==========Nedan är ett första försök att hantera vad plånboken postat in=================================
+	//TODO: läs upp vpSession := openid4vp.VPInteractionSession{}
+	if jwe := g.PostForm("response"); jwe != "" {
+		//decryptedJWT, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
+		//if err != nil {
+		//	return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
+		//}
+		//TODO: handle decryptedJWT and make needed params to handler
+		return nil, errors.New("jwe encryption not implemented yet")
+	} else {
+		vpTokenString := g.PostForm("vp_token")
+		presentationSubmissionString := g.PostForm("presentation_submission")
+		stateString := g.PostForm("state")
+		errorString := g.PostForm("error")
+		errorDescriptionString := g.PostForm("error_description")
+		errorURIString := g.PostForm("error_uri")
+
+		//TODO: fortsätt impl
+
+		s.log.Debug("Received AuthorizationResponse:",
+			"vpTokenString", vpTokenString,
+			"presentationSubmissionString", presentationSubmissionString,
+			"stateString", stateString,
+			"errorString", errorString,
+			"errorDescriptionString", errorDescriptionString,
+			"errorURIString", errorURIString)
+	}
+
+	//=============================================
 
 	//TODO: hantera att request.body kan vara en JWE
 	request := &openid4vp.AuthorizationResponse{}

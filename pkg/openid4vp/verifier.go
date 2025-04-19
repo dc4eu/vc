@@ -649,7 +649,7 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 		// vp_token is a JWE (decrypt it first)
 		fmt.Println("vp_token is a JWE - decrypting it to a JWT!")
 		//TODO(mk): find and extract jwePrivateKey from the real source == the verifiers private key (the wallet encrypted using the verifiers public key)
-		jwtBytes, err := decryptJWE(vp.RawToken, vp.jwePrivateKey)
+		jwtBytes, err := DecryptJWE(vp.RawToken, vp.jwePrivateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -746,7 +746,7 @@ func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{
 	return nil
 }
 
-func decryptJWE(jweStr string, key interface{}) ([]byte, error) {
+func DecryptJWE(jweStr string, key interface{}) ([]byte, error) {
 	parts := strings.Split(jweStr, ".")
 	if len(parts) != 5 {
 		return nil, fmt.Errorf("Invalid JWE format")

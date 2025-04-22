@@ -9,15 +9,12 @@ import (
 	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tidwall/gjson"
-	"log"
 	"strings"
 	"time"
 	//"vc/internal/verifier/apiv1"
 
 	jose "github.com/go-jose/go-jose/v4"
 	//"github.com/go-jose/go-jose/v4/jwk"
-
-	"github.com/PaesslerAG/jsonpath"
 )
 
 //TODO(mk): remove all fmt.println etc and implement "vettig" loggning
@@ -150,6 +147,7 @@ func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 			if err := vp.extractVPToken(); err != nil {
 				return err
 			}
+			vp.PresentationSubmission = arw.authorizationResponse.PresentationSubmission
 
 			arw.vpList = append(arw.vpList, vp)
 		} else if vpTokenRaw.isJSONBased() {
@@ -232,7 +230,7 @@ type VerifiablePresentationWrapper struct {
 
 	//Common for both JWT and JSON based vp
 	IndexInVPTokenArray    int
-	PresentationSubmission PresentationSubmission
+	PresentationSubmission *PresentationSubmission
 	vcList                 []*VerifiableCredentialWrapper
 
 	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
@@ -354,23 +352,15 @@ func (vp *VerifiablePresentationWrapper) extractVPToken() error {
 }
 
 func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
-
-	//TODO: DO TOTAL REFACT ON BELOW, JUST SOME PROTOTYPES
-
-	//TODO: Ta PresentationSubmission från AuthorizationResponse som erhållits från holdern istället för att suga ut den nedan
-	psResult := gjson.Get(vp.PayloadDecoded, "presentation_submission")
-	if !psResult.Exists() {
-		return errors.New("presentation_submission not found in vp_token payload")
+	if vp.PresentationSubmission == nil {
+		return errors.New("no presentation submission found")
+	}
+	if len(vp.PresentationSubmission.DescriptorMap) != 1 {
+		return errors.New("only one PresentationSubmission.DescriptorMap is currently supported")
 	}
 
-	var presentationSubmission PresentationSubmission
-	err := json.Unmarshal([]byte(psResult.Raw), &presentationSubmission)
-	if err != nil {
-		return fmt.Errorf("could not unmarshal presentation_submission: %w", err)
-	}
-	vp.PresentationSubmission = presentationSubmission
-
-	for _, descriptor := range presentationSubmission.DescriptorMap {
+	vp.vcList = make([]*VerifiableCredentialWrapper, 0)
+	for _, descriptor := range vp.PresentationSubmission.DescriptorMap {
 		if descriptor.PathNested != nil {
 			return fmt.Errorf("pathnested in presentation_submission not yet supported!")
 		}
@@ -378,103 +368,33 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 		fmt.Println(descriptor.Path)
 		fmt.Println(descriptor.Format)
 
-		vc, err := jsonpath.Get(descriptor.Path, vp.PayloadDecodedMap)
-		if err != nil {
-			log.Fatalf("JSONPath lookup error: %v", err)
+		if descriptor.Path != "$" {
+			return fmt.Errorf("only path='$' is currently supported for vc placement")
 		}
-		fmt.Println(vc)
-	}
-
-	//TODO: refactorisera nedan och utgå ifrån presentationSubmission ovan för att ta ut alla vc's (istället för att göra som nedan)
-	vcResult := gjson.Get(vp.PayloadDecoded, "vp.verifiableCredential")
-	if !vcResult.Exists() || !vcResult.IsArray() {
-		return errors.New("verifiable credentials key not found in vp_token payload")
-	}
-	vcListFromPayloadDecoded := vcResult.Array()
-	if len(vcListFromPayloadDecoded) == 0 {
-		return errors.New("zero verifiable credentials in vp_token payload")
-	}
-
-	descriptorMap := gjson.Get(vp.PayloadDecoded, "presentation_submission.descriptor_map")
-	if !descriptorMap.Exists() || !descriptorMap.IsArray() {
-		return errors.New("descriptor_map not found or invalid format")
-	}
-	var descriptors []struct {
-		ID     string
-		Format string
-		Path   string
-	}
-	for _, descriptor := range descriptorMap.Array() {
-		descID := descriptor.Get("id").String()
-		format := descriptor.Get("format").String()
-		path := descriptor.Get("path").String()
-		if descID != "" && format != "" && path != "" {
-			descriptors = append(descriptors, struct {
-				ID     string
-				Format string
-				Path   string
-			}{ID: descID, Format: format, Path: path})
+		//TODO: UTRED MED MAGNUS: någonstans försvinner tydligen + för vc+sd-jwt under resan hit
+		if descriptor.Format != "vc sd-jwt" {
+			return fmt.Errorf("only format='vc+sd-jwt' is currently supported for vc format")
 		}
-	}
-	//----------------------------------------------------------------------
-
-	vp.vcList = make([]*VerifiableCredentialWrapper, 0)
-
-	for i, vcInPayload := range vcListFromPayloadDecoded {
-		vcToken := vcInPayload.String()
-
-		//Try to match VerifiableCredentialWrapper with descriptor_map using path
-		var matchedDescriptor *struct {
-			ID     string
-			Format string
-			Path   string
-		}
-		for _, d := range descriptors {
-			if d.Path == fmt.Sprintf("$.vp.verifiableCredential[%d]", i) { // Dynamic matching
-				matchedDescriptor = &d
-				break
-			}
-		}
-
-		// No match found, set  "unknown"
-		format := "unknown"
-		path := "unknown"
-		if matchedDescriptor != nil {
-			format = matchedDescriptor.Format
-			path = matchedDescriptor.Path
-		}
-
-		fmt.Printf("\nCredential [%d]:\n", i+1)
-		descriptorID := "unknown"
-		if matchedDescriptor != nil {
-			descriptorID = matchedDescriptor.ID
-		}
-		fmt.Printf("  Descriptor ID: %s\n", descriptorID)
-		fmt.Printf("  Format: %s\n", format)
-		fmt.Printf("  Path: %s\n", path)
-		//fmt.Printf("  Data: %s\n", vcToken)
 
 		vc := &VerifiableCredentialWrapper{
-			RawToken: vcToken,
-			Format:   format,
+			RawToken: vp.RawToken, //In first supported scenario the vp and vc is the same (direct_post.jwt with vc+sd-jwt)
+			Format:   descriptor.Format,
 		}
-		switch format {
-		case "jwt,", "jwe", "jwt_vc", "jwt_vp", "sd_jwt": //TODO: Har gjort så generiskt som möjligt just nu för att funka i olika test och miljöer initialt
+		switch descriptor.Format {
+		case "jwt,", "jwe", "jwt_vc", "jwt_vp", "sd_jwt", "vc+sd-jwt", "vc sd-jwt": //TODO: Har gjort så generiskt som möjligt just nu för att funka i olika test och miljöer initialt
 			err := vc.extractJWTVC()
 			if err != nil {
 				return err
 			}
 		case "ldp_vc":
 			// TODO: Implement JSON-LD VerifiableCredentialWrapper parsing
-			return fmt.Errorf("not supported VerifiableCredentialWrapper-format: %s", format)
+			return fmt.Errorf("not supported VerifiableCredentialWrapper-format: %s", descriptor.Format)
 		default:
-			return fmt.Errorf("unknown VerifiableCredentialWrapper-format:" + format)
+			return fmt.Errorf("unknown VerifiableCredentialWrapper-format: %s", descriptor.Format)
 			//continue //TODO: ska vi se okänt format som ett fel eller ska vi jobba vidare med de vc's vi kan om allt finns med som presentation definition uppfylls?
 		}
 		vp.vcList = append(vp.vcList, vc)
 	}
-
-	//fmt.Println("vp_token extracted:", vp)
 
 	return nil
 }

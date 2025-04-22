@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/codes"
+	trace2 "go.opentelemetry.io/otel/trace"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -16,8 +19,6 @@ import (
 	"vc/internal/verifier/apiv1"
 	"vc/pkg/openid4vp"
 	"vc/pkg/trace"
-
-	"github.com/gin-gonic/gin"
 )
 
 func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, error) {
@@ -86,88 +87,64 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		return nil, errors.New("callback_id is empty")
 	}
 
-	//-------------
-	body, err := io.ReadAll(g.Request.Body)
+	err := s.saveRequestDataToVPSession(ctx, g, span, sessionID, callbackID)
 	if err != nil {
 		return nil, err
 	}
 
-	span.SetAttributes(
-		trace.SafeAttr("request.body", &body),
-	)
-
-	requestData := &RequestData{
-		Method:           g.Request.Method,
-		URL:              g.Request.URL,
-		Proto:            g.Request.Proto,
-		ProtoMajor:       g.Request.ProtoMajor,
-		ProtoMinor:       g.Request.ProtoMinor,
-		Header:           g.Request.Header,
-		Body:             body,
-		ContentLength:    g.Request.ContentLength,
-		TransferEncoding: g.Request.TransferEncoding,
-		Close:            g.Request.Close,
-		Host:             g.Request.Host,
-		Form:             g.Request.Form,
-		PostForm:         g.Request.PostForm,
-		MultipartForm:    g.Request.MultipartForm,
-		Trailer:          g.Request.Trailer,
-		RemoteAddr:       g.Request.RemoteAddr,
-		RequestURI:       g.Request.RequestURI,
-		TLS:              g.Request.TLS,
-		ClientIP:         g.ClientIP(),
-		ContentType:      g.ContentType(),
-		UserAgent:        g.Request.UserAgent(),
-		Referer:          g.Request.Referer(),
-		Cookies:          g.Request.Cookies(),
-		FullPath:         g.FullPath(),
-		Handler:          g.HandlerName(),
-	}
-
-	requestDataJson := convertRequestDataToJson(requestData)
-	fmt.Println(requestDataJson)
-
-	g.Request.Body = io.NopCloser(bytes.NewBuffer(body))
-	err = s.apiv1.SaveRequestDataToVPSession(ctx, sessionID, callbackID, requestDataJson)
-	if err != nil {
-		return nil, err
-	}
-	//-----------
-	//==========Nedan är ett första försök att hantera vad plånboken postat in=================================
-	//TODO: läs upp vpSession := openid4vp.VPInteractionSession{}
+	var vpTokenStringArray []string
+	var presentationSubmissionString, stateString, errorString, errorDescriptionString, errorURIString string
 	if jwe := g.PostForm("response"); jwe != "" {
-		//decryptedJWT, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
+		//TODO: läs upp vpSession := openid4vp.VPInteractionSession{}
+		//TODO decryptedJWT, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
 		//if err != nil {
 		//	return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
 		//}
 		//TODO: handle decryptedJWT and make needed params to handler
-		return nil, errors.New("jwe encryption not implemented yet")
+		return nil, errors.New("jwe decryption not implemented yet")
 	} else {
-		vpTokenString := g.PostForm("vp_token")
-		presentationSubmissionString := g.PostForm("presentation_submission")
-		stateString := g.PostForm("state")
-		errorString := g.PostForm("error")
-		errorDescriptionString := g.PostForm("error_description")
-		errorURIString := g.PostForm("error_uri")
-
-		//TODO: fortsätt impl
-
-		s.log.Debug("Received AuthorizationResponse:",
-			"vpTokenString", vpTokenString,
-			"presentationSubmissionString", presentationSubmissionString,
-			"stateString", stateString,
-			"errorString", errorString,
-			"errorDescriptionString", errorDescriptionString,
-			"errorURIString", errorURIString)
+		vpTokenStringArray = g.PostFormArray("vp_token")
+		presentationSubmissionString = g.PostForm("presentation_submission")
+		stateString = g.PostForm("state")
+		errorString = g.PostForm("error")
+		errorDescriptionString = g.PostForm("error_description")
+		errorURIString = g.PostForm("error_uri")
 	}
 
-	//=============================================
+	s.log.Debug("Received AuthorizationResponse (direct_post.jwt):",
+		"vpTokenStringArray", vpTokenStringArray,
+		"presentationSubmissionString", presentationSubmissionString,
+		"stateString", stateString,
+		"errorString", errorString,
+		"errorDescriptionString", errorDescriptionString,
+		"errorURIString", errorURIString)
 
-	//TODO: hantera att request.body kan vara en JWE
-	request := &openid4vp.AuthorizationResponse{}
-	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
+	if errorString != "" {
+		return nil, fmt.Errorf("Error from wallet during auth request error=%s, errorDescription=%s, errorURIString=%s", errorString, errorDescriptionString, errorURIString)
+	}
+	if len(vpTokenStringArray) < 1 || presentationSubmissionString == "" || stateString == "" {
+		return nil, errors.New("Missing mandatory fields [vpTokenString, presentationSubmissionString, stateString]")
+	}
+
+	var presentationSubmission openid4vp.PresentationSubmission
+	err = json.Unmarshal([]byte(presentationSubmissionString), &presentationSubmission)
+	if err != nil {
 		return nil, err
+	}
+
+	var vpTokens []openid4vp.VPTokenRaw
+	for _, vpTokenString := range vpTokenStringArray {
+		raw, err := openid4vp.ToVPTokenRaw([]byte(vpTokenString))
+		if err != nil {
+			return nil, err
+		}
+		vpTokens = append(vpTokens, *raw)
+	}
+
+	request := &openid4vp.AuthorizationResponse{
+		VPTokens:               vpTokens,
+		PresentationSubmission: &presentationSubmission,
+		State:                  stateString,
 	}
 
 	reply, err := s.apiv1.Callback(ctx, sessionID, callbackID, request)
@@ -308,6 +285,55 @@ type RequestData struct {
 	Cookies     []*http.Cookie
 	FullPath    string
 	Handler     string
+}
+
+func (s *Service) saveRequestDataToVPSession(ctx context.Context, g *gin.Context, span trace2.Span, sessionID string, callbackID string) error {
+	body, err := io.ReadAll(g.Request.Body)
+	if err != nil {
+		return err
+	}
+
+	span.SetAttributes(
+		trace.SafeAttr("request.body", &body),
+	)
+
+	requestData := &RequestData{
+		Method:           g.Request.Method,
+		URL:              g.Request.URL,
+		Proto:            g.Request.Proto,
+		ProtoMajor:       g.Request.ProtoMajor,
+		ProtoMinor:       g.Request.ProtoMinor,
+		Header:           g.Request.Header,
+		Body:             body,
+		ContentLength:    g.Request.ContentLength,
+		TransferEncoding: g.Request.TransferEncoding,
+		Close:            g.Request.Close,
+		Host:             g.Request.Host,
+		Form:             g.Request.Form,
+		PostForm:         g.Request.PostForm,
+		MultipartForm:    g.Request.MultipartForm,
+		Trailer:          g.Request.Trailer,
+		RemoteAddr:       g.Request.RemoteAddr,
+		RequestURI:       g.Request.RequestURI,
+		TLS:              g.Request.TLS,
+		ClientIP:         g.ClientIP(),
+		ContentType:      g.ContentType(),
+		UserAgent:        g.Request.UserAgent(),
+		Referer:          g.Request.Referer(),
+		Cookies:          g.Request.Cookies(),
+		FullPath:         g.FullPath(),
+		Handler:          g.HandlerName(),
+	}
+
+	requestDataJson := convertRequestDataToJson(requestData)
+	fmt.Println(requestDataJson)
+
+	g.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+	err = s.apiv1.SaveRequestDataToVPSession(ctx, sessionID, callbackID, requestDataJson)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func convertRequestDataToJson(data *RequestData) *openid4vp.JsonRequestData {

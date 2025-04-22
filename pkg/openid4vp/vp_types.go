@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 )
 
 type AuthorizationResponse struct {
@@ -43,7 +44,31 @@ func (vp *VPTokenRaw) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	return fmt.Errorf("vp_token has unknown format: %s", string(data))
+	return fmt.Errorf("vp_token has unknown format in UnmarshalJSON: %s", string(data))
+}
+
+func ToVPTokenRaw(data []byte) (*VPTokenRaw, error) {
+	var jwt string
+	if err := json.Unmarshal(data, &jwt); err == nil {
+		return &VPTokenRaw{JWT: jwt}, nil
+	}
+
+	var jsonObj map[string]interface{}
+	if err := json.Unmarshal(data, &jsonObj); err == nil {
+		return &VPTokenRaw{JSON: jsonObj}, nil
+	}
+
+	raw := string(data)
+	if looksLikeJWT(raw) {
+		return &VPTokenRaw{JWT: raw}, nil
+	}
+
+	return nil, fmt.Errorf("vp_token has unknown format in ToVPTokenRaw: %s", string(data))
+}
+
+func looksLikeJWT(s string) bool {
+	parts := strings.Split(s, ".")
+	return len(parts) == 3 || len(parts) == 5
 }
 
 // === Below: generated based on differens schemas and examples

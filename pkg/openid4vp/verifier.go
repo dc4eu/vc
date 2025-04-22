@@ -371,9 +371,9 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 		if descriptor.Path != "$" {
 			return fmt.Errorf("only path='$' is currently supported for vc placement")
 		}
-		//TODO: UTRED MED MAGNUS: någonstans försvinner tydligen + för vc+sd-jwt under resan hit
-		if descriptor.Format != "vc sd-jwt" {
-			return fmt.Errorf("only format='vc+sd-jwt' is currently supported for vc format")
+		//Clients using "application/x-www-form-urlencoded" may decode '+' as space, so we must also accept the space variant.
+		if descriptor.Format != "vc+sd-jwt" && descriptor.Format != "vc sd-jwt" {
+			return fmt.Errorf("only format='vc+sd-jwt' (or 'vc sd-jwt') is currently supported as vc format")
 		}
 
 		vc := &VerifiableCredentialWrapper{
@@ -381,7 +381,7 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 			Format:   descriptor.Format,
 		}
 		switch descriptor.Format {
-		case "jwt,", "jwe", "jwt_vc", "jwt_vp", "sd_jwt", "vc+sd-jwt", "vc sd-jwt": //TODO: Har gjort så generiskt som möjligt just nu för att funka i olika test och miljöer initialt
+		case "vc+sd-jwt", "vc sd-jwt":
 			err := vc.extractJWTVC()
 			if err != nil {
 				return err
@@ -390,7 +390,7 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 			// TODO: Implement JSON-LD VerifiableCredentialWrapper parsing
 			return fmt.Errorf("not supported VerifiableCredentialWrapper-format: %s", descriptor.Format)
 		default:
-			return fmt.Errorf("unknown VerifiableCredentialWrapper-format: %s", descriptor.Format)
+			return fmt.Errorf("unknown or not supported VerifiableCredentialWrapper-format: %s", descriptor.Format)
 			//continue //TODO: ska vi se okänt format som ett fel eller ska vi jobba vidare med de vc's vi kan om allt finns med som presentation definition uppfylls?
 		}
 		vp.vcList = append(vp.vcList, vc)

@@ -200,6 +200,35 @@ func (arw *AuthorizationResponseWrapper) checkAllSelectiveDisclosures() error {
 	return nil
 }
 
+func (arw *AuthorizationResponseWrapper) ExtractVerificationRecordBasis() (*VerificationRecord, error) {
+	record := &VerificationRecord{
+		Sequence:               0,
+		SessionID:              "",
+		CallbackID:             "",
+		ValidationResult:       ValidationMeta{},
+		PresentationSubmission: arw.authorizationResponse.PresentationSubmission,
+		VPResults:              make([]*VPResult, len(arw.vpList)),
+	}
+
+	for i, vp := range arw.vpList {
+		record.VPResults[i] = &VPResult{
+			RawToken:  vp.RawToken,
+			VCResults: make([]*VCResult, len(vp.vcList)),
+		}
+
+		for j, vc := range vp.vcList {
+			record.VPResults[i].VCResults[j] = &VCResult{
+				RawJWT:                    vc.RawToken,
+				VCT:                       "",
+				ValidSelectiveDisclosures: vc.ValidSelectiveDisclosures,
+				Claims:                    vc.PayloadDecodedMap,
+			}
+		}
+	}
+
+	return record, nil
+}
+
 // NewVerifiablePresentationWrapper initializes a new VerifiablePresentationWrapper instance from a raw token.
 func NewVerifiablePresentationWrapper(jwt_based_vp_token string) (*VerifiablePresentationWrapper, error) {
 	if jwt_based_vp_token == "" {

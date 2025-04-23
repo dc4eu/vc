@@ -200,12 +200,12 @@ func (arw *AuthorizationResponseWrapper) checkAllSelectiveDisclosures() error {
 	return nil
 }
 
-func (arw *AuthorizationResponseWrapper) ExtractVerificationRecordBasis() (*VerificationRecord, error) {
+func (arw *AuthorizationResponseWrapper) ExtractVerificationRecordBasis(sequence int64, sessionID, callbackID string) (*VerificationRecord, error) {
 	record := &VerificationRecord{
-		Sequence:               0,
-		SessionID:              "",
-		CallbackID:             "",
-		ValidationResult:       ValidationMeta{},
+		Sequence:               sequence,
+		SessionID:              sessionID,
+		CallbackID:             callbackID,
+		VerificationMeta:       &VerificationMeta{},
 		PresentationSubmission: arw.authorizationResponse.PresentationSubmission,
 		VPResults:              make([]*VPResult, len(arw.vpList)),
 	}
@@ -219,7 +219,9 @@ func (arw *AuthorizationResponseWrapper) ExtractVerificationRecordBasis() (*Veri
 		for j, vc := range vp.vcList {
 			record.VPResults[i].VCResults[j] = &VCResult{
 				RawJWT:                    vc.RawToken,
-				VCT:                       "",
+				Format:                    vc.Format,
+				JWTTyp:                    vc.JWTTyp,
+				VCTM:                      vc.HeaderVCTMDecodedMap,
 				ValidSelectiveDisclosures: vc.ValidSelectiveDisclosures,
 				Claims:                    vc.PayloadDecodedMap,
 			}

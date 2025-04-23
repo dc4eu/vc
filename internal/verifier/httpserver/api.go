@@ -18,7 +18,7 @@ type Apiv1 interface {
 	PaginatedVerificationRecords(ctx context.Context, request *apiv1.PaginatedVerificationRecordsRequest) (*apiv1.PaginatedVerificationRecordsReply, error)
 
 	// openid4vp-web
-	GetVerificationResult(ctx context.Context, sessionID string) (*openid4vp.VerificationResult, error)
+	GetVerificationResult(ctx context.Context, sessionID string) (*apiv1.VerificationResult, error)
 
 	// ui-web dev/test support
 	GetVPFlowDebugInfo(ctx context.Context, request *apiv1.VPFlowDebugInfoRequest) (*apiv1.VPFlowDebugInfoReply, error)

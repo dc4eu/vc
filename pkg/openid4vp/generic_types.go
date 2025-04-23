@@ -3,6 +3,7 @@ package openid4vp
 import (
 	"crypto"
 	"github.com/golang-jwt/jwt/v5"
+	"sync/atomic"
 	"time"
 )
 
@@ -14,8 +15,11 @@ const (
 	StatusQRDisplayed     InteractionStatus = "qr_displayed"
 	StatusQRScanned       InteractionStatus = "qr_scanned"
 	StatusVPTokenReceived InteractionStatus = "vp_token_received"
-	StatusCompleted       InteractionStatus = "completed"
 	StatusUnknown         InteractionStatus = "unknown"
+
+	VerificationResultVerified VerificationResult = "verified"
+	VerificationResultRejected VerificationResult = "rejected"
+	VerificationResultError    VerificationResult = "error"
 )
 
 // QRReply is a collection of fields representing a QRReply code
@@ -81,9 +85,14 @@ type VPInteractionSession struct {
 	//TODO: Below is just for dev/test purpose and must be removed before production
 	VerifierKeyPair *KeyPair `json:"-"`
 	//VerifierX509CertDER []byte
-	VerifierX5cCertDERBase64       string           `json:"-"`
-	RequestObjectJWS               string           `json:"request_object_jws,omitempty"`
-	AuthorisationResponseDebugData *JsonRequestData `json:"authorisation_response_debug_data,omitempty"`
+	VerifierX5cCertDERBase64               string           `json:"-"`
+	RequestObjectJWS                       string           `json:"request_object_jws,omitempty"`
+	AuthorisationResponseDebugData         *JsonRequestData `json:"authorisation_response_debug_data,omitempty"`
+	CountNbrCallsToGetAuthorizationRequest int64            `json:"count_nbr_calls_to_get_authorization_request,omitempty"` //TODO: Behöver reda ut hur många gånger plånboken verkligen anropar denna (verkar som mer än 1ggr per session)???
+}
+
+func (vpSession *VPInteractionSession) IncrementCountNbrCallsToGetAuthorizationRequest() {
+	atomic.AddInt64(&vpSession.CountNbrCallsToGetAuthorizationRequest, 1)
 }
 
 type JsonRequestData struct {
@@ -120,11 +129,6 @@ type AuthorizationRequest struct {
 	RequestObjectJWS string `json:"request_object"`
 }
 
-type VerificationResult struct {
-	Status string `json:"status,omitempty"`
-	Data   any    `json:"data"`
-}
-
 type CallbackReply struct {
 }
 
@@ -132,25 +136,31 @@ type VerificationRecord struct {
 	Sequence               int64                   `json:"sequence" bson:"sequence" validate:"required"`
 	SessionID              string                  `json:"session_id" bson:"session_id" validate:"required"` //Key
 	CallbackID             string                  `json:"callback_id" bson:"callback_id" validate:"required"`
-	ValidationResult       ValidationMeta          `json:"validation_meta" bson:"validation_meta" validate:"required"`
+	VerificationMeta       *VerificationMeta       `json:"verification_meta" bson:"verification_meta" validate:"required"`
 	PresentationSubmission *PresentationSubmission `json:"presentation_submission,omitempty" bson:"presentation_submission"`
 	VPResults              []*VPResult             `json:"vp_results" bson:"vp_results"`
 }
 
-type ValidationMeta struct {
-	IsValid     bool   `json:"is_valid" bson:"is_valid" validate:"required"`
-	ValidatedAt int64  `bson:"validated_at" json:"validated_at" validate:"required"` //Unix UTC
-	ErrorInfo   string `json:"error_info,omitempty" bson:"error_info,omitempty"`
+type VerificationResult string
+type VerificationMeta struct {
+	VerificationResult VerificationResult `json:"verification_result" bson:"verification_result" validate:"required"`
+	VerifiedAtUnix     int64              `json:"verified_at_unix" bson:"verified_at_unix"  validate:"required"` //Unix (UTC)
+	Error              string             `json:"error,omitempty" bson:"error,omitempty"`
+	ErrorDescription   string             `json:"error_description,omitempty" bson:"error_description,omitempty"`
+	ErrorURI           string             `json:"error_uri,omitempty" bson:"error_uri,omitempty"`
 }
 
 type VPResult struct {
-	RawToken  string      `json:"raw_token" bson:"raw_token" validate:"required"`
+	RawToken  string      `json:"raw_token" bson:"raw_token"`
 	VCResults []*VCResult `json:"vc_results" bson:"vc_results"`
 }
 
 type VCResult struct {
-	RawJWT                    string                 `json:"raw_jwt" bson:"raw_jwt" validate:"required"`
-	VCT                       string                 `json:"vct" bson:"vct" validate:"required"`
+	RawJWT string `json:"raw_jwt" bson:"raw_jwt"`
+	Format string `json:"format" bson:"format"`
+	JWTTyp string `json:"jwt_typ" bson:"jwt_typ"`
+	//VCT                       string                 `json:"vct" bson:"vct"`
+	VCTM                      map[string]interface{} `json:"vctm" bson:"vctm"`
 	ValidSelectiveDisclosures []*Disclosure          `json:"valid_selective_disclosures" bson:"valid_selective_disclosures"`
 	Claims                    map[string]interface{} `json:"claims" bson:"claims"`
 }

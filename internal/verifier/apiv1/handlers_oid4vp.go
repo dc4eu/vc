@@ -126,6 +126,10 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 	if err != nil {
 		return nil, err
 	}
+
+	//TODO: just to see how many times the wallet calls this func for the same session
+	vpSession.IncrementCountNbrCallsToGetAuthorizationRequest()
+
 	if vpSession.SessionExpires.Before(time.Now()) {
 		return nil, errors.New("session expired")
 	}
@@ -162,17 +166,6 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	}
 
 	ehicVCTs := []string{
-		//"https://vc-interop-1.sunet.se/credential/ehic/1.0",
-		//"https://vc-interop-2.sunet.se/credential/ehic/1.0",
-		//"https://vc-interop-3.sunet.se/credential/ehic/1.0",
-		//"https://satosa-test-1.sunet.se/credential/ehic/1.0",
-		//"https://satosa-test-2.sunet.se/credential/ehic/1.0",
-		//"https://satosa-test-3.sunet.se/credential/ehic/1.0",
-		//"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
-		//"https://satosa-dev-2.sunet.se/credential/ehic/1.0",
-		//"https://satosa-dev-3.sunet.se/credential/ehic/1.0",
-		//"EHICCredential",
-		//"SatosaEHICCredential"}
 		"https://vc-interop-1.sunet.se/credential/ehic/1.0",
 		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
 		"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
@@ -222,17 +215,16 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	now := jwt.NewNumericDate(time.Now())
 	claims := &jwthelpers.CustomClaims{
 		ResponseURI:            responseURI,
-		ClientIdScheme:         "x509_san_dns", //TODO: vad ska client_id_scheme sättas till?
-		ClientId:               fqdn,           //TODO: vad ska client_id sättas till?
+		ClientIdScheme:         "x509_san_dns",
+		ClientId:               fqdn,
 		ResponseType:           "vp_token",
 		ResponseMode:           "direct_post.jwt",
 		State:                  vpSession.State,
 		Nonce:                  vpSession.Nonce,
 		PresentationDefinition: presentationDefinition,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer: fqdn, //TODO: vad ska iss sättas till?
-			//Subject:   "todo_set_sub_value_here",                     //TODO vilket värde här för sub, behövs det?
-			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"}, //TODO korrekt aud?
+			Issuer:    fqdn,
+			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"},
 			ExpiresAt: jwt.NewNumericDate(vpSession.SessionExpires),
 			IssuedAt:  now,
 			NotBefore: now,
@@ -251,11 +243,6 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 }
 
 func (c *Client) Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (*openid4vp.CallbackReply, error) {
-	//TODO: denna kan också vara i form av en JWE om ej redan hanterat i endpointen???
-	//TODO:
-	//	21 Evaluate each Verifiable Presentation token
-	//	22 Validate the Wallet Attestation.Attest the Wallet Provideris part of the Federation and the Wallet Instance is not revoked.
-	//	23 Attest Credential Issuer Trust and Validate JWT Signature
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
 		return nil, err
@@ -283,84 +270,27 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	}
 
 	//TODO: skicka in ref till "vpSession" för att kontrollera värden mot (nonce, osv)
-	//TODO: från process ska ett valideringsresultat erhållas som kan presenteras när allt blir mer klart, nu blir det bara ett err om något går fel
-	//TODO: skicka in en ~crypto-store (lång och kortlivade egna nyckar och cert)
+	//TODO: skicka in en ~crypto-store (lång och kortlivade egna nyckar samt cert)
 	err = arw.Process(processConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	record, err := arw.ExtractVerificationRecordBasis()
+	record, err := arw.ExtractVerificationRecordBasis(c.nextSequence(), sessionID, callbackID)
 	if err != nil {
 		return nil, err
 	}
-	record.Sequence = c.nextSequence()
-	record.SessionID = sessionID
-	record.CallbackID = callbackID
-	record.ValidationResult = openid4vp.ValidationMeta{
-		IsValid:     true,
-		ValidatedAt: time.Now().Unix(),
-		ErrorInfo:   "",
+	//TODO: Hantera och lagra scenario rejected samt error också... - nu kastas det errors i de flesta fall
+	record.VerificationMeta = &openid4vp.VerificationMeta{
+		VerificationResult: openid4vp.VerificationResultVerified,
+		VerifiedAtUnix:     time.Now().UTC().Unix(),
 	}
-
-	//TODO: ersätt stora delar av nedan med värden från själva valideringen
-	//record = &openid4vp.VerificationRecord{
-	//	Sequence:   c.nextSequence(),
-	//	SessionID:  sessionID,
-	//	CallbackID: callbackID,
-	//	ValidationResult: openid4vp.ValidationMeta{
-	//		IsValid:     true,
-	//		ValidatedAt: time.Now().Unix(),
-	//		ErrorInfo:   "",
-	//	},
-	//	PresentationSubmission: nil,
-	//	VPResults: []*openid4vp.VPResult{
-	//		{
-	//			RawToken: "raw_vp_token_here",
-	//			VCResults: []*openid4vp.VCResult{
-	//				{
-	//					VCT: "TheVerifiableCredentialType",
-	//					ValidSelectiveDisclosures: []*openid4vp.Disclosure{
-	//						{
-	//							Salt:  "123",
-	//							Key:   "ExampleKey1Here",
-	//							Value: "Example value 1 here",
-	//						},
-	//						{
-	//							Salt: "456",
-	//							Key:  "ExampleKey2Here",
-	//							Value: map[string]interface{}{
-	//								"foo": "NestedValue1",
-	//								"bar": 111,
-	//							},
-	//						},
-	//					},
-	//					Claims: map[string]interface{}{
-	//						"claim1": "Value1",
-	//						"claim2": "Value2",
-	//						"claim3": 3,
-	//						"claim4": map[string]interface{}{
-	//							"foo": "NestedValue2",
-	//							"bar": 222,
-	//						},
-	//					},
-	//				},
-	//			},
-	//		},
-	//	},
-	//}
 	err = c.db.VerificationRecordColl.Create(ctx, record)
 	if err != nil {
 		return nil, err
 	}
 
-	//TODO: ta bort VPInteractionSession när utvecklingen börjar vara mer klar
-	//err = c.db.VPInteractionSessionColl.Delete(ctx, sessionID)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	//TODO: vad ska returneras tillbaka till walleten om validering: 1) allt OK 2) något gick fel eller ej ok
+	//TODO: vad ska returneras tillbaka till walleten om verifiering: 1) verified 2) rejected 3) error
 	return &openid4vp.CallbackReply{}, nil
 }
 
@@ -406,7 +336,12 @@ func validateCallbackPreconditions(vpSession *openid4vp.VPInteractionSession, ca
 	return nil
 }
 
-func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*openid4vp.VerificationResult, error) {
+type VerificationResult struct {
+	Status string `json:"status,omitempty"`
+	Data   any    `json:"data"`
+}
+
+func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*VerificationResult, error) {
 	status := openid4vp.StatusUnknown
 	vpSession, _ := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if vpSession != nil {
@@ -414,13 +349,14 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 	}
 
 	var data any
-	if vpSession == nil || vpSession.Status == openid4vp.StatusVPTokenReceived || vpSession.Status == openid4vp.StatusCompleted {
+	if vpSession == nil || vpSession.Status == openid4vp.StatusVPTokenReceived {
+		//No need to look for a record if the qr code just display or scanned, since no response from the wallet has been recieved yet
 		verificationRecord, _ := c.db.VerificationRecordColl.Read(ctx, sessionID)
 		//TODO: filter what data in verificationRecord to expose (if not nil or any error)
 		data = verificationRecord
 	}
 
-	return &openid4vp.VerificationResult{
+	return &VerificationResult{
 		Status: string(status),
 		Data:   data,
 	}, nil

@@ -3,6 +3,7 @@ package apiv1
 import (
 	"context"
 	"fmt"
+	"vc/pkg/openid4vp"
 )
 
 type PaginatedVerificationRecordsRequest struct {
@@ -10,19 +11,28 @@ type PaginatedVerificationRecordsRequest struct {
 	RequestedSequenceEnd   int64 `json:"requested_sequence_end" validate:"required,gt=0"`
 }
 
-type VerificationRecordReply struct {
-	Sequence int64  `json:"sequence" bson:"sequence" validate:"required"`
-	ID       string `json:"id" bson:"session_id" validate:"required"` //Same as session_id but not exposed as that externally
-	//CallbackID             string                  `json:"callback_id" bson:"callback_id" validate:"required"`
-	//TODO: t b c with the vp's and vc's
+type VerificationRecord struct {
+	Sequence         int64                       `json:"sequence" bson:"sequence" validate:"required"`
+	ID               string                      `json:"id" bson:"session_id" validate:"required"` //Same as session_id but not exposed as that externally
+	VerificationMeta *openid4vp.VerificationMeta `json:"verification_meta" bson:"verification_meta" validate:"required"`
+	VPResults        []*VPResult                 `json:"vp_results" bson:"vp_results"`
+}
+
+type VPResult struct {
+	VCResults []*VCResult `json:"vc_results" bson:"vc_results"`
+}
+
+type VCResult struct {
+	ValidSelectiveDisclosures []*openid4vp.Disclosure `json:"valid_selective_disclosures" bson:"valid_selective_disclosures"`
+	Claims                    map[string]interface{}  `json:"claims" bson:"claims"`
 }
 
 type PaginatedVerificationRecordsReply struct {
 	RequestedSequenceStart int64 `json:"requested_sequence_start" validate:"required"`
 	RequestedSequenceEnd   int64 `json:"requested_sequence_end" validate:"required"`
 	//HighestFetchedSequence int64                      `json:"highest_fetched_sequence"`
-	SequenceMax int64                      `json:"sequence_max" validate:"required"`
-	Items       []*VerificationRecordReply `json:"verification_records"`
+	SequenceMax int64                 `json:"sequence_max" validate:"required"`
+	Items       []*VerificationRecord `json:"verification_records"`
 }
 
 func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *PaginatedVerificationRecordsRequest) (*PaginatedVerificationRecordsReply, error) {
@@ -46,7 +56,7 @@ func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *Pagi
 		return nil, err
 	}
 
-	items := make([]*VerificationRecordReply, 0, requestedNumOfItems)
+	records := make([]*VerificationRecord, 0, requestedNumOfItems)
 	sequenceMax := int64(0)
 	for _, dbRecord := range dbRecords {
 		if dbRecord == nil {
@@ -55,12 +65,9 @@ func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *Pagi
 		if sequenceMax < dbRecord.Sequence {
 			sequenceMax = dbRecord.Sequence
 		}
+
 		if isInRange(dbRecord.Sequence, request.RequestedSequenceStart, request.RequestedSequenceEnd) {
-			items = append(items, &VerificationRecordReply{
-				Sequence: dbRecord.Sequence,
-				ID:       dbRecord.SessionID,
-				//TODO t b c
-			})
+			records = append(records, c.buildVerificationRecordFrom(dbRecord))
 		}
 	}
 
@@ -68,10 +75,36 @@ func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *Pagi
 		RequestedSequenceStart: request.RequestedSequenceStart,
 		RequestedSequenceEnd:   request.RequestedSequenceEnd,
 		SequenceMax:            sequenceMax,
-		Items:                  items,
+		Items:                  records,
 	}
 
 	return reply, nil
+}
+
+func (c *Client) buildVerificationRecordFrom(dbRecord *openid4vp.VerificationRecord) *VerificationRecord {
+	//Will be handled by mongo later
+	var vpResults []*VPResult
+	for _, vp := range dbRecord.VPResults {
+		var vcResults []*VCResult
+		for _, vc := range vp.VCResults {
+			vcResult := &VCResult{
+				ValidSelectiveDisclosures: vc.ValidSelectiveDisclosures,
+				Claims:                    vc.Claims,
+			}
+			vcResults = append(vcResults, vcResult)
+		}
+		vpResult := &VPResult{
+			VCResults: vcResults,
+		}
+		vpResults = append(vpResults, vpResult)
+	}
+
+	return &VerificationRecord{
+		Sequence:         dbRecord.Sequence,
+		ID:               dbRecord.SessionID,
+		VerificationMeta: dbRecord.VerificationMeta,
+		VPResults:        vpResults,
+	}
 }
 
 func isInRange(seq, start, end int64) bool {

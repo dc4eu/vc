@@ -28,11 +28,10 @@ type VCResult struct {
 }
 
 type PaginatedVerificationRecordsReply struct {
-	RequestedSequenceStart int64 `json:"requested_sequence_start" validate:"required"`
-	RequestedSequenceEnd   int64 `json:"requested_sequence_end" validate:"required"`
-	//HighestFetchedSequence int64                      `json:"highest_fetched_sequence"`
-	SequenceMax int64                 `json:"sequence_max" validate:"required"`
-	Items       []*VerificationRecord `json:"verification_records"`
+	RequestedSequenceStart int64                 `json:"requested_sequence_start" validate:"required"`
+	RequestedSequenceEnd   int64                 `json:"requested_sequence_end" validate:"required"`
+	SequenceMax            int64                 `json:"sequence_max" validate:"required"`
+	Items                  []*VerificationRecord `json:"verification_records"`
 }
 
 func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *PaginatedVerificationRecordsRequest) (*PaginatedVerificationRecordsReply, error) {

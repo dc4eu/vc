@@ -161,45 +161,17 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
+	var presentationDefinition *openid4vp.PresentationDefinition
 	if vpSession.DocumentType != openid4vp.DocumentTypeEHIC {
-		return "", errors.New("only EHIC document is currently supported")
-	}
-
-	ehicVCTs := []string{
-		"https://vc-interop-1.sunet.se/credential/ehic/1.0",
-		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
-		"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
-		"EHICCredential"}
-	presentationDefinition := &openid4vp.PresentationDefinition{
-		ID:          "SatosaEuropeanHealthInsuranceCard",
-		Title:       "SATOSA EHIC",
-		Description: "Required Fields: VC type, SSN, Forename, Family Name, Birthdate",
-		InputDescriptors: []openid4vp.InputDescriptor{
-			{
-				ID: "SatosaEHIC",
-				Format: map[string]openid4vp.Format{
-					"vc+sd-jwt": {Alg: []string{"ES256"}},
-				},
-				Constraints: openid4vp.Constraints{
-					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: ehicVCTs}},
-						//{Name: "Subject", Path: []string{"$.subject"}},
-						{Name: "Given Name", Path: []string{"$.subject.forename"}},
-						{Name: "Family Name", Path: []string{"$.subject.family_name"}},
-						{Name: "Birthdate", Path: []string{"$.subject.date_of_birth"}},
-						{Name: "SSN", Path: []string{"$.social_security_pin"}},
-						//TODO: {Name: "Period entitlement", Path: []string{"$.period_entitlement"}},
-						{Name: "Document ID", Path: []string{"$.document_id"}},
-						{Name: "Competent Institution", Path: []string{"$.competent_institution.institution_name"}},
-					},
-				},
-			},
-		},
+		presentationDefinition = EHICPresentationDefinition()
+	} else if vpSession.DocumentType != openid4vp.DocumentTypePDA1 {
+		presentationDefinition = PDA1PresentationDefinition()
+	} else {
+		return "", errors.New("document type is currently not supported")
 	}
 
 	vpSession.PresentationDefinition = presentationDefinition
 
-	//verifierBaseUrl := "http://172.16.50.6:8080"
 	schema := "http://"
 	if c.cfg.Verifier.APIServer.TLS.Enabled {
 		schema = "https://"
@@ -293,8 +265,6 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	//TODO: vad ska returneras tillbaka till walleten om verifiering: 1) verified 2) rejected 3) error
 	return &openid4vp.CallbackReply{}, nil
 }
-
-var currentSequence int64 = 0
 
 func (c *Client) nextSequence() int64 {
 	//TODO workaround until mongodb is used

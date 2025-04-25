@@ -55,7 +55,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		store.Options(sessions.Options{
 			Path:     "/",
 			MaxAge:   600,
-			Secure:   cfg.UI.APIServer.TLS.Enabled,
+			Secure:   cfg.Verifier.APIServer.TLS.Enabled,
 			HttpOnly: true,
 			SameSite: http.SameSiteStrictMode,
 		})

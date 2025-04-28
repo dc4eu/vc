@@ -162,12 +162,12 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
 	var presentationDefinition *openid4vp.PresentationDefinition
-	if vpSession.DocumentType != openid4vp.DocumentTypeEHIC {
+	if vpSession.DocumentType == openid4vp.DocumentTypeEHIC {
 		presentationDefinition = EHICPresentationDefinition()
-	} else if vpSession.DocumentType != openid4vp.DocumentTypePDA1 {
+	} else if vpSession.DocumentType == openid4vp.DocumentTypePDA1 {
 		presentationDefinition = PDA1PresentationDefinition()
 	} else {
-		return "", errors.New("document type is currently not supported")
+		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
 	}
 
 	vpSession.PresentationDefinition = presentationDefinition

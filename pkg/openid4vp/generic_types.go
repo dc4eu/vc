@@ -35,7 +35,7 @@ type QRReply struct {
 }
 
 type QRRequest struct {
-	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=EHIC ELM PDA1 "`
+	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=EHIC ELM PDA1 PID "`
 }
 
 type KeyType string

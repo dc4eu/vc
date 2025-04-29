@@ -20,12 +20,6 @@ import (
 
 // QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request
 func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRRequest) (*openid4vp.QRReply, error) {
-	//TODO: Inspect user-agent type to detect cross device or same device
-
-	if !(request.DocumentType == openid4vp.DocumentTypeEHIC || request.DocumentType == openid4vp.DocumentTypePDA1 || request.DocumentType == openid4vp.DocumentTypeELM || request.DocumentType == openid4vp.DocumentTypePID) {
-		return nil, fmt.Errorf("document type not handled: %s", request.DocumentType)
-	}
-
 	//---key+cert gen----------
 	//veriferLongLivedEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
 	//if err != nil {

@@ -170,6 +170,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
 	case openid4vp.DocumentTypePID:
 		vpSession.PresentationDefinition = PIDPresentationDefinition()
+	//case TODO: diploma här + gr + web + UI sök
 	default:
 		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
 	}

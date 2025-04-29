@@ -4,9 +4,12 @@ import "vc/pkg/openid4vp"
 
 func PIDPresentationDefinition() *openid4vp.PresentationDefinition {
 	pidVCTs := []string{
+		"https://vc-interop-3.sunet.se/credential/pid/1.0",
 		"https://vc-interop-1.sunet.se/credential/pid/1.0",
 		"https://satosa-test-1.sunet.se/credential/pid/1.0",
 		"https://satosa-dev-1.sunet.se/credential/pid/1.0",
+		"urn:credential:vid",
+		"urn:credential:pid",
 		"urn:eudi:pid:1",
 		"PIDCredential"}
 	return &openid4vp.PresentationDefinition{

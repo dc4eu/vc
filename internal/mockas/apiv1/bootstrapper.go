@@ -2,8 +2,10 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 	"vc/pkg/education"
@@ -35,6 +37,16 @@ type address struct {
 	PostCode string `json:"post_code,omitempty"`
 	Town     string `json:"town,omitempty"`
 	Country  string `json:"country,omitempty"`
+}
+
+func (p *person) bootstrapPID() (map[string]any, error) {
+	doc := model.PIDDocument{
+		FirstName:   p.FirstName,
+		FamilyName:  p.FirstName,
+		DateOfBirth: p.DateOfBirth,
+	}
+
+	return doc.Marshal()
 }
 
 func (p *person) bootstrapPDA1() (map[string]any, error) {
@@ -249,24 +261,23 @@ var persons = map[string][]person{
 			EmploymentAddress:       &address{Street: "Franz-Josef-Platz 3", PostCode: "4810", Town: "Gmunden", Country: "AT"},
 		},
 	},
-	//"ELM": {
-	//	{
-	//		AuthenticSourcePersonID: "30",
-	//		FirstName:               "Helen",
-	//		LastName:                "Mirren",
-	//		DateOfBirth:             "1996-01-30",
-	//		Nationality:             []string{"FR"},
-	//	},
-	//},
-	//"Microcredential": {
-	//	{
-	//		AuthenticSourcePersonID: "30",
-	//		FirstName:               "Helen",
-	//		LastName:                "Mirren",
-	//		DateOfBirth:             "1996-01-30",
-	//		Nationality:             []string{"FR"},
-	//	},
-	//},
+	"ELM": {
+		{
+			AuthenticSourcePersonID: "30",
+			FirstName:               "Helen",
+			LastName:                "Mirren",
+			DateOfBirth:             "1996-01-30",
+			Nationality:             []string{"FR"},
+		},
+	},
+	"PID": {
+		{
+			AuthenticSourcePersonID: "30",
+			FirstName:               "Helen",
+			LastName:                "Mirren",
+			DateOfBirth:             "1996-01-30",
+		},
+	},
 }
 
 func (c *Client) bootstrapperConstructor(ctx context.Context) error {
@@ -289,19 +300,25 @@ func (c *Client) bootstrapperConstructor(ctx context.Context) error {
 				if err != nil {
 					return err
 				}
-				//case "ELM":
-				//	b, err := os.ReadFile("standards/elm_3_2.json")
-				//	if err != nil {
-				//		return err
-				//	}
+			case "ELM":
+				b, err := os.ReadFile("standards/elm_3_2.json")
+				if err != nil {
+					return err
+				}
 
-				//	doc := map[string]any{}
-				//	if err := json.Unmarshal(b, &doc); err != nil {
-				//		return err
-				//	}
+				doc := map[string]any{}
+				if err := json.Unmarshal(b, &doc); err != nil {
+					return err
+				}
 
-				//	documentData = doc
+				documentData = doc
 
+			case "PID":
+				var err error
+				documentData, err = p.bootstrapPID()
+				if err != nil {
+					return err
+				}
 			}
 			meta := &model.MetaData{
 				AuthenticSource: fmt.Sprintf("authentic_source_%s", strings.ToLower(p.Nationality[0])),

@@ -34,7 +34,7 @@ COPY --from=builder /go/src/app/users_paris.xlsx /users_paris.xlsx
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=20s --timeout=10s CMD curl --connect-timeout 5 http://localhost:8080/health | grep -q STATUS_OK
+HEALTHCHECK --interval=20s --timeout=10s CMD curl -k --connect-timeout 5 https://localhost:8080/health | grep -q STATUS_OK
 
 # vars in CMD and ENTRYPOINT are evaluated at runtime, that's why we use a static name on the binary.
 CMD [ "./vc_service" ]

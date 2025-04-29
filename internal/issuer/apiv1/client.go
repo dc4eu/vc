@@ -41,6 +41,7 @@ type Client struct {
 	openBadgeCompleteClient    *openbadgeCompleteClient
 	openBadgeBasicClient       *openbadgeBasicClient
 	OpenBadgeEndorsementClient *openbadgeEndorsementsClient
+	PIDClient                  *pidClient
 }
 
 // New creates a new instance of the public api
@@ -91,6 +92,11 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	c.OpenBadgeEndorsementClient, err = newOpenbadgeEndorsementsClient(c, tracer, c.log.New("openbadgeEndorsement"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.PIDClient, err = newPIDClient(c, tracer, c.log.New("pid"))
 	if err != nil {
 		return nil, err
 	}

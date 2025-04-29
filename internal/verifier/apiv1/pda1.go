@@ -4,17 +4,19 @@ import "vc/pkg/openid4vp"
 
 func PDA1PresentationDefinition() *openid4vp.PresentationDefinition {
 	pda1VCTs := []string{
+		"https://vc-interop-3.sunet.se/credential/pda1/1.0",
 		"https://vc-interop-1.sunet.se/credential/pda1/1.0",
 		"https://satosa-test-1.sunet.se/credential/pda1/1.0",
 		"https://satosa-dev-1.sunet.se/credential/pda1/1.0",
+		"urn:credential:pda1",
 		"PDA1Credential"}
 	return &openid4vp.PresentationDefinition{
-		ID:          "SatosaPDA1",
-		Title:       "SATOSA PDA1",
+		ID:          "PDA1",
+		Title:       "PDA1",
 		Description: "Required Fields: VC type, SSN, Member State of Application",
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID: "SatosaPDA1",
+				ID: "PDA1",
 				Format: map[string]openid4vp.Format{
 					"vc+sd-jwt": {Alg: []string{"ES256"}},
 				},

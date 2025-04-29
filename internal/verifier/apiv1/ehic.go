@@ -4,17 +4,19 @@ import "vc/pkg/openid4vp"
 
 func EHICPresentationDefinition() *openid4vp.PresentationDefinition {
 	ehicVCTs := []string{
+		"https://vc-interop-3.sunet.se/credential/ehic/1.0",
 		"https://vc-interop-1.sunet.se/credential/ehic/1.0",
 		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
 		"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
+		"urn:credential:ehic",
 		"EHICCredential"}
 	return &openid4vp.PresentationDefinition{
-		ID:          "SatosaEuropeanHealthInsuranceCard",
-		Title:       "SATOSA EHIC",
-		Description: "Required Fields: VC type, SSN, Forename, Family Name, Birthdate",
+		ID:          "EuropeanHealthInsuranceCard",
+		Title:       "European HealthInsurance Card",
+		Description: "Required Fields: VC type, SSN, Family Name, Given Name & Birth Date",
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID: "SatosaEHIC",
+				ID: "EuropeanHealthInsuranceCard",
 				Format: map[string]openid4vp.Format{
 					"vc+sd-jwt": {Alg: []string{"ES256"}},
 				},

@@ -807,7 +807,7 @@ function displayQRInModal(rowData) {
 
         //TODO(mk): check/error handling if no qr or base64_image exist
         const img = document.createElement("img");
-        img.src = `data:image/png;base64,${data.documents[0].qr.base64_image}`;
+        img.src = `data:image/png;base64,${data.documents[0].qr.qr_base64}`;
         modalBodyDiv.appendChild(img);
 
         const followLinkButton = document.createElement("button");
@@ -816,7 +816,7 @@ function displayQRInModal(rowData) {
         followLinkButton.title = data.documents[0].qr.credential_offer;
         followLinkButton.textContent = "Follow QR-code (opens a new browser window or tab)";
         followLinkButton.addEventListener("click", function () {
-            const url = data.documents[0].qr.credential_offer;
+            const url = data.documents[0].qr.credential_offer_url;
             window.open(`${url}`, "_blank");
         });
         modalParts.footer.appendChild(followLinkButton);
@@ -1100,7 +1100,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
         const documentTypeSelectWithinDivElement = createSelectElement([{
             value: '',
             label: 'Document type (optional)'
-        }, {value: 'EHIC', label: 'EHIC'}, {value: 'PDA1', label: 'PDA1'},{value: 'ELM', label: 'ELM'}]);
+        }, {value: 'EHIC', label: 'EHIC'},{value: 'ELM', label: 'ELM'},{value: 'PDA1', label: 'PDA1'},{value: 'PID', label: 'PID'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
         const documentTypeSelect = documentTypeSelectWithinDivElement[1];
 

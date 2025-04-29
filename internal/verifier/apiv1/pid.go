@@ -11,10 +11,11 @@ func PIDPresentationDefinition() *openid4vp.PresentationDefinition {
 		"urn:credential:vid",
 		"urn:credential:pid",
 		"urn:eudi:pid:1",
-		"PIDCredential"}
+		"PIDCredential",
+		"PID"}
 	return &openid4vp.PresentationDefinition{
-		ID:          "sdJwtPID",
-		Title:       "PID - SD-JWT",
+		ID:          "PID",
+		Title:       "PID",
 		Description: "Required Fields: VC type, Given Name ,Family Name, Birth Date",
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{

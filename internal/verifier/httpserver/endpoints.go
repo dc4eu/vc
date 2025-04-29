@@ -25,6 +25,8 @@ func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, erro
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQRCode")
 	defer span.End()
 
+	//TODO: Inspect user-agent type to detect cross device or same device?
+
 	request := &openid4vp.QRRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())

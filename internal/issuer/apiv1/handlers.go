@@ -7,6 +7,7 @@ import (
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/education"
 	"vc/pkg/helpers"
+	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
 
 	"google.golang.org/grpc"
@@ -104,6 +105,16 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 		token, err = c.openBadgeCompleteClient.sdjwt(ctx, doc, req.JWK, nil)
+		if err != nil {
+			return nil, err
+		}
+
+	case "pid":
+		doc := &model.PIDDocument{}
+		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+			return nil, err
+		}
+		token, err = c.PIDClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
 			return nil, err
 		}

@@ -25,6 +25,11 @@ func TestXLS(t *testing.T) {
 	})
 }
 
+func TestPDA1JsonToFile(t *testing.T) {
+	pda1JsonToFile()
+	ehicJSONToFile()
+}
+
 func TestMake(t *testing.T) {
 	storage := Make("testdata/users_paris.xlsx")
 

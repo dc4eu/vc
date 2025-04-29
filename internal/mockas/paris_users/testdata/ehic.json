@@ -1,0 +1,1442 @@
+{
+  "100": {
+    "subject": {
+      "forename": "Salma",
+      "family_name": "Hayek",
+      "date_of_birth": "1983-08-27"
+    },
+    "social_security_pin": "79785792",
+    "period_entitlement": {
+      "starting_date": "2024-03-08",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003431583",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "101": {
+    "subject": {
+      "forename": "Al",
+      "family_name": "Pacino",
+      "date_of_birth": "1984-06-11"
+    },
+    "social_security_pin": "79785792",
+    "period_entitlement": {
+      "starting_date": "2024-03-08",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003431583",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "102": {
+    "subject": {
+      "forename": "Natalie",
+      "family_name": "Portman",
+      "date_of_birth": "2005-09-01"
+    },
+    "social_security_pin": "27713953",
+    "period_entitlement": {
+      "starting_date": "2023-10-04",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003850509",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "103": {
+    "subject": {
+      "forename": "Jessica",
+      "family_name": "Chastain",
+      "date_of_birth": "1982-10-19"
+    },
+    "social_security_pin": "90126723",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "23456789012345678901",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "104": {
+    "subject": {
+      "forename": "Adam",
+      "family_name": "Driver",
+      "date_of_birth": "1988-09-27"
+    },
+    "social_security_pin": "29899548",
+    "period_entitlement": {
+      "starting_date": "2023-09-12",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003929691",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "105": {
+    "subject": {
+      "forename": "Jodie",
+      "family_name": "Foster",
+      "date_of_birth": "1991-10-30"
+    },
+    "social_security_pin": "71509226",
+    "period_entitlement": {
+      "starting_date": "2023-10-30",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003874563",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "106": {
+    "subject": {
+      "forename": "Matthew",
+      "family_name": "McConaughey",
+      "date_of_birth": "1977-09-09"
+    },
+    "social_security_pin": "37400178",
+    "period_entitlement": {
+      "starting_date": "2024-02-10",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003757763",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "107": {
+    "subject": {
+      "forename": "Ryan",
+      "family_name": "Reynolds",
+      "date_of_birth": "1988-12-05"
+    },
+    "social_security_pin": "86154445",
+    "period_entitlement": {
+      "starting_date": "2023-03-08",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003668716",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "108": {
+    "subject": {
+      "forename": "Kristen",
+      "family_name": "Stewart",
+      "date_of_birth": "1993-07-17"
+    },
+    "social_security_pin": "23987456",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "12345678901234567890",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "109": {
+    "subject": {
+      "forename": "Steve",
+      "family_name": "Carell",
+      "date_of_birth": "2005-06-04"
+    },
+    "social_security_pin": "89015612",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "12345678901234567890",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "110": {
+    "subject": {
+      "forename": "Chris",
+      "family_name": "Hemsworth",
+      "date_of_birth": "1992-01-19"
+    },
+    "social_security_pin": "87299198",
+    "period_entitlement": {
+      "starting_date": "2023-08-15",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003465348",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "111": {
+    "subject": {
+      "forename": "Octavia",
+      "family_name": "Spencer",
+      "date_of_birth": "1997-11-18"
+    },
+    "social_security_pin": "87451234",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "45678901234567890123",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "112": {
+    "subject": {
+      "forename": "Denzel",
+      "family_name": "Washington",
+      "date_of_birth": "1981-10-28"
+    },
+    "social_security_pin": "89012345",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "34567890123456789012",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "113": {
+    "subject": {
+      "forename": "Naomi",
+      "family_name": "Watts",
+      "date_of_birth": "1990-07-24"
+    },
+    "social_security_pin": "90123456",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "45678901234567890123",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "114": {
+    "subject": {
+      "forename": "Colin",
+      "family_name": "Farrell",
+      "date_of_birth": "1977-04-25"
+    },
+    "social_security_pin": "42388599",
+    "period_entitlement": {
+      "starting_date": "2024-03-28",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003508607",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "115": {
+    "subject": {
+      "forename": "Rachel",
+      "family_name": "McAdams",
+      "date_of_birth": "1998-06-09"
+    },
+    "social_security_pin": "65664926",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003630878",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "116": {
+    "subject": {
+      "forename": "Amy",
+      "family_name": "Adams",
+      "date_of_birth": "1990-10-05"
+    },
+    "social_security_pin": "78905612",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "90123456789012345678",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "117": {
+    "subject": {
+      "forename": "Anne",
+      "family_name": "Bancroft",
+      "date_of_birth": "1980-12-30"
+    },
+    "social_security_pin": "90127834",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "23456789012345678901",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "118": {
+    "subject": {
+      "forename": "Benedict",
+      "family_name": "Cumberbatch",
+      "date_of_birth": "1987-10-24"
+    },
+    "social_security_pin": "45660167",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "67890123456789012345",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "119": {
+    "subject": {
+      "forename": "Jamie",
+      "family_name": "Foxx",
+      "date_of_birth": "1977-07-03"
+    },
+    "social_security_pin": "42393788",
+    "period_entitlement": {
+      "starting_date": "2023-01-22",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003980686",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "120": {
+    "subject": {
+      "forename": "Morgan",
+      "family_name": "Freeman",
+      "date_of_birth": "1990-08-24"
+    },
+    "social_security_pin": "86368354",
+    "period_entitlement": {
+      "starting_date": "2023-08-08",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003808930",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "121": {
+    "subject": {
+      "forename": "Joaquin",
+      "family_name": "Phoenix",
+      "date_of_birth": "1979-10-16"
+    },
+    "social_security_pin": "44715442",
+    "period_entitlement": {
+      "starting_date": "2023-05-27",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003882863",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "122": {
+    "subject": {
+      "forename": "Paul",
+      "family_name": "Rudd",
+      "date_of_birth": "2006-03-28"
+    },
+    "social_security_pin": "65664926",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003630878",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "123": {
+    "subject": {
+      "forename": "Tom",
+      "family_name": "Hanks",
+      "date_of_birth": "1989-12-04"
+    },
+    "social_security_pin": "40046784",
+    "period_entitlement": {
+      "starting_date": "2023-12-26",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003420696",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "124": {
+    "subject": {
+      "forename": "Helen",
+      "family_name": "Mirren",
+      "date_of_birth": "1996-01-30"
+    },
+    "social_security_pin": "40046784",
+    "period_entitlement": {
+      "starting_date": "2023-12-26",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003420696",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "125": {
+    "subject": {
+      "forename": "Emma",
+      "family_name": "Stone",
+      "date_of_birth": "1985-01-27"
+    },
+    "social_security_pin": "98765432",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "98765432109876543210",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "126": {
+    "subject": {
+      "forename": "Tilda",
+      "family_name": "Swinton",
+      "date_of_birth": "1984-04-14"
+    },
+    "social_security_pin": "45678901",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "34567890123456789012",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "127": {
+    "subject": {
+      "forename": "Alicia",
+      "family_name": "Vikander",
+      "date_of_birth": "1985-11-09"
+    },
+    "social_security_pin": "67890123",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "89012345678901234567",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "128": {
+    "subject": {
+      "forename": "Nicolas",
+      "family_name": "Cage",
+      "date_of_birth": "2005-05-13"
+    },
+    "social_security_pin": "78904501",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "90123456789012345678",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "129": {
+    "subject": {
+      "forename": "Leonardo",
+      "family_name": "DiCaprio",
+      "date_of_birth": "1972-08-28"
+    },
+    "social_security_pin": "83865760",
+    "period_entitlement": {
+      "starting_date": "2024-04-01",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003861950",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "130": {
+    "subject": {
+      "forename": "Anne",
+      "family_name": "Hathaway",
+      "date_of_birth": "1987-05-06"
+    },
+    "social_security_pin": "57381544",
+    "period_entitlement": {
+      "starting_date": "2023-11-18",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003483005",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "131": {
+    "subject": {
+      "forename": "Anthony",
+      "family_name": "Hopkins",
+      "date_of_birth": "2006-08-16"
+    },
+    "social_security_pin": "44715442",
+    "period_entitlement": {
+      "starting_date": "2023-05-27",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003882863",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "132": {
+    "subject": {
+      "forename": "Dakota",
+      "family_name": "Johnson",
+      "date_of_birth": "1999-04-21"
+    },
+    "social_security_pin": "87416368",
+    "period_entitlement": {
+      "starting_date": "2023-03-02",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003715709",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "133": {
+    "subject": {
+      "forename": "Vanessa",
+      "family_name": "Kirby",
+      "date_of_birth": "1993-06-28"
+    },
+    "social_security_pin": "86154445",
+    "period_entitlement": {
+      "starting_date": "2023-03-08",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003668716",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "134": {
+    "subject": {
+      "forename": "Mila",
+      "family_name": "Kunis",
+      "date_of_birth": "1989-01-01"
+    },
+    "social_security_pin": "55625776",
+    "period_entitlement": {
+      "starting_date": "2023-01-15",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003841233",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "135": {
+    "subject": {
+      "forename": "Emily",
+      "family_name": "Blunt",
+      "date_of_birth": "2000-08-15"
+    },
+    "social_security_pin": "45671278",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "67890123456789012345",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "136": {
+    "subject": {
+      "forename": "John",
+      "family_name": "Boyega",
+      "date_of_birth": "2005-12-05"
+    },
+    "social_security_pin": "56782389",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "78901234567890123456",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "137": {
+    "subject": {
+      "forename": "Robert",
+      "family_name": "De Niro",
+      "date_of_birth": "1982-01-15"
+    },
+    "social_security_pin": "23451235",
+    "period_entitlement": {
+      "starting_date": "2023-09-08",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003464995",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "138": {
+    "subject": {
+      "forename": "Robert",
+      "family_name": "Downey Jr.",
+      "date_of_birth": "1983-05-12"
+    },
+    "social_security_pin": "39738563",
+    "period_entitlement": {
+      "starting_date": "2023-04-29",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003502921",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "139": {
+    "subject": {
+      "forename": "Scarlett",
+      "family_name": "Johansson",
+      "date_of_birth": "1980-05-12"
+    },
+    "social_security_pin": "74070435",
+    "period_entitlement": {
+      "starting_date": "2023-01-23",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003517908",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "140": {
+    "subject": {
+      "forename": "Michelle",
+      "family_name": "Pfeiffer",
+      "date_of_birth": "1992-12-15"
+    },
+    "social_security_pin": "87299198",
+    "period_entitlement": {
+      "starting_date": "2023-08-15",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003465348",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "141": {
+    "subject": {
+      "forename": "Vince",
+      "family_name": "Vaughn",
+      "date_of_birth": "1988-02-19"
+    },
+    "social_security_pin": "56789012",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "78901234567890123456",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "142": {
+    "subject": {
+      "forename": "Daniel",
+      "family_name": "Craig",
+      "date_of_birth": "1988-10-29"
+    },
+    "social_security_pin": "23448945",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "45678901234567890123",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "143": {
+    "subject": {
+      "forename": "Viola",
+      "family_name": "Davis",
+      "date_of_birth": "2007-04-20"
+    },
+    "social_security_pin": "80440167",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "87101234567890123433",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "144": {
+    "subject": {
+      "forename": "Johnny",
+      "family_name": "Depp",
+      "date_of_birth": "1985-12-03"
+    },
+    "social_security_pin": "76841223",
+    "period_entitlement": {
+      "starting_date": "2024-03-14",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003665621",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "145": {
+    "subject": {
+      "forename": "Michael",
+      "family_name": "Fassbender",
+      "date_of_birth": "1992-04-24"
+    },
+    "social_security_pin": "44460320",
+    "period_entitlement": {
+      "starting_date": "2024-01-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003670006",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "146": {
+    "subject": {
+      "forename": "Donald",
+      "family_name": "Glover",
+      "date_of_birth": "2007-03-17"
+    },
+    "social_security_pin": "61350638",
+    "period_entitlement": {
+      "starting_date": "2023-03-10",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003930680",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "147": {
+    "subject": {
+      "forename": "Keanu",
+      "family_name": "Reeves",
+      "date_of_birth": "1985-11-26"
+    },
+    "social_security_pin": "87416368",
+    "period_entitlement": {
+      "starting_date": "2023-03-02",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003715709",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "148": {
+    "subject": {
+      "forename": "John C.",
+      "family_name": "Reilly",
+      "date_of_birth": "2005-11-19"
+    },
+    "social_security_pin": "33133266",
+    "period_entitlement": {
+      "starting_date": "2023-03-01",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003767929",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "149": {
+    "subject": {
+      "forename": "Reese",
+      "family_name": "Witherspoon",
+      "date_of_birth": "1987-04-02"
+    },
+    "social_security_pin": "67894501",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "89012345678901234567",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "70": {
+    "subject": {
+      "forename": "Meryl",
+      "family_name": "Streep",
+      "date_of_birth": "2005-07-29"
+    },
+    "social_security_pin": "12345678",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "23456789012345678901",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "71": {
+    "subject": {
+      "forename": "Charlize",
+      "family_name": "Theron",
+      "date_of_birth": "1988-12-11"
+    },
+    "social_security_pin": "34567890",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "67890123456789012345",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "72": {
+    "subject": {
+      "forename": "Idris",
+      "family_name": "Elba",
+      "date_of_birth": "1980-09-02"
+    },
+    "social_security_pin": "52712842",
+    "period_entitlement": {
+      "starting_date": "2023-09-06",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003667017",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "73": {
+    "subject": {
+      "forename": "Hugh",
+      "family_name": "Jackman",
+      "date_of_birth": "1972-06-28"
+    },
+    "social_security_pin": "70501734",
+    "period_entitlement": {
+      "starting_date": "2023-04-21",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003582443",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "74": {
+    "subject": {
+      "forename": "Gary",
+      "family_name": "Oldman",
+      "date_of_birth": "1988-09-09"
+    },
+    "social_security_pin": "57381544",
+    "period_entitlement": {
+      "starting_date": "2023-11-18",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003483005",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "75": {
+    "subject": {
+      "forename": "Chris",
+      "family_name": "Pratt",
+      "date_of_birth": "1974-01-07"
+    },
+    "social_security_pin": "74070435",
+    "period_entitlement": {
+      "starting_date": "2023-01-23",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003517908",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "76": {
+    "subject": {
+      "forename": "Owen",
+      "family_name": "Wilson",
+      "date_of_birth": "2007-09-11"
+    },
+    "social_security_pin": "45672389",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "67890123456789012345",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "77": {
+    "subject": {
+      "forename": "Will",
+      "family_name": "Smith",
+      "date_of_birth": "1992-03-13"
+    },
+    "social_security_pin": "85734926",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003630878",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "78": {
+    "subject": {
+      "forename": "Kate",
+      "family_name": "Winslet",
+      "date_of_birth": "1986-06-19"
+    },
+    "social_security_pin": "56783490",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "78901234567890123456",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "79": {
+    "subject": {
+      "forename": "Zoe",
+      "family_name": "Saldana",
+      "date_of_birth": "1981-11-23"
+    },
+    "social_security_pin": "80387895",
+    "period_entitlement": {
+      "starting_date": "2023-02-18",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003975414",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "80": {
+    "subject": {
+      "forename": "Jason",
+      "family_name": "Momoa",
+      "date_of_birth": "1983-08-20"
+    },
+    "social_security_pin": "80387895",
+    "period_entitlement": {
+      "starting_date": "2023-02-18",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003975414",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "81": {
+    "subject": {
+      "forename": "Jessica",
+      "family_name": "Biel",
+      "date_of_birth": "1988-09-12"
+    },
+    "social_security_pin": "23459056",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "45678901234567890123",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "82": {
+    "subject": {
+      "forename": "Penélope",
+      "family_name": "Cruz",
+      "date_of_birth": "1994-05-22"
+    },
+    "social_security_pin": "34559056",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "56789012345678901234",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "83": {
+    "subject": {
+      "forename": "Christoph",
+      "family_name": "Waltz",
+      "date_of_birth": "1986-03-23"
+    },
+    "social_security_pin": "78901234",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "90123456789012345678",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "84": {
+    "subject": {
+      "forename": "Nicole",
+      "family_name": "Kidman",
+      "date_of_birth": "1983-03-15"
+    },
+    "social_security_pin": "33133266",
+    "period_entitlement": {
+      "starting_date": "2023-03-01",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003767929",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "85": {
+    "subject": {
+      "forename": "Jennifer",
+      "family_name": "Lawrence",
+      "date_of_birth": "2006-02-14"
+    },
+    "social_security_pin": "43568744",
+    "period_entitlement": {
+      "starting_date": "2023-09-17",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003671438",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "86": {
+    "subject": {
+      "forename": "Ewan",
+      "family_name": "McGregor",
+      "date_of_birth": "1991-08-29"
+    },
+    "social_security_pin": "41191495",
+    "period_entitlement": {
+      "starting_date": "2023-12-31",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003991122",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "87": {
+    "subject": {
+      "forename": "Brad",
+      "family_name": "Pitt",
+      "date_of_birth": "1974-12-07"
+    },
+    "social_security_pin": "70501734",
+    "period_entitlement": {
+      "starting_date": "2023-04-21",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003582443",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "88": {
+    "subject": {
+      "forename": "Channing",
+      "family_name": "Tatum",
+      "date_of_birth": "2006-10-22"
+    },
+    "social_security_pin": "23456789",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "56789012345678901234",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "89": {
+    "subject": {
+      "forename": "Ben",
+      "family_name": "Affleck",
+      "date_of_birth": "1973-07-05"
+    },
+    "social_security_pin": "89016723",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "12345678901234567890",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "90": {
+    "subject": {
+      "forename": "Halle",
+      "family_name": "Berry",
+      "date_of_birth": "1989-08-25"
+    },
+    "social_security_pin": "12348945",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "34567890123456789012",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "91": {
+    "subject": {
+      "forename": "Samuel L.",
+      "family_name": "Jackson",
+      "date_of_birth": "2007-01-27"
+    },
+    "social_security_pin": "27713953",
+    "period_entitlement": {
+      "starting_date": "2023-10-04",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003850509",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "92": {
+    "subject": {
+      "forename": "Margot",
+      "family_name": "Robbie",
+      "date_of_birth": "1991-02-14"
+    },
+    "social_security_pin": "55625776",
+    "period_entitlement": {
+      "starting_date": "2023-01-15",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003841233",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "93": {
+    "subject": {
+      "forename": "Michelle",
+      "family_name": "Williams",
+      "date_of_birth": "1992-03-29"
+    },
+    "social_security_pin": "34561278",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "56789012345678901234",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "94": {
+    "subject": {
+      "forename": "Cate",
+      "family_name": "Blanchett",
+      "date_of_birth": "2006-11-08"
+    },
+    "social_security_pin": "34560167",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "56789012345678901234",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "95": {
+    "subject": {
+      "forename": "Sandra",
+      "family_name": "Bullock",
+      "date_of_birth": "1984-09-08"
+    },
+    "social_security_pin": "67893490",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "89012345678901234567",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "96": {
+    "subject": {
+      "forename": "Glenn",
+      "family_name": "Close",
+      "date_of_birth": "1981-02-05"
+    },
+    "social_security_pin": "12337834",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "34567890123456789012",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "97": {
+    "subject": {
+      "forename": "Matt",
+      "family_name": "Damon",
+      "date_of_birth": "1971-07-09"
+    },
+    "social_security_pin": "92330167",
+    "period_entitlement": {
+      "starting_date": "2023-03-13",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "78901234567890123456",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "98": {
+    "subject": {
+      "forename": "Judi",
+      "family_name": "Dench",
+      "date_of_birth": "1995-09-04"
+    },
+    "social_security_pin": "34873567",
+    "period_entitlement": {
+      "starting_date": "2023-04-21",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003707285",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  },
+  "99": {
+    "subject": {
+      "forename": "Julia",
+      "family_name": "Roberts",
+      "date_of_birth": "1982-07-30"
+    },
+    "social_security_pin": "43568744",
+    "period_entitlement": {
+      "starting_date": "2023-09-17",
+      "ending_date": "2026-04-12"
+    },
+    "document_id": "80246802460003671438",
+    "competent_institution": {
+      "institution_id": "CLEISS",
+      "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons for Social Security",
+      "institution_country": "FR"
+    }
+  }
+}

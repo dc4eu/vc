@@ -2,6 +2,7 @@ package parisusers
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -149,6 +150,59 @@ func EHIC(sourceFilePath string) []model.CompleteDocument {
 	}
 
 	return list
+}
+
+func ehicJSONToFile() {
+	docs := EHIC("testdata/users_paris.xlsx")
+	t := map[int]socialsecurity.EHICDocument{}
+
+	for i, doc := range docs {
+		ii := i + 70
+		fmt.Println("Processing document", ii)
+		fmt.Println("meta authentic source", doc.Meta.Collect.ID)
+		b, err := json.Marshal(doc.DocumentData)
+		if err != nil {
+			panic(err)
+		}
+
+		document := &socialsecurity.EHICDocument{}
+		json.Unmarshal(b, document)
+		t[ii] = *document
+	}
+
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	os.WriteFile("testdata/ehic.json", b, 0644)
+	fmt.Println("ehic.json created")
+
+}
+
+func pda1JsonToFile() {
+	docs := PDA1("testdata/users_paris.xlsx")
+	t := map[int]socialsecurity.PDA1Document{}
+
+	for i, doc := range docs {
+		ii := i + 70
+		fmt.Println("Processing document", ii)
+		b, err := json.Marshal(doc.DocumentData)
+		if err != nil {
+			panic(err)
+		}
+
+		document := &socialsecurity.PDA1Document{}
+		json.Unmarshal(b, document)
+		t[ii] = *document
+	}
+
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	os.WriteFile("testdata/pda1.json", b, 0644)
+	fmt.Println("pda1.json created")
+
 }
 
 // PDA1 returns a list of PDA1 documents

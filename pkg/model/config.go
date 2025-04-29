@@ -161,7 +161,7 @@ type BasicAuth struct {
 // APIGW holds the datastore configuration
 type APIGW struct {
 	APIServer   APIServer   `yaml:"api_server" validate:"required"`
-	OauthServer OAuthServer `yaml:"oauth_server"`
+	OauthServer OAuthServer `yaml:"oauth_server" validate:"omitempty"`
 }
 
 // Portal holds the persistent storage configuration

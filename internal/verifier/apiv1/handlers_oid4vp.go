@@ -22,7 +22,7 @@ import (
 func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRRequest) (*openid4vp.QRReply, error) {
 	//TODO: Inspect user-agent type to detect cross device or same device
 
-	if !(request.DocumentType == openid4vp.DocumentTypeEHIC || request.DocumentType == openid4vp.DocumentTypePDA1 || request.DocumentType == openid4vp.DocumentTypeELM) {
+	if !(request.DocumentType == openid4vp.DocumentTypeEHIC || request.DocumentType == openid4vp.DocumentTypePDA1 || request.DocumentType == openid4vp.DocumentTypeELM || request.DocumentType == openid4vp.DocumentTypePID) {
 		return nil, fmt.Errorf("document type not handled: %s", request.DocumentType)
 	}
 
@@ -161,16 +161,18 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
-	var presentationDefinition *openid4vp.PresentationDefinition
-	if vpSession.DocumentType == openid4vp.DocumentTypeEHIC {
-		presentationDefinition = EHICPresentationDefinition()
-	} else if vpSession.DocumentType == openid4vp.DocumentTypePDA1 {
-		presentationDefinition = PDA1PresentationDefinition()
-	} else {
+	switch vpSession.DocumentType {
+	case openid4vp.DocumentTypeEHIC:
+		vpSession.PresentationDefinition = EHICPresentationDefinition()
+	case openid4vp.DocumentTypePDA1:
+		vpSession.PresentationDefinition = PDA1PresentationDefinition()
+	case openid4vp.DocumentTypeELM:
+		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
+	case openid4vp.DocumentTypePID:
+		vpSession.PresentationDefinition = PIDPresentationDefinition()
+	default:
 		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
 	}
-
-	vpSession.PresentationDefinition = presentationDefinition
 
 	schema := "http://"
 	if c.cfg.Verifier.APIServer.TLS.Enabled {
@@ -193,7 +195,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		ResponseMode:           "direct_post.jwt",
 		State:                  vpSession.State,
 		Nonce:                  vpSession.Nonce,
-		PresentationDefinition: presentationDefinition,
+		PresentationDefinition: vpSession.PresentationDefinition,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    fqdn,
 			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"},

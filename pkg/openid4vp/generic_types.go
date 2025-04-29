@@ -11,6 +11,7 @@ const (
 	DocumentTypeEHIC = "EHIC"
 	DocumentTypeELM  = "ELM"
 	DocumentTypePDA1 = "PDA1"
+	DocumentTypePID  = "PID"
 
 	StatusQRDisplayed     InteractionStatus = "qr_displayed"
 	StatusQRScanned       InteractionStatus = "qr_scanned"

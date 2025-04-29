@@ -37,6 +37,7 @@ type Client struct {
 	pda1Client                 *pda1Client
 	elmClient                  *elmClient
 	diplomaClient              *diplomaClient
+	microCredentialClient      *microCredentialClient
 	openBadgeCompleteClient    *openbadgeCompleteClient
 	openBadgeBasicClient       *openbadgeBasicClient
 	OpenBadgeEndorsementClient *openbadgeEndorsementsClient
@@ -71,6 +72,11 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	c.diplomaClient, err = newDiplomaClient(c, tracer, c.log.New("diploma"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.microCredentialClient, err = newMicroCredentialClient(c, tracer, c.log.New("microCredential"))
 	if err != nil {
 		return nil, err
 	}

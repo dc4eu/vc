@@ -101,6 +101,11 @@ apigw:
     type: "openid_federation"
     trust_anchors:
       - "https://example.com/trust_anchor.pem"
+  oauth_server:
+    grant:
+      test_account:
+        client_type: xxx
+        redirection_endpoint: https://example.com/
   api_server:
     addr: :8080
     basic_auth:

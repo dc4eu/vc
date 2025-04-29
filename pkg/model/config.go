@@ -160,7 +160,8 @@ type BasicAuth struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
+	APIServer   APIServer   `yaml:"api_server" validate:"required"`
+	OauthServer OAuthServer `yaml:"oauth_server"`
 }
 
 // Portal holds the persistent storage configuration
@@ -174,6 +175,16 @@ type OTEL struct {
 	Addr    string `yaml:"addr" validate:"required"`
 	Type    string `yaml:"type" validate:"required"`
 	Timeout int64  `yaml:"timeout" default:"10"`
+}
+
+// OAuthGrant holds the oauth grant configuration
+type OAuthGrant struct {
+	ClientType string `yaml:"client_type" validate:"required,oneof=confidential public"`
+}
+
+// OAuthServer holds the oauth server configuration
+type OAuthServer struct {
+	Grant map[string]OAuthGrant `yaml:"grant" validate:"required"`
 }
 
 // UI holds the user-interface configuration

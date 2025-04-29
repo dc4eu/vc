@@ -37,9 +37,11 @@ type Client struct {
 	pda1Client                 *pda1Client
 	elmClient                  *elmClient
 	diplomaClient              *diplomaClient
+	microCredentialClient      *microCredentialClient
 	openBadgeCompleteClient    *openbadgeCompleteClient
 	openBadgeBasicClient       *openbadgeBasicClient
 	OpenBadgeEndorsementClient *openbadgeEndorsementsClient
+	PIDClient                  *pidClient
 }
 
 // New creates a new instance of the public api
@@ -74,6 +76,11 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 		return nil, err
 	}
 
+	c.microCredentialClient, err = newMicroCredentialClient(c, tracer, c.log.New("microCredential"))
+	if err != nil {
+		return nil, err
+	}
+
 	c.openBadgeCompleteClient, err = newOpenbadgeCompleteClient(c, tracer, c.log.New("openbadgeComplete"))
 	if err != nil {
 		return nil, err
@@ -85,6 +92,11 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	c.OpenBadgeEndorsementClient, err = newOpenbadgeEndorsementsClient(c, tracer, c.log.New("openbadgeEndorsement"))
+	if err != nil {
+		return nil, err
+	}
+
+	c.PIDClient, err = newPIDClient(c, tracer, c.log.New("pid"))
 	if err != nil {
 		return nil, err
 	}

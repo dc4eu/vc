@@ -39,6 +39,16 @@ type address struct {
 	Country  string `json:"country,omitempty"`
 }
 
+func (p *person) bootstrapPID() (map[string]any, error) {
+	doc := model.PIDDocument{
+		FirstName:   p.FirstName,
+		FamilyName:  p.FirstName,
+		DateOfBirth: p.DateOfBirth,
+	}
+
+	return doc.Marshal()
+}
+
 func (p *person) bootstrapPDA1() (map[string]any, error) {
 	doc := socialsecurity.PDA1Document{
 		SocialSecurityPin: p.SocialSecurityPin,
@@ -260,6 +270,14 @@ var persons = map[string][]person{
 			Nationality:             []string{"FR"},
 		},
 	},
+	"PID": {
+		{
+			AuthenticSourcePersonID: "30",
+			FirstName:               "Helen",
+			LastName:                "Mirren",
+			DateOfBirth:             "1996-01-30",
+		},
+	},
 }
 
 func (c *Client) bootstrapperConstructor(ctx context.Context) error {
@@ -294,6 +312,13 @@ func (c *Client) bootstrapperConstructor(ctx context.Context) error {
 				}
 
 				documentData = doc
+
+			case "PID":
+				var err error
+				documentData, err = p.bootstrapPID()
+				if err != nil {
+					return err
+				}
 			}
 			meta := &model.MetaData{
 				AuthenticSource: fmt.Sprintf("authentic_source_%s", strings.ToLower(p.Nationality[0])),

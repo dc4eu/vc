@@ -66,10 +66,11 @@ func (c *Service) apply(ctx context.Context) (*http.Response, error) {
 
 			resp, err := c.datastoreClient.Root.Upload(ctx, doc)
 			if err != nil {
+				c.log.Error(err, "upload error", "documentType", doc.Meta.DocumentType, "authenticSource", doc.Meta.AuthenticSource)
 				return resp, err
 			}
 
-			c.log.Debug("upload response", "status", resp.StatusCode)
+			c.log.Debug("upload response", "status", resp.StatusCode, "documentType", documentType, "user", user.firstName+" "+user.lastName)
 		}
 	}
 

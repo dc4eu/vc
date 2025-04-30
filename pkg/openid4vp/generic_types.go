@@ -8,10 +8,12 @@ import (
 )
 
 const (
-	DocumentTypeEHIC = "EHIC"
-	DocumentTypeELM  = "ELM"
-	DocumentTypePDA1 = "PDA1"
-	DocumentTypePID  = "PID"
+	DocumentTypeDiploma         = "Diploma"
+	DocumentTypeEHIC            = "EHIC"
+	DocumentTypeELM             = "Elm"
+	DocumentTypeMicrocredential = "Microcredential"
+	DocumentTypePDA1            = "PDA1"
+	DocumentTypePID             = "PID"
 
 	StatusQRDisplayed     InteractionStatus = "qr_displayed"
 	StatusQRScanned       InteractionStatus = "qr_scanned"
@@ -35,7 +37,7 @@ type QRReply struct {
 }
 
 type QRRequest struct {
-	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=EHIC ELM PDA1 PID "`
+	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=Diploma EHIC Elm Microcredential PDA1 PID"`
 }
 
 type KeyType string

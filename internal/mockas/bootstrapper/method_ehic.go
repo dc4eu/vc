@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"vc/pkg/datastoreclient"
 	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
 
@@ -14,14 +15,14 @@ import (
 
 type ehicClient struct {
 	client         *Client
-	documents      map[string]*model.CompleteDocument
+	documents      map[string]*datastoreclient.UploadRequest
 	credentialType string
 }
 
 func NewEHICClient(ctx context.Context, client *Client) (*ehicClient, error) {
 	ehicClient := &ehicClient{
 		client:         client,
-		documents:      map[string]*model.CompleteDocument{},
+		documents:      map[string]*datastoreclient.UploadRequest{},
 		credentialType: "ehic",
 	}
 	return ehicClient, nil
@@ -45,12 +46,12 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 	}
 
 	for _, row := range ehicRows {
-		pid := row[0]
-		if pid == "" || pid == "pid_id" {
+		pidNumber := row[0]
+		if pidNumber == "" || pidNumber == "pid_id" {
 			continue
 		}
 
-		c.documents[pid] = &model.CompleteDocument{}
+		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
 
 		SocialSecurityPin := row[4]
 		startDate := row[5]
@@ -61,16 +62,16 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 		InstitutionName := row[9]
 		InstitutionCountry := row[10]
 
-		user, ok := c.client.identities[pid]
+		identity, ok := c.client.identities[pidNumber]
 		if !ok {
-			return fmt.Errorf("no user found for pid %s", pid)
+			return fmt.Errorf("no user found for pid %s", pidNumber)
 		}
 
 		document := &socialsecurity.EHICDocument{
 			Subject: socialsecurity.Subject{
-				Forename:    user.Identities[0].GivenName,
-				FamilyName:  user.Identities[0].FamilyName,
-				DateOfBirth: user.Identities[0].BirthDate,
+				Forename:    identity.Identities[0].GivenName,
+				FamilyName:  identity.Identities[0].FamilyName,
+				DateOfBirth: identity.Identities[0].BirthDate,
 			},
 			SocialSecurityPin: SocialSecurityPin,
 			PeriodEntitlement: socialsecurity.PeriodEntitlement{
@@ -86,12 +87,12 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 		}
 
 		var err error
-		c.documents[pid].DocumentData, err = document.Marshal()
+		c.documents[pidNumber].DocumentData, err = document.Marshal()
 		if err != nil {
 			return err
 		}
 
-		c.documents[pid].Meta = &model.MetaData{
+		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: row[2],
 			DocumentVersion: "1.0.0",
 			DocumentType:    "EHIC",
@@ -107,7 +108,7 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 			DocumentDataValidationRef: "",
 		}
 
-		c.documents[pid].DocumentDisplay = &model.DocumentDisplay{
+		c.documents[pidNumber].DocumentDisplay = &model.DocumentDisplay{
 			Version: "1.0.0",
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
@@ -119,7 +120,9 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 				},
 			},
 		}
+		c.documents[pidNumber].Identities = identity.Identities
 
+		c.documents[pidNumber].DocumentDataVersion = "1.0.0"
 	}
 
 	return nil

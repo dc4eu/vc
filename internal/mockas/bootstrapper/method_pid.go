@@ -6,20 +6,21 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"vc/pkg/datastoreclient"
 	"vc/pkg/identity"
 	"vc/pkg/model"
 )
 
 type pidClient struct {
 	client         *Client
-	documents      map[string]*model.CompleteDocument
+	documents      map[string]*datastoreclient.UploadRequest
 	credentialType string
 }
 
 func NewPIDClient(ctx context.Context, client *Client) (*pidClient, error) {
 	pda1Client := &pidClient{
 		client:         client,
-		documents:      map[string]*model.CompleteDocument{},
+		documents:      map[string]*datastoreclient.UploadRequest{},
 		credentialType: "pid",
 	}
 
@@ -28,7 +29,7 @@ func NewPIDClient(ctx context.Context, client *Client) (*pidClient, error) {
 
 func (c *pidClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
-		c.documents[pidNumber] = &model.CompleteDocument{}
+		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
 
 		documentData := identity.PIDDocument{
 			GivenName:  id.Identities[0].GivenName,
@@ -46,10 +47,10 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 			AuthenticSource: "",
 			DocumentVersion: "1.0.0",
 			DocumentType:    "PID",
-			DocumentID:      fmt.Sprintf("document_id_pda1_%s", pidNumber),
+			DocumentID:      fmt.Sprintf("document_id_pid_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
-				ID:         fmt.Sprintf("collect_id_pda1_%s", pidNumber),
+				ID:         fmt.Sprintf("collect_id_pid_%s", pidNumber),
 				ValidUntil: 0,
 			},
 			Revocation:                &model.Revocation{},
@@ -70,6 +71,10 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 				},
 			},
 		}
+
+		//c.documents[pidNumber].Identities = identity.Identities
+
+		c.documents[pidNumber].DocumentDataVersion = "1.0.0"
 	}
 
 	return nil

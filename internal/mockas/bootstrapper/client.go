@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"vc/pkg/datastoreclient"
 	"vc/pkg/logger"
@@ -20,7 +21,7 @@ type clients interface {
 
 type Client struct {
 	cfg                   *model.Cfg
-	identities            map[string]*model.CompleteDocument
+	identities            map[string]*datastoreclient.UploadRequest
 	datastoreClient       *datastoreclient.Client
 	datastoreClientConfig *datastoreclient.Config
 	log                   *logger.Log
@@ -33,7 +34,7 @@ type Client struct {
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	client := &Client{
 		cfg:        cfg,
-		identities: map[string]*model.CompleteDocument{},
+		identities: map[string]*datastoreclient.UploadRequest{},
 		datastoreClientConfig: &datastoreclient.Config{
 			URL: cfg.MockAS.DatastoreURL,
 		},
@@ -45,8 +46,6 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 	if err != nil {
 		return nil, fmt.Errorf("new datastore client: %w", err)
 	}
-
-	//	client.makeIdentities("testdata/users_paris.xlsx")
 
 	client.pda1Client, err = NewPDA1Client(ctx, client)
 	if err != nil {
@@ -63,7 +62,12 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		return nil, fmt.Errorf("new pid client: %w", err)
 	}
 
-	client.uploader(ctx)
+	for _, credentialType := range []string{"ehic", "pda1"} { // pid is not working
+		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
+		if err := client.uploader(ctx, jsonPath); err != nil {
+			return nil, fmt.Errorf("uploader: %w", err)
+		}
+	}
 
 	return client, nil
 }
@@ -92,7 +96,7 @@ func (c *Client) makeIdentities(sourceFilePath string) error {
 			continue
 		}
 		dateOfBirth := strings.ReplaceAll(row[8], "/", "-")
-		c.identities[row[0]] = &model.CompleteDocument{
+		c.identities[row[0]] = &datastoreclient.UploadRequest{
 			DocumentDataVersion: "1.0.0",
 			Identities: []model.Identity{
 				{
@@ -113,23 +117,25 @@ func (c *Client) makeIdentities(sourceFilePath string) error {
 	return nil
 }
 
-func (c *Client) uploader(ctx context.Context) error {
-	b, err := os.ReadFile("../../../bootstrapper/ehic.json")
+func (c *Client) uploader(ctx context.Context, jsonPath string) error {
+	b, err := os.ReadFile(jsonPath)
 	if err != nil {
 		return err
 	}
 
-	body := &datastoreclient.UploadRequest{}
-	if err := json.Unmarshal(b, body); err != nil {
+	bodys := map[string]*datastoreclient.UploadRequest{}
+	if err := json.Unmarshal(b, &bodys); err != nil {
 		return err
 	}
 
-	resp, err := c.datastoreClient.Root.Upload(ctx, body)
-	if err != nil {
-		return err
-	}
+	for _, body := range bodys {
+		resp, err := c.datastoreClient.Root.Upload(ctx, body)
+		if err != nil {
+			return err
+		}
 
-	c.log.Debug("Upload", "resp", resp.StatusCode)
+		c.log.Debug("Upload", "resp", resp.StatusCode)
+	}
 
 	return nil
 }

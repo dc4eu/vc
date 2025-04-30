@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"vc/pkg/datastoreclient"
 	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
 
@@ -14,14 +15,14 @@ import (
 
 type pda1Client struct {
 	client         *Client
-	documents      map[string]*model.CompleteDocument
+	documents      map[string]*datastoreclient.UploadRequest
 	credentialType string
 }
 
 func NewPDA1Client(ctx context.Context, client *Client) (*pda1Client, error) {
 	c := &pda1Client{
 		client:         client,
-		documents:      map[string]*model.CompleteDocument{},
+		documents:      map[string]*datastoreclient.UploadRequest{},
 		credentialType: "pda1",
 	}
 
@@ -47,16 +48,16 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 	}
 
 	for _, row := range pda1Rows {
-		pid := row[0]
-		if pid == "" || pid == "pid_id" || pid == "pid_id (Spalte H, nach pda1_issuing_country)" {
+		pidNumber := row[0]
+		if pidNumber == "" || pidNumber == "pid_id" || pidNumber == "pid_id (Spalte H, nach pda1_issuing_country)" {
 			continue
 		}
 
-		c.documents[pid] = &model.CompleteDocument{}
+		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
 
-		_, ok := c.client.identities[pid]
+		identity, ok := c.client.identities[pidNumber]
 		if !ok {
-			return fmt.Errorf("no user found for pid %s", pid)
+			return fmt.Errorf("no user found for pid %s", pidNumber)
 		}
 
 		document := &socialsecurity.PDA1Document{
@@ -119,12 +120,12 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 		}
 
 		var err error
-		c.documents[pid].DocumentData, err = document.Marshal()
+		c.documents[pidNumber].DocumentData, err = document.Marshal()
 		if err != nil {
 			return err
 		}
 
-		c.documents[pid].Meta = &model.MetaData{
+		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: row[3],
 			DocumentVersion: "1.0.0",
 			DocumentType:    "PDA1",
@@ -140,7 +141,7 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 			DocumentDataValidationRef: "",
 		}
 
-		c.documents[pid].DocumentDisplay = &model.DocumentDisplay{
+		c.documents[pidNumber].DocumentDisplay = &model.DocumentDisplay{
 			Version: "1.0.0",
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
@@ -152,6 +153,10 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 				},
 			},
 		}
+
+		c.documents[pidNumber].Identities = identity.Identities
+
+		c.documents[pidNumber].DocumentDataVersion = "1.0.0"
 
 	}
 

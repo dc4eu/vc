@@ -1,0 +1,6962 @@
+{
+  "100": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_100",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_100"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28001",
+            "street": "Calle de Serrano 45",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "31",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Total Heat Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75029",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "40046784",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "101": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_101",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_101"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "60311",
+            "street": "Hauptstraße 12",
+            "town": "Frankfurt"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "32",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Safe \u0026 Sound Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "NO"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75030",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "80387895",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "102": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_102",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_102"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1100-001",
+            "street": "Rua Augusta 22",
+            "town": "Lissabon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "33",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "North Star Heating Co. Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "AT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75031",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "57381544",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "103": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_103",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_103"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1000",
+            "street": "Boulevard de la Liberté 3",
+            "town": "Brüssel"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "34",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Rapid Response Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "BE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75032",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "79785792",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "104": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_104",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_104"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "187",
+            "street": "Via dei Condotti 5",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "35",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Golden Gate Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75033",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "87299198",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "105": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_105",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_105"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28015",
+            "street": "Calle de Vallehermoso 45",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "36",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Horizon Heating \u0026 Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "PT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75034",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "44715442",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "106": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_106",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_106"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "70173",
+            "street": "Königstraße 10",
+            "town": "Stuttgart"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "37",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Trusty Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75035",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "70501734",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "107": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_107",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_107"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "69001",
+            "street": "Rue de la République 8",
+            "town": "Lyon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "38",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Efficient Energy Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "NL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75036",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "27713953",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "108": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_108",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_108"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "20123",
+            "street": "Via Torino 18",
+            "town": "Mailand"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "39",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Silver Lining Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "SE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75037",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "74070435",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "109": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_109",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_109"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28013",
+            "street": "Calle de Preciados 20",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "40",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "First Choice Heating Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75038",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "87416368",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "110": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_110",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_110"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "80331",
+            "street": "Hauptstraße 30",
+            "town": "München"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "41",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Dynamic Boiler Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "BG"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75039",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "33133266",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "111": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_111",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_111"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1100-001",
+            "street": "Rua do Ouro 5",
+            "town": "Lissabon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "42",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Comfort Zone Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75040",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "86154445",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "112": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_112",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_112"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "75002",
+            "street": "Boulevard de l'Opéra 12",
+            "town": "Paris"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "43",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Reliable Heat \u0026 Air Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DK"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75041",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "55625776",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "113": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_113",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_113"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "50129",
+            "street": "Via della Libertà 7",
+            "town": "Florenz"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "44",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Top Notch Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "IT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75042",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "43568744",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "114": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_114",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_114"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28012",
+            "street": "Calle de Atocha 45",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "45",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Family First Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75043",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "65664926",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "115": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_115",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_115"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "70173",
+            "street": "Königstraße 15",
+            "town": "Stuttgart"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "46",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Clear Choice Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "EE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75044",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "85734926",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "116": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_116",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_116"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1000",
+            "street": "Rue de la Paix 22",
+            "town": "Brüssel"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "47",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Dependable Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75045",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "87451234",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "117": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_117",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_117"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "186",
+            "street": "Via dei Banchi 3",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "48",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Bright Future Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "NL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75046",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "23987456",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "118": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_118",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_118"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28001",
+            "street": "Calle de Goya 10",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "49",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "All-Star Heating Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75047",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "98765432",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "119": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_119",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_119"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "50667",
+            "street": "Hauptstraße 5",
+            "town": "Köln"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "50",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Comfort Masters Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "CH"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75048",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "12345678",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "120": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_120",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_120"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1100-001",
+            "street": "Rua da Prata 8",
+            "town": "Lissabon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "51",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Next Level Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75049",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "45678901",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "121": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_121",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_121"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1060",
+            "street": "Boulevard de la Gare 4",
+            "town": "Brüssel"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "52",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Quality Care Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "SK"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75050",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "23456789",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "122": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_122",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_122"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "50122",
+            "street": "Via della Storia 9",
+            "town": "Florenz"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "53",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Precision Heat \u0026 Air Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75051",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "34567890",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "123": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_123",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_123"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28015",
+            "street": "Calle de Vallehermoso 30",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "54",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Safe Harbor Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75052",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "56789012",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "124": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_124",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_124"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "70173",
+            "street": "Königstraße 20",
+            "town": "Stuttgart"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "55",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Eco-Friendly Heating Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "AT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75053",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "67890123",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "125": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_125",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_125"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1000",
+            "street": "Rue de la Montagne 11",
+            "town": "Brüssel"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "56",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Local Heroes Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75054",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "78901234",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "126": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_126",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_126"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "185",
+            "street": "Via della Repubblica 25",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "57",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Ultimate Comfort Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "IE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75055",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "89012345",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "127": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_127",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_127"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28008",
+            "street": "Calle de la Princesa 12",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "58",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Trusted Plumbing Experts Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "PL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75056",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "90123456",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "128": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_128",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_128"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "20095",
+            "street": "Hauptstraße 18",
+            "town": "Hamburg"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "59",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Peak Performance Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75057",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "34561278",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "129": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_129",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_129"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1100-001",
+            "street": "Rua do Comércio 14",
+            "town": "Lissabon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "60",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Community Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "NL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75058",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "45672389",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "130": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_130",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_130"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1000",
+            "street": "Boulevard de l'Indépendance 6",
+            "town": "Brüssel"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "61",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Smart Choice Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75059",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "56783490",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "131": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_131",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_131"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "50121",
+            "street": "Via dei Giardini 4",
+            "town": "Florenz"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "62",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Reliable Heat Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "ES"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75060",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "67894501",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "132": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_132",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_132"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28002",
+            "street": "Calle de la Paz 7",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "63",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Comfort First Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75061",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "78905612",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "133": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_133",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_133"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "70173",
+            "street": "Königstraße 25",
+            "town": "Stuttgart"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "64",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Blue Ribbon Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FI"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75062",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "89016723",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "134": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_134",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_134"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "69005",
+            "street": "Rue de l'Église 3",
+            "town": "Lyon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "65",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Efficient Heat \u0026 Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75063",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "90127834",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "135": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_135",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_135"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "60311",
+            "street": "Hauptstraße 12",
+            "town": "Frankfurt"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "66",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Family Owned Heating Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "HR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75064",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "12348945",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "136": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_136",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_136"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1100-001",
+            "street": "Rua Augusta 22",
+            "town": "Lissabon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "67",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Proactive Plumbing Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75065",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "23459056",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "137": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_137",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_137"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1000",
+            "street": "Boulevard de la Liberté 3",
+            "town": "Brüssel"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "68",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Comfort Keepers Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75066",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "34560167",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "138": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_138",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_138"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "186",
+            "street": "Via dei Fori Imperiali 1",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "69",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "All Weather Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "PL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75067",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "45671278",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "139": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_139",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_139"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28001",
+            "street": "Calle de Serrano 45",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "70",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Dependable Plumbing Co. Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75068",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "56782389",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "140": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_140",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_140"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "80331",
+            "street": "Hauptstraße 30",
+            "town": "München"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "71",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Quality Heat Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "SK"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75069",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "67893490",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "141": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_141",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_141"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1100-001",
+            "street": "Rua do Ouro 5",
+            "town": "Lissabon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "72",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Rapid Response Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75070",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "78904501",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "142": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_142",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_142"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "75002",
+            "street": "Boulevard de l'Opéra 12",
+            "town": "Paris"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "73",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Trusted Boiler Installations Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "PT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75071",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "89015612",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "143": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_143",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_143"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "50122",
+            "street": "Via della Repubblica 15",
+            "town": "Florenz"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "74",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Green Energy Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75072",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "90126723",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "144": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_144",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_144"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28012",
+            "street": "Calle de Atocha 45",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "75",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Comfort Crew Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "NL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75073",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "12337834",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "145": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_145",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_145"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "70173",
+            "street": "Königstraße 10",
+            "town": "Stuttgart"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "76",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Reliable Radiators \u0026 Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75074",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "23448945",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "146": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_146",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_146"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "69001",
+            "street": "Rue de la République 8",
+            "town": "Lyon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "77",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Total Comfort Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "AT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75075",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "34559056",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "147": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_147",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_147"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "20123",
+            "street": "Via Torino 18",
+            "town": "Mailand"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "78",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Neighborhood Heating Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75076",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "45660167",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "148": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_148",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_148"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28013",
+            "street": "Calle de Preciados 20",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "79",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Premier Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75077",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "92330167",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "149": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_149",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_149"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "50667",
+            "street": "Hauptstraße 5",
+            "town": "Köln"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "80",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Yellow Energy Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75078",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "80440167",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "70": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_70",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_70"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "78532",
+            "street": "In Thiergarten 17 ",
+            "town": "Tuttlingen"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "1",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Hackman Kitchens Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "23451235",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "71": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_71",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_71"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "94366",
+            "street": "Heilingmühl 26",
+            "town": "Perasdorf"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "2",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Harding Vans Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "AT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "1",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "34873567",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "72": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_72",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_72"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "91054",
+            "street": "Im Herrengarten 24-28 ",
+            "town": "Buckenhof"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "3",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Fairchild Powdered Coatings Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "76841223",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "73": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_73",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_73"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "72119",
+            "street": "Blumenstr. 44",
+            "town": "Ammerbuch"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "4",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Eagle Office Supplies Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "83865760",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "74": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_74",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_74"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "42477",
+            "street": "Heinz-Rosendahl-Str. 23",
+            "town": "Radevormwald"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "5",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "On Point Refrigeration Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "BE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "1",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "39738563",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "75": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_75",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_75"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "96476",
+            "street": "Steinfelder Str. 3",
+            "town": "Bad Rodach"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "6",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Jagger Recreational Vehicles Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "29899548",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "76": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_76",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_76"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "10117",
+            "street": "Forum an der Museumsinsel 1 Mitte",
+            "town": "Berlin"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "7",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Classic Sporting Goods Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "IT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "52712842",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "77": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_77",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_77"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "89264",
+            "street": "Dietschstr. 8 ",
+            "town": "Weißenhorn"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "8",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Hamill Travel Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "NL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "1",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "42388599",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "78": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_78",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_78"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "57639",
+            "street": "Kirchstr. 32 ",
+            "town": "Oberdreis"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "9",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Adam Technical Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "44460320",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "79": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_79",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_79"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "16348",
+            "street": "Lanker Weg 27 ",
+            "town": "Wandlitz"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "10",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "East Coachworks Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "71509226",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "80": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_80",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_80"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "22609",
+            "street": "Christian-F.-Hansen-Str. 1",
+            "town": "Hamburg"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "11",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Oakes Kitchens Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "BG"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "1",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "42393788",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "81": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_81",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_81"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "79098",
+            "street": "Eisenstr. 34",
+            "town": "Freiburg im Breisgau"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "12",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Hillside Cash \u0026 Carry Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "86368354",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "82": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_82",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_82"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "76437",
+            "street": "Friedrich-Ebert-Str. 23 ",
+            "town": "Rastatt"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "13",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Hobbs Lab Equipment Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "CH"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "61350638",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "83": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_83",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_83"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "49393",
+            "street": "Moorstr. 27",
+            "town": "Lohne (Oldenburg)"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "14",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Astral Insurance Brokers Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "1",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "40046784",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "84": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_84",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_84"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "39387",
+            "street": "Neubauernweg 9",
+            "town": "Oschersleben (Bode)"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "15",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Newbry Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DK"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75013",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "80387895",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "85": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_85",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_85"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "187",
+            "street": "Via dei Fiori 12",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "16",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Greenfield Plumbing Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "PL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75014",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "57381544",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "86": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_86",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_86"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "75002",
+            "street": "Rue de la Paix 12",
+            "town": "Paris"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "17",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Apex Heating Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75015",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "79785792",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "87": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_87",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_87"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "184",
+            "street": "Via Roma 45",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "18",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Summit Boiler Installations Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "AT"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75016",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "87299198",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "88": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_88",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_88"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "10115",
+            "street": "Hauptstraße 23",
+            "town": "Berlin"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "19",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Reliable Radiant Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75017",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "44715442",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "89": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_89",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_89"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28013",
+            "street": "Calle Gran Vía 78",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "20",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Blue Sky Plumbing Co. Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "IE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75018",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "70501734",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "90": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_90",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_90"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "20121",
+            "street": "Via Garibaldi 10",
+            "town": "Mailand"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "21",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Precision Boiler Maintenance Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75019",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "27713953",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "91": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_91",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_91"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "70173",
+            "street": "Königstraße 5",
+            "town": "Stuttgart"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "22",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Evergreen Heating \u0026 Cooling Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "NL"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75020",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "74070435",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "92": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_92",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_92"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "1150-001",
+            "street": "Rua da Liberdade 34",
+            "town": "Lissabon"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "23",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Urban Heat Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "SK"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75021",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "87416368",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "93": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_93",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_93"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "75005",
+            "street": "Boulevard Saint-Germain 6",
+            "town": "Paris"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "24",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "ProTech Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75022",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "33133266",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "94": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_94",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_94"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "184",
+            "street": "Via Nazionale 22",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "25",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Crystal Clear Plumbing Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "CZ"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75023",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "86154445",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "95": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_95",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_95"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "28014",
+            "street": "Calle de Alcalá 50",
+            "town": "Madrid"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "26",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Elite Boiler Repairs Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75024",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "55625776",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "96": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_96",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_96"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "10178",
+            "street": "Karl-Marx-Straße 8",
+            "town": "Berlin"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "27",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Fast Flow Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "ES"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75025",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "43568744",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "97": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_97",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_97"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "50122",
+            "street": "Via della Repubblica 15",
+            "town": "Florenz"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "28",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Quality Comfort Solutions Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FR"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75026",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "65664926",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "98": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_98",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_98"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "75001",
+            "street": "Rue de Rivoli 100",
+            "town": "Paris"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "29",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "All Seasons Boiler Services Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "FI"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75027",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "37400178",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  },
+  "99": {
+    "meta": {
+      "authentic_source": "PDA1:00001",
+      "document_version": "1.0.0",
+      "document_type": "PDA1",
+      "document_id": "document_id_pda1_99",
+      "real_data": false,
+      "collect": {
+        "id": "collect_id_pda1_99"
+      },
+      "revocation": {
+        "reference": {}
+      }
+    },
+    "document_display": {
+      "version": "1.0.0",
+      "type": "secure",
+      "description_structured": {
+        "en": {
+          "documentType": "PDA1"
+        },
+        "sv": {
+          "documentType": "PDA1"
+        }
+      }
+    },
+    "document_data": {
+      "competent_institution": {
+        "country_code": "FR",
+        "institution_id": "CLEISS",
+        "institution_name": "Groupe Caisse des Dépôts assisted by the Centre of European and International Liaisons \nfor Social Security"
+      },
+      "decision_legislation_applicable": {
+        "ending_date": "2026-04-20",
+        "member_state_which_legislation_applies": "FR",
+        "starting_date": "2024-04-05",
+        "transitional_rule_apply": false
+      },
+      "details_of_employment": [
+        {
+          "address": {
+            "country": "EU",
+            "post_code": "186",
+            "street": "Via dei Fori Imperiali 1",
+            "town": "Rom"
+          },
+          "ids_of_employer": [
+            {
+              "employer_id": "30",
+              "type_of_id": "02"
+            }
+          ],
+          "name": "Premier Plumbing \u0026 Heating Ltd",
+          "type_of_employment": "02"
+        }
+      ],
+      "nationality": [
+        "DE"
+      ],
+      "places_of_work": [
+        {
+          "a_fixed_place_of_work_exist": false,
+          "country_work": "FR",
+          "place_of_work": [
+            {
+              "address": {
+                "post_code": "75028",
+                "street": "72, avenue Pierre Mendès-France",
+                "town": "Paris"
+              },
+              "company_vessel_name": "",
+              "flag_state_home_base": "",
+              "ids_of_company": [
+                {
+                  "company_id": "2",
+                  "type_of_id": "02"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "social_security_pin": "41191495",
+      "status_confirmation": "01",
+      "unique_number_of_issued_document": ""
+    }
+  }
+}

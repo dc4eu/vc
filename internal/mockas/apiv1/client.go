@@ -3,7 +3,6 @@ package apiv1
 import (
 	"context"
 	"net/http"
-	parisusers "vc/internal/mockas/paris_users"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
@@ -40,18 +39,6 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 
 		PDA1: &PDA1Service{},
 		EHIC: &EHICService{},
-	}
-
-	c.PDA1 = &PDA1Service{
-		Client: c,
-	}
-	c.EHIC = &EHICService{
-		Client: c,
-	}
-	c.parisMocks = parisusers.Make("./users_paris.xlsx")
-
-	if err := c.bootstrapper(ctx); err != nil {
-		return nil, err
 	}
 
 	c.log.Info("Started")

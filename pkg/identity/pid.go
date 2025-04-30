@@ -1,11 +1,11 @@
-package model
+package identity
 
 import "encoding/json"
 
 type PIDDocument struct {
-	FirstName   string `json:"first_name" validate:"required"`
-	FamilyName  string `json:"family_name" validate:"required"`
-	DateOfBirth string `json:"date_of_birth" validate:"required"`
+	GivenName  string `json:"given_name" bson:"given_name" validate:"required"`
+	FamilyName string `json:"family_name" bson:"family_name" validate:"required"`
+	BirthDate  string `json:"birth_date" bson:"birth_date" validate:"required"`
 }
 
 // Marshal marshals the document to a map

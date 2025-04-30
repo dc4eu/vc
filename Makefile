@@ -30,14 +30,6 @@ stop:
 
 restart: stop start
 
-docker-build-and-restart-verifier:
-	$(info docker-build-verifier)
-	$(MAKE) docker-build-verifier
-	$(info stop-verifier)
-	docker compose -f docker-compose.yaml rm -s -f verifier
-	$(info start-verifier)
-	docker compose -f docker-compose.yaml up -d --remove-orphans verifier
-
 get_release-tag:
 	@date +'%Y%m%d%H%M%S%9N'
 
@@ -104,6 +96,14 @@ docker-build-verifier-debug:
 	$(info Docker Building verifier with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker_debug .
 
+docker-build-and-restart-verifier:
+	$(info docker-build-verifier)
+	$(MAKE) docker-build-verifier
+	$(info stop-verifier)
+	docker compose -f docker-compose.yaml rm -s -f verifier
+	$(info start-verifier)
+	docker compose -f docker-compose.yaml up -d --remove-orphans verifier
+
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=registry --tag $(DOCKER_TAG_REGISTRY) --file dockerfiles/worker .
@@ -147,6 +147,14 @@ docker-build-ui:
 docker-build-ui-debug:
 	$(info Docker building ui with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/web_worker_debug .
+
+docker-build-and-restart-ui:
+	$(info docker-build-ui)
+	$(MAKE) docker-build-ui
+	$(info stop-ui)
+	docker compose -f docker-compose.yaml rm -s -f ui
+	$(info start-ui)
+	docker compose -f docker-compose.yaml up -d --remove-orphans ui
 
 docker-build-portal:
 	$(info Docker building portal with tag: $(VERSION))

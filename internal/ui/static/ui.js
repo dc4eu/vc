@@ -802,30 +802,51 @@ function displayQRInModal(rowData) {
     }).then(data => {
         if (Array.isArray(data.documents) && data.documents.length === 0) {
             displayErrorTag("No document found", modalBodyDiv);
+            //TODO(mk): check/error handling if no qr or base64_image exist
             return;
         }
 
-        //TODO(mk): check/error handling if no qr or base64_image exist
+        const credentialOfferUrl = data.documents[0].qr.credential_offer_url;
+
         const img = document.createElement("img");
         img.src = `data:image/png;base64,${data.documents[0].qr.qr_base64}`;
+        img.title = credentialOfferUrl;
         modalBodyDiv.appendChild(img);
 
-        const followLinkButton = document.createElement("button");
-        followLinkButton.id = generateUUID();
-        followLinkButton.classList.add("button", "is-link");
-        followLinkButton.title = data.documents[0].qr.credential_offer;
-        followLinkButton.textContent = "Follow QR-code (opens a new browser window or tab)";
-        followLinkButton.addEventListener("click", function () {
-            const url = data.documents[0].qr.credential_offer_url;
-            window.open(`${url}`, "_blank");
+        const openInDC4EUWWWalletButton = document.createElement("button");
+        const dc4euWWWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://dc4eu.wwwallet.org/cb?")
+        openInDC4EUWWWalletButton.id = generateUUID();
+        openInDC4EUWWWalletButton.classList.add("button", "is-link");
+        openInDC4EUWWWalletButton.title = dc4euWWWalletURL;
+        openInDC4EUWWWalletButton.textContent = "Open in DC4EU wwWallet (opens in a new tab or window)";
+        openInDC4EUWWWalletButton.addEventListener("click", function () {
+            window.open(`${dc4euWWWalletURL}`, "_blank");
         });
-        modalParts.footer.appendChild(followLinkButton);
+        modalParts.footer.appendChild(openInDC4EUWWWalletButton);
+
+        const openInDemoWWWalletButton = document.createElement("button");
+        const demoWWWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://demo.wwwallet.org/cb?")
+        openInDemoWWWalletButton.id = generateUUID();
+        openInDemoWWWalletButton.classList.add("button", "is-link");
+        openInDemoWWWalletButton.title = demoWWWalletURL;
+        openInDemoWWWalletButton.textContent = "Open in demo wwWallet (opens in a new tab or window)";
+        openInDemoWWWalletButton.addEventListener("click", function () {
+            window.open(`${demoWWWalletURL}`, "_blank");
+        });
+        modalParts.footer.appendChild(openInDemoWWWalletButton);
 
         //modalBodyDiv.innerText = JSON.stringify(data, null, 2);
     }).catch(err => {
         console.error("Unexpected error:", err);
         displayErrorTag("Failed to display QR-code: ", modalBodyDiv, err);
     });
+}
+
+function safeReplace(input, toReplace, replacement) {
+    if (typeof input !== "string") return "";
+    if (typeof toReplace !== "string" || toReplace === "") return input;
+    if (!input.includes(toReplace)) return input;
+    return input.replace(toReplace, replacement);
 }
 
 function displayCreateCredentialInModal(rowData) {
@@ -1002,7 +1023,7 @@ function buildDocumentTableRow(doc) {
     row.appendChild(tdBirthDate);
 
     const tdQRCredentialOfferUrl = document.createElement('td');
-    const credentialOfferUrl = doc.qr?.credential_offer || "";
+    const credentialOfferUrl = doc.qr?.credential_offer_url || "";
     tdQRCredentialOfferUrl.textContent = credentialOfferUrl;
     row.appendChild(tdQRCredentialOfferUrl);
 
@@ -1100,7 +1121,12 @@ const addSearchDocumentsFormArticleToContainer = () => {
         const documentTypeSelectWithinDivElement = createSelectElement([{
             value: '',
             label: 'Document type (optional)'
-        }, {value: 'EHIC', label: 'EHIC'},{value: 'ELM', label: 'ELM'},{value: 'PDA1', label: 'PDA1'},{value: 'PID', label: 'PID'}]);
+        }, {value: 'Diploma', label: 'Diploma'},
+            {value: 'EHIC', label: 'EHIC'},
+            {value: 'Elm', label: 'Elm'},
+            {value: 'Microcredential', label: 'Microcredential'},
+            {value: 'PDA1', label: 'PDA1'},
+            {value: 'PID', label: 'PID'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
         const documentTypeSelect = documentTypeSelectWithinDivElement[1];
 

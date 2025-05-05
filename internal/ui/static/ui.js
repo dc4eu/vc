@@ -1123,8 +1123,8 @@ const addSearchDocumentsFormArticleToContainer = () => {
             label: 'Document type (optional)'
         }, {value: 'Diploma', label: 'Diploma'},
             {value: 'EHIC', label: 'EHIC'},
-            {value: 'Elm', label: 'Elm'},
-            {value: 'Microcredential', label: 'Microcredential'},
+            {value: 'ELM', label: 'ELM'},
+            {value: 'MicroCredential', label: 'MicroCredential'},
             {value: 'PDA1', label: 'PDA1'},
             {value: 'PID', label: 'PID'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];

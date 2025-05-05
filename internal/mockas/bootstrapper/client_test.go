@@ -55,4 +55,16 @@ func TestCreateJSONSourceFiles(t *testing.T) {
 		assert.NoError(t, err)
 
 	})
+
+	t.Run("elm", func(t *testing.T) {
+		client, err := NewELMClient(ctx, c)
+		assert.NoError(t, err)
+
+		err = client.makeSourceData("testdata/users_paris.xlsx")
+		assert.NoError(t, err)
+
+		err = client.save2Disk()
+		assert.NoError(t, err)
+
+	})
 }

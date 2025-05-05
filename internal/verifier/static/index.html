@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC verifier</title>
+    <script src="/static/verifier.js"></script>
+    <!--    <script src="verifier.js"></script>-->
+    <!--    <link rel="stylesheet" href="/static/bulma.min.css">-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <!--TODO(mk): create and add favico to /static/ -->
+    <!--    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">-->
+    <!--    <link rel="stylesheet" href="/static/font-awesome.min.css">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+<section class="section">
+    <div class="container">
+
+        <h1 class="title has-text-centered has-text-weight-bold is-size-2">VC Verifier</h1>
+
+        <div id="indexContainer" class="box">
+            <p class="subtitle">Select a document type to start the process.</p>
+            <div class="field">
+                <label class="label">Document type</label>
+                <div class="control">
+                    <div class="select">
+                        <select id="documentTypeSelect">
+                            <option value="Diploma">Diploma</option>
+                            <option value="EHIC" selected>EHIC</option>
+                            <option value="ELM">ELM</option>
+<!--                            <option value="MicroCredential">Microcredential</option>-->
+                            <option value="PDA1">PDA1</option>
+                            <option value="PID">PID</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="button is-primary" onclick="startVPFlow()">Start the verification process</button>
+        </div>
+
+        <div id="qrContainer" class="box is-hidden">
+            <p class="subtitle">QR code</p>
+            <p id="qrErrorMessage" class="notification is-danger is-hidden">An error occured: ...</p>
+            <img id="qrImage" class="is-hidden" alt="QR code">
+            <p id="qrInfoText" class="mt-2 is-hidden">Scan the QR code with a device containing a wallet Or click the
+                button below to use a
+                browser
+                wallet.</p>
+            <button id="openInDC4EUWWWalletButton" class="button is-link mt-2 is-hidden">Open in DC4EU wwWallet (opens in
+                a new tab
+                or window)
+            </button>
+            <br>
+            <button id="openInDemoWWWalletButton" class="button is-link mt-2 is-hidden">Open in demo wwWallet (opens in
+                a new tab
+                or window)
+            </button>
+            <br>
+            <button id="checkVerificationResultButton" class="button is-warning mt-2 is-hidden"
+                    onclick="checkVPVerificationResult()">Check verification result
+            </button>
+            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit and return to start page</button>
+        </div>
+
+        <div id="verificationContainer" class="box is-hidden">
+            <p class="subtitle ">Verification result</p>
+            <p id="verificationErrorMessage" class="notification is-danger is-hidden">An error occured: ...</p>
+            <div class="icons-container">
+                <span id="spinnerIcon" class="icon has-text-warning"><i class="fas fa-spinner fa-spin fa-3x"></i></span>
+                <span id="okIcon" class="icon has-text-success is-hidden"><i
+                        class="fas fa-check-circle fa-3x"></i></span>
+                <span id="errorIcon" class="icon has-text-danger is-hidden"><i
+                        class="fas fa-times-circle fa-3x"></i></span>
+            </div>
+            <br>
+            <p><strong>Status:</strong> <span id="statusValue">Unknown</span></p>
+            <br>
+
+            <label class="label">Claims</label>
+            <textarea id="claimsDisplay" class="textarea is-small" readonly rows="30"></textarea>
+            <br>
+            <button id="refreshVerificationResult" onclick="refreshVerificationResult()" class="button is-link mt-2">
+                Refresh (just for dev)
+            </button>
+            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit and return to start page</button>
+        </div>
+
+    </div>
+</section>
+
+</body>
+
+</html>

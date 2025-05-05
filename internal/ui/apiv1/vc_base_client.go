@@ -23,6 +23,7 @@ func NewClient(serviceName string, baseUrl string, tracer *trace.Tracer, logger 
 		serviceName: serviceName,
 		baseUrl:     baseUrl,
 		httpClient: &http.Client{
+			//TODO(mk): set timeout in config
 			Timeout: 10 * time.Second,
 		},
 		logger: logger,
@@ -31,6 +32,7 @@ func NewClient(serviceName string, baseUrl string, tracer *trace.Tracer, logger 
 	return client
 }
 
+// TODO(mk): DEPRECATED USE GENERIC POST FUNC
 func (c *VCBaseClient) DoPostJSON(endpoint string, reqBody any) (*map[string]any, error) {
 	url := c.url(endpoint)
 
@@ -82,9 +84,12 @@ func DoPostJSONGeneric[T any](c *VCBaseClient, endpoint string, reqBody any) (*T
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		//TODO(mk): also return resp.StatusCode if resp and code not nil
 		return nil, err
 	}
 	defer c.closeBody(resp)
+
+	//TODO(mk): also return resp.StatusCode in all returns below
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

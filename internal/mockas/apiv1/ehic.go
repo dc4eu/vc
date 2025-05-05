@@ -2,7 +2,6 @@ package apiv1
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 	"vc/pkg/socialsecurity"
@@ -15,14 +14,14 @@ type EHICService struct {
 	Client *Client
 }
 
-func (s *EHICService) random(ctx context.Context, person *gofakeit.PersonInfo) map[string]any {
+func (s *EHICService) random(ctx context.Context, person *person) (map[string]any, error) {
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	doc := socialsecurity.EHICDocument{
 		Subject: socialsecurity.Subject{
-			Forename:    person.FirstName,
-			FamilyName:  person.LastName,
+			Forename:    person.sa.FirstName,
+			FamilyName:  person.sa.LastName,
 			DateOfBirth: gofakeit.Date().String(),
 		},
 		SocialSecurityPin: gofakeit.Numerify("##########"),
@@ -38,15 +37,5 @@ func (s *EHICService) random(ctx context.Context, person *gofakeit.PersonInfo) m
 		},
 	}
 
-	jsonBytes, err := json.Marshal(doc)
-	if err != nil {
-		panic(err)
-	}
-
-	reply := map[string]any{}
-	if err := json.Unmarshal(jsonBytes, &reply); err != nil {
-		panic(err)
-	}
-
-	return reply
+	return doc.Marshal()
 }

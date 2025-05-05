@@ -6,10 +6,11 @@ import (
 
 // APIServer holds the api server configuration
 type APIServer struct {
-	Addr       string            `yaml:"addr" validate:"required"`
-	PublicKeys map[string]string `yaml:"public_keys"`
-	TLS        TLS               `yaml:"tls" validate:"omitempty"`
-	BasicAuth  BasicAuth         `yaml:"basic_auth"`
+	Addr         string            `yaml:"addr" validate:"required"`
+	ExternalPort string            `yaml:"external_port,omitempty" validate:"omitempty"`
+	PublicKeys   map[string]string `yaml:"public_keys"`
+	TLS          TLS               `yaml:"tls" validate:"omitempty"`
+	BasicAuth    BasicAuth         `yaml:"basic_auth"`
 }
 
 // TLS holds the tls configuration
@@ -46,14 +47,15 @@ type Log struct {
 
 // Common holds the common configuration
 type Common struct {
-	HTTPProxy  string   `yaml:"http_proxy"`
-	Production bool     `yaml:"production"`
-	Log        Log      `yaml:"log"`
-	Mongo      Mongo    `yaml:"mongo" validate:"omitempty"`
-	Tracing    OTEL     `yaml:"tracing" validate:"required"`
-	KeyValue   KeyValue `yaml:"key_value" validate:"omitempty"`
-	QR         QRCfg    `yaml:"qr" validate:"omitempty"`
-	Kafka      Kafka    `yaml:"kafka" validate:"omitempty"`
+	HTTPProxy           string   `yaml:"http_proxy"`
+	Production          bool     `yaml:"production"`
+	Log                 Log      `yaml:"log"`
+	Mongo               Mongo    `yaml:"mongo" validate:"omitempty"`
+	Tracing             OTEL     `yaml:"tracing" validate:"required"`
+	KeyValue            KeyValue `yaml:"key_value" validate:"omitempty"`
+	QR                  QRCfg    `yaml:"qr" validate:"omitempty"`
+	Kafka               Kafka    `yaml:"kafka" validate:"omitempty"`
+	CredentialOfferType string   `yaml:"credential_offer_type" validate:"required,oneof=credential_offer_uri credential_offer"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -114,6 +116,9 @@ type Issuer struct {
 	JWTAttribute       JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 	IssuerURL          string       `yaml:"issuer_url" validate:"required"`
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
+
+	// MetadataPath path to the metadata file, OpenID
+	MetadataPath string `yaml:"metadata_path" validate:"required"`
 }
 
 // Registry holds the registry configuration
@@ -138,6 +143,7 @@ type MockAS struct {
 type Verifier struct {
 	APIServer  APIServer  `yaml:"api_server" validate:"required"`
 	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
+	FQDN       string     `yaml:"fqdn" validate:"required"`
 }
 
 // Datastore holds the datastore configuration
@@ -154,7 +160,8 @@ type BasicAuth struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer APIServer `yaml:"api_server" validate:"required"`
+	APIServer   APIServer   `yaml:"api_server" validate:"required"`
+	OauthServer OAuthServer `yaml:"oauth_server" validate:"omitempty"`
 }
 
 // Portal holds the persistent storage configuration
@@ -168,6 +175,16 @@ type OTEL struct {
 	Addr    string `yaml:"addr" validate:"required"`
 	Type    string `yaml:"type" validate:"required"`
 	Timeout int64  `yaml:"timeout" default:"10"`
+}
+
+// OAuthGrant holds the oauth grant configuration
+type OAuthGrant struct {
+	ClientType string `yaml:"client_type" validate:"required,oneof=confidential public"`
+}
+
+// OAuthServer holds the oauth server configuration
+type OAuthServer struct {
+	Grant map[string]OAuthGrant `yaml:"grant" validate:"required"`
 }
 
 // UI holds the user-interface configuration

@@ -1,8 +1,12 @@
 package httphelpers
 
 import (
+	"context"
+	"net/http"
 	"reflect"
+	"time"
 	"vc/pkg/logger"
+	"vc/pkg/openid4vci"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -42,4 +46,17 @@ func kindOfData(data any) reflect.Kind {
 		valueType = value.Elem().Kind()
 	}
 	return valueType
+}
+
+// StatusCode returns the status code of the error
+func StatusCode(ctx context.Context, err error) int {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	switch err := err.(type) {
+	case *openid4vci.Error:
+		return openid4vci.StatusCode(err)
+	default:
+		return http.StatusTeapot
+	}
 }

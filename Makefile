@@ -47,6 +47,7 @@ DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
 DOCKER_TAG_PORTAL 		:= docker.sunet.se/dc4eu/portal:$(VERSION)
+DOCKER_TAG_WALLET 		:= docker.sunet.se/dc4eu/wallet:$(VERSION)
 
 
 build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui
@@ -75,6 +76,10 @@ build-ui:
 	$(info Building ui)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_ui ${LDFLAGS} ./cmd/ui/main.go
 
+build-wallet:
+	$(info Building wallet)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_wallet ${LDFLAGS} ./cmd/wallet/main.go
+
 docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui docker-build-portal
 
 docker-build-debug: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui-debug docker-build-portal-debug
@@ -85,7 +90,19 @@ docker-build-gobuild:
 
 docker-build-verifier:
 	$(info Docker Building verifier with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/worker .
+	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker .
+
+docker-build-verifier-debug:
+	$(info Docker Building verifier with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker_debug .
+
+docker-build-and-restart-verifier:
+	$(info docker-build-verifier)
+	$(MAKE) docker-build-verifier
+	$(info stop-verifier)
+	docker compose -f docker-compose.yaml rm -s -f verifier
+	$(info start-verifier)
+	docker compose -f docker-compose.yaml up -d --remove-orphans verifier
 
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
@@ -95,17 +112,33 @@ docker-build-persistent:
 	$(info Docker Building persistent with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=persistent --tag $(DOCKER_TAG_PERSISTENT) --file dockerfiles/worker .
 
+docker-build-persistent-debug:
+	$(info Docker Building persistent with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=persistent --tag $(DOCKER_TAG_PERSISTENT) --file dockerfiles/worker_debug .
+
 docker-build-mockas:
 	$(info Docker Building mockas with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=mockas --tag $(DOCKER_TAG_MOCKAS) --file dockerfiles/worker .
+
+docker-build-mockas-debug:
+	$(info Docker Building mockas with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=mockas --tag $(DOCKER_TAG_MOCKAS) --file dockerfiles/worker_debug .
 
 docker-build-apigw:
 	$(info Docker building apigw with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
 
+docker-build-apigw-debug:
+	$(info Docker building apigw with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg VERSION=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker_debug .
+
 docker-build-issuer:
 	$(info Docker building issuer with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker .
+
+docker-build-issuer-debug:
+	$(info Docker building issuer with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker_debug .
 
 docker-build-ui:
 	$(info Docker building ui with tag: $(VERSION))
@@ -115,6 +148,14 @@ docker-build-ui-debug:
 	$(info Docker building ui with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/web_worker_debug .
 
+docker-build-and-restart-ui:
+	$(info docker-build-ui)
+	$(MAKE) docker-build-ui
+	$(info stop-ui)
+	docker compose -f docker-compose.yaml rm -s -f ui
+	$(info start-ui)
+	docker compose -f docker-compose.yaml up -d --remove-orphans ui
+
 docker-build-portal:
 	$(info Docker building portal with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=portal --tag $(DOCKER_TAG_PORTAL) --file dockerfiles/web_worker .
@@ -122,6 +163,10 @@ docker-build-portal:
 docker-build-portal-debug:
 	$(info Docker building portal with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=portal --tag $(DOCKER_TAG_PORTAL) --file dockerfiles/web_worker_debug .
+
+docker-build-wallet:
+	$(info Docker building wallet with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=wallet --tag $(DOCKER_TAG_WALLET) --file dockerfiles/worker .
 
 docker-push-gobuild:
 	$(info Pushing docker images)

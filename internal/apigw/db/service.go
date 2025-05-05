@@ -35,8 +35,13 @@ type Service struct {
 	tracer     *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	VCDatastoreColl *VCDatastoreColl
-	VCConsentColl   *VCConsentColl
+	VCDatastoreColl       *VCDatastoreColl
+	VCConsentColl         *VCConsentColl
+	VCAuthColl            *VCAuthzColl
+	VCTokenColl           *VCTokenColl
+	VCUsersColl           *VCUsersColl
+	VCCodeChallengeColl   *VCCodeChallengeColl
+	VCCredentialOfferColl *VCCredentialOfferColl
 }
 
 // New creates a new database service
@@ -70,6 +75,36 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		log:     log.New("VCConsentColl"),
 	}
 	if err := service.VCConsentColl.createIndex(ctx); err != nil {
+		return nil, err
+	}
+
+	var err error
+
+	service.VCAuthColl, err = NewAuthzColl(ctx, "authz", service, log.New("VCAuthzColl"))
+	if err != nil {
+		return nil, err
+	}
+
+	service.VCTokenColl, err = NewTokenColl(ctx, "token", service, log.New("VCTokenColl"))
+	if err != nil {
+		return nil, err
+	}
+
+	service.VCUsersColl, err = NewUserColl(ctx, "users", service, log.New("VCUsersColl"))
+	if err != nil {
+		service.log.Error(err, "failed to create user collection")
+		return nil, err
+	}
+
+	service.VCCodeChallengeColl, err = NewPkceColl(ctx, "code_challenge", service, log.New("VCCodeChallengeColl"))
+	if err != nil {
+		service.log.Error(err, "failed to create pkce collection")
+		return nil, err
+	}
+
+	service.VCCredentialOfferColl, err = NewCredentialOfferColl(ctx, "credential_offer", service, log.New("VCCredentialOfferColl"))
+	if err != nil {
+		service.log.Error(err, "failed to create credential offer collection")
 		return nil, err
 	}
 

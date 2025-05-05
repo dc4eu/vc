@@ -67,16 +67,6 @@
                            class="navbar-item">
                             Create credential
                         </a>
-                        <a id="display-verify-form-btn"
-                           onclick="addVerifyFormArticleToContainer()"
-                           class="navbar-item">
-                            Verify credential
-                        </a>
-                        <!--                        <a id="decode-credential-form-btn"-->
-                        <!--                           onclick="addDecodeCredentialFormArticleToContainer()"-->
-                        <!--                           class="navbar-item">-->
-                        <!--                            Decode credential-->
-                        <!--                        </a>-->
                         <hr class="navbar-divider">
                         <a id="fetch-ui-health-btn"
                            onclick="getAndDisplayInArticleContainerFor('/health','Health UI')"
@@ -97,6 +87,12 @@
                            onclick="getAndDisplayInArticleContainerFor('/mockas/health','Health MockAS')"
                            class="navbar-item">
                             Health MockAS
+                        </a>
+                        <hr class="navbar-divider">
+                        <a id="display-view-vpflow-debug-info-btn"
+                           onclick="addViewVPFlowDebugInfoFormArticleToContainer()"
+                           class="navbar-item">
+                            VP-flow debug info
                         </a>
                         <hr class="navbar-divider">
                         <a id="fetch-user-btn" onclick="getAndDisplayInArticleContainerFor('/secure/user','User')"
@@ -130,7 +126,7 @@
                     </div>
                     <div class="control">
                         <input id="identity-schema-name"
-                               class="input" type="text" placeholder="identity schema name" value="SE">
+                               class="input" type="text" placeholder="identity schema name" value="DefaultSchema">
                     </div>
                     <div class="control">
                         <button id="create-mock-btn" onclick="createMock()" class="button" disabled>

@@ -147,6 +147,12 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 		if err != nil {
 			return nil, err
 		}
+
+	case "ELM":
+		mockUpload.DocumentData, err = c.ELM.random(ctx, person)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, helpers.ErrNoKnownDocumentType
 	}

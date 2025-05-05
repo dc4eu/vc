@@ -26,6 +26,7 @@ type Client struct {
 	PDA1 *PDA1Service
 	EHIC *EHICService
 	PID  *PIDService
+	ELM  *ELMService
 }
 
 // New creates a new instance of the public api
@@ -41,6 +42,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	c.PDA1 = &PDA1Service{Client: c}
 	c.EHIC = &EHICService{Client: c}
 	c.PID = &PIDService{Client: c}
+	c.ELM = &ELMService{Client: c}
 
 	c.log.Info("Started")
 

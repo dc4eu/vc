@@ -30,7 +30,6 @@ func NewPDA1Client(ctx context.Context, client *Client) (*pda1Client, error) {
 }
 
 func (c *pda1Client) makeSourceData(sourceFilePath string) error {
-
 	f, err := excelize.OpenFile(sourceFilePath)
 	if err != nil {
 		return err

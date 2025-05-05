@@ -6,38 +6,39 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"vc/pkg/datastoreclient"
 	"vc/pkg/model"
 )
 
-type elmClient struct {
+type diplomaClient struct {
 	client              *Client
-	documents           map[string]*model.CompleteDocument
+	documents           map[string]*datastoreclient.UploadRequest
 	credentialType      string
 	exampleELM          []map[string]any
 	exampleELMFilePaths []string
 }
 
-func NewELMClient(ctx context.Context, client *Client) (*elmClient, error) {
-	elmClient := &elmClient{
+func NewDiplomaClient(ctx context.Context, client *Client) (*diplomaClient, error) {
+	diplomaClient := &diplomaClient{
 		client:     client,
-		documents:  map[string]*model.CompleteDocument{},
+		documents:  map[string]*datastoreclient.UploadRequest{},
 		exampleELM: []map[string]any{},
 		exampleELMFilePaths: []string{
-			filepath.Join("../../../standards", "elm_3_2.json"),
+			filepath.Join("../../../standards", "education_credential", "diploma", "HE-diploma-9ad88a95-2f9a-4a1d-9e08-a61e213a3eac-degreeHBO-M.xml.json"),
 		},
-		credentialType: "elm",
+		credentialType: "diploma",
 	}
 
-	if err := elmClient.loadExampleFiles(); err != nil {
+	if err := diplomaClient.loadExampleFiles(); err != nil {
 		return nil, fmt.Errorf("read document data file: %w", err)
 	}
 
-	return elmClient, nil
+	return diplomaClient, nil
 }
 
-func (c *elmClient) makeSourceData(sourceFilePath string) error {
+func (c *diplomaClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
-		c.documents[pidNumber] = &model.CompleteDocument{}
+		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
 
 		documentData, err := c.getOneDocumentData(pidNumber)
 		if err != nil {
@@ -46,13 +47,13 @@ func (c *elmClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].DocumentData = documentData
 
 		c.documents[pidNumber].Meta = &model.MetaData{
-			AuthenticSource: "ELM:00001",
+			AuthenticSource: "DIPLOMA:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    "ELM",
-			DocumentID:      fmt.Sprintf("document_id_elm_%s", pidNumber),
+			DocumentType:    "Diploma",
+			DocumentID:      fmt.Sprintf("document_id_diploma_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
-				ID:         fmt.Sprintf("collect_id_elm_%s", pidNumber),
+				ID:         fmt.Sprintf("collect_id_diploma_%s", pidNumber),
 				ValidUntil: 0,
 			},
 			Revocation:                &model.Revocation{},
@@ -66,10 +67,10 @@ func (c *elmClient) makeSourceData(sourceFilePath string) error {
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
 				"en": map[string]any{
-					"documentType": "ELM",
+					"documentType": "Diploma",
 				},
 				"sv": map[string]any{
-					"documentType": "ELM",
+					"documentType": "Diploma",
 				},
 			},
 		}
@@ -78,10 +79,11 @@ func (c *elmClient) makeSourceData(sourceFilePath string) error {
 
 		c.documents[pidNumber].DocumentDataVersion = "1.0.0"
 	}
+
 	return nil
 }
 
-func (c *elmClient) save2Disk() error {
+func (c *diplomaClient) save2Disk() error {
 	b, err := json.MarshalIndent(c.documents, "", "  ")
 	if err != nil {
 		return err
@@ -96,7 +98,7 @@ func (c *elmClient) save2Disk() error {
 	return nil
 }
 
-func (c *elmClient) loadExampleFiles() error {
+func (c *diplomaClient) loadExampleFiles() error {
 	for _, filePath := range c.exampleELMFilePaths {
 		b, err := os.ReadFile(filePath)
 		if err != nil {
@@ -114,7 +116,7 @@ func (c *elmClient) loadExampleFiles() error {
 	return nil
 }
 
-func (c *elmClient) getOneDocumentData(pidNumber string) (map[string]any, error) {
+func (c *diplomaClient) getOneDocumentData(pidNumber string) (map[string]any, error) {
 	if len(c.exampleELM) == 0 {
 		return nil, fmt.Errorf("no example ELM files loaded")
 	}

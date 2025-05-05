@@ -26,10 +26,11 @@ type Client struct {
 	datastoreClientConfig *datastoreclient.Config
 	log                   *logger.Log
 
-	pda1Client clients
-	ehicClient clients
-	pidClient  clients
-	elmClient  clients
+	pda1Client    clients
+	ehicClient    clients
+	pidClient     clients
+	elmClient     clients
+	diplomaClient clients
 }
 
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) {
@@ -68,7 +69,12 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		return nil, fmt.Errorf("new elm client: %w", err)
 	}
 
-	for _, credentialType := range []string{"ehic", "pda1", "pid", "elm"} { // pid is not working
+	client.diplomaClient, err = NewDiplomaClient(ctx, client)
+	if err != nil {
+		return nil, fmt.Errorf("new diploma client: %w", err)
+	}
+
+	for _, credentialType := range []string{"ehic", "pda1", "pid", "elm", "diploma"} { // pid is not working
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
 		if err := client.uploader(ctx, jsonPath); err != nil {
 			return nil, fmt.Errorf("uploader: %w", err)

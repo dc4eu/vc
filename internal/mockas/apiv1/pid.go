@@ -17,7 +17,7 @@ func (s *PIDService) random(ctx context.Context, person *person) (map[string]any
 	defer cancel()
 
 	doc := identity.PIDDocument{
-		FirstName:  person.sa.FirstName,
+		GivenName:  person.sa.FirstName,
 		FamilyName: person.sa.LastName,
 		BirthDate:  gofakeit.Date().Format("2006-01-02"),
 	}

@@ -3,7 +3,7 @@ package identity
 import "encoding/json"
 
 type PIDDocument struct {
-	FirstName  string `json:"first_name" validate:"required"`
+	GivenName  string `json:"given_name" validate:"required"`
 	FamilyName string `json:"family_name" validate:"required"`
 	BirthDate  string `json:"birth_date" validate:"required"`
 }

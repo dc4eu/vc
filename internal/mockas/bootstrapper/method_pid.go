@@ -44,7 +44,7 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 		}
 
 		c.documents[pidNumber].Meta = &model.MetaData{
-			AuthenticSource: "",
+			AuthenticSource: "PID:00001",
 			DocumentVersion: "1.0.0",
 			DocumentType:    "PID",
 			DocumentID:      fmt.Sprintf("document_id_pid_%s", pidNumber),
@@ -72,7 +72,7 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 			},
 		}
 
-		//c.documents[pidNumber].Identities = identity.Identities
+		c.documents[pidNumber].Identities = id.Identities
 
 		c.documents[pidNumber].DocumentDataVersion = "1.0.0"
 	}

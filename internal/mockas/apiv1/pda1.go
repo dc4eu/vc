@@ -2,7 +2,6 @@ package apiv1
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 	"vc/pkg/socialsecurity"
@@ -15,7 +14,7 @@ type PDA1Service struct {
 	Client *Client
 }
 
-func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) map[string]any {
+func (s *PDA1Service) random(ctx context.Context, person *person) (map[string]any, error) {
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
@@ -78,15 +77,17 @@ func (s *PDA1Service) random(ctx context.Context, person *gofakeit.PersonInfo) m
 		},
 	}
 
-	jsonBytes, err := json.Marshal(doc)
-	if err != nil {
-		panic(err)
-	}
+	return doc.Marshal()
 
-	reply := map[string]any{}
-	if err := json.Unmarshal(jsonBytes, &reply); err != nil {
-		panic(err)
-	}
+	//jsonBytes, err := json.Marshal(doc)
+	//if err != nil {
+	//	panic(err)
+	//}
 
-	return reply
+	//reply := map[string]any{}
+	//if err := json.Unmarshal(jsonBytes, &reply); err != nil {
+	//	panic(err)
+	//}
+
+	//return reply
 }

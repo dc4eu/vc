@@ -1,6 +1,8 @@
 package jsonschema
 
-import "github.com/goccy/go-json"
+import (
+	"github.com/goccy/go-json"
+)
 
 // EvaluateDependentRequired checks that if a specified property is present, all its dependent properties are also present.
 // According to the JSON Schema Draft 2020-12:

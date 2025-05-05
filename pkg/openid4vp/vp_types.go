@@ -79,6 +79,8 @@ type PresentationDefinition struct {
 	Description            string                  `json:"description,omitempty"`
 	InputDescriptors       []InputDescriptor       `json:"input_descriptors"`
 	SubmissionRequirements []SubmissionRequirement `json:"submission_requirements,omitempty"`
+	Selectable             bool                    `json:"_selectable,omitempty"`
+	Format                 map[string]Format       `json:"format,omitempty"`
 }
 
 type InputDescriptor struct {

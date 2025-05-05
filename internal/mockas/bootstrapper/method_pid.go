@@ -32,7 +32,7 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
 
 		documentData := identity.PIDDocument{
-			GivenName:  id.Identities[0].GivenName,
+			FirstName:  id.Identities[0].GivenName,
 			FamilyName: id.Identities[0].FamilyName,
 			BirthDate:  id.Identities[0].BirthDate,
 		}

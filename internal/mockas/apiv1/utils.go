@@ -22,6 +22,16 @@ type MockInputData struct {
 	IdentitySchemaName      string `json:"identity_schema_name"`
 }
 
+type person struct {
+	sa        *gofakeit.PersonInfo
+	birthDate string
+}
+
+func (p *person) new() {
+	p.sa = gofakeit.Person()
+	p.birthDate = gofakeit.Date().Format("2006-01-02")
+}
+
 type uploadMock struct {
 	Meta                *model.MetaData        `json:"meta" validate:"required"`
 	Identities          []model.Identity       `json:"identities,omitempty" validate:"required,dive"`
@@ -32,22 +42,23 @@ type uploadMock struct {
 
 func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, error) {
 	c.log.Debug("mockOne")
-	person := gofakeit.Person()
+	person := &person{}
+	person.new()
 
 	if data.AuthenticSourcePersonID == "" {
 		data.AuthenticSourcePersonID = gofakeit.UUID()
 	}
 
 	if data.GivenName == "" {
-		data.GivenName = person.FirstName
+		data.GivenName = person.sa.FirstName
 	}
 
 	if data.FamilyName == "" {
-		data.FamilyName = person.LastName
+		data.FamilyName = person.sa.LastName
 	}
 
 	if data.BirthDate == "" {
-		data.BirthDate = gofakeit.Date().Format("2006-01-02")
+		data.BirthDate = person.birthDate
 	}
 
 	if data.CollectID == "" {
@@ -117,13 +128,25 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 		DocumentDisplay: documentDisplay,
 	}
 
+	var err error
 	switch data.DocumentType {
 	case "PDA1":
-		mockUpload.DocumentData = c.PDA1.random(ctx, person)
+		mockUpload.DocumentData, err = c.PDA1.random(ctx, person)
+		if err != nil {
+			return nil, err
+		}
 		mockUpload.Meta.DocumentDataValidationRef = "file://../../standards/schema_pda1.json"
 	case "EHIC":
-		mockUpload.DocumentData = c.EHIC.random(ctx, person)
+		mockUpload.DocumentData, err = c.EHIC.random(ctx, person)
+		if err != nil {
+			return nil, err
+		}
 		mockUpload.Meta.DocumentDataValidationRef = "file://../../standards/schema_ehic.json"
+	case "PID":
+		mockUpload.DocumentData, err = c.PID.random(ctx, person)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, helpers.ErrNoKnownDocumentType
 	}

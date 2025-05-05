@@ -41,9 +41,9 @@ type address struct {
 
 func (p *person) bootstrapPID() (map[string]any, error) {
 	doc := model.PIDDocument{
-		FirstName:   p.FirstName,
-		FamilyName:  p.FirstName,
-		DateOfBirth: p.DateOfBirth,
+		FirstName:  p.FirstName,
+		FamilyName: p.FirstName,
+		BirthDate:  p.DateOfBirth,
 	}
 
 	return doc.Marshal()

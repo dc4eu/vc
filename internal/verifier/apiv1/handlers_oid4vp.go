@@ -156,15 +156,16 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
 	switch vpSession.DocumentType {
+	case openid4vp.DocumentTypeDiploma:
+		vpSession.PresentationDefinition = DiplomaPresentationDefinition()
 	case openid4vp.DocumentTypeEHIC:
 		vpSession.PresentationDefinition = EHICPresentationDefinition()
+	case openid4vp.DocumentTypeELM:
+		vpSession.PresentationDefinition = ELMPresentationDefinition()
 	case openid4vp.DocumentTypePDA1:
 		vpSession.PresentationDefinition = PDA1PresentationDefinition()
-	case openid4vp.DocumentTypeELM:
-		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
 	case openid4vp.DocumentTypePID:
 		vpSession.PresentationDefinition = PIDPresentationDefinition()
-	//case TODO: diploma här + gr + web + UI sök
 	default:
 		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
 	}

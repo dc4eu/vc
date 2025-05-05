@@ -74,7 +74,7 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *model.PIDDocument, jwk *apiv
 	}
 	delete(body, "family_name")
 
-	dateOfBirth, err := disclosure.NewFromObject("date_of_birth", body["date_of_birth"], salt)
+	dateOfBirth, err := disclosure.NewFromObject("birthdate", body["birth_date"], salt)
 	if err != nil {
 		return "", err
 	}

@@ -10,8 +10,8 @@ import (
 const (
 	DocumentTypeDiploma         = "Diploma"
 	DocumentTypeEHIC            = "EHIC"
-	DocumentTypeELM             = "Elm"
-	DocumentTypeMicrocredential = "Microcredential"
+	DocumentTypeELM             = "ELM"
+	DocumentTypeMicroCredential = "MicroCredential"
 	DocumentTypePDA1            = "PDA1"
 	DocumentTypePID             = "PID"
 
@@ -32,12 +32,12 @@ type QRReply struct {
 	RequestURI  string `json:"request_uri" bson:"request_uri" validate:"required"`
 	ClientID    string `json:"client_id" bson:"client_id" validate:"required"`
 
-	//Only to simplify dev and test
+	//For internal usage and to simplify dev/test
 	SessionID string `json:"session_id" bson:"session_id" validate:"required"`
 }
 
 type QRRequest struct {
-	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=Diploma EHIC Elm Microcredential PDA1 PID"`
+	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=Diploma EHIC ELM PDA1 PID"`
 }
 
 type KeyType string

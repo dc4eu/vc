@@ -37,13 +37,13 @@ func (c *VCCredentialOfferColl) createIndex(ctx context.Context) error {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:pkce:createIndex")
 	defer span.End()
 
-	indexCodeChallengeUniq := mongo.IndexModel{
+	indexCredentialOfferURIUniq := mongo.IndexModel{
 		Keys: bson.D{
 			primitive.E{Key: "uuid", Value: 1},
 		},
 		Options: options.Index().SetName("credential_offer_uuid_uniq").SetUnique(true),
 	}
-	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexCodeChallengeUniq})
+	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexCredentialOfferURIUniq})
 	if err != nil {
 		return err
 	}
@@ -59,6 +59,8 @@ func (c *VCCredentialOfferColl) Save(ctx context.Context, doc *CredentialOfferDo
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:credential_offer:save")
 	defer span.End()
 
+	c.log.Info("Saving credential offer", "uuid", doc.UUID)
+
 	_, err := c.Coll.InsertOne(ctx, doc)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
@@ -68,12 +70,12 @@ func (c *VCCredentialOfferColl) Save(ctx context.Context, doc *CredentialOfferDo
 }
 
 // Delete deletes one code_challenge
-func (c *VCCredentialOfferColl) Delete(ctx context.Context, codeChallenge string) error {
+func (c *VCCredentialOfferColl) Delete(ctx context.Context, uuid string) error {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:credential_offer:delete")
 	defer span.End()
 
 	filter := bson.M{
-		"code_challenge": bson.M{"$eq": codeChallenge},
+		"uuid": bson.M{"$eq": uuid},
 	}
 
 	_, err := c.Coll.DeleteOne(ctx, filter)
@@ -89,6 +91,8 @@ func (c *VCCredentialOfferColl) Get(ctx context.Context, uuid string) (*Credenti
 	filter := bson.M{
 		"uuid": bson.M{"$eq": uuid},
 	}
+
+	c.log.Debug("Get credential offer", "filter", filter)
 
 	credentialOffer := &CredentialOfferDocument{}
 	if err := c.Coll.FindOne(ctx, filter).Decode(credentialOffer); err != nil {

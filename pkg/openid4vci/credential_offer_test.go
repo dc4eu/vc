@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -267,6 +268,41 @@ func TestUnpackCredentialOffer(t *testing.T) {
 			assert.NoError(t, err)
 
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestCredentialOfferUriUUID(t *testing.T) {
+	tts := []struct {
+		name string
+		have *CredentialOfferParameters
+	}{
+		{
+			name: "t1",
+			have: &CredentialOfferParameters{
+				CredentialIssuer: "http://test.sunet.se",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState: fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", "test_collect_id", "document_type", "authentic_source"),
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			uri, err := tt.have.CredentialOfferURI()
+			assert.NoError(t, err)
+
+			got, err := uri.UUID()
+			assert.NoError(t, err)
+
+			err = uuid.Validate(got)
+			assert.NoError(t, err)
 		})
 	}
 }

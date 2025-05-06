@@ -67,6 +67,10 @@ func (m *MetaData) QRGenerator(ctx context.Context, issuerURL, credentialOfferUR
 		credentialConfigurationID = "DiplomaCredential"
 	case "MicroCredential":
 		credentialConfigurationID = "MicroCredential"
+	case "ELM":
+		credentialConfigurationID = "ELMCredential"
+	case "PID":
+		credentialConfigurationID = "PIDCredential"
 	}
 
 	credentialOffer := &CredentialOffer{

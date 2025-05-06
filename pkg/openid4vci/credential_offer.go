@@ -181,6 +181,17 @@ func (c *CredentialOfferParameters) CredentialOfferURI() (CredentialOfferURI, er
 	return CredentialOfferURI(q.String()), nil
 }
 
+func (c *CredentialOfferURI) UUID() (string, error) {
+	u, err := url.Parse(c.String())
+	if err != nil {
+		return "", err
+	}
+
+	credentialOfferUUID := u.Path[len("/credential-offer/"):]
+
+	return credentialOfferUUID, nil
+}
+
 // CredentialOffer creates a credential offer
 func (c *CredentialOfferParameters) CredentialOffer() (CredentialOffer, error) {
 	credentialOfferByte, err := c.Marshal()

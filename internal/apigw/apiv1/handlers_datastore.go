@@ -9,7 +9,6 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
 
-	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -99,8 +98,13 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 			return err
 		}
 
+		uuid, err := credentialOffer.UUID()
+		if err != nil {
+			return err
+		}
+
 		doc := &db.CredentialOfferDocument{
-			UUID:                      uuid.NewString(),
+			UUID:                      uuid,
 			CredentialOfferParameters: credentialOfferParameter,
 		}
 
@@ -135,6 +139,8 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		Identities:          req.Identities,
 		QR:                  qr,
 	}
+
+	c.log.Debug("upload document", "qr.uuid", qr.CredentialOfferURL)
 
 	if err := helpers.ValidateDocumentData(ctx, upload, c.log); err != nil {
 		return err

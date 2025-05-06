@@ -9,6 +9,7 @@ func EHICPresentationDefinition() *openid4vp.PresentationDefinition {
 		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
 		"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
 		"urn:credential:ehic",
+		"urn:eudi:ehic:1",
 		"EHICCredential"}
 	return &openid4vp.PresentationDefinition{
 		ID:          "EuropeanHealthInsuranceCard",

@@ -9,6 +9,7 @@ func PDA1PresentationDefinition() *openid4vp.PresentationDefinition {
 		"https://satosa-test-1.sunet.se/credential/pda1/1.0",
 		"https://satosa-dev-1.sunet.se/credential/pda1/1.0",
 		"urn:credential:pda1",
+		"urn:eudi:pda1:1",
 		"PDA1Credential"}
 	return &openid4vp.PresentationDefinition{
 		ID:          "PDA1",

@@ -15,10 +15,10 @@ const (
 	DocumentTypePDA1            = "PDA1"
 	DocumentTypePID             = "PID"
 
-	StatusQRDisplayed     InteractionStatus = "qr_displayed"
-	StatusQRScanned       InteractionStatus = "qr_scanned"
-	StatusVPTokenReceived InteractionStatus = "vp_token_received"
-	StatusUnknown         InteractionStatus = "unknown"
+	InteractionStatusQRDisplayed                   InteractionStatus = "qr_displayed"
+	InteractionStatusQRScanned                     InteractionStatus = "qr_scanned"
+	InteractionStatusAuthorizationResponseReceived InteractionStatus = "authorization_response_received"
+	InteractionStatusUnknown                       InteractionStatus = "unknown"
 
 	VerificationResultVerified VerificationResult = "verified"
 	VerificationResultRejected VerificationResult = "rejected"
@@ -73,7 +73,7 @@ type CertData struct {
 
 type VPInteractionSession struct {
 	SessionID               string                  `json:"session_id"` //key == must be unique i coll (UUID1)
-	Status                  InteractionStatus       `json:"status"`
+	Status                  InteractionStatus       `json:"interaction_status"`
 	SessionEphemeralKeyPair *KeyPair                `json:"session_ephemeral_key_pair"`
 	SessionCreated          time.Time               `json:"session_created"`
 	SessionExpires          time.Time               `json:"session_expires"`

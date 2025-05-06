@@ -61,7 +61,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		State:      uuid.NewString(),
 		JTI:        uuid.NewString(),
 		Authorized: false,
-		Status:     openid4vp.StatusQRDisplayed,
+		Status:     openid4vp.InteractionStatusQRDisplayed,
 		//TODO: nedan ska inte vara här men läggs här tillsvidare
 		VerifierKeyPair: c.verifierKeyPair,
 		//VerifierKeyPair: &openid4vp.KeyPair{
@@ -133,7 +133,7 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 	//}
 
 	vpSession.Authorized = true
-	vpSession.Status = openid4vp.StatusQRScanned
+	vpSession.Status = openid4vp.InteractionStatusQRScanned
 	//vpSession.CallbackID = jwthelpers.GenerateNonce() //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
 
 	requestObjectJWS, err := c.createRequestObjectJWS(ctx, vpSession)
@@ -221,10 +221,15 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	if err != nil {
 		return nil, err
 	}
-	vpSession.Status = openid4vp.StatusVPTokenReceived
+	vpSession.Status = openid4vp.InteractionStatusAuthorizationResponseReceived
 	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
 	if err != nil {
 		return nil, err
+	}
+
+	//TODO flytta in nedan kontroll inom process
+	if request.State != vpSession.State {
+		return nil, fmt.Errorf("state value don't match value in session")
 	}
 
 	arw, err := openid4vp.NewAuthorizationResponseWrapper(request)
@@ -298,26 +303,26 @@ func validateCallbackPreconditions(vpSession *openid4vp.VPInteractionSession, ca
 	if vpSession.CallbackID != callbackID {
 		return errors.New("callback ID does not match the one in session")
 	}
-	if vpSession.Status == openid4vp.StatusVPTokenReceived {
+	if vpSession.Status == openid4vp.InteractionStatusAuthorizationResponseReceived {
 		return errors.New("callback already performed in session")
 	}
 	return nil
 }
 
 type VerificationResult struct {
-	Status string `json:"status,omitempty"`
-	Data   any    `json:"data"`
+	Status string `json:"interaction_status,omitempty"`
+	Data   any    `json:"data,omitempty"`
 }
 
 func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*VerificationResult, error) {
-	status := openid4vp.StatusUnknown
+	status := openid4vp.InteractionStatusUnknown
 	vpSession, _ := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if vpSession != nil {
 		status = vpSession.Status
 	}
 
 	var data any
-	if vpSession == nil || vpSession.Status == openid4vp.StatusVPTokenReceived {
+	if vpSession == nil || vpSession.Status == openid4vp.InteractionStatusAuthorizationResponseReceived {
 		//No need to look for a record if the qr code just display or scanned, since no response from the wallet has been recieved yet
 		verificationRecord, _ := c.db.VerificationRecordColl.Read(ctx, sessionID)
 		//TODO: filter what data in verificationRecord to expose (if not nil or any error)

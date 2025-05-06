@@ -105,7 +105,7 @@ function resetAndHideVerificationContainer() {
 function resetVerificationContainer() {
     clearAndHideError("verificationErrorMessage");
     showIcon("spinnerIcon");
-    getElementById("statusValue").textContent = "Unknown";
+    getElementById("interactionStatusValue").textContent = "Unknown";
     getElementById("claimsDisplay").value = "";
 }
 
@@ -219,9 +219,9 @@ async function refreshVerificationResult() {
         }
 
         const data = await response.json();
-        console.log("Verification Result: status=" + data.status + " with data=" + data.data);
+        console.log("Verification Result: interaction_status=" + data.interaction_status + " with data=" + data.data);
 
-        getElementById("statusValue").textContent = data.status;
+        getElementById("interactionStatusValue").textContent = data.interaction_status;
 
         const claimsDisplay = getElementById("claimsDisplay");
         if (data && data.data && Object.keys(data.data).length > 0) {

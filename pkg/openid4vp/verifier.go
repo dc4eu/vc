@@ -48,6 +48,7 @@ func isValidProcessType(p ProcessType) bool {
 
 type ValidationOptions struct {
 	SkipAllSignatureChecks bool `json:"skip_all_signature_checks,omitempty"`
+	SkipStateCheck         bool `json:"skip_state_check,omitempty"`
 }
 
 type AuthorizationResponseWrapper struct {
@@ -72,17 +73,27 @@ func NewAuthorizationResponseWrapper(authorizationResponse *AuthorizationRespons
 	return arw, nil
 }
 
-// Process TODO: en till returntyp ska till här för utfall när mer blivit klart
-func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig) error {
+// Process
+func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig, vpSession *VPInteractionSession) error {
 	if processConfig == nil {
 		return errors.New("no processConfig provided")
 	}
 	if !isValidProcessType(processConfig.ProcessType) {
-		return errors.New("invalid process type")
+		return &VerificationFailedError{
+			Step: "process_type_configuration",
+			Err:  errors.New("invalid process type"),
+		}
 	}
 
 	if arw.authorizationResponse.Error != "" {
 		return fmt.Errorf("error recieved from holder: %s", arw.authorizationResponse.Error)
+	}
+
+	if !processConfig.ValidationOptions.SkipStateCheck && arw.authorizationResponse.State != vpSession.State {
+		return &VerificationRejectedError{
+			Step:   "state_matching",
+			Reason: "state value from response didn't match value in session",
+		}
 	}
 
 	//TODO: check id_token here or before (if exists)

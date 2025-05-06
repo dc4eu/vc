@@ -227,11 +227,6 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
-	//TODO flytta in nedan kontroll inom process
-	if request.State != vpSession.State {
-		return nil, fmt.Errorf("state value don't match value in session")
-	}
-
 	arw, err := openid4vp.NewAuthorizationResponseWrapper(request)
 	if err != nil {
 		return nil, err
@@ -239,27 +234,54 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	processConfig := &openid4vp.ProcessConfig{
 		ProcessType: openid4vp.FULL_VALIDATION,
 		ValidationOptions: openid4vp.ValidationOptions{
-			//TODO: remove ValidationOptions when all key+crypto handling in place and work's
+			//TODO: remove ValidationOptions when all dev and key+crypto handling in place and work's
 			SkipAllSignatureChecks: true,
+			SkipStateCheck:         false,
 		},
 	}
 
-	//TODO: skicka in ref till "vpSession" för att kontrollera värden mot (nonce, osv)
-	//TODO: skicka in en ~crypto-store (lång och kortlivade egna nyckar samt cert)
-	err = arw.Process(processConfig)
+	//TODO: skicka in en ~keyProvider (långlivade egna nyckar + cert samt fasad för att hämta externa nycklar från openid fed/jwks/mm)
+	err = arw.Process(processConfig, vpSession)
+	verificationMeta := &openid4vp.VerificationMeta{
+		VerifiedAtUnix: time.Now().UTC().Unix(),
+	}
 	if err != nil {
+		var vre *openid4vp.VerificationRejectedError
+		if errors.As(err, &vre) {
+			verificationMeta.VerificationResult = openid4vp.VerificationResultRejected
+			verificationMeta.Error = vre.Step
+			verificationMeta.ErrorDescription = vre.Reason
+		} else {
+			//TODO: to be able to be more detailed on the error (may exist or be a normal error)
+			//var vfe *openid4vp.VerificationFailedError
+			//if errors.As(err, &vfe) {
+			//	fmt.Println("###### verification failed:", err)
+			//}
+			verificationMeta.VerificationResult = openid4vp.VerificationResultError
+			verificationMeta.Error = "General error during verification"
+			verificationMeta.ErrorDescription = err.Error()
+		}
+		record := &openid4vp.VerificationRecord{
+			Sequence:         c.nextSequence(),
+			SessionID:        sessionID,
+			CallbackID:       callbackID,
+			VerificationMeta: verificationMeta,
+			//PresentationSubmission: arw.authorizationResponse.PresentationSubmission,
+			VPResults: []*openid4vp.VPResult{},
+		}
+		err = c.db.VerificationRecordColl.Create(ctx, record)
+		if err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 
+	verificationMeta.VerificationResult = openid4vp.VerificationResultVerified
 	record, err := arw.ExtractVerificationRecordBasis(c.nextSequence(), sessionID, callbackID)
 	if err != nil {
 		return nil, err
 	}
-	//TODO: Hantera och lagra scenario rejected samt error också... - nu kastas det errors i de flesta fall
-	record.VerificationMeta = &openid4vp.VerificationMeta{
-		VerificationResult: openid4vp.VerificationResultVerified,
-		VerifiedAtUnix:     time.Now().UTC().Unix(),
-	}
+	record.VerificationMeta = verificationMeta
 	err = c.db.VerificationRecordColl.Create(ctx, record)
 	if err != nil {
 		return nil, err

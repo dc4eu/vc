@@ -408,10 +408,13 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
         const familyNameElement = createInputElement('family name', '', 'text');
         const givenNameElement = createInputElement('given name', '', 'text');
         const birthdateElement = createInputElement('birth date (YYYY-MM-DD)', '', 'text');
-        const documentTypeSelectWithinDivElement = createSelectElement([{value: 'EHIC', label: 'EHIC'}, {
-            value: 'PDA1',
-            label: 'PDA1'
-        }]);
+        const documentTypeSelectWithinDivElement = createSelectElement([
+            {value: 'EHIC', label: 'EHIC'}, 
+            {value: 'PDA1',label: 'PDA1'},
+            {value: 'PID',label: 'PID'},
+            {value: 'ELM',label: 'ELM'},
+            {value: 'Diploma',label: 'Diploma'},
+        ]);
 
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
         const documentTypeSelect = documentTypeSelectWithinDivElement[1];

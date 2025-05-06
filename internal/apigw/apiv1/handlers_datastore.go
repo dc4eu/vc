@@ -60,6 +60,12 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		credentialConfigurationID = "EHICCredential"
 	case "Diploma":
 		credentialConfigurationID = "DiplomaCredential"
+	case "MicroCredential":
+		credentialConfigurationID = "MicroCredential"
+	case "ELM":
+		credentialConfigurationID = "ELMCredential"
+	case "PID":
+		credentialConfigurationID = "PIDCredential"
 	}
 
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{
@@ -139,8 +145,6 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		Identities:          req.Identities,
 		QR:                  qr,
 	}
-
-	c.log.Debug("upload document", "qr.uuid", qr.CredentialOfferURL)
 
 	if err := helpers.ValidateDocumentData(ctx, upload, c.log); err != nil {
 		return err

@@ -1174,7 +1174,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
 
                 limit: parseInt(limitInput.value, 10),
 
-                fields: ["meta.document_id", "meta.authentic_source", "meta.document_type", "meta.collect.id", "identities", "qr.credential_offer"],
+                fields: ["meta.document_id", "meta.authentic_source", "meta.document_type", "meta.collect.id", "identities", "qr.credential_offer_url"],
             };
 
             if (checkboxShowCompleteDocsAsRawJson.checked) {

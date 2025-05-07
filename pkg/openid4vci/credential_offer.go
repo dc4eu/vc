@@ -145,8 +145,8 @@ func (c *CredentialOffer) Unpack(ctx context.Context) (*CredentialOfferParameter
 
 // QR not part of the spec, for convenience
 type QR struct {
-	QRBase64           string `json:"qr_base64"`
-	CredentialOfferURL string `json:"credential_offer_url"`
+	QRBase64           string `json:"qr_base64" bson:"qr_base64"`
+	CredentialOfferURL string `json:"credential_offer_url" bson:"credential_offer_url"`
 }
 
 // QR returns a base64 encoded QR code, for convenience not part of the spec

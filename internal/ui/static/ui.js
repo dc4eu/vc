@@ -409,11 +409,11 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
         const givenNameElement = createInputElement('given name', '', 'text');
         const birthdateElement = createInputElement('birth date (YYYY-MM-DD)', '', 'text');
         const documentTypeSelectWithinDivElement = createSelectElement([
-            {value: 'EHIC', label: 'EHIC'}, 
-            {value: 'PDA1',label: 'PDA1'},
-            {value: 'PID',label: 'PID'},
-            {value: 'ELM',label: 'ELM'},
-            {value: 'Diploma',label: 'Diploma'},
+            {value: 'EHIC', label: 'EHIC'},
+            {value: 'PDA1', label: 'PDA1'},
+            {value: 'PID', label: 'PID'},
+            {value: 'ELM', label: 'ELM'},
+            {value: 'Diploma', label: 'Diploma'},
         ]);
 
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
@@ -1235,6 +1235,78 @@ const addSearchDocumentsFormArticleToContainer = () => {
 
     document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
 };
+
+const addPIDUser = () => {
+    const buildFormElements = () => {
+        const usernameInput = createInputElement('Username');
+        const passwordInput = createInputElement('Password');
+        const familyNameInput = createInputElement('Family name');
+        const givenNameInput = createInputElement('Given name');
+        const birthdateInput = createInputElement('Birth date (YYYY-MM-DD)');
+        const schemaNameInput = createInputElement('Schema name', 'DefaultSchema');
+
+        const nationalityInput = createInputElement("Nationality (optional)")
+
+        const divResultContainer = document.createElement("div");
+        divResultContainer.id = generateUUID();
+
+        const addUserButton = document.createElement('button');
+        addUserButton.id = generateUUID();
+        addUserButton.classList.add('button', 'is-link');
+        addUserButton.textContent = 'Add';
+        addUserButton.onclick = () => {
+            const path = "/secure/apigw/piduser";
+            divResultContainer.innerHTML = '';
+
+            const requestBody = {
+                username: usernameInput.value,
+                password: passwordInput.value,
+                attributes: {
+                    family_name: familyNameInput.value,
+                    given_name: givenNameInput.value,
+                    birth_date: birthdateInput.value,
+                    nationality: nationalityInput.value,
+                    schema: {
+                        name: schemaNameInput.value,
+                    },
+                },
+            };
+
+            fetchData(new URL(path, baseUrl), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                body: JSON.stringify(requestBody),
+            }).then(data => {
+                displayInfoTag("PID user " + usernameInput.value + " added", divResultContainer)
+            }).catch(err => {
+                console.debug("Unexpected error:", err);
+                displayErrorTag("Failed to add PID user: ", divResultContainer, err);
+            });
+        };
+
+        return [
+            usernameInput,
+            passwordInput,
+            document.createElement('hr'),
+            familyNameInput,
+            givenNameInput,
+            birthdateInput,
+            schemaNameInput,
+            document.createElement('hr'),
+            nationalityInput,
+            addUserButton,
+            divResultContainer];
+    };
+
+    const articleIdBasis = generateArticleIDBasis();
+    const articleDiv = buildArticle(articleIdBasis.articleID, "Add PID user", buildFormElements());
+    const articleContainer = document.getElementById('article-container');
+    articleContainer.prepend(articleDiv);
+    document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
+}
 
 const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
     const buildFormElements = () => {

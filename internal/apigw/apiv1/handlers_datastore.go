@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -163,24 +164,30 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	return nil
 }
 
-type AddUserRequest struct {
+type AddPIDUserRequest struct {
 	// Username must be unique
 	Username   string          `json:"username" bson:"username" validate:"required"`
 	Password   string          `json:"password" bson:"password" validate:"required"`
 	Attributes *model.Identity `json:"attributes" bson:"attributes" validate:"required"`
 }
 
-type AddUserReply struct {
+type AddPIDUserReply struct {
 }
 
-func (c *Client) AddUser(ctx context.Context, req *AddUserRequest) (*AddUserReply, error) {
+func (c *Client) AddPIDUser(ctx context.Context, req *AddPIDUserRequest) (*AddPIDUserReply, error) {
+	if c.cfg.Common.Production {
+		return nil, errors.New("Not supported in production mode")
+	}
 	if req.Attributes.GivenName == "" || req.Attributes.FamilyName == "" || req.Attributes.BirthDate == "" {
 		// Since omitempty in Identity
 		return nil, errors.New("missing one or several of required attributes [GivenName, FamilyName, BirthDate]")
 	}
+	bytes, _ := json.MarshalIndent(req, "", "  ")
+	c.log.Debug("PIDUser added", "with data:", string(bytes))
 
 	//TODO(masv): save user auth data to db + upload new PID doc
-	return &AddUserReply{}, nil
+
+	return &AddPIDUserReply{}, nil
 }
 
 // NotificationRequest is the request for Notification

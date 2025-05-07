@@ -39,16 +39,16 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	return nil, nil
 }
 
-func (s *Service) endpointAddUser(ctx context.Context, g *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAddUser")
+func (s *Service) endpointAddPIDUser(ctx context.Context, g *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAddPIDUser")
 	defer span.End()
 
-	request := &apiv1.AddUserRequest{}
+	request := &apiv1.AddPIDUserRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.AddUser(ctx, request)
+	reply, err := s.apiv1.AddPIDUser(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

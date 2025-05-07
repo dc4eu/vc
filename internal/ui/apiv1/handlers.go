@@ -202,3 +202,11 @@ func (c *Client) DeleteDocument(ctx context.Context, req *apiv1_apigw.DeleteDocu
 	}
 	return nil
 }
+
+func (c *Client) AddPIDUser(ctx context.Context, request *apiv1_apigw.AddPIDUserRequest) (*apiv1_apigw.AddPIDUserReply, error) {
+	reply, err := c.apigwClient.AddPIDUser(request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}

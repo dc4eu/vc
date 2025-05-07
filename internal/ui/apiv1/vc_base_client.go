@@ -3,6 +3,7 @@ package apiv1
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -84,11 +85,15 @@ func DoPostJSONGeneric[T any](c *VCBaseClient, endpoint string, reqBody any) (*T
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		//TODO(mk): also return resp.StatusCode if resp and code not nil
+
 		return nil, err
 	}
 	defer c.closeBody(resp)
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(bodyBytes))
+	}
 	//TODO(mk): also return resp.StatusCode in all returns below
 
 	body, err := io.ReadAll(resp.Body)

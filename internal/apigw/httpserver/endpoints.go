@@ -39,6 +39,23 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	return nil, nil
 }
 
+func (s *Service) endpointAddUser(ctx context.Context, g *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAddUser")
+	defer span.End()
+
+	request := &apiv1.AddUserRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	reply, err := s.apiv1.AddUser(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
 func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointNotification")
 	defer span.End()

@@ -25,6 +25,8 @@ type Apiv1 interface {
 	AddConsent(ctx context.Context, req *apiv1.AddConsentRequest) error
 	GetConsent(ctx context.Context, req *apiv1.GetConsentRequest) (*model.Consent, error)
 
+	AddUser(ctx context.Context, req *apiv1.AddUserRequest) (*apiv1.AddUserReply, error)
+
 	// SatosaCredential endpoints, remove after transition from Satosa to OIDC4VCI
 	SatosaCredential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error)
 	JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)

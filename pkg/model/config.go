@@ -2,6 +2,7 @@ package model
 
 import (
 	"vc/pkg/logger"
+	"vc/pkg/openid4vci"
 )
 
 // APIServer holds the api server configuration
@@ -118,7 +119,7 @@ type Issuer struct {
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
 
 	// MetadataPath path to the metadata file, OpenID
-	MetadataPath string `yaml:"metadata_path" validate:"required"`
+	//MetadataPath string `yaml:"metadata_path" validate:"required"`
 }
 
 // Registry holds the registry configuration
@@ -245,17 +246,18 @@ type AuthenticSource struct {
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common           Common                     `yaml:"common"`
-	AuthenticSources map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
-	APIGW            APIGW                      `yaml:"apigw" validate:"omitempty"`
-	Issuer           Issuer                     `yaml:"issuer" validate:"omitempty"`
-	Verifier         Verifier                   `yaml:"verifier" validate:"omitempty"`
-	Datastore        Datastore                  `yaml:"datastore" validate:"omitempty"`
-	Registry         Registry                   `yaml:"registry" validate:"omitempty"`
-	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
-	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
-	UI               UI                         `yaml:"ui" validate:"omitempty"`
-	Portal           Portal                     `yaml:"portal" validate:"omitempty"`
+	Common           Common                                         `yaml:"common"`
+	AuthenticSources map[string]AuthenticSource                     `yaml:"authentic_sources" validate:"omitempty"`
+	APIGW            APIGW                                          `yaml:"apigw" validate:"omitempty"`
+	Issuer           Issuer                                         `yaml:"issuer" validate:"omitempty"`
+	Verifier         Verifier                                       `yaml:"verifier" validate:"omitempty"`
+	Datastore        Datastore                                      `yaml:"datastore" validate:"omitempty"`
+	Registry         Registry                                       `yaml:"registry" validate:"omitempty"`
+	Persistent       Persistent                                     `yaml:"persistent" validate:"omitempty"`
+	MockAS           MockAS                                         `yaml:"mock_as" validate:"omitempty"`
+	UI               UI                                             `yaml:"ui" validate:"omitempty"`
+	Portal           Portal                                         `yaml:"portal" validate:"omitempty"`
+	IssuerMetadata   *openid4vci.CredentialIssuerMetadataParameters `yaml:"issuing_metadata" validate:"omitempty"`
 }
 
 // IsAsyncEnabled checks if the async is enabled

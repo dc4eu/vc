@@ -2,8 +2,6 @@ package apiv1
 
 import (
 	"context"
-	"encoding/json"
-	"os"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/openid4vci"
 
@@ -83,22 +81,9 @@ func (c *Client) OIDCNotification(ctx context.Context, req *openid4vci.Notificat
 
 // OIDCMetadata https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID1.html#name-credential-issuer-metadata-
 func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error) {
-	//open file and unmarshal
+	c.log.Debug("metadata request")
 
-	data, err := os.ReadFile(c.cfg.Issuer.MetadataPath)
-	if err != nil {
-		c.log.Error(err, "Failed to connect to issuer")
-		return nil, err
-	}
-
-	metadata := &openid4vci.CredentialIssuerMetadataParameters{}
-	err = json.Unmarshal(data, metadata)
-	if err != nil {
-		c.log.Error(err, "failed to call MakeSDJWT")
-		return nil, err
-	}
-
-	return metadata, nil
+	return c.cfg.IssuerMetadata, nil
 }
 
 // RevokeRequest is the request for GenericRevoke

@@ -503,7 +503,7 @@ const addViewVPFlowDebugInfoFormArticleToContainer = () => {
 
 };
 
-const createInputElement = (placeholder, value = '', type = 'text', disabled = false) => {
+const createInputElement = (placeholder, value = '', type = 'text', disabled = false, title = '') => {
     const input = document.createElement('input');
     input.id = generateUUID();
     input.classList.add('input');
@@ -511,6 +511,25 @@ const createInputElement = (placeholder, value = '', type = 'text', disabled = f
     input.placeholder = placeholder;
     input.value = value;
     input.disabled = disabled;
+    input.title = title;
+    return input;
+};
+
+const createInputElementAdvanced = ({
+                                        placeholder,
+                                        value = '',
+                                        type = 'text',
+                                        disabled = false,
+                                        title = ''
+                                    }) => {
+    const input = document.createElement('input');
+    input.id = generateUUID();
+    input.classList.add('input');
+    input.type = type;
+    input.placeholder = placeholder;
+    input.value = value;
+    input.disabled = disabled;
+    input.title = title; //tooltip
     return input;
 };
 
@@ -1238,14 +1257,52 @@ const addSearchDocumentsFormArticleToContainer = () => {
 
 const addPIDUser = () => {
     const buildFormElements = () => {
+        const helpLink = document.createElement("a");
+        const helpURL = "https://eur-lex.europa.eu/eli/reg_impl/2024/2977#anx_1";
+        helpLink.id = generateUUID();
+        helpLink.href = helpURL;
+        helpLink.target = "_blank";
+        helpLink.rel = "noopener noreferrer";
+        helpLink.textContent = "More info: " + helpURL + " (opens in a new tab or window)";
+        helpLink.classList.add("has-text-link");
+        helpLink.style.textDecoration = "underline";
+
+        //Mandatory
         const usernameInput = createInputElement('Username');
         const passwordInput = createInputElement('Password');
+
+        const schemaNameInput = createInputElement('Schema name', 'DefaultSchema');
+
         const familyNameInput = createInputElement('Family name');
         const givenNameInput = createInputElement('Given name');
         const birthdateInput = createInputElement('Birth date (YYYY-MM-DD)');
-        const schemaNameInput = createInputElement('Schema name', 'DefaultSchema');
+        const birthPlaceInput = createInputElement('Birth place (the country as an alpha-2 country code as specified in ISO 3166-1)');
+        const nationalityInput = createInputElement("Nationality (one alpha-2 country code as specified in ISO 3166-1)")
 
-        const nationalityInput = createInputElement("Nationality (optional)")
+        //Optional
+        const residentAddressInput = createInputElement('Resident address (the full address - street name, house number, city etc.)');
+        const residentCountryInput = createInputElement('Resident country (an alpha-2 country code as specified in ISO 3166-1)');
+        const residentStateInput = createInputElement('Resident state');
+        const residentCityInput = createInputElement('Resident city');
+        const residentPostalCodeInput = createInputElement('Resident postal code');
+        const residentStreetInput = createInputElement('Resident street');
+        const residentHouseNumberInput = createInputElement('Resident house number');
+        const personalAdministrativeNumberInput = createInputElementAdvanced({
+            placeholder: 'Personal administrative number',
+            title: "A value assigned to the natural person that is unique among all personal administrative numbers issued by the provider of person identification data. Where Member States opt to include this attribute, they shall describe in their electronic identification schemes under which the person identification data is issued, the policy that they apply to the values of this attribute, including, where applicable, specific conditions for the processing of this value."
+        });
+        const portraitInput = createInputElementAdvanced({
+            placeholder: 'Facial image of the wallet user',
+            disabled: true,
+        })
+        const familyNameBirthInput = createInputElement('Family name birth');
+        const givenNameBirthInput = createInputElement('Given name birth');
+        const sexInput = createInputElementAdvanced({
+            placeholder: 'Sex',
+            title: "Values shall be one of the following: 0 = not known; 1 = male; 2 = female; 3 = other; 4 = inter; 5 = diverse; 6 = open; 9 = not applicable. For values 0, 1, 2 and 9, ISO/IEC 5218 applies.",
+        });
+        const emailAddressInput = createInputElement('Email address');
+        const mobilePhoneNumberInput = createInputElement('Mobile phone number');
 
         const divResultContainer = document.createElement("div");
         divResultContainer.id = generateUUID();
@@ -1262,13 +1319,29 @@ const addPIDUser = () => {
                 username: usernameInput.value,
                 password: passwordInput.value,
                 attributes: {
-                    family_name: familyNameInput.value,
-                    given_name: givenNameInput.value,
-                    birth_date: birthdateInput.value,
-                    nationality: nationalityInput.value,
                     schema: {
                         name: schemaNameInput.value,
                     },
+                    family_name: familyNameInput.value,
+                    given_name: givenNameInput.value,
+                    birth_date: birthdateInput.value,
+                    birth_place: birthPlaceInput.value,
+                    nationality: nationalityInput.value,
+
+                    resident_address: residentAddressInput.value,
+                    resident_country: residentCountryInput.value,
+                    resident_state: residentStateInput.value,
+                    resident_city: residentCityInput.value,
+                    resident_postal_code: residentPostalCodeInput.value,
+                    resident_street: residentStreetInput.value,
+                    resident_house_number: residentHouseNumberInput.value,
+                    personal_administrative_number: personalAdministrativeNumberInput.value,
+                    portrait: portraitInput.value,
+                    family_name_birth: familyNameBirthInput.value,
+                    given_name_birth: givenNameBirthInput.value,
+                    sex: sexInput.value,
+                    email_address: emailAddressInput.value,
+                    mobile_phone_number: mobilePhoneNumberInput.value,
                 },
             };
 
@@ -1291,12 +1364,29 @@ const addPIDUser = () => {
             usernameInput,
             passwordInput,
             document.createElement('hr'),
+            schemaNameInput,
+            document.createElement('hr'),
+            helpLink,
             familyNameInput,
             givenNameInput,
             birthdateInput,
-            schemaNameInput,
-            document.createElement('hr'),
+            birthPlaceInput,
             nationalityInput,
+            document.createElement('hr'),
+            residentAddressInput,
+            residentCountryInput,
+            residentStateInput,
+            residentCityInput,
+            residentPostalCodeInput,
+            residentStreetInput,
+            residentHouseNumberInput,
+            personalAdministrativeNumberInput,
+            portraitInput,
+            familyNameBirthInput,
+            givenNameBirthInput,
+            sexInput,
+            emailAddressInput,
+            mobilePhoneNumberInput,
             addUserButton,
             divResultContainer];
     };

@@ -247,6 +247,7 @@ type Identity struct {
 
 	// required: false
 	// example: swedish
+	//TODO: One or more alpha-2 country codes as specified in ISO 3166-1
 	Nationality string `json:"nationality,omitempty" bson:"nationality"`
 }
 

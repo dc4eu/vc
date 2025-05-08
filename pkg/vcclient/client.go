@@ -1,4 +1,4 @@
-package datastoreclient
+package vcclient
 
 import (
 	"bytes"
@@ -22,6 +22,7 @@ type Client struct {
 	Identity *identityHandler
 	Root     *rootHandler
 	OIDC     *oidcHandler
+	User     *userHandler
 }
 
 // Config is the configuration for the client
@@ -53,6 +54,7 @@ func New(config *Config) (*Client, error) {
 	c.Identity = &identityHandler{client: c, serviceBaseURL: "api/v1/identity", defaultContentType: defaultContentType, log: c.log.New("identity")}
 	c.Root = &rootHandler{client: c, serviceBaseURL: "api/v1", defaultContentType: defaultContentType, log: c.log.New("root")}
 	c.OIDC = &oidcHandler{client: c, defaultContentType: defaultContentType, log: c.log.New("oidc")}
+	c.User = &userHandler{client: c, serviceBaseURL: "api/v1/user", defaultContentType: defaultContentType, log: c.log.New("user")}
 
 	return c, nil
 }

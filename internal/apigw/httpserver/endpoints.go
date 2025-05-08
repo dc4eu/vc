@@ -6,6 +6,7 @@ import (
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
+	"vc/pkg/vcclient"
 
 	"go.opentelemetry.io/otel/codes"
 
@@ -43,16 +44,37 @@ func (s *Service) endpointAddPIDUser(ctx context.Context, g *gin.Context) (any, 
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAddPIDUser")
 	defer span.End()
 
-	request := &apiv1.AddPIDUserRequest{}
+	request := &vcclient.AddPIDRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	reply, err := s.apiv1.AddPIDUser(ctx, request)
+
+	err := s.apiv1.AddPIDUser(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+
+	return nil, nil
+}
+
+func (s *Service) endpointLoginPIDUser(ctx context.Context, g *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointLoginPIDUser")
+	defer span.End()
+
+	request := &vcclient.LoginPIDUserRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	reply, err := s.apiv1.LoginPIDUser(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
 	return reply, nil
 }
 

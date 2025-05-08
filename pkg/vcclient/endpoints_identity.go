@@ -1,4 +1,4 @@
-package datastoreclient
+package vcclient
 
 import (
 	"context"
@@ -9,9 +9,9 @@ import (
 )
 
 type identityHandler struct {
-	client         *Client
-	serviceBaseURL string
-	log            *logger.Log
+	client             *Client
+	serviceBaseURL     string
+	log                *logger.Log
 	defaultContentType string
 }
 

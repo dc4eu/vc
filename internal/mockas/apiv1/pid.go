@@ -3,7 +3,7 @@ package apiv1
 import (
 	"context"
 	"time"
-	"vc/pkg/identity"
+	"vc/pkg/model"
 
 	"github.com/brianvoe/gofakeit/v6"
 )
@@ -16,7 +16,7 @@ func (s *PIDService) random(ctx context.Context, person *person) (map[string]any
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	doc := identity.PIDDocument{
+	doc := model.Identity{
 		GivenName:  person.sa.FirstName,
 		FamilyName: person.sa.LastName,
 		BirthDate:  gofakeit.Date().Format("2006-01-02"),

@@ -15,7 +15,8 @@ type Authorization struct {
 
 // OAuthUsers is the model for the OAuth users in the database
 type OAuthUsers struct {
-	ClientID string `json:"client_id" bson:"client_id" validate:"required"`
+	Username string `json:"username" bson:"username" validate:"required"`
+	Password string `json:"password" bson:"password" validate:"required"`
 }
 
 type CodeChallenge struct {

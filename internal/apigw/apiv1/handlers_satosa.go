@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"vc/internal/gen/issuer/apiv1_issuer"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -23,7 +23,7 @@ type CredentialRequest struct {
 }
 
 func (c *Client) SatosaCredential(ctx context.Context, req *CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
-	document, _, err := c.datastoreClient.Document.CollectID(ctx, &datastoreclient.DocumentCollectIDQuery{
+	document, _, err := c.datastoreClient.Document.CollectID(ctx, &vcclient.DocumentCollectIDQuery{
 		AuthenticSource: req.AuthenticSource,
 		DocumentType:    req.DocumentType,
 		CollectID:       req.CollectID,

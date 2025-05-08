@@ -6,23 +6,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
+	"vc/pkg/vcclient"
 
 	"github.com/xuri/excelize/v2"
 )
 
 type pda1Client struct {
 	client         *Client
-	documents      map[string]*datastoreclient.UploadRequest
+	documents      map[string]*vcclient.UploadRequest
 	credentialType string
 }
 
 func NewPDA1Client(ctx context.Context, client *Client) (*pda1Client, error) {
 	c := &pda1Client{
 		client:         client,
-		documents:      map[string]*datastoreclient.UploadRequest{},
+		documents:      map[string]*vcclient.UploadRequest{},
 		credentialType: "pda1",
 	}
 
@@ -52,7 +52,7 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 			continue
 		}
 
-		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
+		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
 		identity, ok := c.client.identities[pidNumber]
 		if !ok {

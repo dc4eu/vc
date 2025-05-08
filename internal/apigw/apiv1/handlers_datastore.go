@@ -2,7 +2,6 @@ package apiv1
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -10,6 +9,10 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
+	"vc/pkg/vcclient"
+
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
 	"go.opentelemetry.io/otel/codes"
 )
@@ -164,30 +167,85 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	return nil
 }
 
-type AddPIDUserRequest struct {
-	// Username must be unique
-	Username   string          `json:"username" bson:"username" validate:"required"`
-	Password   string          `json:"password" bson:"password" validate:"required"`
-	Attributes *model.Identity `json:"attributes" bson:"attributes" validate:"required"`
-}
-
-type AddPIDUserReply struct {
-}
-
-func (c *Client) AddPIDUser(ctx context.Context, req *AddPIDUserRequest) (*AddPIDUserReply, error) {
+func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
 	if c.cfg.Common.Production {
-		return nil, errors.New("Not supported in production mode")
+		return errors.New("not supported in production mode")
 	}
-	if req.Attributes.GivenName == "" || req.Attributes.FamilyName == "" || req.Attributes.BirthDate == "" {
-		// Since omitempty in Identity
-		return nil, errors.New("missing one or several of required attributes [GivenName, FamilyName, BirthDate]")
+
+	documentData, err := req.Attributes.Marshal()
+	if err != nil {
+		c.log.Error(err, "failed to marshal document data")
+		return err
 	}
-	bytes, _ := json.MarshalIndent(req, "", "  ")
-	c.log.Debug("PIDUser added", "with data:", string(bytes))
 
-	//TODO(masv): save user auth data to db + upload new PID doc
+	// create a new document and upload it
+	uploadRequest := &UploadRequest{
+		Meta: &model.MetaData{
+			AuthenticSource:           "Generic_PID_Issuer",
+			DocumentVersion:           "1.0.0",
+			DocumentType:              "PID",
+			DocumentID:                fmt.Sprintf("generic.pid.%s", uuid.NewString()),
+			RealData:                  false,
+			Collect:                   &model.Collect{},
+			Revocation:                &model.Revocation{},
+			CredentialValidFrom:       0,
+			CredentialValidTo:         0,
+			DocumentDataValidationRef: "",
+		},
+		Identities: []model.Identity{*req.Attributes},
+		DocumentDisplay: &model.DocumentDisplay{
+			Version: "1.0.0",
+			Type:    "",
+			DescriptionStructured: map[string]any{
+				"en": "Generic PID Issuer",
+			},
+		},
+		DocumentData:        documentData,
+		DocumentDataVersion: "1.0.0",
+	}
 
-	return &AddPIDUserReply{}, nil
+	if err := c.Upload(ctx, uploadRequest); err != nil {
+		c.log.Error(err, "failed to upload document")
+		return err
+	}
+
+	// store user and password in the database
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 14)
+	if err != nil {
+		return err
+	}
+
+	err = c.db.VCUsersColl.Save(ctx, &model.OAuthUsers{
+		Username: req.Username,
+		Password: string(passwordHash),
+	})
+	if err != nil {
+		c.log.Error(err, "failed to save user")
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error) {
+	hashedPassword, err := c.db.VCUsersColl.GetHashedPassword(ctx, req.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	reply := &vcclient.LoginPIDUserReply{}
+
+	if hashedPassword == "" {
+		return reply, fmt.Errorf("username %s not found", req.Username)
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password)); err != nil {
+		return reply, fmt.Errorf("password mismatch for username %s", req.Username)
+	}
+
+	reply.Grant = true
+
+	return reply, nil
 }
 
 // NotificationRequest is the request for Notification

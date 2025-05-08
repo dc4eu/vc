@@ -6,21 +6,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"vc/pkg/datastoreclient"
-	"vc/pkg/identity"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 )
 
 type pidClient struct {
 	client         *Client
-	documents      map[string]*datastoreclient.UploadRequest
+	documents      map[string]*vcclient.UploadRequest
 	credentialType string
 }
 
 func NewPIDClient(ctx context.Context, client *Client) (*pidClient, error) {
 	pda1Client := &pidClient{
 		client:         client,
-		documents:      map[string]*datastoreclient.UploadRequest{},
+		documents:      map[string]*vcclient.UploadRequest{},
 		credentialType: "pid",
 	}
 
@@ -29,9 +28,9 @@ func NewPIDClient(ctx context.Context, client *Client) (*pidClient, error) {
 
 func (c *pidClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
-		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
+		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
-		documentData := identity.PIDDocument{
+		documentData := model.Identity{
 			GivenName:  id.Identities[0].GivenName,
 			FamilyName: id.Identities[0].FamilyName,
 			BirthDate:  id.Identities[0].BirthDate,

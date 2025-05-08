@@ -1,4 +1,4 @@
-package datastoreclient
+package vcclient
 
 import "errors"
 

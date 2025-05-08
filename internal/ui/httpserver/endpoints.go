@@ -10,6 +10,7 @@ import (
 	"vc/internal/ui/apiv1"
 	apiv1_verifier "vc/internal/verifier/apiv1"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -232,14 +233,14 @@ func (s *Service) endpointDeleteDocument(ctx context.Context, c *gin.Context) (a
 }
 
 func (s *Service) endpointAddPIDUser(ctx context.Context, g *gin.Context) (any, error) {
-	request := &apiv1_apigw.AddPIDUserRequest{}
+	request := &vcclient.AddPIDRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
 		return nil, err
 	}
 
-	reply, err := s.apiv1.AddPIDUser(ctx, request)
-	if err != nil {
+	if err := s.apiv1.AddPIDUser(ctx, request); err != nil {
 		return nil, err
 	}
-	return reply, nil
+
+	return nil, nil
 }

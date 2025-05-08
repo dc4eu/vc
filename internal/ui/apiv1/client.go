@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/json"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/lestrrat-go/jwx/jwk"
 	"os"
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
@@ -13,6 +11,10 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+	"vc/pkg/vcclient"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/lestrrat-go/jwx/jwk"
 )
 
 // Client holds the public api object
@@ -28,6 +30,7 @@ type Client struct {
 	privateKey *ecdsa.PrivateKey
 	publicKey  *ecdsa.PublicKey
 	jwk        *apiv1_issuer.Jwk
+	vcClient   *vcclient.Client
 }
 
 // New creates a new instance of user interface web page
@@ -43,8 +46,15 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, eventPublish
 		jwk:            &apiv1_issuer.Jwk{},
 	}
 
-	err := c.initKeys(ctx)
+	var err error
+	c.vcClient, err = vcclient.New(&vcclient.Config{
+		URL: cfg.MockAS.DatastoreURL,
+	})
 	if err != nil {
+		return nil, err
+	}
+
+	if err := c.initKeys(ctx); err != nil {
 		return nil, err
 	}
 

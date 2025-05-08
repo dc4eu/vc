@@ -9,6 +9,7 @@ import (
 	apiv1_mockas "vc/internal/mockas/apiv1"
 	apiv1_verifier "vc/internal/verifier/apiv1"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 )
 
 func (c *Client) Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
@@ -203,10 +204,11 @@ func (c *Client) DeleteDocument(ctx context.Context, req *apiv1_apigw.DeleteDocu
 	return nil
 }
 
-func (c *Client) AddPIDUser(ctx context.Context, request *apiv1_apigw.AddPIDUserRequest) (*apiv1_apigw.AddPIDUserReply, error) {
-	reply, err := c.apigwClient.AddPIDUser(request)
+func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
+	_, err := c.vcClient.User.AddPID(ctx, req)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return reply, nil
+
+	return nil
 }

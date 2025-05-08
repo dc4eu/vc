@@ -18,16 +18,6 @@ func (c *Client) OIDCAuth(ctx context.Context, req *openid4vci.AuthorizationRequ
 
 	c.log.Debug("OIDCAuth")
 
-	granted, err := c.db.VCUsersColl.Grant(ctx, req.ClientID)
-	if err != nil {
-		c.log.Debug("grant error", "err", err)
-		return "", err
-	}
-	if !granted {
-		c.log.Debug("grant denied")
-		return "", &openid4vci.Error{Err: openid4vci.ErrUnauthorizedClient, ErrorDescription: "client_id not found"}
-	}
-
 	azt := model.Authorization{
 		Code:     response.Code,
 		IsUsed:   false,

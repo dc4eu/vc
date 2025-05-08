@@ -2,10 +2,10 @@ package apiv1
 
 import (
 	"context"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+	"vc/pkg/vcclient"
 )
 
 // Client holds the public api object
@@ -14,7 +14,7 @@ type Client struct {
 	log    *logger.Log
 	tracer *trace.Tracer
 
-	apigwClient *datastoreclient.Client
+	apigwClient *vcclient.Client
 }
 
 // New creates a new instance of the public api
@@ -26,7 +26,7 @@ func New(ctx context.Context, tracer *trace.Tracer, cfg *model.Cfg, log *logger.
 	}
 
 	var err error
-	c.apigwClient, err = datastoreclient.New(&datastoreclient.Config{URL: cfg.Portal.ApigwApiServer.Addr})
+	c.apigwClient, err = vcclient.New(&vcclient.Config{URL: cfg.Portal.ApigwApiServer.Addr})
 	if err != nil {
 		return nil, err
 	}

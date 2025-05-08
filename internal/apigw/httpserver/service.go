@@ -3,11 +3,14 @@ package httpserver
 import (
 	"context"
 	"net/http"
+	"time"
 	"vc/internal/apigw/apiv1"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+
+	"github.com/gin-contrib/cors"
 
 	// Swagger
 	_ "vc/docs/apigw"
@@ -51,6 +54,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	if err != nil {
 		return nil, err
 	}
+
+	rgRoot.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://dc4eu.wwwallet.org", "https://demo.wwwallet.org"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	rgRestricted, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
 	if err != nil {

@@ -9,8 +9,8 @@
         "ehic",
         "eidas",
         "envconfig",
+        "epass",
         "ESCO",
-	    "epass",
         "excelize",
         "gofakeit",
         "gonic",
@@ -68,6 +68,7 @@
         "SVGID",
         "swaggo",
         "timestamppb",
+        "vcclient",
         "VCTM"
     ]
 }

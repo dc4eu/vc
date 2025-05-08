@@ -1,16 +1,8 @@
 package model
 
 import (
-	"context"
-	"encoding/base64"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"net/url"
-	"strings"
 	"vc/pkg/openid4vci"
-
-	"github.com/skip2/go-qrcode"
 )
 
 // CompleteDocument is a generic type for upload
@@ -33,7 +25,7 @@ type CompleteDocuments []CompleteDocument
 type DocumentList struct {
 	Meta            *MetaData        `json:"meta,omitempty" bson:"meta" validate:"required"`
 	DocumentDisplay *DocumentDisplay `json:"document_display,omitempty" bson:"document_display"`
-	QR              *QR              `json:"qr,omitempty" bson:"qr" validate:"required"`
+	QR              *openid4vci.QR   `json:"qr,omitempty" bson:"qr" validate:"required"`
 }
 
 // Document is a generic type for get document
@@ -45,116 +37,6 @@ type Document struct {
 // IDMapping is a generic type for ID mapping
 type IDMapping struct {
 	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
-}
-
-// QRGenerator generates a QR code
-func (m *MetaData) QRGenerator(ctx context.Context, issuerURL, credentialOfferURL string, recoveryLevel, size int) (*QR, error) {
-	credentialOfferParsedURL, err := url.Parse(credentialOfferURL)
-	if err != nil {
-		return nil, err
-	}
-	issuerState := fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", m.Collect.ID, m.DocumentType, m.AuthenticSource)
-
-	query := credentialOfferParsedURL.Query()
-
-	var credentialConfigurationID string
-	switch m.DocumentType {
-	case "PDA1":
-		credentialConfigurationID = "PDA1Credential"
-	case "EHIC":
-		credentialConfigurationID = "EHICCredential"
-	case "Diploma":
-		credentialConfigurationID = "DiplomaCredential"
-	case "MicroCredential":
-		credentialConfigurationID = "MicroCredential"
-	case "ELM":
-		credentialConfigurationID = "ELMCredential"
-	case "PID":
-		credentialConfigurationID = "PIDCredential"
-	}
-
-	credentialOffer := &CredentialOffer{
-		CredentialIssuer:           issuerURL,
-		CredentialConfigurationIDs: []string{credentialConfigurationID},
-		Grants: map[string]map[string]string{
-			"authorization_code": {
-				"issuer_state": issuerState,
-			},
-		},
-	}
-
-	credentialOfferByte, err := credentialOffer.Marshal()
-	if err != nil {
-		return nil, err
-	}
-
-	query.Add("credential_offer", string(credentialOfferByte))
-	credentialOfferParsedURL.RawQuery = query.Encode()
-
-	qrPNG, err := qrcode.Encode(credentialOfferParsedURL.String(), qrcode.RecoveryLevel(recoveryLevel), size)
-	if err != nil {
-		return nil, err
-	}
-
-	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
-
-	qr := &QR{
-		CredentialOfferURL: credentialOfferParsedURL.String(),
-		Base64Image:        qrBase64,
-	}
-
-	return qr, nil
-}
-
-// CSV returns the document as a CSV
-func (c *CompleteDocument) CSV(issuerURL, credentialOfferURL string) (string, []string, error) {
-	if len(c.Identities) == 0 {
-		return "", nil, errors.New("no identities found")
-	}
-
-	if c.Meta == nil {
-		return "", nil, errors.New("no metadata found")
-	}
-
-	qr, err := c.Meta.QRGenerator(context.Background(), issuerURL, credentialOfferURL, 2, 256)
-	if err != nil {
-		return "", nil, err
-	}
-	attributes := []string{
-		c.Identities[0].AuthenticSourcePersonID,
-		c.Identities[0].GivenName,
-		c.Identities[0].FamilyName,
-		c.Identities[0].BirthDate,
-		c.Identities[0].Schema.Name,
-		c.Meta.AuthenticSource,
-		c.Meta.Collect.ID,
-		c.Meta.DocumentType,
-		c.Meta.DocumentID,
-		qr.CredentialOfferURL,
-	}
-	csv := strings.Join(attributes, ",")
-
-	return csv, attributes, nil
-}
-
-// CSV return CompleteDocuments as a CSV, string array
-func (c *CompleteDocuments) CSV(issuerURL, credentialOfferURL string) ([]string, [][]string, error) {
-	if len(*c) == 0 {
-		return nil, nil, errors.New("no documents found")
-	}
-
-	var csvResult []string
-	var csvRaw [][]string
-	for _, doc := range *c {
-		csvRow, raw, err := doc.CSV(issuerURL, credentialOfferURL)
-		if err != nil {
-			return nil, nil, err
-		}
-		csvRaw = append(csvRaw, raw)
-		csvResult = append(csvResult, fmt.Sprintf("%v\n", csvRow))
-	}
-
-	return csvResult, csvRaw, nil
 }
 
 // CredentialOffer https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html 4.1.1 Credential Offer Parameters
@@ -382,16 +264,6 @@ type DocumentDisplay struct {
 	// required: true
 	// example: {"en": "European Health Insurance Card", "sv": "Europeiskt sjukförsäkringskortet"}
 	DescriptionStructured map[string]any `json:"description_structured,omitempty" bson:"description_structured" validate:"required"`
-}
-
-// QR is a collection of fields representing a QR code
-type QR struct {
-	// required: true
-	// example: "ZWFzdGVyIGVnZyE="
-	Base64Image string `json:"base64_image,omitempty" bson:"base64_image" validate:"required"`
-
-	// required: true
-	CredentialOfferURL string `json:"credential_offer,omitempty" bson:"credential_offer"`
 }
 
 // SearchDocumentsReply the reply from search documents

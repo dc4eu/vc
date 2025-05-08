@@ -185,44 +185,24 @@ type Identity struct {
 	GivenName string `json:"given_name,omitempty" bson:"given_name"`
 
 	// required: true
-	// example: 1970-01-01
+	// example: 1970-01-01 TODO: Day, month, and year?
 	BirthDate string `json:"birth_date,omitempty" bson:"birth_date" validate:"omitempty,datetime=2006-01-02"`
 
-	// required: false
-	// example: Karlsson
-	FamilyNameAtBirth string `json:"family_name_at_birth,omitempty" bson:"family_name_at_birth"`
-
-	// required: false
-	// example: Magnus
-	GivenNameAtBirth string `json:"given_name_at_birth,omitempty" bson:"given_name_at_birth"`
-
-	// required: false
+	// required: true
 	// example: Stockholm
 	BirthPlace string `json:"birth_place,omitempty" bson:"birth_place"`
 
-	// required: false
-	// example: male
-	Gender string `json:"gender,omitempty" bson:"gender"`
-
-	// TODO(masv): full name or just country code?
-	// required: false
-	// example: sweden
-	BirthCountry string `json:"birth_country,omitempty" bson:"birth_country"`
+	// required: true
+	// example: SE
+	//TODO: One [or more] alpha-2 country codes as specified in ISO 3166-1
+	Nationality string `json:"nationality,omitempty" bson:"nationality"`
 
 	// required: false
-	// example: Stockholm
-	BirthState string `json:"birth_state,omitempty" bson:"birth_state"`
-
-	// required: false
-	// example: Stockholm
-	BirthCity string `json:"birth_city,omitempty" bson:"birth_city"`
-
-	// required: false
-	// example: 221b baker street
+	// example: 221b Baker street
 	ResidentAddress string `json:"resident_address,omitempty" bson:"resident_address"`
 
 	// required: false
-	// example: england
+	// example: England
 	ResidentCountry string `json:"resident_country,omitempty" bson:"resident_country"`
 
 	// required: false
@@ -230,7 +210,7 @@ type Identity struct {
 	ResidentState string `json:"resident_state,omitempty" bson:"resident_state"`
 
 	// required: false
-	// example: london
+	// example: London
 	ResidentCity string `json:"resident_city,omitempty" bson:"resident_city"`
 
 	// required: false
@@ -238,7 +218,7 @@ type Identity struct {
 	ResidentPostalCode string `json:"resident_postal_code,omitempty" bson:"resident_postal_code"`
 
 	// required: false
-	// example: baker street
+	// example: Baker street
 	ResidentStreet string `json:"resident_street,omitempty" bson:"resident_street"`
 
 	// required: false
@@ -246,9 +226,64 @@ type Identity struct {
 	ResidentHouseNumber string `json:"resident_house_number,omitempty" bson:"resident_house_number"`
 
 	// required: false
-	// example: swedish
-	//TODO: One or more alpha-2 country codes as specified in ISO 3166-1
-	Nationality string `json:"nationality,omitempty" bson:"nationality"`
+	// example: <personnummer>
+	PersonalAdministrativeNumber string `json:"personal_administrative_number,omitempty" bson:"personal_administrative_number"`
+
+	// required: false
+	// example: facial image compliant with ISO 19794-5 or ISO 39794 specifications
+	//TODO: Portrait ??? `json:"portrait,omitempty" bson:"portrait"` - Facial image of the wallet user compliant with ISO 19794-5 or ISO 39794 specifications.
+
+	// required: false
+	// example: Karlsson
+	FamilyNameBirth string `json:"family_name_birth,omitempty" bson:"family_name_birth"`
+
+	// required: false
+	// example: Mats
+	GivenNameBirth string `json:"given_name_birth,omitempty" bson:"given_name_birth"`
+
+	// required: false
+	// example: 0 = not known, 1 = male, 2 = female, ...
+	Sex string `json:"sex,omitempty" bson:"sex"`
+
+	// required: false
+	// example: <email-address>
+	EmailAddress string `json:"email_address,omitempty" bson:"email_address"`
+
+	// required: false
+	// example: <+mobile-phone-number>
+	MobilePhoneNumber string `json:"mobile_phone_number,omitempty" bson:"mobile_phone_number"`
+
+	//TODO: remove deprecated identity attributes when all is working (testdata, bootstrap, database-operations, etc)
+
+	// required: -
+	// example: Karlsson
+	// Deprecated: Use FamilyNameBirth
+	FamilyNameAtBirth string `json:"family_name_at_birth,omitempty" bson:"family_name_at_birth"`
+
+	// required: -
+	// example: Magnus
+	// Deprecated: Use GivenNameBirth
+	GivenNameAtBirth string `json:"given_name_at_birth,omitempty" bson:"given_name_at_birth"`
+
+	// required: -
+	// example: sweden
+	// Deprecated: Use BirthPlace
+	BirthCountry string `json:"birth_country,omitempty" bson:"birth_country"`
+
+	// required: -
+	// example: Stockholm
+	// Deprecated: Use BirthPlace
+	BirthState string `json:"birth_state,omitempty" bson:"birth_state"`
+
+	// required: -
+	// example: Stockholm
+	// Deprecated: Use BirthPlace
+	BirthCity string `json:"birth_city,omitempty" bson:"birth_city"`
+
+	// required: -
+	// example: male
+	// Deprecated: Use Sex
+	Gender string `json:"gender,omitempty" bson:"gender"`
 }
 
 // Marshal marshals the document to a map

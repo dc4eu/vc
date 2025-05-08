@@ -5,8 +5,8 @@ import (
 	"crypto/sha256"
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
-	"vc/pkg/identity"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
 
@@ -30,7 +30,7 @@ func newPIDClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*pidCl
 	return c, nil
 }
 
-func (c *pidClient) sdjwt(ctx context.Context, doc *identity.PIDDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 

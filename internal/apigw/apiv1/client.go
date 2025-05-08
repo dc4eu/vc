@@ -3,10 +3,10 @@ package apiv1
 import (
 	"context"
 	"vc/internal/apigw/db"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+	"vc/pkg/vcclient"
 )
 
 //	@title		Datastore API
@@ -19,7 +19,7 @@ type Client struct {
 	db              *db.Service
 	log             *logger.Log
 	tracer          *trace.Tracer
-	datastoreClient *datastoreclient.Client
+	datastoreClient *vcclient.Client
 }
 
 // New creates a new instance of the public api
@@ -36,7 +36,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
 
 	var err error
-	c.datastoreClient, err = datastoreclient.New(&datastoreclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL})
+	c.datastoreClient, err = vcclient.New(&vcclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL})
 	if err != nil {
 		return nil, err
 	}

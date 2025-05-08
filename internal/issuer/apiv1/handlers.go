@@ -7,7 +7,7 @@ import (
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/education"
 	"vc/pkg/helpers"
-	"vc/pkg/identity"
+	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
 
 	"google.golang.org/grpc"
@@ -120,7 +120,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 
 	case "PID":
-		doc := &identity.PIDDocument{}
+		doc := &model.Identity{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}

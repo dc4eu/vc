@@ -250,6 +250,22 @@ type Identity struct {
 	Nationality string `json:"nationality,omitempty" bson:"nationality"`
 }
 
+// Marshal marshals the document to a map
+func (i *Identity) Marshal() (map[string]any, error) {
+	data, err := json.Marshal(i)
+	if err != nil {
+		return nil, err
+	}
+
+	var doc map[string]any
+	err = json.Unmarshal(data, &doc)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
+}
+
 // DocumentDisplay is a collection of fields representing display of document
 type DocumentDisplay struct {
 	// required: true

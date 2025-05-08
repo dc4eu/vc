@@ -6,23 +6,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
+	"vc/pkg/vcclient"
 
 	"github.com/xuri/excelize/v2"
 )
 
 type ehicClient struct {
 	client         *Client
-	documents      map[string]*datastoreclient.UploadRequest
+	documents      map[string]*vcclient.UploadRequest
 	credentialType string
 }
 
 func NewEHICClient(ctx context.Context, client *Client) (*ehicClient, error) {
 	ehicClient := &ehicClient{
 		client:         client,
-		documents:      map[string]*datastoreclient.UploadRequest{},
+		documents:      map[string]*vcclient.UploadRequest{},
 		credentialType: "ehic",
 	}
 	return ehicClient, nil
@@ -51,7 +51,7 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 			continue
 		}
 
-		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
+		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
 		SocialSecurityPin := row[4]
 		startDate := row[5]

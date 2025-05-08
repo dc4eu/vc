@@ -7,6 +7,7 @@ import (
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
+	"vc/pkg/vcclient"
 )
 
 // Apiv1 interface
@@ -31,7 +32,8 @@ type Apiv1 interface {
 
 	// datastore endpoints - disabled in production
 	SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error)
-	AddPIDUser(ctx context.Context, req *apiv1.AddPIDUserRequest) (*apiv1.AddPIDUserReply, error)
+	AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error
+	LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error)
 
 	// OpenID4VCI endpoints
 	OIDCAuth(ctx context.Context, req *openid4vci.AuthorizationRequest) (string, error)

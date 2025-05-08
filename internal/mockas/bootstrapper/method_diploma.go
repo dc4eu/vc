@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 )
 
 type diplomaClient struct {
 	client              *Client
-	documents           map[string]*datastoreclient.UploadRequest
+	documents           map[string]*vcclient.UploadRequest
 	credentialType      string
 	exampleELM          []map[string]any
 	exampleELMFilePaths []string
@@ -21,7 +21,7 @@ type diplomaClient struct {
 func NewDiplomaClient(ctx context.Context, client *Client) (*diplomaClient, error) {
 	diplomaClient := &diplomaClient{
 		client:     client,
-		documents:  map[string]*datastoreclient.UploadRequest{},
+		documents:  map[string]*vcclient.UploadRequest{},
 		exampleELM: []map[string]any{},
 		exampleELMFilePaths: []string{
 			filepath.Join("../../../standards", "education_credential", "diploma", "HE-diploma-9ad88a95-2f9a-4a1d-9e08-a61e213a3eac-degreeHBO-M.xml.json"),
@@ -38,7 +38,7 @@ func NewDiplomaClient(ctx context.Context, client *Client) (*diplomaClient, erro
 
 func (c *diplomaClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
-		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
+		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
 		documentData, err := c.getOneDocumentData(pidNumber)
 		if err != nil {

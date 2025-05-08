@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -20,11 +20,11 @@ type clients interface {
 }
 
 type Client struct {
-	cfg                   *model.Cfg
-	identities            map[string]*datastoreclient.UploadRequest
-	datastoreClient       *datastoreclient.Client
-	datastoreClientConfig *datastoreclient.Config
-	log                   *logger.Log
+	cfg            *model.Cfg
+	identities     map[string]*vcclient.UploadRequest
+	vcClient       *vcclient.Client
+	vcClientConfig *vcclient.Config
+	log            *logger.Log
 
 	pda1Client            clients
 	ehicClient            clients
@@ -37,15 +37,15 @@ type Client struct {
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	client := &Client{
 		cfg:        cfg,
-		identities: map[string]*datastoreclient.UploadRequest{},
-		datastoreClientConfig: &datastoreclient.Config{
+		identities: map[string]*vcclient.UploadRequest{},
+		vcClientConfig: &vcclient.Config{
 			URL: cfg.MockAS.DatastoreURL,
 		},
 		log: log.New("bootstrapper"),
 	}
 
 	var err error
-	client.datastoreClient, err = datastoreclient.New(client.datastoreClientConfig)
+	client.vcClient, err = vcclient.New(client.vcClientConfig)
 	if err != nil {
 		return nil, fmt.Errorf("new datastore client: %w", err)
 	}
@@ -114,7 +114,7 @@ func (c *Client) makeIdentities(sourceFilePath string) error {
 			continue
 		}
 		dateOfBirth := strings.ReplaceAll(row[8], "/", "-")
-		c.identities[row[0]] = &datastoreclient.UploadRequest{
+		c.identities[row[0]] = &vcclient.UploadRequest{
 			DocumentDataVersion: "1.0.0",
 			Identities: []model.Identity{
 				{
@@ -141,7 +141,7 @@ func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 		return err
 	}
 
-	bodys := map[string]*datastoreclient.UploadRequest{}
+	bodys := map[string]*vcclient.UploadRequest{}
 	if err := json.Unmarshal(b, &bodys); err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 		if body.Meta.DocumentType == "ELM" {
 			c.log.Info("Upload", "pidNumber", pidNumber, "body", body)
 		}
-		resp, err := c.datastoreClient.Root.Upload(ctx, body)
+		resp, err := c.vcClient.Root.Upload(ctx, body)
 		if err != nil {
 			c.log.Error(err, "Upload", "resp", resp)
 			return err

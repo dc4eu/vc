@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"vc/pkg/datastoreclient"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 )
 
 type MicroCredentialClient struct {
 	client              *Client
-	documents           map[string]*datastoreclient.UploadRequest
+	documents           map[string]*vcclient.UploadRequest
 	credentialType      string
 	exampleELM          []map[string]any
 	exampleELMFilePaths []string
@@ -21,7 +21,7 @@ type MicroCredentialClient struct {
 func NewMicroCredentialClient(ctx context.Context, client *Client) (*MicroCredentialClient, error) {
 	microCredentialClient := &MicroCredentialClient{
 		client:     client,
-		documents:  map[string]*datastoreclient.UploadRequest{},
+		documents:  map[string]*vcclient.UploadRequest{},
 		exampleELM: []map[string]any{},
 		exampleELMFilePaths: []string{
 			filepath.Join("../../../standards", "education_credential", "micro_credential", "uvh_fvhz_microcredential_full.json"),
@@ -38,7 +38,7 @@ func NewMicroCredentialClient(ctx context.Context, client *Client) (*MicroCreden
 
 func (c *MicroCredentialClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
-		c.documents[pidNumber] = &datastoreclient.UploadRequest{}
+		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
 		documentData, err := c.getOneDocumentData(pidNumber)
 		if err != nil {

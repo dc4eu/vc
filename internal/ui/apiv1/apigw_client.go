@@ -90,11 +90,3 @@ func (c *APIGWClient) DeleteDocument(req *apiv1_apigw.DeleteDocumentRequest) err
 	}
 	return nil
 }
-
-func (c *APIGWClient) AddPIDUser(req *apiv1_apigw.AddPIDUserRequest) (*apiv1_apigw.AddPIDUserReply, error) {
-	reply, err := DoPostJSONGeneric[apiv1_apigw.AddPIDUserReply](c.VCBaseClient, "/api/v1/piduser", req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}

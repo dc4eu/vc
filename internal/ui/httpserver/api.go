@@ -8,6 +8,7 @@ import (
 	"vc/internal/ui/apiv1"
 	apiv1_verifier "vc/internal/verifier/apiv1"
 	"vc/pkg/model"
+	"vc/pkg/vcclient"
 )
 
 type Apiv1 interface {
@@ -26,7 +27,7 @@ type Apiv1 interface {
 	Notification(ctx context.Context, reguest *apiv1.NotificationRequest) (any, error)
 	SearchDocuments(ctx context.Context, request *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error)
 	DeleteDocument(ctx context.Context, request *apiv1_apigw.DeleteDocumentRequest) error
-	AddPIDUser(ctx context.Context, request *apiv1_apigw.AddPIDUserRequest) (*apiv1_apigw.AddPIDUserReply, error)
+	AddPIDUser(ctx context.Context, request *vcclient.AddPIDRequest) error
 
 	// mockas
 	HealthMockAS(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)

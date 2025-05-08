@@ -3,14 +3,14 @@ package bootstrapper
 import (
 	"context"
 	"testing"
-	"vc/pkg/datastoreclient"
+	"vc/pkg/vcclient"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func mockClient() *Client {
 	return &Client{
-		identities: map[string]*datastoreclient.UploadRequest{},
+		identities: map[string]*vcclient.UploadRequest{},
 	}
 }
 

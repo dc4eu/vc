@@ -888,9 +888,9 @@ function displayCreateCredentialInModal(rowData) {
                 schema: {
                     name: rowData.firstIdentitySchemaName,
                 },
-                family_name: "",
-                given_name: "",
-                birth_date: "",
+                family_name: rowData.family_name,
+                given_name: rowData.given_name,
+                birth_date: rowData.birth_date,
             },
             document_type: rowData.documentType,
             credential_type: "vc+sd-jwt",
@@ -1056,6 +1056,9 @@ function buildDocumentTableRow(doc) {
         collectId: collectId,
         firstIdentityAuthenticSourcePersonId: doc.identities[0].authentic_source_person_id,
         firstIdentitySchemaName: doc.identities[0].schema.name,
+        family_name: doc.identities[0].family_name,
+        given_name: doc.identities[0].given_name,
+        birth_date: doc.identities[0].birth_date,
     };
 
     select.addEventListener('change', function () {
@@ -1267,21 +1270,31 @@ const addPIDUser = () => {
         helpLink.classList.add("has-text-link");
         helpLink.style.textDecoration = "underline";
 
-        //Mandatory
+        // const headingUser = document.createElement("h3");
+        // headingUser.textContent = "User (mandatory)";
+        // headingUser.classList.add("title", "is-5", "has-text-primary");
+
         const usernameInput = createInputElement('Username');
         const passwordInput = createInputElement('Password');
 
-        const schemaNameInput = createInputElement('Schema name', 'DefaultSchema');
+        const schemaNameInput = createInputElement('Identity schema name', 'DefaultSchema');
+
+        const expiryDateInput = createInputElement("Expiry date");
+        const issuingAuthorityInput = createInputElement("Issuing authority");
+        const issuingCountryInput = createInputElement("Issuing country");
+        //TODO: document_number - optional
+        //TODO: issuing_jurisdiction - optional
+        //TODO: location_status - optional
 
         const familyNameInput = createInputElement('Family name');
         const givenNameInput = createInputElement('Given name');
         const birthdateInput = createInputElement('Birth date (YYYY-MM-DD)');
-        const birthPlaceInput = createInputElement('Birth place (the country as an alpha-2 country code as specified in ISO 3166-1)');
-        const nationalityInput = createInputElement("Nationality (one alpha-2 country code as specified in ISO 3166-1)")
+        const birthPlaceInput = createInputElement('Birth place');
+        const nationalityInput = createInputElement("Nationality");
 
         //Optional
-        const residentAddressInput = createInputElement('Resident address (the full address - street name, house number, city etc.)');
-        const residentCountryInput = createInputElement('Resident country (an alpha-2 country code as specified in ISO 3166-1)');
+        const residentAddressInput = createInputElement('Resident address');
+        const residentCountryInput = createInputElement('Resident country');
         const residentStateInput = createInputElement('Resident state');
         const residentCityInput = createInputElement('Resident city');
         const residentPostalCodeInput = createInputElement('Resident postal code');

@@ -194,7 +194,8 @@ type Identity struct {
 
 	// required: true
 	// example: SE
-	//TODO: One [or more] alpha-2 country codes as specified in ISO 3166-1
+	//TODO: gör om typ till []string + anpassa i UI
+	//TODO: lägg in validate:"dive,iso3166_1_alpha2" när dataladdning mm anpassat
 	Nationality string `json:"nationality,omitempty" bson:"nationality"`
 
 	// required: false
@@ -243,6 +244,7 @@ type Identity struct {
 
 	// required: false
 	// example: 0 = not known, 1 = male, 2 = female, ...
+	//TODO: validate:"oneof=0 1 2 3 4 5 6 7 8 9"` när bootstrap mm är reviderat.
 	Sex string `json:"sex,omitempty" bson:"sex"`
 
 	// required: false

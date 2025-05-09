@@ -116,7 +116,7 @@ type Issuer struct {
 	SigningKeyPath     string       `yaml:"signing_key_path" validate:"required"`
 	JWTAttribute       JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 	IssuerURL          string       `yaml:"issuer_url" validate:"required"`
-	WalletURL          string       `yaml:"wallet_url" validate:"required"`
+	WalletURL          string       `yaml:"wallet_url"`
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
 
 	// MetadataPath path to the metadata file, OpenID

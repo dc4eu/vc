@@ -12,7 +12,7 @@ import (
 func (c *Client) Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
 	probes := model.Probes{}
 
-	status := probes.Check("registry")
+	status := probes.Check("portal")
 
 	return status, nil
 }

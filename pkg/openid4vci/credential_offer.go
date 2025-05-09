@@ -56,9 +56,8 @@ func (c *CredentialOfferURI) String() string {
 	return string(*c)
 }
 
-func (c *CredentialOfferURI) QR(recoveryLevel, size int, walletHost, issuerHost string) (*QR, error) {
-	qrURL := fmt.Sprintf("%s?%s", issuerHost, c.String())
-	u, err := url.Parse(issuerHost)
+func (c *CredentialOfferURI) QR(recoveryLevel, size int, walletURL, issuerURL string) (*QR, error) {
+	u, err := url.Parse(issuerURL)
 	if err != nil {
 		return nil, err
 	}
@@ -66,18 +65,18 @@ func (c *CredentialOfferURI) QR(recoveryLevel, size int, walletHost, issuerHost 
 	q := u.Query()
 	q.Set("credential_offer_uri", c.String())
 
-	qrPNG, err := qrcode.Encode(qrURL, qrcode.RecoveryLevel(recoveryLevel), size)
+	if walletURL == "" {
+		walletURL = "openid-credential-offer://"
+	}
+
+	credentialOfferURL := fmt.Sprintf("%s?%s", walletURL, q.Encode())
+
+	qrPNG, err := qrcode.Encode(credentialOfferURL, qrcode.RecoveryLevel(recoveryLevel), size)
 	if err != nil {
 		return nil, err
 	}
 
 	qrBase64 := base64.StdEncoding.EncodeToString(qrPNG)
-
-	if walletHost == "" {
-		walletHost = "openid-credential-offer://"
-	}
-
-	credentialOfferURL := fmt.Sprintf("%s?%s", walletHost, q.Encode())
 
 	qr := &QR{
 		QRBase64:           qrBase64,
@@ -150,8 +149,12 @@ type QR struct {
 }
 
 // QR returns a base64 encoded QR code, for convenience not part of the spec
-func (c *CredentialOffer) QR(recoveryLevel, size int, walletHost string) (*QR, error) {
-	qrURL := fmt.Sprintf("%s?%s", walletHost, c.String())
+func (c *CredentialOffer) QR(recoveryLevel, size int, walletURL string) (*QR, error) {
+	if walletURL == "" {
+		walletURL = "openid-credential-offer://"
+	}
+
+	qrURL := fmt.Sprintf("%s?%s", walletURL, c.String())
 
 	qrPNG, err := qrcode.Encode(qrURL, qrcode.RecoveryLevel(recoveryLevel), size)
 	if err != nil {

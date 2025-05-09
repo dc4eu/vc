@@ -116,6 +116,7 @@ type Issuer struct {
 	SigningKeyPath     string       `yaml:"signing_key_path" validate:"required"`
 	JWTAttribute       JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 	IssuerURL          string       `yaml:"issuer_url" validate:"required"`
+	WalletURL          string       `yaml:"wallet_url" validate:"required"`
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
 
 	// MetadataPath path to the metadata file, OpenID
@@ -257,7 +258,7 @@ type Cfg struct {
 	MockAS           MockAS                                         `yaml:"mock_as" validate:"omitempty"`
 	UI               UI                                             `yaml:"ui" validate:"omitempty"`
 	Portal           Portal                                         `yaml:"portal" validate:"omitempty"`
-	IssuerMetadata   *openid4vci.CredentialIssuerMetadataParameters `yaml:"issuing_metadata" validate:"omitempty"`
+	IssuerMetadata   *openid4vci.CredentialIssuerMetadataParameters `yaml:"issuing_metadata" validate:"required"`
 }
 
 // IsAsyncEnabled checks if the async is enabled

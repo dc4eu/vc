@@ -99,7 +99,7 @@ func TestParseCredentialOffer(t *testing.T) {
 	}
 }
 
-func TestQR(t *testing.T) {
+func TestCredentialOfferQR(t *testing.T) {
 	tts := []struct {
 		name       string
 		parameters *CredentialOfferParameters
@@ -107,8 +107,8 @@ func TestQR(t *testing.T) {
 		walletHost string
 	}{
 		{
-			name:       "qr",
-			walletHost: "https://wallet.example.com",
+			name:       "openid-credential-offer",
+			walletHost: "",
 			parameters: &CredentialOfferParameters{
 				CredentialIssuer: "issuer.sunet.se",
 				CredentialConfigurationIDs: []string{
@@ -121,8 +121,8 @@ func TestQR(t *testing.T) {
 				},
 			},
 			want: &QR{
-				QRBase64:           "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAAFCUlEQVR42uyYMa6kOhOFy3LgDG8A4W0QIHlLhGR2RthbskTANozYgDtzYPn8Kpp7Nf9LoQneG5Keuf0FblN16pyiv89/6xFAbfsRwQmEEYtv2p6inN/RAuEeIFBDvSOZRex1tFlEi0oTtT1/9wywoCHSnc069mQWL/YwVpqatnfbrYBZvN6z2xYks2LDrOOzgORvZmp7DXgU6zsJau8D+KpV2jA3ck1RejJrMstc6c938WXgU3LbMjf/+Pj/mrwA8NMS0eB0sa8o81HVpFL7R/N8GRDFNTIQv+B99QBEUR6YRfy5h+tAcKlV2IojE0aD3JDFhgzksdJDQJkqqRcW/96RALyjwhaUKOTuAgAR1YskRKFxW/J7h68DiT1oegzI2LOrFhpZi6J0ISe4z2g04RaAaHoXC1NI70HHwWEHyPpq1oSnADlXuabK+tu7rbjGBCcWLwppcRNg80fYJ0SbPmfwQNbRvranAFKIypslJ4NkimpkHrfFkwTMTYCck8zUDUStTWT9m2VicHrHq6NnAAGg2FdHTpSe5eRdyBlu5RVbuAdYciJWXacBVCL+Z0cutT3hIYBsrjJoFEWS/++AoDeAFSvSPYAEUe86OetCI5AbmY/5CvjHgGHiiYrFI/a0AWIPbgvTG/kcOZcBsfh3IeokG4d0XEB2NJCONj0FkGQ5elV5XIBY5mTWJIqqMruzsy4DdhYsxeRqq7hjEHttFgCrx0OAWGZdVBILUGisg2pa9RIAyXzOi+sA5jdWFieAB6tvWC2k5/mDhwCyuTFZR/agFiYonvGiEJc60S2AgKe2HwW8QHbR5o8MKr2fjfMEsMwox0fTWvYwPAMNwMPh1MnrAMgAUSK11kfpkwGfobY0nmf4OkB25iKrdq6kPEeY1npTFLvxmwARHB02Xr2LSlGCLQrg2S2dgfT7AJfzimjnZDJLMUcYtqIG6XPIGwBKRLpKjz2MHU3vT+bVReE0/18HiCXDvjrrq8QrktII4zFmM90EiGX+dAw4F4lAbIFJshMe8RTAHhSvbqAq15fhBiPNwhVtMjcBmBNHUA5L5Dqa2ILx3/f1fN2PADpaiOVYn3CSiZzUfGPWHzd4HWBfPaIcKaIO6o2s6zA1BqCHABomYE2dncmw40bT0ohCqbWvz8S5DIii2KIAc2NWX21GsZ4sksl0JtbvA2HCzrWWm1YljlCsIaxYZ4S5DhAdP7kewpBMmBrJU+fcBz4EDA6F2CqIyAPAiUjnFuWcF5cBUUhg9ezEJEDD9C69q8OE0ruzu78OkJyxB83GKPJgPRdWwJ71TYAAkgSfQRTlt6BO76ux/i7Nvg/42vaaryMqbAuqWT17GLIvcRNQpnTYQMfCt3FF5RN/na/7+0Cg2loe5xz6ueT2FVuZeDj8rEAvAnSsntxpSjqbxSfacyt/sv8DgMyVTyd9ba0/vGEYD+Hqf2ryKiDCxLdaLVB6nuSV1ULmhvqf9ePXAXakEq/OojFBA3gjkFlmtoTnwuoycOyK3VYch6Uoj2+AmX31H8vkrwICqMS/HETHslzvWW9FpV/jfR0IxPqOJWs2ZDK/WZEHOurrKWBBY5DYynAE5fmaR7PM1Zx7uXuAViUaXDVBdwNxfDDIVa4/YfARgMiJxR/ZjMcBUSch9t/lwGUgUNMqv3G7WgjwVVMdJg347SkAqCaPYslk4LHMRApbmKpB+q3qa8Df59/z/C8AAP//jcBQ82xjA8sAAAAASUVORK5CYII=",
-				CredentialOfferURL: "https://wallet.example.com?credential_offer=%7B%22credential_issuer%22%3A%22issuer.sunet.se%22%2C%22credential_configuration_ids%22%3A%5B%22PDA1Credential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_1%5Cu0026document_type%3DPDA1%5Cu0026authentic_source%3Dtest_authentic_source%22%7D%7D%7D",
+				QRBase64:           "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAAFDklEQVR42uyYP661KhTFN6GgkwmYwzQsTJiSpR10lk6JxMJpYJwAp6MgrJft9Xy5ea0ei/c+i/vPX3I5sFl7rU1/n//XI4BqgC04gTBg8U3bUZTTO1og3AMEaqhzL5lF7HS0WUSLSiO1Hb97BljQkALZrGNHZvFiD0OlsWk7t90IkDaL13t224JkVmyYEJ8FJL+ZqO004FGsf1lQex/AW63ShqmRa4rSk1mTwVTp91l8GQBq2w3bMjX/+varJq8B/LRE1Dtd7BxlPqqaVGp/XZ4vA6K4RgbaMOl99QBEUR6YRPzsw2WA7JRaha04MmEwyA1ZbMhAHio9AwjkSmrG4t87EoB3VNiCEoXcbYAXUc0kIQoN25LfO3ztidWCHgMy9uyqhUbWoihdyAm+ZzSYcAtANIpiYQrpPejYO+wA2amaNeEpQE58eSvrb+e24hoTeJGikBY3ATZTyz+PiDb9rMEDWUc7nyX3fYAUYkdYcjJIpqhG5mFbPEngZ5HXATmlYwOIWpvI+jfLRO/0Dv+iZwABoFi8yInSsZy8CznDV3nFFu4Blnz8V3IaQCUCgvvpOISHALIZe9AoiiT/7oCgNzY2KyLdA0jQYVEmXWgAciOzxsKinJ4CRBkbvqeL58rbALEHt5UxyfzpOJcB+Hchekk2DmkDyGRHPeli02PAkqtZ5yqPDRDLlMyaRFFVZmfCLQDJSbAUk6ut4huD2GmzAFg9HgLEMumikliAQkPtVdOqWQAk89kvrgPAGyuLE9cQ4BuZeeN16TQeAsiiMVlHCWotTFDc40Uhktn91NxlQGBKbTdwC0d20f6oRU8sg/EpYJkOyTg8KHuYKg/Ty83h1MnrAMggkURqrY/SJ4M59qq2NJxr+DpAllc3v+xUSXmOMK31pih24zcBIjhqrUdQ76JSlGCLAnh2S2cg/T7A5bwi2imZzFLMEYaNgwFOKb4O8FddpccehheNHLirzCgKp/n/OkAsGXwWvkrMkZRGGFDc4U/vAdj4HTcGnItEILbAR7fNAx4CiFxjML96qnKdDV8w0oJjlE3mHuDUhy241JJ70ah3zPz3fU2/BeSrQHCcf8VyjE84yUROar6R6/y6CVgytd2AMr6LRe3VG1nXfmwMQA8B1BP2Nb3sRIYdN5qWBhRi/Oe4LwPc1ArbzKkxq682o1jPQdggnYH0+0AYsXOt5aZViSMUawgrlp3PSc5VgIhSy4GIhSGZMDaSu05mKcZTQO9QiEzgpD1EciLSOUU5+8VlQBTe7ZmdmASoH9+lc7UfUbrTLn4fIDlhx1yl15Eb6zmwwmEK7wEEciL1k9SU34I6va9me/YY4Ju2c7wdUWFbOD95AyT61OR1oDhq+SM7Fr6NKyprUegd1Xwe9/eBQLW1fE859HPJ7Su2Mla5+s8I9CJAPXE2O03Jy2bxk4Brq9KLHgJkrrw66Wtr/eENwyCKepc/NXkVEGEUUc3VAqXjTl5ZLWRuqBs+MvhtgOykgfnFMSNocKAJZNiNfyY514FjVuy24jgsRXm8ASb21b+GyV8FBFCJPzmIjmG53rPeikp/jPd1IBDrO5as2ZDJ/GZF5mjPhuUhYEFjkAQm9qBHf83DeRYm3Aa0KlHvqgn6xW4CeNlcZaBPjHoCIBrE4o9sxu3gmKmIHcmEe4BAbHo3vq4WArzVVPtR4xNIHwAAliM2hQYey0SksIWxGvg/VX0N+Pv8d55/AgAA//9h4ly0GvTadgAAAABJRU5ErkJggg==",
+				CredentialOfferURL: "openid-credential-offer://?credential_offer=%7B%22credential_issuer%22%3A%22issuer.sunet.se%22%2C%22credential_configuration_ids%22%3A%5B%22PDA1Credential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_1%5Cu0026document_type%3DPDA1%5Cu0026authentic_source%3Dtest_authentic_source%22%7D%7D%7D",
 			},
 		},
 		{

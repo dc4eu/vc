@@ -172,10 +172,16 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		return errors.New("not supported in production mode")
 	}
 
-	// Additional validation of the PID to compensate for the current flexibility in Identity struct
-	//TODO: change to len(req.Attributes.Nationality) == 0
-	if req.Attributes.FamilyName == "" || req.Attributes.GivenName == "" || req.Attributes.BirthDate == "" || req.Attributes.BirthPlace == "" || req.Attributes.Nationality == "" {
-		return errors.New("missing one or several of required attributes [family_name, given_name, birth_date, birth_place, nationality]")
+	// Additional validation of the PID to compensate for the current flexibility/backward compatibility in the Identity struct
+	if req.Attributes.FamilyName == "" ||
+		req.Attributes.GivenName == "" ||
+		req.Attributes.BirthDate == "" ||
+		req.Attributes.BirthPlace == "" ||
+		req.Attributes.Nationality == "" ||
+		req.Attributes.ExpiryDate == "" ||
+		req.Attributes.IssuingAuthority == "" ||
+		req.Attributes.IssuingCountry == "" {
+		return errors.New("missing one or several of required attributes [family_name, given_name, birth_date, birth_place, nationality, expiry_date, issuing_authority, issuing_country]")
 	}
 
 	documentData, err := req.Attributes.Marshal()

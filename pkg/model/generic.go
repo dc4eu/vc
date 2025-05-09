@@ -255,7 +255,33 @@ type Identity struct {
 	// example: <+mobile-phone-number>
 	MobilePhoneNumber string `json:"mobile_phone_number,omitempty" bson:"mobile_phone_number"`
 
-	//TODO: remove deprecated identity attributes when all is working (testdata, bootstrap, database-operations, etc)
+	//===== Metadata about the person identification data =====
+
+	// required: true
+	// example: Date (and if possible time)
+	ExpiryDate string `json:"expiry_date,omitempty" bson:"expiry_date"`
+
+	// required: true
+	// example:
+	IssuingAuthority string `json:"issuing_authority,omitempty" bson:"issuing_authority"`
+
+	// required: true
+	// example:
+	IssuingCountry string `json:"issuing_country,omitempty" bson:"issuing_country"`
+
+	// required: false
+	// example:
+	DocumentNumber string `json:"document_number,omitempty" bson:"document_number"`
+
+	// required: false
+	// example:
+	IssuingJurisdiction string `json:"issuing_jurisdiction,omitempty" bson:"issuing_jurisdiction"`
+
+	// required: false
+	// example:
+	LocationStatus string `json:"location_status,omitempty" bson:"location_status"`
+
+	//TODO: remove deprecated identity attributes below when all is working (testdata, bootstrap, database-operations, etc):
 
 	// required: -
 	// example: Karlsson

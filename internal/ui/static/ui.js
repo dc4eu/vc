@@ -1335,6 +1335,11 @@ const addPIDUser = () => {
                     schema: {
                         name: schemaNameInput.value,
                     },
+
+                    expiry_date: expiryDateInput.value,
+                    issuing_authority: issuingAuthorityInput.value,
+                    issuing_country: issuingCountryInput.value,
+
                     family_name: familyNameInput.value,
                     given_name: givenNameInput.value,
                     birth_date: birthdateInput.value,
@@ -1380,6 +1385,11 @@ const addPIDUser = () => {
             schemaNameInput,
             document.createElement('hr'),
             helpLink,
+            document.createElement('hr'),
+            expiryDateInput,
+            issuingAuthorityInput,
+            issuingCountryInput,
+            document.createElement('hr'),
             familyNameInput,
             givenNameInput,
             birthdateInput,

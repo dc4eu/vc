@@ -32,7 +32,10 @@ func PIDPresentationDefinition() *openid4vp.PresentationDefinition {
 						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: pidVCTs}},
 						{Name: "Given Name", Path: []string{"$.given_name"}},
 						{Name: "Family Name", Path: []string{"$.family_name"}},
+						//TODO: birth_date??? - but wwW uses birthdate right now
 						{Name: "Birth Date", Path: []string{"$.birthdate"}},
+						//TODO: add birth_place, nationality
+						//TODO: add pid-meta: expiry_date, issuing_authority, issuing_country
 					},
 				},
 			},

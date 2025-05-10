@@ -61,6 +61,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	rgAPIGWSecure := rgSecure.Group("apigw")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/search", http.StatusOK, s.endpointSearchDocuments)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "user/credential-offers", http.StatusOK, s.endpointGetUserCredentialOffers)
 
 	// Run http server
 	go func() {

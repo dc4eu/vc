@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
@@ -88,4 +89,24 @@ func (c *VCUsersColl) GetHashedPassword(ctx context.Context, username string) (s
 	}
 
 	return res.Password, nil
+}
+
+func (c *VCUsersColl) GetUser(ctx context.Context, username string) (*model.OAuthUsers, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:user")
+	defer span.End()
+
+	filter := bson.M{
+		"username": bson.M{"$eq": username},
+	}
+
+	res := &model.OAuthUsers{}
+	if err := c.Coll.FindOne(ctx, filter).Decode(&res); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("User not found")
+		}
+		return nil, err
+	}
+
+	return res, nil
 }

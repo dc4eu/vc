@@ -15,6 +15,7 @@ type Client struct {
 	tracer *trace.Tracer
 
 	apigwClient *vcclient.Client
+	vcClient    *vcclient.Client
 }
 
 // New creates a new instance of the public api
@@ -27,6 +28,13 @@ func New(ctx context.Context, tracer *trace.Tracer, cfg *model.Cfg, log *logger.
 
 	var err error
 	c.apigwClient, err = vcclient.New(&vcclient.Config{URL: cfg.Portal.ApigwApiServer.Addr})
+	if err != nil {
+		return nil, err
+	}
+
+	c.vcClient, err = vcclient.New(&vcclient.Config{
+		URL: cfg.MockAS.DatastoreURL,
+	})
 	if err != nil {
 		return nil, err
 	}

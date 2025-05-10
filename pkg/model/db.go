@@ -17,6 +17,8 @@ type Authorization struct {
 type OAuthUsers struct {
 	Username string `json:"username" bson:"username" validate:"required"`
 	Password string `json:"password" bson:"password" validate:"required"`
+	//TODO: ev. flytta nedan till egen collection identities som har OAuthUsers._id som fk
+	Identity *Identity `json:"identity" bson:"identity" validate:"required"`
 }
 
 type CodeChallenge struct {

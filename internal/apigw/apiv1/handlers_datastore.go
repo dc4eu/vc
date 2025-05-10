@@ -224,7 +224,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	err = c.db.VCUsersColl.Save(ctx, &model.OAuthUsers{
 		Username: req.Username,
 		Password: string(passwordHash),
-		//TODO: add identity here
+		Identity: req.Attributes,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to save user")
@@ -241,22 +241,23 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 }
 
 func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error) {
-	hashedPassword, err := c.db.VCUsersColl.GetHashedPassword(ctx, req.Username)
+	user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("username %s not found", req.Username)
 	}
 
 	reply := &vcclient.LoginPIDUserReply{}
 
-	if hashedPassword == "" {
-		return reply, fmt.Errorf("username %s not found", req.Username)
+	if user.Password == "" {
+		return reply, fmt.Errorf("password not found for username", req.Username)
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return reply, fmt.Errorf("password mismatch for username %s", req.Username)
 	}
 
 	reply.Grant = true
+	reply.Identity = user.Identity
 
 	return reply, nil
 }

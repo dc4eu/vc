@@ -36,7 +36,8 @@ type LoginPIDUserRequest struct {
 }
 
 type LoginPIDUserReply struct {
-	Grant bool `json:"grant" validate:"required"`
+	Grant    bool            `json:"grant" validate:"required"`
+	Identity *model.Identity `json:"identity,omitempty"`
 }
 
 func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*LoginPIDUserReply, *http.Response, error) {

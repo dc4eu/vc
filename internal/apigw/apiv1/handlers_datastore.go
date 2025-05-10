@@ -190,7 +190,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		return err
 	}
 
-	// create a new document and upload it
+	// build a new document
 	uploadRequest := &UploadRequest{
 		Meta: &model.MetaData{
 			AuthenticSource:           "Generic_PID_Issuer",
@@ -216,23 +216,24 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		DocumentDataVersion: "1.0.0",
 	}
 
-	if err := c.Upload(ctx, uploadRequest); err != nil {
-		c.log.Error(err, "failed to upload document")
-		return err
-	}
-
-	// store user and password in the database
+	// store user and password in the database before document is saved - to check constraints that the user not already exists
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 14)
 	if err != nil {
 		return err
 	}
-
 	err = c.db.VCUsersColl.Save(ctx, &model.OAuthUsers{
 		Username: req.Username,
 		Password: string(passwordHash),
+		//TODO: add identity here
 	})
 	if err != nil {
 		c.log.Error(err, "failed to save user")
+		return err
+	}
+
+	// store document
+	if err := c.Upload(ctx, uploadRequest); err != nil {
+		c.log.Error(err, "failed to upload document")
 		return err
 	}
 

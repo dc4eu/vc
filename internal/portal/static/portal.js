@@ -55,33 +55,32 @@ const doLogin = () => {
 
     //TODO: apigw/user/credential-offers - hantera login och sedan search i portal backend som en quick fix tills äkta auth införs.
 
-    //TODO(mk): impl real auth (now a simple fake simulation of an auth)
     if (!validateHasValueAndNotEmpty(usernameElement) || !validateHasValueAndNotEmpty(passwordElement)) {
-        displayError("Login failed - please try again");
+        displayError("Empty username and/or password");
         return;
     }
+    clearInnerElementsOf("error_container");
+
     const username = usernameElement.value;
     const password = passwordElement.value;
-    if (username.toLowerCase() !== password) {
-        displayError("Login failed - please try again");
-        return;
-    }
+    // if (username.toLowerCase() !== password) {
+    //     displayError("Login failed - please try again");
+    //     return;
+    // }
 
     usernameElement.value = "";
     passwordElement.value = "";
-    clearInnerElementsOf("error_container");
-    showElement("logout_container");
-    hideElement("login_container");
 
-    // read and display qr-codes after login
-    const url = new URL("/secure/apigw/document/search", baseUrl);
+    const url = new URL("/secure/apigw/user/credential-offers", baseUrl);
     const headers = {
         'Accept': 'application/json', 'Content-Type': 'application/json; charset=utf-8',
     };
     const requestBody = {
-        family_name: username,
-        limit: 100,
-        fields: ["meta.document_id", "meta.authentic_source", "meta.document_type", "meta.collect.id", "identities", "qr"],
+        // family_name: username,
+        // limit: 100,
+        // fields: ["meta.document_id", "meta.authentic_source", "meta.document_type", "meta.collect.id", "identities", "qr"],
+        username: username,
+        password: password,
     };
     const options = {
         method: `POST`, headers: headers, body: JSON.stringify(requestBody),
@@ -89,10 +88,12 @@ const doLogin = () => {
     console.debug(url, options);
 
     fetchData(url, options).then(data => {
+        showElement("logout_container");
+        hideElement("login_container");
         displayQrCodes(data, username);
     }).catch(err => {
         console.debug("Unexpected error:", err);
-        displayError("Failed to fetch documents: " + err);
+        displayError("Failed to fetch credential-offers: " + err);
     });
 };
 
@@ -134,7 +135,7 @@ function displayQrCodes(data, username) {
     const usernameStrong = document.createElement("strong");
     usernameStrong.appendChild(document.createTextNode(username));
 
-    const textBusinessDecisionFor = document.createTextNode("Business decisions for ");
+    const textBusinessDecisionFor = document.createTextNode("Credential offers for ");
 
     const pQrHeader = document.createElement("p");
     pQrHeader.classList.add("subtitle", "is-5", "has-text-centered");
@@ -144,10 +145,10 @@ function displayQrCodes(data, username) {
     qrContainer.appendChild(pQrHeader);
 
     if (isEmptyObject(data) || (Array.isArray(data.documents) && data.documents.length === 0)) {
-        console.debug("No business decision found");
+        console.debug("No credential offers found");
         let p = document.createElement("p");
         p.classList.add("has-text-centered");
-        p.innerText = "No business decision found";
+        p.innerText = "No credential offers found";
         qrContainer.appendChild(p);
         return;
     }
@@ -202,6 +203,7 @@ function displayQrCodes(data, username) {
             qrLink.textContent = "QR-code link";
             qrLink.classList.add("is-Link");
             cell2.appendChild(qrLink);
+            //TODO: lägg in klickbara länkar till web-wallets
         }
 
         gridDiv.appendChild(cell1);

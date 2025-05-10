@@ -50,9 +50,10 @@ const displayError = (errorText) => {
 }
 
 const doLogin = () => {
-
     const usernameElement = document.getElementById("username");
     const passwordElement = document.getElementById("password");
+
+    //TODO: apigw/user/credential-offers - hantera login och sedan search i portal backend som en quick fix tills äkta auth införs.
 
     //TODO(mk): impl real auth (now a simple fake simulation of an auth)
     if (!validateHasValueAndNotEmpty(usernameElement) || !validateHasValueAndNotEmpty(passwordElement)) {
@@ -166,9 +167,9 @@ function displayQrCodes(data, username) {
         const cell1 = document.createElement("div");
         cell1.classList.add("cell");
 
-        if (doc.qr?.base64_image) {
+        if (doc.qr?.qr_base64) {
             const img = document.createElement("img");
-            img.src = `data:image/png;base64,${doc.qr.base64_image}`;
+            img.src = `data:image/png;base64,${doc.qr.qr_base64}`;
             cell1.appendChild(img);
         } else {
             const pQrNotFound = document.createElement("p");
@@ -195,9 +196,9 @@ function displayQrCodes(data, username) {
         pColId.innerText = "Collect ID: " + doc.meta?.collect?.id || "";
         cell2.appendChild(pColId);
 
-        if (doc.qr?.credential_offer) {
+        if (doc.qr?.credential_offer_url) {
             const qrLink = document.createElement('a');
-            qrLink.href = doc.qr.credential_offer;
+            qrLink.href = doc.qr.credential_offer_url;
             qrLink.textContent = "QR-code link";
             qrLink.classList.add("is-Link");
             cell2.appendChild(qrLink);

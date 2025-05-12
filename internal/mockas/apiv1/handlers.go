@@ -90,7 +90,7 @@ func (c *Client) MockBulk(ctx context.Context, inData *MockBulkRequest) (*MockBu
 
 // Health returns the status of the service
 func (c *Client) Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error) {
-	ctx, span := c.tracer.Start(ctx, "apiv1:Health")
+	_, span := c.tracer.Start(ctx, "apiv1:Health")
 	defer span.End()
 
 	probes := model.Probes{}

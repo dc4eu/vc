@@ -24,7 +24,7 @@ func (c *Client) GetUserCredentialOffers(ctx context.Context, req *vcclient.Logi
 		return nil, err
 	}
 	if response.StatusCode != http.StatusOK || loginPIDUserReply == nil || !loginPIDUserReply.Grant {
-		return nil, errors.New("Not authorized")
+		return nil, errors.New("not authorized")
 	}
 
 	identity := loginPIDUserReply.Identity

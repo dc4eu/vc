@@ -2,23 +2,10 @@ package httpserver
 
 import (
 	"context"
-	"vc/internal/gen/registry/apiv1_registry"
 	"vc/internal/gen/status/apiv1_status"
 
 	"github.com/gin-gonic/gin"
 )
-
-func (s *Service) endpointValidate(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1_registry.ValidateRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		return nil, err
-	}
-	reply, err := s.apiv1.Validate(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
 
 func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}

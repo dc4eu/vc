@@ -5,6 +5,7 @@ import (
 	"vc/internal/apigw/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/openid4vci"
 	"vc/pkg/trace"
 	"vc/pkg/vcclient"
 )
@@ -20,6 +21,7 @@ type Client struct {
 	log             *logger.Log
 	tracer          *trace.Tracer
 	datastoreClient *vcclient.Client
+	issuerMetadata  *openid4vci.CredentialIssuerMetadataParameters
 }
 
 // New creates a new instance of the public api
@@ -31,11 +33,16 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 		tracer: tracer,
 	}
 
+	var err error
+	c.issuerMetadata, err = c.cfg.IssuerMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// Specifies the issuer configuration based on the issuer identifier, should be initialized in main I guess.
 	issuerIdentifier := cfg.Issuer.Identifier
 	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
 
-	var err error
 	c.datastoreClient, err = vcclient.New(&vcclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL})
 	if err != nil {
 		return nil, err

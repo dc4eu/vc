@@ -38,7 +38,7 @@ func Check(ctx context.Context, cfg *model.Cfg, s any, log *logger.Log) error {
 		return err
 	}
 
-	ctx, span := tp.Start(ctx, "helpers:check")
+	_, span := tp.Start(ctx, "helpers:check")
 	defer span.End()
 
 	validate, err := NewValidator()
@@ -69,7 +69,7 @@ func CheckSimple(s any) error {
 
 // ValidateDocumentData validates DocumentData against the schemaRef in MetaData.DocumentDataValidationRef
 func ValidateDocumentData(ctx context.Context, completeDocument *model.CompleteDocument, log *logger.Log) error {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	if completeDocument.Meta.DocumentDataValidationRef == "" {

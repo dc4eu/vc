@@ -83,7 +83,7 @@ func (c *Client) OIDCNotification(ctx context.Context, req *openid4vci.Notificat
 func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error) {
 	c.log.Debug("metadata request")
 
-	return c.cfg.IssuerMetadata, nil
+	return c.issuerMetadata, nil
 }
 
 // RevokeRequest is the request for GenericRevoke

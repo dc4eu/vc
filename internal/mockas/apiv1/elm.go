@@ -13,7 +13,7 @@ type ELMService struct {
 }
 
 func (s *ELMService) random(ctx context.Context, person *person) (map[string]any, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	b, err := os.ReadFile(filepath.Join("../../../standards", "elm_3_2.json"))

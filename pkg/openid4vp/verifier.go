@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tidwall/gjson"
-	"strings"
-	"time"
+
 	//"vc/internal/verifier/apiv1"
 
 	jose "github.com/go-jose/go-jose/v4"
@@ -56,9 +58,9 @@ type AuthorizationResponseWrapper struct {
 	vpList                []*VerifiablePresentationWrapper
 
 	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
-	holderPublicKey interface{}
-	jwePrivateKey   interface{}
-	issuerPublicKey interface{}
+	holderPublicKey any
+	jwePrivateKey   any
+	issuerPublicKey any
 }
 
 func NewAuthorizationResponseWrapper(authorizationResponse *AuthorizationResponse) (*AuthorizationResponseWrapper, error) {
@@ -139,7 +141,7 @@ func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig, v
 }
 
 func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
-	if arw.authorizationResponse.VPTokens == nil || len(arw.authorizationResponse.VPTokens) == 0 {
+	if len(arw.authorizationResponse.VPTokens) == 0 {
 		return errors.New("no vp_token found in response")
 	}
 
@@ -162,7 +164,7 @@ func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 
 			arw.vpList = append(arw.vpList, vp)
 		} else if vpTokenRaw.isJSONBased() {
-			return errors.New("vp_token (one element in vp_token array) has json-stucture format and is not yet supported!")
+			return errors.New("vp_token (one element in vp_token array) has json-structure format and is not yet supported")
 		} else {
 			return errors.New("unknown format of vp_token (one element in vp_token array)")
 		}
@@ -404,7 +406,7 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 	vp.vcList = make([]*VerifiableCredentialWrapper, 0)
 	for _, descriptor := range vp.PresentationSubmission.DescriptorMap {
 		if descriptor.PathNested != nil {
-			return fmt.Errorf("pathnested in presentation_submission not yet supported!")
+			return fmt.Errorf("pathnested in presentation_submission not yet supported")
 		}
 		fmt.Println(descriptor.ID)
 		fmt.Println(descriptor.Path)
@@ -552,7 +554,7 @@ func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error
 
 	err := vc.validateSelectiveDisclosures(sdList, sdHashAlg)
 	if err != nil {
-		return fmt.Errorf("Validation of selective disclosures in a vc failed: %v", err)
+		return fmt.Errorf("validation of selective disclosures in a vc failed: %v", err)
 	}
 	return nil
 }
@@ -708,15 +710,15 @@ func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{
 	return nil
 }
 
-func DecryptJWE(jweStr string, key interface{}) ([]byte, error) {
+func DecryptJWE(jweStr string, key any) ([]byte, error) {
 	parts := strings.Split(jweStr, ".")
 	if len(parts) != 5 {
-		return nil, fmt.Errorf("Invalid JWE format")
+		return nil, fmt.Errorf("invalid JWE format")
 	}
 
 	headerJSON, err := base64.RawURLEncoding.DecodeString(parts[0])
 	if err != nil {
-		return nil, fmt.Errorf("Failed to decode JWE header: %w", err)
+		return nil, fmt.Errorf("failed to decode JWE header: %w", err)
 	}
 
 	var header struct {
@@ -724,7 +726,7 @@ func DecryptJWE(jweStr string, key interface{}) ([]byte, error) {
 		Enc string `json:"enc"`
 	}
 	if err := json.Unmarshal(headerJSON, &header); err != nil {
-		return nil, fmt.Errorf("Failed to parse JWE header: %w", err)
+		return nil, fmt.Errorf("failed to parse JWE header: %w", err)
 	}
 
 	fmt.Println("JWE Header:", header)
@@ -734,12 +736,12 @@ func DecryptJWE(jweStr string, key interface{}) ([]byte, error) {
 
 	jwe, err := jose.ParseEncrypted(jweStr, []jose.KeyAlgorithm{keyAlg}, []jose.ContentEncryption{contentEnc})
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse JWE: %w", err)
+		return nil, fmt.Errorf("failed to parse JWE: %w", err)
 	}
 
 	jwtBytes, err := jwe.Decrypt(key)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to decrypt JWE: %w", err)
+		return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
 	}
 
 	return jwtBytes, nil
@@ -805,7 +807,7 @@ func (vc *VerifiableCredentialWrapper) extractJWTVC() error {
 	if headerVCTMResult.Exists() && headerVCTMResult.IsArray() {
 		headerVCTMArray := headerVCTMResult.Array()
 		if len(headerVCTMArray) > 1 {
-			return errors.New("Only one vctm string i vc.header.vctm (array) is currently supported")
+			return errors.New("only one vctm string i vc.header.vctm (array) is currently supported")
 		}
 		vctmEncoded := headerVCTMArray[0].String()
 		vctmDecoded, vctmMap, err := decodeVCTM(vctmEncoded)
@@ -906,12 +908,12 @@ func decodeRevealedSelectiveDisclosures(encodedSDs []string) ([]string, error) {
 
 // Disclosure represents a revealed selective disclosure
 type Disclosure struct {
-	Salt  string      `json:"salt" bson:"salt"`
-	Key   string      `json:"key" bson:"key"`
-	Value interface{} `json:"value" bson:"value"`
+	Salt  string `json:"salt" bson:"salt"`
+	Key   string `json:"key" bson:"key"`
+	Value any    `json:"value" bson:"value"`
 }
 
-// unmarshalDisclosure unmarshals a JSON-encoded disclosure string
+// unmarshalDisclosure unmarshal a JSON-encoded disclosure string
 func (vc *VerifiableCredentialWrapper) unmarshalDisclosure(encoded string) (*Disclosure, error) {
 	var elements []any
 	if err := json.Unmarshal([]byte(encoded), &elements); err != nil {

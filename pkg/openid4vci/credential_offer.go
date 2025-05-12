@@ -95,7 +95,7 @@ func (c *CredentialOffer) String() string {
 
 // Unpack unpacks the CredentialOffer string into a CredentialOfferParameters
 func (c *CredentialOffer) Unpack(ctx context.Context) (*CredentialOfferParameters, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	u, err := url.Parse(c.String())

@@ -248,10 +248,6 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 
 	reply := &vcclient.LoginPIDUserReply{}
 
-	if user.Password == "" {
-		return reply, fmt.Errorf("password not found for username", req.Username)
-	}
-
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return reply, fmt.Errorf("password mismatch for username %s", req.Username)
 	}

@@ -86,7 +86,3 @@ type ClaimDisplay struct {
 	Label       string `json:"label"`
 	Description string `json:"description,omitempty"`
 }
-
-func (c *Client) metadata() error {
-	return nil
-}

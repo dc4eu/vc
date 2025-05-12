@@ -32,7 +32,7 @@ func (c *openbadgeEndorsementsClient) sdjwt(ctx context.Context, doc *education.
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	ctx, span := c.tracer.Start(ctx, "apiv1:DiplomaClient:sdjwt")
+	_, span := c.tracer.Start(ctx, "apiv1:DiplomaClient:sdjwt")
 	defer span.End()
 
 	body, err := doc.Marshal()

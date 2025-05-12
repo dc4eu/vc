@@ -20,7 +20,7 @@ type middlewareHandler struct {
 
 // Duration middleware to calculate the duration of the request and set it in the gin context
 func (m *middlewareHandler) Duration(ctx context.Context) gin.HandlerFunc {
-	ctx, span := m.client.tracer.Start(ctx, "httphelpers:middleware:Duration")
+	_, span := m.client.tracer.Start(ctx, "httphelpers:middleware:Duration")
 	defer span.End()
 
 	return func(c *gin.Context) {
@@ -33,7 +33,7 @@ func (m *middlewareHandler) Duration(ctx context.Context) gin.HandlerFunc {
 
 // RequestID middleware to set a unique request ID in the gin context and header
 func (m *middlewareHandler) RequestID(ctx context.Context) gin.HandlerFunc {
-	ctx, span := m.client.tracer.Start(ctx, "httphelpers:middleware:RequestID")
+	_, span := m.client.tracer.Start(ctx, "httphelpers:middleware:RequestID")
 	defer span.End()
 
 	return func(c *gin.Context) {
@@ -46,7 +46,7 @@ func (m *middlewareHandler) RequestID(ctx context.Context) gin.HandlerFunc {
 
 // Logger middleware to log the request details
 func (m *middlewareHandler) Logger(ctx context.Context) gin.HandlerFunc {
-	ctx, span := m.client.tracer.Start(ctx, "httphelpers:middleware:Logger")
+	_, span := m.client.tracer.Start(ctx, "httphelpers:middleware:Logger")
 	defer span.End()
 
 	log := m.log.New("http")
@@ -58,7 +58,7 @@ func (m *middlewareHandler) Logger(ctx context.Context) gin.HandlerFunc {
 
 // AuthLog middleware to log the request details with the user information
 func (m *middlewareHandler) AuthLog(ctx context.Context) gin.HandlerFunc {
-	ctx, span := m.client.tracer.Start(ctx, "httphelpers:middleware:AuthLog")
+	_, span := m.client.tracer.Start(ctx, "httphelpers:middleware:AuthLog")
 	defer span.End()
 
 	log := m.log.New("http")
@@ -89,7 +89,7 @@ func (m *middlewareHandler) Crash(ctx context.Context) gin.HandlerFunc {
 
 // ClientCertAuth middleware to authenticate the client certificate, this should compare client certificate SAH1 hash with some config value.
 func (m *middlewareHandler) ClientCertAuth(ctx context.Context) gin.HandlerFunc {
-	ctx, span := m.client.tracer.Start(ctx, "httphelpers:middleware:ClientCertAuth")
+	_, span := m.client.tracer.Start(ctx, "httphelpers:middleware:ClientCertAuth")
 	defer span.End()
 
 	log := m.log.New("http")
@@ -103,7 +103,7 @@ func (m *middlewareHandler) ClientCertAuth(ctx context.Context) gin.HandlerFunc 
 
 // BasicAuth middleware to authenticate the user with basic auth
 func (m *middlewareHandler) BasicAuth(ctx context.Context, users map[string]string) gin.HandlerFunc {
-	ctx, span := m.client.tracer.Start(ctx, "httphelpers:middleware:BasicAuth")
+	_, span := m.client.tracer.Start(ctx, "httphelpers:middleware:BasicAuth")
 	defer span.End()
 
 	return func(c *gin.Context) {

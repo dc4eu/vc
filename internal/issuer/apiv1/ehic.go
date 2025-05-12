@@ -34,7 +34,7 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	ctx, span := c.tracer.Start(ctx, "apiv1:EHICClient:sdjwt")
+	_, span := c.tracer.Start(ctx, "apiv1:EHICClient:sdjwt")
 	defer span.End()
 
 	body, err := doc.Marshal()

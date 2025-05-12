@@ -15,7 +15,7 @@ type PDA1Service struct {
 }
 
 func (s *PDA1Service) random(ctx context.Context, person *person) (map[string]any, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	doc := socialsecurity.PDA1Document{

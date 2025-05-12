@@ -53,6 +53,7 @@ func TestSaveTransaction(t *testing.T) {
 
 			//mongo := NewMongo(testMongoURI, testDbName, nil)
 			s, err := New(ctx, cfg, tracer, logger.NewSimple("test-db"))
+			assert.NoError(t, err)
 			//mongo.db = mt.DB
 
 			// Test function

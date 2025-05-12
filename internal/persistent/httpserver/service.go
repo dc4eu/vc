@@ -2,7 +2,6 @@ package httpserver
 
 import (
 	"context"
-	"crypto/tls"
 	"net/http"
 	"vc/internal/persistent/apiv1"
 	"vc/pkg/httphelpers"
@@ -20,7 +19,6 @@ type Service struct {
 	log         *logger.Log
 	server      *http.Server
 	apiv1       Apiv1
-	tlsConfig   *tls.Config
 	gin         *gin.Engine
 	httpHelpers *httphelpers.Client
 }

@@ -34,7 +34,7 @@ func (c *elmClient) sdjwt(ctx context.Context, doc *education.ELMDocument, jwk *
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	ctx, span := c.tracer.Start(ctx, "apiv1:EmrexClient:sdjwt")
+	_, span := c.tracer.Start(ctx, "apiv1:EmrexClient:sdjwt")
 	defer span.End()
 
 	body, err := doc.Marshal()

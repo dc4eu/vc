@@ -204,7 +204,7 @@ type Identity struct {
 
 	// required: false
 	// example: England
-	ResidentCountry string `json:"resident_country,omitempty" bson:"resident_country"`
+	ResidentCountry string `json:"resident_country,omitempty" bson:"resident_country" validate:"omitempty,iso3166_1_alpha2"`
 
 	// required: false
 	// example: england
@@ -244,16 +244,15 @@ type Identity struct {
 
 	// required: false
 	// example: 0 = not known, 1 = male, 2 = female, ...
-	//TODO: validate:"oneof=0 1 2 3 4 5 6 7 8 9"` när bootstrap mm är reviderat.
-	Sex string `json:"sex,omitempty" bson:"sex"`
+	Sex string `json:"sex,omitempty" bson:"sex" validate:"omitempty,oneof=0 1 2 3 4 5 6 7 8 9"`
 
 	// required: false
 	// example: <email-address>
-	EmailAddress string `json:"email_address,omitempty" bson:"email_address"`
+	EmailAddress string `json:"email_address,omitempty" bson:"email_address" validate:"omitempty,email"`
 
 	// required: false
 	// example: <+mobile-phone-number>
-	MobilePhoneNumber string `json:"mobile_phone_number,omitempty" bson:"mobile_phone_number"`
+	MobilePhoneNumber string `json:"mobile_phone_number,omitempty" bson:"mobile_phone_number" validate:"omitempty,e164"`
 
 	//===== Metadata about the person identification data =====
 
@@ -267,7 +266,7 @@ type Identity struct {
 
 	// required: true
 	// example:
-	IssuingCountry string `json:"issuing_country,omitempty" bson:"issuing_country"`
+	IssuingCountry string `json:"issuing_country,omitempty" bson:"issuing_country" validate:"omitempty,iso3166_1_alpha2"`
 
 	// required: false
 	// example:

@@ -127,6 +127,13 @@ async function fetchData(url, options) {
     return data;
 }
 
+function safeReplace(input, toReplace, replacement) {
+    if (typeof input !== "string") return "";
+    if (typeof toReplace !== "string" || toReplace === "") return input;
+    if (!input.includes(toReplace)) return input;
+    return input.replace(toReplace, replacement);
+}
+
 function displayQrCodes(data, username) {
     console.debug("Data received:", data);
 
@@ -165,13 +172,22 @@ function displayQrCodes(data, username) {
 
     data.documents.forEach((doc) => {
 
+        const credentialOfferUrl = doc.qr.credential_offer_url;
+
         const cell1 = document.createElement("div");
         cell1.classList.add("cell");
 
         if (doc.qr?.qr_base64) {
             const img = document.createElement("img");
             img.src = `data:image/png;base64,${doc.qr.qr_base64}`;
-            cell1.appendChild(img);
+
+            const a = document.createElement("a");
+            const credentialOfferUrl = doc.qr.credential_offer_url;
+            a.href = credentialOfferUrl;
+            a.target = "_blank";
+            a.title = credentialOfferUrl;
+            a.appendChild(img);
+            cell1.appendChild(a);
         } else {
             const pQrNotFound = document.createElement("p");
             pQrNotFound.innerText = "No qr code found in document";
@@ -198,12 +214,44 @@ function displayQrCodes(data, username) {
         cell2.appendChild(pColId);
 
         if (doc.qr?.credential_offer_url) {
-            const qrLink = document.createElement('a');
-            qrLink.href = doc.qr.credential_offer_url;
-            qrLink.textContent = "QR-code link";
-            qrLink.classList.add("is-Link");
-            cell2.appendChild(qrLink);
-            //TODO: lägg in klickbara länkar till web-wallets
+            // const browserWalletLink = document.createElement('a');
+            // browserWalletLink.href = credentialOfferUrl;
+            // browserWalletLink.textContent = "Browser wallet";
+            // browserWalletLink.classList.add("is-Link");
+            // cell2.appendChild(browserWalletLink);
+            //
+            //cell2.appendChild(document.createElement("br"));
+
+            const dc4euWalletLink = document.createElement('a');
+            const dc4euWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://dc4eu.wwwallet.org/cb?");
+            dc4euWalletLink.href = dc4euWalletURL;
+            dc4euWalletLink.title = dc4euWalletURL;
+            dc4euWalletLink.textContent = "DC4EU wallet";
+            dc4euWalletLink.target = "_blank";
+            dc4euWalletLink.classList.add("is-Link");
+            cell2.appendChild(dc4euWalletLink);
+
+            cell2.appendChild(document.createElement("br"));
+
+            const demoDC4EUWalletLink = document.createElement('a');
+            const demoDC4EUWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://demo.wwwallet.org/cb?");
+            demoDC4EUWalletLink.href = demoDC4EUWalletURL;
+            demoDC4EUWalletLink.title = demoDC4EUWalletURL;
+            demoDC4EUWalletLink.textContent = "Demo DC4EU wallet";
+            demoDC4EUWalletLink.target = "_blank";
+            demoDC4EUWalletLink.classList.add("is-Link");
+            cell2.appendChild(demoDC4EUWalletLink);
+
+            cell2.appendChild(document.createElement("br"));
+
+            const devSunetWalletLink = document.createElement('a');
+            const devSunetWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://dev.wallet.sunet.se/cb?");
+            devSunetWalletLink.href = devSunetWalletURL;
+            devSunetWalletLink.title = devSunetWalletURL;
+            devSunetWalletLink.textContent = "Dev SUNET wallet";
+            devSunetWalletLink.target = "_blank";
+            devSunetWalletLink.classList.add("is-Link");
+            cell2.appendChild(devSunetWalletLink);
         }
 
         gridDiv.appendChild(cell1);

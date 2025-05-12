@@ -31,7 +31,7 @@ func newPDA1Client(client *Client, tracer *trace.Tracer, log *logger.Log) (*pda1
 }
 
 func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	body, err := doc.Marshal()

@@ -4,13 +4,11 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"os"
-	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/auditlog"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/sdjwt"
 	"vc/pkg/trace"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -133,39 +131,4 @@ func (c *Client) initKeys(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (c *Client) sign(ctx context.Context, instruction sdjwt.InstructionsV2) (*sdjwt.SDJWT, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
-	defer cancel()
-
-	jwtConfig := &sdjwt.Config{
-		ISS: c.cfg.Issuer.JWTAttribute.Issuer,
-		VCT: c.cfg.Issuer.JWTAttribute.VerifiableCredentialType,
-		CNF: c.jwkClaim,
-		Header: sdjwt.ConfigHeader{
-			Typ: "sd-jwt",
-			Kid: c.kid,
-		},
-	}
-
-	if c.cfg.Issuer.JWTAttribute.EnableNotBefore {
-		jwtConfig.NBF = time.Now().Unix()
-		jwtConfig.EXP = time.Now().Add(time.Duration(c.cfg.Issuer.JWTAttribute.ValidDuration) * time.Second).Unix()
-	}
-
-	if c.cfg.Issuer.JWTAttribute.Status != "" {
-		jwtConfig.Status = c.cfg.Issuer.JWTAttribute.Status
-	}
-
-	signedCredential, err := instruction.SDJWT(jwt.SigningMethodES256, c.privateKey, jwtConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return signedCredential, nil
-}
-
-func (c *Client) sign2(ctx context.Context, claims map[string]any) {
-
 }

@@ -89,7 +89,7 @@ func (c *Client) initKeys(ctx context.Context) error {
 }
 
 func (c *Client) createJWK(ctx context.Context) error {
-	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(2*time.Second))
+	_, cancel := context.WithDeadline(ctx, time.Now().Add(2*time.Second))
 	defer cancel()
 
 	key, err := jwk.New(c.privateKey)

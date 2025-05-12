@@ -13,7 +13,7 @@ type PIDService struct {
 }
 
 func (s *PIDService) random(ctx context.Context, person *person) (map[string]any, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	doc := model.Identity{

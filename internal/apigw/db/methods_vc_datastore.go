@@ -79,7 +79,7 @@ func (c *VCDatastoreColl) IDMapping(ctx context.Context, query *IDMappingQuery) 
 	if err := c.Coll.FindOne(ctx, filter, opts).Decode(&res); err != nil {
 		return "", err
 	}
-	if res.Identities == nil || len(res.Identities) == 0 {
+	if len(res.Identities) == 0 {
 		return "", helpers.ErrNoIdentityFound
 	}
 
@@ -380,7 +380,7 @@ type SearchDocumentsQuery struct {
 // @Deprecated
 func (c *VCDatastoreColl) SearchDocuments(ctx context.Context, query *SearchDocumentsQuery, limit int64, fields []string, sortFields map[string]int) ([]*model.CompleteDocument, bool, error) {
 	if c.Service.cfg.Common.Production {
-		return nil, false, errors.New("Not supported in production mode")
+		return nil, false, errors.New("not supported in production mode")
 	}
 
 	if err := helpers.Check(ctx, c.Service.cfg, query, c.Service.log); err != nil {

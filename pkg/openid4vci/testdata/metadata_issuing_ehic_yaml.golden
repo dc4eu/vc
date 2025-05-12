@@ -9,7 +9,7 @@ credential_response_encryption:
   alg_values_supported:
     - ECDH-ES
   enc_values_supported:
-    - A129GCM
+    - A128GCM
   encryption_required: false
 display:
   - name: European Health Insurance Card
@@ -22,7 +22,8 @@ display:
     url: ''
 credential_configurations_supported:
   EHICCredential:
-    format: jwt_vc_json
+    vct: "EHICCredential"
+    format: "vc+sd-jwt"
     scope: EHIC
     cryptographic_binding_methods_supported:
       - did:example
@@ -72,7 +73,7 @@ credential_configurations_supported:
       - name: "European Health Insurance Card Credential"
         locale: en-US
         logo:
-          url: https://example.edu/public/logo.png
+          uri: https://example.edu/public/logo.png
           alt_text: "a square logo of a EHIC card"
         background_color: "#12107c"
         background_image:

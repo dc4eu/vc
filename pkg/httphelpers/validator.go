@@ -50,7 +50,7 @@ func kindOfData(data any) reflect.Kind {
 
 // StatusCode returns the status code of the error
 func StatusCode(ctx context.Context, err error) int {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	switch err := err.(type) {

@@ -62,8 +62,8 @@ type MetadataDisplay struct {
 
 // MetadataLogo object with information about the logo of the Credential Issuer. Below is a non-exhaustive list of parameters that MAY be included:
 type MetadataLogo struct {
-	//URL: REQUIRED. String value that contains a URL where the Wallet can obtain the logo of the Credential Issuer. The Wallet needs to determine the scheme, since the URL value could use the https: scheme, the data: scheme, etc.
-	URL string `json:"url" yaml:"url" validate:"required"`
+	//URI: REQUIRED. String value that contains a URI where the Wallet can obtain the logo of the Credential Issuer. The Wallet needs to determine the scheme, since the URI value could use the https: scheme, the data: scheme, etc.
+	URI string `json:"uri" yaml:"uri" validate:"required"`
 
 	// AltText: OPTIONAL. String value of the alternative text for the logo image.
 	AltText string `json:"alt_text,omitempty" yaml:"alt_text,omitempty"`
@@ -87,10 +87,12 @@ type CredentialConfigurationsSupported struct {
 	CredentialDefinition CredentialDefinition `json:"credential_definition" yaml:"credential_definition" validate:"required"`
 
 	// ProofTypesSupported: OPTIONAL. Object that describes specifics of the key proof(s) that the Credential Issuer supports. This object contains a list of name/value pairs, where each name is a unique identifier of the supported proof type(s). Valid values are defined in Section 7.2.1, other values MAY be used. This identifier is also used by the Wallet in the Credential Request as defined in Section 7.2. The value in the name/value pair is an object that contains metadata about the key proof and contains the following parameters defined by this specification:
-	ProofsTypesSupported map[string]ProofsTypesSupported `json:"proofs_types_supported,omitempty" yaml:"proofs_types_supported,omitempty"`
+	ProofTypesSupported map[string]ProofsTypesSupported `json:"proof_types_supported" yaml:"proof_types_supported"`
 
 	// Display: OPTIONAL. Array of objects, where each object contains the display properties of the supported Credential for a certain language. Below is a non-exhaustive list of parameters that MAY be included.
 	Display []CredentialMetadataDisplay `json:"display,omitempty" yaml:"display,omitempty"`
+
+	VCT string `json:"vct,omitempty" yaml:"vct,omitempty"`
 }
 
 // ProofsTypesSupported Object that describes specifics of the key proof(s) that the Credential Issuer supports.

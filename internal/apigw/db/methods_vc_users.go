@@ -103,7 +103,7 @@ func (c *VCUsersColl) GetUser(ctx context.Context, username string) (*model.OAut
 	if err := c.Coll.FindOne(ctx, filter).Decode(&res); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		if err == mongo.ErrNoDocuments {
-			return nil, errors.New("User not found")
+			return nil, errors.New("user not found")
 		}
 		return nil, err
 	}

@@ -56,87 +56,7 @@ authentic_sources:
       PDA1:
         profile: "SD-JWT"
 
-issuing_metadata:
-  credential_issuer: http://vc_dev_apigw:8080
-  credential_endpoint: http://vc_dev_apigw:8080/credential
-  authorization_servers:
-    - http://vc_dev_apigw:8080
-  batch_credential_endpoint: http://vc_dev_apigw:8080/batch_credential
-  deferred_credential_endpoint: http://vc_dev_apigw:8080/deferred_credential
-  notification_endpoint: "http://vc_dev_apigw:8080/notification"
-  credential_response_encryption:
-    alg_values_supported:
-      - ECDH-ES
-    enc_values_supported:
-      - A129GCM
-    encryption_required: false
-  display:
-    - name: European Health Insurance Card
-      locale: en-US
-      logo:
-      url: ''
-    - name: Carte européenne d'assurance maladie
-      locale: fr-FR
-      logo:
-      url: ''
-  credential_configurations_supported:
-    EHICCredential:
-      format: jwt_vc_json
-      scope: EHIC
-      cryptographic_binding_methods_supported:
-        - did:example
-      credential_signing_alg_values_supported:
-        - ES256
-      credential_definition:
-        type:
-          - VerifiableCredential
-          - EHICCredential
-        credentialSubject:
-          social_security_pin:
-            mandatory: true
-            value_type: string
-            display:
-              - name: "Social Security Number"
-                locale: en-US
-                description: "The social security number of the EHIC holder"
-          institution_country:
-            mandatory: true
-            value_type: string
-            display:
-              - name: "Issuer Country"
-                locale: en-US
-                description: "The issuer country of the EHIC holder"
-          institution_id:
-            mandatory: true
-            value_type: string
-            display:
-              - name: "Issuer Institution Code"
-                locale: en-US
-                description: "The issuer institution code of the EHIC holder"
-          document_id:
-            mandatory: true
-            value_type: string
-            display:
-              - name: "Identification card number"
-                locale: en-US
-                description: "The Identification card number of the EHIC holder"
-          ending_date:
-            mandatory: true
-            value_type: string
-            display:
-              - name: "Expiry Date"
-                locale: en-US
-                description: "The date and time expired this credential"
-      display:
-        - name: "European Health Insurance Card Credential"
-          locale: en-US
-          logo:
-            url: https://example.edu/public/logo.png
-            alt_text: "a square logo of a EHIC card"
-          background_color: "#12107c"
-          background_image:
-            uri:  "https://example.edu/public/background.png"
-          text_color: "#FFFFFF"
+issuer_metadata_path: "/issuer_metadata.json"
 
 issuer:
   identifier: "SUNET_v1"
@@ -148,7 +68,6 @@ issuer:
   issuer_url: "http://172.16.50.2:8080"
   wallet_url: ""
   credential_offer_url: "http://www.sunet.se" # is this the wallet url?
-  #metadata_path: "/metadata.golden"
   jwt_attribute:
     issuer: https://issuer.sunet.se
     enable_not_before: true

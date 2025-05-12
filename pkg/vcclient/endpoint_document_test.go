@@ -49,7 +49,7 @@ func mockHappyHttServer(t *testing.T) *httptest.Server {
 }
 
 func mockClient(ctx context.Context, t *testing.T, url string) *Client {
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	_, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	client, err := New(&Config{

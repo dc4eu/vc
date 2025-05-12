@@ -1,8 +1,15 @@
 package model
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
+	"os"
+	"path/filepath"
 	"vc/pkg/logger"
 	"vc/pkg/openid4vci"
+
+	"gopkg.in/yaml.v2"
 )
 
 // APIServer holds the api server configuration
@@ -118,9 +125,11 @@ type Issuer struct {
 	IssuerURL          string       `yaml:"issuer_url" validate:"required"`
 	WalletURL          string       `yaml:"wallet_url"`
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
+}
 
+type IssuerMetadata struct {
 	// MetadataPath path to the metadata file, OpenID
-	//MetadataPath string `yaml:"metadata_path" validate:"required"`
+	MetadataPath string `yaml:"metadata_path" validate:"required"`
 }
 
 // Registry holds the registry configuration
@@ -247,18 +256,18 @@ type AuthenticSource struct {
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common           Common                                         `yaml:"common"`
-	AuthenticSources map[string]AuthenticSource                     `yaml:"authentic_sources" validate:"omitempty"`
-	APIGW            APIGW                                          `yaml:"apigw" validate:"omitempty"`
-	Issuer           Issuer                                         `yaml:"issuer" validate:"omitempty"`
-	Verifier         Verifier                                       `yaml:"verifier" validate:"omitempty"`
-	Datastore        Datastore                                      `yaml:"datastore" validate:"omitempty"`
-	Registry         Registry                                       `yaml:"registry" validate:"omitempty"`
-	Persistent       Persistent                                     `yaml:"persistent" validate:"omitempty"`
-	MockAS           MockAS                                         `yaml:"mock_as" validate:"omitempty"`
-	UI               UI                                             `yaml:"ui" validate:"omitempty"`
-	Portal           Portal                                         `yaml:"portal" validate:"omitempty"`
-	IssuerMetadata   *openid4vci.CredentialIssuerMetadataParameters `yaml:"issuing_metadata" validate:"required"`
+	Common             Common                     `yaml:"common"`
+	AuthenticSources   map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
+	APIGW              APIGW                      `yaml:"apigw" validate:"omitempty"`
+	Issuer             Issuer                     `yaml:"issuer" validate:"omitempty"`
+	Verifier           Verifier                   `yaml:"verifier" validate:"omitempty"`
+	Datastore          Datastore                  `yaml:"datastore" validate:"omitempty"`
+	Registry           Registry                   `yaml:"registry" validate:"omitempty"`
+	Persistent         Persistent                 `yaml:"persistent" validate:"omitempty"`
+	MockAS             MockAS                     `yaml:"mock_as" validate:"omitempty"`
+	UI                 UI                         `yaml:"ui" validate:"omitempty"`
+	Portal             Portal                     `yaml:"portal" validate:"omitempty"`
+	IssuerMetadataPath string                     `yaml:"issuer_metadata_path" validate:"required"`
 }
 
 // IsAsyncEnabled checks if the async is enabled
@@ -268,4 +277,31 @@ func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
 		log.Info("EventPublisher disabled in config")
 	}
 	return enabled
+}
+
+// IssuerMetadata loads the issuing metadata from
+func (cfg *Cfg) IssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error) {
+	fileByte, err := os.ReadFile(cfg.IssuerMetadataPath)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata := &openid4vci.CredentialIssuerMetadataParameters{}
+
+	switch filepath.Ext(cfg.IssuerMetadataPath) {
+	case ".json":
+		if err := json.Unmarshal(fileByte, &metadata); err != nil {
+			return nil, err
+		}
+
+	case "yaml", ".yml":
+		if err := yaml.Unmarshal(fileByte, &metadata); err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, errors.New("unsupported file type")
+	}
+
+	return metadata, nil
 }

@@ -7,10 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/otel/codes"
-	trace2 "go.opentelemetry.io/otel/trace"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -19,6 +15,11 @@ import (
 	"vc/internal/verifier/apiv1"
 	"vc/pkg/openid4vp"
 	"vc/pkg/trace"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/codes"
+	trace2 "go.opentelemetry.io/otel/trace"
 )
 
 func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, error) {
@@ -122,10 +123,10 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		"errorURIString", errorURIString)
 
 	if errorString != "" {
-		return nil, fmt.Errorf("Error from wallet during auth request error=%s, errorDescription=%s, errorURIString=%s", errorString, errorDescriptionString, errorURIString)
+		return nil, fmt.Errorf("error from wallet during auth request error=%s, errorDescription=%s, errorURIString=%s", errorString, errorDescriptionString, errorURIString)
 	}
 	if len(vpTokenStringArray) < 1 || presentationSubmissionString == "" || stateString == "" {
-		return nil, errors.New("Missing mandatory fields [vpTokenString, presentationSubmissionString, stateString]")
+		return nil, errors.New("missing mandatory fields [vpTokenString, presentationSubmissionString, stateString]")
 	}
 
 	var presentationSubmission openid4vp.PresentationSubmission
@@ -176,7 +177,7 @@ func (s *Service) endpointGetVerificationResult(ctx context.Context, g *gin.Cont
 }
 
 func (s *Service) endpointQuitVPFlow(ctx context.Context, g *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQuitVPFlow")
+	_, span := s.tracer.Start(ctx, "httpserver:endpointQuitVPFlow")
 	defer span.End()
 
 	webSession := sessions.Default(g)

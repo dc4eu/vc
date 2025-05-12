@@ -34,7 +34,6 @@ type Consumer interface {
 type MessageConsumerClient struct {
 	SaramaConfig *sarama.Config
 	brokers      []string
-	ctx          context.Context
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
 	log          *logger.Log
@@ -123,14 +122,14 @@ func (cgh *ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { 
 
 func (cgh *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	if cgh.Handlers == nil {
-		cgh.Log.Error(errors.New("No handlers defined"), "No Handlers for any topic")
+		cgh.Log.Error(errors.New("no handlers defined"), "No Handlers for any topic")
 		//TODO(mk): send to a general error topic?
 		return nil
 	}
 
 	handler, exists := cgh.Handlers[claim.Topic()]
 	if !exists {
-		cgh.Log.Error(errors.New("No handler for topic"), "topic", claim.Topic())
+		cgh.Log.Error(errors.New("no handler for topic"), "topic", claim.Topic())
 		//TODO(mk): send to a general error topic?
 		return nil
 	}

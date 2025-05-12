@@ -31,7 +31,7 @@ func newPIDClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*pidCl
 }
 
 func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	body, err := doc.Marshal()

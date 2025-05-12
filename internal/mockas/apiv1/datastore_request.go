@@ -66,7 +66,7 @@ func (c *Client) newRequest(ctx context.Context, method, path string, body any) 
 
 // Do does the new request
 func (c *Client) do(ctx context.Context, req *http.Request, value any) (*http.Response, error) {
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	_, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	resp, err := c.httpClient.Do(req)
@@ -100,11 +100,11 @@ func checkResponse(r *http.Response) error {
 	case 200, 201, 202, 204, 304:
 		return nil
 	case 401:
-		return errors.New("Unauthorized")
+		return errors.New("unauthorized")
 	case 500:
-		return errors.New("Invalid")
+		return errors.New("invalid")
 	}
-	return errors.New("Invalid request")
+	return errors.New("invalid request")
 }
 
 func (c *Client) call(ctx context.Context, method, path string, body, reply any) (*http.Response, error) {

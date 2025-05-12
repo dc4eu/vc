@@ -137,13 +137,13 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 }
 
 // read body and make it reusable
-func readBody(body io.ReadCloser) ([]byte, error) {
-	buf := &bytes.Buffer{}
-	if _, err := buf.ReadFrom(body); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
+//func readBody(body io.ReadCloser) ([]byte, error) {
+//	buf := &bytes.Buffer{}
+//	if _, err := buf.ReadFrom(body); err != nil {
+//		return nil, err
+//	}
+//	return buf.Bytes(), nil
+//}
 
 func checkResponse(r *http.Response) error {
 	switch r.StatusCode {

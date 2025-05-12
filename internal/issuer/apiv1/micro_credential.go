@@ -31,7 +31,7 @@ func (c *microCredentialClient) sdjwt(ctx context.Context, body map[string]any, 
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	ctx, span := c.tracer.Start(ctx, "apiv1:MicroClient:sdjwt")
+	_, span := c.tracer.Start(ctx, "apiv1:MicroClient:sdjwt")
 	defer span.End()
 
 	vct := "MicroCredential"

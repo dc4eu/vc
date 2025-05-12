@@ -1,7 +1,6 @@
 package apiv1
 
 import (
-	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -23,8 +22,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 )
-
-var nonRandomSeed = bytes.NewReader([]byte("1234567890abcdefghijklmnopqrstuvxyz1234567890abcdefghijklmnopqrstuvxyz1234567890abcdefghijklmnopqrstuvxyz"))
 
 func mockKey(t *testing.T, keyType string) string {
 	tempFolder := t.TempDir()
@@ -73,6 +70,7 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 	assert.NoError(t, err)
 
 	audit, err := auditlog.New(ctx, cfg, log.New("audit"))
+	assert.NoError(t, err)
 
 	client, err := New(ctx, audit, cfg, tracer, log.New("apiv1"))
 	assert.NoError(t, err)
@@ -181,8 +179,10 @@ func TestPDA1Credential(t *testing.T) {
 		assert.NoError(t, err)
 
 		body, err := sdjwt3.Base64Decode(bodyEncoded)
+		assert.NoError(t, err)
 
 		got, err := sdjwt3.Unmarshal(body)
+		assert.NoError(t, err)
 
 		excludeCNF := cmpopts.IgnoreMapEntries(func(k string, v any) bool {
 			switch k {
@@ -275,8 +275,10 @@ func TestEHICCredential(t *testing.T) {
 		assert.NoError(t, err)
 
 		body, err := sdjwt3.Base64Decode(bodyEncoded)
+		assert.NoError(t, err)
 
 		got, err := sdjwt3.Unmarshal(body)
+		assert.NoError(t, err)
 
 		excludeCNF := cmpopts.IgnoreMapEntries(func(k string, v any) bool {
 			switch k {

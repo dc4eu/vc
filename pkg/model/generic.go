@@ -194,9 +194,7 @@ type Identity struct {
 
 	// required: true
 	// example: SE
-	//TODO: gör om typ till []string + anpassa i UI
-	//TODO: lägg in validate:"dive,iso3166_1_alpha2" när dataladdning mm anpassat
-	Nationality string `json:"nationality,omitempty" bson:"nationality"`
+	Nationality []string `json:"nationality,omitempty" bson:"nationality" validate:"dive,iso3166_1_alpha2"`
 
 	// required: false
 	// example: 221b Baker street

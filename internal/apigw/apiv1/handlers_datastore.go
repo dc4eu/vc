@@ -177,7 +177,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		req.Attributes.GivenName == "" ||
 		req.Attributes.BirthDate == "" ||
 		req.Attributes.BirthPlace == "" ||
-		req.Attributes.Nationality == "" ||
+		len(req.Attributes.Nationality) == 0 ||
 		req.Attributes.ExpiryDate == "" ||
 		req.Attributes.IssuingAuthority == "" ||
 		req.Attributes.IssuingCountry == "" {

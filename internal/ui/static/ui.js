@@ -1344,7 +1344,7 @@ const addPIDUser = () => {
                     given_name: givenNameInput.value,
                     birth_date: birthdateInput.value,
                     birth_place: birthPlaceInput.value,
-                    nationality: nationalityInput.value,
+                    nationality: [nationalityInput.value],
 
                     resident_address: residentAddressInput.value,
                     resident_country: residentCountryInput.value,

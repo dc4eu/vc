@@ -134,6 +134,16 @@ function safeReplace(input, toReplace, replacement) {
     return input.replace(toReplace, replacement);
 }
 
+function buildLink({href, text, title = href, target = "_blank", className = "is-Link"}) {
+    const link = document.createElement('a');
+    link.href = href;
+    link.title = title;
+    link.textContent = text;
+    link.target = target;
+    link.classList.add(className);
+    return link;
+}
+
 function displayQrCodes(data, username) {
     console.debug("Data received:", data);
 
@@ -172,12 +182,12 @@ function displayQrCodes(data, username) {
 
     data.documents.forEach((doc) => {
 
-        const credentialOfferUrl = doc.qr.credential_offer_url;
+        const credentialOfferUrl = doc.qr?.credential_offer_url || "";
 
         const cell1 = document.createElement("div");
         cell1.classList.add("cell");
 
-        if (doc.qr?.qr_base64) {
+        if (doc.qr?.qr_base64 && credentialOfferUrl !== "") {
             const img = document.createElement("img");
             img.src = `data:image/png;base64,${doc.qr.qr_base64}`;
 
@@ -213,45 +223,27 @@ function displayQrCodes(data, username) {
         pColId.innerText = "Collect ID: " + doc.meta?.collect?.id || "";
         cell2.appendChild(pColId);
 
-        if (doc.qr?.credential_offer_url) {
-            // const browserWalletLink = document.createElement('a');
-            // browserWalletLink.href = credentialOfferUrl;
-            // browserWalletLink.textContent = "Browser wallet";
-            // browserWalletLink.classList.add("is-Link");
-            // cell2.appendChild(browserWalletLink);
-            //
-            //cell2.appendChild(document.createElement("br"));
-
-            const dc4euWalletLink = document.createElement('a');
-            const dc4euWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://dc4eu.wwwallet.org/cb?");
-            dc4euWalletLink.href = dc4euWalletURL;
-            dc4euWalletLink.title = dc4euWalletURL;
-            dc4euWalletLink.textContent = "DC4EU wallet";
-            dc4euWalletLink.target = "_blank";
-            dc4euWalletLink.classList.add("is-Link");
-            cell2.appendChild(dc4euWalletLink);
-
+        if (credentialOfferUrl !== "") {
+            const toReplace = "openid-credential-offer://?";
+            cell2.appendChild(buildLink({
+                href: safeReplace(credentialOfferUrl, toReplace, "https://dc4eu.wwwallet.org/cb?"),
+                text: "DC4EU wallet",
+            }));
             cell2.appendChild(document.createElement("br"));
-
-            const demoDC4EUWalletLink = document.createElement('a');
-            const demoDC4EUWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://demo.wwwallet.org/cb?");
-            demoDC4EUWalletLink.href = demoDC4EUWalletURL;
-            demoDC4EUWalletLink.title = demoDC4EUWalletURL;
-            demoDC4EUWalletLink.textContent = "Demo DC4EU wallet";
-            demoDC4EUWalletLink.target = "_blank";
-            demoDC4EUWalletLink.classList.add("is-Link");
-            cell2.appendChild(demoDC4EUWalletLink);
-
+            cell2.appendChild(buildLink({
+                href: safeReplace(credentialOfferUrl, toReplace, "https://demo.wwwallet.org/cb?"),
+                text: "Demo DC4EU wallet",
+            }));
             cell2.appendChild(document.createElement("br"));
-
-            const devSunetWalletLink = document.createElement('a');
-            const devSunetWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://dev.wallet.sunet.se/cb?");
-            devSunetWalletLink.href = devSunetWalletURL;
-            devSunetWalletLink.title = devSunetWalletURL;
-            devSunetWalletLink.textContent = "Dev SUNET wallet";
-            devSunetWalletLink.target = "_blank";
-            devSunetWalletLink.classList.add("is-Link");
-            cell2.appendChild(devSunetWalletLink);
+            cell2.appendChild(buildLink({
+                href: safeReplace(credentialOfferUrl, toReplace, "https://dev.wallet.sunet.se/cb?"),
+                text: "Dev SUNET wallet",
+            }));
+            cell2.appendChild(document.createElement("br"));
+            cell2.appendChild(buildLink({
+                href: safeReplace(credentialOfferUrl, toReplace, "https://funke.wwwallet.org/cb?"),
+                text: "Funke wallet",
+            }));
         }
 
         gridDiv.appendChild(cell1);

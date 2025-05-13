@@ -230,7 +230,7 @@ type Identity struct {
 
 	// required: false
 	// example: facial image compliant with ISO 19794-5 or ISO 39794 specifications
-	//TODO: Portrait ??? `json:"portrait,omitempty" bson:"portrait"` - Facial image of the wallet user compliant with ISO 19794-5 or ISO 39794 specifications.
+	Portrait string `json:"portrait,omitempty" bson:"portrait"`
 
 	// required: false
 	// example: Karlsson
@@ -357,9 +357,11 @@ type SearchDocumentsRequest struct {
 	CollectID       string `json:"collect_id,omitempty"`
 
 	AuthenticSourcePersonID string `json:"authentic_source_person_id,omitempty"`
-	FamilyName              string `json:"family_name,omitempty"`
-	GivenName               string `json:"given_name,omitempty"`
-	BirthDate               string `json:"birth_date,omitempty"`
+
+	FamilyName string `json:"family_name,omitempty"`
+	GivenName  string `json:"given_name,omitempty"`
+	BirthDate  string `json:"birth_date,omitempty"`
+	BirthPlace string `json:"birth_place,omitempty"`
 
 	Limit      int64          `json:"limit,omitempty"`
 	Fields     []string       `json:"fields,omitempty"`

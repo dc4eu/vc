@@ -804,6 +804,26 @@ function displayCompleteDocumentInModal(rowData) {
     });
 }
 
+function buildButton({
+                         id = generateUUID(),
+                         text,
+                         title = "",
+                         classList = ["button", "is-link"],
+                         onClick
+                     }) {
+    const button = document.createElement("button");
+    button.id = id;
+    button.textContent = text;
+    button.title = title;
+
+    classList.forEach(cls => button.classList.add(cls));
+
+    if (typeof onClick === "function") {
+        button.addEventListener("click", onClick);
+    }
+    return button;
+}
+
 function displayQRInModal(rowData) {
     const modalParts = buildAndDisplayModal("QR-code");
     const modalBodyDiv = modalParts.modalBodyDiv;
@@ -832,30 +852,50 @@ function displayQRInModal(rowData) {
 
         const img = document.createElement("img");
         img.src = `data:image/png;base64,${data.documents[0].qr.qr_base64}`;
-        img.title = credentialOfferUrl;
-        modalBodyDiv.appendChild(img);
 
-        const openInDC4EUWWWalletButton = document.createElement("button");
-        const dc4euWWWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://dc4eu.wwwallet.org/cb?")
-        openInDC4EUWWWalletButton.id = generateUUID();
-        openInDC4EUWWWalletButton.classList.add("button", "is-link");
-        openInDC4EUWWWalletButton.title = dc4euWWWalletURL;
-        openInDC4EUWWWalletButton.textContent = "Open in DC4EU wwWallet (opens in a new tab or window)";
-        openInDC4EUWWWalletButton.addEventListener("click", function () {
-            window.open(`${dc4euWWWalletURL}`, "_blank");
-        });
-        modalParts.footer.appendChild(openInDC4EUWWWalletButton);
+        const a = document.createElement("a");
+        a.href = credentialOfferUrl;
+        a.target = "_blank";
+        a.title = credentialOfferUrl;
+        a.appendChild(img);
+        modalBodyDiv.appendChild(a);
 
-        const openInDemoWWWalletButton = document.createElement("button");
-        const demoWWWalletURL = safeReplace(credentialOfferUrl, "openid-credential-offer://?", "https://demo.wwwallet.org/cb?")
-        openInDemoWWWalletButton.id = generateUUID();
-        openInDemoWWWalletButton.classList.add("button", "is-link");
-        openInDemoWWWalletButton.title = demoWWWalletURL;
-        openInDemoWWWalletButton.textContent = "Open in demo wwWallet (opens in a new tab or window)";
-        openInDemoWWWalletButton.addEventListener("click", function () {
-            window.open(`${demoWWWalletURL}`, "_blank");
-        });
-        modalParts.footer.appendChild(openInDemoWWWalletButton);
+        const toReplace = "openid-credential-offer://?";
+        const dc4euWalletURL = safeReplace(credentialOfferUrl, toReplace, "https://dc4eu.wwwallet.org/cb?")
+        modalParts.footer.appendChild(buildButton(
+            {
+                text: "DC4EU wallet",
+                title: dc4euWalletURL,
+                onClick: () => window.open(dc4euWalletURL, "_blank"),
+            }
+        ));
+
+        const demoDC4EUWalletURL = safeReplace(credentialOfferUrl, toReplace, "https://demo.wwwallet.org/cb?");
+        modalParts.footer.appendChild(buildButton(
+            {
+                text: "Demo DC4EU wallet",
+                title: demoDC4EUWalletURL,
+                onClick: () => window.open(demoDC4EUWalletURL, "_blank"),
+            }
+        ));
+
+        const devSUNETWalletURL = safeReplace(credentialOfferUrl, toReplace, "https://dev.wallet.sunet.se/cb?");
+        modalParts.footer.appendChild(buildButton(
+            {
+                text: "Dev SUNET wallet",
+                title: devSUNETWalletURL,
+                onClick: () => window.open(devSUNETWalletURL, "_blank"),
+            }
+        ));
+
+        const funkeWalletURL = safeReplace(credentialOfferUrl, toReplace, "https://funke.wwwallet.org/cb?");
+        modalParts.footer.appendChild(buildButton(
+            {
+                text: "Funke wallet",
+                title: funkeWalletURL,
+                onClick: () => window.open(funkeWalletURL, "_blank"),
+            }
+        ));
 
         //modalBodyDiv.innerText = JSON.stringify(data, null, 2);
     }).catch(err => {
@@ -1258,11 +1298,6 @@ const addSearchDocumentsFormArticleToContainer = () => {
     document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
 };
 
-const countries = input
-    .split(',')
-    .map(c => c.trim())
-    .filter(c => c !== '');
-
 const addPIDUser = () => {
     const buildFormElements = () => {
         const helpLink = document.createElement("a");
@@ -1287,9 +1322,9 @@ const addPIDUser = () => {
         const expiryDateInput = createInputElement("Expiry date");
         const issuingAuthorityInput = createInputElement("Issuing authority");
         const issuingCountryInput = createInputElement("Issuing country");
-        //TODO: document_number - optional
-        //TODO: issuing_jurisdiction - optional
-        //TODO: location_status - optional
+        const documentNumberInput = createInputElement("Document number");
+        const issuingJurisdictionInput = createInputElement("Issuing jurisdiction");
+        const locationStatusInput = createInputElement("Location status");
 
         const familyNameInput = createInputElement('Family name');
         const givenNameInput = createInputElement('Given name');
@@ -1311,7 +1346,7 @@ const addPIDUser = () => {
         });
         const portraitInput = createInputElementAdvanced({
             placeholder: 'Facial image of the wallet user',
-            disabled: true,
+            title: "data:image/jpeg;base64,/9j/4AAQSkZJRgAB ... AAf/9k="
         })
         const familyNameBirthInput = createInputElement('Family name birth');
         const givenNameBirthInput = createInputElement('Given name birth');
@@ -1344,6 +1379,9 @@ const addPIDUser = () => {
                     expiry_date: expiryDateInput.value,
                     issuing_authority: issuingAuthorityInput.value,
                     issuing_country: issuingCountryInput.value,
+                    document_number: documentNumberInput.value,
+                    issuing_jurisdiction: issuingJurisdictionInput.value,
+                    location_status: locationStatusInput.value,
 
                     family_name: familyNameInput.value,
                     given_name: givenNameInput.value,
@@ -1393,6 +1431,9 @@ const addPIDUser = () => {
             expiryDateInput,
             issuingAuthorityInput,
             issuingCountryInput,
+            documentNumberInput,
+            issuingJurisdictionInput,
+            locationStatusInput,
             document.createElement('hr'),
             familyNameInput,
             givenNameInput,

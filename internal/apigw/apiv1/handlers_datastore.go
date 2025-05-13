@@ -667,9 +667,11 @@ func (c *Client) SearchDocuments(ctx context.Context, req *model.SearchDocuments
 		CollectID:       req.CollectID,
 
 		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
-		FamilyName:              req.FamilyName,
-		GivenName:               req.GivenName,
-		BirthDate:               req.BirthDate,
+
+		FamilyName: req.FamilyName,
+		GivenName:  req.GivenName,
+		BirthDate:  req.BirthDate,
+		BirthPlace: req.BirthPlace,
 	}, req.Limit, req.Fields, req.SortFields)
 
 	if err != nil {

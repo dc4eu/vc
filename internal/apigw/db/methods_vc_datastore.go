@@ -368,9 +368,12 @@ type SearchDocumentsQuery struct {
 	CollectID       string `json:"collect_id,omitempty" validate:"omitempty,max=1000"`
 
 	AuthenticSourcePersonID string `json:"authentic_source_person_id,omitempty"`
-	FamilyName              string `json:"family_name,omitempty" validate:"omitempty,max=597"`
-	GivenName               string `json:"given_name,omitempty" validate:"omitempty,max=1019"`
-	BirthDate               string `json:"birth_date,omitempty" validate:"omitempty,datetime=2006-01-02"`
+
+	FamilyName string `json:"family_name,omitempty" validate:"omitempty,max=597"`
+	GivenName  string `json:"given_name,omitempty" validate:"omitempty,max=1019"`
+	BirthDate  string `json:"birth_date,omitempty" validate:"omitempty,datetime=2006-01-02"`
+	BirthPlace string `json:"birth_place,omitempty"`
+	//TODO: add Nationality []string `json:"nationality,omitempty" validate:"omitempty,dive,iso3166_1_alpha2"` - men vad betyder det i sökning om man bara angivit ex. en som matchar och man även är medborgare i ett till land???
 }
 
 // SearchDocuments search documents in datastore
@@ -470,6 +473,9 @@ func buildSearchDocumentsFilter(query *SearchDocumentsQuery) bson.M {
 	}
 	if query.BirthDate != "" {
 		identityConditions["birth_date"] = query.BirthDate
+	}
+	if query.BirthPlace != "" {
+		identityConditions["birth_place"] = query.BirthPlace
 	}
 	if len(identityConditions) > 0 {
 		filter["identities"] = bson.M{

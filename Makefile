@@ -164,6 +164,14 @@ docker-build-portal-debug:
 	$(info Docker building portal with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=portal --tag $(DOCKER_TAG_PORTAL) --file dockerfiles/web_worker_debug .
 
+docker-build-and-restart-portal:
+	$(info docker-build-portal)
+	$(MAKE) docker-build-portal
+	$(info stop-portal)
+	docker compose -f docker-compose.yaml rm -s -f portal
+	$(info start-portal)
+	docker compose -f docker-compose.yaml up -d --remove-orphans portal
+
 docker-build-wallet:
 	$(info Docker building wallet with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=wallet --tag $(DOCKER_TAG_WALLET) --file dockerfiles/worker .

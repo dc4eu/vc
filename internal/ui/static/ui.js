@@ -451,7 +451,7 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
 
 const addViewVPFlowDebugInfoFormArticleToContainer = () => {
     const buildFormElements = () => {
-        const sessionIDElement = createInputElement('session id');
+        const sessionIDInput = createInputElement('session id');
 
         const divResultContainer = document.createElement("div");
         divResultContainer.id = generateUUID();
@@ -469,7 +469,7 @@ const addViewVPFlowDebugInfoFormArticleToContainer = () => {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json; charset=utf-8',
                 },
-                body: JSON.stringify({session_id: sessionIDElement.value}),
+                body: JSON.stringify({session_id: sessionIDInput.value}),
             }).then(data => {
                 console.log(data);
                 divResultContainer.appendChild(document.createElement("br"));
@@ -490,8 +490,8 @@ const addViewVPFlowDebugInfoFormArticleToContainer = () => {
                 displayErrorTag("Failed to fetch vp-flow debug info: ", divResultContainer, err);
             });
         };
-
-        return [sessionIDElement, viewButton, divResultContainer];
+        triggerButtonOnEnter([sessionIDInput], viewButton);
+        return [sessionIDInput, viewButton, divResultContainer];
     };
 
     const articleIdBasis = generateArticleIDBasis();
@@ -1177,12 +1177,25 @@ function exportTableToCSV(table) {
     URL.revokeObjectURL(url);
 }
 
+function triggerButtonOnEnter(inputs, buttonOrHandler) {
+    const handler = typeof buttonOrHandler === 'function'
+        ? buttonOrHandler
+        : () => buttonOrHandler.click();
+
+    inputs.forEach(input => {
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                handler();
+            }
+        });
+    });
+}
+
 const addSearchDocumentsFormArticleToContainer = () => {
     const buildFormElements = () => {
-
-        const documentIDElement = createInputElement('Document id (optional)');
+        const documentIDInput = createInputElement('Document id (optional)');
         const authenticSourceInput = createInputElement('Authentic source (optional)');
-
         const documentTypeSelectWithinDivElement = createSelectElement([{
             value: '',
             label: 'Document type (optional)'
@@ -1194,19 +1207,15 @@ const addSearchDocumentsFormArticleToContainer = () => {
             {value: 'PID', label: 'PID'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
         const documentTypeSelect = documentTypeSelectWithinDivElement[1];
-
         const collectIdInput = createInputElement('Collect ID (optional)');
-
         const authenticSourcePersonIdInput = createInputElement('Authentic source person id (optional)');
         const familyNameInput = createInputElement('Family name (optional)');
         const givenNameInput = createInputElement('Given name (optional)');
         const birthdateInput = createInputElement('Birth date (YYYY-MM-DD, optional)');
-
         const {
             label: checkboxShowCompleteDocsAsRawJsonLabel,
             input: checkboxShowCompleteDocsAsRawJson
         } = createCheckboxElement("Show complete documents as raw json");
-
         const limitInput = createInputElement('Max number of results (optional, default is 50, max is 500)', '50');
 
         const divResultContainer = document.createElement("div");
@@ -1224,7 +1233,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
             }
 
             const requestBody = {
-                document_id: documentIDElement.value,
+                document_id: documentIDInput.value,
                 authentic_source: authenticSourceInput.value,
                 document_type: documentTypeSelect.value,
                 collect_id: collectIdInput.value,
@@ -1242,7 +1251,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
             if (checkboxShowCompleteDocsAsRawJson.checked) {
                 requestBody.fields = []; // request all fields
                 disableElements([
-                    documentIDElement,
+                    documentIDInput,
                     authenticSourceInput,
                     documentTypeSelect,
                     collectIdInput,
@@ -1274,8 +1283,10 @@ const addSearchDocumentsFormArticleToContainer = () => {
 
         let brElement = document.createElement('br');
 
+        triggerButtonOnEnter([documentIDInput, authenticSourceInput, documentTypeSelect, collectIdInput, authenticSourcePersonIdInput, familyNameInput, givenNameInput, birthdateInput, checkboxShowCompleteDocsAsRawJson, limitInput], searchButton);
+
         return [
-            documentIDElement,
+            documentIDInput,
             authenticSourceInput,
             documentTypeDiv,
             collectIdInput,

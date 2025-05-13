@@ -262,5 +262,19 @@ async function quitVPFlow() {
     }
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    const startVPFlowButton = document.getElementById('start-vp-flow-btn');
+    startVPFlowButton.addEventListener('click', function () {
+        startVPFlow();
+    });
+
+    const documentTypeSelect = document.getElementById('documentTypeSelect');
+    documentTypeSelect.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            startVPFlowButton.click();
+        }
+    });
+});
 
 

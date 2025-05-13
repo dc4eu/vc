@@ -53,8 +53,6 @@ const doLogin = () => {
     const usernameElement = document.getElementById("username");
     const passwordElement = document.getElementById("password");
 
-    //TODO: apigw/user/credential-offers - hantera login och sedan search i portal backend som en quick fix tills äkta auth införs.
-
     if (!validateHasValueAndNotEmpty(usernameElement) || !validateHasValueAndNotEmpty(passwordElement)) {
         displayError("Empty username and/or password");
         return;
@@ -63,11 +61,6 @@ const doLogin = () => {
 
     const username = usernameElement.value;
     const password = passwordElement.value;
-    // if (username.toLowerCase() !== password) {
-    //     displayError("Login failed - please try again");
-    //     return;
-    // }
-
     usernameElement.value = "";
     passwordElement.value = "";
 
@@ -98,13 +91,11 @@ const doLogin = () => {
 };
 
 const doLogout = () => {
-
-    //TODO(mk): impl real logout for session and on server when real login implemented
-
     hideElement("logout_container");
     clearInnerElementsOf("error_container");
     showElement("login_container");
     clearInnerElementsOf("qr_container");
+    document.getElementById('username').focus();
 };
 
 
@@ -253,4 +244,27 @@ function displayQrCodes(data, username) {
     });
 }
 
-//TODO(mk): add listener to handle if logged in or logged out on load/reload
+document.addEventListener('DOMContentLoaded', function () {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('do-login-btn');
+
+    function handleEnterKey(event) {
+        if (event.key === 'Enter') {
+            loginButton.click();
+        }
+    }
+
+    usernameInput.focus();
+    usernameInput.addEventListener('keydown', handleEnterKey);
+    passwordInput.addEventListener('keydown', handleEnterKey);
+
+    loginButton.addEventListener('click', function () {
+        doLogin();
+    });
+
+    const logoutButton = document.getElementById("do-logout-btn");
+    logoutButton.addEventListener('click', function () {
+        doLogout();
+    });
+});

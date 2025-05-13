@@ -89,6 +89,16 @@ function resetAndHideQRContainer() {
     openInDC4EUWWWalletButton.onclick = null;
     openInDC4EUWWWalletButton.classList.add("is-hidden");
 
+    const openInDevSUNETWalletButton = getElementById("openInDevSUNETWalletButton");
+    openInDevSUNETWalletButton.title = "";
+    openInDevSUNETWalletButton.onclick = null;
+    openInDevSUNETWalletButton.classList.add("is-hidden");
+
+    const openInFunkeWalletButton = getElementById("openInFunkeWalletButton");
+    openInFunkeWalletButton.title = "";
+    openInFunkeWalletButton.onclick = null;
+    openInFunkeWalletButton.classList.add("is-hidden");
+
     const checkVerificationResultButton = getElementById("checkVerificationResultButton");
     checkVerificationResultButton.title = "";
     checkVerificationResultButton.onclick = null;
@@ -175,6 +185,18 @@ async function startVPFlow() {
         openInDemoWWWalletButton.onclick = () => window.open(demoWWWalletURL, "_blank");
         openInDemoWWWalletButton.title = demoWWWalletURL;
         openInDemoWWWalletButton.classList.remove("is-hidden");
+
+        const openInDevSUNETWalletButton = document.getElementById("openInDevSUNETWalletButton");
+        const devSUNETWalletURL = `https://dev.wallet.sunet.se/cb?${params.toString()}`;
+        openInDevSUNETWalletButton.onclick = () => window.open(devSUNETWalletURL, "_blank");
+        openInDevSUNETWalletButton.title = devSUNETWalletURL;
+        openInDevSUNETWalletButton.classList.remove("is-hidden");
+
+        const openInFunkeWalletButton = document.getElementById("openInFunkeWalletButton");
+        const funkeWalletURL = `https://funke.wwwallet.org/cb?${params.toString()}`;
+        openInFunkeWalletButton.onclick = () => window.open(funkeWalletURL, "_blank");
+        openInFunkeWalletButton.title = funkeWalletURL;
+        openInFunkeWalletButton.classList.remove("is-hidden");
 
         const checkVerificationResultButton = document.getElementById("checkVerificationResultButton");
         checkVerificationResultButton.onclick = () => checkVPVerificationResult();

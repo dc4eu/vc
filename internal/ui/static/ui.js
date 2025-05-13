@@ -1258,6 +1258,11 @@ const addSearchDocumentsFormArticleToContainer = () => {
     document.getElementById(articleIdBasis.articleID).querySelector('input').focus();
 };
 
+const countries = input
+    .split(',')
+    .map(c => c.trim())
+    .filter(c => c !== '');
+
 const addPIDUser = () => {
     const buildFormElements = () => {
         const helpLink = document.createElement("a");
@@ -1290,7 +1295,7 @@ const addPIDUser = () => {
         const givenNameInput = createInputElement('Given name');
         const birthdateInput = createInputElement('Birth date (YYYY-MM-DD)');
         const birthPlaceInput = createInputElement('Birth place');
-        const nationalityInput = createInputElement("Nationality");
+        const nationalityInput = createInputElement("Nationalities (separate with commas)");
 
         //Optional
         const residentAddressInput = createInputElement('Resident address');
@@ -1344,8 +1349,7 @@ const addPIDUser = () => {
                     given_name: givenNameInput.value,
                     birth_date: birthdateInput.value,
                     birth_place: birthPlaceInput.value,
-                    nationality: [nationalityInput.value],
-
+                    nationality: nationalityInput.value.trim() ? nationalityInput.value.split(',').map(c => c.trim()).filter(Boolean) : [],
                     resident_address: residentAddressInput.value,
                     resident_country: residentCountryInput.value,
                     resident_state: residentStateInput.value,

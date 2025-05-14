@@ -220,7 +220,6 @@ func TestSignIssuerMetadata(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			metadata := tt.issuerMetadata
-			metadata.SignedMetadata = ""
 
 			signingKey, cert := mockGenerateECDSAKey(t)
 			pubKey := signingKey.Public()

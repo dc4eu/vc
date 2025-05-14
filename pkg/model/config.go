@@ -305,6 +305,9 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 		return nil, nil, nil, errors.New("unsupported file type")
 	}
 
+	// ensure that the metadata is empty, should be procured/signed by the request or other automated process
+	metadata.SignedMetadata = ""
+
 	privateKey, err := pki.ParseKeyFromFile(cfg.APIGW.IssuerMetadata.SigningKeyPath)
 	if err != nil {
 		return nil, nil, nil, err

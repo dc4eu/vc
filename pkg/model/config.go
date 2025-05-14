@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"vc/pkg/logger"
+	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/pki"
 
@@ -165,7 +166,7 @@ type BasicAuth struct {
 	Enabled bool              `yaml:"enabled"`
 }
 
-type IssuerMetadata struct {
+type Metadata struct {
 	Path             string `yaml:"path" validate:"required"`
 	SigningKeyPath   string `yaml:"signing_key_path" validate:"required"`
 	SigningChainPath string `yaml:"signing_chain_path" validate:"required"`
@@ -173,9 +174,9 @@ type IssuerMetadata struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer      APIServer      `yaml:"api_server" validate:"required"`
-	OauthServer    OAuthServer    `yaml:"oauth_server" validate:"omitempty"`
-	IssuerMetadata IssuerMetadata `yaml:"issuer_metadata" validate:"omitempty"`
+	APIServer      APIServer    `yaml:"api_server" validate:"required"`
+	OauthServer    OAuth2Server `yaml:"oauth_server" validate:"omitempty"`
+	IssuerMetadata Metadata     `yaml:"issuer_metadata" validate:"omitempty"`
 }
 
 // Portal holds the persistent storage configuration
@@ -196,9 +197,10 @@ type OAuthGrant struct {
 	ClientType string `yaml:"client_type" validate:"required,oneof=confidential public"`
 }
 
-// OAuthServer holds the oauth server configuration
-type OAuthServer struct {
-	Grant map[string]OAuthGrant `yaml:"grant" validate:"required"`
+// OAuth2Server holds the oauth server configuration
+type OAuth2Server struct {
+	Grant    map[string]OAuthGrant `yaml:"grant" validate:"required"`
+	Metadata Metadata              `yaml:"metadata" validate:"required"`
 }
 
 // UI holds the user-interface configuration
@@ -300,6 +302,52 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 		if err := yaml.Unmarshal(fileByte, &metadata); err != nil {
 			return nil, nil, nil, err
 		}
+
+	default:
+		return nil, nil, nil, errors.New("unsupported file type")
+	}
+
+	// ensure that the metadata is empty, should be procured/signed by the request or other automated process
+	metadata.SignedMetadata = ""
+
+	privateKey, err := pki.ParseKeyFromFile(cfg.APIGW.IssuerMetadata.SigningKeyPath)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	_, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	chainBase64Encoded := []string{}
+	for _, c := range chain {
+		chainBase64Encoded = append(chainBase64Encoded, pki.Base64EncodeCertificate(c))
+	}
+
+	return metadata, privateKey, chainBase64Encoded, nil
+}
+
+// LoadOAuth2Metadata loads OAuth2 metadata from file
+func (cfg *Cfg) LoadOAuth2Metadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, any, []string, error) {
+	fileByte, err := os.ReadFile(cfg.APIGW.OauthServer.Metadata.Path)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	metadata := &oauth2.AuthorizationServerMetadata{}
+
+	switch filepath.Ext(cfg.APIGW.IssuerMetadata.Path) {
+	case ".json":
+		if err := json.Unmarshal(fileByte, &metadata); err != nil {
+			return nil, nil, nil, err
+		}
+
+	// Not implemented yet
+	//case "yaml", ".yml":
+	//	if err := yaml.Unmarshal(fileByte, &metadata); err != nil {
+	//		return nil, nil, nil, err
+	//	}
 
 	default:
 		return nil, nil, nil, errors.New("unsupported file type")

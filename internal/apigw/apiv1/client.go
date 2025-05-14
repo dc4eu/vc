@@ -5,6 +5,7 @@ import (
 	"vc/internal/apigw/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/trace"
 	"vc/pkg/vcclient"
@@ -24,6 +25,9 @@ type Client struct {
 	issuerMetadata             *openid4vci.CredentialIssuerMetadataParameters
 	issuerMetadataSigningKey   any
 	issuerMetadataSigningChain []string
+	oauth2Metadata             *oauth2.AuthorizationServerMetadata
+	oauth2MetadataSigningKey   any
+	oauth2MetadataSigningChain []string
 }
 
 // New creates a new instance of the public api
@@ -37,6 +41,11 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 
 	var err error
 	c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain, err = c.cfg.LoadIssuerMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	c.oauth2Metadata, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain, err = c.cfg.LoadOAuth2Metadata(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ common:
     addr: jaeger:4318
     type: jaeger
     #timeout: 10
-  credential_offer_type: "credential_offer_uri"
+  credential_offer_type: "credential_offer" # fix, use the other instead
   qr:
     recovery_level: 2
     size: 256
@@ -18,7 +18,7 @@ common:
       - "kafka1:9092"
 
 credential_offer:
-  type: "credential_offer_uri"
+  type: "credential_offer"
   issuer_url: "http://vc_dev_issuer:8080"
 
 
@@ -108,6 +108,11 @@ apigw:
       test_account:
         client_type: xxx
         redirection_endpoint: https://example.com/
+    metadata:
+      path: oauth2_metadata.json
+      signing_key_path: "/pki/apigw.key"
+      signing_chain_path: "/pki/apigw.crt"
+
   api_server:
     addr: :8080
     basic_auth:

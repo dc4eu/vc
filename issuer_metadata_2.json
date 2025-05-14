@@ -3,11 +3,43 @@
   "credential_endpoint": "http://vc_dev_apigw:8080/credential",
   "display": [
     {
-      "name": "SUNET wwWallet Issuer",
+      "name": "SUNET dev Issuer (vc project)",
       "locale": "en-US"
     }
   ],
   "credential_configurations_supported": {
+    "DiplomaCredential": {
+      "scope": "diploma",
+      "vct": "DiplomaCredential",
+      "format": "vc+sd-jwt",
+      "display": [
+        {
+          "name": "Bachelor Diploma - SD-JWT VC",
+          "background_image": {
+            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
+          },
+          "logo": {
+            "uri": "http://vc_dev_apigw:8080/images/diploma-logo.png"
+          },
+          "background_color": "#b1d3ff",
+          "text_color": "#ffffff",
+          "locale": "en-US"
+        }
+      ],
+      "cryptographic_binding_methods_supported": [
+        "ES256"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        }
+      }
+    },
     "urn:eudi:pid:1": {
       "scope": "pid:sd_jwt_vc",
       "vct": "urn:eudi:pid:1",

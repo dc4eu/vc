@@ -432,6 +432,18 @@ func (s *Service) endpointOIDCMetadata(ctx context.Context, c *gin.Context) (any
 	return reply, nil
 }
 
+func (s *Service) endpointOAuth2Metadata(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointMetadata")
+	defer span.End()
+
+	reply, err := s.apiv1.OAuth2Metadata(ctx)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return reply, nil
+}
+
 //func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
 //	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")
 //	defer span.End()

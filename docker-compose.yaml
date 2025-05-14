@@ -8,6 +8,7 @@ services:
       -  ./developer_tools/pki/:/pki:ro
       - ./config.yaml:/config.yaml:ro
       - ./issuer_metadata_2.json:/issuer_metadata.json:ro
+      - ./oauth2_metadata.json:/oauth2_metadata.json:ro
       - /var/log/sunet:/var/log/sunet
       - ./pkg/openid4vci/testdata/metadata_response.golden:/metadata.golden:ro
     depends_on:

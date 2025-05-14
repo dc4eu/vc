@@ -70,7 +70,6 @@ EOF
 
     openssl req -new -sha256 -nodes -out ${service_name}.csr -newkey rsa:2048 -keyout ${service_name}.key -config ${service_name}.conf
     openssl x509 -req -in ${service_name}.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out ${service_name}.crt -days 730 -sha256 -extfile ${service_name}.ext
-    cat ${service_name}.key ${service_name}.crt rootCA.crt > ${service_name}.pem
 
     # remove any generated config files
     if [ $conf_generated -eq 1 ]; then

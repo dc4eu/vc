@@ -60,6 +60,9 @@ func (c *CredentialIssuerMetadataParameters) Sign(signingMethod jwt.SigningMetho
 		"x5c": x5c,
 	}
 
+	// ensure that signed_metadata is empty
+	c.SignedMetadata = ""
+
 	body, err := c.Marshal()
 	if err != nil {
 		return nil, err

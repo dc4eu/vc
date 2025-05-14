@@ -445,7 +445,7 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 
 // checkVPTokenIntegrity verifies the signature of the outer JWT (vp_token jws).
 func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
-	parsedToken, err := jwt.Parse(vp.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.Parse(vp.RawJWSPartOfToken, func(token *jwt.Token) (any, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vp_token signing alg: %s\n", alg)
 		//TODO(mk): find and extract holderPublicKey from the real source

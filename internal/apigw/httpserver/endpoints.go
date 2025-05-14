@@ -382,23 +382,6 @@ func (s *Service) endpointOIDCCredential(ctx context.Context, c *gin.Context) (a
 	return reply, nil
 }
 
-func (s *Service) endpointOIDCBatchCredential(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointBatchCredential")
-	defer span.End()
-
-	request := &openid4vci.BatchCredentialRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.OIDCBatchCredential(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoint
 func (s *Service) endpointOIDCDeferredCredential(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointDeferredCredential")

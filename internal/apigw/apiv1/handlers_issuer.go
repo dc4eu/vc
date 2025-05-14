@@ -5,6 +5,7 @@ import (
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/openid4vci"
 
+	"github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -51,11 +52,6 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	return response, nil
 }
 
-// OIDCBatchCredential https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID1.html#name-batch-credential-endpoint
-func (c *Client) OIDCBatchCredential(ctx context.Context, req *openid4vci.BatchCredentialRequest) (*openid4vci.BatchCredentialResponse, error) {
-	return nil, nil
-}
-
 // OIDCDeferredCredential https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoin
 func (c *Client) OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.CredentialResponse, error) {
 	// run the same code as OIDCCredential
@@ -83,7 +79,12 @@ func (c *Client) OIDCNotification(ctx context.Context, req *openid4vci.Notificat
 func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error) {
 	c.log.Debug("metadata request")
 
-	return c.issuerMetadata, nil
+	signedMetadata, err := c.issuerMetadata.Sign(jwt.SigningMethodRS256, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
+	if err != nil {
+		return nil, err
+	}
+
+	return signedMetadata, nil
 }
 
 // RevokeRequest is the request for GenericRevoke

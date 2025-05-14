@@ -1,0 +1,166 @@
+{
+  "credential_issuer": "http://vc_dev_apigw:8080",
+  "credential_endpoint": "http://vc_dev_apigw:8080/credential",
+  "display": [
+    {
+      "name": "SUNET wwWallet Issuer",
+      "locale": "en-US"
+    }
+  ],
+  "credential_configurations_supported": {
+    "urn:eudi:pid:1": {
+      "scope": "pid:sd_jwt_vc",
+      "vct": "urn:eudi:pid:1",
+      "display": [
+        {
+          "name": "PID SD-JWT VC",
+          "description": "Person Identification Data",
+          "background_image": {
+            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
+          },
+          "background_color": "#1b263b",
+          "text_color": "#FFFFFF",
+          "locale": "en-US"
+        }
+      ],
+      "format": "vc+sd-jwt",
+      "cryptographic_binding_methods_supported": [
+        "ES256"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        }
+      }
+    },
+    "eu.europa.ec.eudi.pid.1": {
+      "scope": "pid:mso_mdoc",
+      "doctype": "eu.europa.ec.eudi.pid.1",
+      "display": [
+        {
+          "name": "PID - MDOC",
+          "description": "Person Identification Data",
+          "background_image": {
+            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
+          },
+          "background_color": "#4CC3DD",
+          "text_color": "#000000",
+          "locale": "en-US"
+        }
+      ],
+      "format": "mso_mdoc",
+      "cryptographic_binding_methods_supported": [
+        "ES256"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        }
+      }
+    },
+    "urn:credential:diploma": {
+      "scope": "diploma",
+      "vct": "urn:credential:diploma",
+      "format": "vc+sd-jwt",
+      "display": [
+        {
+          "name": "Bachelor Diploma - SD-JWT VC",
+          "background_image": {
+            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
+          },
+          "logo": {
+            "uri": "http://vc_dev_apigw:8080/images/diploma-logo.png"
+          },
+          "background_color": "#b1d3ff",
+          "text_color": "#ffffff",
+          "locale": "en-US"
+        }
+      ],
+      "cryptographic_binding_methods_supported": [
+        "ES256"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        }
+      }
+    },
+    "urn:credential:ehic": {
+      "scope": "ehic",
+      "vct": "urn:credential:ehic",
+      "format": "vc+sd-jwt",
+      "display": [
+        {
+          "name": "EHIC - SD-JWT VC",
+          "description": "European Health Insurance Card",
+          "background_image": {
+            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
+          },
+          "background_color": "#1b263b",
+          "text_color": "#FFFFFF",
+          "locale": "en-US"
+        }
+      ],
+      "cryptographic_binding_methods_supported": [
+        "ES256"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        }
+      }
+    },
+    "urn:eu.europa.ec.eudi:por:1": {
+      "scope": "por:sd_jwt_vc",
+      "vct": "urn:eu.europa.ec.eudi:por:1",
+      "display": [
+        {
+          "name": "POR - SD-JWT VC",
+          "description": "Power of Representation",
+          "background_image": {
+            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
+          },
+          "background_color": "#c3b25d",
+          "text_color": "#363531",
+          "locale": "en-US"
+        }
+      ],
+      "format": "vc+sd-jwt",
+      "cryptographic_binding_methods_supported": [
+        "ES256"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        }
+      }
+    }
+  },
+  "mdoc_iacas_uri": "http://vc_dev_apigw:8080/mdoc-iacas",
+  "signed_metadata": "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsIng1YyI6WyJNSUlDTGpDQ0FkV2dBd0lCQWdJVWRnRVNiVEc5bnhTWFZJbUZkRkhIQUhHSjlSNHdDZ1lJS29aSXpqMEVBd0l3SURFUk1BOEdBMVVFQXd3SWQzZFhZV3hzWlhReEN6QUpCZ05WQkFZVEFrZFNNQjRYRFRJMU1ETXlNREE0TlRJME4xb1hEVE0xTURNeE9EQTROVEkwTjFvd01ERWhNQjhHQTFVRUF3d1laR1Z0YnkxcGMzTjFaWEl1ZDNkM1lXeHNaWFF1YjNKbk1Rc3dDUVlEVlFRR0V3SkhVakJaTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEEwSUFCT3NlU20xY1VSWnJpbkdNMGFFZHNMM21ERzlvbTBtUTFFSmR0bG1VQkl5RWxvcTZsdVlqNkdvQnA5VnpacDYwcGpZWSt5dEpiV2tiQURJVXNteXFibitqZ2R3d2dka3dId1lEVlIwakJCZ3dGb0FVZkhqNGJ6eXZvNHVuSHlzR3QrcE5hMFhzQmFJd0NRWURWUjBUQkFJd0FEQUxCZ05WSFE4RUJBTUNCYUF3RXdZRFZSMGxCQXd3Q2dZSUt3WUJCUVVIQXdFd2FnWURWUjBSQkdNd1lZSVlkMkZzYkdWMExXVnVkR1Z5Y0hKcGMyVXRhWE56ZFdWeWdoTnBjM04xWlhJdWQzZDNZV3hzWlhRdWIzSm5naGhrWlcxdkxXbHpjM1ZsY2k1M2QzZGhiR3hsZEM1dmNtZUNGbkZoTFdsemMzVmxjaTUzZDNkaGJHeGxkQzV2Y21jd0hRWURWUjBPQkJZRUZLYWZhODdEUWJyWFlZdUplN1lvQ29Kb0dLL0xNQW9HQ0NxR1NNNDlCQU1DQTBjQU1FUUNJQjRXM1NiMG5LYm5iOFk3YUlaNG5qSkc3bEdTbTF4V09XUU1yQ3dneDlONUFpQmxJYTRFQVdmOU5pNFVNZVdGU1dJMktPQzVwUnlPQUVCU0dhdzlTK1BUd0E9PSJdfQ.eyJjcmVkZW50aWFsX2lzc3VlciI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UiLCJjcmVkZW50aWFsX2VuZHBvaW50IjoiaHR0cHM6Ly9pc3N1ZXIuZGV2LndhbGxldC5zdW5ldC5zZS9vcGVuaWQ0dmNpL2NyZWRlbnRpYWwiLCJkaXNwbGF5IjpbeyJuYW1lIjoiU1VORVQgd3dXYWxsZXQgSXNzdWVyIiwibG9jYWxlIjoiZW4tVVMifV0sImNyZWRlbnRpYWxfY29uZmlndXJhdGlvbnNfc3VwcG9ydGVkIjp7InVybjpldWRpOnBpZDoxIjp7InNjb3BlIjoicGlkOnNkX2p3dF92YyIsInZjdCI6InVybjpldWRpOnBpZDoxIiwiZGlzcGxheSI6W3sibmFtZSI6IlBJRCBTRC1KV1QgVkMiLCJkZXNjcmlwdGlvbiI6IlBlcnNvbiBJZGVudGlmaWNhdGlvbiBEYXRhIiwiYmFja2dyb3VuZF9pbWFnZSI6eyJ1cmkiOiJodHRwczovL2lzc3Vlci5kZXYud2FsbGV0LnN1bmV0LnNlL2ltYWdlcy9iYWNrZ3JvdW5kLWltYWdlLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzFiMjYzYiIsInRleHRfY29sb3IiOiIjRkZGRkZGIiwibG9jYWxlIjoiZW4tVVMifV0sImZvcm1hdCI6InZjK3NkLWp3dCIsImNyeXB0b2dyYXBoaWNfYmluZGluZ19tZXRob2RzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJjcmVkZW50aWFsX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXSwicHJvb2ZfdHlwZXNfc3VwcG9ydGVkIjp7Imp3dCI6eyJwcm9vZl9zaWduaW5nX2FsZ192YWx1ZXNfc3VwcG9ydGVkIjpbIkVTMjU2Il19fX0sImV1LmV1cm9wYS5lYy5ldWRpLnBpZC4xIjp7InNjb3BlIjoicGlkOm1zb19tZG9jIiwiZG9jdHlwZSI6ImV1LmV1cm9wYS5lYy5ldWRpLnBpZC4xIiwiZGlzcGxheSI6W3sibmFtZSI6IlBJRCAtIE1ET0MiLCJkZXNjcmlwdGlvbiI6IlBlcnNvbiBJZGVudGlmaWNhdGlvbiBEYXRhIiwiYmFja2dyb3VuZF9pbWFnZSI6eyJ1cmkiOiJodHRwczovL2lzc3Vlci5kZXYud2FsbGV0LnN1bmV0LnNlL2ltYWdlcy9iYWNrZ3JvdW5kLWltYWdlLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzRDQzNERCIsInRleHRfY29sb3IiOiIjMDAwMDAwIiwibG9jYWxlIjoiZW4tVVMifV0sImZvcm1hdCI6Im1zb19tZG9jIiwiY3J5cHRvZ3JhcGhpY19iaW5kaW5nX21ldGhvZHNfc3VwcG9ydGVkIjpbIkVTMjU2Il0sImNyZWRlbnRpYWxfc2lnbmluZ19hbGdfdmFsdWVzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJwcm9vZl90eXBlc19zdXBwb3J0ZWQiOnsiand0Ijp7InByb29mX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXX19fSwidXJuOmNyZWRlbnRpYWw6ZGlwbG9tYSI6eyJzY29wZSI6ImRpcGxvbWEiLCJ2Y3QiOiJ1cm46Y3JlZGVudGlhbDpkaXBsb21hIiwiZm9ybWF0IjoidmMrc2Qtand0IiwiZGlzcGxheSI6W3sibmFtZSI6IkJhY2hlbG9yIERpcGxvbWEgLSBTRC1KV1QgVkMiLCJiYWNrZ3JvdW5kX2ltYWdlIjp7InVyaSI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UvaW1hZ2VzL2JhY2tncm91bmQtaW1hZ2UucG5nIn0sImxvZ28iOnsidXJpIjoiaHR0cHM6Ly9pc3N1ZXIuZGV2LndhbGxldC5zdW5ldC5zZS9pbWFnZXMvZGlwbG9tYS1sb2dvLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2IxZDNmZiIsInRleHRfY29sb3IiOiIjZmZmZmZmIiwibG9jYWxlIjoiZW4tVVMifV0sImNyeXB0b2dyYXBoaWNfYmluZGluZ19tZXRob2RzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJjcmVkZW50aWFsX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXSwicHJvb2ZfdHlwZXNfc3VwcG9ydGVkIjp7Imp3dCI6eyJwcm9vZl9zaWduaW5nX2FsZ192YWx1ZXNfc3VwcG9ydGVkIjpbIkVTMjU2Il19fX0sInVybjpjcmVkZW50aWFsOmVoaWMiOnsic2NvcGUiOiJlaGljIiwidmN0IjoidXJuOmNyZWRlbnRpYWw6ZWhpYyIsImZvcm1hdCI6InZjK3NkLWp3dCIsImRpc3BsYXkiOlt7Im5hbWUiOiJFSElDIC0gU0QtSldUIFZDIiwiZGVzY3JpcHRpb24iOiJFdXJvcGVhbiBIZWFsdGggSW5zdXJhbmNlIENhcmQiLCJiYWNrZ3JvdW5kX2ltYWdlIjp7InVyaSI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UvaW1hZ2VzL2JhY2tncm91bmQtaW1hZ2UucG5nIn0sImJhY2tncm91bmRfY29sb3IiOiIjMWIyNjNiIiwidGV4dF9jb2xvciI6IiNGRkZGRkYiLCJsb2NhbGUiOiJlbi1VUyJ9XSwiY3J5cHRvZ3JhcGhpY19iaW5kaW5nX21ldGhvZHNfc3VwcG9ydGVkIjpbIkVTMjU2Il0sImNyZWRlbnRpYWxfc2lnbmluZ19hbGdfdmFsdWVzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJwcm9vZl90eXBlc19zdXBwb3J0ZWQiOnsiand0Ijp7InByb29mX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXX19fSwidXJuOmV1LmV1cm9wYS5lYy5ldWRpOnBvcjoxIjp7InNjb3BlIjoicG9yOnNkX2p3dF92YyIsInZjdCI6InVybjpldS5ldXJvcGEuZWMuZXVkaTpwb3I6MSIsImRpc3BsYXkiOlt7Im5hbWUiOiJQT1IgLSBTRC1KV1QgVkMiLCJkZXNjcmlwdGlvbiI6IlBvd2VyIG9mIFJlcHJlc2VudGF0aW9uIiwiYmFja2dyb3VuZF9pbWFnZSI6eyJ1cmkiOiJodHRwczovL2lzc3Vlci5kZXYud2FsbGV0LnN1bmV0LnNlL2ltYWdlcy9iYWNrZ3JvdW5kLWltYWdlLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2MzYjI1ZCIsInRleHRfY29sb3IiOiIjMzYzNTMxIiwibG9jYWxlIjoiZW4tVVMifV0sImZvcm1hdCI6InZjK3NkLWp3dCIsImNyeXB0b2dyYXBoaWNfYmluZGluZ19tZXRob2RzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJjcmVkZW50aWFsX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXSwicHJvb2ZfdHlwZXNfc3VwcG9ydGVkIjp7Imp3dCI6eyJwcm9vZl9zaWduaW5nX2FsZ192YWx1ZXNfc3VwcG9ydGVkIjpbIkVTMjU2Il19fX19LCJtZG9jX2lhY2FzX3VyaSI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UvbWRvYy1pYWNhcyIsImlhdCI6MTc0NzA1NTQxNCwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZGV2LndhbGxldC5zdW5ldC5zZSIsInN1YiI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UifQ.lScrOAAR4J6GEc3oSK8AUYLRETWKZksQnJT-Dk4Pf82ZsYdnKxARRCJmgCPjr0-UvJFEsWDWbAxRWtBN74oSaA"
+}

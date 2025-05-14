@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"vc/pkg/logger"
 	"vc/pkg/openid4vci"
+	"vc/pkg/pki"
 
 	"gopkg.in/yaml.v2"
 )
@@ -127,11 +128,6 @@ type Issuer struct {
 	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
 }
 
-type IssuerMetadata struct {
-	// MetadataPath path to the metadata file, OpenID
-	MetadataPath string `yaml:"metadata_path" validate:"required"`
-}
-
 // Registry holds the registry configuration
 type Registry struct {
 	APIServer  APIServer  `yaml:"api_server" validate:"required"`
@@ -169,10 +165,17 @@ type BasicAuth struct {
 	Enabled bool              `yaml:"enabled"`
 }
 
+type IssuerMetadata struct {
+	Path             string `yaml:"path" validate:"required"`
+	SigningKeyPath   string `yaml:"signing_key_path" validate:"required"`
+	SigningChainPath string `yaml:"signing_chain_path" validate:"required"`
+}
+
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer   APIServer   `yaml:"api_server" validate:"required"`
-	OauthServer OAuthServer `yaml:"oauth_server" validate:"omitempty"`
+	APIServer      APIServer      `yaml:"api_server" validate:"required"`
+	OauthServer    OAuthServer    `yaml:"oauth_server" validate:"omitempty"`
+	IssuerMetadata IssuerMetadata `yaml:"issuer_metadata" validate:"omitempty"`
 }
 
 // Portal holds the persistent storage configuration
@@ -256,18 +259,17 @@ type AuthenticSource struct {
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common             Common                     `yaml:"common"`
-	AuthenticSources   map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
-	APIGW              APIGW                      `yaml:"apigw" validate:"omitempty"`
-	Issuer             Issuer                     `yaml:"issuer" validate:"omitempty"`
-	Verifier           Verifier                   `yaml:"verifier" validate:"omitempty"`
-	Datastore          Datastore                  `yaml:"datastore" validate:"omitempty"`
-	Registry           Registry                   `yaml:"registry" validate:"omitempty"`
-	Persistent         Persistent                 `yaml:"persistent" validate:"omitempty"`
-	MockAS             MockAS                     `yaml:"mock_as" validate:"omitempty"`
-	UI                 UI                         `yaml:"ui" validate:"omitempty"`
-	Portal             Portal                     `yaml:"portal" validate:"omitempty"`
-	IssuerMetadataPath string                     `yaml:"issuer_metadata_path" validate:"required"`
+	Common           Common                     `yaml:"common"`
+	AuthenticSources map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
+	APIGW            APIGW                      `yaml:"apigw" validate:"omitempty"`
+	Issuer           Issuer                     `yaml:"issuer" validate:"omitempty"`
+	Verifier         Verifier                   `yaml:"verifier" validate:"omitempty"`
+	Datastore        Datastore                  `yaml:"datastore" validate:"omitempty"`
+	Registry         Registry                   `yaml:"registry" validate:"omitempty"`
+	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
+	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
+	UI               UI                         `yaml:"ui" validate:"omitempty"`
+	Portal           Portal                     `yaml:"portal" validate:"omitempty"`
 }
 
 // IsAsyncEnabled checks if the async is enabled
@@ -280,28 +282,43 @@ func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
 }
 
 // IssuerMetadata loads the issuing metadata from
-func (cfg *Cfg) IssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error) {
-	fileByte, err := os.ReadFile(cfg.IssuerMetadataPath)
+func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, any, []string, error) {
+	fileByte, err := os.ReadFile(cfg.APIGW.IssuerMetadata.Path)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	metadata := &openid4vci.CredentialIssuerMetadataParameters{}
 
-	switch filepath.Ext(cfg.IssuerMetadataPath) {
+	switch filepath.Ext(cfg.APIGW.IssuerMetadata.Path) {
 	case ".json":
 		if err := json.Unmarshal(fileByte, &metadata); err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 
 	case "yaml", ".yml":
 		if err := yaml.Unmarshal(fileByte, &metadata); err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 
 	default:
-		return nil, errors.New("unsupported file type")
+		return nil, nil, nil, errors.New("unsupported file type")
 	}
 
-	return metadata, nil
+	privateKey, err := pki.ParseKeyFromFile(cfg.APIGW.IssuerMetadata.SigningKeyPath)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	_, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	chainBase64Encoded := []string{}
+	for _, c := range chain {
+		chainBase64Encoded = append(chainBase64Encoded, pki.Base64EncodeCertificate(c))
+	}
+
+	return metadata, privateKey, chainBase64Encoded, nil
 }

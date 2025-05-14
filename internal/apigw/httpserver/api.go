@@ -40,7 +40,6 @@ type Apiv1 interface {
 	OIDCToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error)
 	OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, error)
 	OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error)
-	OIDCBatchCredential(ctx context.Context, req *openid4vci.BatchCredentialRequest) (*openid4vci.BatchCredentialResponse, error)
 	OIDCredentialOfferURI(ctx context.Context, req *openid4vci.CredentialOfferURIRequest) (*openid4vci.CredentialOfferParameters, error)
 	OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.CredentialResponse, error)
 	OIDCNotification(ctx context.Context, req *openid4vci.NotificationRequest) error

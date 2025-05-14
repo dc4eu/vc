@@ -56,7 +56,7 @@ authentic_sources:
       PDA1:
         profile: "SD-JWT"
 
-issuer_metadata_path: "/issuer_metadata.json"
+
 
 issuer:
   identifier: "SUNET_v1"
@@ -117,6 +117,10 @@ apigw:
         client_2: "secret_2"
         client_3: "secret_3"
         client_4: "secret_4"
+  issuer_metadata:
+    path: "/issuer_metadata.json"
+    signing_key_path: "/pki/apigw.key"
+    signing_chain_path: "/pki/apigw.crt"
 
 mock_as:
   api_server:

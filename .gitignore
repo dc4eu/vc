@@ -11,3 +11,5 @@ developer_tools/*.csr
 developer_tools/*.cnf
 .env
 .~lock.*.csv#
+developer_tools/pki/*
+!developer_tools/pki/create_pki.sh

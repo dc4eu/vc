@@ -2,7 +2,6 @@ credential_issuer: http://vc_dev_apigw:8080
 credential_endpoint: http://vc_dev_apigw:8080/credential
 authorization_servers:
   - http://vc_dev_apigw:8080
-batch_credential_endpoint: http://vc_dev_apigw:8080/batch_credential
 deferred_credential_endpoint: http://vc_dev_apigw:8080/deferred_credential
 notification_endpoint: "http://vc_dev_apigw:8080/notification"
 credential_response_encryption:

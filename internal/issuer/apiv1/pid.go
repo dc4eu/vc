@@ -39,7 +39,7 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_i
 		return "", err
 	}
 
-	vct := "PID"
+	vct := "PIDCredential"
 
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()

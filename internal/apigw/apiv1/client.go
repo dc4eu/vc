@@ -16,12 +16,14 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg             *model.Cfg
-	db              *db.Service
-	log             *logger.Log
-	tracer          *trace.Tracer
-	datastoreClient *vcclient.Client
-	issuerMetadata  *openid4vci.CredentialIssuerMetadataParameters
+	cfg                        *model.Cfg
+	db                         *db.Service
+	log                        *logger.Log
+	tracer                     *trace.Tracer
+	datastoreClient            *vcclient.Client
+	issuerMetadata             *openid4vci.CredentialIssuerMetadataParameters
+	issuerMetadataSigningKey   any
+	issuerMetadataSigningChain []string
 }
 
 // New creates a new instance of the public api
@@ -34,7 +36,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	}
 
 	var err error
-	c.issuerMetadata, err = c.cfg.IssuerMetadata(ctx)
+	c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain, err = c.cfg.LoadIssuerMetadata(ctx)
 	if err != nil {
 		return nil, err
 	}

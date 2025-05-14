@@ -4,8 +4,10 @@ import (
 	"context"
 	"time"
 	"vc/pkg/model"
+	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -52,4 +54,16 @@ func (c *Client) OIDCToken(ctx context.Context, req *openid4vci.TokenRequest) (*
 	// Check if Code have been used
 	// Check if Code is expired
 	return nil, nil
+}
+
+func (c *Client) OAuth2Metadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error) {
+	c.log.Debug("metadata request")
+
+	signedMetadata, err := c.oauth2Metadata.Sign(jwt.SigningMethodRS256, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain)
+	if err != nil {
+		return nil, err
+	}
+
+	return signedMetadata, nil
+
 }

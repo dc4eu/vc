@@ -6,6 +6,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
+	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/vcclient"
 )
@@ -44,6 +45,8 @@ type Apiv1 interface {
 	OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.CredentialResponse, error)
 	OIDCNotification(ctx context.Context, req *openid4vci.NotificationRequest) error
 	OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error)
+
+	OAuth2Metadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error)
 
 	//Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 

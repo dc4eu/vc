@@ -71,6 +71,8 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		credentialConfigurationID = "ELMCredential"
 	case "PID":
 		credentialConfigurationID = "PIDCredential"
+	default:
+		return fmt.Errorf("unsupported document type %s", req.Meta.DocumentType)
 	}
 
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{

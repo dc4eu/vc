@@ -157,20 +157,10 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
-	//TODO: anpassa P_D baserat på vpSession.EncryptDirectPostJWT
-	switch vpSession.DocumentType {
-	case openid4vp.DocumentTypeDiploma:
-		vpSession.PresentationDefinition = DiplomaPresentationDefinition()
-	case openid4vp.DocumentTypeEHIC:
-		vpSession.PresentationDefinition = EHICPresentationDefinition()
-	case openid4vp.DocumentTypeELM:
-		vpSession.PresentationDefinition = ELMPresentationDefinition()
-	case openid4vp.DocumentTypePDA1:
-		vpSession.PresentationDefinition = PDA1PresentationDefinition()
-	case openid4vp.DocumentTypePID:
-		vpSession.PresentationDefinition = PIDPresentationDefinition()
-	default:
-		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
+	if pd, err := buildPresentationDefinitionFor(vpSession.DocumentType); err != nil {
+		return "", err
+	} else {
+		vpSession.PresentationDefinition = pd
 	}
 
 	schema := "http://"
@@ -179,7 +169,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	}
 	responseURI := fmt.Sprintf("%s%s%s/callback/direct-post-jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, vpSession.SessionID, vpSession.CallbackID)
 
-	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
+	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey), vpSession.EncryptDirectPostJWT)
 	if err != nil {
 		c.log.Error(err, "Failed to build client metadata")
 		return "", err

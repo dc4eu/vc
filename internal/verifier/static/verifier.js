@@ -253,7 +253,7 @@ async function refreshVerificationResult() {
         const claimsDisplay = getElementById("claimsDisplay");
         if (data && data.data && Object.keys(data.data).length > 0) {
             // the verifier has received some response from the wallet
-            const verificationResultValue = data.verification_meta?.verification_result || null;
+            const verificationResultValue = data?.data?.verification_meta?.verification_result || null;
             if (verificationResultValue !== null) {
                 getElementById("verificationResultSpan").textContent = verificationResultValue;
                 if (verificationResultValue === "verified") {

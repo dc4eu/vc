@@ -289,23 +289,23 @@ func (c *Client) nextSequence() int64 {
 	return atomic.AddInt64(&c.currentSequence, 1)
 }
 
-func (c *Client) SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) error {
+func (c *Client) SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) (*openid4vp.VPInteractionSession, error) {
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = validateCallbackPreconditions(vpSession, callbackID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	vpSession.AuthorisationResponseDebugData = request
 	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return vpSession, nil
 }
 
 func validateCallbackPreconditions(vpSession *openid4vp.VPInteractionSession, callbackID string) error {

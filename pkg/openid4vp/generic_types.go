@@ -36,8 +36,32 @@ type QRReply struct {
 	SessionID string `json:"session_id" bson:"session_id" validate:"required"`
 }
 
+//TODO: fortsätt med utkast för mer avancerat val av vad som ska verifiera
+//var presentationRequestTypes = map[string]*PresentationRequestType{
+//	"WWWPID":       {Code: "WWWPID", Description: "WWW Personal Identification Data"},
+//	"VCPID":        {Code: "VCPID", Description: "VC Personal Identification Data"},
+//	"WWWEHIC":      {Code: "WWWEHIC", Description: "WWW European Health Insurance Card"},
+//	"VCEHIC":       {Code: "VCEHIC", Description: "VC European Health Insurance Card"},
+//	"VCPID+VCEHIC": {Code: "VCPID+VCEHIC", Description: "Both VC Personal Identification Data and VC European Health Insurance Card"},
+//	"ELM":          {Code: "ELM", Description: "ELM for EMREX"},
+//}
+//
+//func LookupPresentationRequestTypeFrom(code string) (*PresentationRequestType, bool) {
+//	prt, ok := presentationRequestTypes[code]
+//	return prt, ok
+//}
+//
+//type PresentationRequestType struct {
+//	Code        string `json:"code" bson:"code" validate:"required"`
+//	Description string `json:"description" bson:"description" validate:"required"`
+//}
+
 type QRRequest struct {
-	DocumentType string `json:"document_type" bson:"document_type" validate:"required,oneof=Diploma EHIC ELM PDA1 PID"`
+	// Deprecated: to be removed after Ladok has adapted, use ??? instead
+	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"omitempty,oneof=Diploma EHIC ELM PDA1 PID"`
+
+	//PresentationRequestTypeCode string `json:"presentation_request_type_code,omitempty" bson:"presentation_request_type_code" validate:"omitempty,oneof=WWWPID VCPID WWWEHIC VCEHIC VCPID+VCEHIC"`
+	EncryptDirectPostJWT bool `json:"encrypt_direct_post_jwt,omitempty" bson:"encrypt_direct_post_jwt" validate:"omitempty"`
 }
 
 type KeyType string
@@ -84,6 +108,7 @@ type VPInteractionSession struct {
 	CallbackID              string                  `json:"callback_id"`
 	JTI                     string                  `json:"jti"`
 	PresentationDefinition  *PresentationDefinition `json:"presentation_definition"`
+	EncryptDirectPostJWT    bool                    `json:"encrypt_direct_post_jwt"`
 
 	//TODO: Below is just for dev/test purpose and must be removed before production
 	VerifierKeyPair *KeyPair `json:"-"`

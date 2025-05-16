@@ -57,11 +57,13 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		DocumentType:   request.DocumentType,
 		Nonce:          jwthelpers.GenerateNonce(),
 		//TODO: flytta nedan till auth request hämtningen istället när wwW anpassat
-		CallbackID: jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
-		State:      uuid.NewString(),
-		JTI:        uuid.NewString(),
-		Authorized: false,
-		Status:     openid4vp.InteractionStatusQRDisplayed,
+		CallbackID:           jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
+		State:                uuid.NewString(),
+		JTI:                  uuid.NewString(),
+		Authorized:           false,
+		Status:               openid4vp.InteractionStatusQRDisplayed,
+		EncryptDirectPostJWT: request.EncryptDirectPostJWT,
+
 		//TODO: nedan ska inte vara här men läggs här tillsvidare
 		VerifierKeyPair: c.verifierKeyPair,
 		//VerifierKeyPair: &openid4vp.KeyPair{
@@ -155,6 +157,7 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
+	//TODO: anpassa P_D baserat på vpSession.EncryptDirectPostJWT
 	switch vpSession.DocumentType {
 	case openid4vp.DocumentTypeDiploma:
 		vpSession.PresentationDefinition = DiplomaPresentationDefinition()
@@ -332,8 +335,9 @@ func validateCallbackPreconditions(vpSession *openid4vp.VPInteractionSession, ca
 }
 
 type VerificationResult struct {
-	Status string `json:"interaction_status,omitempty"`
-	Data   any    `json:"data,omitempty"`
+	Status      string `json:"interaction_status,omitempty"`
+	VPSessionID string `json:"vp_session_id,omitempty"`
+	Data        any    `json:"data,omitempty"`
 }
 
 func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*VerificationResult, error) {
@@ -347,13 +351,16 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 	if vpSession == nil || vpSession.Status == openid4vp.InteractionStatusAuthorizationResponseReceived {
 		//No need to look for a record if the qr code just display or scanned, since no response from the wallet has been recieved yet
 		verificationRecord, _ := c.db.VerificationRecordColl.Read(ctx, sessionID)
-		//TODO: filter what data in verificationRecord to expose (if not nil or any error)
+		if verificationRecord != nil {
+			//TODO: filter what data in verificationRecord to not expose (if not nil or any error)
+		}
 		data = verificationRecord
 	}
 
 	return &VerificationResult{
-		Status: string(status),
-		Data:   data,
+		Status:      string(status),
+		VPSessionID: sessionID,
+		Data:        data,
 	}, nil
 }
 

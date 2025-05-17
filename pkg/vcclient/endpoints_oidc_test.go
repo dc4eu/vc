@@ -13,13 +13,13 @@ import (
 func TestAuthorize(t *testing.T) {
 	tts := []struct {
 		name         string
-		req          *openid4vci.AuthorizationRequest
+		req          *openid4vci.PARRequest
 		wantResponse *openid4vci.AuthorizationResponse
 		wantHTTP     *http.Response
 	}{
 		{
 			name: "success",
-			req: &openid4vci.AuthorizationRequest{
+			req: &openid4vci.PARRequest{
 				ResponseType:         "",
 				ClientID:             "",
 				RedirectURI:          "",
@@ -74,13 +74,13 @@ func TestAuthorize(t *testing.T) {
 func TestPar(t *testing.T) {
 	tts := []struct {
 		name         string
-		req          *openid4vci.AuthorizationRequest
+		req          *openid4vci.PARRequest
 		wantResponse *openid4vci.AuthorizationResponse
 		wantHTTP     *http.Response
 	}{
 		{
 			name: "success",
-			req: &openid4vci.AuthorizationRequest{
+			req: &openid4vci.PARRequest{
 				ResponseType:         "",
 				ClientID:             "",
 				RedirectURI:          "",

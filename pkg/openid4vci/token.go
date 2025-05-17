@@ -1,43 +1,42 @@
 package openid4vci
 
-import "fmt"
-
 // TokenRequest https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-13.html#name-token-request
 type TokenRequest struct {
+	DPOP string `header:"DPoP" binding:"required" validate:"required"`
 	// Pre-Authorized Code Flow
 	// PreAuthorizedCode The code representing the authorization to obtain Credentials of a certain type. This parameter MUST be present if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
-	PreAuthorizedCode string `json:"pre_authorized_code,omitempty" validate:"required_with=GrantType"`
+	//PreAuthorizedCode string `json:"pre_authorized_code,omitempty" validate:"required_with=GrantType"`
 
-	// TXCode OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
-	TXCode string `json:"tx_code" validate:"required_unless=GrantType urn:ietf:params:oauth:grant-type:pre-authorized_code"`
+	//// TXCode OPTIONAL. String value containing a Transaction Code. This value MUST be present if a tx_code object was present in the Credential Offer (including if the object was empty). This parameter MUST only be used if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
+	//TXCode string `json:"tx_code" validate:"required_unless=GrantType urn:ietf:params:oauth:grant-type:pre-authorized_code"`
 
-	// Authorization Code Flow
-	// GrantType REQUIRED.  Value MUST be set to "authorization_code".
-	GrantType string `json:"grant_type"`
+	//// Authorization Code Flow
+	//// GrantType REQUIRED.  Value MUST be set to "authorization_code".
+	//GrantType string `json:"grant_type"`
 
-	// Code REQUIRED.  The authorization code received from the authorization server.
-	Code string `json:"code" validate:"required"`
+	//// Code REQUIRED.  The authorization code received from the authorization server.
+	//Code string `json:"code" validate:"required"`
 
-	// RedirectURI	REQUIRED, if the "redirect_uri" parameter was included in the authorization request as described in Section 4.1.1, and their values MUST be identical.
-	RedirectURI string `json:"redirect_uri"`
+	//// RedirectURI	REQUIRED, if the "redirect_uri" parameter was included in the authorization request as described in Section 4.1.1, and their values MUST be identical.
+	//RedirectURI string `json:"redirect_uri"`
 
-	// ClientID REQUIRED, if the client is not authenticating with the authorization server as described in Section 3.2.1.
-	ClientID string `json:"client_id"`
+	//// ClientID REQUIRED, if the client is not authenticating with the authorization server as described in Section 3.2.1.
+	//ClientID string `json:"client_id"`
 
-	// CodeVerifier OPTIONAL
-	CodeVerifier string `json:"code_verifier"`
+	//// CodeVerifier OPTIONAL
+	//CodeVerifier string `json:"code_verifier"`
 }
 
 // Validate validates the TokenRequest
-func (t *TokenRequest) Validate(req *CredentialOfferParameters) error {
-	grant, ok := req.Grants[t.PreAuthorizedCode]
-	if ok {
-		g := grant.(GrantPreAuthorizedCode)
-		fmt.Println(g.PreAuthorizedCode)
-	}
-
-	return nil
-}
+//func (t *TokenRequest) Validate(req *CredentialOfferParameters) error {
+//	grant, ok := req.Grants[t.PreAuthorizedCode]
+//	if ok {
+//		g := grant.(GrantPreAuthorizedCode)
+//		fmt.Println(g.PreAuthorizedCode)
+//	}
+//
+//	return nil
+//}
 
 // TokenResponse https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-13.html#name-successful-token-response
 type TokenResponse struct {

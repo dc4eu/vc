@@ -32,6 +32,11 @@ func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) err
 	if err := c.BindUri(v); err != nil {
 		return err
 	}
+
+	if err := c.ShouldBindHeader(v); err != nil {
+		return err
+	}
+
 	return nil
 }
 

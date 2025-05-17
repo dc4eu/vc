@@ -16,19 +16,10 @@ func (c *pidClient) MetadataClaim(vct string) ([]string, error) {
 				Name:        "PID",
 				Description: "",
 				Rendering: Rendering{
-					Simple: SimpleRendering{
-						Logo: Logo{
-							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1.png",
-							URIIntegrity: "sha256-ecf6af03924f152deb2fad59c8496750a12e376a3b2b575d53b79f22241e3d96",
-							AltText:      "PDA1 Card",
-						},
-						BackgroundColor: "#8ebeeb",
-						TextColor:       "#ffffff",
-					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/pda1Template.svg",
-							URLIntegrity: "sha256-35a9eecb4d2d8d92e42a33e7e765afc6b24c8875cf145ea1b29cde9cd2f63f5e",
+							URI:          "https://raw.githubusercontent.com/SUNET/openid4v/9af381e628cb88abe79e8a17572a165a449dcdf2/images/template-pid.svg",
+							URLIntegrity: "sha256-0def174036c9fbdc849db8c617a94e7ed574c31012e1a7157616d8f5faa79ba8",
 							Properties:   SVGTemplateProperties{},
 						},
 					},

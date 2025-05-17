@@ -302,50 +302,6 @@ func (s *Service) endpointOIDCNonce(ctx context.Context, c *gin.Context) (any, e
 	return reply, nil
 }
 
-func (s *Service) endpointOIDCAuth(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAuthPar")
-	defer span.End()
-
-	s.log.Debug("OIDCAuth endpoint")
-
-	s.log.Debug("OIDCAuth", "content-type", c.ContentType(), "body", c.Request.Body)
-
-	request := &openid4vci.AuthorizationRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		//request, err := openid4vci.BindAuthorizationRequest(c.Request.Body)
-		//if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "binding error")
-		return nil, err
-	}
-	reply, err := s.apiv1.OIDCAuth(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "OIDCAuth error")
-		return nil, err
-	}
-	s.log.Debug("OIDCAuth", "reply", reply)
-	c.Redirect(302, reply)
-	return reply, nil
-}
-
-func (s *Service) endpointOIDCToken(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointToken")
-	defer span.End()
-
-	request := &openid4vci.TokenRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	reply, err := s.apiv1.OIDCToken(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
-
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-14.html#name-sending-credential-offer-by-
 func (s *Service) endpointOIDCredentialOfferURI(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredential")
@@ -429,20 +385,11 @@ func (s *Service) endpointOIDCMetadata(ctx context.Context, c *gin.Context) (any
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+
+	c.SetAccepted("application/json")
 	return reply, nil
 }
 
-func (s *Service) endpointOAuth2Metadata(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointMetadata")
-	defer span.End()
-
-	reply, err := s.apiv1.OAuth2Metadata(ctx)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	return reply, nil
-}
 
 //func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
 //	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")

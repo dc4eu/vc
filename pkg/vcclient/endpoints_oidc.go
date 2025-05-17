@@ -14,7 +14,7 @@ type oidcHandler struct {
 	defaultContentType string
 }
 
-func (s *oidcHandler) Authorize(ctx context.Context, body *openid4vci.AuthorizationRequest) (*openid4vci.AuthorizationResponse, *http.Response, error) {
+func (s *oidcHandler) Authorize(ctx context.Context, body *openid4vci.PARRequest) (*openid4vci.AuthorizationResponse, *http.Response, error) {
 	s.log.Info("Authorize")
 
 	reply := &openid4vci.AuthorizationResponse{}
@@ -26,7 +26,7 @@ func (s *oidcHandler) Authorize(ctx context.Context, body *openid4vci.Authorizat
 	return reply, resp, nil
 }
 
-func (s *oidcHandler) Par(ctx context.Context, body *openid4vci.AuthorizationRequest) (*openid4vci.AuthorizationResponse, *http.Response, error) {
+func (s *oidcHandler) Par(ctx context.Context, body *openid4vci.PARRequest) (*openid4vci.AuthorizationResponse, *http.Response, error) {
 	s.log.Info("par")
 
 	reply := &openid4vci.AuthorizationResponse{}

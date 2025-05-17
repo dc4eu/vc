@@ -18,7 +18,6 @@ func (c *diplomaClient) MetadataClaim(vct string) ([]string, error) {
 					SVGTemplates: []SVGTemplates{
 
 						{
-
 							URI:          "https://raw.githubusercontent.com/dc4eu/vc/633940b0b00ab259af01cfbff958f1ffebf5176a/images/diplomaTemplate.svg",
 							URLIntegrity: "sha256-1acd4883826aba0318d219213bb75a9dfc858f926e93f576224412301fe3018a",
 							Properties:   SVGTemplateProperties{},

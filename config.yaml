@@ -104,10 +104,13 @@ apigw:
     trust_anchors:
       - "https://example.com/trust_anchor.pem"
   oauth_server:
-    grant:
-      test_account:
-        client_type: xxx
-        redirection_endpoint: https://example.com/
+    clients:
+      "1003":
+        type: "confidential"
+        redirect_uri: "https://dev.wallet.sunet.se"
+        scopes:
+          - "pid:sd_jwt_vc"
+          - "diploma"
     metadata:
       path: oauth2_metadata.json
       signing_key_path: "/pki/apigw.key"

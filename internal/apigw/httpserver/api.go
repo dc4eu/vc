@@ -37,8 +37,6 @@ type Apiv1 interface {
 	LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error)
 
 	// OpenID4VCI endpoints
-	OIDCAuth(ctx context.Context, req *openid4vci.AuthorizationRequest) (string, error)
-	OIDCToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error)
 	OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, error)
 	OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error)
 	OIDCredentialOfferURI(ctx context.Context, req *openid4vci.CredentialOfferURIRequest) (*openid4vci.CredentialOfferParameters, error)
@@ -46,7 +44,10 @@ type Apiv1 interface {
 	OIDCNotification(ctx context.Context, req *openid4vci.NotificationRequest) error
 	OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error)
 
-	OAuth2Metadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error)
+	OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*openid4vci.ParResponse, error)
+	OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRequest) (*openid4vci.AuthorizationResponse, error)
+	OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error)
+	OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error)
 
 	//Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 

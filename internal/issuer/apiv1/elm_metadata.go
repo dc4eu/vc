@@ -20,19 +20,10 @@ func (c *elmClient) MetadataClaim(vct string) ([]string, error) {
 				Lang: "en-US",
 				Name: "ELM",
 				Rendering: Rendering{
-					Simple: SimpleRendering{
-						Logo: Logo{
-							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/elmcard.png",
-							URIIntegrity: "sha256-124c5fea148d56527baa77259942b6ee5050e635cc86c268fd42587d022a69c7",
-							AltText:      "EHIC Card",
-						},
-						BackgroundColor: "#12107c",
-						TextColor:       "#FFFFFF",
-					},
 					SVGTemplates: []SVGTemplates{
 						{
-							URI:          "https://raw.githubusercontent.com/dc4eu/vc/9832bb494ecd982c3aa56ed1b504e3a884d46d23/images/elmTemplate.svg",
-							URLIntegrity: "sha256-c9089cb2c8b845a69978cc9adc2d53c88207ed5a586399b9aede8e1a93cd305a",
+							URI:          "https://raw.githubusercontent.com/dc4eu/vc/633940b0b00ab259af01cfbff958f1ffebf5176a/images/diplomaTemplate.svg",
+							URLIntegrity: "sha256-1acd4883826aba0318d219213bb75a9dfc858f926e93f576224412301fe3018a",
 							Properties:   SVGTemplateProperties{},
 						},
 					},

@@ -15,34 +15,6 @@ const (
 	mockEscapedAuthorizationDetails = "%5B%7B%22type%22%3A%22openid_credential%22%2C%22credential_configuration_id%22%3A%22TestCredential%22%7D%2C%7B%22type%22%3A%22openid_credential%22%2C%22format%22%3A%22vc%2Bsd-jwt%22%2C%22vct%22%3A%22SD_JWT_VC_example_in_OpenID4VCI%22%7D%5D"
 )
 
-func TestAuthRedirectURL(t *testing.T) {
-	tts := []struct {
-		name        string
-		have        *AuthorizationResponse
-		redirectURL string
-		want        string
-	}{
-		{
-			name: "test",
-			have: &AuthorizationResponse{
-				Code:  "test_code",
-				State: "test_state",
-			},
-			redirectURL: "https://client.example.org/cb",
-			want:        "https://client.example.org/cb?code=test_code&state=test_state",
-		},
-	}
-
-	for _, tt := range tts {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.have.AuthRedirectURL(tt.redirectURL)
-			assert.NoError(t, err)
-
-			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
 func TestMockAuthorizationDetails(t *testing.T) {
 	tts := []struct {
 		name string
@@ -138,12 +110,12 @@ func TestAuthParse(t *testing.T) {
 func TestAuthorizeBinding(t *testing.T) {
 	tts := []struct {
 		name string
-		want *AuthorizationRequest
+		want *PARRequest
 		have map[string]any
 	}{
 		{
 			name: "with authorization details",
-			want: &AuthorizationRequest{
+			want: &PARRequest{
 				ResponseType: "code",
 				AuthorizationDetails: []AuthorizationDetailsParameter{
 					{
@@ -164,7 +136,7 @@ func TestAuthorizeBinding(t *testing.T) {
 		},
 		{
 			name: "without authorization details",
-			want: &AuthorizationRequest{
+			want: &PARRequest{
 				ResponseType: "code",
 			},
 			have: map[string]any{

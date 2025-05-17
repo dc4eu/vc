@@ -192,15 +192,10 @@ type OTEL struct {
 	Timeout int64  `yaml:"timeout" default:"10"`
 }
 
-// OAuthGrant holds the oauth grant configuration
-type OAuthGrant struct {
-	ClientType string `yaml:"client_type" validate:"required,oneof=confidential public"`
-}
-
 // OAuth2Server holds the oauth server configuration
 type OAuth2Server struct {
-	Grant    map[string]OAuthGrant `yaml:"grant" validate:"required"`
-	Metadata Metadata              `yaml:"metadata" validate:"required"`
+	Clients  oauth2.Clients `yaml:"clients" validate:"required"`
+	Metadata Metadata       `yaml:"metadata" validate:"required"`
 }
 
 // UI holds the user-interface configuration

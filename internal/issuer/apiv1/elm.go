@@ -42,7 +42,7 @@ func (c *elmClient) sdjwt(ctx context.Context, doc *education.ELMDocument, jwk *
 		return "", err
 	}
 
-	vct := "ElmCredential"
+	vct := "ELMCredential"
 
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()

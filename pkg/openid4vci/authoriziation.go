@@ -24,8 +24,8 @@ type AuthorizationDetailsParameter struct {
 	Claims map[string]any `json:"claims,omitempty" form:"claims"`
 }
 
-// AuthorizationRequest https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#RFC6749
-type AuthorizationRequest struct {
+// PARRequest https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#RFC6749
+type PARRequest struct {
 	// RFC 6749#4.1.1
 	ResponseType string `form:"response_type" json:"response_type" validate:"required,oneof=code"`
 	ClientID     string `json:"client_id" form:"client_id" validate:"required"`
@@ -41,6 +41,19 @@ type AuthorizationRequest struct {
 	WalletIssuer string `json:"wallet_issuer" form:"wallet_issuer"`
 	UserHint     string `json:"user_hint" form:"user_hint"`
 	IssuingState string `json:"issuing_state" form:"issuing_state"`
+}
+
+type ParResponse struct {
+	// RequestURI : The request URI corresponding to the authorization request posted. This URI is used as reference to the respective request data in the subsequent authorization request only. The way the authorization process obtains the authorization request data is at the discretion of the authorization server and out of scope of this specification. There is no need to make the authorization request data available to other parties via this URI.
+	RequestURI string `json:"request_uri" form:"request_uri" validate:"required"`
+
+	// ExpiresIn : A JSON number that represents the lifetime of the request URI in seconds. The request URI lifetime is at the discretion of the authorization server and will typically be relatively short.
+	ExpiresIn int `json:"expires_in" form:"expires_in" validate:"required"`
+}
+
+type AuthorizeRequest struct {
+	ClientID   string `json:"client_id" uri:"client_id" form:"client_id" validate:"required"`
+	RequestURI string `json:"request_uri" uri:"request_uri" form:"request_uri" validate:"required"`
 }
 
 // AuthorizationResponse RFC6749#4.1.2
@@ -59,36 +72,16 @@ type AuthorizationResponse struct {
 	Code string `json:"code" validate:"required"`
 
 	// State REQUIRED if the "state" parameter was present in the client authorization request.  The exact value received from the client.
-	State string `json:"state"`
-}
-
-// AuthRedirectURL returns the URL to redirect to for the authorization
-func (a *AuthorizationResponse) AuthRedirectURL(redirectURL string) (string, error) {
-	u, err := url.Parse(redirectURL)
-	if err != nil {
-		return "", err
-	}
-
-	query := u.Query()
-
-	query.Add("code", a.Code)
-
-	if a.State != "" {
-		query.Add("state", a.State)
-	}
-
-	u.RawQuery = query.Encode()
-
-	return u.String(), nil
+	State string `json:"state" validate:"required"`
 }
 
 // BindAuthorizationRequest binds the AuthorizationRequest
-func BindAuthorizationRequest(body io.ReadCloser) (*AuthorizationRequest, error) {
+func BindAuthorizationRequest(body io.ReadCloser) (*PARRequest, error) {
 	if body == nil {
 		return nil, errors.New("no_body")
 	}
 
-	authorizationRequest := &AuthorizationRequest{}
+	authorizationRequest := &PARRequest{}
 
 	v := map[string]any{}
 

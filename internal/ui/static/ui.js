@@ -629,7 +629,9 @@ function buildDocumentsTableWithoutContent() {
         {title: 'Family name', abbr: null},
         {title: 'Given name', abbr: null},
         {title: 'Birthdate', abbr: null},
-        {title: 'QR credential offer url', abbr: null}
+        {title: 'Birthplace', abbr: null},
+        {title: 'Nationality', abbr: null},
+        {title: 'Credential offer url', abbr: null}
     ];
 
     headers.forEach(header => {
@@ -1030,7 +1032,7 @@ function buildDocumentTableRow(doc) {
     divSelect.appendChild(select);
     tdActions.appendChild(divSelect);
     row.appendChild(tdActions);
-    //-------------------------
+    //------select end-------------------
 
     const tdDocumentId = document.createElement('td');
     const documentId = doc.meta?.document_id || "";
@@ -1083,6 +1085,26 @@ function buildDocumentTableRow(doc) {
     });
     tdBirthDate.innerHTML = bdStringBuilder.join("<br>");
     row.appendChild(tdBirthDate);
+
+    const tdBirthplace = document.createElement('td');
+    const bpStringBuilder = [];
+    doc.identities.forEach(identity => {
+        bpStringBuilder.push(identity.birth_place || "");
+    });
+    tdBirthplace.innerHTML = bpStringBuilder.join("<br>");
+    row.appendChild(tdBirthplace);
+
+    const tdNationality = document.createElement('td');
+    const natStringBuilder = [];
+    doc.identities.forEach(identity => {
+        if (identity.nationality != null) {
+            identity.nationality.forEach(countryCode => {
+                natStringBuilder.push(countryCode || "");
+            });
+        }
+    });
+    tdNationality.innerHTML = natStringBuilder.join("<br>");
+    row.appendChild(tdNationality);
 
     const tdQRCredentialOfferUrl = document.createElement('td');
     const credentialOfferUrl = doc.qr?.credential_offer_url || "";

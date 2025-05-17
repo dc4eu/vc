@@ -57,11 +57,13 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		DocumentType:   request.DocumentType,
 		Nonce:          jwthelpers.GenerateNonce(),
 		//TODO: flytta nedan till auth request hämtningen istället när wwW anpassat
-		CallbackID: jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
-		State:      uuid.NewString(),
-		JTI:        uuid.NewString(),
-		Authorized: false,
-		Status:     openid4vp.InteractionStatusQRDisplayed,
+		CallbackID:           jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
+		State:                uuid.NewString(),
+		JTI:                  uuid.NewString(),
+		Authorized:           false,
+		Status:               openid4vp.InteractionStatusQRDisplayed,
+		EncryptDirectPostJWT: request.EncryptDirectPostJWT,
+
 		//TODO: nedan ska inte vara här men läggs här tillsvidare
 		VerifierKeyPair: c.verifierKeyPair,
 		//VerifierKeyPair: &openid4vp.KeyPair{
@@ -155,19 +157,10 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
-	switch vpSession.DocumentType {
-	case openid4vp.DocumentTypeDiploma:
-		vpSession.PresentationDefinition = DiplomaPresentationDefinition()
-	case openid4vp.DocumentTypeEHIC:
-		vpSession.PresentationDefinition = EHICPresentationDefinition()
-	case openid4vp.DocumentTypeELM:
-		vpSession.PresentationDefinition = ELMPresentationDefinition()
-	case openid4vp.DocumentTypePDA1:
-		vpSession.PresentationDefinition = PDA1PresentationDefinition()
-	case openid4vp.DocumentTypePID:
-		vpSession.PresentationDefinition = PIDPresentationDefinition()
-	default:
-		return "", fmt.Errorf("document type %s is currently not supported", vpSession.DocumentType)
+	if pd, err := buildPresentationDefinitionFor(vpSession.DocumentType); err != nil {
+		return "", err
+	} else {
+		vpSession.PresentationDefinition = pd
 	}
 
 	schema := "http://"
@@ -176,7 +169,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 	}
 	responseURI := fmt.Sprintf("%s%s%s/callback/direct-post-jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, vpSession.SessionID, vpSession.CallbackID)
 
-	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey))
+	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey), vpSession.EncryptDirectPostJWT)
 	if err != nil {
 		c.log.Error(err, "Failed to build client metadata")
 		return "", err
@@ -296,23 +289,23 @@ func (c *Client) nextSequence() int64 {
 	return atomic.AddInt64(&c.currentSequence, 1)
 }
 
-func (c *Client) SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) error {
+func (c *Client) SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) (*openid4vp.VPInteractionSession, error) {
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = validateCallbackPreconditions(vpSession, callbackID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	vpSession.AuthorisationResponseDebugData = request
 	err = c.db.VPInteractionSessionColl.Update(ctx, vpSession)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return vpSession, nil
 }
 
 func validateCallbackPreconditions(vpSession *openid4vp.VPInteractionSession, callbackID string) error {
@@ -332,8 +325,9 @@ func validateCallbackPreconditions(vpSession *openid4vp.VPInteractionSession, ca
 }
 
 type VerificationResult struct {
-	Status string `json:"interaction_status,omitempty"`
-	Data   any    `json:"data,omitempty"`
+	Status      string `json:"interaction_status,omitempty"`
+	VPSessionID string `json:"vp_session_id,omitempty"`
+	Data        any    `json:"data,omitempty"`
 }
 
 func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*VerificationResult, error) {
@@ -347,13 +341,16 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 	if vpSession == nil || vpSession.Status == openid4vp.InteractionStatusAuthorizationResponseReceived {
 		//No need to look for a record if the qr code just display or scanned, since no response from the wallet has been recieved yet
 		verificationRecord, _ := c.db.VerificationRecordColl.Read(ctx, sessionID)
-		//TODO: filter what data in verificationRecord to expose (if not nil or any error)
+		if verificationRecord != nil {
+			//TODO: filter what data in verificationRecord to not expose (if not nil or any error)
+		}
 		data = verificationRecord
 	}
 
 	return &VerificationResult{
-		Status: string(status),
-		Data:   data,
+		Status:      string(status),
+		VPSessionID: sessionID,
+		Data:        data,
 	}, nil
 }
 

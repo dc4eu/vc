@@ -90,7 +90,7 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		return nil, errors.New("callback_id is empty")
 	}
 
-	err := s.saveRequestDataToVPSession(ctx, g, span, sessionID, callbackID)
+	vpSession, err := s.saveRequestDataToVPSession(ctx, g, span, sessionID, callbackID)
 	if err != nil {
 		return nil, err
 	}
@@ -98,14 +98,26 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 	var vpTokenStringArray []string
 	var presentationSubmissionString, stateString, errorString, errorDescriptionString, errorURIString string
 	if jwe := g.PostForm("response"); jwe != "" {
-		//TODO: läs upp vpSession := openid4vp.VPInteractionSession{}
-		//TODO decryptedJWT, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
-		//if err != nil {
-		//	return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
-		//}
-		//TODO: handle decryptedJWT and make needed params to handler
-		return nil, errors.New("jwe decryption not implemented yet")
+		decryptedPayload, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
+		}
+		queryStr := string(decryptedPayload)
+		values, err := url.ParseQuery(queryStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse query string: %w", err)
+		}
+
+		vpTokenStringArray = values["vp_token"]
+		presentationSubmissionString = values.Get("presentation_submission")
+		stateString = values.Get("state")
+		errorString = values.Get("error")
+		errorDescriptionString = values.Get("error_description")
+		errorURIString = values.Get("error_uri")
 	} else {
+		if vpSession.EncryptDirectPostJWT {
+			return nil, errors.New("encrypted direct_post.jwt expected as response from wallet")
+		}
 		vpTokenStringArray = g.PostFormArray("vp_token")
 		presentationSubmissionString = g.PostForm("presentation_submission")
 		stateString = g.PostForm("state")
@@ -290,10 +302,10 @@ type RequestData struct {
 	Handler     string
 }
 
-func (s *Service) saveRequestDataToVPSession(ctx context.Context, g *gin.Context, span trace2.Span, sessionID string, callbackID string) error {
+func (s *Service) saveRequestDataToVPSession(ctx context.Context, g *gin.Context, span trace2.Span, sessionID string, callbackID string) (*openid4vp.VPInteractionSession, error) {
 	body, err := io.ReadAll(g.Request.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	span.SetAttributes(
@@ -332,11 +344,11 @@ func (s *Service) saveRequestDataToVPSession(ctx context.Context, g *gin.Context
 	fmt.Println(requestDataJson)
 
 	g.Request.Body = io.NopCloser(bytes.NewBuffer(body))
-	err = s.apiv1.SaveRequestDataToVPSession(ctx, sessionID, callbackID, requestDataJson)
+	vpSession, err := s.apiv1.SaveRequestDataToVPSession(ctx, sessionID, callbackID, requestDataJson)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return vpSession, nil
 }
 
 func convertRequestDataToJson(data *RequestData) *openid4vp.JsonRequestData {

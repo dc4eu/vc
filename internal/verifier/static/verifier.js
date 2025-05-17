@@ -49,7 +49,7 @@ function showIcon(id) {
 }
 
 function hideIcons() {
-    let icons = ["spinnerIcon", "okIcon", "errorIcon"];
+    let icons = ["unknownIcon", "scanQRIcon", "spinnerIcon", "okIcon", "errorIcon", "rejectedIcon"];
     icons.forEach(id => {
         let el = document.getElementById(id);
         if (el) {
@@ -65,8 +65,19 @@ function resetAndHideIndexContainer() {
         documentTypeSelect.value = defaultOption.value;
     }
 
+    getElementById("encryptWalletResponseCB").checked = getElementById("encryptWalletResponseCB").defaultChecked;
+
     hideElement("indexContainer");
 }
+
+function resetButton(buttonId) {
+    const button = document.getElementById(buttonId);
+    if (!button) return;
+    button.title = "";
+    button.onclick = null;
+    button.classList.add("is-hidden");
+}
+
 
 function resetAndHideQRContainer() {
     clearAndHideError("qrErrorMessage");
@@ -79,30 +90,11 @@ function resetAndHideQRContainer() {
     const qrInfoText = getElementById("qrInfoText");
     qrInfoText.classList.add("is-hidden");
 
-    const openInDemoWWWalletButton = getElementById("openInDemoWWWalletButton");
-    openInDemoWWWalletButton.title = "";
-    openInDemoWWWalletButton.onclick = null;
-    openInDemoWWWalletButton.classList.add("is-hidden");
-
-    const openInDC4EUWWWalletButton = getElementById("openInDC4EUWWWalletButton");
-    openInDC4EUWWWalletButton.title = "";
-    openInDC4EUWWWalletButton.onclick = null;
-    openInDC4EUWWWalletButton.classList.add("is-hidden");
-
-    const openInDevSUNETWalletButton = getElementById("openInDevSUNETWalletButton");
-    openInDevSUNETWalletButton.title = "";
-    openInDevSUNETWalletButton.onclick = null;
-    openInDevSUNETWalletButton.classList.add("is-hidden");
-
-    const openInFunkeWalletButton = getElementById("openInFunkeWalletButton");
-    openInFunkeWalletButton.title = "";
-    openInFunkeWalletButton.onclick = null;
-    openInFunkeWalletButton.classList.add("is-hidden");
-
-    const checkVerificationResultButton = getElementById("checkVerificationResultButton");
-    checkVerificationResultButton.title = "";
-    checkVerificationResultButton.onclick = null;
-    checkVerificationResultButton.classList.add("is-hidden");
+    resetButton("openInDemoWWWalletButton");
+    resetButton("openInDC4EUWWWalletButton");
+    resetButton("openInDevSUNETWalletButton");
+    resetButton("openInFunkeWalletButton");
+    resetButton("checkVerificationResultButton");
 
     hideElement("qrContainer");
 }
@@ -114,13 +106,16 @@ function resetAndHideVerificationContainer() {
 
 function resetVerificationContainer() {
     clearAndHideError("verificationErrorMessage");
-    showIcon("spinnerIcon");
-    getElementById("interactionStatusValue").textContent = "Unknown";
+    showIcon("unknownIcon");
+    getElementById("interactionStatusSpan").textContent = "unknown";
+    getElementById("verificationResultSpan").textContent = "unknown";
+    getElementById("vpSessionIDSpan").textContent = "unknown";
     getElementById("claimsDisplay").value = "";
 }
 
 async function startVPFlow() {
     const documentTypeValue = getElementById("documentTypeSelect").value;
+    const encryptWalletResponse = getElementById("encryptWalletResponseCB").checked;
 
     resetAndHideIndexContainer();
     resetAndHideQRContainer();
@@ -133,7 +128,10 @@ async function startVPFlow() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json; charset=utf-8',
             },
-            body: JSON.stringify({document_type: documentTypeValue})
+            body: JSON.stringify({
+                document_type: documentTypeValue,
+                encrypt_direct_post_jwt: encryptWalletResponse,
+            })
         });
 
         if (!response.ok) {
@@ -241,12 +239,31 @@ async function refreshVerificationResult() {
         }
 
         const data = await response.json();
-        console.log("Verification Result: interaction_status=" + data.interaction_status + " with data=" + data.data);
+        const interactionStatus = data.interaction_status;
+        console.debug("interaction_status=" + interactionStatus + " with data=" + data.data);
 
-        getElementById("interactionStatusValue").textContent = data.interaction_status;
+        getElementById("interactionStatusSpan").textContent = interactionStatus;
+        if (interactionStatus === "qr_displayed") {
+            showIcon("scanQRIcon");
+        } else {
+            showIcon("spinnerIcon");
+        }
+        getElementById("vpSessionIDSpan").textContent = data.vp_session_id;
 
         const claimsDisplay = getElementById("claimsDisplay");
         if (data && data.data && Object.keys(data.data).length > 0) {
+            // the verifier has received some response from the wallet
+            const verificationResultValue = data?.data?.verification_meta?.verification_result || null;
+            if (verificationResultValue !== null) {
+                getElementById("verificationResultSpan").textContent = verificationResultValue;
+                if (verificationResultValue === "verified") {
+                    showIcon("okIcon");
+                } else if (verificationResultValue === "rejected") {
+                    showIcon("rejectedIcon");
+                } else if (verificationResultValue === "error") {
+                    showIcon("errorIcon");
+                }
+            }
             claimsDisplay.value = JSON.stringify(data.data, null, 2);
         } else {
             claimsDisplay.value = '';
@@ -292,6 +309,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const documentTypeSelect = document.getElementById('documentTypeSelect');
     documentTypeSelect.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            startVPFlowButton.click();
+        }
+    });
+
+    const encryptWalletResponseCB = document.getElementById('encryptWalletResponseCB');
+    encryptWalletResponseCB.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
             event.preventDefault();
             startVPFlowButton.click();

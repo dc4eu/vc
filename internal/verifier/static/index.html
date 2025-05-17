@@ -20,30 +20,44 @@
 <section class="section">
     <div class="container">
 
-        <h1 class="title has-text-centered has-text-weight-bold is-size-2">VC Verifier</h1>
+        <h1 class="title has-text-centered has-text-weight-bold is-size-2">VC verifier</h1>
 
         <div id="indexContainer" class="box">
-            <p class="subtitle">Select a document type to start the process.</p>
+            <p class="subtitle">Select what you want to verify.</p>
             <div class="field">
-                <label class="label">Document type</label>
+                <label class="label">Type of credentials</label>
                 <div class="control">
                     <div class="select">
                         <select id="documentTypeSelect">
                             <option value="Diploma">Diploma</option>
                             <option value="EHIC" selected>EHIC</option>
                             <option value="ELM">ELM</option>
-<!--                            <option value="MicroCredential">Microcredential</option>-->
+                            <!--TODO: Microcredential-->
+                            <!--TODO: Open-badge-->
                             <option value="PDA1">PDA1</option>
                             <option value="PID">PID</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <button id="start-vp-flow-btn" class="button is-primary">Start the verification process</button>
+            <div class="field">
+                <div class="control">
+                    <label class="checkbox">
+                        <input id="encryptWalletResponseCB" type="checkbox"/>
+                        Encrypt credential response from wallet
+                    </label>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button id="start-vp-flow-btn" class="button is-primary">Start the verification process</button>
+                </div>
+            </div>
         </div>
 
         <div id="qrContainer" class="box is-hidden">
-            <p class="subtitle">QR code</p>
+            <p class="subtitle">Use your wallet app to scan the QR code and select the credentials you want to
+                share.</p>
             <p id="qrErrorMessage" class="notification is-danger is-hidden">An error occured: ...</p>
             <img id="qrImage" class="is-hidden" alt="QR code">
             <p id="qrInfoText" class="mt-2 is-hidden"></p>
@@ -55,30 +69,39 @@
             <button id="checkVerificationResultButton" class="button is-warning mt-2 is-hidden"
                     onclick="checkVPVerificationResult()">Check verification result
             </button>
-            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit and return to start page</button>
+            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit</button>
         </div>
 
         <div id="verificationContainer" class="box is-hidden">
             <p class="subtitle ">Verification result</p>
             <p id="verificationErrorMessage" class="notification is-danger is-hidden">An error occured: ...</p>
             <div class="icons-container">
-                <span id="spinnerIcon" class="icon has-text-warning"><i class="fas fa-spinner fa-spin fa-3x"></i></span>
+                        <span id="unknownIcon" class="icon has-text-info"><i
+                                class="fas fa-question-circle fa-4x"></i></span>
+                <span id="scanQRIcon" class="icon has-text-grey is-hidden"><i
+                        class="fas fa-qrcode fa-4x"></i></span>
+                <span id="spinnerIcon" class="icon has-text-warning is-hidden"><i
+                        class="fas fa-spinner fa-spin fa-4x"></i></span>
                 <span id="okIcon" class="icon has-text-success is-hidden"><i
-                        class="fas fa-check-circle fa-3x"></i></span>
+                        class="fas fa-check-circle fa-4x"></i></span>
+                <span id="rejectedIcon" class="icon has-text-warning is-hidden"><i
+                        class="fas fa-ban fa-4x"></i></span>
                 <span id="errorIcon" class="icon has-text-danger is-hidden"><i
-                        class="fas fa-times-circle fa-3x"></i></span>
+                        class="fas fa-circle-xmark fa-4x"></i></span>
             </div>
             <br>
-            <p><strong>InteractionStatus:</strong> <span id="interactionStatusValue">Unknown</span></p>
+            <p><strong>Interaction status:</strong> <span id="interactionStatusSpan">unknown</span></p>
+            <p><strong>Verification result:</strong> <span id="verificationResultSpan">unknown</span></p>
+            <p><strong>VP session id:</strong> <span id="vpSessionIDSpan">unknown</span></p>
             <br>
-
             <label class="label">Claims</label>
             <textarea id="claimsDisplay" class="textarea is-small" readonly rows="30"></textarea>
             <br>
-            <button id="refreshVerificationResult" onclick="refreshVerificationResult()" class="button is-link mt-2">
+            <button id="refreshVerificationResult" onclick="refreshVerificationResult()"
+                    class="button is-link mt-2">
                 Refresh
             </button>
-            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit and return to start page</button>
+            <button class="button is-danger mt-2" onclick="quitVPFlow()">Quit</button>
         </div>
 
     </div>

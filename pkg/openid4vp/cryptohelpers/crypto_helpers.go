@@ -36,8 +36,7 @@ type VCSDJWT struct {
 	KBJWTAlgValues []string `json:"kb-jwt_alg_values"`
 }
 
-func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey) (*ClientMetadata, error) {
-	//TODO: gör denna mer generisk samt bryt ev metadata till annan del av koden men behåll jwks här
+func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey, encryptDirectPostJWT bool) (*ClientMetadata, error) {
 	crv := "P-256"
 	curveSize := 32 // byte-length for P-256
 	x := bigIntToBase64URL(privateEmpKey.PublicKey.X, curveSize)
@@ -56,15 +55,16 @@ func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey) (*ClientMe
 		JWKS: JWKS{
 			Keys: []JWK{jwk},
 		},
-		//TODO: VIKTIGT: aktivera kryptering av direct_post.jwt responsen från walleten när verifiern är mer stabil (aktivera nedan två bortkommenterade rader)
-		//AuthorizationEncryptedResponseAlg: "ECDH-ES",
-		//AuthorizationEncryptedResponseEnc: "A256GCM",
 		VPFormats: VPFormats{
 			VCSDJWT: VCSDJWT{
 				SDJWTAlgValues: []string{"ES256"},
 				KBJWTAlgValues: []string{"ES256"},
 			},
 		},
+	}
+	if encryptDirectPostJWT {
+		clientMetadata.AuthorizationEncryptedResponseAlg = "ECDH-ES"
+		clientMetadata.AuthorizationEncryptedResponseEnc = "A256GCM"
 	}
 
 	return clientMetadata, nil

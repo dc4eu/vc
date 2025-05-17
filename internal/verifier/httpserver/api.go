@@ -22,7 +22,7 @@ type Apiv1 interface {
 
 	// ui-web dev/test support
 	GetVPFlowDebugInfo(ctx context.Context, request *apiv1.VPFlowDebugInfoRequest) (*apiv1.VPFlowDebugInfoReply, error)
-	SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) error
+	SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) (*openid4vp.VPInteractionSession, error)
 
 	// misc
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)

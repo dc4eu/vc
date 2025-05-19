@@ -95,71 +95,84 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		return nil, err
 	}
 
-	var vpTokenStringArray []string
-	var presentationSubmissionString, stateString, errorString, errorDescriptionString, errorURIString string
+	//TODO refactorisera och flytta nedan till en authorization_response_parser
+	var request *openid4vp.AuthorizationResponse
 	if jwe := g.PostForm("response"); jwe != "" {
 		decryptedPayload, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
 		}
-		queryStr := string(decryptedPayload)
-		values, err := url.ParseQuery(queryStr)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse query string: %w", err)
-		}
 
-		vpTokenStringArray = values["vp_token"]
-		presentationSubmissionString = values.Get("presentation_submission")
-		stateString = values.Get("state")
-		errorString = values.Get("error")
-		errorDescriptionString = values.Get("error_description")
-		errorURIString = values.Get("error_uri")
+		//queryStr := string(decryptedPayload)
+		//values, err := url.ParseQuery(queryStr)
+		//if err != nil {
+		//	return nil, fmt.Errorf("failed to parse query string: %w", err)
+		//}
+		//
+		//vpTokenStringArray = values["vp_token"]
+		//presentationSubmissionString = values.Get("presentation_submission")
+		//stateString = values.Get("state")
+		//errorString = values.Get("error")
+		//errorDescriptionString = values.Get("error_description")
+		//errorURIString = values.Get("error_uri")
+
+		request = &openid4vp.AuthorizationResponse{}
+		err = json.Unmarshal(decryptedPayload, request)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal: %w", err)
+		}
+		if request.Error != "" {
+			return nil, fmt.Errorf("error from wallet; error=%s, error_description=%s, error_uri=%s", request.Error, request.ErrorDescription, request.ErrorURI)
+		}
+		if request.VPTokens == nil || len(request.VPTokens) < 1 || request.PresentationSubmission == nil || request.State == "" {
+			return nil, errors.New("missing on or more of mandatory fields [vp_token, presentation_submission, state]")
+		}
 	} else {
 		if vpSession.EncryptDirectPostJWT {
 			return nil, errors.New("encrypted direct_post.jwt expected as response from wallet")
 		}
-		vpTokenStringArray = g.PostFormArray("vp_token")
-		presentationSubmissionString = g.PostForm("presentation_submission")
-		stateString = g.PostForm("state")
-		errorString = g.PostForm("error")
-		errorDescriptionString = g.PostForm("error_description")
-		errorURIString = g.PostForm("error_uri")
-	}
+		vpTokenStringArray := g.PostFormArray("vp_token")
+		presentationSubmissionString := g.PostForm("presentation_submission")
+		stateString := g.PostForm("state")
+		errorString := g.PostForm("error")
+		errorDescriptionString := g.PostForm("error_description")
+		errorURIString := g.PostForm("error_uri")
 
-	s.log.Debug("Received AuthorizationResponse (direct_post.jwt):",
-		"vpTokenStringArray", vpTokenStringArray,
-		"presentationSubmissionString", presentationSubmissionString,
-		"stateString", stateString,
-		"errorString", errorString,
-		"errorDescriptionString", errorDescriptionString,
-		"errorURIString", errorURIString)
+		s.log.Debug("Received AuthorizationResponse (direct_post.jwt):",
+			"vpTokenStringArray", vpTokenStringArray,
+			"presentationSubmissionString", presentationSubmissionString,
+			"stateString", stateString,
+			"errorString", errorString,
+			"errorDescriptionString", errorDescriptionString,
+			"errorURIString", errorURIString)
 
-	if errorString != "" {
-		return nil, fmt.Errorf("error from wallet during auth request error=%s, errorDescription=%s, errorURIString=%s", errorString, errorDescriptionString, errorURIString)
-	}
-	if len(vpTokenStringArray) < 1 || presentationSubmissionString == "" || stateString == "" {
-		return nil, errors.New("missing mandatory fields [vpTokenString, presentationSubmissionString, stateString]")
-	}
+		if errorString != "" {
+			return nil, fmt.Errorf("error from wallet during auth request error=%s, errorDescription=%s, errorURIString=%s", errorString, errorDescriptionString, errorURIString)
+		}
+		if vpTokenStringArray == nil || len(vpTokenStringArray) < 1 || presentationSubmissionString == "" || stateString == "" {
+			return nil, errors.New("missing on or more of mandatory query string [vp_token, presentation_submission, state]")
+		}
 
-	var presentationSubmission openid4vp.PresentationSubmission
-	err = json.Unmarshal([]byte(presentationSubmissionString), &presentationSubmission)
-	if err != nil {
-		return nil, err
-	}
-
-	var vpTokens []openid4vp.VPTokenRaw
-	for _, vpTokenString := range vpTokenStringArray {
-		raw, err := openid4vp.ToVPTokenRaw([]byte(vpTokenString))
+		var presentationSubmission openid4vp.PresentationSubmission
+		err = json.Unmarshal([]byte(presentationSubmissionString), &presentationSubmission)
 		if err != nil {
 			return nil, err
 		}
-		vpTokens = append(vpTokens, *raw)
-	}
 
-	request := &openid4vp.AuthorizationResponse{
-		VPTokens:               vpTokens,
-		PresentationSubmission: &presentationSubmission,
-		State:                  stateString,
+		var vpTokens []openid4vp.VPTokenRaw
+		for _, vpTokenString := range vpTokenStringArray {
+			raw, err := openid4vp.ToVPTokenRaw([]byte(vpTokenString))
+			if err != nil {
+				return nil, err
+			}
+			vpTokens = append(vpTokens, *raw)
+		}
+
+		request = &openid4vp.AuthorizationResponse{
+			VPTokens:               vpTokens,
+			PresentationSubmission: &presentationSubmission,
+			State:                  stateString,
+		}
 	}
 
 	reply, err := s.apiv1.Callback(ctx, sessionID, callbackID, request)

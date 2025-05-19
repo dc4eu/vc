@@ -18,6 +18,73 @@ type AuthorizationResponse struct {
 	ErrorURI               string                  `json:"error_uri,omitempty"`               //Optional on error
 }
 
+func (v *AuthorizationResponse) UnmarshalJSON(data []byte) error {
+	// no recursion
+	type Alias AuthorizationResponse
+	aux := struct {
+		IDToken                string                  `json:"id_token,omitempty"`
+		VPTokens               json.RawMessage         `json:"vp_token,omitempty"`
+		PresentationSubmission *PresentationSubmission `json:"presentation_submission,omitempty"`
+		State                  string                  `json:"state,omitempty"`
+		Error                  string                  `json:"error,omitempty"`
+		ErrorDescription       string                  `json:"error_description,omitempty"`
+		ErrorURI               string                  `json:"error_uri,omitempty"`
+	}{}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	v.PresentationSubmission = aux.PresentationSubmission
+	v.State = aux.State
+	v.Error = aux.Error
+	v.ErrorDescription = aux.ErrorDescription
+	v.ErrorURI = aux.ErrorURI
+
+	if len(aux.VPTokens) == 0 || string(aux.VPTokens) == "null" {
+		// vp_token is missing or nil
+		v.VPTokens = nil
+		return nil
+	}
+
+	// array?
+	var rawList []json.RawMessage
+	if err := json.Unmarshal(aux.VPTokens, &rawList); err == nil {
+		for _, item := range rawList {
+			var token VPTokenRaw
+			if isString(item) {
+				if err := json.Unmarshal(item, &token.JWT); err != nil {
+					return err
+				}
+			} else {
+				if err := json.Unmarshal(item, &token.JSON); err != nil {
+					return err
+				}
+			}
+			v.VPTokens = append(v.VPTokens, token)
+		}
+		return nil
+	}
+
+	// not array – try as single value
+	var singleStr string
+	if err := json.Unmarshal(aux.VPTokens, &singleStr); err == nil {
+		v.VPTokens = []VPTokenRaw{{JWT: singleStr}}
+		return nil
+	}
+	var singleObj map[string]interface{}
+	if err := json.Unmarshal(aux.VPTokens, &singleObj); err == nil {
+		v.VPTokens = []VPTokenRaw{{JSON: singleObj}}
+		return nil
+	}
+
+	return fmt.Errorf("vp_token is neither string, object, nor array")
+}
+
+func isString(msg json.RawMessage) bool {
+	return len(msg) > 0 && msg[0] == '"'
+}
+
 type VPTokenRaw struct {
 	JWT  string                 `json:"jwt,omitempty"`
 	JSON map[string]interface{} `json:"json,omitempty"`
@@ -31,21 +98,22 @@ func (vp *VPTokenRaw) isJSONBased() bool {
 	return vp.JSON != nil
 }
 
-func (vp *VPTokenRaw) UnmarshalJSON(data []byte) error {
-	var jwt string
-	if err := json.Unmarshal(data, &jwt); err == nil {
-		vp.JWT = jwt
-		return nil
-	}
-
-	var jsonObj map[string]interface{}
-	if err := json.Unmarshal(data, &jsonObj); err == nil {
-		vp.JSON = jsonObj
-		return nil
-	}
-
-	return fmt.Errorf("vp_token has unknown format in UnmarshalJSON: %s", string(data))
-}
+//
+//func (vp *VPTokenRaw) UnmarshalJSON(data []byte) error {
+//	var jwt string
+//	if err := json.Unmarshal(data, &jwt); err == nil {
+//		vp.JWT = jwt
+//		return nil
+//	}
+//
+//	var jsonObj map[string]interface{}
+//	if err := json.Unmarshal(data, &jsonObj); err == nil {
+//		vp.JSON = jsonObj
+//		return nil
+//	}
+//
+//	return fmt.Errorf("vp_token has unknown format in UnmarshalJSON: %s", string(data))
+//}
 
 func ToVPTokenRaw(data []byte) (*VPTokenRaw, error) {
 	var jwt string

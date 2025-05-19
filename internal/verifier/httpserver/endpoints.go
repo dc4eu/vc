@@ -137,8 +137,8 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 	if errorString != "" {
 		return nil, fmt.Errorf("error from wallet during auth request error=%s, errorDescription=%s, errorURIString=%s", errorString, errorDescriptionString, errorURIString)
 	}
-	if len(vpTokenStringArray) < 1 || presentationSubmissionString == "" || stateString == "" {
-		return nil, errors.New("missing mandatory fields [vpTokenString, presentationSubmissionString, stateString]")
+	if vpTokenStringArray == nil || len(vpTokenStringArray) < 1 || presentationSubmissionString == "" || stateString == "" {
+		return nil, errors.New("missing on or more of mandatory query string [vp_token, presentation_submission, state]")
 	}
 
 	var presentationSubmission openid4vp.PresentationSubmission

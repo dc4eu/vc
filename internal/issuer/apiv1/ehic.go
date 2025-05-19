@@ -31,7 +31,7 @@ func newEHICClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*ehic
 }
 
 func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	_, span := c.tracer.Start(ctx, "apiv1:EHICClient:sdjwt")
@@ -43,6 +43,7 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 	}
 
 	vct := "EHICCredential"
+	c.log.Info("sdjwt", "vct", vct, "status", "start")
 
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
@@ -117,6 +118,7 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")
+	c.log.Info("sdjwt", "vct", vct, "status", "done")
 
 	return signedToken, nil
 }

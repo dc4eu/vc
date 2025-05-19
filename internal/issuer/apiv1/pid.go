@@ -31,7 +31,7 @@ func newPIDClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*pidCl
 }
 
 func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
-	_, cancel := context.WithTimeout(ctx, 1*time.Second)
+	_, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	body, err := doc.Marshal()
@@ -40,6 +40,7 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_i
 	}
 
 	vct := "PIDCredential"
+	c.log.Info("sdjwt", "vct", vct, "status", "start")
 
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
@@ -99,6 +100,8 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_i
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")
+
+	c.log.Info("sdjwt", "vct", vct, "status", "done")
 
 	return signedToken, nil
 }

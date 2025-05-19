@@ -31,10 +31,10 @@ func newElmClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*elmCl
 }
 
 func (c *elmClient) sdjwt(ctx context.Context, doc *education.ELMDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
-	_, span := c.tracer.Start(ctx, "apiv1:EmrexClient:sdjwt")
+	_, span := c.tracer.Start(ctx, "apiv1:ElmClient:sdjwt")
 	defer span.End()
 
 	body, err := doc.Marshal()
@@ -43,6 +43,7 @@ func (c *elmClient) sdjwt(ctx context.Context, doc *education.ELMDocument, jwk *
 	}
 
 	vct := "ELMCredential"
+	c.log.Info("sdjwt", "vct", vct, "status", "start")
 
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
@@ -85,6 +86,7 @@ func (c *elmClient) sdjwt(ctx context.Context, doc *education.ELMDocument, jwk *
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")
+	c.log.Info("sdjwt", "vct", vct, "status", "done")
 
 	return signedToken, nil
 }

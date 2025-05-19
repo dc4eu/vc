@@ -39,8 +39,6 @@ func (c *Client) SatosaCredential(ctx context.Context, req *CredentialRequest) (
 		return nil, helpers.ErrNoDocumentFound
 	}
 
-	c.log.Debug("document", "document", document)
-
 	documentData, err := json.Marshal(document.DocumentData)
 	if err != nil {
 		c.log.Debug("failed to marshal document data", "error", err)

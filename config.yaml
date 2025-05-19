@@ -7,7 +7,11 @@ common:
     addr: jaeger:4318
     type: jaeger
     #timeout: 10
-  credential_offer_type: "credential_offer" # fix, use the other instead
+  credential_offer:
+    wallet_url: ""
+    issuer_url: "http://vc_dev_issuer:8080"
+    type: "credential_offer"
+
   qr:
     recovery_level: 2
     size: 256
@@ -16,10 +20,6 @@ common:
     brokers:
       - "kafka0:9092"
       - "kafka1:9092"
-
-credential_offer:
-  type: "credential_offer"
-  issuer_url: "http://vc_dev_issuer:8080"
 
 
 authentic_sources:

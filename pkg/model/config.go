@@ -57,15 +57,22 @@ type Log struct {
 
 // Common holds the common configuration
 type Common struct {
-	HTTPProxy           string   `yaml:"http_proxy"`
-	Production          bool     `yaml:"production"`
-	Log                 Log      `yaml:"log"`
-	Mongo               Mongo    `yaml:"mongo" validate:"omitempty"`
-	Tracing             OTEL     `yaml:"tracing" validate:"required"`
-	KeyValue            KeyValue `yaml:"key_value" validate:"omitempty"`
-	QR                  QRCfg    `yaml:"qr" validate:"omitempty"`
-	Kafka               Kafka    `yaml:"kafka" validate:"omitempty"`
-	CredentialOfferType string   `yaml:"credential_offer_type" validate:"required,oneof=credential_offer_uri credential_offer"`
+	HTTPProxy       string                `yaml:"http_proxy"`
+	Production      bool                  `yaml:"production"`
+	Log             Log                   `yaml:"log"`
+	Mongo           Mongo                 `yaml:"mongo" validate:"omitempty"`
+	Tracing         OTEL                  `yaml:"tracing" validate:"required"`
+	KeyValue        KeyValue              `yaml:"key_value" validate:"omitempty"`
+	QR              QRCfg                 `yaml:"qr" validate:"omitempty"`
+	Kafka           Kafka                 `yaml:"kafka" validate:"omitempty"`
+	CredentialOffer CredentialOfferConfig `yaml:"credential_offer" validate:"omitempty"`
+}
+
+type CredentialOfferConfig struct {
+	// WalletURL sets the wallet url or "openid-credential-offer://"
+	WalletURL string `yaml:"wallet_url"`
+	IssuerURL string `yaml:"issuer_url" validate:"required"`
+	Type      string `yaml:"type" validate:"required,oneof=credential_offer_uri credential_offer"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -119,14 +126,13 @@ type JWTAttribute struct {
 
 // Issuer holds the issuer configuration
 type Issuer struct {
-	APIServer          APIServer    `yaml:"api_server" validate:"required"`
-	Identifier         string       `yaml:"identifier" validate:"required"`
-	GRPCServer         GRPCServer   `yaml:"grpc_server" validate:"required"`
-	SigningKeyPath     string       `yaml:"signing_key_path" validate:"required"`
-	JWTAttribute       JWTAttribute `yaml:"jwt_attribute" validate:"required"`
-	IssuerURL          string       `yaml:"issuer_url" validate:"required"`
-	WalletURL          string       `yaml:"wallet_url"`
-	CredentialOfferURL string       `yaml:"credential_offer_url" validate:"required"`
+	APIServer      APIServer    `yaml:"api_server" validate:"required"`
+	Identifier     string       `yaml:"identifier" validate:"required"`
+	GRPCServer     GRPCServer   `yaml:"grpc_server" validate:"required"`
+	SigningKeyPath string       `yaml:"signing_key_path" validate:"required"`
+	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
+	IssuerURL      string       `yaml:"issuer_url" validate:"required"`
+	WalletURL      string       `yaml:"wallet_url"`
 }
 
 // Registry holds the registry configuration

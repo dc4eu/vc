@@ -7,19 +7,48 @@ common:
     addr: jaeger:4318
     type: jaeger
     #timeout: 10
-  credential_offer_type: "credential_offer" # fix, use the other instead
-  qr:
-    recovery_level: 2
-    size: 256
+  credential_offer:
+    wallet_url: ""
+    issuer_url: "http://vc_dev_issuer:8080"
+    type: "credential_offer"
+    qr:
+      recovery_level: 2
+      size: 256
+
+credential_constructor:
+  "pid":
+    vct: "urn:eu.europa.ec.eudi:pid:1"
+    vctm_file_path: "/metadata/vctm_pid.json"
+  "ehic":
+    vct: "urn:eudi:ehic:1"
+    vctm_file_path: "/metadata/vctm_ehic.json"
+  "pda1":
+    vct: "urn:eudi:pda1:1"
+    vctm_file_path: "/metadata/vctm_pda1.json"
+  "elm":
+    vct: "urn:edui:elm:1"
+    vctm_file_path: "/metadata/vctm_elm.json"
+  "diploma":
+    vct: "urn:edui:diploma:1"
+    vctm_file_path: "/metadata/vctm_diploma.json"
+  "micro_credential":
+    vct: "urn:edui:micro_credential:1"
+    vctm_file_path: "/metadata/vctm_elm.json"
+  "openbadge_complete":
+    vct: "urn:edui:openbadge_complete:1"
+    vctm_file_path: "/metadata/vctm_elm.json"
+  "openbadge_basic":
+    vct: "urn:edui:openbadge_basic:1"
+    vctm_file_path: "/metadata/vctm_elm.json"
+  "openbadge_endorsements":
+    vct: "urn:edui:openbadge_endorsements:1"
+    vctm_file_path: "/metadata/vctm_elm.json"
+
   kafka:
     enabled: false
     brokers:
       - "kafka0:9092"
       - "kafka1:9092"
-
-credential_offer:
-  type: "credential_offer"
-  issuer_url: "http://vc_dev_issuer:8080"
 
 
 authentic_sources:
@@ -104,12 +133,15 @@ apigw:
     trust_anchors:
       - "https://example.com/trust_anchor.pem"
   oauth_server:
-    grant:
-      test_account:
-        client_type: xxx
-        redirection_endpoint: https://example.com/
+    clients:
+      "1003":
+        type: "confidential"
+        redirect_uri: "https://dev.wallet.sunet.se"
+        scopes:
+          - "pid:sd_jwt_vc"
+          - "diploma"
     metadata:
-      path: oauth2_metadata.json
+      path: /metadata/oauth2_metadata.json
       signing_key_path: "/pki/apigw.key"
       signing_chain_path: "/pki/apigw.crt"
 
@@ -123,7 +155,7 @@ apigw:
         client_3: "secret_3"
         client_4: "secret_4"
   issuer_metadata:
-    path: "/issuer_metadata.json"
+    path: "/metadata/issuer_metadata.json"
     signing_key_path: "/pki/apigw.key"
     signing_chain_path: "/pki/apigw.crt"
 

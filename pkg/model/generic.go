@@ -47,7 +47,7 @@ type CredentialOffer struct {
 }
 
 // Marshal marshals the CredentialOffer
-func (c *CredentialOffer) Marshal() ([]byte, error) {
+func (c *CredentialOfferConfig) Marshal() ([]byte, error) {
 	return json.Marshal(c)
 }
 

@@ -6,6 +6,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/education"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
 
@@ -13,16 +14,22 @@ import (
 )
 
 type openbadgeEndorsementsClient struct {
-	log    *logger.Log
-	tracer *trace.Tracer
-	client *Client
+	log                   *logger.Log
+	tracer                *trace.Tracer
+	client                *Client
+	credentialConstructor *model.CredentialConstructor
 }
 
-func newOpenbadgeEndorsementsClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*openbadgeEndorsementsClient, error) {
+func newOpenbadgeEndorsementsClient(ctx context.Context, client *Client, tracer *trace.Tracer, log *logger.Log) (*openbadgeEndorsementsClient, error) {
 	c := &openbadgeEndorsementsClient{
 		client: client,
 		log:    log,
 		tracer: tracer,
+	}
+
+	c.credentialConstructor = c.client.cfg.CredentialConstructor["openbadge_endorsements"]
+	if err := c.credentialConstructor.LoadFile(ctx); err != nil {
+		return nil, err
 	}
 
 	return c, nil
@@ -40,13 +47,11 @@ func (c *openbadgeEndorsementsClient) sdjwt(ctx context.Context, doc *education.
 		return "", err
 	}
 
-	vct := "EduOpenbadgeEndorsementsCredential"
-
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
-	body["vct"] = vct
+	body["vct"] = c.credentialConstructor.VCT
 
 	body["cnf"] = map[string]any{
 		"jwk": jwk,

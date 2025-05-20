@@ -41,6 +41,7 @@ func (c *Client) OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, erro
 //	@Param			req	body		openid4vci.CredentialRequest			true	" "
 //	@Router			/credential [post]
 func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
+	c.log.Debug("credential", "req", req)
 	response := &openid4vci.CredentialResponse{
 		Credential:      c,
 		TransactionID:   "",
@@ -54,6 +55,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 // OIDCDeferredCredential https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoin
 func (c *Client) OIDCDeferredCredential(ctx context.Context, req *openid4vci.DeferredCredentialRequest) (*openid4vci.CredentialResponse, error) {
+	c.log.Debug("deferred credential", "req", req)
 	// run the same code as OIDCCredential
 	return nil, nil
 }
@@ -72,6 +74,7 @@ func (c *Client) OIDCredentialOfferURI(ctx context.Context, req *openid4vci.Cred
 
 // OIDCNotification https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-notification-endpoint
 func (c *Client) OIDCNotification(ctx context.Context, req *openid4vci.NotificationRequest) error {
+	c.log.Debug("notification", "req", req)
 	return nil
 }
 

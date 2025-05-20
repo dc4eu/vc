@@ -50,6 +50,8 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	ctx, span := c.tracer.Start(ctx, "apiv1:CreateCredential")
 	defer span.End()
 
+	c.log.Debug("create credential", "document_type", req.DocumentType)
+
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		c.log.Debug("Validation", "err", err)
 		return nil, err
@@ -66,6 +68,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 		token, err = c.pda1Client.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
+			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 
@@ -76,6 +79,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 		token, err = c.ehicClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
+			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 
@@ -86,6 +90,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 		token, err = c.elmClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
+			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 
@@ -96,6 +101,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 		token, err = c.diplomaClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
+			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 
@@ -106,6 +112,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 		token, err = c.microCredentialClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
+			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 
@@ -116,6 +123,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 		token, err = c.openBadgeCompleteClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
+			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 
@@ -124,8 +132,9 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
-		token, err = c.PIDClient.sdjwt(ctx, doc, req.JWK, nil)
+		token, err = c.pidClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
+			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 	}

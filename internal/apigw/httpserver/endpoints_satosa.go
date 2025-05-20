@@ -17,6 +17,7 @@ func (s *Service) endpointSatosaCredential(ctx context.Context, c *gin.Context) 
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+	s.log.Debug("endpointSatosaCredential", "request", request)
 	reply, err := s.apiv1.SatosaCredential(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())

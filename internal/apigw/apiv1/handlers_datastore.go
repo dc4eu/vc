@@ -88,14 +88,14 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	}
 
 	var qr *openid4vci.QR
-	switch c.cfg.Common.CredentialOfferType {
+	switch c.cfg.Common.CredentialOffer.Type {
 	case "credential_offer":
 		credentialOffer, err := credentialOfferParameter.CredentialOffer()
 		if err != nil {
 			return err
 		}
 
-		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Issuer.WalletURL)
+		qr, err = credentialOffer.QR(c.cfg.Common.CredentialOffer.QR.RecoveryLevel, c.cfg.Common.CredentialOffer.QR.Size, c.cfg.Common.CredentialOffer.WalletURL)
 		if err != nil {
 			return err
 		}
@@ -106,7 +106,7 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 			return err
 		}
 
-		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Issuer.WalletURL, c.cfg.Issuer.IssuerURL)
+		qr, err = credentialOffer.QR(c.cfg.Common.CredentialOffer.QR.RecoveryLevel, c.cfg.Common.CredentialOffer.QR.Size, c.cfg.Common.CredentialOffer.WalletURL, c.cfg.Common.CredentialOffer.IssuerURL)
 		if err != nil {
 			return err
 		}
@@ -162,7 +162,7 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	}
 
 	if err := c.db.VCDatastoreColl.Save(ctx, upload); err != nil {
-		c.log.Debug("Failed to save document", "error", err)
+		c.log.Error(err, "failed to save document")
 		return err
 	}
 

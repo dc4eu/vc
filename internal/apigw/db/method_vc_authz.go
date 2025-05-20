@@ -41,11 +41,18 @@ func (c *VCAuthzColl) createIndex(ctx context.Context) error {
 
 	indexCodeUniq := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "code", Value: 1},
+			primitive.E{Key: "request_uri", Value: 1},
 		},
 		Options: options.Index().SetName("auth_code_uniq").SetUnique(true),
 	}
-	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexCodeUniq})
+
+	indexTTL := mongo.IndexModel{
+		Keys: bson.D{
+			primitive.E{Key: "request_uri", Value: 1},
+		},
+		Options: options.Index().SetName("auth_code_ttl").SetExpireAfterSeconds(60),
+	}
+	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexCodeUniq, indexTTL})
 	if err != nil {
 		return err
 	}
@@ -68,12 +75,12 @@ func (c *VCAuthzColl) Save(ctx context.Context, doc *model.Authorization) error 
 }
 
 // Get gets one user from auth collection
-func (c *VCAuthzColl) Get(ctx context.Context, code string) (*model.Authorization, error) {
+func (c *VCAuthzColl) Get(ctx context.Context, requestURI string) (*model.Authorization, error) {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:auth:get")
 	defer span.End()
 
 	var doc model.Authorization
-	err := c.Coll.FindOne(ctx, bson.M{"code": code}).Decode(&doc)
+	err := c.Coll.FindOne(ctx, bson.M{"request_uri": requestURI}).Decode(&doc)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

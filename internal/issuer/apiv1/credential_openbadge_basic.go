@@ -6,6 +6,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/education"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
 
@@ -13,16 +14,21 @@ import (
 )
 
 type openbadgeBasicClient struct {
-	log    *logger.Log
-	tracer *trace.Tracer
-	client *Client
+	log                   *logger.Log
+	tracer                *trace.Tracer
+	client                *Client
+	credentialConstructor *model.CredentialConstructor
 }
 
-func newOpenbadgeBasicClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*openbadgeBasicClient, error) {
+func newOpenbadgeBasicClient(ctx context.Context, client *Client, tracer *trace.Tracer, log *logger.Log) (*openbadgeBasicClient, error) {
 	c := &openbadgeBasicClient{
 		client: client,
 		log:    log,
 		tracer: tracer,
+	}
+	c.credentialConstructor = client.cfg.CredentialConstructor["openbadge_basic"]
+	if err := c.credentialConstructor.LoadFile(ctx); err != nil {
+		return nil, err
 	}
 
 	return c, nil

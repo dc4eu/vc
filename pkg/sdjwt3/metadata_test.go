@@ -1,4 +1,4 @@
-package apiv1
+package sdjwt3
 
 import (
 	"encoding/json"

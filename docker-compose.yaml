@@ -5,12 +5,10 @@ services:
     image: docker.sunet.se/dc4eu/apigw:latest
     restart: always
     volumes:
-      -  ./developer_tools/pki/:/pki:ro
+      - ./developer_tools/pki/:/pki:ro
       - ./config.yaml:/config.yaml:ro
-      - ./issuer_metadata_2.json:/issuer_metadata.json:ro
-      - ./oauth2_metadata.json:/oauth2_metadata.json:ro
+      - ./metadata/:/metadata/:ro
       - /var/log/sunet:/var/log/sunet
-      - ./pkg/openid4vci/testdata/metadata_response.golden:/metadata.golden:ro
     depends_on:
       - mongo
     networks:
@@ -50,8 +48,9 @@ services:
     restart: always
     volumes:
       - ./config.yaml:/config.yaml:ro
-      - /var/log/sunet:/var/log/sunet
       - ./developer_tools/private_ec256.pem:/private_ec256.pem:ro
+      - ./metadata/:/metadata/:ro
+      - /var/log/sunet:/var/log/sunet
     depends_on:
       - mongo
     networks:

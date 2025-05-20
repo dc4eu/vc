@@ -3,9 +3,11 @@ package apiv1
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
@@ -15,23 +17,36 @@ import (
 )
 
 type ehicClient struct {
-	log    *logger.Log
-	tracer *trace.Tracer
-	client *Client
+	log                   *logger.Log
+	tracer                *trace.Tracer
+	client                *Client
+	credentialConstructor *model.CredentialConstructor
 }
 
-func newEHICClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*ehicClient, error) {
+func newEHICClient(ctx context.Context, client *Client, tracer *trace.Tracer, log *logger.Log) (*ehicClient, error) {
 	c := &ehicClient{
 		client: client,
 		log:    log,
 		tracer: tracer,
 	}
 
+	var ok bool
+	c.credentialConstructor, ok = c.client.cfg.CredentialConstructor["ehic"]
+	if !ok {
+		return nil, errors.New("ehic credential constructor not found")
+	}
+
+	if err := c.credentialConstructor.LoadFile(ctx); err != nil {
+		return nil, err
+	}
+
+	c.log.Debug("ehic", "vctm", c.credentialConstructor.VCTM)
+
 	return c, nil
 }
 
 func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	_, span := c.tracer.Start(ctx, "apiv1:EHICClient:sdjwt")
@@ -42,13 +57,11 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 		return "", err
 	}
 
-	vct := "EHICCredential"
-
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
-	body["vct"] = vct
+	body["vct"] = c.credentialConstructor.VCT
 
 	body["cnf"] = map[string]any{
 		"jwk": jwk,
@@ -60,7 +73,7 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 		"alg": "ES256",
 	}
 
-	header["vctm"], err = c.MetadataClaim(vct)
+	header["vctm"], err = c.credentialConstructor.VCTM.Encode()
 	if err != nil {
 		return "", err
 	}

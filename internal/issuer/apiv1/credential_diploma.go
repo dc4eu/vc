@@ -5,6 +5,7 @@ import (
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
 
@@ -12,35 +13,39 @@ import (
 )
 
 type diplomaClient struct {
-	log    *logger.Log
-	tracer *trace.Tracer
-	client *Client
+	log                   *logger.Log
+	tracer                *trace.Tracer
+	client                *Client
+	credentialConstructor *model.CredentialConstructor
 }
 
-func newDiplomaClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*diplomaClient, error) {
+func newDiplomaClient(ctx context.Context, client *Client, tracer *trace.Tracer, log *logger.Log) (*diplomaClient, error) {
 	c := &diplomaClient{
 		client: client,
 		log:    log,
 		tracer: tracer,
 	}
 
+	c.credentialConstructor = c.client.cfg.CredentialConstructor["diploma"]
+	if err := c.credentialConstructor.LoadFile(ctx); err != nil {
+		return nil, err
+	}
+
 	return c, nil
 }
 
 func (c *diplomaClient) sdjwt(ctx context.Context, body map[string]any, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	_, span := c.tracer.Start(ctx, "apiv1:DiplomaClient:sdjwt")
 	defer span.End()
 
-	vct := "DiplomaCredential"
-
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
-	body["vct"] = vct
+	body["vct"] = c.credentialConstructor.VCT
 
 	body["cnf"] = map[string]any{
 		"jwk": jwk,
@@ -53,7 +58,7 @@ func (c *diplomaClient) sdjwt(ctx context.Context, body map[string]any, jwk *api
 	}
 
 	var err error
-	header["vctm"], err = c.MetadataClaim(vct)
+	header["vctm"], err = c.credentialConstructor.VCTM.Encode()
 	if err != nil {
 		return "", err
 	}

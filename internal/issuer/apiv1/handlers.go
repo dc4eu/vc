@@ -132,7 +132,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}
-		token, err = c.PIDClient.sdjwt(ctx, doc, req.JWK, nil)
+		token, err = c.pidClient.sdjwt(ctx, doc, req.JWK, nil)
 		if err != nil {
 			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err

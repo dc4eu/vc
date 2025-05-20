@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"vc/pkg/logger"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/pki"
+	"vc/pkg/sdjwt3"
 
 	"gopkg.in/yaml.v2"
 )
@@ -41,14 +43,6 @@ type Kafka struct {
 	Brokers []string `yaml:"brokers" validate:"required"`
 }
 
-// KeyValue holds the key/value configuration
-type KeyValue struct {
-	Addr     string `yaml:"addr" validate:"required"`
-	DB       int    `yaml:"db" validate:"required"`
-	Password string `yaml:"password" validate:"required"`
-	PDF      PDF    `yaml:"pdf" validate:"required"`
-}
-
 // Log holds the log configuration
 type Log struct {
 	Level      string `yaml:"level"`
@@ -62,8 +56,6 @@ type Common struct {
 	Log             Log                   `yaml:"log"`
 	Mongo           Mongo                 `yaml:"mongo" validate:"omitempty"`
 	Tracing         OTEL                  `yaml:"tracing" validate:"required"`
-	KeyValue        KeyValue              `yaml:"key_value" validate:"omitempty"`
-	QR              QRCfg                 `yaml:"qr" validate:"omitempty"`
 	Kafka           Kafka                 `yaml:"kafka" validate:"omitempty"`
 	CredentialOffer CredentialOfferConfig `yaml:"credential_offer" validate:"omitempty"`
 }
@@ -73,6 +65,13 @@ type CredentialOfferConfig struct {
 	WalletURL string `yaml:"wallet_url"`
 	IssuerURL string `yaml:"issuer_url" validate:"required"`
 	Type      string `yaml:"type" validate:"required,oneof=credential_offer_uri credential_offer"`
+	QR        QRCfg  `yaml:"qr" validate:"omitempty"`
+}
+
+// QRCfg holds the qr configuration
+type QRCfg struct {
+	RecoveryLevel int `yaml:"recovery_level" validate:"required,min=0,max=3"`
+	Size          int `yaml:"size" validate:"required"`
 }
 
 // SMT Spares Merkel Tree configuration
@@ -91,12 +90,6 @@ type GRPCServer struct {
 type PDF struct {
 	KeepSignedDuration   int `yaml:"keep_signed_duration"`
 	KeepUnsignedDuration int `yaml:"keep_unsigned_duration"`
-}
-
-// QRCfg holds the qr configuration
-type QRCfg struct {
-	RecoveryLevel int `yaml:"recovery_level" validate:"required,min=0,max=3"`
-	Size          int `yaml:"size" validate:"required"`
 }
 
 // JWTAttribute holds the jwt attribute configuration.
@@ -262,17 +255,42 @@ type AuthenticSource struct {
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common           Common                     `yaml:"common"`
-	AuthenticSources map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
-	APIGW            APIGW                      `yaml:"apigw" validate:"omitempty"`
-	Issuer           Issuer                     `yaml:"issuer" validate:"omitempty"`
-	Verifier         Verifier                   `yaml:"verifier" validate:"omitempty"`
-	Datastore        Datastore                  `yaml:"datastore" validate:"omitempty"`
-	Registry         Registry                   `yaml:"registry" validate:"omitempty"`
-	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
-	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
-	UI               UI                         `yaml:"ui" validate:"omitempty"`
-	Portal           Portal                     `yaml:"portal" validate:"omitempty"`
+	Common                Common                            `yaml:"common"`
+	AuthenticSources      map[string]AuthenticSource        `yaml:"authentic_sources" validate:"omitempty"`
+	APIGW                 APIGW                             `yaml:"apigw" validate:"omitempty"`
+	Issuer                Issuer                            `yaml:"issuer" validate:"omitempty"`
+	Verifier              Verifier                          `yaml:"verifier" validate:"omitempty"`
+	Datastore             Datastore                         `yaml:"datastore" validate:"omitempty"`
+	Registry              Registry                          `yaml:"registry" validate:"omitempty"`
+	Persistent            Persistent                        `yaml:"persistent" validate:"omitempty"`
+	MockAS                MockAS                            `yaml:"mock_as" validate:"omitempty"`
+	UI                    UI                                `yaml:"ui" validate:"omitempty"`
+	Portal                Portal                            `yaml:"portal" validate:"omitempty"`
+	CredentialConstructor map[string]*CredentialConstructor `yaml:"credential_constructor" validate:"omitempty"`
+}
+
+type CredentialConstructor struct {
+	VCT          string       `yaml:"vct" validate:"required"`
+	VCTMFilePath string       `yaml:"vctm_file_path" validate:"required"`
+	VCTM         *sdjwt3.VCTM `yaml:"-"`
+}
+
+func (c *CredentialConstructor) LoadFile(ctx context.Context) error {
+	if c.VCTMFilePath == "" {
+		return fmt.Errorf("vctm_file_path is empty vct: %s", c.VCT)
+	}
+
+	fileByte, err := os.ReadFile(c.VCTMFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to read file %s: %w", c.VCTMFilePath, err)
+	}
+
+	if err := json.Unmarshal(fileByte, &c.VCTM); err != nil {
+		fmt.Println("Failed to unmarshal VCTM file:", err)
+		return err
+	}
+
+	return nil
 }
 
 // IsAsyncEnabled checks if the async is enabled

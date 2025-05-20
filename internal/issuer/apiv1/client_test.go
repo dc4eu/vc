@@ -2,81 +2,19 @@ package apiv1
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
-	"vc/internal/issuer/auditlog"
 	"vc/pkg/logger"
-	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/socialsecurity"
-	"vc/pkg/trace"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 )
-
-func mockKey(t *testing.T, keyType string) string {
-	tempFolder := t.TempDir()
-	keyPath := filepath.Join(tempFolder, "signing.key")
-
-	switch keyType {
-	case "ecdsa":
-		privKey, err := ecdsa.GenerateKey(elliptic.P256(), nonRandom)
-		assert.NoError(t, err)
-
-		keyEncoded, err := x509.MarshalECPrivateKey(privKey)
-		assert.NoError(t, err)
-
-		pemEncoded := pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE", Bytes: keyEncoded})
-
-		os.WriteFile(keyPath, pemEncoded, 0644)
-
-	default:
-		assert.Fail(t, "unknown key type")
-	}
-
-	return keyPath
-}
-
-func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logger.Log) *Client {
-	keyPath := mockKey(t, keyType)
-
-	cfg := &model.Cfg{
-		Issuer: model.Issuer{
-			APIServer:      model.APIServer{},
-			Identifier:     "",
-			GRPCServer:     model.GRPCServer{},
-			SigningKeyPath: keyPath,
-			JWTAttribute: model.JWTAttribute{
-				Issuer:                   "https://test-issuer.sunet.se",
-				EnableNotBefore:          false,
-				ValidDuration:            0,
-				VerifiableCredentialType: "",
-				Status:                   "",
-				Kid:                      "",
-			},
-		},
-	}
-
-	tracer, err := trace.NewForTesting(ctx, "test", log.New("trace"))
-	assert.NoError(t, err)
-
-	audit, err := auditlog.New(ctx, cfg, log.New("audit"))
-	assert.NoError(t, err)
-
-	client, err := New(ctx, audit, cfg, tracer, log.New("apiv1"))
-	assert.NoError(t, err)
-
-	return client
-}
 
 func TestPDA1Credential(t *testing.T) {
 	doc := &socialsecurity.PDA1Document{

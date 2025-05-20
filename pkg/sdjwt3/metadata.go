@@ -1,4 +1,4 @@
-package apiv1
+package sdjwt3
 
 import (
 	"encoding/base64"
@@ -10,6 +10,7 @@ type VCTM struct {
 	VCT                string        `json:"vct"`
 	Name               string        `json:"name"`
 	Description        string        `json:"description"`
+	Comment            string        `json:"$comment"`
 	Display            []VCTMDisplay `json:"display"`
 	Claims             []Claim       `json:"claims"`
 	SchemaURL          string        `json:"schema_url"`
@@ -18,7 +19,7 @@ type VCTM struct {
 	ExtendsIntegrity   string        `json:"extends#integrity"`
 }
 
-func (v *VCTM) encode() (string, error) {
+func (v *VCTM) Encode() (string, error) {
 	json, err := json.Marshal(v)
 	if err != nil {
 		return "", err

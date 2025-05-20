@@ -15,16 +15,22 @@ import (
 )
 
 type pidClient struct {
-	log    *logger.Log
-	tracer *trace.Tracer
-	client *Client
+	log                   *logger.Log
+	tracer                *trace.Tracer
+	client                *Client
+	credentialConstructor *model.CredentialConstructor
 }
 
-func newPIDClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*pidClient, error) {
+func newPIDClient(ctx context.Context, client *Client, tracer *trace.Tracer, log *logger.Log) (*pidClient, error) {
 	c := &pidClient{
 		client: client,
 		log:    log,
 		tracer: tracer,
+	}
+
+	c.credentialConstructor = client.cfg.CredentialConstructor["pid"]
+	if err := c.credentialConstructor.LoadFile(ctx); err != nil {
+		return nil, err
 	}
 
 	return c, nil
@@ -39,14 +45,11 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_i
 		return "", err
 	}
 
-	vct := "PIDCredential"
-	c.log.Info("sdjwt", "vct", vct, "status", "start")
-
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
-	body["vct"] = vct
+	body["vct"] = c.credentialConstructor.VCT
 
 	body["cnf"] = map[string]any{
 		"jwk": jwk,
@@ -58,7 +61,7 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_i
 		"alg": "ES256",
 	}
 
-	header["vctm"], err = c.MetadataClaim(vct)
+	header["vctm"], err = c.credentialConstructor.VCTM.Encode()
 	if err != nil {
 		return "", err
 	}
@@ -100,8 +103,6 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_i
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")
-
-	c.log.Info("sdjwt", "vct", vct, "status", "done")
 
 	return signedToken, nil
 }

@@ -6,29 +6,35 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/education"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type openbadgeEndorsementsClient struct {
-	log    *logger.Log
-	tracer *trace.Tracer
-	client *Client
+type openbadgeBasicClient struct {
+	log                   *logger.Log
+	tracer                *trace.Tracer
+	client                *Client
+	credentialConstructor *model.CredentialConstructor
 }
 
-func newOpenbadgeEndorsementsClient(client *Client, tracer *trace.Tracer, log *logger.Log) (*openbadgeEndorsementsClient, error) {
-	c := &openbadgeEndorsementsClient{
+func newOpenbadgeBasicClient(ctx context.Context, client *Client, tracer *trace.Tracer, log *logger.Log) (*openbadgeBasicClient, error) {
+	c := &openbadgeBasicClient{
 		client: client,
 		log:    log,
 		tracer: tracer,
+	}
+	c.credentialConstructor = client.cfg.CredentialConstructor["openbadge_basic"]
+	if err := c.credentialConstructor.LoadFile(ctx); err != nil {
+		return nil, err
 	}
 
 	return c, nil
 }
 
-func (c *openbadgeEndorsementsClient) sdjwt(ctx context.Context, doc *education.OpenbadgeEndorsementDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+func (c *openbadgeBasicClient) sdjwt(ctx context.Context, doc *education.OpenbadgeBasicDocument, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
@@ -40,7 +46,7 @@ func (c *openbadgeEndorsementsClient) sdjwt(ctx context.Context, doc *education.
 		return "", err
 	}
 
-	vct := "EduOpenbadgeEndorsementsCredential"
+	vct := "EduOpenBadgeBasicCredential"
 
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()

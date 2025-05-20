@@ -38,8 +38,8 @@ type Client struct {
 	microCredentialClient      *microCredentialClient
 	openBadgeCompleteClient    *openbadgeCompleteClient
 	openBadgeBasicClient       *openbadgeBasicClient
-	OpenBadgeEndorsementClient *openbadgeEndorsementsClient
-	PIDClient                  *pidClient
+	openBadgeEndorsementClient *openbadgeEndorsementsClient
+	pidClient                  *pidClient
 }
 
 // New creates a new instance of the public api
@@ -54,47 +54,47 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	var err error
-	c.ehicClient, err = newEHICClient(c, tracer, c.log.New("ehic"))
+	c.ehicClient, err = newEHICClient(ctx, c, tracer, c.log.New("ehic"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.pda1Client, err = newPDA1Client(c, tracer, c.log.New("pda1"))
+	c.pda1Client, err = newPDA1Client(ctx, c, tracer, c.log.New("pda1"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.elmClient, err = newElmClient(c, tracer, c.log.New("elm"))
+	c.elmClient, err = newElmClient(ctx, c, tracer, c.log.New("elm"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.diplomaClient, err = newDiplomaClient(c, tracer, c.log.New("diploma"))
+	c.diplomaClient, err = newDiplomaClient(ctx, c, tracer, c.log.New("diploma"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.microCredentialClient, err = newMicroCredentialClient(c, tracer, c.log.New("microCredential"))
+	c.microCredentialClient, err = newMicroCredentialClient(ctx, c, tracer, c.log.New("microCredential"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.openBadgeCompleteClient, err = newOpenbadgeCompleteClient(c, tracer, c.log.New("openbadgeComplete"))
+	c.openBadgeCompleteClient, err = newOpenbadgeCompleteClient(ctx, c, tracer, c.log.New("openbadgeComplete"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.openBadgeBasicClient, err = newOpenbadgeBasicClient(c, tracer, c.log.New("openbadgeBasic"))
+	c.openBadgeBasicClient, err = newOpenbadgeBasicClient(ctx, c, tracer, c.log.New("openbadgeBasic"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.OpenBadgeEndorsementClient, err = newOpenbadgeEndorsementsClient(c, tracer, c.log.New("openbadgeEndorsement"))
+	c.openBadgeEndorsementClient, err = newOpenbadgeEndorsementsClient(ctx, c, tracer, c.log.New("openbadgeEndorsement"))
 	if err != nil {
 		return nil, err
 	}
 
-	c.PIDClient, err = newPIDClient(c, tracer, c.log.New("pid"))
+	c.pidClient, err = newPIDClient(ctx, c, tracer, c.log.New("pid"))
 	if err != nil {
 		return nil, err
 	}

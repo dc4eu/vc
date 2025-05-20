@@ -2,7 +2,7 @@
 	"issuer": "http://vc_dev_apigw:8080",
 	"authorization_endpoint": "http://vc_dev_apigw:8080/authorize",
 	"token_endpoint": "http://vc_dev_apigw:8080/token",
-	"pushed_authorization_request_endpoint": "http://vc_dev_apigw:8080/par",
+	"pushed_authorization_request_endpoint": "http://vc_dev_apigw:8080/op/par",
 	"require_pushed_authorization_requests": true,
 	"token_endpoint_auth_methods_supported": [
 		"none"

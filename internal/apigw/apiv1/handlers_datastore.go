@@ -95,7 +95,7 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 			return err
 		}
 
-		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Common.CredentialOffer.WalletURL)
+		qr, err = credentialOffer.QR(c.cfg.Common.CredentialOffer.QR.RecoveryLevel, c.cfg.Common.CredentialOffer.QR.Size, c.cfg.Common.CredentialOffer.WalletURL)
 		if err != nil {
 			return err
 		}
@@ -106,7 +106,7 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 			return err
 		}
 
-		qr, err = credentialOffer.QR(c.cfg.Common.QR.RecoveryLevel, c.cfg.Common.QR.Size, c.cfg.Common.CredentialOffer.WalletURL, c.cfg.Common.CredentialOffer.IssuerURL)
+		qr, err = credentialOffer.QR(c.cfg.Common.CredentialOffer.QR.RecoveryLevel, c.cfg.Common.CredentialOffer.QR.Size, c.cfg.Common.CredentialOffer.WalletURL, c.cfg.Common.CredentialOffer.IssuerURL)
 		if err != nil {
 			return err
 		}

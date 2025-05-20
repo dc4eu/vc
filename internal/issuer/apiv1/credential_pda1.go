@@ -6,6 +6,7 @@ import (
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
+	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
@@ -15,16 +16,22 @@ import (
 )
 
 type pda1Client struct {
-	log    *logger.Log
-	tracer *trace.Tracer
-	client *Client
+	log                   *logger.Log
+	tracer                *trace.Tracer
+	client                *Client
+	credentialConstructor *model.CredentialConstructor
 }
 
-func newPDA1Client(client *Client, tracer *trace.Tracer, log *logger.Log) (*pda1Client, error) {
+func newPDA1Client(ctx context.Context, client *Client, tracer *trace.Tracer, log *logger.Log) (*pda1Client, error) {
 	c := &pda1Client{
 		client: client,
 		log:    log,
 		tracer: tracer,
+	}
+
+	c.credentialConstructor = client.cfg.CredentialConstructor["pda1"]
+	if err := c.credentialConstructor.LoadFile(ctx); err != nil {
+		return nil, err
 	}
 
 	return c, nil
@@ -39,14 +46,11 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document
 		return "", err
 	}
 
-	vct := "PDA1Credential"
-	c.log.Info("sdjwt", "vct", vct, "status", "start")
-
 	body["nbf"] = int64(time.Now().Unix())
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
-	body["vct"] = vct
+	body["vct"] = c.credentialConstructor.VCT
 
 	body["cnf"] = map[string]any{
 		"jwk": jwk,
@@ -58,7 +62,7 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document
 		"alg": "ES256",
 	}
 
-	header["vctm"], err = c.MetadataClaim(vct)
+	header["vctm"], err = c.credentialConstructor.VCTM.Encode()
 	if err != nil {
 		return "", err
 	}
@@ -147,7 +151,6 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")
-	c.log.Info("sdjwt", "vct", vct, "status", "done")
 
 	return signedToken, nil
 }

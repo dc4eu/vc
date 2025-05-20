@@ -482,9 +482,13 @@ const addViewVPFlowDebugInfoFormArticleToContainer = () => {
                 } else {
                     debugData = String(data);
                 }
+
                 preElement = document.createElement("pre");
                 preElement.innerText = debugData;
-                divResultContainer.appendChild(preElement);
+                const scrollXDiv = document.createElement("div");
+                scrollXDiv.style.overflowX = 'auto';
+                scrollXDiv.appendChild(preElement);
+                divResultContainer.appendChild(scrollXDiv);
             }).catch(err => {
                 console.debug("Unexpected error:", err);
                 displayErrorTag("Failed to fetch vp-flow debug info: ", divResultContainer, err);
@@ -655,7 +659,11 @@ function buildDocumentsTableWithoutContent() {
     const tbody = document.createElement('tbody');
     table.appendChild(tbody);
 
-    return {table: table, tbody: tbody};
+    const scrollXDiv = document.createElement("div");
+    scrollXDiv.style.overflowX = 'auto';
+    scrollXDiv.appendChild(table);
+
+    return {tableDiv: scrollXDiv, table: table, tbody: tbody};
 }
 
 function buildAndDisplayModal(title) {
@@ -1167,7 +1175,7 @@ function displayDocumentsTable(data, divResultContainer) {
 
     const tableBasis = buildDocumentsTableWithoutContent();
     exportToCsvButton.addEventListener('click', () => exportTableToCSV(tableBasis.table));
-    divResultContainer.appendChild(tableBasis.table);
+    divResultContainer.appendChild(tableBasis.tableDiv);
     data.documents.forEach(doc => {
         tableBasis.tbody.appendChild(buildDocumentTableRow(doc));
     });

@@ -186,7 +186,7 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		Nonce:                  vpSession.Nonce,
 		PresentationDefinition: vpSession.PresentationDefinition,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    fqdn,
+			Issuer:    fmt.Sprintf("%s%s", schema, c.cfg.Verifier.FQDN),
 			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"},
 			ExpiresAt: jwt.NewNumericDate(vpSession.SessionExpires),
 			IssuedAt:  now,

@@ -28,6 +28,7 @@ func (c *Client) GetUserCredentialOffers(ctx context.Context, req *vcclient.Logi
 	}
 
 	identity := loginPIDUserReply.Identity
+	//TODO: komplettera searchRequest med birth_place + nationality när issuer och bootstrapdata anpassat. Komplettera även sökimpl för att kunna söka med dessa samt bestäm vad utfall av sök ska bli om man skickar in ex. bara en landskod som matchar men man har dubbla medborgarskap
 	searchRequest := &model.SearchDocumentsRequest{
 		Limit:      100,
 		FamilyName: identity.FamilyName,

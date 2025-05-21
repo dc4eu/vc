@@ -37,8 +37,8 @@ type VCSDJWT struct {
 }
 
 func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey, encryptDirectPostJWT bool) (*ClientMetadata, error) {
-	crv := "P-256"
-	curveSize := 32 // byte-length for P-256
+	curve := privateEmpKey.Curve
+	curveSize := (curve.Params().BitSize + 7) / 8
 	x := bigIntToBase64URL(privateEmpKey.PublicKey.X, curveSize)
 	y := bigIntToBase64URL(privateEmpKey.PublicKey.Y, curveSize)
 
@@ -46,9 +46,10 @@ func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey, encryptDir
 		Kty: "EC",
 		Use: "enc",
 		Kid: uuid.NewString(), //Only for emp keys
-		Crv: crv,
+		Crv: getCurveName(privateEmpKey),
 		X:   x,
 		Y:   y,
+		Alg: "ECDH-ES",
 	}
 
 	clientMetadata := &ClientMetadata{
@@ -68,6 +69,19 @@ func BuildClientMetadataFromECDSAKey(privateEmpKey *ecdsa.PrivateKey, encryptDir
 	}
 
 	return clientMetadata, nil
+}
+
+func getCurveName(priv *ecdsa.PrivateKey) string {
+	switch priv.Curve {
+	case elliptic.P256():
+		return "P-256"
+	case elliptic.P384():
+		return "P-384"
+	case elliptic.P521():
+		return "P-521"
+	default:
+		return "unknown"
+	}
 }
 
 func base64urlNoPad(b []byte) string {

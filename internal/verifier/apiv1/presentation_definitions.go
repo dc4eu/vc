@@ -38,19 +38,16 @@ func diploma() *openid4vp.PresentationDefinition {
 		"urn:credential:diploma",
 		"DiplomaCredential",
 		"Diploma"}
+
 	return &openid4vp.PresentationDefinition{
 		ID:          "Bachelor",
 		Title:       "Bachelor Diploma",
 		Description: "Required Fields: VC type, Grade, EQF Level & Diploma Title",
-		Format: map[string]openid4vp.Format{
-			"vc+sd-jwt": {Alg: []string{"ES256"}},
-		},
+		Format:      format,
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID: "Bachelor",
-				Format: map[string]openid4vp.Format{
-					"vc+sd-jwt": {Alg: []string{"ES256"}},
-				},
+				ID:     "Bachelor",
+				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
 						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
@@ -62,7 +59,6 @@ func diploma() *openid4vp.PresentationDefinition {
 			},
 		},
 	}
-	return nil
 }
 
 func ehic() *openid4vp.PresentationDefinition {
@@ -74,16 +70,15 @@ func ehic() *openid4vp.PresentationDefinition {
 		"urn:credential:ehic",
 		model.CredentialTypeUrnEudiEhic1,
 		"EHICCredential"}
+
 	return &openid4vp.PresentationDefinition{
 		ID:          "EuropeanHealthInsuranceCard",
 		Title:       "European HealthInsurance Card",
 		Description: "Required Fields: VC type, SSN, Family Name, Given Name & Birth Date",
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID: "EuropeanHealthInsuranceCard",
-				Format: map[string]openid4vp.Format{
-					"vc+sd-jwt": {Alg: []string{"ES256"}},
-				},
+				ID:     "EuropeanHealthInsuranceCard",
+				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
 						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: ehicVCTs}},
@@ -111,17 +106,17 @@ func elm() *openid4vp.PresentationDefinition {
 		"urn:credential:elm",
 		"ELMCredential",
 		"ElmCredential",
-		"ELM"}
+		"ELM",
+		"elm"}
+
 	return &openid4vp.PresentationDefinition{
 		ID:          "ELM",
 		Title:       "European Learning Model for EMREX",
 		Description: "Required Fields: VC type, ELM",
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID: "ELM",
-				Format: map[string]openid4vp.Format{
-					"vc+sd-jwt": {Alg: []string{"ES256"}},
-				},
+				ID:     "ELM",
+				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
 						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
@@ -142,16 +137,15 @@ func pda1() *openid4vp.PresentationDefinition {
 		"urn:credential:pda1",
 		"urn:eudi:pda1:1",
 		"PDA1Credential"}
+
 	return &openid4vp.PresentationDefinition{
 		ID:          "PDA1",
 		Title:       "PDA1",
 		Description: "Required Fields: VC type, SSN, Member State of Application",
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID: "PDA1",
-				Format: map[string]openid4vp.Format{
-					"vc+sd-jwt": {Alg: []string{"ES256"}},
-				},
+				ID:     "PDA1",
+				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
 						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: pda1VCTs}},
@@ -176,9 +170,7 @@ func pid() *openid4vp.PresentationDefinition {
 		"urn:eudi:pid:1",
 		"PIDCredential",
 		"PID"}
-	format := map[string]openid4vp.Format{
-		"vc+sd-jwt": {Alg: []string{"ES256"}},
-	}
+
 	return &openid4vp.PresentationDefinition{
 		ID:          "PID",
 		Title:       "PID",

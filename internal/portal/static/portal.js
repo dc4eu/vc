@@ -53,11 +53,11 @@ const doLogin = () => {
     const usernameElement = document.getElementById("username");
     const passwordElement = document.getElementById("password");
 
+    clearInnerElementsOf("error_container");
     if (!validateHasValueAndNotEmpty(usernameElement) || !validateHasValueAndNotEmpty(passwordElement)) {
         displayError("Empty username and/or password");
         return;
     }
-    clearInnerElementsOf("error_container");
 
     const username = usernameElement.value;
     const password = passwordElement.value;

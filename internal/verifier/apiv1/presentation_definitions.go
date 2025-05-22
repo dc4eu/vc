@@ -62,7 +62,7 @@ func diploma() *openid4vp.PresentationDefinition {
 }
 
 func ehic() *openid4vp.PresentationDefinition {
-	ehicVCTs := []string{
+	vctList := []string{
 		"https://vc-interop-3.sunet.se/credential/ehic/1.0",
 		"https://vc-interop-1.sunet.se/credential/ehic/1.0",
 		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
@@ -81,7 +81,7 @@ func ehic() *openid4vp.PresentationDefinition {
 				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: ehicVCTs}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
 						//{Name: "Subject", Path: []string{"$.subject"}},
 						{Name: "Given Name", Path: []string{"$.subject.forename"}},
 						{Name: "Family Name", Path: []string{"$.subject.family_name"}},
@@ -129,7 +129,7 @@ func elm() *openid4vp.PresentationDefinition {
 }
 
 func pda1() *openid4vp.PresentationDefinition {
-	pda1VCTs := []string{
+	vctList := []string{
 		"https://vc-interop-3.sunet.se/credential/pda1/1.0",
 		"https://vc-interop-1.sunet.se/credential/pda1/1.0",
 		"https://satosa-test-1.sunet.se/credential/pda1/1.0",
@@ -148,7 +148,7 @@ func pda1() *openid4vp.PresentationDefinition {
 				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: pda1VCTs}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "SSN", Path: []string{"$.social_security_pin"}},
 						{Name: "Nationality", Path: []string{"$.nationality"}},
 						{Name: "Member State of Application", Path: []string{"$.decision_legislation_applicable.member_state_which_legislation_applies"}},
@@ -160,7 +160,7 @@ func pda1() *openid4vp.PresentationDefinition {
 }
 
 func pid() *openid4vp.PresentationDefinition {
-	pidVCTs := []string{
+	vctList := []string{
 		"https://vc-interop-3.sunet.se/credential/pid/1.0",
 		"https://vc-interop-1.sunet.se/credential/pid/1.0",
 		"https://satosa-test-1.sunet.se/credential/pid/1.0",
@@ -183,7 +183,7 @@ func pid() *openid4vp.PresentationDefinition {
 				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: pidVCTs}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "Given Name", Path: []string{"$.given_name"}},
 						{Name: "Family Name", Path: []string{"$.family_name"}},
 						//TODO: birth_date??? - but wwW uses birthdate right now

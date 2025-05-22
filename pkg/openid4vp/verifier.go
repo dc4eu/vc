@@ -213,6 +213,8 @@ func (arw *AuthorizationResponseWrapper) checkAllSelectiveDisclosures() error {
 	return nil
 }
 
+// ExtractVerificationRecordBasis creates a new VerificationRecord using provided sequence, sessionID, and callbackID.
+// It processes VP and VC results from the AuthorizationResponseWrapper and populates them in the VerificationRecord.
 func (arw *AuthorizationResponseWrapper) ExtractVerificationRecordBasis(sequence int64, sessionID, callbackID string) (*VerificationRecord, error) {
 	record := &VerificationRecord{
 		Sequence:               sequence,

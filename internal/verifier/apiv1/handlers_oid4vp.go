@@ -117,6 +117,7 @@ func bigIntToBase64URL(i *big.Int, size int) string {
 	return base64.RawURLEncoding.EncodeToString(buf)
 }
 
+// GetAuthorizationRequest retrieves an authorization request for a given session ID, returning a signed request object.
 func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) (*openid4vp.AuthorizationRequest, error) {
 	vpSession, err := c.db.VPInteractionSessionColl.Read(ctx, sessionID)
 	if err != nil {

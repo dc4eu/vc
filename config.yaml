@@ -94,7 +94,6 @@ issuer:
   signing_key_path: "/private_ec256.pem"
   issuer_url: "http://172.16.50.2:8080"
   wallet_url: ""
-  credential_offer_url: "http://www.sunet.se" # is this the wallet url?
   jwt_attribute:
     issuer: https://issuer.sunet.se
     enable_not_before: true

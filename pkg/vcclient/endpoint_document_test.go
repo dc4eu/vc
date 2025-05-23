@@ -105,22 +105,15 @@ func TestGet(t *testing.T) {
 				},
 			},
 			expectedDocumentData: &socialsecurity.EHICDocument{
-				Subject: socialsecurity.Subject{
-					Forename:    "test_forename",
-					FamilyName:  "test_family_name",
-					DateOfBirth: "1986-02-23",
+				PersonalAdministrativeNumber: "123123123",
+				IssuingAuthority: socialsecurity.IssuingAuthority{
+					ID:   "1231231",
+					Name: "SUNET",
 				},
-				SocialSecurityPin: "1234",
-				PeriodEntitlement: socialsecurity.PeriodEntitlement{
-					StartingDate: "1970-01-01",
-					EndingDate:   "2038-01-19",
-				},
-				DocumentID: "test_document_id",
-				CompetentInstitution: socialsecurity.CompetentInstitution{
-					InstitutionID:      "SE:1234",
-					InstitutionName:    "Myndigheten",
-					InstitutionCountry: "SE",
-				},
+				IssuingCountry: "SE",
+				DateOfExpiry:   "2038-01-19",
+				DateOfIssuance: "2021-01-19",
+				DocumentNumber: "123123123",
 			},
 		},
 	}

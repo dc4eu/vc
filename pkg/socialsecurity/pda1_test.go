@@ -16,62 +16,28 @@ import (
 
 func GenerateDocument(t *testing.T) map[string]any {
 	document := PDA1Document{
-		SocialSecurityPin: "12345",
-		Nationality:       []string{"SE"},
-		DetailsOfEmployment: []DetailsOfEmployment{
-			{
-				TypeOfEmployment: "01",
-				Name:             "SUNET",
-				Address: AddressWithCountry{
-					Street:   "Tulegatan 11",
-					PostCode: "12354",
-					Town:     "Stockholm",
-					Country:  "SE",
-				},
-				IDsOfEmployer: []IDsOfEmployer{
-					{
-						EmployerID: "SE:1234",
-						TypeOfID:   "01",
-					},
-				},
-			},
+		PersonalAdministrativeNumber: "134",
+		Employer: Employer{
+			ID:   "123123",
+			Name: "SUNET",
 		},
-		PlacesOfWork: []PlacesOfWork{
-			{
-				AFixedPlaceOfWorkExist: false,
-				CountryWork:            "SE",
-				PlaceOfWork: []PlaceOfWork{
-					{
-						CompanyVesselName: "M/S Transpaper",
-						FlagStateHomeBase: "Göteborg",
-						IDsOfCompany: []IDsOfCompany{
-							{
-								CompanyID: "SE:1234",
-								TypeOfID:  "01",
-							},
-						},
-						Address: Address{
-							Street:   "vägen 1",
-							PostCode: "1235",
-							Town:     "Göteborg",
-						},
-					},
-				},
-			},
+		WorkAddress: WorkAddress{
+			Formatted:      "Tulegatan 11",
+			Street_address: "Tulgatan 11",
+			House_number:   "11",
+			Postal_code:    "11353",
+			Locality:       "Stockholm",
+			Region:         "Stockholm",
+			Country:        "SE",
 		},
-		DecisionLegislationApplicable: DecisionLegislationApplicable{
-			MemberStateWhichLegislationApplies: "SE",
-			TransitionalRuleApply:              false,
-			StartingDate:                       "1970-01-01",
-			EndingDate:                         "2038-01-19",
+		IssuingAuthority: IssuingAuthority{
+			ID:   "345345",
+			Name: "SUNET",
 		},
-		StatusConfirmation:           "02",
-		UniqueNumberOfIssuedDocument: "SE1234",
-		CompetentInstitution: PDA1CompetentInstitution{
-			InstitutionID:   "SE:12345",
-			InstitutionName: "test",
-			CountryCode:     "SE",
-		},
+		LegislationCountry: "SE",
+		DateOfExpiry:       "2023-01-01",
+		DateOfIssuance:     "2021-01-01",
+		DocumentNumber:     "09809820394SE",
 	}
 
 	b, err := json.Marshal(document)

@@ -31,24 +31,39 @@ var (
 	}
 
 	mockPDA1 = &socialsecurity.PDA1Document{
-		SocialSecurityPin:             "1234",
-		Nationality:                   []string{"SE"},
-		DetailsOfEmployment:           []socialsecurity.DetailsOfEmployment{},
-		PlacesOfWork:                  []socialsecurity.PlacesOfWork{},
-		DecisionLegislationApplicable: socialsecurity.DecisionLegislationApplicable{},
-		StatusConfirmation:            "",
-		UniqueNumberOfIssuedDocument:  "",
-		CompetentInstitution:          socialsecurity.PDA1CompetentInstitution{},
+		PersonalAdministrativeNumber: "1234",
+		Employer: socialsecurity.Employer{
+			ID:   "09809384",
+			Name: "SUNET",
+		},
+		WorkAddress: socialsecurity.WorkAddress{
+			Formatted:      "Tulegatan 11",
+			Street_address: "Tulegatan 11",
+			House_number:   "11",
+			Postal_code:    "11353",
+			Locality:       "Stockholm",
+			Region:         "Stockholm",
+			Country:        "SE",
+		},
+		IssuingAuthority: socialsecurity.IssuingAuthority{
+			ID:   "123123",
+			Name: "SUNET",
+		},
+		LegislationCountry: "SE",
+		DateOfExpiry:       "2023-01-01",
+		DateOfIssuance:     "2021-01-01",
+		DocumentNumber:     "09809834",
 	}
 
 	mockDiploma = map[string]any{}
 
 	mockEHIC = &socialsecurity.EHICDocument{
-		Subject:              socialsecurity.Subject{},
-		SocialSecurityPin:    "",
-		PeriodEntitlement:    socialsecurity.PeriodEntitlement{},
-		DocumentID:           "",
-		CompetentInstitution: socialsecurity.CompetentInstitution{},
+		PersonalAdministrativeNumber: "",
+		IssuingAuthority:             socialsecurity.IssuingAuthority{},
+		IssuingCountry:               "",
+		DateOfExpiry:                 "",
+		DateOfIssuance:               "",
+		DocumentNumber:               "",
 	}
 
 	mockELM = &education.ELMDocument{}

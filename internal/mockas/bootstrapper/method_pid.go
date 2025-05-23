@@ -31,9 +31,14 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
 		documentData := model.Identity{
-			GivenName:  id.Identities[0].GivenName,
-			FamilyName: id.Identities[0].FamilyName,
-			BirthDate:  id.Identities[0].BirthDate,
+			GivenName:        id.Identities[0].GivenName,
+			FamilyName:       id.Identities[0].FamilyName,
+			BirthDate:        id.Identities[0].BirthDate,
+			BirthPlace:       id.Identities[0].BirthPlace,
+			Nationality:      id.Identities[0].Nationality,
+			ExpiryDate:       id.Identities[0].ExpiryDate,
+			IssuingAuthority: id.Identities[0].IssuingAuthority,
+			IssuingCountry:   id.Identities[0].IssuingCountry,
 		}
 
 		var err error
@@ -45,7 +50,7 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "PID:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    "PID",
+			DocumentType:    "urn:eu.europa.ec.eudi:pid:1",
 			DocumentID:      fmt.Sprintf("document_id_pid_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

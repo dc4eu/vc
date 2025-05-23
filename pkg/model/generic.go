@@ -91,7 +91,7 @@ type MetaData struct {
 
 	// required: true
 	// example: PDA1
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=PDA1 EHIC ELM Diploma MicroCredential PID"`
+	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=PDA1 EHIC ELM Diploma MicroCredential PID urn:eu.europa.ec.eudi:pid:1 urn:eudi:ehic:1 urn:eudi:pda1:1"`
 
 	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
@@ -178,67 +178,35 @@ type Identity struct {
 
 	// required: true
 	// example: Svensson
-	FamilyName string `json:"family_name,omitempty" bson:"family_name"`
+	FamilyName string `json:"family_name,omitempty" bson:"family_name" validate:"required,min=1,max=100"`
 
 	// required: true
 	// example: Magnus
-	GivenName string `json:"given_name,omitempty" bson:"given_name"`
+	GivenName string `json:"given_name,omitempty" bson:"given_name" validate:"required,min=1,max=100"`
 
 	// required: true
 	// example: 1970-01-01 TODO: Day, month, and year?
-	BirthDate string `json:"birth_date,omitempty" bson:"birth_date" validate:"omitempty,datetime=2006-01-02"`
+	BirthDate string `json:"birth_date,omitempty" bson:"birth_date" validate:"required,datetime=2006-01-02"`
 
 	// required: true
 	// example: Stockholm
-	BirthPlace string `json:"birth_place,omitempty" bson:"birth_place"`
+	BirthPlace string `json:"birth_place,omitempty" bson:"birth_place" validate:"omitempty,min=2,max=100"`
 
 	// required: true
 	// example: SE
-	Nationality []string `json:"nationality,omitempty" bson:"nationality" validate:"dive,iso3166_1_alpha2"`
-
-	// required: false
-	// example: 221b Baker street
-	ResidentAddress string `json:"resident_address,omitempty" bson:"resident_address"`
-
-	// required: false
-	// example: England
-	ResidentCountry string `json:"resident_country,omitempty" bson:"resident_country" validate:"omitempty,iso3166_1_alpha2"`
-
-	// required: false
-	// example: england
-	ResidentState string `json:"resident_state,omitempty" bson:"resident_state"`
-
-	// required: false
-	// example: London
-	ResidentCity string `json:"resident_city,omitempty" bson:"resident_city"`
-
-	// required: false
-	// example: W1U 6SG
-	ResidentPostalCode string `json:"resident_postal_code,omitempty" bson:"resident_postal_code"`
-
-	// required: false
-	// example: Baker street
-	ResidentStreet string `json:"resident_street,omitempty" bson:"resident_street"`
-
-	// required: false
-	// example: 221b
-	ResidentHouseNumber string `json:"resident_house_number,omitempty" bson:"resident_house_number"`
+	Nationality []string `json:"nationality,omitempty" bson:"nationality" validate:"omitempty,dive,iso3166_1_alpha2"`
 
 	// required: false
 	// example: <personnummer>
-	PersonalAdministrativeNumber string `json:"personal_administrative_number,omitempty" bson:"personal_administrative_number"`
+	PersonalAdministrativeNumber string `json:"personal_administrative_number,omitempty" bson:"personal_administrative_number" validate:"omitempty,min=4,max=50"`
 
 	// required: false
 	// example: facial image compliant with ISO 19794-5 or ISO 39794 specifications
-	Portrait string `json:"portrait,omitempty" bson:"portrait"`
+	Picture string `json:"picture,omitempty" bson:"picture"`
 
-	// required: false
-	// example: Karlsson
-	FamilyNameBirth string `json:"family_name_birth,omitempty" bson:"family_name_birth"`
+	BirthFamilyName string `json:"birth_family_name,omitempty" bson:"birth_family_name" validate:"omitempty,min=1,max=100"`
 
-	// required: false
-	// example: Mats
-	GivenNameBirth string `json:"given_name_birth,omitempty" bson:"given_name_birth"`
+	BirthGivenName string `json:"birth_given_name,omitempty" bson:"birth_given_name" validate:"omitempty,min=1,max=100"`
 
 	// required: false
 	// example: 0 = not known, 1 = male, 2 = female, ...
@@ -252,19 +220,58 @@ type Identity struct {
 	// example: <+mobile-phone-number>
 	MobilePhoneNumber string `json:"mobile_phone_number,omitempty" bson:"mobile_phone_number" validate:"omitempty,e164"`
 
-	//===== Metadata about the person identification data =====
+	// required: false
+	// example: 221b Baker street
+	ResidentAddress string `json:"resident_address,omitempty" bson:"resident_address"`
 
-	// required: true
-	// example: Date (and if possible time)
-	ExpiryDate string `json:"expiry_date,omitempty" bson:"expiry_date"`
+	// required: false
+	// example: Baker street
+	ResidentStreetAddress string `json:"resident_street_address,omitempty" bson:"resident_street_address" validate:"omitempty,min=1,max=100"`
+
+	// required: false
+	// example: 221b
+	ResidentHouseNumber string `json:"resident_house_number,omitempty" bson:"resident_house_number"`
+
+	// required: false
+	// example: W1U 6SG
+	ResidentPostalCode string `json:"resident_postal_code,omitempty" bson:"resident_postal_code"`
+
+	// required: false
+	// example: London
+	ResidentCity string `json:"resident_city,omitempty" bson:"resident_city"`
+	// required: false
+	// example: england
+	ResidentState string `json:"resident_state,omitempty" bson:"resident_state"`
+	// required: false
+	// example: England
+	ResidentCountry string `json:"resident_country,omitempty" bson:"resident_country" validate:"omitempty,iso3166_1_alpha2"`
+
+	AgeOver14 string `json:"age_over_14,omitempty" bson:"age_over_14"`
+
+	AgeOver16 bool `json:"age_over_16,omitempty" bson:"age_over_16"`
+
+	AgeOver18 bool `json:"age_over_18,omitempty" bson:"age_over_18"`
+
+	AgeOver21 bool `json:"age_over_21,omitempty" bson:"age_over_21"`
+
+	AgeOver65 bool `json:"age_over_65,omitempty" bson:"age_over_65"`
+
+	AgeInYears int `json:"age_in_years,omitempty" bson:"age_in_years"`
+
+	AgeBirthYear int `json:"age_birth_year,omitempty" bson:"age_birth_year"`
 
 	// required: true
 	// example:
 	IssuingAuthority string `json:"issuing_authority,omitempty" bson:"issuing_authority"`
-
 	// required: true
 	// example:
 	IssuingCountry string `json:"issuing_country,omitempty" bson:"issuing_country" validate:"omitempty,iso3166_1_alpha2"`
+
+	// required: true
+	// example: Date (and if possible time)
+	ExpiryDate string `json:"expiry_date,omitempty" bson:"expiry_date" validate:"omitempty,datetime=2006-01-02"`
+
+	IssuanceDate string `json:"issuance_date,omitempty" bson:"issuance_date"`
 
 	// required: false
 	// example:
@@ -274,41 +281,7 @@ type Identity struct {
 	// example:
 	IssuingJurisdiction string `json:"issuing_jurisdiction,omitempty" bson:"issuing_jurisdiction"`
 
-	// required: false
-	// example:
-	LocationStatus string `json:"location_status,omitempty" bson:"location_status"`
-
-	//TODO: remove deprecated identity attributes below when all is working (testdata, bootstrap, database-operations, etc):
-
-	// required: -
-	// example: Karlsson
-	// Deprecated: Use FamilyNameBirth
-	FamilyNameAtBirth string `json:"family_name_at_birth,omitempty" bson:"family_name_at_birth"`
-
-	// required: -
-	// example: Magnus
-	// Deprecated: Use GivenNameBirth
-	GivenNameAtBirth string `json:"given_name_at_birth,omitempty" bson:"given_name_at_birth"`
-
-	// required: -
-	// example: sweden
-	// Deprecated: Use BirthPlace
-	BirthCountry string `json:"birth_country,omitempty" bson:"birth_country"`
-
-	// required: -
-	// example: Stockholm
-	// Deprecated: Use BirthPlace
-	BirthState string `json:"birth_state,omitempty" bson:"birth_state"`
-
-	// required: -
-	// example: Stockholm
-	// Deprecated: Use BirthPlace
-	BirthCity string `json:"birth_city,omitempty" bson:"birth_city"`
-
-	// required: -
-	// example: male
-	// Deprecated: Use Sex
-	Gender string `json:"gender,omitempty" bson:"gender"`
+	TrustAnchor string `json:"trust_anchor,omitempty" bson:"trust_anchor"`
 }
 
 // Marshal marshals the document to a map

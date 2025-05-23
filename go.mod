@@ -7,7 +7,6 @@ require (
 	github.com/MichaelFraser99/go-sd-jwt v1.3.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/creasty/defaults v1.8.0
-	github.com/ethereum/go-ethereum v1.15.7
 	github.com/gin-contrib/cors v1.7.5
 	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/sessions v1.0.3
@@ -73,7 +72,6 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
-	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect

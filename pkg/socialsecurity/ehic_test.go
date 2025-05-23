@@ -14,22 +14,15 @@ import (
 
 func generateDocument(t *testing.T) map[string]any {
 	document := EHICDocument{
-		Subject: Subject{
-			Forename:    "Magnus",
-			FamilyName:  "Svensson",
-			DateOfBirth: "1986-02-23",
+		PersonalAdministrativeNumber: "123123123",
+		IssuingAuthority: IssuingAuthority{
+			ID:   "1231231",
+			Name: "SUNET",
 		},
-		SocialSecurityPin: "1234",
-		PeriodEntitlement: PeriodEntitlement{
-			StartingDate: "1970-01-01",
-			EndingDate:   "2038-01-19",
-		},
-		DocumentID: "12354",
-		CompetentInstitution: CompetentInstitution{
-			InstitutionID:      "SE:1234",
-			InstitutionName:    "Myndigheten",
-			InstitutionCountry: "SE",
-		},
+		IssuingCountry: "SE",
+		DateOfExpiry:   "2038-01-19",
+		DateOfIssuance: "2021-01-19",
+		DocumentNumber: "123123123",
 	}
 
 	b, err := json.Marshal(document)
@@ -46,27 +39,15 @@ func generateDocument(t *testing.T) map[string]any {
 }
 
 var mockEHICJSON = `{
-    "subject": {
-        "forename": "Magnus",
-        "family_name": "Svensson",
-        "date_of_birth": "1986-02-23",
-        "other_elements": {
-            "sex": "01",
-            "forename_at_birth": "Magnus",
-            "family_name_at_birth": "Svensson"
-        }
-    },
-    "social_security_pin": "1234",
-    "period_entitlement": {
-        "starting_date": "1970-01-01",
-        "ending_date": "2038-01-19"
-    },
-    "document_id": "12354",
-    "competent_institution": {
-        "institution_id": "SE:1234",
-        "institution_name": "Myndigheten",
-        "institution_country": "SE"
-    }
+	"personal_administrative_number": "123123123",
+	"issuing_authority": {
+		"id": "1231231",
+		"name": "SUNET"
+	},
+	"issuing_country": "SE",
+	"date_of_expiry": "2038-01-19",
+	"date_of_issuance": "2021-01-19",
+	"document_number": "123123123"
 }`
 
 func mockEHICMap(t *testing.T) map[string]any {
@@ -88,7 +69,7 @@ func TestEHICSchemaValidation(t *testing.T) {
 			name: "from struct to map",
 			payload: &model.CompleteDocument{
 				Meta: &model.MetaData{
-					DocumentDataValidationRef: "file://../../standards/schema_ehic.json",
+					DocumentDataValidationRef: "https://demo-issuer.wwwallet.org/public/creds/ehic/european-health-insurance-card-schema-dc4eu-01.json",
 				},
 				DocumentData: generateDocument(t),
 			},
@@ -98,7 +79,7 @@ func TestEHICSchemaValidation(t *testing.T) {
 			name: "from string to map",
 			payload: &model.CompleteDocument{
 				Meta: &model.MetaData{
-					DocumentDataValidationRef: "file://../../standards/schema_ehic.json",
+					DocumentDataValidationRef: "https://demo-issuer.wwwallet.org/public/creds/ehic/european-health-insurance-card-schema-dc4eu-01.json",
 				},
 				DocumentData: mockEHICMap(t),
 			},

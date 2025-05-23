@@ -40,8 +40,6 @@ func newEHICClient(ctx context.Context, client *Client, tracer *trace.Tracer, lo
 		return nil, err
 	}
 
-	c.log.Debug("ehic", "vctm", c.credentialConstructor.VCTM)
-
 	return c, nil
 }
 
@@ -78,42 +76,20 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 		return "", err
 	}
 
-	subjectSelectiveDisclosure, err := disclosure.NewFromObject("subject", body["subject"], salt)
+	personalAdministrativeNumber, err := disclosure.NewFromObject("personal_administrative_number", body["personal_administrative_number"], salt)
 	if err != nil {
 		return "", err
 	}
-	delete(body, "subject")
+	delete(body, "personal_administrative_number")
 
-	socialSecurityPinDisclosure, err := disclosure.NewFromObject("social_security_pin", body["social_security_pin"], salt)
+	documentNumber, err := disclosure.NewFromObject("document_number", body["document_number"], salt)
 	if err != nil {
 		return "", err
 	}
-	delete(body, "social_security_pin")
-
-	periodEntitlementDisclosure, err := disclosure.NewFromObject("period_entitlement", body["period_entitlement"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "period_entitlement")
-
-	documentIDDisclosure, err := disclosure.NewFromObject("document_id", body["document_id"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "document_id")
-
-	competentInstitutionDisclosure, err := disclosure.NewFromObject("competent_institution", body["competent_institution"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "competent_institution")
 
 	body["_sd"] = []string{
-		string(subjectSelectiveDisclosure.Hash(sha256.New())),
-		string(socialSecurityPinDisclosure.Hash(sha256.New())),
-		string(periodEntitlementDisclosure.Hash(sha256.New())),
-		string(documentIDDisclosure.Hash(sha256.New())),
-		string(competentInstitutionDisclosure.Hash(sha256.New())),
+		string(personalAdministrativeNumber.Hash(sha256.New())),
+		string(documentNumber.Hash(sha256.New())),
 	}
 
 	signedToken, err := sdjwt3.Sign(header, body, jwt.SigningMethodES256, c.client.privateKey)
@@ -122,11 +98,8 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 	}
 
 	ds := []string{
-		subjectSelectiveDisclosure.EncodedValue,
-		socialSecurityPinDisclosure.EncodedValue,
-		periodEntitlementDisclosure.EncodedValue,
-		documentIDDisclosure.EncodedValue,
-		competentInstitutionDisclosure.EncodedValue,
+		personalAdministrativeNumber.EncodedValue,
+		documentNumber.EncodedValue,
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")

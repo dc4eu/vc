@@ -67,70 +67,21 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document
 		return "", err
 	}
 
-	placesOfWorkDisclosure, err := disclosure.NewFromObject("places_of_work", body["places_of_work"], salt)
+	personalAdministrative_number, err := disclosure.NewFromObject("personal_administrative_number", body["personal_administrative_number"], salt)
 	if err != nil {
 		return "", err
 	}
-	delete(body, "places_of_work")
+	delete(body, "personal_administrative_number")
 
-	socialSecurityNumberDisclosure, err := disclosure.NewFromObject("social_security_pin", body["social_security_pin"], salt)
+	documentNumber, err := disclosure.NewFromObject("document_number", body["document_number"], salt)
 	if err != nil {
 		return "", err
 	}
-	delete(body, "social_security_pin")
-
-	nationalityDisclosure, err := disclosure.NewFromObject("nationality", body["nationality"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "nationality")
-
-	detailsOfEmploymentDisclosure, err := disclosure.NewFromObject("details_of_employment", body["details_of_employment"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "details_of_employment")
-
-	decisionLegislationApplicableDisclosure, err := disclosure.NewFromObject("decision_legislation_applicable", body["decision_legislation_applicable"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "decision_legislation_applicable")
-
-	statusConfirmationDisclosure, err := disclosure.NewFromObject("status_confirmation", body["status_confirmation"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "status_confirmation")
-
-	uniqueNumberOfIssuedDocumentDisclosure, err := disclosure.NewFromObject("unique_number_of_issued_document", body["unique_number_of_issued_document"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "unique_number_of_issued_document")
-
-	competentInstitutionDisclosure, err := disclosure.NewFromObject("competent_institution", body["competent_institution"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "competent_institution")
-
-	personDisclosure, err := disclosure.NewFromObject("person", body["person"], salt)
-	if err != nil {
-		return "", err
-	}
-	delete(body, "person")
+	delete(body, "document_number")
 
 	body["_sd"] = []string{
-		string(placesOfWorkDisclosure.Hash(sha256.New())),
-		string(socialSecurityNumberDisclosure.Hash(sha256.New())),
-		string(nationalityDisclosure.Hash(sha256.New())),
-		string(detailsOfEmploymentDisclosure.Hash(sha256.New())),
-		string(decisionLegislationApplicableDisclosure.Hash(sha256.New())),
-		string(statusConfirmationDisclosure.Hash(sha256.New())),
-		string(uniqueNumberOfIssuedDocumentDisclosure.Hash(sha256.New())),
-		string(competentInstitutionDisclosure.Hash(sha256.New())),
-		string(personDisclosure.Hash(sha256.New())),
+		string(personalAdministrative_number.Hash(sha256.New())),
+		string(documentNumber.Hash(sha256.New())),
 	}
 
 	signedToken, err := sdjwt3.Sign(header, body, jwt.SigningMethodES256, c.client.privateKey)
@@ -139,15 +90,8 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document
 	}
 
 	ds := []string{
-		placesOfWorkDisclosure.EncodedValue,
-		socialSecurityNumberDisclosure.EncodedValue,
-		nationalityDisclosure.EncodedValue,
-		detailsOfEmploymentDisclosure.EncodedValue,
-		decisionLegislationApplicableDisclosure.EncodedValue,
-		statusConfirmationDisclosure.EncodedValue,
-		uniqueNumberOfIssuedDocumentDisclosure.EncodedValue,
-		competentInstitutionDisclosure.EncodedValue,
-		personDisclosure.EncodedValue,
+		personalAdministrative_number.EncodedValue,
+		documentNumber.EncodedValue,
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")

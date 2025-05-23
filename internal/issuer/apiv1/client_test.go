@@ -17,65 +17,6 @@ import (
 )
 
 func TestPDA1Credential(t *testing.T) {
-	doc := &socialsecurity.PDA1Document{
-		SocialSecurityPin: "1234",
-		Nationality:       []string{"SE"},
-		DetailsOfEmployment: []socialsecurity.DetailsOfEmployment{
-			{
-				TypeOfEmployment: "01",
-				Name:             "Corp inc.",
-				Address: socialsecurity.AddressWithCountry{
-					Street:   "street",
-					PostCode: "12345",
-					Town:     "town",
-					Country:  "SE",
-				},
-				IDsOfEmployer: []socialsecurity.IDsOfEmployer{
-					{
-						EmployerID: "123",
-						TypeOfID:   "01",
-					},
-				},
-			},
-		},
-		PlacesOfWork: []socialsecurity.PlacesOfWork{
-			{
-				AFixedPlaceOfWorkExist: false,
-				CountryWork:            "SE",
-				PlaceOfWork: []socialsecurity.PlaceOfWork{
-					{
-						CompanyVesselName: "M/S Transpaper",
-						FlagStateHomeBase: "Göteborg",
-						IDsOfCompany: []socialsecurity.IDsOfCompany{
-							{
-								CompanyID: "123",
-								TypeOfID:  "01",
-							},
-						},
-						Address: socialsecurity.Address{
-							Street:   "street",
-							PostCode: "1235",
-							Town:     "town",
-						},
-					},
-				},
-			},
-		},
-		DecisionLegislationApplicable: socialsecurity.DecisionLegislationApplicable{
-			MemberStateWhichLegislationApplies: "",
-			TransitionalRuleApply:              false,
-			StartingDate:                       "1970-01-01",
-			EndingDate:                         "2038-01-19",
-		},
-		StatusConfirmation:           "01",
-		UniqueNumberOfIssuedDocument: "asldmnjklh123laa123",
-		CompetentInstitution: socialsecurity.PDA1CompetentInstitution{
-			InstitutionID:   "SE:123",
-			InstitutionName: "SUNET",
-			CountryCode:     "SE",
-		},
-	}
-
 	want := map[string]any{
 		"_sd": []any{
 			"2D0ScjxNWXCvr9bcj1rVWLAW4xZRsHHq4rzB00RbapI",
@@ -110,7 +51,7 @@ func TestPDA1Credential(t *testing.T) {
 	deterministicSalt := string("salt")
 
 	t.Run("Create", func(t *testing.T) {
-		token, err := client.pda1Client.sdjwt(ctx, doc, nil, &deterministicSalt)
+		token, err := client.pda1Client.sdjwt(ctx, mockPDA1, nil, &deterministicSalt)
 		assert.NoError(t, err)
 
 		_, bodyEncoded, _, _, err := sdjwt3.SplitToken(token)
@@ -140,7 +81,7 @@ func TestPDA1Credential(t *testing.T) {
 	})
 
 	t.Run("Validate", func(t *testing.T) {
-		token, err := client.pda1Client.sdjwt(ctx, doc, nil, &deterministicSalt)
+		token, err := client.pda1Client.sdjwt(ctx, mockPDA1, nil, &deterministicSalt)
 		assert.NoError(t, err)
 
 		valid, err := sdjwt3.Validate(token, client.publicKey)
@@ -164,18 +105,15 @@ func TestPDA1Credential(t *testing.T) {
 
 func TestEHICCredential(t *testing.T) {
 	doc := &socialsecurity.EHICDocument{
-		Subject:           socialsecurity.Subject{Forename: "kalle", FamilyName: "karlsson", DateOfBirth: "1980-01-01"},
-		SocialSecurityPin: "12334",
-		PeriodEntitlement: socialsecurity.PeriodEntitlement{
-			StartingDate: "1970-01-01",
-			EndingDate:   "2038-01-19",
+		PersonalAdministrativeNumber: "0918230998123",
+		IssuingAuthority: socialsecurity.IssuingAuthority{
+			ID:   "1234",
+			Name: "SUNET",
 		},
-		DocumentID: "7f87b4c4-9d0a-11ef-bc21-3b0ccffe7106",
-		CompetentInstitution: socialsecurity.CompetentInstitution{
-			InstitutionID:      "SE:123",
-			InstitutionName:    "SUNET",
-			InstitutionCountry: "SE",
-		},
+		IssuingCountry: "SE",
+		DateOfExpiry:   "2038-01-19",
+		DateOfIssuance: "2021-01-19",
+		DocumentNumber: "7f87b4c4-9d0a-11ef-bc21-3b0ccffe7106",
 	}
 
 	want := map[string]any{

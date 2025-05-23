@@ -60,62 +60,29 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 		}
 
 		document := &socialsecurity.PDA1Document{
-			SocialSecurityPin: row[6],
-			Nationality:       []string{row[7]},
-			DetailsOfEmployment: []socialsecurity.DetailsOfEmployment{
-				{
-					TypeOfEmployment: row[8],
-					Name:             row[9],
-					Address: socialsecurity.AddressWithCountry{
-						Street:   row[12],
-						PostCode: row[14],
-						Town:     row[13],
-						Country:  row[15],
-					},
-					IDsOfEmployer: []socialsecurity.IDsOfEmployer{
-						{
-							EmployerID: row[10],
-							TypeOfID:   row[11],
-						},
-					},
-				},
+			PersonalAdministrativeNumber: row[6],
+			Employer: socialsecurity.Employer{
+				ID:   row[10],
+				Name: row[11],
 			},
-			PlacesOfWork: []socialsecurity.PlacesOfWork{
-				{
-					AFixedPlaceOfWorkExist: false,
-					CountryWork:            row[16],
-					PlaceOfWork: []socialsecurity.PlaceOfWork{
-						{
-							CompanyVesselName: "",
-							FlagStateHomeBase: row[21],
-							IDsOfCompany: []socialsecurity.IDsOfCompany{
-								{
-									CompanyID: row[18],
-									TypeOfID:  row[19],
-								},
-							},
-							Address: socialsecurity.Address{
-								Street:   row[22],
-								PostCode: row[24],
-								Town:     row[23],
-							},
-						},
-					},
-				},
+			WorkAddress: socialsecurity.WorkAddress{
+				Formatted:      row[12],
+				Street_address: "Tulegatan",
+				House_number:   "11",
+				Postal_code:    row[14],
+				Locality:       row[13],
+				Region:         row[13],
+				Country:        row[15],
 			},
-			DecisionLegislationApplicable: socialsecurity.DecisionLegislationApplicable{
-				MemberStateWhichLegislationApplies: row[26],
-				TransitionalRuleApply:              false,
-				StartingDate:                       row[28],
-				EndingDate:                         row[29],
+			IssuingAuthority: socialsecurity.IssuingAuthority{
+				ID:   "01",
+				Name: "SUNET",
 			},
-			StatusConfirmation:           row[30],
-			UniqueNumberOfIssuedDocument: "",
-			CompetentInstitution: socialsecurity.PDA1CompetentInstitution{
-				InstitutionID:   row[32],
-				InstitutionName: row[33],
-				CountryCode:     row[34],
-			},
+			LegislationCountry: "EU",
+			IssuingCountry:     "EU",
+			DateOfExpiry:       row[29],
+			DateOfIssuance:     row[28],
+			DocumentNumber:     row[6], // something better?
 		}
 
 		var err error
@@ -127,7 +94,7 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: row[3],
 			DocumentVersion: "1.0.0",
-			DocumentType:    "PDA1",
+			DocumentType:    model.CredentialTypeUrnEudiPda11,
 			DocumentID:      fmt.Sprintf("document_id_pda1_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{

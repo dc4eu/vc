@@ -40,14 +40,18 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	}
 
 	var err error
-	c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain, err = c.cfg.LoadIssuerMetadata(ctx)
-	if err != nil {
-		return nil, err
+	if c.cfg.APIGW.IssuerMetadata.Path != "" {
+		c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain, err = c.cfg.LoadIssuerMetadata(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	c.oauth2Metadata, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain, err = c.cfg.LoadOAuth2Metadata(ctx)
-	if err != nil {
-		return nil, err
+	if c.cfg.APIGW.OauthServer.Metadata.Path != "" {
+		c.oauth2Metadata, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain, err = c.cfg.LoadOAuth2Metadata(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Specifies the issuer configuration based on the issuer identifier, should be initialized in main I guess.

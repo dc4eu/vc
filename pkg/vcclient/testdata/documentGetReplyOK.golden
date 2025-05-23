@@ -22,22 +22,15 @@
             "credential_valid_to": -1730367911
         },
         "document_data": {
-            "subject": {
-                "forename": "test_forename",
-                "family_name": "test_family_name",
-                "date_of_birth": "1986-02-23"
-            },
-            "social_security_pin": "1234",
-            "period_entitlement": {
-                "starting_date": "1970-01-01",
-                "ending_date": "2038-01-19"
-            },
-            "document_id": "test_document_id",
-            "competent_institution": {
-                "institution_id": "SE:1234",
-                "institution_name": "Myndigheten",
-                "institution_country": "SE"
-            }
+            "personal_administrative_number": "123123123",
+	        "issuing_authority": {
+		        "id": "1231231",
+		        "name": "SUNET"
+	        },
+        	"issuing_country": "SE",
+        	"date_of_expiry": "2038-01-19",
+        	"date_of_issuance": "2021-01-19",
+        	"document_number": "123123123"
         }
     }
 }

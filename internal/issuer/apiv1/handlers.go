@@ -61,7 +61,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	var token string
 	var err error
 	switch req.DocumentType {
-	case "PDA1":
+	case model.CredentialTypeUrnEudiPda11:
 		doc := &socialsecurity.PDA1Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
@@ -72,7 +72,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case "EHIC":
+	case model.CredentialTypeUrnEudiEhic1:
 		doc := &socialsecurity.EHICDocument{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
@@ -127,7 +127,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case "PID":
+	case model.CredentialTypeUrnEuEuropaEcEudiPid1:
 		doc := &model.Identity{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err

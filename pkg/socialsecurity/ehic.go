@@ -4,34 +4,17 @@ import "encoding/json"
 
 // EHICDocument is the EHIC model
 type EHICDocument struct {
-	Subject              Subject              `json:"subject" bson:"subject" validate:"required"`
-	SocialSecurityPin    string               `json:"social_security_pin" bson:"socialSecurityPin" validate:"required"`
-	PeriodEntitlement    PeriodEntitlement    `json:"period_entitlement" bson:"periodOfEntitlement" validate:"required"`
-	DocumentID           string               `json:"document_id" bson:"documentID" validate:"required"`
-	CompetentInstitution CompetentInstitution `json:"competent_institution" bson:"competent_institution" validate:"required"`
+	PersonalAdministrativeNumber string           `json:"personal_administrative_number" bson:"personalAdministrativeNumber" validate:"required,min=4,max=50"`
+	IssuingAuthority             IssuingAuthority `json:"issuing_authority" bson:"issuingAuthority" validate:"required"`
+	IssuingCountry               string           `json:"issuing_country" bson:"issuingCountry" validate:"required,iso3166_1_alpha2"`
+	DateOfExpiry                 string           `json:"date_of_expiry" bson:"dateOfExpiry" validate:"required"`
+	DateOfIssuance               string           `json:"date_of_issuance" bson:"dateOfIssuance" validate:"required"`
+	DocumentNumber               string           `json:"document_number" bson:"documentNumber" validate:"required,min=4,max=50"`
 }
 
-type Subject struct {
-	Forename    string `json:"forename" bson:"forename" validate:"required"`
-	FamilyName  string `json:"family_name" bson:"familyName" validate:"required"`
-	DateOfBirth string `json:"date_of_birth" bson:"dateOfBirth" validate:"required"`
-}
-
-type OtherElements struct {
-	Sex               string `json:"sex" bson:"sex" validate:"required"`
-	ForenameAtBirth   string `json:"forename_at_birth" bson:"forenameAtBirth" validate:"required"`
-	FamilyNameAtBirth string `json:"family_name_at_birth" bson:"familyNameAtBirth" validate:"required"`
-}
-
-type PeriodEntitlement struct {
-	StartingDate string `json:"starting_date" bson:"startingDate" validate:"required"`
-	EndingDate   string `json:"ending_date" bson:"endingDate" validate:"required"`
-}
-
-type CompetentInstitution struct {
-	InstitutionID      string `json:"institution_id" bson:"instidutionID" validate:"required"`
-	InstitutionName    string `json:"institution_name" bson:"institutionName" validate:"required"`
-	InstitutionCountry string `json:"institution_country" bson:"institutionCountry" validate:"required"`
+type IssuingAuthority struct {
+	ID   string `json:"id" bson:"id" validate:"required,min=1,max=20"`
+	Name string `json:"name" bson:"name" validate:"required,min=1,max=100"`
 }
 
 // Marshal marshals the document to a map

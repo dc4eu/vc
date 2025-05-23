@@ -57,28 +57,28 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 		}
 	}
 
-	var credentialConfigurationID string
-	switch req.Meta.DocumentType {
-	case "PDA1":
-		credentialConfigurationID = "PDA1Credential"
-	case "EHIC":
-		credentialConfigurationID = "EHICCredential"
-	case "Diploma":
-		credentialConfigurationID = "DiplomaCredential"
-	case "MicroCredential":
-		credentialConfigurationID = "MicroCredential"
-	case "ELM":
-		credentialConfigurationID = "ELMCredential"
-	case "PID":
-		credentialConfigurationID = "PIDCredential"
-	default:
-		return fmt.Errorf("unsupported document type %s", req.Meta.DocumentType)
-	}
+	//var credentialConfigurationID string
+	//switch req.Meta.DocumentType {
+	//case "PDA1":
+	//	credentialConfigurationID = "PDA1Credential"
+	//case "EHIC":
+	//	credentialConfigurationID = "EHICCredential"
+	//case "Diploma":
+	//	credentialConfigurationID = "DiplomaCredential"
+	//case "MicroCredential":
+	//	credentialConfigurationID = "MicroCredential"
+	//case "ELM":
+	//	credentialConfigurationID = "ELMCredential"
+	//case "PID":
+	//	credentialConfigurationID = "PIDCredential"
+	//default:
+	//	return fmt.Errorf("unsupported document type %s", req.Meta.DocumentType)
+	//}
 
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{
 		CredentialIssuer: c.cfg.Issuer.IssuerURL,
 		CredentialConfigurationIDs: []string{
-			credentialConfigurationID,
+			req.Meta.DocumentType,
 		},
 		Grants: map[string]any{
 			"authorization_code": openid4vci.GrantAuthorizationCode{

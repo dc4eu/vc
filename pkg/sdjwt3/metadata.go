@@ -19,15 +19,15 @@ type VCTM struct {
 	ExtendsIntegrity   string        `json:"extends#integrity"`
 }
 
-func (v *VCTM) Encode() (string, error) {
+func (v *VCTM) Encode() ([]string, error) {
 	json, err := json.Marshal(v)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	encoded := base64.URLEncoding.EncodeToString(json)
 
-	return encoded, nil
+	return []string{encoded}, nil
 
 }
 

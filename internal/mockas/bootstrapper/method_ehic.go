@@ -59,7 +59,7 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 
 		CardNumber := row[7]
 		InstitutionID := row[8]
-		InstitutionName := row[9]
+		//InstitutionName := row[9]
 		InstitutionCountry := row[10]
 
 		identity, ok := c.client.identities[pidNumber]
@@ -68,22 +68,15 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 		}
 
 		document := &socialsecurity.EHICDocument{
-			Subject: socialsecurity.Subject{
-				Forename:    identity.Identities[0].GivenName,
-				FamilyName:  identity.Identities[0].FamilyName,
-				DateOfBirth: identity.Identities[0].BirthDate,
+			PersonalAdministrativeNumber: SocialSecurityPin,
+			IssuingAuthority: socialsecurity.IssuingAuthority{
+				ID:   InstitutionID,
+				Name: "SUNET",
 			},
-			SocialSecurityPin: SocialSecurityPin,
-			PeriodEntitlement: socialsecurity.PeriodEntitlement{
-				StartingDate: startDate,
-				EndingDate:   endDate,
-			},
-			DocumentID: CardNumber,
-			CompetentInstitution: socialsecurity.CompetentInstitution{
-				InstitutionID:      InstitutionID,
-				InstitutionName:    InstitutionName,
-				InstitutionCountry: InstitutionCountry,
-			},
+			IssuingCountry: InstitutionCountry,
+			DateOfExpiry:   endDate,
+			DateOfIssuance: startDate,
+			DocumentNumber: CardNumber,
 		}
 
 		var err error
@@ -95,7 +88,7 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: row[2],
 			DocumentVersion: "1.0.0",
-			DocumentType:    "EHIC",
+			DocumentType:    model.CredentialTypeUrnEudiEhic1,
 			DocumentID:      fmt.Sprintf("document_id_ehic_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{

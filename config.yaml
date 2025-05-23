@@ -50,7 +50,6 @@ credential_constructor:
       - "kafka0:9092"
       - "kafka1:9092"
 
-
 authentic_sources:
   SUNET_v1:
     country_code: "SE"
@@ -84,7 +83,6 @@ authentic_sources:
         profile: "SD-JWT"
       PDA1:
         profile: "SD-JWT"
-
 
 
 issuer:
@@ -128,11 +126,21 @@ persistent:
 
 apigw:
   identifier: "SUNET_v1"
+  api_server:
+    addr: :8080
+    basic_auth:
+    enabled: false
+    users:
+      admin: "secret123"
   trust_model:
     type: "openid_federation"
     trust_anchors:
       - "https://example.com/trust_anchor.pem"
   oauth_server:
+    metadata:
+      path: /metadata/oauth2_metadata.json
+      signing_key_path: "/pki/apigw.key"
+      signing_chain_path: "/pki/apigw.crt"
     clients:
       "1003":
         type: "confidential"
@@ -140,20 +148,6 @@ apigw:
         scopes:
           - "pid:sd_jwt_vc"
           - "diploma"
-    metadata:
-      path: /metadata/oauth2_metadata.json
-      signing_key_path: "/pki/apigw.key"
-      signing_chain_path: "/pki/apigw.crt"
-
-  api_server:
-    addr: :8080
-    basic_auth:
-      enabled: false
-      users:
-        client_1: "secret_1"
-        client_2: "secret_2"
-        client_3: "secret_3"
-        client_4: "secret_4"
   issuer_metadata:
     path: "/metadata/issuer_metadata.json"
     signing_key_path: "/pki/apigw.key"

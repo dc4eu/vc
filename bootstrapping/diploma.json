@@ -21,7 +21,14 @@
         },
         "family_name": "Mirren",
         "given_name": "Helen",
-        "birth_date": "1996-01-30"
+        "birth_date": "1996-01-30",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -441,7 +448,14 @@
         },
         "family_name": "Momoa",
         "given_name": "Jason",
-        "birth_date": "1983-08-20"
+        "birth_date": "1983-08-20",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -861,7 +875,14 @@
         },
         "family_name": "Oldman",
         "given_name": "Gary",
-        "birth_date": "1988-09-09"
+        "birth_date": "1988-09-09",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -1281,7 +1302,14 @@
         },
         "family_name": "Pacino",
         "given_name": "Al",
-        "birth_date": "1984-06-11"
+        "birth_date": "1984-06-11",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -1701,7 +1729,14 @@
         },
         "family_name": "Pfeiffer",
         "given_name": "Michelle",
-        "birth_date": "1992-12-15"
+        "birth_date": "1992-12-15",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -2121,7 +2156,14 @@
         },
         "family_name": "Phoenix",
         "given_name": "Joaquin",
-        "birth_date": "1979-10-16"
+        "birth_date": "1979-10-16",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -2541,7 +2583,14 @@
         },
         "family_name": "Pitt",
         "given_name": "Brad",
-        "birth_date": "1974-12-07"
+        "birth_date": "1974-12-07",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -2961,7 +3010,14 @@
         },
         "family_name": "Portman",
         "given_name": "Natalie",
-        "birth_date": "2005-09-01"
+        "birth_date": "2005-09-01",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -3381,7 +3437,14 @@
         },
         "family_name": "Pratt",
         "given_name": "Chris",
-        "birth_date": "1974-01-07"
+        "birth_date": "1974-01-07",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -3801,7 +3864,14 @@
         },
         "family_name": "Reeves",
         "given_name": "Keanu",
-        "birth_date": "1985-11-26"
+        "birth_date": "1985-11-26",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -4221,7 +4291,14 @@
         },
         "family_name": "Reilly",
         "given_name": "John C.",
-        "birth_date": "2005-11-19"
+        "birth_date": "2005-11-19",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -4641,7 +4718,14 @@
         },
         "family_name": "Reynolds",
         "given_name": "Ryan",
-        "birth_date": "1988-12-05"
+        "birth_date": "1988-12-05",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -5061,7 +5145,14 @@
         },
         "family_name": "Robbie",
         "given_name": "Margot",
-        "birth_date": "1991-02-14"
+        "birth_date": "1991-02-14",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -5481,7 +5572,14 @@
         },
         "family_name": "Roberts",
         "given_name": "Julia",
-        "birth_date": "1982-07-30"
+        "birth_date": "1982-07-30",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -5901,7 +5999,14 @@
         },
         "family_name": "Rudd",
         "given_name": "Paul",
-        "birth_date": "2006-03-28"
+        "birth_date": "2006-03-28",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -6321,7 +6426,14 @@
         },
         "family_name": "Smith",
         "given_name": "Will",
-        "birth_date": "1992-03-13"
+        "birth_date": "1992-03-13",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -6741,7 +6853,14 @@
         },
         "family_name": "Spencer",
         "given_name": "Octavia",
-        "birth_date": "1997-11-18"
+        "birth_date": "1997-11-18",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -7161,7 +7280,14 @@
         },
         "family_name": "Stewart",
         "given_name": "Kristen",
-        "birth_date": "1993-07-17"
+        "birth_date": "1993-07-17",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -7581,7 +7707,14 @@
         },
         "family_name": "Stone",
         "given_name": "Emma",
-        "birth_date": "1985-01-27"
+        "birth_date": "1985-01-27",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -8001,7 +8134,14 @@
         },
         "family_name": "Streep",
         "given_name": "Meryl",
-        "birth_date": "2005-07-29"
+        "birth_date": "2005-07-29",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -8421,7 +8561,14 @@
         },
         "family_name": "Swinton",
         "given_name": "Tilda",
-        "birth_date": "1984-04-14"
+        "birth_date": "1984-04-14",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -8841,7 +8988,14 @@
         },
         "family_name": "Tatum",
         "given_name": "Channing",
-        "birth_date": "2006-10-22"
+        "birth_date": "2006-10-22",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -9261,7 +9415,14 @@
         },
         "family_name": "Theron",
         "given_name": "Charlize",
-        "birth_date": "1988-12-11"
+        "birth_date": "1988-12-11",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -9681,7 +9842,14 @@
         },
         "family_name": "Vaughn",
         "given_name": "Vince",
-        "birth_date": "1988-02-19"
+        "birth_date": "1988-02-19",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -10101,7 +10269,14 @@
         },
         "family_name": "Vikander",
         "given_name": "Alicia",
-        "birth_date": "1985-11-09"
+        "birth_date": "1985-11-09",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -10521,7 +10696,14 @@
         },
         "family_name": "Waltz",
         "given_name": "Christoph",
-        "birth_date": "1986-03-23"
+        "birth_date": "1986-03-23",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -10941,7 +11123,14 @@
         },
         "family_name": "Washington",
         "given_name": "Denzel",
-        "birth_date": "1981-10-28"
+        "birth_date": "1981-10-28",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -11361,7 +11550,14 @@
         },
         "family_name": "Watts",
         "given_name": "Naomi",
-        "birth_date": "1990-07-24"
+        "birth_date": "1990-07-24",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -11781,7 +11977,14 @@
         },
         "family_name": "Williams",
         "given_name": "Michelle",
-        "birth_date": "1992-03-29"
+        "birth_date": "1992-03-29",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -12201,7 +12404,14 @@
         },
         "family_name": "Wilson",
         "given_name": "Owen",
-        "birth_date": "2007-09-11"
+        "birth_date": "2007-09-11",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -12621,7 +12831,14 @@
         },
         "family_name": "Winslet",
         "given_name": "Kate",
-        "birth_date": "1986-06-19"
+        "birth_date": "1986-06-19",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -13041,7 +13258,14 @@
         },
         "family_name": "Witherspoon",
         "given_name": "Reese",
-        "birth_date": "1987-04-02"
+        "birth_date": "1987-04-02",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -13461,7 +13685,14 @@
         },
         "family_name": "Adams",
         "given_name": "Amy",
-        "birth_date": "1990-10-05"
+        "birth_date": "1990-10-05",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -13881,7 +14112,14 @@
         },
         "family_name": "Affleck",
         "given_name": "Ben",
-        "birth_date": "1973-07-05"
+        "birth_date": "1973-07-05",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -14301,7 +14539,14 @@
         },
         "family_name": "Bancroft",
         "given_name": "Anne",
-        "birth_date": "1980-12-30"
+        "birth_date": "1980-12-30",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -14721,7 +14966,14 @@
         },
         "family_name": "Berry",
         "given_name": "Halle",
-        "birth_date": "1989-08-25"
+        "birth_date": "1989-08-25",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -15141,7 +15393,14 @@
         },
         "family_name": "Biel",
         "given_name": "Jessica",
-        "birth_date": "1988-09-12"
+        "birth_date": "1988-09-12",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -15561,7 +15820,14 @@
         },
         "family_name": "Blanchett",
         "given_name": "Cate",
-        "birth_date": "2006-11-08"
+        "birth_date": "2006-11-08",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -15981,7 +16247,14 @@
         },
         "family_name": "Blunt",
         "given_name": "Emily",
-        "birth_date": "2000-08-15"
+        "birth_date": "2000-08-15",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -16401,7 +16674,14 @@
         },
         "family_name": "Boyega",
         "given_name": "John",
-        "birth_date": "2005-12-05"
+        "birth_date": "2005-12-05",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -16821,7 +17101,14 @@
         },
         "family_name": "Bullock",
         "given_name": "Sandra",
-        "birth_date": "1984-09-08"
+        "birth_date": "1984-09-08",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -17241,7 +17528,14 @@
         },
         "family_name": "Cage",
         "given_name": "Nicolas",
-        "birth_date": "2005-05-13"
+        "birth_date": "2005-05-13",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -17661,7 +17955,14 @@
         },
         "family_name": "Carell",
         "given_name": "Steve",
-        "birth_date": "2005-06-04"
+        "birth_date": "2005-06-04",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -18081,7 +18382,14 @@
         },
         "family_name": "Chastain",
         "given_name": "Jessica",
-        "birth_date": "1982-10-19"
+        "birth_date": "1982-10-19",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -18501,7 +18809,14 @@
         },
         "family_name": "Close",
         "given_name": "Glenn",
-        "birth_date": "1981-02-05"
+        "birth_date": "1981-02-05",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -18921,7 +19236,14 @@
         },
         "family_name": "Craig",
         "given_name": "Daniel",
-        "birth_date": "1988-10-29"
+        "birth_date": "1988-10-29",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -19341,7 +19663,14 @@
         },
         "family_name": "Cruz",
         "given_name": "Penélope",
-        "birth_date": "1994-05-22"
+        "birth_date": "1994-05-22",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -19761,7 +20090,14 @@
         },
         "family_name": "Cumberbatch",
         "given_name": "Benedict",
-        "birth_date": "1987-10-24"
+        "birth_date": "1987-10-24",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -20181,7 +20517,14 @@
         },
         "family_name": "Damon",
         "given_name": "Matt",
-        "birth_date": "1971-07-09"
+        "birth_date": "1971-07-09",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -20601,7 +20944,14 @@
         },
         "family_name": "Davis",
         "given_name": "Viola",
-        "birth_date": "2007-04-20"
+        "birth_date": "2007-04-20",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -21021,7 +21371,14 @@
         },
         "family_name": "De Niro",
         "given_name": "Robert",
-        "birth_date": "1982-01-15"
+        "birth_date": "1982-01-15",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -21441,7 +21798,14 @@
         },
         "family_name": "Dench",
         "given_name": "Judi",
-        "birth_date": "1995-09-04"
+        "birth_date": "1995-09-04",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -21861,7 +22225,14 @@
         },
         "family_name": "Depp",
         "given_name": "Johnny",
-        "birth_date": "1985-12-03"
+        "birth_date": "1985-12-03",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -22281,7 +22652,14 @@
         },
         "family_name": "DiCaprio",
         "given_name": "Leonardo",
-        "birth_date": "1972-08-28"
+        "birth_date": "1972-08-28",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -22701,7 +23079,14 @@
         },
         "family_name": "Downey Jr.",
         "given_name": "Robert",
-        "birth_date": "1983-05-12"
+        "birth_date": "1983-05-12",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -23121,7 +23506,14 @@
         },
         "family_name": "Driver",
         "given_name": "Adam",
-        "birth_date": "1988-09-27"
+        "birth_date": "1988-09-27",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -23541,7 +23933,14 @@
         },
         "family_name": "Elba",
         "given_name": "Idris",
-        "birth_date": "1980-09-02"
+        "birth_date": "1980-09-02",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -23961,7 +24360,14 @@
         },
         "family_name": "Farrell",
         "given_name": "Colin",
-        "birth_date": "1977-04-25"
+        "birth_date": "1977-04-25",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -24381,7 +24787,14 @@
         },
         "family_name": "Fassbender",
         "given_name": "Michael",
-        "birth_date": "1992-04-24"
+        "birth_date": "1992-04-24",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -24801,7 +25214,14 @@
         },
         "family_name": "Foster",
         "given_name": "Jodie",
-        "birth_date": "1991-10-30"
+        "birth_date": "1991-10-30",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -25221,7 +25641,14 @@
         },
         "family_name": "Foxx",
         "given_name": "Jamie",
-        "birth_date": "1977-07-03"
+        "birth_date": "1977-07-03",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -25641,7 +26068,14 @@
         },
         "family_name": "Freeman",
         "given_name": "Morgan",
-        "birth_date": "1990-08-24"
+        "birth_date": "1990-08-24",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -26061,7 +26495,14 @@
         },
         "family_name": "Glover",
         "given_name": "Donald",
-        "birth_date": "2007-03-17"
+        "birth_date": "2007-03-17",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -26481,7 +26922,14 @@
         },
         "family_name": "Hanks",
         "given_name": "Tom",
-        "birth_date": "1989-12-04"
+        "birth_date": "1989-12-04",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -26901,7 +27349,14 @@
         },
         "family_name": "Saldana",
         "given_name": "Zoe",
-        "birth_date": "1981-11-23"
+        "birth_date": "1981-11-23",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -27321,7 +27776,14 @@
         },
         "family_name": "Hathaway",
         "given_name": "Anne",
-        "birth_date": "1987-05-06"
+        "birth_date": "1987-05-06",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -27741,7 +28203,14 @@
         },
         "family_name": "Hayek",
         "given_name": "Salma",
-        "birth_date": "1983-08-27"
+        "birth_date": "1983-08-27",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -28161,7 +28630,14 @@
         },
         "family_name": "Hemsworth",
         "given_name": "Chris",
-        "birth_date": "1992-01-19"
+        "birth_date": "1992-01-19",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -28581,7 +29057,14 @@
         },
         "family_name": "Hopkins",
         "given_name": "Anthony",
-        "birth_date": "2006-08-16"
+        "birth_date": "2006-08-16",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -29001,7 +29484,14 @@
         },
         "family_name": "Jackman",
         "given_name": "Hugh",
-        "birth_date": "1972-06-28"
+        "birth_date": "1972-06-28",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -29421,7 +29911,14 @@
         },
         "family_name": "Jackson",
         "given_name": "Samuel L.",
-        "birth_date": "2007-01-27"
+        "birth_date": "2007-01-27",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -29841,7 +30338,14 @@
         },
         "family_name": "Johansson",
         "given_name": "Scarlett",
-        "birth_date": "1980-05-12"
+        "birth_date": "1980-05-12",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -30261,7 +30765,14 @@
         },
         "family_name": "Johnson",
         "given_name": "Dakota",
-        "birth_date": "1999-04-21"
+        "birth_date": "1999-04-21",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -30681,7 +31192,14 @@
         },
         "family_name": "Kidman",
         "given_name": "Nicole",
-        "birth_date": "1983-03-15"
+        "birth_date": "1983-03-15",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -31101,7 +31619,14 @@
         },
         "family_name": "Kirby",
         "given_name": "Vanessa",
-        "birth_date": "1993-06-28"
+        "birth_date": "1993-06-28",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -31521,7 +32046,14 @@
         },
         "family_name": "Kunis",
         "given_name": "Mila",
-        "birth_date": "1989-01-01"
+        "birth_date": "1989-01-01",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -31941,7 +32473,14 @@
         },
         "family_name": "Lawrence",
         "given_name": "Jennifer",
-        "birth_date": "2006-02-14"
+        "birth_date": "2006-02-14",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -32361,7 +32900,14 @@
         },
         "family_name": "McAdams",
         "given_name": "Rachel",
-        "birth_date": "1998-06-09"
+        "birth_date": "1998-06-09",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -32781,7 +33327,14 @@
         },
         "family_name": "McConaughey",
         "given_name": "Matthew",
-        "birth_date": "1977-09-09"
+        "birth_date": "1977-09-09",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {
@@ -33201,7 +33754,14 @@
         },
         "family_name": "McGregor",
         "given_name": "Ewan",
-        "birth_date": "1991-08-29"
+        "birth_date": "1991-08-29",
+        "birth_place": "Tulegatan 11",
+        "nationality": [
+          "SE"
+        ],
+        "issuing_authority": "SUNET",
+        "issuing_country": "SE",
+        "expiry_date": "2033-01-01"
       }
     ],
     "document_display": {

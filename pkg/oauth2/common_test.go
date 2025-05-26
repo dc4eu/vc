@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"bytes"
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -18,7 +19,7 @@ import (
 var nonRandom = bytes.NewReader([]byte("01234567890123456789012345678901234567890123456789ABCDEF"))
 
 // mockGenerateECDSAKey generates a mock ECDSA key and a self-signed base65 encoded certificate
-func mockGenerateECDSAKey(t *testing.T) (*ecdsa.PrivateKey, string) {
+func mockGenerateECDSAKey(t *testing.T) (crypto.PrivateKey, string) {
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), nonRandom)
 	assert.NoError(t, err)
 

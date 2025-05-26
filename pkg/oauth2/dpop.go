@@ -3,7 +3,8 @@ package oauth2
 import (
 	"fmt"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 type DPoP struct {
@@ -21,30 +22,91 @@ type DPoP struct {
 
 	// ATH Hash of the access token. The value MUST be the result of a base64url encoding (as defined in Section 2 of [RFC7515]) the SHA-256 [SHS] hash of the ASCII encoding of the associated access token's value.¶
 	ATH string `json:"ath"`
-	jwt.RegisteredClaims
+	//jwt.RegisteredClaims
 }
 
-func ParseAndValidateDPoPJWT(signedJWT string) (*DPoP, error) {
-	//claims := DPoP{}
-	//	token, err := jwt.ParseWithClaims(signedJWT, &claims, func(token *jwt.Token) (any, error) {
-	//		return []byte{}, nil
-	//	}, jwt.WithLeeway(2*time.Second))
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-
-	token, err := jwt.ParseWithClaims(signedJWT, &DPoP{}, func(token *jwt.Token) (any, error) {
-		alg := token.Method.Alg()
-		fmt.Println("alg", alg)
-		//return pubkey.(token.Method.Alg()), nil
-		return nil, nil
-	})
+func parseJWK(dpopJWT string) (jwk.Set, error) {
+	token, err := jwt.ParseString(dpopJWT, jwt.WithVerify(false))
 	if err != nil {
 		return nil, err
 	}
 
 	fmt.Println("token", token)
 
-	return nil, nil
+	keySet := jwk.NewSet()
+	//
+	//	k, err := jwk.ParseKey([]byte(key))
+	//	if err != nil {
+	//		return nil, fmt.Errorf("failed to parse JWK: %w", err)
+	//	}
+	//	keySet.AddKey(k)
+
+	return keySet, err
 }
+
+func Validate(dPopJWT string, set jwk.Set) (bool, error) {
+	jwt.WithKeySet(set)
+	token, err := jwt.ParseString(dPopJWT, jwt.WithKeySet(set))
+	if err != nil {
+		return false, err
+	}
+
+	fmt.Println("token", token)
+
+	return false, nil
+
+}
+
+// Validate validates a signed sdjwt
+//func ParseDPoPJWT(dpopJWT string, pubkey crypto.PublicKey) (bool, error) {
+//	claims := jwt.MapClaims{}
+//
+//	token, err := jwt.ParseWithClaims(dpopJWT, claims, func(token *jwt.Token) (any, error) {
+//		return pubkey.(*ecdsa.PublicKey), nil
+//	})
+//	if err != nil {
+//		return false, err
+//	}
+//
+//	return token.Valid, nil
+//}
+//
+//func (d *DPoP) SignJWT(signingMethod jwt.SigningMethod, privateKey crypto.PrivateKey, certs []string) (string, error) {
+//	token := jwt.NewWithClaims(signingMethod, d)
+//
+//	// Sign the token with the private key
+//	signedToken, err := token.SignedString(privateKey)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	return signedToken, nil
+//}
+
+//func (d *DPoP) SignJWT2(signingMethod jwt., privateKey crypto.PrivateKey, certs []string) (string, error) {
+//	//token := jwt.NewWithClaims(signingMethod, d)
+//
+//	pubkey, err := jwk.PublicKeyOf(privateKey)
+//	if err != nil {
+//		fmt.Printf("failed to get public key: %s\n", err)
+//		return "", err
+//	}
+//	b, err := json.Marshal(pubkey)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	fmt.Println("pubkey", string(b))
+//
+//	// Sign the token with the private key
+//	signedToken, err := token.SignedString(privateKey)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	return signedToken, nil
+//}
+
+//func mura() {
+//
+//}

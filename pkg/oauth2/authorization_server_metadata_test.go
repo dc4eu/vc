@@ -65,7 +65,7 @@ func TestSignMetadata(t *testing.T) {
 			metadata := tt.issuerMetadata
 
 			signingKey, cert := mockGenerateECDSAKey(t)
-			pubKey := signingKey.Public()
+			pubKey := signingKey.(*ecdsa.PrivateKey).Public()
 
 			metadataWithSignature, err := metadata.Sign(jwt.SigningMethodES256, signingKey, []string{cert})
 			assert.NoError(t, err)

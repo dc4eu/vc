@@ -583,8 +583,8 @@ const addViewDocumentFormArticleToContainer = () => {
     const buildFormElements = () => {
 
         const documentIDElement = createInputElement('document id');
-        const documentTypeElement = createInputElement('document type (EHIC/PDA1)', 'EHIC');
-        const authenticSourceElement = createInputElement('authentic source', 'SUNET');
+        const documentTypeElement = createInputElement('document type');
+        const authenticSourceElement = createInputElement('authentic source');
 
         const viewButton = document.createElement('button');
         viewButton.id = generateUUID();
@@ -1230,11 +1230,11 @@ const addSearchDocumentsFormArticleToContainer = () => {
             value: '',
             label: 'Document type (optional)'
         }, {value: 'Diploma', label: 'Diploma'},
-            {value: 'EHIC', label: 'EHIC'},
+            {value: 'urn:eudi:ehic:1', label: 'urn:eudi:ehic:1'},
             {value: 'ELM', label: 'ELM'},
             {value: 'MicroCredential', label: 'MicroCredential'},
-            {value: 'PDA1', label: 'PDA1'},
-            {value: 'PID', label: 'PID'}]);
+            {value: 'urn:eudi:pda1:1', label: 'urn:eudi:pda1:1'},
+            {value: 'urn:eu.europa.ec.eudi:pid:1', label: 'urn:eu.europa.ec.eudi:pid:1'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
         const documentTypeSelect = documentTypeSelectWithinDivElement[1];
         const collectIdInput = createInputElement('Collect ID (optional)');
@@ -1509,7 +1509,7 @@ const addPIDUser = () => {
 
 const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
     const buildFormElements = () => {
-        const documentTypeSelectWithinDivElement = createSelectElement([{value: 'EHIC', label: 'EHIC'}], false);
+        const documentTypeSelectWithinDivElement = createSelectElement([{value: 'urn:eudi:ehic:1', label: 'urn:eudi:ehic:1'}], false);
 
         const fileDiv = document.createElement('div');
         fileDiv.className = 'file has-name is-fullwidth';
@@ -1827,7 +1827,7 @@ const addViewNotificationFormArticleToContainer = () => {
     const buildFormElements = () => {
 
         const documentIDElement = createInputElement('document id');
-        const documentTypeElement = createInputElement('document type (EHIC/PDA1)', 'EHIC');
+        const documentTypeElement = createInputElement('document type', 'urn:eudi:ehic:1');
         const authenticSourceElement = createInputElement('authentic source', 'SUNET');
 
         const viewButton = document.createElement('button');
@@ -1867,7 +1867,7 @@ const addCredentialFormArticleToContainer = () => {
         const givenNameElement = createInputElement('given name', '', 'text');
         const birthdateElement = createInputElement('birth date', '', 'text');
         const schemaNameElement = createInputElement('identity schema name', 'FR');
-        const documentTypeElement = createInputElement('document type (EHIC/PDA1)', 'EHIC');
+        const documentTypeElement = createInputElement('document type', 'urn:eudi:ehic:1');
         const credentialTypeElement = createInputElement('credential type', 'vc+sd-jwt');
         const authenticSourceElement = createInputElement('authentic source', 'SUNET');
         const collectIdElement = createInputElement('collect id');

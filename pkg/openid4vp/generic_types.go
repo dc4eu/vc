@@ -9,11 +9,11 @@ import (
 
 const (
 	DocumentTypeDiploma         = "Diploma"
-	DocumentTypeEHIC            = "EHIC"
+	DocumentTypeEHIC            = "urn:eudi:ehic:1"
 	DocumentTypeELM             = "ELM"
 	DocumentTypeMicroCredential = "MicroCredential"
-	DocumentTypePDA1            = "PDA1"
-	DocumentTypePID             = "PID"
+	DocumentTypePDA1            = "urn:eudi:pda1:1"
+	DocumentTypePID             = "urn:eu.europa.ec.eudi:pid:1"
 
 	InteractionStatusQRDisplayed                   InteractionStatus = "qr_displayed"
 	InteractionStatusQRScanned                     InteractionStatus = "qr_scanned"

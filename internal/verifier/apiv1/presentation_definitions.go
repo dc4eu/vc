@@ -104,6 +104,7 @@ func elm() *openid4vp.PresentationDefinition {
 		"https://satosa-test-1.sunet.se/credential/elm/1.0",
 		"https://satosa-dev-1.sunet.se/credential/elm/1.0",
 		"urn:credential:elm",
+		"urn:edui:elm:1",
 		"ELMCredential",
 		"ElmCredential",
 		"ELM",

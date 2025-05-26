@@ -10,6 +10,38 @@ var format = map[string]openid4vp.Format{
 	"vc+sd-jwt": {Alg: []string{"ES256"}},
 }
 
+func buildPresentationDefinition(presentationRequestType openid4vp.PresentationRequestType) (*openid4vp.PresentationDefinition, error) {
+	switch presentationRequestType.ID {
+	case "ELM":
+		return elmForEMREX(presentationRequestType), nil
+	default:
+		return nil, fmt.Errorf("presentationRequestType.ID %s is currently not supported", presentationRequestType.ID)
+	}
+}
+
+func elmForEMREX(requestType openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
+	vctList := []string{requestType.VCT}
+
+	return &openid4vp.PresentationDefinition{
+		ID:          requestType.ID,
+		Title:       requestType.Title,
+		Description: requestType.Description,
+		InputDescriptors: []openid4vp.InputDescriptor{
+			{
+				ID:     "ELM",
+				Format: format,
+				Constraints: openid4vp.Constraints{
+					Fields: []openid4vp.Field{
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "ELM", Path: []string{"$.elm"}},
+					},
+				},
+			},
+		},
+	}
+}
+
+// DEPRECATED:
 func buildPresentationDefinitionFor(documentType string) (*openid4vp.PresentationDefinition, error) {
 	switch documentType {
 	case "Diploma":

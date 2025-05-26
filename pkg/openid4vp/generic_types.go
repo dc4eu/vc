@@ -26,15 +26,15 @@ const (
 )
 
 type QRRequest struct {
-	// Deprecated: to be removed after Ladok has adapted, use PresentationRequestTypeID instead
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"omitempty,oneof=Diploma EHIC ELM PDA1 PID"`
-
 	PresentationRequestTypeID string `json:"presentation_request_type_id,omitempty" bson:"presentation_request_type_id" validate:"omitempty,oneof=MinimalPIDAndBachelorDiploma"`
 	EncryptDirectPostJWT      bool   `json:"encrypt_direct_post_jwt,omitempty" bson:"encrypt_direct_post_jwt" validate:"omitempty"`
+
+	// Deprecated: to be removed after Ladok has adapted, use PresentationRequestTypeID instead
+	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"omitempty,oneof=Diploma EHIC ELM PDA1 PID"`
 }
 
 var presentationRequestTypes = map[string]*PresentationRequestType{
-	"Bachelor": {ID: "Bachelor", Title: "Bachelor Diploma", Description: "Request a Bachelor Diploma"},
+	"ELM": {ID: "ELM", VCT: "urn:edui:elm:1", Title: "European Learning Model for EMREX", Description: "Required Fields: VC type, ELM"},
 	//"MinimalPIDAndBachelorDiploma": {ID: "MinimalPIDAndBachelorDiploma", Title: "PID (ARF v1.8) + Diploma", Description: "Request a PID (ARF v1.8) along with a Bachelor Diploma"},
 }
 
@@ -45,6 +45,7 @@ func LookupPresentationRequestTypeFrom(ID string) (*PresentationRequestType, boo
 
 type PresentationRequestType struct {
 	ID          string `json:"id" bson:"id" validate:"required"`
+	VCT         string `json:"VCT" bson:"VCT" validate:"required"`
 	Title       string `json:"title" bson:"title" validate:"required"`
 	Description string `json:"description" bson:"description" validate:"required"`
 }

@@ -49,7 +49,7 @@ func (c *diplomaClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "DIPLOMA:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    "Diploma",
+			DocumentType:    "urn:edui:diploma:1",
 			DocumentID:      fmt.Sprintf("document_id_diploma_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

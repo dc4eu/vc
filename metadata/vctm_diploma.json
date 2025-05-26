@@ -1,5 +1,5 @@
 {
-  "vct": "DiplomaCredential",
+  "vct": "urn:edui:diploma:1",
   "name": "Diploma Credential",
   "description": "European Learning Model Diploma Credential.",
   "$comment": "",

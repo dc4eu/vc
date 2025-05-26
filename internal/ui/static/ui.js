@@ -409,11 +409,12 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
         const givenNameElement = createInputElement('given name', '', 'text');
         const birthdateElement = createInputElement('birth date (YYYY-MM-DD)', '', 'text');
         const documentTypeSelectWithinDivElement = createSelectElement([
-            {value: 'EHIC', label: 'EHIC'},
-            {value: 'PDA1', label: 'PDA1'},
-            {value: 'PID', label: 'PID'},
-            {value: 'ELM', label: 'ELM'},
-            {value: 'Diploma', label: 'Diploma'},
+            {value: 'urn:eudi:ehic:1', label: 'urn:eudi:ehic:1'},
+            {value: '"urn:eudi:pda1:', label: '"urn:eudi:pda1:'},
+            {value: 'urn:eu.europa.ec.eudi:pid:1"', label: 'urn:eu.europa.ec.eudi:pid:1"'},
+            {value: 'urn:edui:elm:1', label: 'urn:edui:elm:1'},
+            {value: 'urn:edui:diploma:1', label: 'urn:edui:diploma:1'},
+            {value: 'urn:edui:micro_credential:1', label: 'urn:edui:diploma:1'},
         ]);
 
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
@@ -1229,10 +1230,10 @@ const addSearchDocumentsFormArticleToContainer = () => {
         const documentTypeSelectWithinDivElement = createSelectElement([{
             value: '',
             label: 'Document type (optional)'
-        }, {value: 'Diploma', label: 'Diploma'},
+        }, {value: 'urn:edui:diploma:1', label: 'urn:edui:diploma:1'},
             {value: 'urn:eudi:ehic:1', label: 'urn:eudi:ehic:1'},
-            {value: 'ELM', label: 'ELM'},
-            {value: 'MicroCredential', label: 'MicroCredential'},
+            {value: 'urn:edui:elm:1', label: 'urn:edui:elm:1'},
+            {value: 'urn:edui:micro_credential:1', label: 'urn:edui:micro_credential:1'},
             {value: 'urn:eudi:pda1:1', label: 'urn:eudi:pda1:1'},
             {value: 'urn:eu.europa.ec.eudi:pid:1', label: 'urn:eu.europa.ec.eudi:pid:1'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];

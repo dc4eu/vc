@@ -69,6 +69,7 @@ func diploma() *openid4vp.PresentationDefinition {
 		"https://satosa-dev-1.sunet.se/credential/diploma/1.0",
 		"urn:credential:diploma",
 		"DiplomaCredential",
+		model.CredentialTypeUrnEduiDiploma1,
 		"Diploma"}
 
 	return &openid4vp.PresentationDefinition{
@@ -136,9 +137,9 @@ func elm() *openid4vp.PresentationDefinition {
 		"https://satosa-test-1.sunet.se/credential/elm/1.0",
 		"https://satosa-dev-1.sunet.se/credential/elm/1.0",
 		"urn:credential:elm",
-		"urn:edui:elm:1",
 		"ELMCredential",
 		"ElmCredential",
+		model.CredentialTypeUrnEduiElm1,
 		"ELM",
 		"elm"}
 
@@ -168,7 +169,7 @@ func pda1() *openid4vp.PresentationDefinition {
 		"https://satosa-test-1.sunet.se/credential/pda1/1.0",
 		"https://satosa-dev-1.sunet.se/credential/pda1/1.0",
 		"urn:credential:pda1",
-		"urn:eudi:pda1:1",
+		model.CredentialTypeUrnEudiPda11,
 		"PDA1Credential"}
 
 	return &openid4vp.PresentationDefinition{
@@ -200,7 +201,7 @@ func pid() *openid4vp.PresentationDefinition {
 		"https://satosa-dev-1.sunet.se/credential/pid/1.0",
 		"urn:credential:vid",
 		"urn:credential:pid",
-		"urn:eudi:pid:1",
+		model.CredentialTypeUrnEuEuropaEcEudiPid1,
 		"PIDCredential",
 		"PID"}
 

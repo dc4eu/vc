@@ -378,9 +378,9 @@ type SearchDocumentsQuery struct {
 
 // SearchDocuments search documents in datastore
 //
-// @return return matching documents, has more results (refine query), or error
-// @Description not supported in production mode
-// @Deprecated
+//	@return			return matching documents, has more results (refine query), or error
+//	@Description	not supported in production mode
+//	@Deprecated
 func (c *VCDatastoreColl) SearchDocuments(ctx context.Context, query *SearchDocumentsQuery, limit int64, fields []string, sortFields map[string]int) ([]*model.CompleteDocument, bool, error) {
 	if c.Service.cfg.Common.Production {
 		return nil, false, errors.New("not supported in production mode")

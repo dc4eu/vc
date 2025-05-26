@@ -49,7 +49,7 @@ func (c *MicroCredentialClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "MICROCREDENTIAL:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    "MicroCredential",
+			DocumentType:    model.CredentialTypeUrnEduiMicroCredential1,
 			DocumentID:      fmt.Sprintf("document_id_microcredential_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

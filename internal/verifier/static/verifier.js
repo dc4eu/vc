@@ -59,10 +59,16 @@ function hideIcons() {
 }
 
 function resetAndHideIndexContainer() {
+    const presentationRequestTypeIDSelect = document.getElementById("presentationRequestTypeIDSelect");
+    const defaultOption1 = Array.from(presentationRequestTypeIDSelect.options).find(opt => opt.defaultSelected);
+    if (defaultOption1) {
+        presentationRequestTypeIDSelect.value = defaultOption1.value;
+    }
+
     const documentTypeSelect = document.getElementById("documentTypeSelect");
-    const defaultOption = Array.from(documentTypeSelect.options).find(opt => opt.defaultSelected);
-    if (defaultOption) {
-        documentTypeSelect.value = defaultOption.value;
+    const defaultOption2 = Array.from(documentTypeSelect.options).find(opt => opt.defaultSelected);
+    if (defaultOption2) {
+        documentTypeSelect.value = defaultOption2.value;
     }
 
     getElementById("encryptWalletResponseCB").checked = getElementById("encryptWalletResponseCB").defaultChecked;
@@ -115,6 +121,7 @@ function resetVerificationContainer() {
 
 async function startVPFlow() {
     const documentTypeValue = getElementById("documentTypeSelect").value;
+    const presentationRequestTypeValue = getElementById("presentationRequestTypeIDSelect").value;
     const encryptWalletResponse = getElementById("encryptWalletResponseCB").checked;
 
     resetAndHideIndexContainer();
@@ -129,6 +136,7 @@ async function startVPFlow() {
                 'Content-Type': 'application/json; charset=utf-8',
             },
             body: JSON.stringify({
+                presentation_request_type_id: presentationRequestTypeValue,
                 document_type: documentTypeValue,
                 encrypt_direct_post_jwt: encryptWalletResponse,
             })
@@ -305,6 +313,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const startVPFlowButton = document.getElementById('start-vp-flow-btn');
     startVPFlowButton.addEventListener('click', function () {
         startVPFlow();
+    });
+    
+    const presentationRequestTypeIDSelect = document.getElementById('presentationRequestTypeIDSelect');
+    presentationRequestTypeIDSelect.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            startVPFlowButton.click();
+        }
     });
 
     const documentTypeSelect = document.getElementById('documentTypeSelect');

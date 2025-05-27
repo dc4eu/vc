@@ -8,13 +8,6 @@ import (
 )
 
 const (
-	DocumentTypeDiploma         = "Diploma"
-	DocumentTypeEHIC            = "urn:eudi:ehic:1"
-	DocumentTypeELM             = "ELM"
-	DocumentTypeMicroCredential = "MicroCredential"
-	DocumentTypePDA1            = "urn:eudi:pda1:1"
-	DocumentTypePID             = "urn:eu.europa.ec.eudi:pid:1"
-
 	InteractionStatusQRDisplayed                   InteractionStatus = "qr_displayed"
 	InteractionStatusQRScanned                     InteractionStatus = "qr_scanned"
 	InteractionStatusAuthorizationResponseReceived InteractionStatus = "authorization_response_received"
@@ -26,26 +19,15 @@ const (
 )
 
 type QRRequest struct {
-	PresentationRequestTypeID string `json:"presentation_request_type_id,omitempty" bson:"presentation_request_type_id" validate:"omitempty,oneof=MinimalPIDAndBachelorDiploma"`
+	PresentationRequestTypeID string `json:"presentation_request_type_id,omitempty" bson:"presentation_request_type_id" validate:"omitempty,oneof=VCEHIC VCELM VCPID EuropeanHealthInsuranceCard MinimalPIDAndEuropeanHealthInsuranceCard"`
 	EncryptDirectPostJWT      bool   `json:"encrypt_direct_post_jwt,omitempty" bson:"encrypt_direct_post_jwt" validate:"omitempty"`
 
 	// Deprecated: to be removed after Ladok has adapted, use PresentationRequestTypeID instead
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"omitempty,oneof=Diploma EHIC ELM PDA1 PID"`
-}
-
-var presentationRequestTypes = map[string]*PresentationRequestType{
-	"ELM": {ID: "ELM", VCT: "urn:edui:elm:1", Title: "European Learning Model for EMREX", Description: "Required Fields: VC type, ELM"},
-	//"MinimalPIDAndBachelorDiploma": {ID: "MinimalPIDAndBachelorDiploma", Title: "PID (ARF v1.8) + Diploma", Description: "Request a PID (ARF v1.8) along with a Bachelor Diploma"},
-}
-
-func LookupPresentationRequestTypeFrom(ID string) (*PresentationRequestType, bool) {
-	prt, ok := presentationRequestTypes[ID]
-	return prt, ok
+	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"omitempty,oneof=urn:edui:diploma:1 urn:eudi:ehic:1 urn:edui:elm:1 urn:edui:micro_credential:1 urn:eudi:pda1:1 urn:eu.europa.ec.eudi:pid:1"`
 }
 
 type PresentationRequestType struct {
 	ID          string `json:"id" bson:"id" validate:"required"`
-	VCT         string `json:"VCT" bson:"VCT" validate:"required"`
 	Title       string `json:"title" bson:"title" validate:"required"`
 	Description string `json:"description" bson:"description" validate:"required"`
 }
@@ -91,19 +73,21 @@ type CertData struct {
 }
 
 type VPInteractionSession struct {
-	SessionID               string                  `json:"session_id"` //key == must be unique i coll (UUID1)
-	Status                  InteractionStatus       `json:"interaction_status"`
-	SessionEphemeralKeyPair *KeyPair                `json:"session_ephemeral_key_pair"`
-	SessionCreated          time.Time               `json:"session_created"`
-	SessionExpires          time.Time               `json:"session_expires"`
-	DocumentType            string                  `json:"document_type"` //type of document (vc) the presentation_definition will request from the holder
-	Nonce                   string                  `json:"nonce"`
-	State                   string                  `json:"state"` //UUID2
-	Authorized              bool                    `json:"authorized"`
-	CallbackID              string                  `json:"callback_id"`
-	JTI                     string                  `json:"jti"`
-	PresentationDefinition  *PresentationDefinition `json:"presentation_definition"`
-	EncryptDirectPostJWT    bool                    `json:"encrypt_direct_post_jwt"`
+	SessionID               string            `json:"session_id"` //key == must be unique i coll (UUID1)
+	Status                  InteractionStatus `json:"interaction_status"`
+	SessionEphemeralKeyPair *KeyPair          `json:"session_ephemeral_key_pair"`
+	SessionCreated          time.Time         `json:"session_created"`
+	SessionExpires          time.Time         `json:"session_expires"`
+	// DEPRECATED: use PresentationRequestTypeID
+	DocumentType              string                  `json:"document_type"` //type of document (vc) the presentation_definition will request from the holder
+	PresentationRequestTypeID string                  `json:"presentation_request_type_id"`
+	Nonce                     string                  `json:"nonce"`
+	State                     string                  `json:"state"` //UUID2
+	Authorized                bool                    `json:"authorized"`
+	CallbackID                string                  `json:"callback_id"`
+	JTI                       string                  `json:"jti"`
+	PresentationDefinition    *PresentationDefinition `json:"presentation_definition"`
+	EncryptDirectPostJWT      bool                    `json:"encrypt_direct_post_jwt"`
 
 	//TODO: Below is just for dev/test purpose and must be removed before production
 	VerifierKeyPair *KeyPair `json:"-"`

@@ -10,17 +10,66 @@ var format = map[string]openid4vp.Format{
 	"vc+sd-jwt": {Alg: []string{"ES256"}},
 }
 
-func buildPresentationDefinition(presentationRequestType openid4vp.PresentationRequestType) (*openid4vp.PresentationDefinition, error) {
+var presentationRequestTypes = map[string]*openid4vp.PresentationRequestType{
+	"VCELM": {
+		ID:          "VCELM",
+		Title:       "VC European Learning Model for EMREX",
+		Description: "Required Fields: VC type, ELM",
+	},
+	"VCEHIC": {
+		ID:          "VCEHIC",
+		Title:       "VC European Health Insurance Card",
+		Description: "Request a VC European Health Insurance Card",
+	},
+	"VCPID": {
+		ID:          "VCPID",
+		Title:       "VC PID",
+		Description: "Request a VC PID",
+	},
+
+	"EuropeanHealthInsuranceCard": {
+		ID:          "EuropeanHealthInsuranceCard",
+		Title:       "European Health Insurance Card - based on wwWallet issuer",
+		Description: "Request a European Health Insurance Card",
+	},
+	//"CustomVerifiableId": {
+	//	ID:          "CustomVerifiableId",
+	//	Title:       "PID  (ARF v1.8) - based on wwWallet issuer",
+	//	Description: "Request a PID (ARF v1.8)",
+	//},
+	"MinimalPIDAndEuropeanHealthInsuranceCard": {
+		ID:          "MinimalPIDAndEuropeanHealthInsuranceCard",
+		Title:       "PID (ARF v1.8) + EHIC - both based on wwWallet issuer",
+		Description: "Request a PID (ARF v1.8) along with an EHIC",
+	},
+}
+
+func lookupPresentationRequestTypeFrom(ID string) (*openid4vp.PresentationRequestType, bool) {
+	prt, ok := presentationRequestTypes[ID]
+	return prt, ok
+}
+
+func buildPresentationDefinition(presentationRequestType *openid4vp.PresentationRequestType) (*openid4vp.PresentationDefinition, error) {
 	switch presentationRequestType.ID {
-	case "ELM":
-		return elmForEMREX(presentationRequestType), nil
+	case "VCELM":
+		return vcELMForEMREX(presentationRequestType), nil
+	case "VCEHIC":
+		return vcEHIC(presentationRequestType), nil
+	case "VCPID":
+		return vcPID(presentationRequestType), nil
+	case "EuropeanHealthInsuranceCard":
+		return wwwEHIC(presentationRequestType), nil
+	//case "CustomVerifiableId":
+	//	return wwwPID18(presentationRequestType), nil
+	case "MinimalPIDAndEuropeanHealthInsuranceCard":
+		return wwwMinimalPIDAndEuropeanHealthInsuranceCard(presentationRequestType), nil
 	default:
 		return nil, fmt.Errorf("presentationRequestType.ID %s is currently not supported", presentationRequestType.ID)
 	}
 }
 
-func elmForEMREX(requestType openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
-	vctList := []string{requestType.VCT}
+func vcELMForEMREX(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
+	vctList := []string{model.CredentialTypeUrnEduiElm1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          requestType.ID,
@@ -28,7 +77,7 @@ func elmForEMREX(requestType openid4vp.PresentationRequestType) *openid4vp.Prese
 		Description: requestType.Description,
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
-				ID:     "ELM",
+				ID:     requestType.ID,
 				Format: format,
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
@@ -41,36 +90,157 @@ func elmForEMREX(requestType openid4vp.PresentationRequestType) *openid4vp.Prese
 	}
 }
 
-// DEPRECATED:
+func vcEHIC(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
+	vctList := []string{model.CredentialTypeUrnEudiEhic1}
+
+	return &openid4vp.PresentationDefinition{
+		ID:          requestType.ID,
+		Title:       requestType.Title,
+		Description: requestType.Description,
+		InputDescriptors: []openid4vp.InputDescriptor{
+			{
+				ID:     requestType.ID,
+				Format: format,
+				Constraints: openid4vp.Constraints{
+					Fields: []openid4vp.Field{
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "Personal ID", Path: []string{"$.personal_administrative_number"}},
+						{Name: "Document number", Path: []string{"$.document_number"}},
+						{Name: "Issuing country", Path: []string{"$.issuing_country"}},
+						{Name: "Issuing authority id", Path: []string{"$.issuing_authority.id"}},
+						{Name: "Issuing authority name", Path: []string{"$.issuing_authority.name"}},
+						{Name: "Expiry date", Path: []string{"$.date_of_expiry"}},
+						{Name: "Issue date", Path: []string{"$.date_of_issuance"}},
+					},
+				},
+			},
+		},
+	}
+}
+
+func vcPID(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
+	vctList := []string{model.CredentialTypeUrnEuEuropaEcEudiPid1}
+
+	return &openid4vp.PresentationDefinition{
+		ID:          requestType.ID,
+		Title:       requestType.Title,
+		Description: requestType.Description,
+		Selectable:  true, // special field found i db4eu verifier
+		InputDescriptors: []openid4vp.InputDescriptor{
+			{
+				ID:     requestType.ID,
+				Format: format,
+				Constraints: openid4vp.Constraints{
+					Fields: []openid4vp.Field{
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "Family name", Path: []string{"$.family_name"}},
+						{Name: "Given name", Path: []string{"$.given_name"}},
+						{Name: "Date of birth", Path: []string{"$.birthdate"}},
+						{Name: "Place of birth", Path: []string{"$.birth_place"}},
+						{Name: "Nationality", Path: []string{"$.nationality"}},
+						{Name: "Issuing authority", Path: []string{"$.issuing_authority"}},
+						{Name: "Issuing country", Path: []string{"$.issuing_country"}},
+						{Name: "Expiry date", Path: []string{"$.expiry_date"}},
+						//TODO add more optional attributes for vcPID?
+					},
+				},
+			},
+		},
+	}
+}
+
+func wwwEHIC(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
+	vctList := []string{"urn:eudi:ehic:1"}
+
+	return &openid4vp.PresentationDefinition{
+		ID:          requestType.ID,
+		Title:       requestType.Title,
+		Description: requestType.Description,
+		InputDescriptors: []openid4vp.InputDescriptor{
+			{
+				ID:     requestType.ID,
+				Format: format,
+				Constraints: openid4vp.Constraints{
+					Fields: []openid4vp.Field{
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "Personal ID", Path: []string{"$.personal_administrative_number"}},
+						{Name: "Document number", Path: []string{"$.document_number"}},
+						{Name: "Issuing country", Path: []string{"$.issuing_country"}},
+						{Name: "Issuing authority id", Path: []string{"$.issuing_authority.id"}},
+						{Name: "Issuing authority name", Path: []string{"$.issuing_authority.name"}},
+						{Name: "Expiry Date", Path: []string{"$.date_of_expiry"}},
+						{Name: "Issue Date", Path: []string{"$.date_of_issuance"}},
+					},
+				},
+			},
+		},
+	}
+}
+
+func wwwMinimalPIDAndEuropeanHealthInsuranceCard(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
+	pidVctList := []string{"urn:eudi:pid:1"}
+	ehicVctList := []string{"urn:eudi:ehic:1"}
+
+	return &openid4vp.PresentationDefinition{
+		ID:          requestType.ID,
+		Title:       requestType.Title,
+		Description: requestType.Description,
+		InputDescriptors: []openid4vp.InputDescriptor{
+			{
+				ID:     "minimalSdJwtPID",
+				Format: format,
+				Constraints: openid4vp.Constraints{
+					Fields: []openid4vp.Field{
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: pidVctList}},
+						{Name: "Family name", Path: []string{"$.family_name"}},
+						{Name: "Given name", Path: []string{"$.given_name"}},
+						{Name: "Date of birth", Path: []string{"$.birthdate"}},
+						//{Name: "Place of birth", Path: []string{"$.birth_place"}},
+						//{Name: "Nationality", Path: []string{"$.nationalities"}},
+						//{Name: "Issuing authority", Path: []string{"$.issuing_authority"}},
+						//{Name: "Issuing country", Path: []string{"$.issuing_country"}},
+						//{Name: "Expiry date", Path: []string{"$.date_of_expiry"}},
+					},
+				},
+			},
+			{
+				ID:     "EuropeanHealthInsuranceCard",
+				Format: format,
+				Constraints: openid4vp.Constraints{
+					Fields: []openid4vp.Field{
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: ehicVctList}},
+						{Name: "Personal ID", Path: []string{"$.personal_administrative_number"}},
+						{Name: "Document Number", Path: []string{"$.document_number"}},
+					},
+				},
+			},
+		},
+	}
+}
+
+// DEPRECATED: use build buildPresentationDefinition()
 func buildPresentationDefinitionFor(documentType string) (*openid4vp.PresentationDefinition, error) {
 	switch documentType {
-	case "Diploma":
+	case model.CredentialTypeUrnEduiDiploma1:
 		return diploma(), nil
-	case "EHIC":
+	case model.CredentialTypeUrnEudiEhic1:
 		return ehic(), nil
-	case "ELM":
+	case model.CredentialTypeUrnEduiElm1:
 		return elm(), nil
-	case "MicroCredential":
+	case model.CredentialTypeUrnEduiMicroCredential1:
 		return nil, fmt.Errorf("document type %s is currently not supported", documentType)
-	case "PDA1":
+	case model.CredentialTypeUrnEudiPda11:
 		return pda1(), nil
-	case "PID":
+	case model.CredentialTypeUrnEuEuropaEcEudiPid1:
 		return pid(), nil
 	default:
 		return nil, fmt.Errorf("document type %s is currently not supported", documentType)
 	}
 }
 
+// DEPRECATED:
 func diploma() *openid4vp.PresentationDefinition {
-	vctList := []string{
-		"https://vc-interop-3.sunet.se/credential/diploma/1.0",
-		"https://vc-interop-1.sunet.se/credential/diploma/1.0",
-		"https://satosa-test-1.sunet.se/credential/diploma/1.0",
-		"https://satosa-dev-1.sunet.se/credential/diploma/1.0",
-		"urn:credential:diploma",
-		"DiplomaCredential",
-		model.CredentialTypeUrnEduiDiploma1,
-		"Diploma"}
+	vctList := []string{model.CredentialTypeUrnEduiDiploma1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "Bachelor",
@@ -94,15 +264,9 @@ func diploma() *openid4vp.PresentationDefinition {
 	}
 }
 
+// DEPRECATED:
 func ehic() *openid4vp.PresentationDefinition {
-	vctList := []string{
-		"https://vc-interop-3.sunet.se/credential/ehic/1.0",
-		"https://vc-interop-1.sunet.se/credential/ehic/1.0",
-		"https://satosa-test-1.sunet.se/credential/ehic/1.0",
-		"https://satosa-dev-1.sunet.se/credential/ehic/1.0",
-		"urn:credential:ehic",
-		model.CredentialTypeUrnEudiEhic1,
-		"EHICCredential"}
+	vctList := []string{model.CredentialTypeUrnEudiEhic1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "EuropeanHealthInsuranceCard",
@@ -130,18 +294,9 @@ func ehic() *openid4vp.PresentationDefinition {
 	}
 }
 
+// DEPRECATED:
 func elm() *openid4vp.PresentationDefinition {
-	vctList := []string{
-		"https://vc-interop-3.sunet.se/credential/elm/1.0",
-		"https://vc-interop-1.sunet.se/credential/elm/1.0",
-		"https://satosa-test-1.sunet.se/credential/elm/1.0",
-		"https://satosa-dev-1.sunet.se/credential/elm/1.0",
-		"urn:credential:elm",
-		"ELMCredential",
-		"ElmCredential",
-		model.CredentialTypeUrnEduiElm1,
-		"ELM",
-		"elm"}
+	vctList := []string{model.CredentialTypeUrnEduiElm1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "ELM",
@@ -162,15 +317,9 @@ func elm() *openid4vp.PresentationDefinition {
 	}
 }
 
+// DEPRECATED:
 func pda1() *openid4vp.PresentationDefinition {
-	vctList := []string{
-		"https://vc-interop-3.sunet.se/credential/pda1/1.0",
-		"https://vc-interop-1.sunet.se/credential/pda1/1.0",
-		"https://satosa-test-1.sunet.se/credential/pda1/1.0",
-		"https://satosa-dev-1.sunet.se/credential/pda1/1.0",
-		"urn:credential:pda1",
-		model.CredentialTypeUrnEudiPda11,
-		"PDA1Credential"}
+	vctList := []string{model.CredentialTypeUrnEudiPda11}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "PDA1",
@@ -193,17 +342,9 @@ func pda1() *openid4vp.PresentationDefinition {
 	}
 }
 
+// DEPRECATED:
 func pid() *openid4vp.PresentationDefinition {
-	vctList := []string{
-		"https://vc-interop-3.sunet.se/credential/pid/1.0",
-		"https://vc-interop-1.sunet.se/credential/pid/1.0",
-		"https://satosa-test-1.sunet.se/credential/pid/1.0",
-		"https://satosa-dev-1.sunet.se/credential/pid/1.0",
-		"urn:credential:vid",
-		"urn:credential:pid",
-		model.CredentialTypeUrnEuEuropaEcEudiPid1,
-		"PIDCredential",
-		"PID"}
+	vctList := []string{model.CredentialTypeUrnEuEuropaEcEudiPid1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "PID",

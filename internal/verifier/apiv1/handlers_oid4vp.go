@@ -36,6 +36,10 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 	//}
 	//-------------------------
 
+	if request.DocumentType == "" && request.PresentationRequestTypeID == "" {
+		return nil, errors.New("presentation_request_type_id is required")
+	}
+
 	sessionID := uuid.NewString()
 	now := time.Now()
 	verifierEmpEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
@@ -52,10 +56,11 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 			PublicKey:          verifierEmpEcdsaP256Private.PublicKey,
 			SigningMethodToUse: jwt.SigningMethodES256,
 		},
-		SessionCreated: now,
-		SessionExpires: now.Add(10 * time.Minute),
-		DocumentType:   request.DocumentType,
-		Nonce:          jwthelpers.GenerateNonce(),
+		SessionCreated:            now,
+		SessionExpires:            now.Add(10 * time.Minute),
+		DocumentType:              request.DocumentType,
+		PresentationRequestTypeID: request.PresentationRequestTypeID,
+		Nonce:                     jwthelpers.GenerateNonce(),
 		//TODO: flytta nedan till auth request hämtningen istället när wwW anpassat
 		CallbackID:           jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
 		State:                uuid.NewString(),
@@ -158,10 +163,24 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
-	if pd, err := buildPresentationDefinitionFor(vpSession.DocumentType); err != nil {
-		return "", err
+	if vpSession.PresentationRequestTypeID != "" {
+		prt, exists := lookupPresentationRequestTypeFrom(vpSession.PresentationRequestTypeID)
+		if !exists {
+			return "", errors.New("presentation_request_type not found")
+		}
+		if pd, err := buildPresentationDefinition(prt); err != nil {
+			return "", err
+		} else {
+			vpSession.PresentationDefinition = pd
+		}
+	} else if vpSession.DocumentType != "" {
+		if pd, err := buildPresentationDefinitionFor(vpSession.DocumentType); err != nil {
+			return "", err
+		} else {
+			vpSession.PresentationDefinition = pd
+		}
 	} else {
-		vpSession.PresentationDefinition = pd
+		return "", errors.New("presentation_request_type_id is required")
 	}
 
 	schema := "http://"

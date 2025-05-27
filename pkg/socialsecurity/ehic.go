@@ -10,9 +10,17 @@ type EHICDocument struct {
 	DateOfExpiry                 string           `json:"date_of_expiry" bson:"dateOfExpiry" validate:"required"`
 	DateOfIssuance               string           `json:"date_of_issuance" bson:"dateOfIssuance" validate:"required"`
 	DocumentNumber               string           `json:"document_number" bson:"documentNumber" validate:"required,min=4,max=50"`
+	AuthenticSource              AuthenticSource  `json:"authentic_source" bson:"authenticSource" validate:"required"`
+	EndingDate                   string           `json:"ending_date" bson:"endingDate" validate:"required"`
+	StartingDate                 string           `json:"starting_date" bson:"startingDate" validate:"required"`
 }
 
 type IssuingAuthority struct {
+	ID   string `json:"id" bson:"id" validate:"required,min=1,max=20"`
+	Name string `json:"name" bson:"name" validate:"required,min=1,max=100"`
+}
+
+type AuthenticSource struct {
 	ID   string `json:"id" bson:"id" validate:"required,min=1,max=20"`
 	Name string `json:"name" bson:"name" validate:"required,min=1,max=100"`
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/vcclient"
@@ -77,6 +78,12 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 			DateOfExpiry:   endDate,
 			DateOfIssuance: startDate,
 			DocumentNumber: CardNumber,
+			StartingDate:   time.Now().Format("2006-01-02"),
+			EndingDate:     time.Now().AddDate(1, 0, 0).Format("2006-01-02"),
+			AuthenticSource: socialsecurity.AuthenticSource{
+				ID:   InstitutionID,
+				Name: "SUNET",
+			},
 		}
 
 		var err error

@@ -14,6 +14,7 @@ import (
 
 	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type ehicClient struct {
@@ -59,6 +60,7 @@ func (c *ehicClient) sdjwt(ctx context.Context, doc *socialsecurity.EHICDocument
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
+	body["jti"] = uuid.NewString()
 	body["vct"] = c.credentialConstructor.VCT
 
 	body["cnf"] = map[string]any{

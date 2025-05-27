@@ -24,22 +24,42 @@
 
         <div id="indexContainer" class="box">
             <p class="subtitle">Select what you want to verify.</p>
+
             <div class="field">
-                <label class="label">Type of credentials</label>
+                <label class="label">Type of credentials (used if selected)</label>
                 <div class="control">
                     <div class="select">
-                        <select id="documentTypeSelect">
-                            <option value="Diploma">Diploma</option>
-                            <option value="EHIC" selected>EHIC</option>
-                            <option value="ELM">ELM</option>
-                            <!--TODO: Microcredential-->
-                            <!--TODO: Open-badge-->
-                            <option value="PDA1">PDA1</option>
-                            <option value="PID">PID</option>
+                        <select id="presentationRequestTypeIDSelect">
+                            <option value="" selected>--- Select ---</option>
+                            <option value="VCEHIC">EHIC - based on VC issuer</option>
+                            <option value="VCELM">ELM - based on VC issuer</option>
+                            <option value="VCPID">PID - based on VC issuer</option>
+                            <option value="">-----</option>
+                            <option value="EuropeanHealthInsuranceCard">EHIC - based on wwWallet issuer</option>
+                            <option value="CustomVerifiableId">PID ARF v1.8 - based on wwWallet issuer</option>
+                            <option value="MinimalPIDAndEuropeanHealthInsuranceCard">PID (ARF v1.8) + EHIC - both based on wwWallet issuer</option>
                         </select>
                     </div>
                 </div>
             </div>
+
+            <div class="field">
+                <label class="label">Credential type (deprecated; used if type of credential not selected)</label>
+                <div class="control">
+                    <div class="select">
+                        <select id="documentTypeSelect">
+                            <option value="" selected>--- Select ---</option>
+                            <option value="urn:edui:diploma:1">Deprecated - Diploma (urn:edui:diploma:1)</option>
+                            <option value="urn:eudi:ehic:1">Deprecated - EHIC (urn:eudi:ehic:1)</option>
+                            <option value="urn:edui:elm:1">Deprecated - ELM (urn:edui:elm:1)</option>
+                            <option value="urn:eudi:pda1:1">Deprecated - PDA1 (urn:eudi:pda1:1)</option>
+                            <option value="urn:eu.europa.ec.eudi:pid:1">Deprecated - PID (urn:eu.europa.ec.eudi:pid:1)
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="field">
                 <div class="control">
                     <label class="checkbox">

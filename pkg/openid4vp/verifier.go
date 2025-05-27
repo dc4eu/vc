@@ -545,8 +545,10 @@ func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error
 	}
 	sdHashAlg := sdAlgResults.String()
 
+	//TODO: mer avancerad lösning för att verifiera sd's när de är på flera nivåer. Nedan tillfälliga lösning så tas alla _sd rekursivt fram men det fungerar bara så länge som ex. revealedSelectiveDisclosures.id bara förekommer en gång (ex. id, person.id, org.id borde ställa till det om de förekommer samtidigt)
+
 	var sdList []string
-	sdResults := gjson.Get(vc.PayloadDecoded, "_sd")
+	sdResults := gjson.Get(vc.PayloadDecoded, ".._sd")
 	if sdResults.Exists() && sdResults.IsArray() {
 		sdResults.ForEach(func(_, value gjson.Result) bool {
 			sdList = append(sdList, value.String())

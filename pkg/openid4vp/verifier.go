@@ -311,63 +311,6 @@ type VerifiableCredentialWrapper struct {
 
 }
 
-// Process process the vp_token depending on selected ProcessType.
-// DEPRECATED: replaced by AuthorizationResponseWrapper.Process
-func (vp *VerifiablePresentationWrapper) Process(processType ProcessType) error {
-	if !isValidProcessType(processType) {
-		return errors.New("invalid process type")
-	}
-
-	// 1. parse, decrypt and decode top level jwt only (the vp_token level)
-	if err := vp.extractVPToken(); err != nil {
-		return err
-	}
-
-	if processType == FULL_VALIDATION {
-		// 2. verify the signature of the outer JWT (VP) using the Holder's public key.
-		// Ensure that it's not expired, revoked, or issued by untrusted holder (wallet), etc.
-		if err := vp.checkVPTokenIntegrity(); err != nil {
-			return err
-		}
-	}
-
-	// 3. parse, decrypt and decode every embedded VC
-	if err := vp.extractVerifiableCredentials(); err != nil {
-		return err
-	}
-
-	if processType == ONLY_EXTRACT_JSON {
-		// Break here to display extracted and decoded vp_token incl. vc's
-		return nil
-	}
-
-	// 4. Validate Issuer's Signatures on Embedded VerifiableCredentialWrapper's
-	// Extract and verify the signatures of all Verifiable Credentials using the Issuer's public key.
-	// Ensure that credentials are not expired, revoked, or issued by untrusted issuers, etc.
-	if err := vp.checkVerifiableCredentialsIntegrity(); err != nil {
-		return err
-	}
-
-	// 5. Verify Selective Disclosure Claims
-	// Validate disclosed claims against the hashed values (_sd list) in the original credential.
-	if err := vp.checkSelectiveDisclosures(); err != nil {
-		return err
-	}
-
-	// 6. Validate Holder Binding
-	// Ensure the Holder is correctly bound to the credentials.
-	if err := vp.checkHolderBindingsInEmbeddedVCs(); err != nil {
-		return err
-	}
-
-	// 7. Validate Presentation Requirements
-	// Ensure the VP matches the verifier's requirements.
-	return vp.checkPresentationRequirements()
-
-	// 8. Persist verified credentials
-	//TODO: analysera utfall och om allt är OK, persistera/lägg på en kö; alla vc's inkl. nödvändiga metadata för ev. konsumtion av en authentic_source men även stöd för att kunna ta emot revokeringsinfo(?) (import)
-}
-
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
 func (vp *VerifiablePresentationWrapper) extractVPToken() error {
 	parsedVP, err := vp.parseVPToken()

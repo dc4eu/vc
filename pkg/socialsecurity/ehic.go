@@ -15,15 +15,7 @@ type EHICDocument struct {
 	StartingDate                 string           `json:"starting_date" bson:"startingDate" validate:"required"`
 }
 
-type IssuingAuthority struct {
-	ID   string `json:"id" bson:"id" validate:"required,min=1,max=20"`
-	Name string `json:"name" bson:"name" validate:"required,min=1,max=100"`
-}
 
-type AuthenticSource struct {
-	ID   string `json:"id" bson:"id" validate:"required,min=1,max=20"`
-	Name string `json:"name" bson:"name" validate:"required,min=1,max=100"`
-}
 
 // Marshal marshals the document to a map
 func (d *EHICDocument) Marshal() (map[string]any, error) {

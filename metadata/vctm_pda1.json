@@ -33,7 +33,7 @@
       "display": [
         {
           "lang": "en-US",
-          "label": "Personal ID",
+          "label": "Social Security PIN",
           "description": "Unique personal identifier used by social security services."
         }
       ]
@@ -77,6 +77,21 @@
           "lang": "en-US",
           "label": "Employer name",
           "description": "Employer name in EU or Member State registries."
+        }
+      ]
+    },
+    {
+      "path": [
+        "employer",
+        "country"
+      ],
+      "sd": "never",
+      "svg_id": "employer_country",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Employer country",
+          "description": "Country where the employer is registered."
         }
       ]
     },
@@ -199,7 +214,20 @@
         {
           "lang": "en-US",
           "label": "Applicable legislation",
-          "description": "Country whose legislation applies during work abroad (posting)."
+          "description": "Country whose legislation is to be applied during the work abroad."
+        }
+      ]
+    },
+    {
+      "path": [
+        "status_confirmation"
+      ],
+      "sd": "never",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Status Confirmation:",
+          "description": "Status Confirmation, which defines the exact applicable legal framework for the worker."
         }
       ]
     },
@@ -221,12 +249,11 @@
         "id"
       ],
       "sd": "never",
-      "svg_id": "issuing_authority_id",
       "display": [
         {
           "lang": "en-US",
           "label": "Issuing authority id",
-          "description": "PDA1 issuing authority unique identifier in EU or Member State registries."
+          "description": "PDA1 issuing authority unique identifier."
         }
       ]
     },
@@ -236,12 +263,11 @@
         "name"
       ],
       "sd": "never",
-      "svg_id": "issuing_authority_name",
       "display": [
         {
           "lang": "en-US",
           "label": "Issuing authority name",
-          "description": "PDA1 issuing authority name in EU or Member State registries."
+          "description": "PDA1 issuing authority name."
         }
       ]
     },
@@ -288,6 +314,74 @@
     },
     {
       "path": [
+        "authentic_source"
+      ],
+      "sd": "never",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Competent institution"
+        }
+      ]
+    },
+    {
+      "path": [
+        "authentic_source",
+        "id"
+      ],
+      "sd": "never",
+      "svg_id": "authentic_source_id",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Competent institution id",
+          "description": "Identifier of the competent insitution as registered in the EESSI Institution Repository."
+        }
+      ]
+    },
+    {
+      "path": [
+        "authentic_source",
+        "name"
+      ],
+      "sd": "never",
+      "svg_id": "authentic_source_name",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Competent institution name",
+          "description": "Name of the competent insitution as registered in the EESSI Institution Repository."
+        }
+      ]
+    },
+    {
+      "path": [
+        "ending_date"
+      ],
+      "sd": "never",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Ending date",
+          "description": "End date of the business decision validity period of the PDA1."
+        }
+      ]
+    },
+    {
+      "path": [
+        "starting_date"
+      ],
+      "sd": "never",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Starting date",
+          "description": "Start date of the business decision validity period of the PDA1."
+        }
+      ]
+    },
+    {
+      "path": [
         "document_number"
       ],
       "sd": "always",
@@ -302,5 +396,5 @@
     }
   ],
   "schema_uri": "https://demo-issuer.wwwallet.org/public/creds/pda1/portable-document-a1-schema-dc4eu-01.json",
-  "schema_uri#integrity": "sha256-pvezVEjU4aJ5oxXbDUOaJhqzgZkU8FVDs66LP6JukE8="
+  "schema_uri#integrity": "sha256-8B1DykjQMxV7r9JigAsch6TZL3voBdu26lEHT9tOIeY="
 }

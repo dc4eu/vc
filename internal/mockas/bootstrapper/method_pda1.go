@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/vcclient"
 
+	"github.com/google/uuid"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -62,8 +64,9 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 		document := &socialsecurity.PDA1Document{
 			PersonalAdministrativeNumber: row[6],
 			Employer: socialsecurity.Employer{
-				ID:   row[10],
-				Name: row[11],
+				ID:      row[10],
+				Name:    row[11],
+				Country: "SE",
 			},
 			WorkAddress: socialsecurity.WorkAddress{
 				Formatted:      row[12],
@@ -79,10 +82,17 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 				Name: "SUNET",
 			},
 			LegislationCountry: "EU",
+			StatusConfirmation: "02",
 			IssuingCountry:     "EU",
 			DateOfExpiry:       row[29],
 			DateOfIssuance:     row[28],
 			DocumentNumber:     row[6], // something better?
+			StartingDate:       time.Now().Format("2006-01-02"),
+			EndingDate:         time.Now().AddDate(1, 0, 0).Format("2006-01-02"),
+			AuthenticSource: socialsecurity.AuthenticSource{
+				ID:   uuid.NewString(),
+				Name: "SUNET",
+			},
 		}
 
 		var err error

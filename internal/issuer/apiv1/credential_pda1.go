@@ -13,6 +13,7 @@ import (
 
 	"github.com/MichaelFraser99/go-sd-jwt/disclosure"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type pda1Client struct {
@@ -50,6 +51,7 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document
 	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
 	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
 	body["_sd_alg"] = "sha-256"
+	body["jti"] = uuid.NewString()
 	body["vct"] = c.credentialConstructor.VCT
 
 	body["cnf"] = map[string]any{

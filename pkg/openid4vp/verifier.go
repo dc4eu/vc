@@ -538,6 +538,46 @@ func (vp *VerifiablePresentationWrapper) checkSelectiveDisclosures() error {
 	return nil
 }
 
+// extractSDListDeep walks a JSON structure recursively and extracts all _sd arrays containing strings.
+func extractSDListDeep(jsonStr string) ([]string, error) {
+	var result []string
+	if jsonStr == "" {
+		return nil, errors.New("empty JSON string")
+	}
+
+	var root interface{}
+	if err := json.Unmarshal([]byte(jsonStr), &root); err != nil {
+		return nil, err
+	}
+
+	walkRecursive(root, &result)
+	return result, nil
+}
+
+// walkRecursive looks for _sd keys and adds their string array values to the result.
+func walkRecursive(v interface{}, result *[]string) {
+	switch val := v.(type) {
+	case map[string]interface{}:
+		for k, v2 := range val {
+			if k == "_sd" {
+				if arr, ok := v2.([]interface{}); ok {
+					for _, entry := range arr {
+						if str, ok := entry.(string); ok && str != "" {
+							*result = append(*result, str)
+						}
+					}
+				}
+			} else {
+				walkRecursive(v2, result)
+			}
+		}
+	case []interface{}:
+		for _, item := range val {
+			walkRecursive(item, result)
+		}
+	}
+}
+
 func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error {
 	sdAlgResults := gjson.Get(vc.PayloadDecoded, "_sd_alg")
 	if !sdAlgResults.Exists() {
@@ -545,20 +585,27 @@ func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error
 	}
 	sdHashAlg := sdAlgResults.String()
 
-	//TODO: mer avancerad lösning för att verifiera sd's när de är på flera nivåer. Nedan tillfälliga lösning så tas alla _sd rekursivt fram men det fungerar bara så länge som ex. revealedSelectiveDisclosures.id bara förekommer en gång (ex. id, person.id, org.id borde ställa till det om de förekommer samtidigt)
-
-	var sdList []string
-	sdResults := gjson.Get(vc.PayloadDecoded, ".._sd")
-	if sdResults.Exists() && sdResults.IsArray() {
-		sdResults.ForEach(func(_, value gjson.Result) bool {
-			sdList = append(sdList, value.String())
-			return true
-		})
+	// extracts all _sd values on all levels in JSON
+	//fmt.Printf("vc.PayloadDecoded (len=%d): %q\n", len(vc.PayloadDecoded), vc.PayloadDecoded)
+	sdList, err := extractSDListDeep(vc.PayloadDecoded)
+	if err != nil {
+		return err
 	}
 
-	err := vc.validateSelectiveDisclosures(sdList, sdHashAlg)
+	//Nedan kod har tidigare använts men då bara tagit ut _sd från rootnivån i jsonen.
+	//
+	//var sdList []string
+	//sdResults := gjson.Get(vc.PayloadDecoded, "_sd")
+	//if sdResults.Exists() && sdResults.IsArray() {
+	//	sdResults.ForEach(func(_, value gjson.Result) bool {
+	//		sdList = append(sdList, value.String())
+	//		return true
+	//	})
+	//}
+
+	err = vc.validateSelectiveDisclosures(sdList, sdHashAlg)
 	if err != nil {
-		return fmt.Errorf("validation of selective disclosures in a vc failed: %v", err)
+		return err
 	}
 	return nil
 }
@@ -964,7 +1011,10 @@ func (vc *VerifiableCredentialWrapper) validateSelectiveDisclosures(sdList []str
 		}
 
 		if !found {
-			return fmt.Errorf("invalid disclosure: %s", d.Key)
+			return &VerificationRejectedError{
+				Step:   "verify_selective_disclosures",
+				Reason: fmt.Sprintf("a revealed selective disclosure %s did not match any _sd hash value", d.Key),
+			}
 		} else {
 			fmt.Println("disclosure found and valid:", d)
 			vc.ValidSelectiveDisclosures = append(vc.ValidSelectiveDisclosures, d)

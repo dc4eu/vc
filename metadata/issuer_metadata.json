@@ -41,8 +41,9 @@
       }
     },
     "urn:eudi:pid:1": {
-      "scope": "pid:sd_jwt_vc",
+      "scope": "pid",
       "vct": "urn:eudi:pid:1",
+      "format": "vc+sd-jwt",
       "display": [
         {
           "name": "PID SD-JWT VC",
@@ -55,7 +56,6 @@
           "locale": "en-US"
         }
       ],
-      "format": "vc+sd-jwt",
       "cryptographic_binding_methods_supported": [
         "ES256"
       ],
@@ -73,6 +73,7 @@
     "eu.europa.ec.eudi.pid.1": {
       "scope": "pid:mso_mdoc",
       "doctype": "eu.europa.ec.eudi.pid.1",
+      "format": "mso_mdoc",
       "display": [
         {
           "name": "PID - MDOC",
@@ -85,7 +86,6 @@
           "locale": "en-US"
         }
       ],
-      "format": "mso_mdoc",
       "cryptographic_binding_methods_supported": [
         "ES256"
       ],
@@ -129,37 +129,6 @@
           ]
         }
       }
-    },
-    "urn:eu.europa.ec.eudi:por:1": {
-      "scope": "por:sd_jwt_vc",
-      "vct": "urn:eu.europa.ec.eudi:por:1",
-      "display": [
-        {
-          "name": "POR - SD-JWT VC",
-          "description": "Power of Representation",
-          "background_image": {
-            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
-          },
-          "background_color": "#c3b25d",
-          "text_color": "#363531",
-          "locale": "en-US"
-        }
-      ],
-      "format": "vc+sd-jwt",
-      "cryptographic_binding_methods_supported": [
-        "ES256"
-      ],
-      "credential_signing_alg_values_supported": [
-        "ES256"
-      ],
-      "proof_types_supported": {
-        "jwt": {
-          "proof_signing_alg_values_supported": [
-            "ES256"
-          ]
-        }
-      }
     }
-  },
-  "mdoc_iacas_uri": "http://vc_dev_apigw:8080/mdoc-iacas"
+  }
 }

@@ -1,5 +1,5 @@
 {
-  "vct": "urn:eu.europa.ec.eudi:pid:1",
+  "vct": "urn:eudi:pid:1",
   "name": "Example ARF 1.5 PID SD-JWT VCTM",
   "description": "Example PID SD-JWT Verifiable Credential Type Metadata, based on ietf-oauth-sd-jwt-vc (draft 09), using a single language tag (en-US). Adheres to PID Rulebook ARF 1.5 (urn:eu.europa.ec.eudi:pid:1).",
   "$comment": "Implementation of this example VCTM may require Member State–specific clarifications to align with national policies governing the display of included claims.",

@@ -17,7 +17,7 @@ common:
 
 credential_constructor:
   "pid":
-    vct: "urn:eu.europa.ec.eudi:pid:1"
+    vct: "urn:eudi:pid:1"
     vctm_file_path: "/metadata/vctm_pid.json"
   "ehic":
     vct: "urn:eudi:ehic:1"

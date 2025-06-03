@@ -10,7 +10,7 @@
   "credential_configurations_supported": {
     "urn:edui:diploma:1": {
       "scope": "diploma",
-      "vct": "urn:edui:diploma:1",
+      "vct": "urn:eudi:diploma:1",
       "format": "vc+sd-jwt",
       "display": [
         {
@@ -39,7 +39,7 @@
     },
     "urn:eudi:pid:1": {
       "scope": "pid",
-      "vct": "urn:eudi:pid:1",
+      "vct": "urn:eu.europa.ec.eudi:pid:1",
       "format": "vc+sd-jwt",
       "display": [
         {

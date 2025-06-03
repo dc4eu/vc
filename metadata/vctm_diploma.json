@@ -11,8 +11,8 @@
       "rendering": {
         "svg_templates": [
           {
-            "uri": "https://raw.githubusercontent.com/dc4eu/vc/633940b0b00ab259af01cfbff958f1ffebf5176a/images/diplomaTemplate.svg",
-            "uri#integrity": "sha256-1acd4883826aba0318d219213bb75a9dfc858f926e93f576224412301fe3018a",
+            "uri": "https://raw.githubusercontent.com/dc4eu/vc/8e0066324edbdcf468d3337ce6d1d9a150b4be4f/images/diploma-plain.svg",
+            "uri#integrity": "sha256-8d59febde3089b1e5281d37d41d5b40a9155717f6868774332845d7064089cc9",
             "properties": {
             }
           }
@@ -59,7 +59,6 @@
         "dateOfBirth"
       ],
       "sd": "never",
-      "svg_id": "dateOfBirth",
       "display": [
         {
           "lang": "en-US",
@@ -80,8 +79,8 @@
       "display": [
         {
           "lang": "en-US",
-          "label": "Name of qualification",
-          "description": "The name of the qualification awarded to the individual."
+          "label": "Title",
+          "description": "The title of the diploma awarded to the individual."
         }
       ]
     },
@@ -89,7 +88,10 @@
       "path": [
         "credentialSubject",
           "hasClaim",
-          "awardedBy","awardingBody","LegalName","nl"
+          "awardedBy",
+          "awardingBody",
+          "legalName",
+          "nl"
       ],
       "sd": "never",
       "svg_id": "awardingInstitution",
@@ -97,7 +99,7 @@
         {
           "lang": "en-US",
           "label": "Awarding institution",
-          "description": "The awarding institution of the Diploma."
+          "description": "The awarding institution of the diploma."
         }
       ]
     },
@@ -113,8 +115,8 @@
       "display": [
         {
           "lang": "en-US",
-          "label": "Awarding Date",
-          "description": "The awarding date of the Diploma."
+          "label": "Awarding date",
+          "description": "The awarding date of the diploma."
         }
       ]
     },
@@ -123,23 +125,22 @@
         "credentialSubject",
           "hasClaim",
           "awardedBy",
-         "awardingBody","location","address","countryCode","prefLabel","en"
+         "awardingBody",
+         "location",
+         "address",
+         "countryCode",
+         "prefLabel",
+         "en"
       ],
       "sd": "never",
-      "svg_id": "ClassificationOfTheAcademicQualification",
+      "svg_id": "country",
       "display": [
         {
           "lang": "en-US",
-          "label": "Classification of the academic qualification",
-          "description": "Classification of the academic qualification for Diploma."
+          "label": "Country",
+          "description": "The country where the issuing institution is located."
         }
       ]
     }
-  ],
-  "schema_uri": "",
-  "schema_uri#integrity": ""
+  ]
 }
-
-
-
-

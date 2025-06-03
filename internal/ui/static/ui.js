@@ -411,10 +411,10 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
         const documentTypeSelectWithinDivElement = createSelectElement([
             {value: 'urn:eudi:ehic:1', label: 'urn:eudi:ehic:1'},
             {value: '"urn:eudi:pda1:', label: '"urn:eudi:pda1:'},
-            {value: 'urn:eu.europa.ec.eudi:pid:1"', label: 'urn:eu.europa.ec.eudi:pid:1"'},
-            {value: 'urn:edui:elm:1', label: 'urn:edui:elm:1'},
-            {value: 'urn:edui:diploma:1', label: 'urn:edui:diploma:1'},
-            {value: 'urn:edui:micro_credential:1', label: 'urn:edui:diploma:1'},
+            {value: 'urn:eu.europa.ec.eudi:pid:1"', label: 'urn:eudi:pid:1"'},
+            {value: 'urn:eudi:elm:1', label: 'urn:eudi:elm:1'},
+            {value: 'urn:eudi:diploma:1', label: 'urn:eudi:diploma:1'},
+            {value: 'urn:eudi:micro_credential:1', label: 'urn:eudi:diploma:1'},
         ]);
 
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
@@ -1230,12 +1230,12 @@ const addSearchDocumentsFormArticleToContainer = () => {
         const documentTypeSelectWithinDivElement = createSelectElement([{
             value: '',
             label: 'Document type (optional)'
-        }, {value: 'urn:edui:diploma:1', label: 'Diploma (urn:edui:diploma:1)'},
+        }, {value: 'urn:eudi:diploma:1', label: 'Diploma (urn:eudi:diploma:1)'},
             {value: 'urn:eudi:ehic:1', label: 'EHIC (urn:eudi:ehic:1)'},
-            {value: 'urn:edui:elm:1', label: 'ELM (urn:edui:elm:1)'},
-            {value: 'urn:edui:micro_credential:1', label: 'Micro credential (urn:edui:micro_credential:1)'},
+            {value: 'urn:eudi:elm:1', label: 'ELM (urn:eudi:elm:1)'},
+            {value: 'urn:eudi:micro_credential:1', label: 'Micro credential (urn:eudi:micro_credential:1)'},
             {value: 'urn:eudi:pda1:1', label: 'PDA1 (urn:eudi:pda1:1)'},
-            {value: 'urn:eu.europa.ec.eudi:pid:1', label: 'PID (urn:eu.europa.ec.eudi:pid:1)'}]);
+            {value: 'urn:eudi:pid:1', label: 'PID (urn:eudi:pid:1)'}]);
         const documentTypeDiv = documentTypeSelectWithinDivElement[0];
         const documentTypeSelect = documentTypeSelectWithinDivElement[1];
         const collectIdInput = createInputElement('Collect ID (optional)');

@@ -15,11 +15,8 @@
       "display": [
         {
           "name": "Bachelor Diploma - SD-JWT VC",
-          "background_image": {
-            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
-          },
           "logo": {
-            "uri": "http://vc_dev_apigw:8080/images/diploma-logo.png"
+            "uri": "https://raw.githubusercontent.com/dc4eu/vc/8e0066324edbdcf468d3337ce6d1d9a150b4be4f/images/micro-credential-logo.svg"
           },
           "background_color": "#b1d3ff",
           "text_color": "#ffffff",

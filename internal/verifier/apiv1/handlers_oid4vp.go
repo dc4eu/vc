@@ -240,10 +240,6 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
-	arw, err := openid4vp.NewAuthorizationResponseWrapper(request)
-	if err != nil {
-		return nil, err
-	}
 	processConfig := &openid4vp.ProcessConfig{
 		ProcessType: openid4vp.FULL_VALIDATION,
 		ValidationOptions: openid4vp.ValidationOptions{
@@ -253,8 +249,9 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		},
 	}
 
-	//TODO: skicka in en ~keyProvider (långlivade egna nyckar + cert samt fasad för att hämta externa nycklar från openid fed/jwks/mm)
-	err = arw.Process(processConfig, vpSession)
+	arw := &openid4vp.AuthorizationResponseWrapper{}
+	err = arw.Process(request, processConfig, vpSession, c.trustService)
+
 	verificationMeta := &openid4vp.VerificationMeta{
 		VerifiedAtUnix: time.Now().UTC().Unix(),
 	}

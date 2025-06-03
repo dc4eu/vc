@@ -57,26 +57,34 @@ type AuthorizationResponseWrapper struct {
 	authorizationResponse *AuthorizationResponse
 	vpList                []*VerifiablePresentationWrapper
 
+	// resources etc
+	vpSession    *VPInteractionSession
+	trustService *TrustService
+
 	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
+
+	// Deprecated: to be removed, use trustService instead
 	holderPublicKey any
-	jwePrivateKey   any
+
+	// Deprecated: to be removed, use trustService instead
+	jwePrivateKey any
+
+	// Deprecated: to be removed, use trustService instead
 	issuerPublicKey any
 }
 
-func NewAuthorizationResponseWrapper(authorizationResponse *AuthorizationResponse) (*AuthorizationResponseWrapper, error) {
-	if authorizationResponse == nil {
-		return nil, errors.New("no authorizationResponse provided")
-	}
-
-	arw := &AuthorizationResponseWrapper{
-		authorizationResponse: authorizationResponse,
-	}
-
-	return arw, nil
-}
-
 // Process
-func (arw *AuthorizationResponseWrapper) Process(processConfig *ProcessConfig, vpSession *VPInteractionSession) error {
+func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *AuthorizationResponse, processConfig *ProcessConfig, vpSession *VPInteractionSession, trustService *TrustService) error {
+	if authorizationResponse == nil {
+		return errors.New("no authorizationResponse provided")
+	}
+	if arw.authorizationResponse != nil {
+		return errors.New("authorizationResponse already processed")
+	}
+	arw.authorizationResponse = authorizationResponse
+	arw.trustService = trustService
+	arw.vpSession = vpSession
+
 	if processConfig == nil {
 		return errors.New("no processConfig provided")
 	}
@@ -148,7 +156,7 @@ func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 	arw.vpList = make([]*VerifiablePresentationWrapper, 0)
 	for index, vpTokenRaw := range arw.authorizationResponse.VPTokens {
 		if vpTokenRaw.isJWTBased() {
-			vp, err := NewVerifiablePresentationWrapper(vpTokenRaw.JWT)
+			vp, err := NewVerifiablePresentationWrapper(vpTokenRaw.JWT, arw.vpSession, arw.trustService)
 			if err != nil {
 				return err
 			}
@@ -247,13 +255,15 @@ func (arw *AuthorizationResponseWrapper) ExtractVerificationRecordBasis(sequence
 }
 
 // NewVerifiablePresentationWrapper initializes a new VerifiablePresentationWrapper instance from a raw token.
-func NewVerifiablePresentationWrapper(jwt_based_vp_token string) (*VerifiablePresentationWrapper, error) {
+func NewVerifiablePresentationWrapper(jwt_based_vp_token string, vpSession *VPInteractionSession, trustService *TrustService) (*VerifiablePresentationWrapper, error) {
 	if jwt_based_vp_token == "" {
 		return nil, errors.New("empty vp_token provided")
 	}
 
 	vp := &VerifiablePresentationWrapper{
-		RawToken: jwt_based_vp_token,
+		RawToken:     jwt_based_vp_token,
+		vpSession:    vpSession,
+		trustService: trustService,
 	}
 
 	return vp, nil
@@ -279,9 +289,19 @@ type VerifiablePresentationWrapper struct {
 	PresentationSubmission *PresentationSubmission
 	vcList                 []*VerifiableCredentialWrapper
 
+	// resources etc
+	vpSession    *VPInteractionSession
+	trustService *TrustService
+
 	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
+
+	// Deprecated: to be removed, use trustService instead
 	holderPublicKey interface{}
-	jwePrivateKey   interface{}
+
+	// Deprecated: to be removed, use trustService instead
+	jwePrivateKey interface{}
+
+	// Deprecated: to be removed, use trustService instead
 	issuerPublicKey interface{} //FOR NOW: All embedded vc's in a vp must currently be signed by the same issuer key
 
 }
@@ -309,6 +329,9 @@ type VerifiableCredentialWrapper struct {
 
 	//TODO: ldp_vc based vc
 
+	// resources etc
+	vpSession    *VPInteractionSession
+	trustService *TrustService
 }
 
 // extractAndDecodeTopLevel (decrypt - not supported yet), extract and decode the vp_token into its components: header, payload, and signature.
@@ -366,9 +389,12 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 		}
 
 		vc := &VerifiableCredentialWrapper{
-			RawToken: vp.RawToken, //In first supported scenario the vp and vc is the same (direct_post.jwt with vc+sd-jwt)
-			Format:   descriptor.Format,
+			RawToken:     vp.RawToken, //In first supported scenario the vp and vc is the same (direct_post.jwt with vc+sd-jwt)
+			Format:       descriptor.Format,
+			vpSession:    vp.vpSession,
+			trustService: vp.trustService,
 		}
+
 		switch descriptor.Format {
 		case "vc+sd-jwt", "vc sd-jwt":
 			err := vc.extractJWTVC()
@@ -393,7 +419,7 @@ func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
 	parsedToken, err := jwt.Parse(vp.RawJWSPartOfToken, func(token *jwt.Token) (any, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vp_token signing alg: %s\n", alg)
-		//TODO(mk): find and extract holderPublicKey from the real source
+		//TODO(mk): find and extract holderPublicKey from the real source using vp.trustService.GetPublicKey...(...)
 		return vp.holderPublicKey, nil
 	})
 	if err != nil {
@@ -431,7 +457,7 @@ func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
 	}
 
 	if iss, ok := claims["iss"].(string); ok {
-		//TODO: Hårdkodad expectedIssuer "did:example:myprivatewallet" - ta in via (förmodligen från tidigare steg)???
+		//TODO: Hårdkodad expectedIssuer "did:example:myprivatewallet" - ta in via config, vpSession eller trustService?
 		expectedIssuer := "did:example:myprivatewallet"
 		if iss != expectedIssuer {
 			return fmt.Errorf("VP JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
@@ -439,7 +465,7 @@ func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
 	}
 
 	if audClaim, ok := claims["aud"]; ok {
-		//TODO: Hårdkodad expectedAudience - ta in via config
+		//TODO: Hårdkodad expectedAudience - ta in via config, vpSession eller trustService?
 		expectedAudience := "did:example:sunetverifier"
 		switch aud := audClaim.(type) {
 		case string:
@@ -463,6 +489,7 @@ func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
 	}
 
 	//TODO(mk): check more claims: nonce, revocation etc
+
 	return nil
 }
 
@@ -644,7 +671,7 @@ func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{
 	parsedToken, _ := jwt.Parse(vc.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vc_token signing alg: %s\n", alg)
-		//TODO(mk): find and extract the issuer public key from the real source instead of param
+		//TODO(mk): find and extract the issuer public key using vc.trustService.GetPublicKey...(...)
 		return issuerPublicKey, nil
 	})
 
@@ -690,17 +717,8 @@ func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{
 		}
 	}
 
-	if vct, ok := claims["vct"].(string); ok {
-		//TODO: Hårdkodad expectedVCT "EHICCredential"
-		expectedVCT := "urn:credential:ehic" //"EHICCredential"
-		if vct != expectedVCT {
-			return fmt.Errorf("VerifiableCredentialWrapper JWT vct mismatch: expected %s, got %s", expectedVCT, vct)
-		}
-	}
-
 	//TODO(mk): check more claims: revocation mm
 
-	//TODO: REFACTORISERA: kanske kontrollera _sd här, då de finns i claims???
 	return nil
 }
 

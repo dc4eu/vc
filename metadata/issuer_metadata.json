@@ -39,7 +39,7 @@
     },
     "urn:eudi:pid:1": {
       "scope": "pid",
-      "vct": "urn:eu.europa.ec.eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "format": "vc+sd-jwt",
       "display": [
         {

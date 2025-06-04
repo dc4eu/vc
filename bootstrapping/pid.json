@@ -3,7 +3,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_100",
       "real_data": false,
       "collect": {
@@ -61,7 +61,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_101",
       "real_data": false,
       "collect": {
@@ -119,7 +119,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_102",
       "real_data": false,
       "collect": {
@@ -177,7 +177,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_103",
       "real_data": false,
       "collect": {
@@ -235,7 +235,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_104",
       "real_data": false,
       "collect": {
@@ -293,7 +293,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_105",
       "real_data": false,
       "collect": {
@@ -351,7 +351,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_106",
       "real_data": false,
       "collect": {
@@ -409,7 +409,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_107",
       "real_data": false,
       "collect": {
@@ -467,7 +467,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_108",
       "real_data": false,
       "collect": {
@@ -525,7 +525,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_109",
       "real_data": false,
       "collect": {
@@ -583,7 +583,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_110",
       "real_data": false,
       "collect": {
@@ -641,7 +641,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_111",
       "real_data": false,
       "collect": {
@@ -699,7 +699,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_112",
       "real_data": false,
       "collect": {
@@ -757,7 +757,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_113",
       "real_data": false,
       "collect": {
@@ -815,7 +815,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_114",
       "real_data": false,
       "collect": {
@@ -873,7 +873,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_115",
       "real_data": false,
       "collect": {
@@ -931,7 +931,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_116",
       "real_data": false,
       "collect": {
@@ -989,7 +989,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_117",
       "real_data": false,
       "collect": {
@@ -1047,7 +1047,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_118",
       "real_data": false,
       "collect": {
@@ -1105,7 +1105,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_119",
       "real_data": false,
       "collect": {
@@ -1163,7 +1163,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_120",
       "real_data": false,
       "collect": {
@@ -1221,7 +1221,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_121",
       "real_data": false,
       "collect": {
@@ -1279,7 +1279,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_122",
       "real_data": false,
       "collect": {
@@ -1337,7 +1337,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_123",
       "real_data": false,
       "collect": {
@@ -1395,7 +1395,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_124",
       "real_data": false,
       "collect": {
@@ -1453,7 +1453,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_125",
       "real_data": false,
       "collect": {
@@ -1511,7 +1511,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_126",
       "real_data": false,
       "collect": {
@@ -1569,7 +1569,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_127",
       "real_data": false,
       "collect": {
@@ -1627,7 +1627,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_128",
       "real_data": false,
       "collect": {
@@ -1685,7 +1685,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_129",
       "real_data": false,
       "collect": {
@@ -1743,7 +1743,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_130",
       "real_data": false,
       "collect": {
@@ -1801,7 +1801,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_131",
       "real_data": false,
       "collect": {
@@ -1859,7 +1859,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_132",
       "real_data": false,
       "collect": {
@@ -1917,7 +1917,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_133",
       "real_data": false,
       "collect": {
@@ -1975,7 +1975,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_134",
       "real_data": false,
       "collect": {
@@ -2033,7 +2033,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_135",
       "real_data": false,
       "collect": {
@@ -2091,7 +2091,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_136",
       "real_data": false,
       "collect": {
@@ -2149,7 +2149,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_137",
       "real_data": false,
       "collect": {
@@ -2207,7 +2207,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_138",
       "real_data": false,
       "collect": {
@@ -2265,7 +2265,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_139",
       "real_data": false,
       "collect": {
@@ -2323,7 +2323,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_140",
       "real_data": false,
       "collect": {
@@ -2381,7 +2381,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_141",
       "real_data": false,
       "collect": {
@@ -2439,7 +2439,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_142",
       "real_data": false,
       "collect": {
@@ -2497,7 +2497,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_143",
       "real_data": false,
       "collect": {
@@ -2555,7 +2555,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_144",
       "real_data": false,
       "collect": {
@@ -2613,7 +2613,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_145",
       "real_data": false,
       "collect": {
@@ -2671,7 +2671,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_146",
       "real_data": false,
       "collect": {
@@ -2729,7 +2729,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_147",
       "real_data": false,
       "collect": {
@@ -2787,7 +2787,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_148",
       "real_data": false,
       "collect": {
@@ -2845,7 +2845,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_149",
       "real_data": false,
       "collect": {
@@ -2903,7 +2903,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_70",
       "real_data": false,
       "collect": {
@@ -2961,7 +2961,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_71",
       "real_data": false,
       "collect": {
@@ -3019,7 +3019,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_72",
       "real_data": false,
       "collect": {
@@ -3077,7 +3077,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_73",
       "real_data": false,
       "collect": {
@@ -3135,7 +3135,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_74",
       "real_data": false,
       "collect": {
@@ -3193,7 +3193,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_75",
       "real_data": false,
       "collect": {
@@ -3251,7 +3251,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_76",
       "real_data": false,
       "collect": {
@@ -3309,7 +3309,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_77",
       "real_data": false,
       "collect": {
@@ -3367,7 +3367,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_78",
       "real_data": false,
       "collect": {
@@ -3425,7 +3425,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_79",
       "real_data": false,
       "collect": {
@@ -3483,7 +3483,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_80",
       "real_data": false,
       "collect": {
@@ -3541,7 +3541,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_81",
       "real_data": false,
       "collect": {
@@ -3599,7 +3599,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_82",
       "real_data": false,
       "collect": {
@@ -3657,7 +3657,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_83",
       "real_data": false,
       "collect": {
@@ -3715,7 +3715,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_84",
       "real_data": false,
       "collect": {
@@ -3773,7 +3773,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_85",
       "real_data": false,
       "collect": {
@@ -3831,7 +3831,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_86",
       "real_data": false,
       "collect": {
@@ -3889,7 +3889,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_87",
       "real_data": false,
       "collect": {
@@ -3947,7 +3947,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_88",
       "real_data": false,
       "collect": {
@@ -4005,7 +4005,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_89",
       "real_data": false,
       "collect": {
@@ -4063,7 +4063,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_90",
       "real_data": false,
       "collect": {
@@ -4121,7 +4121,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_91",
       "real_data": false,
       "collect": {
@@ -4179,7 +4179,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_92",
       "real_data": false,
       "collect": {
@@ -4237,7 +4237,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_93",
       "real_data": false,
       "collect": {
@@ -4295,7 +4295,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_94",
       "real_data": false,
       "collect": {
@@ -4353,7 +4353,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_95",
       "real_data": false,
       "collect": {
@@ -4411,7 +4411,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_96",
       "real_data": false,
       "collect": {
@@ -4469,7 +4469,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_97",
       "real_data": false,
       "collect": {
@@ -4527,7 +4527,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_98",
       "real_data": false,
       "collect": {
@@ -4585,7 +4585,7 @@
     "meta": {
       "authentic_source": "PID:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eu.europa.ec.eudi:pid:1",
+      "document_type": "urn:eudi:pid:1",
       "document_id": "document_id_pid_99",
       "real_data": false,
       "collect": {

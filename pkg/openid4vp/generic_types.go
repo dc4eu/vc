@@ -89,13 +89,12 @@ type VPInteractionSession struct {
 	PresentationDefinition    *PresentationDefinition `json:"presentation_definition"`
 	EncryptDirectPostJWT      bool                    `json:"encrypt_direct_post_jwt"`
 
-	//TODO: Below is just for dev/test purpose and must be removed before production
-	VerifierKeyPair *KeyPair `json:"-"`
-	//VerifierX509CertDER []byte
-	VerifierX5cCertDERBase64               string           `json:"-"`
-	RequestObjectJWS                       string           `json:"request_object_jws,omitempty"`
-	AuthorisationResponseDebugData         *JsonRequestData `json:"authorisation_response_debug_data,omitempty"`
-	CountNbrCallsToGetAuthorizationRequest int64            `json:"count_nbr_calls_to_get_authorization_request,omitempty"` //TODO: Behöver reda ut hur många gånger plånboken verkligen anropar denna (verkar som mer än 1ggr per session)???
+	VerifierKeyPair                *KeyPair         `json:"-"`
+	VerifierX5cCertDERBase64       string           `json:"-"`
+	RequestObjectJWS               string           `json:"request_object_jws,omitempty"`
+	AuthorisationResponseDebugData *JsonRequestData `json:"authorisation_response_debug_data,omitempty"`
+	// Deprecated: ta bort när wwW bara gör ett anrop och behovet att kolla detta inte längre finns kvar
+	CountNbrCallsToGetAuthorizationRequest int64 `json:"count_nbr_calls_to_get_authorization_request,omitempty"` //TODO: Behöver reda ut hur många gånger plånboken verkligen anropar denna (verkar som mer än 1ggr per session)???
 }
 
 func (vpSession *VPInteractionSession) IncrementCountNbrCallsToGetAuthorizationRequest() {

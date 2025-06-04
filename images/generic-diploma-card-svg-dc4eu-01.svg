@@ -16,7 +16,7 @@
 	<text x="45" y="200" font-family="math" font-size="30" fill="#625f60" font-weight="normal">{{title}}</text>
 
 	<text x="45" y="250" font-family="math" font-size="25" fill="#700000" font-weight="bold">Name</text>
-	<text x="45" y="280" font-family="math" font-size="30" fill="#625f60" font-weight="normal">{{given_name}} {{family_name}}</text>
+	<text x="45" y="280" font-family="math" font-size="30" fill="#625f60" font-weight="normal">{{givenName}} {{familyName}}</text>
 
 	<text x="45" y="330" font-family="math" font-size="25" fill="#700000" font-weight="bold">Institution</text>
 	<text x="45" y="360" font-family="math" font-size="30" fill="#625f60" ont-weight="normal">{{awardingInstitution}} {{country}}</text>

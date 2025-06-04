@@ -142,7 +142,7 @@ func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *Authoriz
 		return err
 	}
 
-	//TODO: fortsätt refact/impl av process här....
+	//TODO: fortsätt impl av verifieringsprocessen här....
 
 	return nil
 
@@ -651,7 +651,7 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 	parsedVPToken.signatureEncoded = tokenParts[2]
 
 	if len(parts) > 1 {
-		//TODO: handle remainingParts := parts[1:] ie what might be after the jws parts in the vp_token
+		//TODO: handle remainingParts := parts[1:] ie what might be after the jws parts in the vp_token?
 	}
 
 	return parsedVPToken, nil

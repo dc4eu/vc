@@ -26,8 +26,6 @@ func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, erro
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQRCode")
 	defer span.End()
 
-	//TODO: Inspect user-agent type to detect cross device or same device?
-
 	request := &openid4vp.QRRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
@@ -102,19 +100,6 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
 		}
-
-		//queryStr := string(decryptedPayload)
-		//values, err := url.ParseQuery(queryStr)
-		//if err != nil {
-		//	return nil, fmt.Errorf("failed to parse query string: %w", err)
-		//}
-		//
-		//vpTokenStringArray = values["vp_token"]
-		//presentationSubmissionString = values.Get("presentation_submission")
-		//stateString = values.Get("state")
-		//errorString = values.Get("error")
-		//errorDescriptionString = values.Get("error_description")
-		//errorURIString = values.Get("error_uri")
 
 		request = &openid4vp.AuthorizationResponse{}
 		err = json.Unmarshal(decryptedPayload, request)

@@ -11,8 +11,8 @@
       "rendering": {
         "svg_templates": [
           {
-            "uri": "https://raw.githubusercontent.com/dc4eu/vc/f0b3419f3e1aee6039f9c3657df44a1a8bf1f44d/images/generic-diploma-card-svg-dc4eu-01.svg",
-            "uri#integrity": "sha256-acf861cdc811830e413ca7d82ecd2ea647e331e383aa38078722a642fafbc5c6",
+            "uri": "https://github.com/dc4eu/vc/blob/d5bcc09ad66fb8491d0694f48d60371fc6ac9e04/images/generic-diploma-card-svg-dc4eu-01.svg",
+            "uri#integrity": "sha256-c0b7aded16b62d1f3427ca17151f5aa01f74daaf2f6b57924613b4240e9aa46f",
             "properties": {
             }
           }

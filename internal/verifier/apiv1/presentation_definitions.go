@@ -119,7 +119,7 @@ func vcEHIC(requestType *openid4vp.PresentationRequestType) *openid4vp.Presentat
 }
 
 func vcPID(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
-	vctList := []string{model.CredentialTypeUrnEuEuropaEcEudiPid1}
+	vctList := []string{model.CredentialTypeUrnEudiPid1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          requestType.ID,
@@ -231,7 +231,7 @@ func buildPresentationDefinitionFor(documentType string) (*openid4vp.Presentatio
 		return nil, fmt.Errorf("document type %s is currently not supported", documentType)
 	case model.CredentialTypeUrnEudiPda11:
 		return pda1(), nil
-	case model.CredentialTypeUrnEuEuropaEcEudiPid1:
+	case model.CredentialTypeUrnEudiPid1:
 		return pid(), nil
 	default:
 		return nil, fmt.Errorf("document type %s is currently not supported", documentType)
@@ -344,7 +344,7 @@ func pda1() *openid4vp.PresentationDefinition {
 
 // DEPRECATED:
 func pid() *openid4vp.PresentationDefinition {
-	vctList := []string{model.CredentialTypeUrnEuEuropaEcEudiPid1}
+	vctList := []string{model.CredentialTypeUrnEudiPid1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "PID",

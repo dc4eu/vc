@@ -127,7 +127,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case model.CredentialTypeUrnEuEuropaEcEudiPid1:
+	case model.CredentialTypeUrnEudiPid1:
 		doc := &model.Identity{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err

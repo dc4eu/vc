@@ -48,7 +48,7 @@ func (c *elmClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "ELM:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEduiElm1,
+			DocumentType:    model.CredentialTypeUrnEudiElm1,
 			DocumentID:      fmt.Sprintf("document_id_elm_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

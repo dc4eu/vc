@@ -91,7 +91,7 @@ type MetaData struct {
 
 	// required: true
 	// example: PDA1
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=urn:edui:elm:1 urn:edui:diploma:1 urn:edui:micro_credential:1 urn:eu.europa.ec.eudi:pid:1 urn:eudi:ehic:1 urn:eudi:pda1:1"`
+	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=urn:eudi:elm:1 urn:eudi:diploma:1 urn:eudi:micro_credential:1 urn:eudi:pid:1 urn:eudi:ehic:1 urn:eudi:pda1:1"`
 
 	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9

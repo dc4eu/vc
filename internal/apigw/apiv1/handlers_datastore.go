@@ -179,7 +179,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		Meta: &model.MetaData{
 			AuthenticSource:           "Generic_PID_Issuer",
 			DocumentVersion:           "1.0.0",
-			DocumentType:              "urn:eu.europa.ec.eudi:pid:1",
+			DocumentType:              model.CredentialTypeUrnEudiPid1,
 			DocumentID:                fmt.Sprintf("generic.pid.%s", uuid.NewString()),
 			RealData:                  false,
 			Collect:                   &model.Collect{},

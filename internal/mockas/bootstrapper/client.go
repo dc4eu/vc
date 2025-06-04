@@ -32,6 +32,7 @@ type Client struct {
 	elmClient             clients
 	diplomaClient         clients
 	MicroCredentialClient clients
+	UserClient            clients
 }
 
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) {
@@ -80,10 +81,22 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		return nil, fmt.Errorf("new micro credential client: %w", err)
 	}
 
+	client.UserClient, err = NewUserClient(ctx, client)
+	if err != nil {
+		return nil, fmt.Errorf("new user client: %w", err)
+	}
+
 	for _, credentialType := range []string{"ehic", "pda1", "pid", "elm", "diploma", "microcredential"} { // pid is not working
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
 		if err := client.uploader(ctx, jsonPath); err != nil {
 			return nil, fmt.Errorf("uploader: %w", err)
+		}
+	}
+
+	for _, credentialType := range []string{"user"} {
+		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
+		if err := client.userUpload(ctx, jsonPath); err != nil {
+			return nil, fmt.Errorf("user upload: %w", err)
 		}
 	}
 
@@ -151,10 +164,7 @@ func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 		return err
 	}
 
-	for pidNumber, body := range bodys {
-		if body.Meta.DocumentType == "ELM" {
-			c.log.Info("Upload", "pidNumber", pidNumber, "body", body)
-		}
+	for _, body := range bodys {
 		resp, err := c.vcClient.Root.Upload(ctx, body)
 		if err != nil {
 			c.log.Error(err, "Upload", "resp", resp)
@@ -162,6 +172,29 @@ func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 		}
 
 		c.log.Debug("Upload", "resp", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func (c *Client) userUpload(ctx context.Context, jsonPath string) error {
+	b, err := os.ReadFile(jsonPath)
+	if err != nil {
+		return err
+	}
+
+	bodys := map[string]*vcclient.AddPIDRequest{}
+	if err := json.Unmarshal(b, &bodys); err != nil {
+		return err
+	}
+
+	for _, body := range bodys {
+		resp, err := c.vcClient.User.AddPID(ctx, body)
+		if err != nil {
+			c.log.Error(err, "User Upload", "resp", resp)
+			return err
+		}
+		c.log.Debug("User Upload", "resp", resp.StatusCode)
 	}
 
 	return nil

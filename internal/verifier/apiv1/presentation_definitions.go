@@ -69,7 +69,7 @@ func buildPresentationDefinition(presentationRequestType *openid4vp.Presentation
 }
 
 func vcELMForEMREX(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
-	vctList := []string{model.CredentialTypeUrnEduiElm1}
+	vctList := []string{model.CredentialTypeUrnEudiElm1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          requestType.ID,
@@ -119,7 +119,7 @@ func vcEHIC(requestType *openid4vp.PresentationRequestType) *openid4vp.Presentat
 }
 
 func vcPID(requestType *openid4vp.PresentationRequestType) *openid4vp.PresentationDefinition {
-	vctList := []string{model.CredentialTypeUrnEuEuropaEcEudiPid1}
+	vctList := []string{model.CredentialTypeUrnEudiPid1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          requestType.ID,
@@ -221,17 +221,17 @@ func wwwMinimalPIDAndEuropeanHealthInsuranceCard(requestType *openid4vp.Presenta
 // DEPRECATED: use build buildPresentationDefinition()
 func buildPresentationDefinitionFor(documentType string) (*openid4vp.PresentationDefinition, error) {
 	switch documentType {
-	case model.CredentialTypeUrnEduiDiploma1:
+	case model.CredentialTypeUrnEudiDiploma1:
 		return diploma(), nil
 	case model.CredentialTypeUrnEudiEhic1:
 		return ehic(), nil
-	case model.CredentialTypeUrnEduiElm1:
+	case model.CredentialTypeUrnEudiElm1:
 		return elm(), nil
-	case model.CredentialTypeUrnEduiMicroCredential1:
+	case model.CredentialTypeUrnEudiMicroCredential1:
 		return nil, fmt.Errorf("document type %s is currently not supported", documentType)
 	case model.CredentialTypeUrnEudiPda11:
 		return pda1(), nil
-	case model.CredentialTypeUrnEuEuropaEcEudiPid1:
+	case model.CredentialTypeUrnEudiPid1:
 		return pid(), nil
 	default:
 		return nil, fmt.Errorf("document type %s is currently not supported", documentType)
@@ -240,7 +240,7 @@ func buildPresentationDefinitionFor(documentType string) (*openid4vp.Presentatio
 
 // DEPRECATED:
 func diploma() *openid4vp.PresentationDefinition {
-	vctList := []string{model.CredentialTypeUrnEduiDiploma1}
+	vctList := []string{model.CredentialTypeUrnEudiDiploma1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "Bachelor",
@@ -296,7 +296,7 @@ func ehic() *openid4vp.PresentationDefinition {
 
 // DEPRECATED:
 func elm() *openid4vp.PresentationDefinition {
-	vctList := []string{model.CredentialTypeUrnEduiElm1}
+	vctList := []string{model.CredentialTypeUrnEudiElm1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "ELM",
@@ -344,7 +344,7 @@ func pda1() *openid4vp.PresentationDefinition {
 
 // DEPRECATED:
 func pid() *openid4vp.PresentationDefinition {
-	vctList := []string{model.CredentialTypeUrnEuEuropaEcEudiPid1}
+	vctList := []string{model.CredentialTypeUrnEudiPid1}
 
 	return &openid4vp.PresentationDefinition{
 		ID:          "PID",

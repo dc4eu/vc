@@ -2,6 +2,7 @@ package bootstrapper
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"vc/pkg/vcclient"
 
@@ -71,6 +72,10 @@ func TestCreateJSONSourceFiles(t *testing.T) {
 		err = client.makeSourceData("testdata/users_paris.xlsx")
 		assert.NoError(t, err)
 
+		for pidNumber, ur := range client.documents {
+			fmt.Println("in test:::: pidNumber", pidNumber, ur.DocumentData["credentialSubject"].(map[string]any)["givenName"])
+		}
+
 		err = client.save2Disk()
 		assert.NoError(t, err)
 	})
@@ -84,6 +89,16 @@ func TestCreateJSONSourceFiles(t *testing.T) {
 
 		err = client.save2Disk()
 		assert.NoError(t, err)
+	})
 
+	t.Run("user", func(t *testing.T) {
+		client, err := NewUserClient(ctx, c)
+		assert.NoError(t, err)
+
+		err = client.makeSourceData("")
+		assert.NoError(t, err)
+
+		err = client.save2Disk()
+		assert.NoError(t, err)
 	})
 }

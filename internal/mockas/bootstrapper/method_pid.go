@@ -50,7 +50,7 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "PID:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEuEuropaEcEudiPid1,
+			DocumentType:    model.CredentialTypeUrnEudiPid1,
 			DocumentID:      fmt.Sprintf("document_id_pid_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

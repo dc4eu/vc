@@ -12,7 +12,7 @@
         "svg_templates": [
           {
             "uri": "https://github.com/dc4eu/vc/blob/d5bcc09ad66fb8491d0694f48d60371fc6ac9e04/images/generic-diploma-card-svg-dc4eu-01.svg",
-            "uri#integrity": "sha256-c0b7aded16b62d1f3427ca17151f5aa01f74daaf2f6b57924613b4240e9aa46f",
+            "uri#integrity": "sha256-wLet7Ra2LR80J8oXFR9aoB902q8va1eSRhO0JA6apG8=",
             "properties": {
             }
           }

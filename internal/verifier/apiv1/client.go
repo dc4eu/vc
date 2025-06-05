@@ -28,7 +28,9 @@ type Client struct {
 	verifierKeyPair  *openid4vp.KeyPair
 	verifierX509Cert *openid4vp.CertData
 
-	//TODO: remove after mongodb is being used
+	trustService *openid4vp.TrustService
+
+	//TODO: remove after mongodb is being used to provide a tread-safe new next sequence
 	currentSequence int64
 }
 
@@ -39,6 +41,8 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		db:  db,
 		log: log.New("apiv1"),
 	}
+
+	c.trustService = &openid4vp.TrustService{}
 
 	//TODO: config value for private key file path + cert file path
 	keyPair, err := LoadKeyPairFromPEMFile("/private_verifier_rsa.pem")

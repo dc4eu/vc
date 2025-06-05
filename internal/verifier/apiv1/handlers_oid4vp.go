@@ -69,13 +69,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		Status:               openid4vp.InteractionStatusQRDisplayed,
 		EncryptDirectPostJWT: request.EncryptDirectPostJWT,
 
-		//TODO: nedan ska inte vara här men läggs här tillsvidare
-		VerifierKeyPair: c.verifierKeyPair,
-		//VerifierKeyPair: &openid4vp.KeyPair{
-		//	PrivateKey:         c.veriferLongLivedEcdsaP256Private,
-		//	PublicKey:          veriferLongLivedEcdsaP256Private.PublicKey,
-		//	SigningMethodToUse: jwt.SigningMethodES256,
-		//},
+		VerifierKeyPair:          c.verifierKeyPair,
 		VerifierX5cCertDERBase64: base64.StdEncoding.EncodeToString(c.verifierX509Cert.CertDER),
 	}
 
@@ -91,14 +85,12 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		return nil, err
 	}
 
-	//verifierBaseUrl := "http://172.16.50.6:8080"
 	schema := "http://"
 	if c.cfg.Verifier.APIServer.TLS.Enabled {
 		schema = "https://"
 	}
 
 	requestURI := fmt.Sprintf("%s%s%s/authorize?id=%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, sessionID)
-	//requestURIQueryEscaped := url.QueryEscape(requestURI)
 	clientID := c.cfg.Verifier.FQDN
 	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURI)
 
@@ -240,21 +232,19 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
-	arw, err := openid4vp.NewAuthorizationResponseWrapper(request)
-	if err != nil {
-		return nil, err
-	}
 	processConfig := &openid4vp.ProcessConfig{
 		ProcessType: openid4vp.FULL_VALIDATION,
 		ValidationOptions: openid4vp.ValidationOptions{
-			//TODO: remove ValidationOptions when all dev and key+crypto handling in place and work's
-			SkipAllSignatureChecks: true,
-			SkipStateCheck:         false,
+			//TODO: set prod values when all dev and key+crypto handling in place and work's
+			SkipVPSignatureChecks: true,
+			SkipVCSignatureChecks: false,
+			SkipStateCheck:        false,
 		},
 	}
 
-	//TODO: skicka in en ~keyProvider (långlivade egna nyckar + cert samt fasad för att hämta externa nycklar från openid fed/jwks/mm)
-	err = arw.Process(processConfig, vpSession)
+	arw := &openid4vp.AuthorizationResponseWrapper{}
+	err = arw.Process(request, processConfig, vpSession, c.trustService)
+
 	verificationMeta := &openid4vp.VerificationMeta{
 		VerifiedAtUnix: time.Now().UTC().Unix(),
 	}
@@ -279,8 +269,7 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 			SessionID:        sessionID,
 			CallbackID:       callbackID,
 			VerificationMeta: verificationMeta,
-			//PresentationSubmission: arw.authorizationResponse.PresentationSubmission,
-			VPResults: []*openid4vp.VPResult{},
+			VPResults:        []*openid4vp.VPResult{},
 		}
 		err = c.db.VerificationRecordColl.Create(ctx, record)
 		if err != nil {
@@ -362,7 +351,7 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 		//No need to look for a record if the qr code just display or scanned, since no response from the wallet has been recieved yet
 		verificationRecord, _ := c.db.VerificationRecordColl.Read(ctx, sessionID)
 		if verificationRecord != nil {
-			//TODO: filter what data in verificationRecord to not expose (if not nil or any error)
+			//TODO: filter what data in verificationRecord to expose to the verifier web (if not nil or any error)
 		}
 		data = verificationRecord
 	}
@@ -397,12 +386,6 @@ func (c *Client) GetVPFlowDebugInfo(ctx context.Context, request *VPFlowDebugInf
 
 	if vpSession != nil && vpSession.AuthorisationResponseDebugData != nil && len(vpSession.AuthorisationResponseDebugData.Body) != 0 {
 		fmt.Println("vpSession.AuthorisationResponseDebugData.Body as string:", string(vpSession.AuthorisationResponseDebugData.Body))
-		//var generic map[string]interface{}
-		//err := json.Unmarshal(vpSession.AuthorisationResponseDebugData.Body, &generic)
-		//if err != nil {
-		//	return nil, fmt.Errorf("Failed to parse JSON: %w", err)
-		//}
-		//fmt.Println("Body as generic struct:", generic)
 	}
 
 	return &VPFlowDebugInfoReply{

@@ -615,10 +615,10 @@ definitions:
           required: true
           example: PDA1
         enum:
-        - urn:edui:elm:1
-        - urn:edui:diploma:1
-        - urn:edui:micro_credential:1
-        - urn:eu.europa.ec.eudi:pid:1
+        - urn:eudi:elm:1
+        - urn:eudi:diploma:1
+        - urn:eudi:micro_credential:1
+        - urn:eudi:pid:1
         - urn:eudi:ehic:1
         - urn:eudi:pda1:1
         type: string
@@ -710,6 +710,8 @@ definitions:
           is used, the credential_identifier Credential Request parameter MUST NOT
           be present.
         type: string
+      headers:
+        $ref: '#/definitions/openid4vci.CredentialRequestHeader'
       proof:
         allOf:
         - $ref: '#/definitions/openid4vci.Proof'
@@ -719,6 +721,18 @@ definitions:
           and present in the credential_configurations_supported parameter of the
           Issuer metadata for the requested Credential. The proof object MUST contain
           the following:'
+      vct:
+        type: string
+    type: object
+  openid4vci.CredentialRequestHeader:
+    properties:
+      authorization:
+        type: string
+      dpoP:
+        type: string
+    required:
+    - authorization
+    - dpoP
     type: object
   openid4vci.CredentialResponseEncryption:
     properties:

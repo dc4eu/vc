@@ -236,8 +236,9 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		ProcessType: openid4vp.FULL_VALIDATION,
 		ValidationOptions: openid4vp.ValidationOptions{
 			//TODO: set prod values when all dev and key+crypto handling in place and work's
-			SkipAllSignatureChecks: true,
-			SkipStateCheck:         false,
+			SkipVPSignatureChecks: true,
+			SkipVCSignatureChecks: false,
+			SkipStateCheck:        false,
 		},
 	}
 

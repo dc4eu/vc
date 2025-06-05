@@ -30,6 +30,8 @@ type ProcessType int
 
 const (
 	FULL_VALIDATION ProcessType = iota
+
+	// DEPRECATED: ta bort nedan alternativ då det inte längre känns aktuellt
 	ONLY_EXTRACT_JSON
 )
 
@@ -49,8 +51,9 @@ func isValidProcessType(p ProcessType) bool {
 }
 
 type ValidationOptions struct {
-	SkipAllSignatureChecks bool `json:"skip_all_signature_checks,omitempty"`
-	SkipStateCheck         bool `json:"skip_state_check,omitempty"`
+	SkipVPSignatureChecks bool `json:"skip_vp_signature_checks,omitempty"`
+	SkipVCSignatureChecks bool `json:"skip_vc_signature_checks,omitempty"`
+	SkipStateCheck        bool `json:"skip_state_check,omitempty"`
 }
 
 type AuthorizationResponseWrapper struct {
@@ -116,8 +119,7 @@ func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *Authoriz
 		return err
 	}
 
-	if processConfig.ProcessType == FULL_VALIDATION &&
-		!processConfig.ValidationOptions.SkipAllSignatureChecks {
+	if processConfig.ProcessType == FULL_VALIDATION && !processConfig.ValidationOptions.SkipVPSignatureChecks {
 		if err := arw.checkAllVPsIntegrity(); err != nil {
 			return err
 		}
@@ -132,7 +134,7 @@ func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *Authoriz
 		return nil
 	}
 
-	if !processConfig.ValidationOptions.SkipAllSignatureChecks {
+	if !processConfig.ValidationOptions.SkipVCSignatureChecks {
 		if err := arw.checkAllVCsIntegrity(); err != nil {
 			return err
 		}
@@ -668,20 +670,38 @@ func (vp *VerifiablePresentationWrapper) checkVerifiableCredentialsIntegrity() e
 }
 
 func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{}) error {
-	parsedToken, _ := jwt.Parse(vc.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
-		alg := token.Method.Alg()
-		fmt.Printf("\nFound vc_token signing alg: %s\n", alg)
-		//TODO(mk): find and extract the issuer public key using vc.trustService.GetPublicKey...(...)
-		return issuerPublicKey, nil
-	})
 
-	//TODO: TA UT err i jwt.Parse samt KOMMENTERA FRAM NEDAN NÄR ÄKTA issuerPublicKey FINNS TILLGÄNGLIG
-	//if err != nil {
-	//	return fmt.Errorf("VerifiableCredentialWrapper JWS-verification failed: %w", err)
-	//}
-	//if !parsedToken.Valid {
-	//	return fmt.Errorf("VerifiableCredentialWrapper JWS not valid")
-	//}
+	rawX5C, ok := vc.HeaderDecodedMap["x5c"]
+	if !ok {
+		return fmt.Errorf("missing 'x5c'")
+	}
+
+	x5cList, ok := rawX5C.([]interface{})
+	if !ok || len(x5cList) == 0 {
+		return fmt.Errorf("x5c is not a non-empty array")
+	}
+
+	firstCert, ok := x5cList[0].(string)
+	if !ok {
+		return fmt.Errorf("x5c[0] is not a string")
+	}
+
+	pubKey, err := vc.trustService.ExtractPublicKeyFromX5C(firstCert)
+	if err != nil {
+		return fmt.Errorf("failed to extract public key: %w", err)
+	}
+
+	parsedToken, err := jwt.Parse(vc.RawJWSPartOfToken, func(token *jwt.Token) (interface{}, error) {
+		//alg := token.Method.Alg()
+		//fmt.Printf("\nFound vc_token signing alg: %s\n", alg)
+		return pubKey, nil
+	})
+	if err != nil {
+		return fmt.Errorf("VerifiableCredentialWrapper JWS-verification failed: %w", err)
+	}
+	if !parsedToken.Valid {
+		return fmt.Errorf("VerifiableCredentialWrapper JWS not valid")
+	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
@@ -709,15 +729,30 @@ func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{
 		}
 	}
 
-	if iss, ok := claims["iss"].(string); ok {
-		//TODO: Hårdkodad expectedIssuer "https://issuer.sunet.se" - ta in via config
-		expectedIssuer := "https://ehic-issuer.wwwallet.org" //"https://issuer.sunet.se"
-		if iss != expectedIssuer {
-			return fmt.Errorf("VerifiableCredentialWrapper JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
-		}
-	}
+	//TODO: verifiera att det är en issuer som verifiern litar på
+	//if iss, ok := claims["iss"].(string); ok {
+	//	//TODO: Hårdkodad expectedIssuer "https://issuer.sunet.se" - ta in via config
+	//	expectedIssuer := "https://ehic-issuer.wwwallet.org" //"https://issuer.sunet.se"
+	//	if iss != expectedIssuer {
+	//		return fmt.Errorf("VerifiableCredentialWrapper JWT issuer mismatch: expected %s, got %s", expectedIssuer, iss)
+	//	}
+	//}
 
 	//TODO(mk): check more claims: revocation mm
+
+	//TODO: verifiera holder binding, tror nedan är nyckeln för holderbindingen?
+	//cnfRaw, ok := vc.PayloadDecodedMap["cnf"]
+	//if !ok {
+	//	return fmt.Errorf("missing 'cnf'")
+	//}
+	//cnfMap, ok := cnfRaw.(map[string]interface{})
+	//if !ok {
+	//	return fmt.Errorf("'cnf' is not a map")
+	//}
+	//pubKey, err := vc.trustService.ExtractPublicKeyFromCnfMap(cnfMap)
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }

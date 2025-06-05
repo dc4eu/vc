@@ -1,10 +1,14 @@
 package oauth2
 
 import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"encoding/json"
 	"fmt"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v3/jwk"
-	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 type DPoP struct {
@@ -22,91 +26,117 @@ type DPoP struct {
 
 	// ATH Hash of the access token. The value MUST be the result of a base64url encoding (as defined in Section 2 of [RFC7515]) the SHA-256 [SHS] hash of the ASCII encoding of the associated access token's value.¶
 	ATH string `json:"ath"`
-	//jwt.RegisteredClaims
+
+	Thumbprint string `json:"thumbprint,omitempty"` // Optional, used for JWK thumbprint
+
 }
 
-func parseJWK(dpopJWT string) (jwk.Set, error) {
-	token, err := jwt.ParseString(dpopJWT, jwt.WithVerify(false))
+func (d *DPoP) Unmarshal(claims jwt.MapClaims) error {
+	// Unmarshal the claims into the DPoP struct
+	data, err := json.Marshal(claims)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to marshal claims: %w", err)
 	}
 
-	fmt.Println("token", token)
-
-	keySet := jwk.NewSet()
-	//
-	//	k, err := jwk.ParseKey([]byte(key))
-	//	if err != nil {
-	//		return nil, fmt.Errorf("failed to parse JWK: %w", err)
-	//	}
-	//	keySet.AddKey(k)
-
-	return keySet, err
-}
-
-func Validate(dPopJWT string, set jwk.Set) (bool, error) {
-	jwt.WithKeySet(set)
-	token, err := jwt.ParseString(dPopJWT, jwt.WithKeySet(set))
-	if err != nil {
-		return false, err
+	if err := json.Unmarshal(data, d); err != nil {
+		return fmt.Errorf("failed to unmarshal claims into DPoP struct: %w", err)
 	}
 
-	fmt.Println("token", token)
-
-	return false, nil
-
+	return nil
 }
 
-// Validate validates a signed sdjwt
-//func ParseDPoPJWT(dpopJWT string, pubkey crypto.PublicKey) (bool, error) {
-//	claims := jwt.MapClaims{}
-//
-//	token, err := jwt.ParseWithClaims(dpopJWT, claims, func(token *jwt.Token) (any, error) {
-//		return pubkey.(*ecdsa.PublicKey), nil
-//	})
-//	if err != nil {
-//		return false, err
-//	}
-//
-//	return token.Valid, nil
-//}
-//
-//func (d *DPoP) SignJWT(signingMethod jwt.SigningMethod, privateKey crypto.PrivateKey, certs []string) (string, error) {
-//	token := jwt.NewWithClaims(signingMethod, d)
-//
-//	// Sign the token with the private key
-//	signedToken, err := token.SignedString(privateKey)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	return signedToken, nil
-//}
+func parseDpopJWK(jwkClaim []byte) (any, string, error) {
+	keySet, err := jwk.Parse(jwkClaim)
+	if err != nil {
+		return nil, "", err
+	}
 
-//func (d *DPoP) SignJWT2(signingMethod jwt., privateKey crypto.PrivateKey, certs []string) (string, error) {
-//	//token := jwt.NewWithClaims(signingMethod, d)
-//
-//	pubkey, err := jwk.PublicKeyOf(privateKey)
-//	if err != nil {
-//		fmt.Printf("failed to get public key: %s\n", err)
-//		return "", err
-//	}
-//	b, err := json.Marshal(pubkey)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	fmt.Println("pubkey", string(b))
-//
-//	// Sign the token with the private key
-//	signedToken, err := token.SignedString(privateKey)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	return signedToken, nil
-//}
+	key, ok := keySet.Key(0)
+	if !ok {
+		return nil, "", fmt.Errorf("failed to get key from JWK set")
+	}
 
-//func mura() {
-//
-//}
+	thumbprint, err := key.Thumbprint(crypto.SHA256)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get key fingerprint: %w", err)
+	}
+	fingerprint := fmt.Sprintf("%x", thumbprint)
+
+	var kk = &ecdsa.PublicKey{}
+
+	if err := jwk.Export(key, kk); err != nil {
+		return nil, "", fmt.Errorf("failed to export key from JWK: %w", err)
+	}
+
+	if err := key.Validate(); err != nil {
+		return nil, "", fmt.Errorf("failed to validate JWK: %w", err)
+	}
+
+	keyIsPrivate, err := jwk.IsPrivateKey(key)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to check if key is private: %w", err)
+	}
+	if keyIsPrivate {
+		fmt.Println("JWK is a private key, expected a public key")
+	}
+
+	return kk, fingerprint, err
+}
+
+func ValidateAndParseDPoPJWT(dPopJWT string) (*DPoP, error) {
+	if dPopJWT == "" {
+		return nil, fmt.Errorf("DPoP JWT is empty")
+	}
+	fmt.Println("Validating DPoP JWT")
+	dpopClaims := &DPoP{}
+	claims := jwt.MapClaims{}
+
+	token, err := jwt.ParseWithClaims(dPopJWT, claims, func(token *jwt.Token) (any, error) {
+		j := token.Header["jwk"].(map[string]any)
+		fmt.Println("JWK in token header:", j)
+
+		b, err := json.Marshal(j)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal JWK: %w", err)
+		}
+		var signingKey any
+		signingKey, dpopClaims.Thumbprint, err = parseDpopJWK(b)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse JWK: %w", err)
+		}
+
+		if token.Header["typ"] != "dpop+jwt" {
+			return nil, fmt.Errorf("unexpected token type: %v", token.Header["typ"])
+		}
+
+		alg := token.Header["alg"]
+		switch jwt.GetSigningMethod(alg.(string)).(type) {
+		case *jwt.SigningMethodECDSA:
+			return signingKey.(*ecdsa.PublicKey), nil
+		case *jwt.SigningMethodRSA:
+			return signingKey.(*rsa.PublicKey), nil
+		default:
+			return nil, fmt.Errorf("unexpected signing method: %v", alg)
+		}
+	})
+	if err != nil {
+		return nil, jwt.ErrSignatureInvalid
+	}
+
+	if err := dpopClaims.Unmarshal(claims); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal claims into DPoP struct: %w", err)
+	}
+
+	fmt.Println("Parsed DPoP JWT:", token, "valid:", token.Valid)
+
+	return dpopClaims, nil
+}
+
+func (c *DPoP) IsAccessTokenDPoP(token string) bool {
+	// Check if the ATH is set, which indicates that this is a DPoP proof
+	if c.ATH == token {
+		return true
+	}
+
+	return false
+}

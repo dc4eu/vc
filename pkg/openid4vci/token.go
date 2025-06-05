@@ -1,8 +1,15 @@
 package openid4vci
 
+//"client_id=1003&grant_type=authorization_code&code=b4af17ce-1c56-4546-9118-d60f6b301e44&code_verifier=vXshCcXYcceHZWukHCOVTN2WhXTJujgblBuokp8ofUw&redirect_uri=https%3A%2F%2Fdev.wallet.sunet.se"}
+
+type TokenRequestHeader struct {
+	DPOP string `header:"dpop" validate:"required"`
+}
+
 // TokenRequest https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-13.html#name-token-request
 type TokenRequest struct {
-	DPOP string `header:"DPoP" binding:"required" validate:"required"`
+	Header *TokenRequestHeader
+
 	// Pre-Authorized Code Flow
 	// PreAuthorizedCode The code representing the authorization to obtain Credentials of a certain type. This parameter MUST be present if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.
 	//PreAuthorizedCode string `json:"pre_authorized_code,omitempty" validate:"required_with=GrantType"`
@@ -12,31 +19,20 @@ type TokenRequest struct {
 
 	//// Authorization Code Flow
 	//// GrantType REQUIRED.  Value MUST be set to "authorization_code".
-	//GrantType string `json:"grant_type"`
+	GrantType string `form:"grant_type" json:"grant_type" validate:"required,oneof=authorization_code"`
 
 	//// Code REQUIRED.  The authorization code received from the authorization server.
-	//Code string `json:"code" validate:"required"`
+	Code string `form:"code" json:"code" validate:"required"`
 
 	//// RedirectURI	REQUIRED, if the "redirect_uri" parameter was included in the authorization request as described in Section 4.1.1, and their values MUST be identical.
-	//RedirectURI string `json:"redirect_uri"`
+	RedirectURI string `form:"redirect_uri" json:"redirect_uri" validate:"required"`
 
 	//// ClientID REQUIRED, if the client is not authenticating with the authorization server as described in Section 3.2.1.
-	//ClientID string `json:"client_id"`
+	ClientID string `form:"client_id" json:"client_id" validate:"required"`
 
 	//// CodeVerifier OPTIONAL
-	//CodeVerifier string `json:"code_verifier"`
+	CodeVerifier string `form:"code_verifier" json:"code_verifier"`
 }
-
-// Validate validates the TokenRequest
-//func (t *TokenRequest) Validate(req *CredentialOfferParameters) error {
-//	grant, ok := req.Grants[t.PreAuthorizedCode]
-//	if ok {
-//		g := grant.(GrantPreAuthorizedCode)
-//		fmt.Println(g.PreAuthorizedCode)
-//	}
-//
-//	return nil
-//}
 
 // TokenResponse https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-13.html#name-successful-token-response
 type TokenResponse struct {
@@ -65,4 +61,8 @@ type TokenResponse struct {
 	// * credential_identifiers: OPTIONAL. Array of strings, each uniquely identifying a Credential that can be issued using the Access Token returned in this response. Each of these Credentials corresponds to the same entry in the credential_configurations_supported Credential Issuer metadata but can contain different claim values or a different subset of claims within the claims set identified by that Credential type. This parameter can be used to simplify the Credential Request, as defined in Section 7.2, where the credential_identifier parameter replaces the format parameter and any other Credential format-specific parameters in the Credential Request. When received, the Wallet MUST use these values together with an Access Token in subsequent Credential Requests.
 
 	AuthorizationDetails []AuthorizationDetailsParameter `json:"authorization_details"`
+}
+
+func (t *TokenResponse) DpopResponse() error {
+	return nil
 }

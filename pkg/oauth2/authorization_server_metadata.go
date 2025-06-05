@@ -15,7 +15,6 @@ type AuthorizationServerMetadata struct {
 	AuthorizationEndpoint string `json:"authorization_endpoint" validate:"required"`
 
 	// TokenEndpoint URL of the authorization server's token endpoint [RFC6749]. This is REQUIRED unless only the implicit grant type is supported.
-
 	TokenEndpoint string `json:"token_endpoint" validate:"required"`
 
 	// JWKSURI   OPTIONAL.  URL of the authorization server's JWK Set [JWK] document.  The referenced document contains the signing key(s) the client uses to validate signatures from the authorization server. This URL MUST use the "https" scheme.  The JWK Set MAY also contain the server's encryption key or keys, which are used by clients to encrypt requests to the server.  When both signing and encryption keys are made available, a "use" (public key use) parameter value is REQUIRED for all keys in the referenced JWK Set to indicate each key's intended usage.

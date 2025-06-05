@@ -10,6 +10,7 @@ type Authorization struct {
 	CodeChallenge       string `json:"code_challenge" bson:"code_challenge" validate:"required"`
 	CodeChallengeMethod string `json:"code_challenge_method" bson:"code_challenge_method" validate:"required,oneof=S256 plain"`
 	LastUsed            int64  `json:"last_used" bson:"last_used"`
+	SavedAt             int64  `json:"saved_at" bson:"saved_at"`
 }
 
 // OAuthUsers is the model for the OAuth users in the database

@@ -2,17 +2,43 @@ package openid4vci
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
+//{"body": "{\"format\":\"vc+sd-jwt\",\
+//"proof\":{\"proof_type\":\"jwt\",
+// \"jwt\":\"eyJhbGciOiJFUzI1NiIsInR5cCI6Im9wZW5pZDR2Y2ktcHJvb2Yrand0IiwiandrIjp7ImNydiI6IlAtMjU2IiwiZXh0Ijp0cnVlLCJrZXlfb3BzIjpbInZlcmlmeSJdLCJrdHkiOiJFQyIsIngiOiJLYURFejhybkt3RGVHeXB6RlNwclRxX3BLZjNLLXFZdzU2dW4xSjcyYkZRIiwieSI6IkFNV0d2Umo3QU9Zc3dGNU5BSU55Rnk3OUdUVjJOR1ktcG5PM0JKZHpwMDAifX0.eyJub25jZSI6IiIsImF1ZCI6Imh0dHBzOi8vdmMtaW50ZXJvcC0zLnN1bmV0LnNlIiwiaXNzIjoiMTAwMyIsImlhdCI6MTc0ODUzNTQ3OH0.hlZrNbnzD8eR7Ulmp6qv4A4Ev-GLvhUgZ4P3ZURSd1C7OVFhhzgiPoAW41TYMcgFPuuwNsftebBUEncC4mWcKA\"},\
+//"vct\":\"DiplomaCredential\"}"}
+
+type CredentialRequestHeader struct {
+	DPoP          string `header:"dpop" validate:"required"`
+	Authorization string `header:"Authorization" validate:"required"`
+}
+
+// HashAuthorizeToken hashes the Authorization header using SHA-256 and encodes it in Base64 URL format.
+func (c *CredentialRequestHeader) HashAuthorizeToken() string {
+	token := strings.TrimPrefix(c.Authorization, "DPoP ")
+	fmt.Println("Token: ", token)
+
+	tokenS256 := sha256.Sum256([]byte(token))
+	fmt.Printf("Token SHA256: %x\n", tokenS256)
+
+	b64 := base64.RawURLEncoding.EncodeToString(tokenS256[:])
+	fmt.Println("Base64 Raw Encoded Token SHA256: ", b64)
+	return b64
+}
+
 // CredentialRequest https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
 type CredentialRequest struct {
+	Headers *CredentialRequestHeader
+
 	// Format REQUIRED when the credential_identifiers parameter was not returned from the Token Response. It MUST NOT be used otherwise. It is a String that determines the format of the Credential to be issued, which may determine the type and any other information related to the Credential to be issued. Credential Format Profiles consist of the Credential format specific parameters that are defined in Appendix A. When this parameter is used, the credential_identifier Credential Request parameter MUST NOT be present.
 	Format string `json:"format"`
-
-	// credential_definition
 
 	// Proof OPTIONAL. Object containing the proof of possession of the cryptographic key material the issued Credential would be bound to. The proof object is REQUIRED if the proof_types_supported parameter is non-empty and present in the credential_configurations_supported parameter of the Issuer metadata for the requested Credential. The proof object MUST contain the following:
 	Proof *Proof `json:"proof"`
@@ -22,6 +48,14 @@ type CredentialRequest struct {
 
 	// CredentialIdentifier REQUIRED when credential_identifiers parameter was returned from the Token Response. It MUST NOT be used otherwise. It is a String that identifies a Credential that is being requested to be issued. When this parameter is used, the format parameter and any other Credential format specific parameters such as those defined in Appendix A MUST NOT be present.
 	CredentialResponseEncryption *CredentialResponseEncryption `json:"credential_response_encryption"`
+
+	VCT string `json:"vct"`
+}
+
+// IsAccessTokenDPoP checks if the Authorize header belong to DPoP proof
+func (c *CredentialRequestHeader) IsAccessTokenDPoP() bool {
+
+	return false
 }
 
 // Validate validates the CredentialRequest based claims in TokenResponse

@@ -2,6 +2,8 @@ package httpserver
 
 import (
 	"context"
+	"embed"
+	"html/template"
 	"net/http"
 	"time"
 	"vc/internal/apigw/apiv1"
@@ -13,6 +15,7 @@ import (
 	"github.com/gin-contrib/cors"
 
 	// Swagger
+	_ "embed"
 	_ "vc/docs/apigw"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +35,9 @@ type Service struct {
 	httpHelpers    *httphelpers.Client
 }
 
+//go:embed index.html consent.js consent.css
+var embeddedStaticFiles embed.FS
+
 // New creates a new httpserver service
 func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, log *logger.Log) (*Service, error) {
 	s := &Service{
@@ -49,6 +55,27 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	if err != nil {
 		return nil, err
 	}
+
+	//	files, err := embeddedStaticFiles.ReadDir("static")
+	//	if err != nil {
+	//		s.log.Error(err, "failed to read embedded static files")
+	//		return nil, fmt.Errorf("failed to read embedded static files: %w", err)
+	//	}
+	//	for _, file := range files {
+	//		data, _ := embeddedStaticFiles.ReadFile("static/" + file.Name())
+	//		fmt.Printf("File: %snContent: %snn", file.Name(), data)
+	//	}
+
+	//s.gin.Static("/static", "./static")
+	//	s.gin.LoadHTMLFiles("./static/index.html")
+	//	s.gin.GET("/", func(c *gin.Context) {
+	//		c.HTML(http.StatusOK, "index.html", nil)
+	//	})
+
+	s.gin.StaticFS("/static", http.FS(embeddedStaticFiles))
+
+	f := template.Must(template.New("").ParseFS(embeddedStaticFiles, "index.html"))
+	s.gin.SetHTMLTemplate(f)
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
 	if err != nil {
@@ -80,6 +107,8 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "op/par", http.StatusCreated, s.endpointOAuthPar)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusPermanentRedirect, s.endpointOAuthAuthorize)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorization/consent", http.StatusOK, s.endpointOAuthAuthorizationConsent)
+	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "authorization/consent", http.StatusOK, s.endpointOAuthAuthorizationConsentLogin)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuth2Metadata)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", 200, s.endpointHealth)

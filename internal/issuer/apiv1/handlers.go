@@ -83,7 +83,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case model.CredentialTypeUrnEduiElm1:
+	case model.CredentialTypeUrnEudiElm1:
 		doc := &education.ELMDocument{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
@@ -94,7 +94,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case model.CredentialTypeUrnEduiDiploma1:
+	case model.CredentialTypeUrnEudiDiploma1:
 		doc := map[string]any{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case model.CredentialTypeUrnEduiMicroCredential1:
+	case model.CredentialTypeUrnEudiMicroCredential1:
 		doc := map[string]any{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
@@ -127,7 +127,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 			return nil, err
 		}
 
-	case model.CredentialTypeUrnEuEuropaEcEudiPid1:
+	case model.CredentialTypeUrnEudiPid1:
 		doc := &model.Identity{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err

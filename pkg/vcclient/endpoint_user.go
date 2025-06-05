@@ -31,8 +31,8 @@ func (s *userHandler) AddPID(ctx context.Context, body *AddPIDRequest) (*http.Re
 }
 
 type LoginPIDUserRequest struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Username string `json:"username" form:"username" validate:"required"`
+	Password string `json:"password" form:"password" validate:"required"`
 }
 
 type LoginPIDUserReply struct {

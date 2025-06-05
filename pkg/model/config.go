@@ -58,6 +58,7 @@ type Common struct {
 	Tracing         OTEL                  `yaml:"tracing" validate:"required"`
 	Kafka           Kafka                 `yaml:"kafka" validate:"omitempty"`
 	CredentialOffer CredentialOfferConfig `yaml:"credential_offer" validate:"omitempty"`
+	SupportedPidVCT []string              `yaml:"supported_pid_vct" validate:"omitempty"`
 }
 
 type CredentialOfferConfig struct {

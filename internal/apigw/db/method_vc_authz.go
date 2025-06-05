@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"errors"
+	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
@@ -48,7 +50,7 @@ func (c *VCAuthzColl) createIndex(ctx context.Context) error {
 
 	indexTTL := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "request_uri", Value: 1},
+			primitive.E{Key: "saved_at", Value: 1},
 		},
 		Options: options.Index().SetName("auth_code_ttl").SetExpireAfterSeconds(60),
 	}
@@ -64,6 +66,8 @@ func (c *VCAuthzColl) Save(ctx context.Context, doc *model.Authorization) error 
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:auth:save")
 	defer span.End()
 
+	doc.SavedAt = time.Now().Unix()
+
 	_, err := c.Coll.InsertOne(ctx, doc)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
@@ -75,13 +79,36 @@ func (c *VCAuthzColl) Save(ctx context.Context, doc *model.Authorization) error 
 }
 
 // Get gets one user from auth collection
-func (c *VCAuthzColl) Get(ctx context.Context, requestURI string) (*model.Authorization, error) {
+func (c *VCAuthzColl) Get(ctx context.Context, query *model.Authorization) (*model.Authorization, error) {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:auth:get")
 	defer span.End()
 
+	if query == nil {
+		span.SetStatus(codes.Error, "query cannot be nil")
+		return nil, errors.New("query cannot be nil")
+	}
+
+	filter := bson.M{}
+
+	if query.RequestURI != "" {
+		filter["request_uri"] = bson.M{"$eq": query.RequestURI}
+	}
+
+	if query.ClientID != "" {
+		filter["client_id"] = bson.M{"$eq": query.ClientID}
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"is_used":   true,
+			"last_used": time.Now().Unix(),
+		},
+	}
+
 	var doc model.Authorization
-	err := c.Coll.FindOne(ctx, bson.M{"request_uri": requestURI}).Decode(&doc)
-	if err != nil {
+	if err := c.Coll.FindOneAndUpdate(ctx, filter, update).Decode(&doc); err != nil {
+		//err := c.Coll.FindOne(ctx, filter).Decode(&doc)
+		//if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}

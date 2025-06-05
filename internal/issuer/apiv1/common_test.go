@@ -75,11 +75,11 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 	cfg := &model.Cfg{
 		CredentialConstructor: map[string]*model.CredentialConstructor{
 			"diploma": {
-				VCT:          model.CredentialTypeUrnEduiDiploma1,
+				VCT:          model.CredentialTypeUrnEudiDiploma1,
 				VCTMFilePath: "testdata/vctm_test.json",
 			},
 			"pid": {
-				VCT:          model.CredentialTypeUrnEuEuropaEcEudiPid1,
+				VCT:          model.CredentialTypeUrnEudiPid1,
 				VCTMFilePath: "testdata/vctm_test.json",
 			},
 			"ehic": {
@@ -91,7 +91,7 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 				VCTMFilePath: "testdata/vctm_test.json",
 			},
 			"micro_credential": {
-				VCT:          model.CredentialTypeUrnEduiMicroCredential1,
+				VCT:          model.CredentialTypeUrnEudiMicroCredential1,
 				VCTMFilePath: "testdata/vctm_test.json",
 			},
 			"openbadge_complete": {
@@ -107,7 +107,7 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 				VCTMFilePath: "testdata/vctm_test.json",
 			},
 			"elm": {
-				VCT:          model.CredentialTypeUrnEduiElm1,
+				VCT:          model.CredentialTypeUrnEudiElm1,
 				VCTMFilePath: "testdata/vctm_test.json",
 			},
 		},

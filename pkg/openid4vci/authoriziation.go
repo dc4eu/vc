@@ -33,7 +33,7 @@ type PARRequest struct {
 	Scope        string `json:"scope" form:"scope"`
 	State        string `json:"state" form:"state"`
 
-	AuthorizationDetails []AuthorizationDetailsParameter `json:"authorization_details" mura:"authorization_details"`
+	AuthorizationDetails []AuthorizationDetailsParameter `json:"authorization_details" form:"authorization_details"`
 	CodeChallenge        string                          `json:"code_challenge" form:"code_challenge" validate:"required"`
 	CodeChallengeMethod  string                          `json:"code_challenge_method" form:"code_challenge_method" validate:"required,oneof=S256 plain"`
 

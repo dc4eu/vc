@@ -325,13 +325,26 @@ func (s *Service) endpointOIDCCredential(ctx context.Context, c *gin.Context) (a
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOIDCredential")
 	defer span.End()
 
+	//	dpop := c.Request.Header.Get("DPoP")
+	//	authorizationToken := c.Request.Header.Get("Authorization")
+
+	credentialRequestHeader := &openid4vci.CredentialRequestHeader{}
+	if err := c.BindHeader(credentialRequestHeader); err != nil {
+		return nil, err
+	}
+
 	request := &openid4vci.CredentialRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "binding error")
 		return nil, err
 	}
+
+	request.Headers = credentialRequestHeader
+
 	reply, err := s.apiv1.OIDCCredential(ctx, request)
 	if err != nil {
+		s.log.Error(err, "OIDCCredential error")
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -389,7 +402,6 @@ func (s *Service) endpointOIDCMetadata(ctx context.Context, c *gin.Context) (any
 	c.SetAccepted("application/json")
 	return reply, nil
 }
-
 
 //func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
 //	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")

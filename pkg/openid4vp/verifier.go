@@ -302,10 +302,6 @@ type VerifiablePresentationWrapper struct {
 
 	// Deprecated: to be removed, use trustService instead
 	jwePrivateKey interface{}
-
-	// Deprecated: to be removed, use trustService instead
-	issuerPublicKey interface{} //FOR NOW: All embedded vc's in a vp must currently be signed by the same issuer key
-
 }
 
 // VerifiableCredentialWrapper represents the structure for validating a Verifiable Credential (can be used both as is and within a verifiable presentation)
@@ -558,22 +554,10 @@ func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error
 	sdHashAlg := sdAlgResults.String()
 
 	// extracts all _sd values on all levels in JSON
-	//fmt.Printf("vc.PayloadDecoded (len=%d): %q\n", len(vc.PayloadDecoded), vc.PayloadDecoded)
 	sdList, err := extractSDListDeep(vc.PayloadDecoded)
 	if err != nil {
 		return err
 	}
-
-	//Nedan kod har tidigare använts men då bara tagit ut _sd från rootnivån i jsonen.
-	//
-	//var sdList []string
-	//sdResults := gjson.Get(vc.PayloadDecoded, "_sd")
-	//if sdResults.Exists() && sdResults.IsArray() {
-	//	sdResults.ForEach(func(_, value gjson.Result) bool {
-	//		sdList = append(sdList, value.String())
-	//		return true
-	//	})
-	//}
 
 	err = vc.validateSelectiveDisclosures(sdList, sdHashAlg)
 	if err != nil {
@@ -635,8 +619,7 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 	if len(tokenParts) == 5 {
 		// vp_token is a JWE (decrypt it first)
 		fmt.Println("vp_token is a JWE - decrypting it to a JWT!")
-		//TODO(mk): find and extract jwePrivateKey from the real source == the verifiers private key (the wallet encrypted using the verifiers public key)
-		jwtBytes, err := DecryptJWE(vp.RawToken, vp.jwePrivateKey)
+		jwtBytes, err := DecryptJWE(vp.RawToken, vp.vpSession.SessionEphemeralKeyPair.PrivateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -645,7 +628,6 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 		vp.RawToken = string(jwtBytes)
 		vp.RawTokenHasBeenDecryptedFromJWE = true
 		return vp.parseVPToken()
-		//return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
 	}
 
 	parsedVPToken.headerEncoded = tokenParts[0]
@@ -661,7 +643,7 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 
 func (vp *VerifiablePresentationWrapper) checkVerifiableCredentialsIntegrity() error {
 	for _, vc := range vp.vcList {
-		err := vc.checkIntegrity(vp.issuerPublicKey)
+		err := vc.checkIntegrity()
 		if err != nil {
 			return err
 		}
@@ -669,8 +651,7 @@ func (vp *VerifiablePresentationWrapper) checkVerifiableCredentialsIntegrity() e
 	return nil
 }
 
-func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{}) error {
-
+func (vc *VerifiableCredentialWrapper) checkIntegrity() error {
 	rawX5C, ok := vc.HeaderDecodedMap["x5c"]
 	if !ok {
 		return fmt.Errorf("missing 'x5c'")

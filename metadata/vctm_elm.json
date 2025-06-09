@@ -20,7 +20,60 @@
       }
     }
   ],
-  "claims": [],
-  "schema_uri": "",
-  "schema_uri#integrity": ""
+  "claims": [
+        {
+      "path": [
+         "elm",
+         "credentialSubject",
+         "givenName",
+         "und"
+      ],
+      "sd": "always",
+      "svg_id": "given_name",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Given name",
+          "description": "Given name of the individual who holds the ELM credential."
+        }
+      ]
+    },
+        {
+      "path": [
+         "elm",
+         "credentialSubject",
+         "familyName",
+         "und"
+      ],
+      "sd": "always",
+      "svg_id": "family_name",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Given name",
+          "description": "Family name of the individual who holds the ELM credential."
+        }
+      ]
+    },
+            {
+      "path": [
+         "elm",
+         "credentialSubject",
+         "hasClaim[0]",
+         "awardedBy",
+         "awardingBody",
+         "legalName",
+         "en"
+      ],
+      "sd": "always",
+      "svg_id": "awarding_body",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Awarding body",
+          "description": "The legal name of the awarding body that issued the ELM credential."
+        }
+      ]
+    }
+  ]
 }

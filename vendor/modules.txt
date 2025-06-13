@@ -70,6 +70,9 @@ github.com/creasty/defaults
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
+# github.com/dchest/uniuri v1.2.0
+## explicit; go 1.19
+github.com/dchest/uniuri
 # github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0
 ## explicit; go 1.17
 github.com/decred/dcrd/dcrec/secp256k1/v4
@@ -332,26 +335,14 @@ github.com/lestrrat-go/jwx/jwk
 github.com/lestrrat-go/jwx/x25519
 # github.com/lestrrat-go/jwx/v3 v3.0.1
 ## explicit; go 1.23.0
-github.com/lestrrat-go/jwx/v3
 github.com/lestrrat-go/jwx/v3/cert
 github.com/lestrrat-go/jwx/v3/internal/base64
 github.com/lestrrat-go/jwx/v3/internal/ecutil
 github.com/lestrrat-go/jwx/v3/internal/json
-github.com/lestrrat-go/jwx/v3/internal/keyconv
 github.com/lestrrat-go/jwx/v3/internal/pool
 github.com/lestrrat-go/jwx/v3/jwa
-github.com/lestrrat-go/jwx/v3/jwe
-github.com/lestrrat-go/jwx/v3/jwe/internal/aescbc
-github.com/lestrrat-go/jwx/v3/jwe/internal/cipher
-github.com/lestrrat-go/jwx/v3/jwe/internal/concatkdf
-github.com/lestrrat-go/jwx/v3/jwe/internal/content_crypt
-github.com/lestrrat-go/jwx/v3/jwe/internal/keyenc
-github.com/lestrrat-go/jwx/v3/jwe/internal/keygen
 github.com/lestrrat-go/jwx/v3/jwk
 github.com/lestrrat-go/jwx/v3/jwk/ecdsa
-github.com/lestrrat-go/jwx/v3/jws
-github.com/lestrrat-go/jwx/v3/jwt
-github.com/lestrrat-go/jwx/v3/jwt/internal/types
 # github.com/lestrrat-go/option v1.0.1
 ## explicit; go 1.16
 github.com/lestrrat-go/option
@@ -633,7 +624,6 @@ golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blake2b
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/curve25519
-golang.org/x/crypto/ed25519
 golang.org/x/crypto/md4
 golang.org/x/crypto/ocsp
 golang.org/x/crypto/pbkdf2

@@ -7,6 +7,7 @@ require (
 	github.com/MichaelFraser99/go-sd-jwt v1.3.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/creasty/defaults v1.8.0
+	github.com/dchest/uniuri v1.2.0
 	github.com/gin-contrib/cors v1.7.5
 	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/sessions v1.0.4

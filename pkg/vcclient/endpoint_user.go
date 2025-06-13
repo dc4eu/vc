@@ -33,11 +33,15 @@ func (s *userHandler) AddPID(ctx context.Context, body *AddPIDRequest) (*http.Re
 type LoginPIDUserRequest struct {
 	Username string `json:"username" form:"username" validate:"required"`
 	Password string `json:"password" form:"password" validate:"required"`
+
+	// RequestURI comes from session cookie
+	RequestURI string `json:"-"`
 }
 
 type LoginPIDUserReply struct {
-	Grant    bool            `json:"grant" validate:"required"`
-	Identity *model.Identity `json:"identity,omitempty"`
+	Grant       bool            `json:"grant" validate:"required"`
+	Identity    *model.Identity `json:"identity,omitempty"`
+	RedirectURL string          `json:"redirect_url,omitempty"`
 }
 
 func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*LoginPIDUserReply, *http.Response, error) {
@@ -49,4 +53,12 @@ func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserReques
 	}
 
 	return reply, resp, nil
+}
+
+type GetPIDRequest struct {
+	Username string `json:"username" form:"username" validate:"required"`
+}
+
+type GetPIDReply struct {
+	Identity *model.Identity `json:"identity,omitempty"`
 }

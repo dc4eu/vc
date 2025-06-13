@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+
+	"github.com/dchest/uniuri"
 )
 
 // GenerateCryptographicNonce generates a cryptographically secure nonce base64URL encoded, or error.
@@ -13,7 +15,7 @@ func GenerateCryptographicNonce(n int) (string, error) {
 	buf := make([]byte, 1)
 	_, err := io.ReadFull(rand.Reader, buf)
 	if err != nil {
-		panic(fmt.Sprintf("crypto/rand is unavailable: Read() failed with %#v", err))
+		return "", fmt.Errorf("crypto/rand is unavailable: %w", err)
 	}
 
 	// Generate a random nonce of n length.
@@ -23,4 +25,8 @@ func GenerateCryptographicNonce(n int) (string, error) {
 	}
 
 	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+func GenerateCryptographicNonceWithLength(n int) string {
+	return uniuri.NewLen(n)
 }

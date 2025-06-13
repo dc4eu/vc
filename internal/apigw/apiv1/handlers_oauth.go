@@ -13,23 +13,21 @@ import (
 	"github.com/google/uuid"
 )
 
-// return_uri presentation_definition
-// after authorize
-
 // OIDCAuth  https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-authorization-endpoint
 func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*openid4vci.ParResponse, error) {
+	c.log.Debug("OAuthPar", "req", req)
 	if !c.cfg.APIGW.OauthServer.Clients.Allow(req.ClientID, req.RedirectURI, req.Scope) {
 		return nil, oauth2.ErrInvalidClient
 	}
 
 	c.log.Debug("par")
-	c.log.Debug("req", "data", req)
 
 	requestURI := fmt.Sprintf("urn:ietf:params:oauth:request_uri:%s", uuid.NewString())
 
 	azt := model.Authorization{
 		Code:                uuid.NewString(),
 		RequestURI:          requestURI,
+		Scope:               req.Scope,
 		IsUsed:              false,
 		CodeChallenge:       req.CodeChallenge,
 		CodeChallengeMethod: req.CodeChallengeMethod,
@@ -37,7 +35,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		ClientID:            req.ClientID,
 	}
 
-	if err := c.db.VCAuthzColl.Save(ctx, &azt); err != nil {
+	if err := c.db.VCOauthColl.Save(ctx, &azt); err != nil {
 		c.log.Error(err, "save error")
 		return nil, err
 	}
@@ -58,7 +56,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 		RequestURI: req.RequestURI,
 		ClientID:   req.ClientID,
 	}
-	authorization, err := c.db.VCAuthzColl.Get(ctx, query)
+	authorization, err := c.db.VCOauthColl.Get(ctx, query)
 	c.log.Debug("Get authorization", "query", query, "authorization", authorization)
 	if err != nil {
 		c.log.Error(err, "get error")
@@ -66,34 +64,22 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 	}
 
 	if authorization.IsUsed {
+		c.log.Debug("Authorization already used")
 		return nil, errors.New("not allowed")
+	}
+
+	var redirectURL string
+	if !authorization.Consent {
+		redirectURL = "/authorization/consent"
+	}
+
+	response := &openid4vci.AuthorizationResponse{
+		RedirectURL: redirectURL,
 	}
 
 	c.log.Debug("Authorize", "authorization", authorization)
 
-	response := &openid4vci.AuthorizationResponse{
-		Code:  authorization.Code,
-		State: authorization.State,
-	}
-
 	return response, nil
-}
-
-// OAuthAuthorizeConsent collects user attributes
-func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *openid4vci.AuthorizationConsentRequest) (*openid4vci.AuthorizationConsentReply, error) {
-	c.log.Debug("OAuthAuthorizationConsent", "req", req)
-
-	return nil, nil
-}
-
-// OAuthAuthorizeConsentLogin collects user attributes
-func (c *Client) OAuthAuthorizationConsentLogin(ctx context.Context, req *openid4vci.AuthorizationConsentLoginRequest) (*openid4vci.AuthorizationConsentLoginReply, error) {
-	c.log.Debug("OAuthAuthorizationConsentLogin", "req", req)
-
-c.db.VCUsersColl.GetHashedPassword(ctx, req.Username)
-
-
-	return nil, nil
 }
 
 // OIDCToken https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-13.html#name-token-endpoint
@@ -104,7 +90,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 	query := &model.Authorization{
 		Code: req.Code,
 	}
-	authorization, err := c.db.VCAuthzColl.Get(ctx, query)
+	authorization, err := c.db.VCOauthColl.ForfeitAuthorizationCode(ctx, query)
 	if err != nil {
 		c.log.Error(err, "failed to get authorization")
 		return nil, err
@@ -124,11 +110,20 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		AccessToken:          accessToken,
 		TokenType:            "DPoP",
 		ExpiresIn:            3600, // 1 hour
-		Scope:                "diploma",
+		Scope:                authorization.Scope,
 		State:                authorization.State,
 		CNonce:               "",
 		CNonceExpiresIn:      0,
 		AuthorizationDetails: []openid4vci.AuthorizationDetailsParameter{},
+	}
+
+	tokenDoc := &model.Token{
+		AccessToken: accessToken,
+	}
+
+	if err := c.db.VCOauthColl.AddToken(ctx, authorization.Code, tokenDoc); err != nil {
+		c.log.Error(err, "failed to add token")
+		return nil, err
 	}
 
 	//dpop, err := oauth2.ValidateAndParseDPoPJWT(req.DPOP)

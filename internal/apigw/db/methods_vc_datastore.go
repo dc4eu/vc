@@ -221,6 +221,28 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQue
 	return reply, nil
 }
 
+func (c *VCDatastoreColl) GetDocumentWithIdentity(ctx context.Context, query *GetDocumentQuery) (*model.CompleteDocument, error) {
+	filter := bson.M{
+		"meta.authentic_source":  bson.M{"$eq": query.Meta.AuthenticSource},
+		"meta.document_type":     bson.M{"$eq": query.Meta.DocumentType},
+		"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
+		"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
+		"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
+	}
+
+	opt := options.FindOne().SetProjection(bson.M{
+		"document_data": 1,
+	})
+
+	doc := &model.CompleteDocument{}
+	if err := c.Coll.FindOne(ctx, filter, opt).Decode(doc); err != nil {
+		c.log.Error(err, "failed to find document with identity")
+		return nil, err
+	}
+
+	return doc, nil
+}
+
 // DocumentListQuery is the query to get document list
 type DocumentListQuery struct {
 	AuthenticSource string          `json:"authentic_source" bson:"authentic_source"`
@@ -275,6 +297,32 @@ func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*ope
 		"meta.authentic_source": bson.M{"$eq": attr.AuthenticSource},
 		"meta.document_type":    bson.M{"$eq": attr.DocumentType},
 		"meta.document_id":      bson.M{"$eq": attr.DocumentID},
+	}
+	opt := options.FindOne().SetProjection(bson.M{
+		"qr": 1,
+	})
+
+	res := &model.CompleteDocument{}
+	if err := c.Coll.FindOne(ctx, filter, opt).Decode(res); err != nil {
+		return nil, err
+	}
+	return res.QR, nil
+}
+
+type GetQRForUserFilter struct {
+	AuthenticSource string          `json:"authentic_source" bson:"authentic_source"`
+	DocumentType    string          `json:"document_type" bson:"document_type"`
+	Identity        *model.Identity `json:"identity" bson:"identity" validate:"required"`
+}
+
+// GetQRForUser return matching document and return its QR code, else error
+func (c *VCDatastoreColl) GetQRForUser(ctx context.Context, query *GetQRForUserFilter) (*openid4vci.QR, error) {
+	filter := bson.M{
+		"meta.authentic_source":  bson.M{"$eq": query.AuthenticSource},
+		"meta.document_type":     bson.M{"$eq": query.DocumentType},
+		"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
+		"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
+		"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
 	}
 	opt := options.FindOne().SetProjection(bson.M{
 		"qr": 1,

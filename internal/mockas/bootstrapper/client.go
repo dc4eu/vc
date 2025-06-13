@@ -86,7 +86,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		return nil, fmt.Errorf("new user client: %w", err)
 	}
 
-	for _, credentialType := range []string{"ehic", "pda1", "pid", "elm", "diploma", "microcredential"} { // pid is not working
+	for _, credentialType := range []string{"ehic", "pda1", "elm", "diploma", "microcredential"} { // pid is not working
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
 		if err := client.uploader(ctx, jsonPath); err != nil {
 			return nil, fmt.Errorf("uploader: %w", err)

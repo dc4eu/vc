@@ -66,3 +66,49 @@ func (c *VCTokenColl) Save(ctx context.Context, doc *model.Authorization) error 
 
 	return nil
 }
+
+//func (c *VCTokenColl) Get(ctx context.Context, code string) (*model.Authorization, error) {
+//	ctx, span := c.Service.tracer.Start(ctx, "db:vc:auth:get")
+//	defer span.End()
+//	c.log.Debug("get authorization", "code", code)
+//
+//	filter := bson.M{
+//		"code": bson.M{"$eq": code},
+//	}
+//	doc := &model.Authorization{}
+//	if err := c.Coll.FindOne(ctx, filter).Decode(doc); err != nil {
+//		span.SetStatus(codes.Error, err.Error())
+//		return nil, err
+//	}
+//
+//	c.log.Debug("get authorization success", "doc", doc)
+//
+//	return doc, nil
+//}
+
+//func (c *VCTokenColl) Update(ctx context.Context, query *model.Authorization) error {
+//	ctx, span := c.Service.tracer.Start(ctx, "db:vc:auth:update")
+//	defer span.End()
+//
+//	if query == nil {
+//		span.SetStatus(codes.Error, "query cannot be nil")
+//		return errors.New("query cannot be nil")
+//	}
+//
+//	filter := bson.M{
+//		"request_uri": bson.M{"$eq": query.RequestURI},
+//		"client_id":   bson.M{"$eq": query.ClientID},
+//	}
+//
+//	update := bson.M{
+//		"$set": query,
+//	}
+//
+//	_, err := c.Coll.UpdateOne(ctx, filter, update)
+//	if err != nil {
+//		span.SetStatus(codes.Error, err.Error())
+//		return err
+//	}
+//
+//	return nil
+//}

@@ -30,3 +30,24 @@ func TestGenerateCryptographicNonce(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateCryptographicNonceWithLength(t *testing.T) {
+	tts := []struct {
+		name string
+		n    int
+		want int
+	}{
+		{
+			name: "Generate 32 byte nonce",
+			n:    32,
+			want: 32,
+		},
+	}
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GenerateCryptographicNonceWithLength(tt.n)
+
+			assert.Equal(t, tt.want, len(got))
+		})
+	}
+}

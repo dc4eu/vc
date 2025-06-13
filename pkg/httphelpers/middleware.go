@@ -11,6 +11,8 @@ import (
 	"github.com/lithammer/shortuuid/v4"
 
 	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 )
 
 type middlewareHandler struct {
@@ -121,4 +123,10 @@ func (m *middlewareHandler) BasicAuth(ctx context.Context, users map[string]stri
 // Gzip middleware sets the compression level
 func (m *middlewareHandler) Gzip(ctx context.Context) gin.HandlerFunc {
 	return gzip.Gzip(gzip.DefaultCompression)
+}
+
+func (m *middlewareHandler) UserSession(name, authKey, encKey string, opts sessions.Options) gin.HandlerFunc {
+	store := cookie.NewStore([]byte(authKey), []byte(encKey))
+	store.Options(opts)
+	return sessions.Sessions(name, store)
 }

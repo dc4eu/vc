@@ -33,6 +33,7 @@ type PARRequest struct {
 	Scope        string `json:"scope" form:"scope"`
 	State        string `json:"state" form:"state"`
 
+	Prompt               string                          `json:"prompt" form:"prompt"`
 	AuthorizationDetails []AuthorizationDetailsParameter `json:"authorization_details" form:"authorization_details"`
 	CodeChallenge        string                          `json:"code_challenge" form:"code_challenge" validate:"required"`
 	CodeChallengeMethod  string                          `json:"code_challenge_method" form:"code_challenge_method" validate:"required,oneof=S256 plain"`
@@ -73,6 +74,8 @@ type AuthorizationResponse struct {
 
 	// State REQUIRED if the "state" parameter was present in the client authorization request.  The exact value received from the client.
 	State string `json:"state" validate:"required"`
+
+	RedirectURL string `json:"-"`
 }
 
 // BindAuthorizationRequest binds the AuthorizationRequest

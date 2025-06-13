@@ -152,10 +152,6 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 }
 
 func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
-	if c.cfg.Common.Production {
-		return errors.New("not supported in production mode")
-	}
-
 	// Additional validation of the PID to compensate for the current flexibility/backward compatibility in the Identity struct
 	if req.Attributes.FamilyName == "" ||
 		req.Attributes.GivenName == "" ||
@@ -201,7 +197,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	}
 
 	// store user and password in the database before document is saved - to check constraints that the user not already exists
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 14)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
@@ -225,6 +221,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 }
 
 func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error) {
+	c.log.Debug("LoginPIDUser called", "username", req.Username)
 	user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
 	if err != nil {
 		return nil, fmt.Errorf("username %s not found", req.Username)
@@ -236,8 +233,30 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 		return reply, fmt.Errorf("password mismatch for username %s", req.Username)
 	}
 
+	if err := c.db.VCOauthColl.Consent(ctx, &model.Authorization{RequestURI: req.RequestURI}); err != nil {
+		c.log.Error(err, "failed to consent for user", "username", req.Username)
+		return nil, fmt.Errorf("failed to consent for user %s: %w", req.Username, err)
+	}
+
+	auth, err := c.db.VCOauthColl.Get(ctx, &model.Authorization{
+		RequestURI: req.RequestURI,
+	})
+	if err != nil {
+		c.log.Error(err, "failed to get authorization for user", "request_uri", req.RequestURI)
+	}
+
+	// Update the authorization with the user identity
+	if err := c.db.VCOauthColl.AddIdentity(ctx, req.RequestURI, user.Identity); err != nil {
+		return nil, err
+	}
+
+	c.log.Debug("LoginPIDUser", "user", user, "auth", auth)
+
+	redirectURL := fmt.Sprintf("https://dev.wallet.sunet.se/?code=%s&state=%s", auth.Code, auth.State)
+
 	reply.Grant = true
 	reply.Identity = user.Identity
+	reply.RedirectURL = redirectURL
 
 	return reply, nil
 }

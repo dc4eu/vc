@@ -10,14 +10,18 @@ import (
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/oauth2"
 	"vc/pkg/trace"
 
-	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
 
 	// Swagger
-	_ "embed"
 	_ "vc/docs/apigw"
 
+	// Embed static files for web page
+	_ "embed"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -25,14 +29,18 @@ import (
 
 // Service is the service object for httpserver
 type Service struct {
-	cfg            *model.Cfg
-	log            *logger.Log
-	server         *http.Server
-	apiv1          Apiv1
-	gin            *gin.Engine
-	tracer         *trace.Tracer
-	eventPublisher apiv1.EventPublisher
-	httpHelpers    *httphelpers.Client
+	cfg             *model.Cfg
+	log             *logger.Log
+	server          *http.Server
+	apiv1           Apiv1
+	gin             *gin.Engine
+	tracer          *trace.Tracer
+	eventPublisher  apiv1.EventPublisher
+	httpHelpers     *httphelpers.Client
+	sessionsOptions sessions.Options
+	sessionsEncKey  string
+	sessionsAuthKey string
+	sessionsName    string
 }
 
 //go:embed index.html consent.js consent.css
@@ -41,13 +49,24 @@ var embeddedStaticFiles embed.FS
 // New creates a new httpserver service
 func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, log *logger.Log) (*Service, error) {
 	s := &Service{
-		cfg:            cfg,
-		log:            log.New("httpserver"),
-		apiv1:          apiv1,
-		gin:            gin.New(),
-		tracer:         tracer,
-		server:         &http.Server{},
-		eventPublisher: eventPublisher,
+		cfg:             cfg,
+		log:             log.New("httpserver"),
+		apiv1:           apiv1,
+		gin:             gin.New(),
+		tracer:          tracer,
+		server:          &http.Server{},
+		eventPublisher:  eventPublisher,
+		sessionsName:    "oauth_user_session",
+		sessionsAuthKey: oauth2.GenerateCryptographicNonceWithLength(32),
+		sessionsEncKey:  oauth2.GenerateCryptographicNonceWithLength(32),
+		sessionsOptions: sessions.Options{
+			Path:     "/",
+			Domain:   "",
+			MaxAge:   900,
+			Secure:   true,
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		},
 	}
 
 	var err error
@@ -55,22 +74,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	if err != nil {
 		return nil, err
 	}
-
-	//	files, err := embeddedStaticFiles.ReadDir("static")
-	//	if err != nil {
-	//		s.log.Error(err, "failed to read embedded static files")
-	//		return nil, fmt.Errorf("failed to read embedded static files: %w", err)
-	//	}
-	//	for _, file := range files {
-	//		data, _ := embeddedStaticFiles.ReadFile("static/" + file.Name())
-	//		fmt.Printf("File: %snContent: %snn", file.Name(), data)
-	//	}
-
-	//s.gin.Static("/static", "./static")
-	//	s.gin.LoadHTMLFiles("./static/index.html")
-	//	s.gin.GET("/", func(c *gin.Context) {
-	//		c.HTML(http.StatusOK, "index.html", nil)
-	//	})
 
 	s.gin.StaticFS("/static", http.FS(embeddedStaticFiles))
 
@@ -83,7 +86,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	}
 
 	rgRoot.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://dc4eu.wwwallet.org", "https://demo.wwwallet.org"},
+		AllowOrigins:     []string{"https://dc4eu.wwwallet.org", "https://demo.wwwallet.org", "https://dev.wallet.sunet.se"},
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -104,12 +107,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRestricted, http.MethodPost, "notification", http.StatusNoContent, s.endpointOIDCNotification)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/openid-credential-issuer", http.StatusOK, s.endpointOIDCMetadata)
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "op/par", http.StatusCreated, s.endpointOAuthPar)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusPermanentRedirect, s.endpointOAuthAuthorize)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorization/consent", http.StatusOK, s.endpointOAuthAuthorizationConsent)
-	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "authorization/consent", http.StatusOK, s.endpointOAuthAuthorizationConsentLogin)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuth2Metadata)
+	rgOAuthSession := rgRoot.Group("")
+	rgOAuthSession.Use(s.httpHelpers.Middleware.UserSession(s.sessionsName, s.sessionsAuthKey, s.sessionsEncKey, s.sessionsOptions))
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "op/par", http.StatusCreated, s.endpointOAuthPar)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorize", http.StatusPermanentRedirect, s.endpointOAuthAuthorize)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent", http.StatusNotModified, s.endpointOAuthAuthorizationConsent)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", 200, s.endpointHealth)
 
@@ -137,7 +141,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/document/revoke", http.StatusOK, s.endpointRevokeDocument)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/user/pid", http.StatusOK, s.endpointAddPIDUser)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/user/pid/login", http.StatusOK, s.endpointLoginPIDUser)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "/user/pid/login", http.StatusOK, s.endpointLoginPIDUser)
 
 	// SatosaCredential remove after refactoring
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "credential", http.StatusOK, s.endpointSatosaCredential)

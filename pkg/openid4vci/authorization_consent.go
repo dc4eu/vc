@@ -1,6 +1,9 @@
 package openid4vci
 
-type AuthorizationConsentRequest struct{}
+type AuthorizationConsentRequest struct {
+	State string `json:"state"`
+	Code  string `json:"code"`
+}
 type AuthorizationConsentReply struct{}
 
 type AuthorizationConsentLoginRequest struct {

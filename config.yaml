@@ -138,6 +138,7 @@ apigw:
     trust_anchors:
       - "https://example.com/trust_anchor.pem"
   oauth_server:
+    token_endpoint: "http://vc_dev_apigw:8080/token"
     metadata:
       path: /metadata/oauth2_metadata.json
       signing_key_path: "/pki/apigw.key"

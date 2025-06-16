@@ -194,8 +194,9 @@ type OTEL struct {
 
 // OAuth2Server holds the oauth server configuration
 type OAuth2Server struct {
-	Clients  oauth2.Clients `yaml:"clients" validate:"required"`
-	Metadata Metadata       `yaml:"metadata" validate:"required"`
+	TokenEndpoint      string         `yaml:"token_endpoint" validate:"required"`
+	Clients            oauth2.Clients `yaml:"clients" validate:"required"`
+	Metadata           Metadata       `yaml:"metadata" validate:"required"`
 }
 
 // UI holds the user-interface configuration

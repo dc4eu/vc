@@ -5,7 +5,6 @@ import (
 	"embed"
 	"html/template"
 	"net/http"
-	"time"
 	"vc/internal/apigw/apiv1"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
@@ -21,7 +20,6 @@ import (
 	// Embed static files for web page
 	_ "embed"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -85,13 +83,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
-	rgRoot.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://dc4eu.wwwallet.org", "https://demo.wwwallet.org", "https://dev.wallet.sunet.se"},
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	//rgRoot.Use(cors.New(cors.Config{
+	//	AllowOrigins:     []string{"https://dc4eu.wwwallet.org", "https://demo.wwwallet.org", "https://dev.wallet.sunet.se"},
+	//	AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+	//	AllowHeaders:     []string{"Content-Type", "Authorization"},
+	//	AllowCredentials: true,
+	//	MaxAge:           12 * time.Hour,
+	//}))
 
 	rgRestricted, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
 	if err != nil {

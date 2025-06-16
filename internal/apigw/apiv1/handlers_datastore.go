@@ -252,7 +252,7 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 
 	c.log.Debug("LoginPIDUser", "user", user, "auth", auth)
 
-	redirectURL := fmt.Sprintf("https://dev.wallet.sunet.se/?code=%s&state=%s", auth.Code, auth.State)
+	redirectURL := fmt.Sprintf("%s/?code=%s&state=%s", auth.RedirectURI, auth.Code, auth.State)
 
 	reply.Grant = true
 	reply.Identity = user.Identity

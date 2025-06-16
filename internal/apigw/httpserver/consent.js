@@ -82,9 +82,6 @@ const doLogin = () => {
         showElement("logout_container");
         hideElement("login_container");
         selectPID(data, username);
-        //console.info("data", data);
-       // window.location.replace("https://dev.wallet.sunet.se/login?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fvc-interop-3.sunet.se%22%2C%22credential_configuration_ids%22%3A%5B%22urn%3Aeudi%3Adiploma%3A1%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_diploma_100%5Cu0026document_type%3Durn%3Aeudi%3Adiploma%3A1%5Cu0026authentic_source%3DDIPLOMA%3A00001%22%7D%7D%7D");
-        //window.location.replace("https://dev.wallet.sunet.se")
     }).catch(err => {
         displayError("Failed to login: ");
     });
@@ -140,119 +137,7 @@ function selectPID(data, username) {
         const qrContainer = document.getElementById("qr_container");
         window.location.replace(data.redirect_url);
     }
-    //window.location.replace("https://dev.wallet.sunet.se")
-   // if (cookie && cookie.match(/oauth_user_session=(.*?)(;|$)/)[1]) {
-   //     return true;
-   // }
-
-    //const usernameStrong = document.createElement("strong");
-    //usernameStrong.appendChild(document.createTextNode(username));
-
     const textBusinessDecisionFor = document.createTextNode("Credential offers for ");
-
-
-    // Create credential offer URL
-
-    // redirect to credential offer URL
-
-
-    //const pQrHeader = document.createElement("p");
-    //pQrHeader.classList.add("subtitle", "is-5", "has-text-centered");
-    //pQrHeader.appendChild(textBusinessDecisionFor);
-    //pQrHeader.appendChild(usernameStrong);
-
-    //qrContainer.appendChild(pQrHeader);
-
-    //if (isEmptyObject(data) || (Array.isArray(data.documents) && data.documents.length === 0)) {
-    //    console.debug("No credential offers found");
-    //    let p = document.createElement("p");
-    //    p.classList.add("has-text-centered");
-    //    p.innerText = "No credential offers found";
-    //    qrContainer.appendChild(p);
-    //    return;
-    //}
-
-    //const gridDiv = document.createElement("div");
-    //gridDiv.classList.add("grid");
-
-    //const fixedGridDiv = document.createElement("div");
-    //fixedGridDiv.classList.add("fixed-grid");
-    //fixedGridDiv.appendChild(gridDiv);
-
-
-    //const br = document.createElement("br");
-
-    //data.documents.forEach((doc) => {
-
-    //    const credentialOfferUrl = doc.qr?.credential_offer_url || "";
-
-    //    const cell1 = document.createElement("div");
-    //    cell1.classList.add("cell");
-
-    //    if (doc.qr?.qr_base64 && credentialOfferUrl !== "") {
-    //        const img = document.createElement("img");
-    //        img.src = `data:image/png;base64,${doc.qr.qr_base64}`;
-
-    //        const a = document.createElement("a");
-    //        const credentialOfferUrl = doc.qr.credential_offer_url;
-    //        a.href = credentialOfferUrl;
-    //        a.target = "_blank";
-    //        a.title = credentialOfferUrl;
-    //        a.appendChild(img);
-    //        cell1.appendChild(a);
-    //    } else {
-    //        const pQrNotFound = document.createElement("p");
-    //        pQrNotFound.innerText = "No qr code found in document";
-    //        cell1.appendChild(pQrNotFound);
-    //    }
-
-    //    const cell2 = document.createElement("div");
-    //    cell2.classList.add("cell", "has-text-left");
-
-    //    const boldText = document.createElement("b");
-    //    boldText.textContent = doc.meta?.document_type || "";
-    //    cell2.appendChild(boldText);
-
-    //    const pAS = document.createElement("p");
-    //    pAS.innerText = "Authentic source: " + doc.meta?.authentic_source || "";
-    //    cell2.appendChild(pAS);
-
-    //    const pDocId = document.createElement("p");
-    //    pDocId.innerText = "Document ID: " + doc.meta?.document_id || "";
-    //    cell2.appendChild(pDocId);
-
-    //    const pColId = document.createElement("p");
-    //    pColId.innerText = "Collect ID: " + doc.meta?.collect?.id || "";
-    //    cell2.appendChild(pColId);
-
-    //    if (credentialOfferUrl !== "") {
-    //        const toReplace = "openid-credential-offer://?";
-    //        cell2.appendChild(buildLink({
-    //            href: safeReplace(credentialOfferUrl, toReplace, "https://dc4eu.wwwallet.org/cb?"),
-    //            text: "DC4EU wallet",
-    //        }));
-    //        cell2.appendChild(document.createElement("br"));
-    //        cell2.appendChild(buildLink({
-    //            href: safeReplace(credentialOfferUrl, toReplace, "https://demo.wwwallet.org/cb?"),
-    //            text: "Demo DC4EU wallet",
-    //        }));
-    //        cell2.appendChild(document.createElement("br"));
-    //        cell2.appendChild(buildLink({
-    //            href: safeReplace(credentialOfferUrl, toReplace, "https://dev.wallet.sunet.se/cb?"),
-    //            text: "Dev SUNET wallet",
-    //        }));
-    //        cell2.appendChild(document.createElement("br"));
-    //        cell2.appendChild(buildLink({
-    //            href: safeReplace(credentialOfferUrl, toReplace, "https://funke.wwwallet.org/cb?"),
-    //            text: "Funke wallet",
-    //        }));
-    //    }
-
-    //    gridDiv.appendChild(cell1);
-    //    gridDiv.appendChild(cell2);
-
-    //    qrContainer.appendChild(fixedGridDiv);
-    //});
 }
 
 document.addEventListener('DOMContentLoaded', function () {

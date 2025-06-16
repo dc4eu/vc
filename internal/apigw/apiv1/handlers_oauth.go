@@ -34,6 +34,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		CodeChallengeMethod: req.CodeChallengeMethod,
 		State:               req.State,
 		ClientID:            req.ClientID,
+		RedirectURI:         req.RedirectURI,
 	}
 
 	if err := c.db.VCOauthColl.Save(ctx, &azt); err != nil {
@@ -132,7 +133,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		return nil, err
 	}
 
-	if dpop.HTU != "https://vc-interop-3.sunet.se/token" {
+	if dpop.HTU != c.cfg.APIGW.OauthServer.TokenEndpoint {
 		return nil, fmt.Errorf("invalid HTU in DPoP claims: %s", dpop.HTU)
 	}
 	if dpop.HTM != "POST" {

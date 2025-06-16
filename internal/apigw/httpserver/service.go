@@ -61,7 +61,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 			Path:     "/",
 			Domain:   "",
 			MaxAge:   900,
-			Secure:   true,
+			Secure:   false, // TODO(masv): fix this
 			HttpOnly: true,
 			SameSite: http.SameSiteStrictMode,
 		},

@@ -5,6 +5,7 @@ type Authorization struct {
 	Scope               string    `json:"scope" bson:"scope" validate:"required"`
 	Code                string    `json:"code" bson:"code"`
 	RequestURI          string    `json:"request_uri" bson:"request_uri" validate:"required"`
+	RedirectURI         string    `json:"redirect_url" bson:"redirect_url" validate:"required"`
 	IsUsed              bool      `json:"is_used" bson:"is_used"`
 	State               string    `json:"state"`
 	ClientID            string    `json:"client_id" bson:"client_id" validate:"required"`

@@ -19,13 +19,13 @@ type Authorization struct {
 
 type Token struct {
 	AccessToken string `json:"access_token" bson:"access_token" validate:"required"`
+	ExpiresAt   int64  `json:"expires_at" bson:"expires_at" validate:"required"`
 }
 
 // OAuthUsers is the model for the OAuth users in the database
 type OAuthUsers struct {
-	Username string `json:"username" bson:"username" validate:"required"`
-	Password string `json:"password" bson:"password" validate:"required"`
-	//TODO: ev. flytta nedan till egen collection identities som har OAuthUsers._id som fk
+	Username string    `json:"username" bson:"username" validate:"required"`
+	Password string    `json:"password" bson:"password" validate:"required"`
 	Identity *Identity `json:"identity" bson:"identity" validate:"required"`
 }
 

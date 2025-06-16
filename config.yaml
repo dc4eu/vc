@@ -35,7 +35,7 @@ credential_constructor:
     vctm_file_path: "/metadata/vctm_diploma.json"
   "micro_credential":
     vct: "urn:eudi:micro_credential:1"
-    vctm_file_path: "/metadata/vctm_elm.json"
+    vctm_file_path: "/metadata/vctm_microcredential.json"
   "openbadge_complete":
     vct: "urn:eudi:openbadge_complete:1"
     vctm_file_path: "/metadata/vctm_elm.json"

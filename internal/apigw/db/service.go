@@ -38,7 +38,6 @@ type Service struct {
 	VCDatastoreColl       *VCDatastoreColl
 	VCConsentColl         *VCConsentColl
 	VCOauthColl           *VCOauthColl
-	VCTokenColl           *VCTokenColl
 	VCUsersColl           *VCUsersColl
 	VCCodeChallengeColl   *VCCodeChallengeColl
 	VCCredentialOfferColl *VCCredentialOfferColl
@@ -81,11 +80,6 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	var err error
 
 	service.VCOauthColl, err = NewOauthColl(ctx, "oauth", service, log.New("VCOauthColl"))
-	if err != nil {
-		return nil, err
-	}
-
-	service.VCTokenColl, err = NewTokenColl(ctx, "token", service, log.New("VCTokenColl"))
 	if err != nil {
 		return nil, err
 	}

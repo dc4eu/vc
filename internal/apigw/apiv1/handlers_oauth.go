@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -84,13 +85,11 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 
 // OIDCToken https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-13.html#name-token-endpoint
 func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error) {
-	c.log.Debug("OIDCToken")
-	c.log.Debug("req", "data", req)
+	c.log.Debug("OIDCToken", "req", req)
 
-	query := &model.Authorization{
+	authorization, err := c.db.VCOauthColl.ForfeitAuthorizationCode(ctx, &model.Authorization{
 		Code: req.Code,
-	}
-	authorization, err := c.db.VCOauthColl.ForfeitAuthorizationCode(ctx, query)
+	})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization")
 		return nil, err
@@ -119,6 +118,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 
 	tokenDoc := &model.Token{
 		AccessToken: accessToken,
+		ExpiresAt:   time.Now().Add(time.Duration(reply.ExpiresIn) * time.Second).Unix(),
 	}
 
 	if err := c.db.VCOauthColl.AddToken(ctx, authorization.Code, tokenDoc); err != nil {
@@ -126,22 +126,22 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		return nil, err
 	}
 
-	//dpop, err := oauth2.ValidateAndParseDPoPJWT(req.DPOP)
-	//if err != nil {
-	//	c.log.Error(err, "dpop validation error")
-	//	return nil, err
-	//}
+	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.Header.DPOP)
+	if err != nil {
+		c.log.Error(err, "dpop validation error")
+		return nil, err
+	}
 
-	//if dpop.HTU != "https://vc-interop-3.sunet.se/token" {
-	//	return nil, fmt.Errorf("invalid HTU in DPoP claims: %s", dpop.HTU)
-	//}
-	//if dpop.HTM != "POST" {
-	//	return nil, fmt.Errorf("invalid HTM in DPoP claims: %s", dpop.HTM)
-	//}
+	if dpop.HTU != "https://vc-interop-3.sunet.se/token" {
+		return nil, fmt.Errorf("invalid HTU in DPoP claims: %s", dpop.HTU)
+	}
+	if dpop.HTM != "POST" {
+		return nil, fmt.Errorf("invalid HTM in DPoP claims: %s", dpop.HTM)
+	}
 
-	//c.log.Debug("DPoP claims", "jti", dpop.JTI, "htu", dpop.HTU, "htm", dpop.HTM)
+	c.log.Debug("DPoP claims", "jti", dpop.JTI, "htu", dpop.HTU, "htm", dpop.HTM)
 
-	// base64(sha256(code_verifier)) == stored code_challenge
+	//base64(sha256(code_verifier)) == stored code_challenge
 
 	//c.db.VCAuthColl.Grant(ctx, req.ClientID, req.Code)
 

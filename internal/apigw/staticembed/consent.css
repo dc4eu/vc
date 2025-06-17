@@ -7,6 +7,10 @@
     background-color: var(--bulma-info-95);
 }
 
+.vc-table {
+    width: 100%;
+}
+
 .vc-radio-label {
     padding: 5px;
     border-radius: 4.18mm;

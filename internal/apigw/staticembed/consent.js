@@ -1,166 +1,161 @@
+import Alpine from 'alpinejs';
+
+/**
+ * @typedef {Object} Schema
+ * @property {string} name
+ */
+
+/**
+ * @typedef {Object} Identity
+ * @property {string} authentic_source_person_id
+ * @property {Schema} schema
+ * @property {string} family_name
+ * @property {string} given_name
+ * @property {string} birth_date - Format: YYYY-MM-DD
+ * @property {string} birth_place
+ * @property {string[]} nationality
+ * @property {string} issuing_authority
+ * @property {string} issuing_country
+ * @property {string} expiry_date - Format: YYYY-MM-DD
+ */
+
+/**
+ * @typedef {Object} GrantResponse
+ * @property {boolean} grant
+ * @property {Identity} identity
+ * @property {string} redirect_url
+ */
+
+/**
+ * @typedef {Object} UserData
+ * @property {string} family_name
+ * @property {string} given_name
+ */
+
+/**
+ * @typedef {Object} SvgTemplate
+ * @property {string} uri
+ * @property {string} integrity
+ */
+
+/**
+ * @typedef {Object} Claim
+ * @property {string} id
+ */
+
+/**
+ * @typedef {Object} Credential
+ * @property {string} vct
+ * @property {string} name
+ * @property {SvgTemplate} svg_template
+ * @property {Claim[]} claims
+ */
+
 const baseUrl = window.location.origin;
 
-const validateHasValueAndNotEmpty = (element) => {
-    return element?.value?.trim().length > 0;
-};
+window.Alpine = Alpine;
 
-const hideElement = (elementId) => {
-    const element = document.getElementById(elementId);
-    if (element === null) {
-        console.error("element not found for id: " + elementId);
-        return;
-    }
-    if (!element.classList.contains("is-hidden")) {
-        element.classList.add("is-hidden");
-    }
-};
+Alpine.data("app", () => ({
+    /** @type {GrantResponse | null} */
+    grantResponse: null,
 
-const showElement = (elementId) => {
-    const element = document.getElementById(elementId);
-    if (element === null) {
-        console.error("element not found for id: " + elementId);
-        return;
-    }
-    if (element.classList.contains("is-hidden")) {
-        element.classList.remove("is-hidden");
-    }
-};
+    /** @type {UserData | null} */
+    userData: null,
 
-const clearInnerElementsOf = (elementId) => {
-    const element = document.getElementById(elementId);
-    if (element === null) {
-        console.error("element not found for id: " + elementId);
-        return;
-    }
-    while (element.firstChild) {
-        element.removeChild(element.firstChild);
-    }
-};
+    /** @type {boolean} */
+    loggedIn: false,
+    
+    /** @type {string | null} */
+    loginError: null,
 
-const isEmptyObject = (obj) => {
-    return obj && Object.keys(obj).length === 0 && obj.constructor === Object;
-};
+    /** @param {SubmitEvent} event */
+    async handleLogin(event) {
+        this.loginError = null;
 
+        const formData = new FormData(this.$refs.loginForm);
 
-const displayError = (errorText) => {
-    const pError = document.createElement("p");
-    pError.innerText = errorText;
-    pError.classList.add("has-text-danger");
-    document.getElementById("error_container").appendChild(pError);
-}
-
-const doLogin = () => {
-    const usernameElement = document.getElementById("username");
-    const passwordElement = document.getElementById("password");
-
-    clearInnerElementsOf("error_container");
-    if (!validateHasValueAndNotEmpty(usernameElement) || !validateHasValueAndNotEmpty(passwordElement)) {
-        displayError("Empty username and/or password");
-        return;
-    }
-
-    const username = usernameElement.value;
-    const password = passwordElement.value;
-    usernameElement.value = "";
-    passwordElement.value = "";
-
-    console.info("Fetching credential offers for user:", username);
-
-    const url = new URL("/user/pid/login", baseUrl);
-    const headers = {
-        'Accept': 'application/json', 'Content-Type': 'application/json; charset=utf-8',
-    };
-    const requestBody = {
-        username: username,
-        password: password,
-    };
-    const options = {
-        method: `POST`, headers: headers, body: JSON.stringify(requestBody),
-    };
-
-    fetchData(url, options).then(data => {
-        showElement("logout_container");
-        hideElement("login_container");
-        selectPID(data, username);
-    }).catch(err => {
-        displayError("Failed to login: ");
-    });
-};
-
-const doLogout = () => {
-    hideElement("logout_container");
-    clearInnerElementsOf("error_container");
-    showElement("login_container");
-    clearInnerElementsOf("qr_container");
-    document.getElementById('username').focus();
-};
-
-
-async function fetchData(url, options) {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        if (response.status === 401) {
-            hideElement("logout_container");
-            clearInnerElementsOf("error_container");
-            clearInnerElementsOf("qr_container");
-            showElement("login_container");
-
-            throw new Error("Unauthorized/session expired");
+        const username = formData.get("username");
+        if (!username) {
+            this.loginError = "Username is required";
+            return;
         }
-        throw new Error(`HTTP error! status: ${response.status}, method: ${response.method}, url: ${url}`);
-    }
 
-    const data = await response.json();
-    console.info(JSON.stringify(data, null, 2));
-    return data;
-}
-
-function safeReplace(input, toReplace, replacement) {
-    if (typeof input !== "string") return "";
-    if (typeof toReplace !== "string" || toReplace === "") return input;
-    if (!input.includes(toReplace)) return input;
-    return input.replace(toReplace, replacement);
-}
-
-function buildLink({href, text, title = href, target = "_blank", className = "is-Link"}) {
-    const link = document.createElement('a');
-    link.href = href;
-    link.title = title;
-    link.textContent = text;
-    link.target = target;
-    link.classList.add(className);
-    return link;
-}
-
-function selectPID(data, username) {
-    if (data.grant) {
-        const qrContainer = document.getElementById("qr_container");
-        window.location.replace(data.redirect_url);
-    }
-    const textBusinessDecisionFor = document.createTextNode("Credential offers for ");
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginButton = document.getElementById('do-login-btn');
-
-    function handleEnterKey(event) {
-        if (event.key === 'Enter') {
-            loginButton.click();
+        const password = formData.get("password");
+        if (!password) {
+            this.loginError = "Password is required";
+            return;
         }
-    }
 
-    usernameInput.focus();
-    usernameInput.addEventListener('keydown', handleEnterKey);
-    passwordInput.addEventListener('keydown', handleEnterKey);
+        console.info("Fetching credential offers for user:", username);
 
-    loginButton.addEventListener('click', function () {
-        doLogin();
-    });
+        const url = new URL("/user/pid/login", baseUrl);
 
-    const logoutButton = document.getElementById("do-logout-btn");
-    logoutButton.addEventListener('click', function () {
-        doLogout();
-    });
-});
+        const options = {
+            method: "POST", 
+            headers: {
+                "Accept": "application/json", 
+                "Content-Type": "application/json; charset=utf-8",
+            }, 
+            body: JSON.stringify({
+                username: username,
+                password: password,
+            }),
+        };
+
+        try {
+            /** @type {GrantResponse} */ 
+            const data = await this.fetchData(url, options);
+
+            this.userData = {
+                given_name: data.identity.given_name,
+                family_name: data.identity.family_name,
+                date_of_birth: data.identity.birth_date,
+                expiry_date: data.identity.expiry_date,
+            };
+
+            this.grantResponse = data;
+
+            this.$refs.title.innerText = `Welcome, ${this.userData.given_name}!`
+
+            this.loggedIn = true;
+        } catch (err) {
+            this.loginError = "Failed to login: " + err.message;
+        }
+    },
+
+    /** @param {SubmitEvent} event */
+    handleCredentialSelection(event) {
+        window.location.replace(this.grantResponse.redirect_url);
+    },
+
+    /** @param {Event} event */
+    handleLogout(event) {
+        this.loggedIn = null;
+        this.userData = null;
+    },
+
+    /**
+     * @param {RequestInfo} url 
+     * @param {RequestInit} options 
+     * @returns {Promise<any>}
+     */
+    async fetchData(url, options) {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            if (response.status === 401) {
+                this.userData = null;
+                this.loggedIn = false;
+
+                throw new Error("Unauthorized/session expired");
+            }
+            throw new Error(`HTTP error! status: ${response.status}, method: ${response.method}, url: ${url}`);
+        }
+
+        const data = await response.json();
+        console.info(JSON.stringify(data, null, 2));
+        return data;
+    },
+
+}));
+
+Alpine.start();

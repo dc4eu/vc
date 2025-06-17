@@ -30,11 +30,11 @@
                     <div class="container is-max-tablet">
                         <div class="field">
                             <label for="username" class="label">Username</label>
-                            <input id="username" name="username" class="input" type="text" placeholder="johndoe" required>
+                            <input id="username" name="username" class="input" type="text" placeholder="johndoe" required value="mcgregor">
                         </div>
                         <div class="field">
                             <label for="password" class="label">Password</label>
-                            <input id="password" name="password" class="input" type="password" placeholder="mysecret123" required>
+                            <input id="password" name="password" class="input" type="password" placeholder="mysecret123" required value="mcgregor">
                         </div>
                         <input type="submit" class="button is-success is-justify-content-left" value="Log in" />
                     </div>
@@ -46,40 +46,43 @@
                         <p>Select the credential you wish to retrieve:</p>
                     </div>
                     <form x-ref="credentialSelectionForm" @submit.prevent="handleCredentialSelection">
-                        <div class="block field">
-                            <div class="control is-flex is-align-items-flex-start is-gap-1 is-justify-content-space-between">
-                                <input class="vc-radio" type="radio" name="urn:eudi:pid:1" id="urn:eudi:pid:1" required>
-                                <label for="urn:eudi:pid:1" class="vc-radio-label radio">
-                                    <div class="block">
-                                        <img class="vc-credential-card" width="829" height="504" src="https://demo-issuer.wwwallet.org/public/creds/pid/person-identification-data-svg-example-01.svg" alt="">
-                                        <table class="vc-table table">
-                                            <tbody>
-                                                <tr>
-                                                    <th>Credential type</th>
-                                                    <td>urn:eudi:pid:1</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Given Name</th>
-                                                    <td x-text="userData.given_name"></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Family Name</th>
-                                                    <td x-text="userData.family_name"></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Date of birth</th>
-                                                    <td x-text="userData.date_of_birth"></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Expiry date</th>
-                                                    <td x-text="userData.expiry_date"></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </label>
-                            </div>
+                        <div class="field">
+                            <template x-for="(credential, index) in credentials">
+                                <div class="block control is-flex is-align-items-flex-start is-gap-1 is-justify-content-space-between">
+                                    <input class="vc-radio" type="radio" name="credential" :id="`credential:${index}`" :value="credential.vct" required>
+                                    <label :for="`credential:${index}`" class="vc-radio-label radio">
+                                        <div class="block">
+                                            <img class="vc-credential-card" width="829" height="504" :src="credential.svg" alt="">
+                                            <table class="vc-table table">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>Credential type</th>
+                                                        <td>urn:eudi:pid:1</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Given Name</th>
+                                                        <td x-text="credential.claims.given_name"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Family Name</th>
+                                                        <td x-text="credential.claims.family_name"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Birth date</th>
+                                                        <td x-text="credential.claims.birth_date"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Expiry date</th>
+                                                        <td x-text="credential.claims.expiry_date"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </label>
+                                </div>
+                            </template>
                         </div>
+
                         <div class="block is-flex is-justify-content-space-between">
                             <button class="button is-danger is-outlined is-small" @click="handleLogout" title="Log out">Cancel</button>
                             <input type="submit" value="Get credential" class="button is-success">

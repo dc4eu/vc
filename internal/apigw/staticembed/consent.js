@@ -39,16 +39,11 @@ import Alpine from 'alpinejs';
  */
 
 /**
- * @typedef {Object} Claim
- * @property {string} id
- */
-
-/**
  * @typedef {Object} Credential
  * @property {string} vct
  * @property {string} name
- * @property {SvgTemplate} svg_template
- * @property {Claim[]} claims
+ * @property {string} svg
+ * @property {Record<string, string>} claims
  */
 
 const baseUrl = window.location.origin;
@@ -61,6 +56,9 @@ Alpine.data("app", () => ({
 
     /** @type {UserData | null} */
     userData: null,
+
+    /** @type {Credential[]} */
+    credentials: [],
 
     /** @type {boolean} */
     loggedIn: false,
@@ -115,6 +113,28 @@ Alpine.data("app", () => ({
 
             this.grantResponse = data;
 
+            const claims = {
+                given_name: data.identity.given_name,
+                family_name: data.identity.family_name,
+                birth_date: data.identity.birth_date,
+                expiry_date: data.identity.expiry_date,
+            };
+
+            const svg = await this.createCredentialSvgImageUri(
+                {
+                    uri: new URL("/static/person-identification-data-svg-example-01.svg", baseUrl),
+                    integrity: "sha256-037rNwIiS/qeKc16yxy3xJlAYYFGul1wJAcGjXjDVLw="
+                },
+                claims,
+            );
+
+            this.credentials.push({
+                vct: "urn:eudi:pid:1",
+                name: "PID",
+                svg,
+                claims,
+            });
+
             this.$refs.title.innerText = `Welcome, ${this.userData.given_name}!`
 
             this.loggedIn = true;
@@ -156,6 +176,21 @@ Alpine.data("app", () => ({
         return data;
     },
 
+    /**
+     * @param {SvgTemplate} svg_template
+     * @param {Record<string, string>} claims
+     * @returns {Promise<string>}
+     */
+    async createCredentialSvgImageUri(svg_template, claims) {
+        const res = await fetch(svg_template.uri);
+        let svg = await res.text();
+
+        for (let [key, value] of Object.entries(claims)) {
+            svg = svg.replaceAll(`{{${key}}}`, value);
+        }
+
+        return `data:image/svg+xml;base64,${btoa(svg)}`;
+    }
 }));
 
 Alpine.start();

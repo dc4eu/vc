@@ -135,6 +135,8 @@ Alpine.data("app", () => ({
     /** @param {Event} event */
     handleLogout(event) {
         this.loggedIn = null;
+        this.grantResponse = null;
+        this.credentials = [];
     },
 
     /**
@@ -147,6 +149,8 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
+                this.grantResponse = null;
+                this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");
             }

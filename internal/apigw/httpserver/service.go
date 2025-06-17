@@ -2,10 +2,10 @@ package httpserver
 
 import (
 	"context"
-	"embed"
 	"html/template"
 	"net/http"
 	"vc/internal/apigw/apiv1"
+	"vc/internal/apigw/staticembed"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -16,9 +16,6 @@ import (
 
 	// Swagger
 	_ "vc/docs/apigw"
-
-	// Embed static files for web page
-	_ "embed"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -40,9 +37,6 @@ type Service struct {
 	sessionsAuthKey string
 	sessionsName    string
 }
-
-//go:embed index.html consent.js consent.css
-var embeddedStaticFiles embed.FS
 
 // New creates a new httpserver service
 func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, log *logger.Log) (*Service, error) {
@@ -73,9 +67,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
-	s.gin.StaticFS("/static", http.FS(embeddedStaticFiles))
+	// Used in development to avoid bundling static files in the executable.
+	// When used, comment the four lines below these ones.
+	// s.gin.Static("/static", "./staticembed")
+	// s.gin.LoadHTMLFiles("./staticembed/index.html")
 
-	f := template.Must(template.New("").ParseFS(embeddedStaticFiles, "index.html"))
+	s.gin.StaticFS("/static", http.FS(staticembed.FS))
+
+	f := template.Must(template.New("").ParseFS(staticembed.FS, "index.html"))
 	s.gin.SetHTMLTemplate(f)
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)

@@ -9,6 +9,7 @@
 
 .vc-table {
     width: 100%;
+    background-color: transparent;
 }
 
 .vc-radio-label {
@@ -22,7 +23,8 @@
     transform: scale(2);
     
     &:checked + .vc-radio-label {
-        outline: 2px solid var(--bulma-info);
+        outline: 2px solid var(--bulma-info-80);
+        background-color: var(--bulma-info-95);
     }
 }
 

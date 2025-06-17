@@ -27,12 +27,6 @@ import Alpine from 'alpinejs';
  */
 
 /**
- * @typedef {Object} UserData
- * @property {string} family_name
- * @property {string} given_name
- */
-
-/**
  * @typedef {Object} SvgTemplate
  * @property {string} uri
  * @property {string} integrity
@@ -53,9 +47,6 @@ window.Alpine = Alpine;
 Alpine.data("app", () => ({
     /** @type {GrantResponse | null} */
     grantResponse: null,
-
-    /** @type {UserData | null} */
-    userData: null,
 
     /** @type {Credential[]} */
     credentials: [],
@@ -104,13 +95,6 @@ Alpine.data("app", () => ({
             /** @type {GrantResponse} */ 
             const data = await this.fetchData(url, options);
 
-            this.userData = {
-                given_name: data.identity.given_name,
-                family_name: data.identity.family_name,
-                date_of_birth: data.identity.birth_date,
-                expiry_date: data.identity.expiry_date,
-            };
-
             this.grantResponse = data;
 
             const claims = {
@@ -135,7 +119,7 @@ Alpine.data("app", () => ({
                 claims,
             });
 
-            this.$refs.title.innerText = `Welcome, ${this.userData.given_name}!`
+            this.$refs.title.innerText = `Welcome, ${data.identity.given_name}!`
 
             this.loggedIn = true;
         } catch (err) {
@@ -151,7 +135,6 @@ Alpine.data("app", () => ({
     /** @param {Event} event */
     handleLogout(event) {
         this.loggedIn = null;
-        this.userData = null;
     },
 
     /**
@@ -163,7 +146,6 @@ Alpine.data("app", () => ({
         const response = await fetch(url, options);
         if (!response.ok) {
             if (response.status === 401) {
-                this.userData = null;
                 this.loggedIn = false;
 
                 throw new Error("Unauthorized/session expired");

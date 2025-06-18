@@ -42,6 +42,7 @@ type LoginPIDUserReply struct {
 	Grant       bool            `json:"grant" validate:"required"`
 	Identity    *model.Identity `json:"identity,omitempty"`
 	RedirectURL string          `json:"redirect_url,omitempty"`
+	StateFlow   string          `json:"state_flow,omitempty" validate:"required,oneof=pid_auth pw_auth"`
 }
 
 func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*LoginPIDUserReply, *http.Response, error) {

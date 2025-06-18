@@ -7,7 +7,7 @@ for file in "${files[@]}"; do
     remote="../vc-ops/interop-common/overlay/opt/vc/metadata/vctm_$file.json"
     local="metadata/vctm_$file.json"
 
-    rsync -avz --progress "$remote" "$local"
+    rsync -avz --progress "$local" "$remote"
 
     remoteS256=$(sha256sum $remote)
     localS256=$(sha256sum $local)

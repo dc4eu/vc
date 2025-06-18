@@ -141,9 +141,9 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 }
 
 func (s *Service) endpointOAuthWalletRedirect(ctx context.Context, c *gin.Context) (any, error) {
-	s.log.Debug("endpointWalletRedirect", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
+	s.log.Debug("endpointOAuthWalletRedirect", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
 
-	_, span := s.tracer.Start(ctx, "httpserver:endpointWalletRedirect")
+	_, span := s.tracer.Start(ctx, "httpserver:endpointOAuthWalletRedirect")
 	defer span.End()
 	session := sessions.Default(c)
 
@@ -151,7 +151,7 @@ func (s *Service) endpointOAuthWalletRedirect(ctx context.Context, c *gin.Contex
 	if !ok {
 		err := errors.New("redirect_uri not found in session")
 		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "endpointWalletRedirect: redirect_uri not found in session")
+		s.log.Error(err, "endpointOAuthWalletRedirect: redirect_uri not found in session")
 		return nil, err
 	}
 

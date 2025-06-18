@@ -35,6 +35,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		State:               req.State,
 		ClientID:            req.ClientID,
 		RedirectURI:         req.RedirectURI,
+		ExpiresAt:           time.Now().Add(60 * time.Second).Unix(),
 	}
 
 	if err := c.db.VCOauthColl.Save(ctx, &azt); err != nil {
@@ -77,6 +78,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 
 	response := &openid4vci.AuthorizationResponse{
 		RedirectURL: redirectURL,
+		Scope:       authorization.Scope,
 	}
 
 	c.log.Debug("Authorize", "authorization", authorization)
@@ -166,5 +168,11 @@ func (c *Client) OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServer
 	}
 
 	return signedMetadata, nil
+}
 
+func (c *Client) OAuthAuthorizationConsent(ctx context.Context) (*model.Authorization, error) {
+	c.log.Debug("OAuthAuthorizationConsent request")
+
+	//return authorization, nil
+	return nil, nil
 }

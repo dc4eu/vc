@@ -115,7 +115,10 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	client := apiv1_issuer.NewIssuerServiceClient(conn)
 
 	jwk := &apiv1_issuer.Jwk{
-		Kty: "RSA",
+		Kty: "EC",
+		Crv: "P-256",
+		X:   "FnNrw9qaiVVeL4-SVnVJcAR1elC3boHvxkFugO1vNFQ",
+		Y:   "y-aapQ2mMG8hSlKO4DYZjKD0WV3s1Osc0L8lL1xgeF0",
 	}
 	c.log.Debug("Here 1")
 

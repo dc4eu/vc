@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 	"vc/internal/apigw/db"
 	"vc/pkg/helpers"
@@ -252,11 +253,17 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 
 	c.log.Debug("LoginPIDUser", "user", user, "auth", auth)
 
-	redirectURL := fmt.Sprintf("%s/?code=%s&state=%s", auth.RedirectURI, auth.Code, auth.State)
+	redirectURL, err := url.Parse(auth.RedirectURI)
+	if err != nil {
+		c.log.Error(err, "failed to parse redirect URI", "redirect_uri", auth.RedirectURI)
+		return nil, fmt.Errorf("failed to parse redirect URI %s: %w", auth.RedirectURI, err)
+	}
+
+	redirectURL.RawQuery = url.Values{"code": {auth.Code}, "state": {auth.State}}.Encode()
 
 	reply.Grant = true
 	reply.Identity = user.Identity
-	reply.RedirectURL = redirectURL
+	reply.RedirectURL = redirectURL.String()
 
 	return reply, nil
 }

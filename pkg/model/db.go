@@ -9,6 +9,7 @@ type Authorization struct {
 	IsUsed              bool      `json:"is_used" bson:"is_used"`
 	State               string    `json:"state"`
 	ClientID            string    `json:"client_id" bson:"client_id" validate:"required"`
+	ExpiresAt           int64     `json:"expires_at" bson:"expires_at" validate:"required"`
 	CodeChallenge       string    `json:"code_challenge" bson:"code_challenge" validate:"required"`
 	CodeChallengeMethod string    `json:"code_challenge_method" bson:"code_challenge_method" validate:"required,oneof=S256 plain"`
 	LastUsed            int64     `json:"last_used" bson:"last_used"`

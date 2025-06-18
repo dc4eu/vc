@@ -76,6 +76,8 @@ type AuthorizationResponse struct {
 	State string `json:"state" validate:"required"`
 
 	RedirectURL string `json:"-"`
+
+	Scope string `json:"-"`
 }
 
 // BindAuthorizationRequest binds the AuthorizationRequest

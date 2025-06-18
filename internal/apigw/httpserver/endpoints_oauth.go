@@ -54,16 +54,11 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 		return nil, err
 	}
 
-	session.Set("code", reply.Code)
-	session.Set("state", reply.State)
-	if err := session.Save(); err != nil {
-		return nil, err
-	}
+	session.Set("scope", reply.Scope)
 	session.Set("request_uri", request.RequestURI)
-	session.Set("scope", reply.Code)
-	session.Set("scope", reply.State)
-	session.Set("client_id", request.ClientID)
 	if err := session.Save(); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "session save error")
 		return nil, err
 	}
 
@@ -126,16 +121,21 @@ func (s *Service) endpointOAuth2Metadata(ctx context.Context, c *gin.Context) (a
 
 func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointOAuthAuthorizationConsent", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
-
-	c.HTML(http.StatusOK, "index.html", nil)
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAuthorizationConsent")
 	defer span.End()
 
-	//request := &openid4vci.AuthorizationConsentRequest{}
-	//if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-	//	span.SetStatus(codes.Error, err.Error())
-	//	return nil, err
-	//}
+	session := sessions.Default(c)
+	scope := session.Get("scope")
+	if scope == nil {
+		err := errors.New("scope not found in session")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "scope not found in session")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, err
+	}
 
+	c.SetCookie("scope", scope.(string), 900, "/authorization/consent", "", false, false)
+
+	c.HTML(http.StatusOK, "index.html", nil)
 	return nil, nil
 }

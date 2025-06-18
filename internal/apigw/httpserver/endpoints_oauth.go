@@ -143,7 +143,7 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 func (s *Service) endpointOAuthWalletRedirect(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointWalletRedirect", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
 
-	_, span := s.tracer.Start(ctx, "httpserver:endpointAuthorizationConsent")
+	_, span := s.tracer.Start(ctx, "httpserver:endpointWalletRedirect")
 	defer span.End()
 	session := sessions.Default(c)
 

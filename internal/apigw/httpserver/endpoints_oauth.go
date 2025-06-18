@@ -155,7 +155,6 @@ func (s *Service) endpointOAuthWalletRedirect(ctx context.Context, c *gin.Contex
 		return nil, err
 	}
 
-	c.Request.Method = "GET"
 	c.Redirect(http.StatusSeeOther, redirectURI)
 
 	return nil, nil

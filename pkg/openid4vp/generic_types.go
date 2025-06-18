@@ -19,11 +19,8 @@ const (
 )
 
 type QRRequest struct {
-	PresentationRequestTypeID string `json:"presentation_request_type_id,omitempty" bson:"presentation_request_type_id" validate:"omitempty,oneof=VCEHIC VCELM VCPID EuropeanHealthInsuranceCard MinimalPIDAndEuropeanHealthInsuranceCard"`
+	PresentationRequestTypeID string `json:"presentation_request_type_id" bson:"presentation_request_type_id" validate:"required,oneof=VCEHIC VCELM VCPID EuropeanHealthInsuranceCard MinimalPIDAndEuropeanHealthInsuranceCard"`
 	EncryptDirectPostJWT      bool   `json:"encrypt_direct_post_jwt,omitempty" bson:"encrypt_direct_post_jwt" validate:"omitempty"`
-
-	// Deprecated: to be removed after Ladok has adapted, use PresentationRequestTypeID instead
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"omitempty,oneof=urn:edui:diploma:1 urn:eudi:ehic:1 urn:edui:elm:1 urn:edui:micro_credential:1 urn:eudi:pda1:1 urn:eu.europa.ec.eudi:pid:1"`
 }
 
 type PresentationRequestType struct {
@@ -73,13 +70,11 @@ type CertData struct {
 }
 
 type VPInteractionSession struct {
-	SessionID               string            `json:"session_id"` //key == must be unique i coll (UUID1)
-	Status                  InteractionStatus `json:"interaction_status"`
-	SessionEphemeralKeyPair *KeyPair          `json:"session_ephemeral_key_pair"`
-	SessionCreated          time.Time         `json:"session_created"`
-	SessionExpires          time.Time         `json:"session_expires"`
-	// DEPRECATED: use PresentationRequestTypeID
-	DocumentType              string                  `json:"document_type"` //type of document (vc) the presentation_definition will request from the holder
+	SessionID                 string                  `json:"session_id"` //key == must be unique i coll (UUID1)
+	Status                    InteractionStatus       `json:"interaction_status"`
+	SessionEphemeralKeyPair   *KeyPair                `json:"session_ephemeral_key_pair"`
+	SessionCreated            time.Time               `json:"session_created"`
+	SessionExpires            time.Time               `json:"session_expires"`
 	PresentationRequestTypeID string                  `json:"presentation_request_type_id"`
 	Nonce                     string                  `json:"nonce"`
 	State                     string                  `json:"state"` //UUID2

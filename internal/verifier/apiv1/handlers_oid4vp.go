@@ -36,7 +36,7 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 	//}
 	//-------------------------
 
-	if request.DocumentType == "" && request.PresentationRequestTypeID == "" {
+	if request.PresentationRequestTypeID == "" {
 		return nil, errors.New("presentation_request_type_id is required")
 	}
 
@@ -58,16 +58,14 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		},
 		SessionCreated:            now,
 		SessionExpires:            now.Add(10 * time.Minute),
-		DocumentType:              request.DocumentType,
 		PresentationRequestTypeID: request.PresentationRequestTypeID,
 		Nonce:                     jwthelpers.GenerateNonce(),
-		//TODO: flytta nedan till auth request hämtningen istället när wwW anpassat
-		CallbackID:           jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
-		State:                uuid.NewString(),
-		JTI:                  uuid.NewString(),
-		Authorized:           false,
-		Status:               openid4vp.InteractionStatusQRDisplayed,
-		EncryptDirectPostJWT: request.EncryptDirectPostJWT,
+		CallbackID:                jwthelpers.GenerateNonce(), //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
+		State:                     uuid.NewString(),
+		JTI:                       uuid.NewString(),
+		Authorized:                false,
+		Status:                    openid4vp.InteractionStatusQRDisplayed,
+		EncryptDirectPostJWT:      request.EncryptDirectPostJWT,
 
 		VerifierKeyPair:          c.verifierKeyPair,
 		VerifierX5cCertDERBase64: base64.StdEncoding.EncodeToString(c.verifierX509Cert.CertDER),
@@ -155,24 +153,17 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 }
 
 func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4vp.VPInteractionSession) (string, error) {
-	if vpSession.PresentationRequestTypeID != "" {
-		prt, exists := lookupPresentationRequestTypeFrom(vpSession.PresentationRequestTypeID)
-		if !exists {
-			return "", errors.New("presentation_request_type not found")
-		}
-		if pd, err := buildPresentationDefinition(prt); err != nil {
-			return "", err
-		} else {
-			vpSession.PresentationDefinition = pd
-		}
-	} else if vpSession.DocumentType != "" {
-		if pd, err := buildPresentationDefinitionFor(vpSession.DocumentType); err != nil {
-			return "", err
-		} else {
-			vpSession.PresentationDefinition = pd
-		}
-	} else {
+	if vpSession.PresentationRequestTypeID == "" {
 		return "", errors.New("presentation_request_type_id is required")
+	}
+	prt, exists := lookupPresentationRequestTypeFrom(vpSession.PresentationRequestTypeID)
+	if !exists {
+		return "", errors.New("presentation_request_type not found")
+	}
+	if pd, err := buildPresentationDefinition(prt); err != nil {
+		return "", err
+	} else {
+		vpSession.PresentationDefinition = pd
 	}
 
 	schema := "http://"
@@ -237,7 +228,7 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		ValidationOptions: openid4vp.ValidationOptions{
 			//TODO: set prod values when all dev and key+crypto handling in place and work's
 			SkipVPSignatureChecks: true,
-			SkipVCSignatureChecks: false,
+			SkipVCSignatureChecks: true,
 			SkipStateCheck:        false,
 		},
 	}

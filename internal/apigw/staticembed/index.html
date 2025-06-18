@@ -45,7 +45,7 @@
                     <div class="block">
                         <p>Select the credential you wish to retrieve by clicking on it:</p>
                     </div>
-                    <form x-ref="credentialSelectionForm" @submit.prevent="handleCredentialSelection">
+                    <form x-ref="credentialSelectionForm" method="POST">
                         <div class="field">
                             <template x-for="(credential, index) in credentials">
                                 <div class="block control is-flex is-align-items-flex-start is-gap-1 is-justify-content-space-between">

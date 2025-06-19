@@ -1,4 +1,4 @@
-package openid4vci
+package oauth2
 
 import (
 	"crypto/rand"

@@ -179,12 +179,6 @@ type APIGW struct {
 	IssuerMetadata Metadata     `yaml:"issuer_metadata" validate:"omitempty"`
 }
 
-// Portal holds the persistent storage configuration
-type Portal struct {
-	APIServer      APIServer `yaml:"api_server" validate:"required"`
-	ApigwApiServer APIServer `yaml:"apigw_api_server" validate:"required"`
-}
-
 // OTEL holds the opentelemetry configuration
 type OTEL struct {
 	Addr    string `yaml:"addr" validate:"required"`
@@ -194,9 +188,9 @@ type OTEL struct {
 
 // OAuth2Server holds the oauth server configuration
 type OAuth2Server struct {
-	TokenEndpoint      string         `yaml:"token_endpoint" validate:"required"`
-	Clients            oauth2.Clients `yaml:"clients" validate:"required"`
-	Metadata           Metadata       `yaml:"metadata" validate:"required"`
+	TokenEndpoint string         `yaml:"token_endpoint" validate:"required"`
+	Clients       oauth2.Clients `yaml:"clients" validate:"required"`
+	Metadata      Metadata       `yaml:"metadata" validate:"required"`
 }
 
 // UI holds the user-interface configuration
@@ -267,7 +261,6 @@ type Cfg struct {
 	Persistent            Persistent                        `yaml:"persistent" validate:"omitempty"`
 	MockAS                MockAS                            `yaml:"mock_as" validate:"omitempty"`
 	UI                    UI                                `yaml:"ui" validate:"omitempty"`
-	Portal                Portal                            `yaml:"portal" validate:"omitempty"`
 	CredentialConstructor map[string]*CredentialConstructor `yaml:"credential_constructor" validate:"omitempty"`
 }
 

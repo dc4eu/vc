@@ -20,26 +20,6 @@ import (
 
 // QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request
 func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRRequest) (*openid4vp.QRReply, error) {
-	//---key+cert gen----------
-	//veriferLongLivedEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
-	//if err != nil {
-	//	return nil, err
-	//}
-	//veriferLongLivedEcdsaP256Private, ok := c.verifierKeyPair.PrivateKey.(*ecdsa.PrivateKey)
-	//if !ok {
-	//	return nil, errors.New("expected *ecdsa.PrivateKey")
-	//}
-	//certData, err := cryptohelpers.GenerateSelfSignedX509Cert(veriferLongLivedEcdsaP256Private)
-	//if err != nil {
-	//	c.log.Error(err, "Failed to generate SelfSignedX509Cert")
-	//	return nil, err
-	//}
-	//-------------------------
-
-	if request.PresentationRequestTypeID == "" {
-		return nil, errors.New("presentation_request_type_id is required")
-	}
-
 	sessionID := uuid.NewString()
 	now := time.Now()
 	verifierEmpEcdsaP256Private, err := cryptohelpers.GenerateECDSAKey(elliptic.P256())
@@ -119,20 +99,16 @@ func (c *Client) GetAuthorizationRequest(ctx context.Context, sessionID string) 
 		return nil, err
 	}
 
-	//TODO: just to see how many times the wallet calls this func for the same session
-	vpSession.IncrementCountNbrCallsToGetAuthorizationRequest()
-
 	if vpSession.SessionExpires.Before(time.Now()) {
 		return nil, errors.New("session expired")
 	}
-	//TODO: kommentera fram när wwW bara gör ett enda anrop för GetAuthorizationRequest (nu gör de minst två)...
-	//if vpSession.Authorized {
-	//	return nil, errors.New("authorization request has already been requested for this session")
-	//}
+
+	if vpSession.Authorized {
+		return nil, errors.New("authorization request has already been requested for this session")
+	}
 
 	vpSession.Authorized = true
 	vpSession.Status = openid4vp.InteractionStatusQRScanned
-	//vpSession.CallbackID = jwthelpers.GenerateNonce() //make it impossible to guess the complete uri to do the callback for this session (the holders https post of the vp_tokens)
 
 	requestObjectJWS, err := c.createRequestObjectJWS(ctx, vpSession)
 	if err != nil {
@@ -226,9 +202,9 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 	processConfig := &openid4vp.ProcessConfig{
 		ProcessType: openid4vp.FULL_VALIDATION,
 		ValidationOptions: openid4vp.ValidationOptions{
-			//TODO: set prod values when all dev and key+crypto handling in place and work's
+			//TODO: IMPORTANT!!! set values for what to check in the verification process using properties
 			SkipVPSignatureChecks: true,
-			SkipVCSignatureChecks: true,
+			SkipVCSignatureChecks: false,
 			SkipStateCheck:        false,
 		},
 	}
@@ -246,7 +222,7 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 			verificationMeta.Error = vre.Step
 			verificationMeta.ErrorDescription = vre.Reason
 		} else {
-			//TODO: to be able to be more detailed on the error (may exist or be a normal error)
+			//TODO: to be able to be more detailed on an error (may exist or be a normal error)
 			//var vfe *openid4vp.VerificationFailedError
 			//if errors.As(err, &vfe) {
 			//	fmt.Println("###### verification failed:", err)
@@ -280,7 +256,7 @@ func (c *Client) Callback(ctx context.Context, sessionID string, callbackID stri
 		return nil, err
 	}
 
-	//TODO: vad ska returneras tillbaka till walleten om verifiering: 1) verified 2) rejected 3) error
+	//TODO: vad ska returneras tillbaka till walleten om verifiering: 1) verified=Svara_200_OK 2) rejected? 3) error?
 	return &openid4vp.CallbackReply{}, nil
 }
 
@@ -339,10 +315,10 @@ func (c *Client) GetVerificationResult(ctx context.Context, sessionID string) (*
 
 	var data any
 	if vpSession == nil || vpSession.Status == openid4vp.InteractionStatusAuthorizationResponseReceived {
-		//No need to look for a record if the qr code just display or scanned, since no response from the wallet has been recieved yet
+		//No need to look for a record if the qr code just displayed or scanned, since no response from the wallet has been recieved yet
 		verificationRecord, _ := c.db.VerificationRecordColl.Read(ctx, sessionID)
 		if verificationRecord != nil {
-			//TODO: filter what data in verificationRecord to expose to the verifier web (if not nil or any error)
+			//TODO: ev. filter what data in verificationRecord to expose to the verifier web (if not nil or any error)
 		}
 		data = verificationRecord
 	}

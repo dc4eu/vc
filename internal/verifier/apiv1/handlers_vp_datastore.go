@@ -11,7 +11,7 @@ type PaginatedVerificationRecordsRequest struct {
 	RequestedSequenceEnd   int64 `json:"requested_sequence_end" validate:"required,gt=0"`
 }
 
-type VerificationRecord struct {
+type PaginatedVerificationRecord struct {
 	Sequence         int64                       `json:"sequence" bson:"sequence" validate:"required"`
 	ID               string                      `json:"id" bson:"session_id" validate:"required"` //Same as session_id but not exposed as that externally
 	VerificationMeta *openid4vp.VerificationMeta `json:"verification_meta" bson:"verification_meta" validate:"required"`
@@ -28,10 +28,10 @@ type VCResult struct {
 }
 
 type PaginatedVerificationRecordsReply struct {
-	RequestedSequenceStart int64                 `json:"requested_sequence_start" validate:"required"`
-	RequestedSequenceEnd   int64                 `json:"requested_sequence_end" validate:"required"`
-	SequenceMax            int64                 `json:"sequence_max" validate:"required"`
-	Items                  []*VerificationRecord `json:"verification_records"`
+	RequestedSequenceStart int64                          `json:"requested_sequence_start" validate:"required"`
+	RequestedSequenceEnd   int64                          `json:"requested_sequence_end" validate:"required"`
+	SequenceMax            int64                          `json:"sequence_max" validate:"required"`
+	Items                  []*PaginatedVerificationRecord `json:"verification_records"`
 }
 
 func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *PaginatedVerificationRecordsRequest) (*PaginatedVerificationRecordsReply, error) {
@@ -55,7 +55,7 @@ func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *Pagi
 		return nil, err
 	}
 
-	records := make([]*VerificationRecord, 0, requestedNumOfItems)
+	records := make([]*PaginatedVerificationRecord, 0, requestedNumOfItems)
 	sequenceMax := int64(0)
 	for _, dbRecord := range dbRecords {
 		if dbRecord == nil {
@@ -80,7 +80,7 @@ func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *Pagi
 	return reply, nil
 }
 
-func (c *Client) buildVerificationRecordFrom(dbRecord *openid4vp.VerificationRecord) *VerificationRecord {
+func (c *Client) buildVerificationRecordFrom(dbRecord *openid4vp.VerificationRecord) *PaginatedVerificationRecord {
 	//Will be handled by mongo later
 	var vpResults []*VPResult
 	for _, vp := range dbRecord.VPResults {
@@ -98,7 +98,7 @@ func (c *Client) buildVerificationRecordFrom(dbRecord *openid4vp.VerificationRec
 		vpResults = append(vpResults, vpResult)
 	}
 
-	return &VerificationRecord{
+	return &PaginatedVerificationRecord{
 		Sequence:         dbRecord.Sequence,
 		ID:               dbRecord.SessionID,
 		VerificationMeta: dbRecord.VerificationMeta,

@@ -3,7 +3,6 @@ package openid4vp
 import (
 	"crypto"
 	"github.com/golang-jwt/jwt/v5"
-	"sync/atomic"
 	"time"
 )
 
@@ -88,12 +87,6 @@ type VPInteractionSession struct {
 	VerifierX5cCertDERBase64       string           `json:"-"`
 	RequestObjectJWS               string           `json:"request_object_jws,omitempty"`
 	AuthorisationResponseDebugData *JsonRequestData `json:"authorisation_response_debug_data,omitempty"`
-	// Deprecated: ta bort när wwW bara gör ett anrop och behovet att kolla detta inte längre finns kvar
-	CountNbrCallsToGetAuthorizationRequest int64 `json:"count_nbr_calls_to_get_authorization_request,omitempty"` //TODO: Behöver reda ut hur många gånger plånboken verkligen anropar denna (verkar som mer än 1ggr per session)???
-}
-
-func (vpSession *VPInteractionSession) IncrementCountNbrCallsToGetAuthorizationRequest() {
-	atomic.AddInt64(&vpSession.CountNbrCallsToGetAuthorizationRequest, 1)
 }
 
 type JsonRequestData struct {

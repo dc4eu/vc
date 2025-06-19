@@ -10,8 +10,6 @@ import (
 // VerificationRecord is the generic collection of the verification of verifiable presentations (i.e., credentials, claims, etc) received in an authorization response from a holder (wallet).
 type VerificationRecordColl struct {
 	repo *db.InMemoryRepo[openid4vp.VerificationRecord]
-
-	//log *logger.Log
 }
 
 func (c *VerificationRecordColl) Create(ctx context.Context, verificationRecord *openid4vp.VerificationRecord) error {

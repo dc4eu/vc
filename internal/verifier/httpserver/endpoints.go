@@ -71,10 +71,6 @@ func (s *Service) endpointGetAuthorizationRequest(ctx context.Context, g *gin.Co
 	return reply.RequestObjectJWS, nil
 }
 
-type ResponseBody struct {
-	Response string `json:"response"`
-}
-
 func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCallback")
 	defer span.End()
@@ -93,7 +89,7 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		return nil, err
 	}
 
-	//TODO refactorisera och flytta nedan till en authorization_response_parser
+	//TODO refactorisera och flytta nedan till en ~authorization_response_parser
 	var request *openid4vp.AuthorizationResponse
 	if jwe := g.PostForm("response"); jwe != "" {
 		decryptedPayload, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
@@ -135,7 +131,7 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 			return nil, fmt.Errorf("error from wallet during auth request error=%s, errorDescription=%s, errorURIString=%s", errorString, errorDescriptionString, errorURIString)
 		}
 		if vpTokenStringArray == nil || len(vpTokenStringArray) < 1 || presentationSubmissionString == "" || stateString == "" {
-			return nil, errors.New("missing on or more of mandatory query string [vp_token, presentation_submission, state]")
+			return nil, errors.New("missing one or more of mandatory query string [vp_token, presentation_submission, state]")
 		}
 
 		var presentationSubmission openid4vp.PresentationSubmission
@@ -191,21 +187,13 @@ func (s *Service) endpointQuitVPFlow(ctx context.Context, g *gin.Context) (any, 
 	defer span.End()
 
 	webSession := sessions.Default(g)
-	vpSessionID, err := s.extractVPSessionIDfrom(webSession)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
 	webSession.Clear()
 	webSession.Options(sessions.Options{MaxAge: -1})
-	err = webSession.Save()
+	err := webSession.Save()
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-
-	fmt.Println("web session removed for vpSessionID:", vpSessionID)
-	//TODO: ta även bort vpSession om sådan finns lagrad (om man vill det före den timat ut av sig själv?) - kan ju dock pågå interaktion från en wallet samtidigt???
 
 	return nil, nil
 }

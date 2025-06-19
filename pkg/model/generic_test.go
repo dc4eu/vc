@@ -31,7 +31,7 @@ func TestDecodeCredentialOffer(t *testing.T) {
 			},
 		},
 		{
-			name: "not working from credential constructorn",
+			name: "not working from credential constructor",
 			have: "https://wallet.dc4eu.eu/cb?credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fsatosa-test-1.sunet.se%22%2C%22credential_configuration_ids%22%3A%5B%22EHICCredential%22%5D%2C%22grants%22%3A%7B%22authorization_code%22%3A%7B%22issuer_state%22%3A%22collect_id%3Dcollect_id_ehic_86%5Cu0026document_type%3DEHIC%5Cu0026authentic_source%3DEHIC%3A00001%22%7D%7D%7D",
 			want: map[string]any{
 				"credential_issuer": "https://satosa-test-1.sunet.se",

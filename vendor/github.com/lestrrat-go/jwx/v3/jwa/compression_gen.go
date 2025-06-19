@@ -17,11 +17,9 @@ var builtinCompressionAlgorithm = map[string]struct{}{}
 
 func init() {
 	// builtin values for CompressionAlgorithm
-	algorithms := make([]CompressionAlgorithm, 0, 2)
-
-	for _, alg := range []string{"DEF", ""} {
-		algorithms = append(algorithms, NewCompressionAlgorithm(alg))
-	}
+	algorithms := make([]CompressionAlgorithm, 2)
+	algorithms[0] = NewCompressionAlgorithm("DEF")
+	algorithms[1] = NewCompressionAlgorithm("")
 
 	RegisterCompressionAlgorithm(algorithms...)
 }
@@ -48,11 +46,17 @@ func lookupBuiltinCompressionAlgorithm(name string) CompressionAlgorithm {
 
 // CompressionAlgorithm represents the compression algorithms as described in https://tools.ietf.org/html/rfc7518#section-7.3
 type CompressionAlgorithm struct {
-	name string
+	name       string
+	deprecated bool
 }
 
 func (s CompressionAlgorithm) String() string {
 	return s.name
+}
+
+// IsDeprecated returns true if the CompressionAlgorithm object is deprecated.
+func (s CompressionAlgorithm) IsDeprecated() bool {
+	return s.deprecated
 }
 
 // EmptyCompressionAlgorithm returns an empty CompressionAlgorithm object, used as a zero value.
@@ -61,8 +65,17 @@ func EmptyCompressionAlgorithm() CompressionAlgorithm {
 }
 
 // NewCompressionAlgorithm creates a new CompressionAlgorithm object with the given name.
-func NewCompressionAlgorithm(name string) CompressionAlgorithm {
-	return CompressionAlgorithm{name: name}
+func NewCompressionAlgorithm(name string, options ...NewAlgorithmOption) CompressionAlgorithm {
+	var deprecated bool
+	for _, option := range options {
+		switch option.Ident() {
+		case identDeprecated{}:
+			if err := option.Value(&deprecated); err != nil {
+				panic("jwa.NewCompressionAlgorithm: WithDeprecated option must be a boolean")
+			}
+		}
+	}
+	return CompressionAlgorithm{name: name, deprecated: deprecated}
 }
 
 // LookupCompressionAlgorithm returns the CompressionAlgorithm object for the given name.
@@ -133,7 +146,7 @@ func (s *CompressionAlgorithm) UnmarshalJSON(data []byte) error {
 	}
 	v, ok := LookupCompressionAlgorithm(name)
 	if !ok {
-		return fmt.Errorf(`unknown CompressionAlgorithm: %s`, name)
+		return fmt.Errorf(`unknown CompressionAlgorithm: %q`, name)
 	}
 	*s = v
 	return nil

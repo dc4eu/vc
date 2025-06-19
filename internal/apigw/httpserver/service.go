@@ -55,10 +55,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 			Path:     "/",
 			Domain:   "",
 			MaxAge:   900,
-			Secure:   false, // TODO(masv): fix this
+			Secure:   false,
 			HttpOnly: true,
 			SameSite: http.SameSiteStrictMode,
 		},
+	}
+
+	if s.cfg.APIGW.APIServer.TLS.Enabled {
+		s.sessionsOptions.Secure = true
 	}
 
 	var err error

@@ -13,6 +13,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/internal/base64"
 	"github.com/lestrrat-go/jwx/v3/internal/json"
 	"github.com/lestrrat-go/jwx/v3/internal/pool"
+	"github.com/lestrrat-go/jwx/v3/internal/tokens"
 	"github.com/lestrrat-go/jwx/v3/jwa"
 )
 
@@ -61,6 +62,14 @@ func newRSAPublicKey() *rsaPublicKey {
 
 func (h rsaPublicKey) KeyType() jwa.KeyType {
 	return jwa.RSA()
+}
+
+func (h rsaPublicKey) rlock() {
+	h.mu.RLock()
+}
+
+func (h rsaPublicKey) runlock() {
+	h.mu.RUnlock()
 }
 
 func (h rsaPublicKey) IsPrivate() bool {
@@ -138,6 +147,8 @@ func (h *rsaPublicKey) Has(name string) bool {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	switch name {
+	case KeyTypeKey:
+		return true
 	case AlgorithmKey:
 		return h.algorithm != nil
 	case RSAEKey:
@@ -432,11 +443,11 @@ LOOP:
 		switch tok := tok.(type) {
 		case json.Delim:
 			// Assuming we're doing everything correctly, we should ONLY
-			// get either '{' or '}' here.
-			if tok == '}' { // End of object
+			// get either tokens.OpenCurlyBracket or tokens.CloseCurlyBracket here.
+			if tok == tokens.CloseCurlyBracket { // End of object
 				break LOOP
-			} else if tok != '{' {
-				return fmt.Errorf(`expected '{', but got '%c'`, tok)
+			} else if tok != tokens.OpenCurlyBracket {
+				return fmt.Errorf(`expected '%c' but got '%c'`, tokens.OpenCurlyBracket, tok)
 			}
 		case string: // Objects can only have string keys
 			switch tok {
@@ -579,23 +590,23 @@ func (h rsaPublicKey) MarshalJSON() ([]byte, error) {
 	}
 
 	sort.Strings(fields)
-	buf := pool.GetBytesBuffer()
-	defer pool.ReleaseBytesBuffer(buf)
-	buf.WriteByte('{')
+	buf := pool.BytesBuffer().Get()
+	defer pool.BytesBuffer().Put(buf)
+	buf.WriteByte(tokens.OpenCurlyBracket)
 	enc := json.NewEncoder(buf)
 	for i, f := range fields {
 		if i > 0 {
-			buf.WriteRune(',')
+			buf.WriteRune(tokens.Comma)
 		}
-		buf.WriteRune('"')
+		buf.WriteRune(tokens.DoubleQuote)
 		buf.WriteString(f)
 		buf.WriteString(`":`)
 		v := data[f]
 		switch v := v.(type) {
 		case []byte:
-			buf.WriteRune('"')
+			buf.WriteRune(tokens.DoubleQuote)
 			buf.WriteString(base64.EncodeToString(v))
-			buf.WriteRune('"')
+			buf.WriteRune(tokens.DoubleQuote)
 		default:
 			if err := enc.Encode(v); err != nil {
 				return nil, fmt.Errorf(`failed to encode value for field %s: %w`, f, err)
@@ -603,7 +614,7 @@ func (h rsaPublicKey) MarshalJSON() ([]byte, error) {
 			buf.Truncate(buf.Len() - 1)
 		}
 	}
-	buf.WriteByte('}')
+	buf.WriteByte(tokens.CloseCurlyBracket)
 	ret := make([]byte, buf.Len())
 	copy(ret, buf.Bytes())
 	return ret, nil
@@ -696,6 +707,14 @@ func newRSAPrivateKey() *rsaPrivateKey {
 
 func (h rsaPrivateKey) KeyType() jwa.KeyType {
 	return jwa.RSA()
+}
+
+func (h rsaPrivateKey) rlock() {
+	h.mu.RLock()
+}
+
+func (h rsaPrivateKey) runlock() {
+	h.mu.RUnlock()
 }
 
 func (h rsaPrivateKey) IsPrivate() bool {
@@ -815,6 +834,8 @@ func (h *rsaPrivateKey) Has(name string) bool {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	switch name {
+	case KeyTypeKey:
+		return true
 	case AlgorithmKey:
 		return h.algorithm != nil
 	case RSADKey:
@@ -1223,11 +1244,11 @@ LOOP:
 		switch tok := tok.(type) {
 		case json.Delim:
 			// Assuming we're doing everything correctly, we should ONLY
-			// get either '{' or '}' here.
-			if tok == '}' { // End of object
+			// get either tokens.OpenCurlyBracket or tokens.CloseCurlyBracket here.
+			if tok == tokens.CloseCurlyBracket { // End of object
 				break LOOP
-			} else if tok != '{' {
-				return fmt.Errorf(`expected '{', but got '%c'`, tok)
+			} else if tok != tokens.OpenCurlyBracket {
+				return fmt.Errorf(`expected '%c' but got '%c'`, tokens.OpenCurlyBracket, tok)
 			}
 		case string: // Objects can only have string keys
 			switch tok {
@@ -1421,23 +1442,23 @@ func (h rsaPrivateKey) MarshalJSON() ([]byte, error) {
 	}
 
 	sort.Strings(fields)
-	buf := pool.GetBytesBuffer()
-	defer pool.ReleaseBytesBuffer(buf)
-	buf.WriteByte('{')
+	buf := pool.BytesBuffer().Get()
+	defer pool.BytesBuffer().Put(buf)
+	buf.WriteByte(tokens.OpenCurlyBracket)
 	enc := json.NewEncoder(buf)
 	for i, f := range fields {
 		if i > 0 {
-			buf.WriteRune(',')
+			buf.WriteRune(tokens.Comma)
 		}
-		buf.WriteRune('"')
+		buf.WriteRune(tokens.DoubleQuote)
 		buf.WriteString(f)
 		buf.WriteString(`":`)
 		v := data[f]
 		switch v := v.(type) {
 		case []byte:
-			buf.WriteRune('"')
+			buf.WriteRune(tokens.DoubleQuote)
 			buf.WriteString(base64.EncodeToString(v))
-			buf.WriteRune('"')
+			buf.WriteRune(tokens.DoubleQuote)
 		default:
 			if err := enc.Encode(v); err != nil {
 				return nil, fmt.Errorf(`failed to encode value for field %s: %w`, f, err)
@@ -1445,7 +1466,7 @@ func (h rsaPrivateKey) MarshalJSON() ([]byte, error) {
 			buf.Truncate(buf.Len() - 1)
 		}
 	}
-	buf.WriteByte('}')
+	buf.WriteByte(tokens.CloseCurlyBracket)
 	ret := make([]byte, buf.Len())
 	copy(ret, buf.Bytes())
 	return ret, nil
@@ -1508,4 +1529,15 @@ func (h *rsaPrivateKey) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+var rsaStandardFields KeyFilter
+
+func init() {
+	rsaStandardFields = NewFieldNameFilter(KeyTypeKey, KeyUsageKey, KeyOpsKey, AlgorithmKey, KeyIDKey, X509URLKey, X509CertChainKey, X509CertThumbprintKey, X509CertThumbprintS256Key, RSAEKey, RSANKey, RSADKey, RSADPKey, RSADQKey, RSAPKey, RSAQKey, RSAQIKey)
+}
+
+// RSAStandardFieldsFilter returns a KeyFilter that filters out standard RSA fields.
+func RSAStandardFieldsFilter() KeyFilter {
+	return rsaStandardFields
 }

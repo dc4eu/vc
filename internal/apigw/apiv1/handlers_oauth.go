@@ -25,7 +25,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 
 	requestURI := fmt.Sprintf("urn:ietf:params:oauth:request_uri:%s", uuid.NewString())
 
-	azt := model.Authorization{
+	azt := model.AuthorizationContext{
 		Code:                uuid.NewString(),
 		RequestURI:          requestURI,
 		Scope:               req.Scope,
@@ -38,7 +38,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		ExpiresAt:           time.Now().Add(60 * time.Second).Unix(),
 	}
 
-	if err := c.db.VCOauthColl.Save(ctx, &azt); err != nil {
+	if err := c.db.VCAuthorizationContextColl.Save(ctx, &azt); err != nil {
 		c.log.Error(err, "save error")
 		return nil, err
 	}
@@ -55,11 +55,11 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 
 func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRequest) (*openid4vci.AuthorizationResponse, error) {
 	c.log.Debug("Authorize", "req", req)
-	query := &model.Authorization{
+	query := &model.AuthorizationContext{
 		RequestURI: req.RequestURI,
 		ClientID:   req.ClientID,
 	}
-	authorization, err := c.db.VCOauthColl.Get(ctx, query)
+	authorization, err := c.db.VCAuthorizationContextColl.Get(ctx, query)
 	c.log.Debug("Get authorization", "query", query, "authorization", authorization)
 	if err != nil {
 		c.log.Error(err, "get error")
@@ -90,7 +90,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error) {
 	c.log.Debug("OIDCToken", "req", req)
 
-	authorization, err := c.db.VCOauthColl.ForfeitAuthorizationCode(ctx, &model.Authorization{
+	authorization, err := c.db.VCAuthorizationContextColl.ForfeitAuthorizationCode(ctx, &model.AuthorizationContext{
 		Code: req.Code,
 	})
 	if err != nil {
@@ -124,7 +124,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		ExpiresAt:   time.Now().Add(time.Duration(reply.ExpiresIn) * time.Second).Unix(),
 	}
 
-	if err := c.db.VCOauthColl.AddToken(ctx, authorization.Code, tokenDoc); err != nil {
+	if err := c.db.VCAuthorizationContextColl.AddToken(ctx, authorization.Code, tokenDoc); err != nil {
 		c.log.Error(err, "failed to add token")
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (c *Client) OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServer
 	return signedMetadata, nil
 }
 
-func (c *Client) OAuthAuthorizationConsent(ctx context.Context) (*model.Authorization, error) {
+func (c *Client) OAuthAuthorizationConsent(ctx context.Context) (*model.AuthorizationContext, error) {
 	c.log.Debug("OAuthAuthorizationConsent request")
 
 	//return authorization, nil

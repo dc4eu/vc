@@ -200,19 +200,24 @@ func ParseKey(data []byte, options ...ParseOption) (Key, error) {
 	var localReg *json.Registry
 	var pemDecoder PEMDecoder
 	for _, option := range options {
-		//nolint:forcetypeassert
 		switch option.Ident() {
 		case identPEM{}:
-			parsePEM = option.Value().(bool)
+			if err := option.Value(&parsePEM); err != nil {
+				return nil, fmt.Errorf(`failed to retrieve PEM option value: %w`, err)
+			}
 		case identPEMDecoder{}:
-			pemDecoder = option.Value().(PEMDecoder)
+			if err := option.Value(&pemDecoder); err != nil {
+				return nil, fmt.Errorf(`failed to retrieve PEMDecoder option value: %w`, err)
+			}
 		case identLocalRegistry{}:
-			// in reality you can only pass either withLocalRegistry or
-			// WithTypedField, but since withLocalRegistry is used only by us,
-			// we skip checking
-			localReg = option.Value().(*json.Registry)
+			if err := option.Value(&localReg); err != nil {
+				return nil, fmt.Errorf(`failed to retrieve local registry option value: %w`, err)
+			}
 		case identTypedField{}:
-			pair := option.Value().(typedFieldPair)
+			var pair typedFieldPair // temporary var needed for typed field
+			if err := option.Value(&pair); err != nil {
+				return nil, fmt.Errorf(`failed to retrieve typed field option value: %w`, err)
+			}
 			if localReg == nil {
 				localReg = json.NewRegistry()
 			}
@@ -281,16 +286,24 @@ func Parse(src []byte, options ...ParseOption) (Set, error) {
 	var ignoreParseError bool
 	var pemDecoder PEMDecoder
 	for _, option := range options {
-		//nolint:forcetypeassert
 		switch option.Ident() {
 		case identPEM{}:
-			parsePEM = option.Value().(bool)
+			if err := option.Value(&parsePEM); err != nil {
+				return nil, parseerr(`failed to retrieve PEM option value: %w`, err)
+			}
 		case identPEMDecoder{}:
-			pemDecoder = option.Value().(PEMDecoder)
+			if err := option.Value(&pemDecoder); err != nil {
+				return nil, parseerr(`failed to retrieve PEMDecoder option value: %w`, err)
+			}
 		case identIgnoreParseError{}:
-			ignoreParseError = option.Value().(bool)
+			if err := option.Value(&ignoreParseError); err != nil {
+				return nil, parseerr(`failed to retrieve IgnoreParseError option value: %w`, err)
+			}
 		case identTypedField{}:
-			pair := option.Value().(typedFieldPair)
+			var pair typedFieldPair // temporary var needed for typed field
+			if err := option.Value(&pair); err != nil {
+				return nil, parseerr(`failed to retrieve typed field option value: %w`, err)
+			}
 			if localReg == nil {
 				localReg = json.NewRegistry()
 			}
@@ -377,10 +390,11 @@ func AssignKeyID(key Key, options ...AssignKeyIDOption) error {
 
 	hash := crypto.SHA256
 	for _, option := range options {
-		//nolint:forcetypeassert
 		switch option.Ident() {
 		case identThumbprintHash{}:
-			hash = option.Value().(crypto.Hash)
+			if err := option.Value(&hash); err != nil {
+				return fmt.Errorf(`failed to retrieve thumbprint hash option value: %w`, err)
+			}
 		}
 	}
 
@@ -611,11 +625,13 @@ func IsKeyValidationError(err error) bool {
 // Configure is used to configure global behavior of the jwk package.
 func Configure(options ...GlobalOption) {
 	var strictKeyUsagePtr *bool
-	//nolint:forcetypeassert
 	for _, option := range options {
 		switch option.Ident() {
 		case identStrictKeyUsage{}:
-			v := option.Value().(bool)
+			var v bool
+			if err := option.Value(&v); err != nil {
+				continue
+			}
 			strictKeyUsagePtr = &v
 		}
 	}
@@ -631,3 +647,50 @@ type keyWithD interface {
 }
 
 var _ keyWithD = &okpPrivateKey{}
+
+func extractEmbeddedKey(keyif Key, concretTypes []reflect.Type) (Key, error) {
+	rv := reflect.ValueOf(keyif)
+
+	// If the value can be converted to one of the concrete types, then we're done
+	for _, t := range concretTypes {
+		if rv.Type().ConvertibleTo(t) {
+			return keyif, nil
+		}
+	}
+
+	// When a struct implements the Key interface via embedding, you unfortunately
+	// cannot use a type switch to determine the concrete type, because
+	if rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			return nil, fmt.Errorf(`invalid key value (0): %w`, ContinueError())
+		}
+		rv = rv.Elem()
+	}
+
+	if rv.Kind() != reflect.Struct {
+		return nil, fmt.Errorf(`invalid key value type %T (1): %w`, keyif, ContinueError())
+	}
+	if rv.NumField() == 0 {
+		return nil, fmt.Errorf(`invalid key value type %T (2): %w`, keyif, ContinueError())
+	}
+	// Iterate through the fields of the struct to find the first field that
+	// implements the Key interface
+	rt := rv.Type()
+	for i := range rv.NumField() {
+		field := rv.Field(i)
+		ft := rt.Field(i)
+		if !ft.Anonymous {
+			// We can only salvage this object if the object implements jwk.Key
+			// via embedding, so we skip fields that are not anonymous
+			continue
+		}
+
+		if field.CanInterface() {
+			if k, ok := field.Interface().(Key); ok {
+				return extractEmbeddedKey(k, concretTypes)
+			}
+		}
+	}
+
+	return nil, fmt.Errorf(`invalid key value type %T (3): %w`, keyif, ContinueError())
+}

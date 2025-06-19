@@ -34,7 +34,7 @@ func NewCredentialOfferColl(ctx context.Context, collName string, service *Servi
 }
 
 func (c *VCCredentialOfferColl) createIndex(ctx context.Context) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:vc:pkce:createIndex")
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:credential_offer:createIndex")
 	defer span.End()
 
 	indexCredentialOfferURIUniq := mongo.IndexModel{
@@ -88,6 +88,9 @@ func (c *VCCredentialOfferColl) Delete(ctx context.Context, uuid string) error {
 }
 
 func (c *VCCredentialOfferColl) Get(ctx context.Context, uuid string) (*CredentialOfferDocument, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:credential_offer:get")
+	defer span.End()
+
 	filter := bson.M{
 		"uuid": bson.M{"$eq": uuid},
 	}

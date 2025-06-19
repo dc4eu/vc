@@ -17,11 +17,11 @@ var builtinKeyType = map[string]struct{}{}
 
 func init() {
 	// builtin values for KeyType
-	algorithms := make([]KeyType, 0, 5)
-
-	for _, alg := range []string{"EC", "OKP", "oct", "RSA"} {
-		algorithms = append(algorithms, NewKeyType(alg))
-	}
+	algorithms := make([]KeyType, 4)
+	algorithms[0] = NewKeyType("EC")
+	algorithms[1] = NewKeyType("OKP")
+	algorithms[2] = NewKeyType("oct")
+	algorithms[3] = NewKeyType("RSA")
 
 	RegisterKeyType(algorithms...)
 }
@@ -65,11 +65,17 @@ func lookupBuiltinKeyType(name string) KeyType {
 
 // KeyType represents the key type ("kty") that are supported
 type KeyType struct {
-	name string
+	name       string
+	deprecated bool
 }
 
 func (s KeyType) String() string {
 	return s.name
+}
+
+// IsDeprecated returns true if the KeyType object is deprecated.
+func (s KeyType) IsDeprecated() bool {
+	return s.deprecated
 }
 
 // EmptyKeyType returns an empty KeyType object, used as a zero value.
@@ -78,8 +84,17 @@ func EmptyKeyType() KeyType {
 }
 
 // NewKeyType creates a new KeyType object with the given name.
-func NewKeyType(name string) KeyType {
-	return KeyType{name: name}
+func NewKeyType(name string, options ...NewAlgorithmOption) KeyType {
+	var deprecated bool
+	for _, option := range options {
+		switch option.Ident() {
+		case identDeprecated{}:
+			if err := option.Value(&deprecated); err != nil {
+				panic("jwa.NewKeyType: WithDeprecated option must be a boolean")
+			}
+		}
+	}
+	return KeyType{name: name, deprecated: deprecated}
 }
 
 // LookupKeyType returns the KeyType object for the given name.
@@ -150,7 +165,7 @@ func (s *KeyType) UnmarshalJSON(data []byte) error {
 	}
 	v, ok := LookupKeyType(name)
 	if !ok {
-		return fmt.Errorf(`unknown KeyType: %s`, name)
+		return fmt.Errorf(`unknown KeyType: %q`, name)
 	}
 	*s = v
 	return nil

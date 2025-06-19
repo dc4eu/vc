@@ -121,7 +121,7 @@ func (s *Service) endpointOAuth2Metadata(ctx context.Context, c *gin.Context) (a
 
 func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointOAuthAuthorizationConsent", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAuthorizationConsent")
+	_, span := s.tracer.Start(ctx, "httpserver:endpointAuthorizationConsent")
 	defer span.End()
 
 	session := sessions.Default(c)

@@ -1,194 +1,328 @@
-# JsonSchema Validator for Go
+# JSON Schema Validator for Go
 
-This library provides robust JSON Schema validation for Go applications, designed to support the latest specifications of JSON Schema. This validator aligns with JSON Schema Draft 2020-12, implementing a modern approach to JSON schema validation.
+[![Go Version](https://img.shields.io/badge/go-%3E%3D1.21.1-blue)](https://golang.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Test Status](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
 
-## Table of Contents
-- [Features](#features)
-- [Installation](#installation)
-- [Quickstart](#quickstart)
-- [Output Formats](#output-formats)
-- [Loading Schema from URI](#loading-schema-from-uri)
-- [Multilingual Error Messages](#multilingual-error-messages)
-- [Setup Test Environment](#setup-test-environment)
-- [How to Contribute](#how-to-contribute)
-- [License](#license)
+A high-performance JSON Schema validator for Go with **direct struct validation**, **smart unmarshaling** with defaults, and **separated validation workflow**.
 
 ## Features
 
-- **Latest JSON Schema Support**: Compliant with JSON Schema Draft 2020-12. This library does not support earlier versions of JSON Schema.
-- **Passed All JSON Schema Test Suite Cases**: Successfully passes all the [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) cases for Draft 2020-12, except those involving vocabulary.
-- **Internationalization Support**: Includes capabilities for internationalized validation messages. Supports multiple languages including English (en), German (de-DE), Spanish (es-ES), French (fr-FR), Japanese (ja-JP), Korean (ko-KR), Portuguese (pt-BR), Simplified Chinese (zh-Hans), and Traditional Chinese (zh-Hant).
-- **Enhanced Validation Output**: Implements [enhanced output](https://json-schema.org/blog/posts/fixing-json-schema-output) for validation errors as proposed in recent JSON Schema updates.
-- **Flexible JSON Encoding/Decoding**: Uses standard library `github.com/goccy/go-json` by default, with the ability to configure any custom JSON encoder/decoder, including high-performance options like [github.com/bytedance/sonic](https://github.com/bytedance/sonic).
+- ✅ **JSON Schema Draft 2020-12** - Full spec compliance  
+- ✅ **Direct Struct Validation** - Zero-copy validation without JSON marshaling
+- ✅ **Separated Workflow** - Validation and unmarshaling as distinct operations
+- ✅ **Type-Specific Methods** - Optimized paths for JSON, structs, and maps
+- ✅ **Schema References** - Full `$ref`, `$recursiveRef`, `$dynamicRef` support
+- ✅ **Custom Formats** - Register your own validators
+- ✅ **Internationalization** - Multi-language error messages
+- ✅ **Code Construction** - Type-safe schema building using JSON Schema keywords
 
-## Installation
+## Quick Start
 
-Ensure your Go environment is set up (requires Go version 1.21.1 or higher) and install the library:
+### Installation
 
 ```bash
 go get github.com/kaptinlin/jsonschema
 ```
 
-## Quickstart
-
-Here is a simple example to demonstrate compiling a schema and validating an instance:
+### Basic Usage
 
 ```go
-import (
-    "fmt"
-    "log"
-    "github.com/goccy/go-json"
-    "github.com/kaptinlin/jsonschema"
-)
+import "github.com/kaptinlin/jsonschema"
 
-func main() {
-	schemaJSON := `{
-		"type": "object",
-		"properties": {
-			"name": {"type": "string"},
-			"age": {"type": "integer", "minimum":20}
-		},
-		"required": ["name", "age"]
-	}`
-
-	compiler := jsonschema.NewCompiler()
-	schema, err := compiler.Compile([]byte(schemaJSON))
-	if err != nil {
-		log.Fatalf("Failed to compile schema: %v", err)
-	}
-
-	instance := map[string]interface{}{
-		"name": "John Doe",
-		"age":  19,
-	}
-	result := schema.Validate(instance)
-	if !result.IsValid() {
-		details, _ := json.MarshalIndent(result.ToList(), "", "  ")
-		fmt.Println(string(details))
-	}
-}
-```
-
-This example will output the following:
-```json
-{
-  "valid": false,
-  "evaluationPath": "",
-  "schemaLocation": "",
-  "instanceLocation": "",
-  "errors": {
-    "properties": "Property 'age' does not match the schema"
-  },
-  "details": [
-    {
-      "valid": true,
-      "evaluationPath": "/properties/name",
-      "schemaLocation": "#/properties/name",
-      "instanceLocation": "/name"
-    },
-    {
-      "valid": false,
-      "evaluationPath": "/properties/age",
-      "schemaLocation": "#/properties/age",
-      "instanceLocation": "/age",
-      "errors": {
-        "minimum": "19 should be at least 20"
-      }
-    }
-  ]
-}
-```
-
-## Custom JSON Encoder/Decoder
-
-By default, this library uses Go's standard `github.com/goccy/go-json` package. However, you can configure custom JSON encoder/decoder implementations for better performance or specialized functionality:
-
-```go
-// Using bytedance/sonic for high performance
-import (
-    "github.com/bytedance/sonic"
-    "github.com/kaptinlin/jsonschema"
-)
-
+// Compile schema
 compiler := jsonschema.NewCompiler()
+schema, err := compiler.Compile([]byte(`{
+    "type": "object",
+    "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "age": {"type": "integer", "minimum": 0}
+    },
+    "required": ["name"]
+}`))
 
-compiler.WithEncoderJSON(sonic.Marshal)
-compiler.WithDecoderJSON(sonic.Unmarshal)
-```
+// Recommended workflow: validate first, then unmarshal
+data := []byte(`{"name": "John", "age": 25}`)
 
-## Output Formats
-
-The library supports three output formats:
-- **Flag**: Provides a simple boolean indicating whether the validation was successful.
-  ```go
-  result.ToFlag()
-  ```
-- **List**: Organizes all validation results into a top-level list.
-  ```go
-  result.ToList()
-  ```
-- **Hierarchical**: Organizes validation results into a hierarchy mimicking the schema structure.
-  ```go
-  result.ToList(false)
-  ```
-
-## Loading Schema from URI
-
-The `compiler.GetSchema` method allows loading a JSON Schema directly from a URI, which is especially useful for utilizing shared or standard schemas:
-
-```go
-metaSchema, err := compiler.GetSchema("https://json-schema.org/draft/2020-12/schema")
-if err != nil {
-    log.Fatalf("Failed to load meta-schema: %v", err)
+// Step 1: Validate
+result := schema.Validate(data)
+if result.IsValid() {
+    fmt.Println("✅ Valid")
+    // Step 2: Unmarshal validated data
+    var user User
+    err := schema.Unmarshal(&user, data)
+    if err != nil {
+        log.Fatal(err)
+    }
+} else {
+    fmt.Println("❌ Invalid")
+    for field, err := range result.Errors {
+        fmt.Printf("- %s: %s\n", field, err.Message)
+    }
 }
 ```
 
-## Multilingual Error Messages
+### Type-Specific Validation
 
-The library supports multilingual error messages through the integration with `github.com/kaptinlin/go-i18n`. Users can customize the localizer to support additional languages:
+Choose the method that matches your data type for best performance:
 
 ```go
-i18n, err := jsonschema.GetI18n()
-if err != nil {
-	log.Fatalf("Failed to get i18n: %v", err)
-}
-localizer := i18n.NewLocalizer("zh-Hans")
+// For JSON bytes - fastest JSON parsing
+result := schema.ValidateJSON([]byte(`{"name": "John"}`))
 
-result := schema.Validate(instance)
+// For Go structs - zero-copy validation
+result := schema.ValidateStruct(Person{Name: "John"})
+
+// For maps - optimal for pre-parsed data
+result := schema.ValidateMap(map[string]interface{}{"name": "John"})
+
+// Auto-detect input type
+result := schema.Validate(anyData)
+```
+
+### Unmarshal with Defaults
+
+```go
+type User struct {
+    Name    string `json:"name"`
+    Country string `json:"country"`
+    Active  bool   `json:"active"`
+}
+
+// Schema with defaults
+schemaJSON := `{
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "country": {"type": "string", "default": "US"},
+        "active": {"type": "boolean", "default": true}
+    },
+    "required": ["name"]
+}`
+
+schema, _ := compiler.Compile([]byte(schemaJSON))
+
+// Validation + Unmarshal workflow
+data := []byte(`{"name": "John"}`)
+result := schema.Validate(data)
+if result.IsValid() {
+    var user User
+    err := schema.Unmarshal(&user, data)
+    // Result: user.Country = "US", user.Active = true
+}
+```
+
+### Dynamic Default Values
+
+Register functions to generate dynamic defaults during unmarshaling:
+
+```go
+// Register custom functions
+compiler := jsonschema.NewCompiler()
+compiler.RegisterDefaultFunc("now", jsonschema.DefaultNowFunc)
+compiler.RegisterDefaultFunc("uuid", func(args ...any) (any, error) {
+    return uuid.New().String(), nil
+})
+
+// Schema with dynamic defaults
+schemaJSON := `{
+    "type": "object",
+    "properties": {
+        "id": {"default": "uuid()"},
+        "createdAt": {"default": "now()"},
+        "formattedDate": {"default": "now(2006-01-02)"},
+        "status": {"default": "active"}
+    }
+}`
+
+schema, _ := compiler.Compile([]byte(schemaJSON))
+
+// Input: {}  
+// Result: {
+//   "id": "3ace637a-515a-4328-a614-b3deb58d410d",
+//   "createdAt": "2025-06-05T01:05:22+08:00",
+//   "formattedDate": "2025-06-05",
+//   "status": "active"
+// }
+```
+
+## Programmatic Schema Building
+
+Create JSON schemas directly in Go code with type-safe constructors:
+
+```go
+// Define schemas with fluent API
+schema := jsonschema.Object(
+    jsonschema.Prop("name", jsonschema.String(jsonschema.MinLen(1))),
+    jsonschema.Prop("email", jsonschema.Email()),
+    jsonschema.Required("name", "email"),
+)
+
+// Validate immediately - no compilation step
+result := schema.Validate(data)
+```
+
+### Key Features
+
+- **Core Types**: String, Integer, Array, Object with validation keywords
+- **Composition**: OneOf, AnyOf, AllOf, conditional logic (If/Then/Else)
+- **Formats**: Built-in validators for email, UUID, datetime, URI, etc.
+- **Registration**: Register schemas for reuse and cross-references
+
+**📖 Full Documentation**: [docs/constructor.md](docs/constructor.md)
+
+### Custom Compiler for Schemas
+
+Set custom compilers on schemas for isolated function registries:
+
+```go
+// Create custom compiler with functions
+compiler := jsonschema.NewCompiler()
+compiler.RegisterDefaultFunc("now", jsonschema.DefaultNowFunc)
+
+// Apply to programmatically built schema
+schema := jsonschema.Object(
+    jsonschema.Prop("timestamp", jsonschema.String(jsonschema.Default("now()"))),
+    jsonschema.Prop("name", jsonschema.String()),
+).SetCompiler(compiler)
+
+// Child schemas automatically inherit parent's compiler
+result := schema.Validate(data)
+```
+
+## Advanced Features
+
+### Custom Formats
+
+```go
+compiler.RegisterFormat("uuid", func(value string) bool {
+    _, err := uuid.Parse(value)
+    return err == nil
+})
+
+// Use in schema
+schema := `{
+    "type": "string",
+    "format": "uuid"
+}`
+```
+
+### Schema References
+
+```go
+schema := `{
+    "type": "object",
+    "properties": {
+        "user": {"$ref": "#/$defs/User"}
+    },
+    "$defs": {
+        "User": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"}
+            }
+        }
+    }
+}`
+```
+
+### Internationalization
+
+```go
+// Set custom error messages
+compiler.SetLocale("zh-CN")
+
+// Or use custom translator
+compiler.SetTranslator(func(key string, args ...interface{}) string {
+    return customTranslate(key, args...)
+})
+```
+
+### Performance Optimization
+
+```go
+// Pre-compile schemas for better performance
+compiler := jsonschema.NewCompiler()
+schema := compiler.MustCompile(schemaJSON)
+
+// Use type-specific validation methods
+result := schema.ValidateStruct(structData)  // Fastest for structs
+result := schema.ValidateJSON(jsonBytes)     // Fastest for JSON
+result := schema.ValidateMap(mapData)        // Fastest for maps
+```
+
+## Error Handling
+
+### Detailed Error Information
+
+```go
+result := schema.Validate(data)
 if !result.IsValid() {
-    details, _ := json.MarshalIndent(result.ToLocalizeList(localizer), "", "  ")
-    log.Println(string(details))
+    // Get all errors
+    for field, err := range result.Errors {
+        fmt.Printf("Field: %s\n", field)
+        fmt.Printf("Message: %s\n", err.Message)
+        fmt.Printf("Value: %v\n", err.Value)
+        fmt.Printf("Schema: %v\n", err.Schema)
+    }
+    
+    // Or get as a list
+    errors := result.ToList()
+    for _, err := range errors {
+        fmt.Printf("Error: %s\n", err.Error())
+    }
 }
 ```
 
-## Setup Test Environment
+### Custom Error Messages
 
-This library uses a git submodule to include the [official JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) for thorough validation. Setting up your test environment is simple:
+```go
+schema := `{
+    "type": "string",
+    "minLength": 5,
+    "errorMessage": "Name must be at least 5 characters long"
+}`
+```
 
-1. **Initialize Submodule:**
+## Testing
 
-   - In your terminal, navigate to your project directory.
-   - Run: `git submodule update --init --recursive`
+The library includes comprehensive tests and passes the official JSON Schema Test Suite:
 
-2. **Run Tests:**
+```bash
+go test ./...
+```
 
-   - Change directory to `tests`: `cd tests`
-   - Run standard Go test command: `go test`
+### Benchmarks
 
-## How to Contribute
+```bash
+go test -bench=. -benchmem
+```
 
-Contributions to the `jsonschema` package are welcome. If you'd like to contribute, please follow the [contribution guidelines](CONTRIBUTING.md).
+## Contributing
 
-## Recommended JSON Schema Libraries
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-- [quicktype](https://github.com/glideapps/quicktype): Generating code from JSON schema.
-- [hyperjump-io/json-schema](https://github.com/hyperjump-io/json-schema): TypeScript version of JSON Schema Validation, Annotation, and Bundling. Supports Draft 04, 06, 07, 2019-09, 2020-12, OpenAPI 3.0, and OpenAPI 3.1.
-- [swaggest/jsonschema-go](https://github.com/swaggest/jsonschema-go): JSON Schema structures for Go.
+### Development Setup
+
+```bash
+git clone https://github.com/kaptinlin/jsonschema.git
+cd jsonschema
+go mod download
+go test ./...
+```
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Credits
+## Related Projects
 
-Special thanks to the creators of [jsonschema by santhosh-tekuri](https://github.com/santhosh-tekuri/jsonschema) and [Json-Everything](https://json-everything.net/) for inspiring and supporting the development of this library.
+- [JSON Schema](https://json-schema.org/) - The official JSON Schema specification
+- [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) - Official test suite
+- [Understanding JSON Schema](https://json-schema.org/understanding-json-schema/) - Comprehensive guide
+
+## Acknowledgments
+
+- Thanks to the JSON Schema community for the excellent specification
+- Inspired by other JSON Schema implementations in various languages
+- Special thanks to all contributors who have helped improve this library

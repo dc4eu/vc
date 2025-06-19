@@ -9,6 +9,7 @@ go_library(
         "ecdsa_gen.go",
         "errors.go",
         "fetch.go",
+        "filter.go",
         "interface.go",
         "interface_gen.go",
         "io.go",
@@ -34,19 +35,22 @@ go_library(
         "//cert",
         "//internal/base64",
         "//internal/ecutil",
+        "//transform",
         "//internal/json",
         "//internal/pool",
+	"//internal/tokens",
         "//jwa",
         "//jwk/ecdsa",
         "@com_github_lestrrat_go_blackmagic//:blackmagic",
         "@com_github_lestrrat_go_httprc_v3//:httprc",
-        "@com_github_lestrrat_go_option//:option",
+        "@com_github_lestrrat_go_option_v2//:option",
     ],
 )
 
 go_test(
     name = "jwk_test",
     srcs = [
+        "filter_test.go",
         "headers_test.go",
         "jwk_internal_test.go",
         "jwk_test.go",

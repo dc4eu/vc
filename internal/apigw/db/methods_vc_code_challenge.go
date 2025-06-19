@@ -5,7 +5,7 @@ import (
 	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/openid4vci"
+	"vc/pkg/oauth2"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -110,7 +110,7 @@ func (c *VCCodeChallengeColl) Grant(ctx context.Context, codeVerifier, codeChall
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:pkce:grant")
 	defer span.End()
 
-	codeChallenge := openid4vci.CreateCodeChallenge(codeChallengeMethod, codeVerifier)
+	codeChallenge := oauth2.CreateCodeChallenge(codeChallengeMethod, codeVerifier)
 
 	filter := bson.M{
 		"code_challenge": bson.M{"$eq": codeChallenge},

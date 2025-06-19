@@ -35,12 +35,12 @@ type Service struct {
 	tracer     *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	VCDatastoreColl       *VCDatastoreColl
-	VCConsentColl         *VCConsentColl
-	VCOauthColl           *VCOauthColl
-	VCUsersColl           *VCUsersColl
-	VCCodeChallengeColl   *VCCodeChallengeColl
-	VCCredentialOfferColl *VCCredentialOfferColl
+	VCDatastoreColl            *VCDatastoreColl
+	VCConsentColl              *VCConsentColl
+	VCAuthorizationContextColl *VCAuthorizationContextColl
+	VCUsersColl                *VCUsersColl
+	VCCodeChallengeColl        *VCCodeChallengeColl
+	VCCredentialOfferColl      *VCCredentialOfferColl
 }
 
 // New creates a new database service
@@ -79,7 +79,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 
 	var err error
 
-	service.VCOauthColl, err = NewOauthColl(ctx, "oauth", service, log.New("VCOauthColl"))
+	service.VCAuthorizationContextColl, err = NewAuthorizationContextColl(ctx, "authorization_context", service, log.New("VCAuthorizationContextColl"))
 	if err != nil {
 		return nil, err
 	}

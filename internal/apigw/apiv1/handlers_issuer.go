@@ -80,7 +80,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "mura", code)
 
-	tDB, err := c.db.VCOauthColl.GetWithToken(ctx, code)
+	tDB, err := c.db.VCAuthorizationContextColl.GetWithToken(ctx, code)
 	if err != nil {
 		c.log.Error(err, "failed to get authorization")
 		return nil, err

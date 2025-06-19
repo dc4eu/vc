@@ -2,6 +2,31 @@
     width: min(500px, 100%);
 }
 
+.vc-loader {
+    min-height: 100px;
+    display: grid;
+    place-content: center;
+    > .loader {
+        width: 48px;
+        height: 48px;
+        border: 5px solid var(--bulma-primary);
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+    }
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+} 
+
 .vc-credential-card {
     border-radius: 3.18mm;
     background-color: var(--bulma-info-95);

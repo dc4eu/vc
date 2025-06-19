@@ -57,12 +57,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 			MaxAge:   900,
 			Secure:   false,
 			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
+			SameSite: http.SameSiteLaxMode,
 		},
 	}
 
 	if s.cfg.APIGW.APIServer.TLS.Enabled {
 		s.sessionsOptions.Secure = true
+		s.sessionsOptions.SameSite = http.SameSiteStrictMode
 	}
 
 	var err error

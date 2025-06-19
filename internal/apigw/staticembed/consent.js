@@ -40,11 +40,28 @@ import Alpine from 'alpinejs';
  * @property {Record<string, string>} claims
  */
 
+/**
+ * @param {string} name 
+ * @returns {string}
+ */
+function getCookie(name) {
+    return document.cookie
+        .split(";")
+        .find((cookie) =>
+            cookie.trim().startsWith(`${name}=`),
+        )
+        ?.split("=")
+        .pop();
+}
+
 const baseUrl = window.location.origin;
 
 window.Alpine = Alpine;
 
 Alpine.data("app", () => ({
+    /** @type {boolean} */
+    loading: true,
+
     /** @type {GrantResponse | null} */
     grantResponse: null,
 
@@ -53,12 +70,34 @@ Alpine.data("app", () => ({
 
     /** @type {boolean} */
     loggedIn: false,
-    
+
+    /** @type {"basic" | "pid_auth" | null} */
+    loginMethod: null,
+
     /** @type {string | null} */
     loginError: null,
 
+    init() {
+        const scope = getCookie("scope");
+
+        switch(scope) {
+            case "pid":
+                this.loginMethod = "basic";
+                break;
+            case "ehic":
+                this.loginMethod = "pid_auth";
+                break;
+            default:
+                this.loginMethod = "pid_auth";
+                break;
+        }
+
+        this.loading = false;
+    },
+
     /** @param {SubmitEvent} event */
-    async handleLogin(event) {
+    async handleLoginBasic(event) {
+        this.loading = true;
         this.loginError = null;
 
         const formData = new FormData(this.$refs.loginForm);
@@ -122,8 +161,10 @@ Alpine.data("app", () => ({
             this.$refs.title.innerText = `Welcome, ${data.identity.given_name}!`
 
             this.loggedIn = true;
+            this.loading = false;
         } catch (err) {
             this.loginError = "Failed to login: " + err.message;
+            this.loading = false;
         }
     },
 

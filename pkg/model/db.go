@@ -1,7 +1,7 @@
 package model
 
-// Authorization is the model for the authorization token in the database
-type Authorization struct {
+// AuthorizationContext is the model for the authorization token in the database
+type AuthorizationContext struct {
 	Scope               string    `json:"scope" bson:"scope" validate:"required"`
 	Code                string    `json:"code" bson:"code"`
 	RequestURI          string    `json:"request_uri" bson:"request_uri" validate:"required"`

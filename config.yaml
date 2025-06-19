@@ -21,9 +21,13 @@ credential_constructor:
   "pid":
     vct: "urn:eudi:pid:1"
     vctm_file_path: "/metadata/vctm_pid.json"
+    auth_method:
+      - basic
   "ehic":
     vct: "urn:eudi:ehic:1"
     vctm_file_path: "/metadata/vctm_ehic.json"
+    auth_method:
+      - pid_auth
   "pda1":
     vct: "urn:eudi:pda1:1"
     vctm_file_path: "/metadata/vctm_pda1.json"

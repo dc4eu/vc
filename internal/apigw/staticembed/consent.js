@@ -127,11 +127,6 @@ Alpine.data("app", () => ({
         }
     },
 
-    /** @param {SubmitEvent} event */
-    handleCredentialSelection(event) {
-        window.location.replace(this.grantResponse.redirect_url);
-    },
-
     /** @param {Event} event */
     handleLogout(event) {
         this.loggedIn = false;

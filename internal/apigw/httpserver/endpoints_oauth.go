@@ -139,3 +139,23 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 	c.HTML(http.StatusOK, "index.html", nil)
 	return nil, nil
 }
+
+func (s *Service) endpointOAuthWalletRedirect(ctx context.Context, c *gin.Context) (any, error) {
+	s.log.Debug("endpointOAuthWalletRedirect", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
+
+	_, span := s.tracer.Start(ctx, "httpserver:endpointOAuthWalletRedirect")
+	defer span.End()
+	session := sessions.Default(c)
+
+	redirectURI, ok := session.Get("redirect_uri").(string)
+	if !ok {
+		err := errors.New("redirect_uri not found in session")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointOAuthWalletRedirect: redirect_uri not found in session")
+		return nil, err
+	}
+
+	c.Redirect(http.StatusSeeOther, redirectURI)
+
+	return nil, nil
+}

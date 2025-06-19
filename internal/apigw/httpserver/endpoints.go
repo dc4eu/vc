@@ -90,6 +90,11 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 		return nil, err
 	}
 
+	session.Set("redirect_uri", reply.RedirectURL)
+	if err := session.Save(); err != nil {
+		return nil, err
+	}
+
 	return reply, nil
 }
 

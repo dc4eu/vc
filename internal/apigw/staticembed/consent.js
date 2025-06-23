@@ -85,7 +85,11 @@ Alpine.data("app", () => ({
     init() {
         const authMethod = getCookie("auth_method");
 
-        if (!["basic", "pid_auth"].includes(authMethod)) {
+        if (
+            !authMethod ||
+            authMethod !== "basic" &&
+            authMethod !== "pid_auth"
+        ) {
             console.error("Fatal: unknown auth method", authMethod);
             return;
         }

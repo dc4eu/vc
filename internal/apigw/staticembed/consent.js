@@ -78,19 +78,14 @@ Alpine.data("app", () => ({
     loginError: null,
 
     init() {
-        const scope = getCookie("scope");
+        const authMethod = getCookie("auth_method");
 
-        switch(scope) {
-            case "pid":
-                this.loginMethod = "basic";
-                break;
-            case "ehic":
-                this.loginMethod = "pid_auth";
-                break;
-            default:
-                this.loginMethod = "pid_auth";
-                break;
+        if (!["basic", "pid_auth"].includes(authMethod)) {
+            console.error("Fatal: unknown auth method", authMethod);
+            return;
         }
+
+        this.loginMethod = authMethod
 
         this.loading = false;
     },

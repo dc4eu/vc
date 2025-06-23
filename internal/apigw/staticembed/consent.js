@@ -61,8 +61,6 @@ function getCookie(name) {
 
 const baseUrl = window.location.origin;
 
-window.Alpine = Alpine;
-
 Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,

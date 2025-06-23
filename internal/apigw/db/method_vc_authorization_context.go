@@ -208,6 +208,7 @@ func (c *VCAuthorizationContextColl) AddToken(ctx context.Context, code string, 
 	return nil
 }
 
+// GetWithToken retrieves an authorization context by its access token
 func (c VCAuthorizationContextColl) GetWithToken(ctx context.Context, token string) (*model.AuthorizationContext, error) {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:get_with_token")
 	defer span.End()
@@ -231,7 +232,7 @@ func (c VCAuthorizationContextColl) GetWithToken(ctx context.Context, token stri
 	return &doc, nil
 }
 
-func (c *VCAuthorizationContextColl) AddIdentity(ctx context.Context, requestURI string, identity *model.Identity) error {
+func (c *VCAuthorizationContextColl) AddIdentity(ctx context.Context, requestURI string, input *model.AuthorizationContext) error {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:add_identity")
 	defer span.End()
 
@@ -246,7 +247,9 @@ func (c *VCAuthorizationContextColl) AddIdentity(ctx context.Context, requestURI
 
 	update := bson.M{
 		"$set": bson.M{
-			"identity": identity,
+			"identity":         input.Identity,
+			"document_type":    input.DocumentType,
+			"authentic_source": input.AuthenticSource,
 		},
 	}
 

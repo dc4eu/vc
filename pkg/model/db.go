@@ -14,9 +14,11 @@ type AuthorizationContext struct {
 	CodeChallengeMethod string    `json:"code_challenge_method" bson:"code_challenge_method" validate:"required,oneof=S256 plain"`
 	LastUsed            int64     `json:"last_used" bson:"last_used"`
 	SavedAt             int64     `json:"saved_at" bson:"saved_at"`
-	Consent             bool      `json:"consent" bson:"consent"`                       // Indicates if the user has given consent for the authorization
-	Identity            *Identity `json:"identity,omitempty" bson:"identity,omitempty"` // Optional identity information associated with the authorization
-	Token               *Token    `json:"token,omitempty" bson:"token,omitempty"`       // Optional token information associated with the authorization
+	Consent             bool      `json:"consent" bson:"consent"`
+	AuthenticSource     string    `json:"authentic_source" bson:"authentic_source"`
+	DocumentType        string    `json:"document_type" bson:"document_type"`
+	Identity            *Identity `json:"identity,omitempty" bson:"identity,omitempty"`
+	Token               *Token    `json:"token,omitempty" bson:"token,omitempty"`
 }
 
 type Token struct {
@@ -26,9 +28,11 @@ type Token struct {
 
 // OAuthUsers is the model for the OAuth users in the database
 type OAuthUsers struct {
-	Username string    `json:"username" bson:"username" validate:"required"`
-	Password string    `json:"password" bson:"password" validate:"required"`
-	Identity *Identity `json:"identity" bson:"identity" validate:"required"`
+	Username        string    `json:"username" bson:"username" validate:"required"`
+	Password        string    `json:"password" bson:"password" validate:"required"`
+	Identity        *Identity `json:"identity" bson:"identity" validate:"required"`
+	AuthenticSource string    `json:"authentic_source" bson:"authentic_source" validate:"required"`
+	DocumentType    string    `json:"document_type" bson:"document_type" validate:"required"`
 }
 
 type CodeChallenge struct {

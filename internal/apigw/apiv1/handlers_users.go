@@ -12,7 +12,7 @@ import (
 )
 
 func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
-	documentData, err := req.Attributes.Marshal()
+	documentData, err := req.Identity.Marshal()
 	if err != nil {
 		c.log.Error(err, "failed to marshal document data")
 		return err
@@ -21,9 +21,9 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	// build a new document
 	uploadRequest := &UploadRequest{
 		Meta: &model.MetaData{
-			AuthenticSource:           "Generic_PID_Issuer",
+			AuthenticSource:           req.AuthenticSource,
 			DocumentVersion:           "1.0.0",
-			DocumentType:              model.CredentialTypeUrnEudiPid1,
+			DocumentType:              req.DocumentType,
 			DocumentID:                fmt.Sprintf("generic.pid.%s", uuid.NewString()),
 			RealData:                  false,
 			Collect:                   &model.Collect{},
@@ -32,7 +32,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 			CredentialValidTo:         0,
 			DocumentDataValidationRef: "",
 		},
-		Identities: []model.Identity{*req.Attributes},
+		Identities: []model.Identity{*req.Identity},
 		DocumentDisplay: &model.DocumentDisplay{
 			Version: "1.0.0",
 			Type:    "",
@@ -52,7 +52,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	err = c.db.VCUsersColl.Save(ctx, &model.OAuthUsers{
 		Username: req.Username,
 		Password: string(passwordHash),
-		Identity: req.Attributes,
+		Identity: req.Identity,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to save user")
@@ -93,8 +93,13 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 		c.log.Error(err, "failed to get authorization for user", "request_uri", req.RequestURI)
 	}
 
+	update := &model.AuthorizationContext{
+		Identity:        user.Identity,
+		DocumentType:    user.DocumentType,
+		AuthenticSource: user.AuthenticSource,
+	}
 	// Update the authorization with the user identity
-	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, req.RequestURI, user.Identity); err != nil {
+	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, req.RequestURI, update); err != nil {
 		return nil, err
 	}
 

@@ -58,7 +58,6 @@ type Common struct {
 	Tracing         OTEL                  `yaml:"tracing" validate:"required"`
 	Kafka           Kafka                 `yaml:"kafka" validate:"omitempty"`
 	CredentialOffer CredentialOfferConfig `yaml:"credential_offer" validate:"omitempty"`
-	SupportedPidVCT []string              `yaml:"supported_pid_vct" validate:"omitempty"`
 }
 
 type CredentialOfferConfig struct {
@@ -264,11 +263,19 @@ type Cfg struct {
 	CredentialConstructor map[string]*CredentialConstructor `yaml:"credential_constructor" validate:"omitempty"`
 }
 
+// GetCredentialConstructorAuthMethod returns the auth method for the given credential type or "basic" if not found
+func (c *Cfg) GetCredentialConstructorAuthMethod(credentialType string) string {
+	if constructor, ok := c.CredentialConstructor[credentialType]; ok {
+		return constructor.AuthMethod
+	}
+	return "basic"
+}
+
 type CredentialConstructor struct {
 	VCT          string       `yaml:"vct" validate:"required"`
 	VCTMFilePath string       `yaml:"vctm_file_path" validate:"required"`
 	VCTM         *sdjwt3.VCTM `yaml:"-"`
-	AuthMethod   []string     `yaml:"auth_method"`
+	AuthMethod   string       `yaml:"auth_method" validate:"required,oneof=basic pid_auth"`
 }
 
 func (c *CredentialConstructor) LoadFile(ctx context.Context) error {

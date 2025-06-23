@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"slices"
 	"strings"
 	"vc/internal/apigw/db"
 	"vc/internal/gen/issuer/apiv1_issuer"
@@ -69,12 +68,6 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, errors.New("invalid DPoP token")
 	}
 
-	if slices.Contains(c.cfg.Common.SupportedPidVCT, req.VCT) {
-		// pid flow
-	} else {
-		// non-pid flow
-	}
-
 	// "DPoP H4fFxp2hDZ-KY-_am35sXBJStQn9plmV_UC_bk20heA="
 	code := strings.TrimPrefix(req.Headers.Authorization, "DPoP ")
 
@@ -88,8 +81,8 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	document, err := c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 		Meta: &model.MetaData{
-			AuthenticSource: "Generic_PID_Issuer",
-			DocumentType:    "urn:eudi:pid:1",
+			AuthenticSource: tDB.AuthenticSource,
+			DocumentType:    tDB.DocumentType,
 		},
 		Identity: tDB.Identity,
 	})

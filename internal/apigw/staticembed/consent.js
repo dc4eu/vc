@@ -104,6 +104,11 @@ Alpine.data("app", () => ({
         this.loading = true;
         this.loginError = null;
 
+        if (!(this.$refs.loginForm instanceof HTMLFormElement)) {
+            console.error("Fatal: Login form not of type 'HtmlFormElement'");
+            return;
+        }
+
         const formData = new FormData(this.$refs.loginForm);
 
         const username = formData.get("username");

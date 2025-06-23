@@ -209,7 +209,7 @@ Alpine.data("app", () => ({
 
                 throw new Error("Unauthorized/session expired");
             }
-            throw new Error(`HTTP error! status: ${response.status}, method: ${response.method}, url: ${url}`);
+            throw new Error(`HTTP error! status: ${response.status}, url: ${url}`);
         }
 
         const data = await response.json();

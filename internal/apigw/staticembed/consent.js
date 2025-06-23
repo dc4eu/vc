@@ -141,7 +141,7 @@ Alpine.data("app", () => ({
 
         try {
             /** @type {GrantResponse} */ 
-            const data = await this.fetchData(url, options);
+            const data = await this.fetchData(url.toString(), options);
 
             this.grantResponse = data;
 
@@ -154,7 +154,7 @@ Alpine.data("app", () => ({
 
             const svg = await this.createCredentialSvgImageUri(
                 {
-                    uri: new URL("/static/person-identification-data-svg-example-01.svg", baseUrl),
+                    uri: new URL("/static/person-identification-data-svg-example-01.svg", baseUrl).toString(),
                     integrity: "sha256-037rNwIiS/qeKc16yxy3xJlAYYFGul1wJAcGjXjDVLw="
                 },
                 claims,

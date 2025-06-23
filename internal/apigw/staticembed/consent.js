@@ -179,6 +179,10 @@ Alpine.data("app", () => ({
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
+        if (!this.grantResponse) {
+            console.error("Fatal: 'grantResponse' is null");
+            return;
+        }
         window.location.replace(this.grantResponse.redirect_url);
     },
 

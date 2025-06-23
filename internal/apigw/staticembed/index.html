@@ -30,7 +30,7 @@
                     <span class="loader"></span>
                 </div>
             </template>
-            <template x-if="!loading && !loggedIn && loginMethod === 'basic'">
+            <template x-if="!loading && !loggedIn && authMethod === 'basic'">
                 <div>
                     <p class="block has-text-centered">Authenticate with username and password to continue.</p>
                     <form x-ref="loginForm" @submit.prevent="handleLoginBasic">
@@ -48,7 +48,7 @@
                     </form>
                 </div>
             </template>
-            <template x-if="!loading && !loggedIn && loginMethod === 'pid_auth'">
+            <template x-if="!loading && !loggedIn && authMethod === 'pid_auth'">
                 <div>
                     <p class="block has-text-centered">Authenticate with PID to continue.</p>
                     <pre>pid_auth</pre>

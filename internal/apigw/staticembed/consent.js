@@ -72,7 +72,7 @@ Alpine.data("app", () => ({
     loggedIn: false,
 
     /** @type {"basic" | "pid_auth" | null} */
-    loginMethod: null,
+    authMethod: null,
 
     /** @type {string | null} */
     loginError: null,
@@ -85,7 +85,7 @@ Alpine.data("app", () => ({
             return;
         }
 
-        this.loginMethod = authMethod
+        this.authMethod = authMethod
 
         this.loading = false;
     },

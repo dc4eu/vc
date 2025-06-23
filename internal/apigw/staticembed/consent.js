@@ -20,9 +20,14 @@ import Alpine from 'alpinejs';
  */
 
 /**
+ * @typedef {Object} PID
+ * @property {Identity} identity
+ */
+
+/**
  * @typedef {Object} GrantResponse
  * @property {boolean} grant
- * @property {Identity} identity
+ * @property {PID} pid
  * @property {string} redirect_url
  */
 

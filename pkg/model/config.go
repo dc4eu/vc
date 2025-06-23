@@ -268,6 +268,7 @@ type CredentialConstructor struct {
 	VCT          string       `yaml:"vct" validate:"required"`
 	VCTMFilePath string       `yaml:"vctm_file_path" validate:"required"`
 	VCTM         *sdjwt3.VCTM `yaml:"-"`
+	AuthMethod   []string     `yaml:"auth_method"`
 }
 
 func (c *CredentialConstructor) LoadFile(ctx context.Context) error {

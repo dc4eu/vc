@@ -21,9 +21,13 @@ credential_constructor:
   "pid":
     vct: "urn:eudi:pid:1"
     vctm_file_path: "/metadata/vctm_pid.json"
+    auth_method:
+      - basic
   "ehic":
     vct: "urn:eudi:ehic:1"
     vctm_file_path: "/metadata/vctm_ehic.json"
+    auth_method:
+      - pid_auth
   "pda1":
     vct: "urn:eudi:pda1:1"
     vctm_file_path: "/metadata/vctm_pda1.json"
@@ -148,8 +152,9 @@ apigw:
         type: "confidential"
         redirect_uri: "https://dev.wallet.sunet.se"
         scopes:
-          - "pid:sd_jwt_vc"
+          - "pid"
           - "diploma"
+          - "ehic"
   issuer_metadata:
     path: "/metadata/issuer_metadata.json"
     signing_key_path: "/pki/apigw.key"

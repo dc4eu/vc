@@ -125,16 +125,16 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 	defer span.End()
 
 	session := sessions.Default(c)
-	scope := session.Get("scope")
-	if scope == nil {
-		err := errors.New("scope not found in session")
+	authMethod := session.Get("auth_method")
+	if authMethod == nil {
+		err := errors.New("auth_method not found in session")
 		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "scope not found in session")
+		s.log.Error(err, "auth_method not found in session")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return nil, err
 	}
 
-	c.SetCookie("scope", scope.(string), 900, "/authorization/consent", "", false, false)
+	c.SetCookie("auth_method", authMethod.(string), 900, "/authorization/consent", "", false, false)
 
 	c.HTML(http.StatusOK, "index.html", nil)
 	return nil, nil

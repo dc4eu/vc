@@ -132,10 +132,10 @@ Alpine.data("app", () => ({
             this.grantResponse = data;
 
             const claims = {
-                given_name: data.identity.given_name,
-                family_name: data.identity.family_name,
-                birth_date: data.identity.birth_date,
-                expiry_date: data.identity.expiry_date,
+                given_name: data.pid.identity.given_name,
+                family_name: data.pid.identity.family_name,
+                birth_date: data.pid.identity.birth_date,
+                expiry_date: data.pid.identity.expiry_date,
             };
 
             const svg = await this.createCredentialSvgImageUri(
@@ -153,7 +153,7 @@ Alpine.data("app", () => ({
                 claims,
             });
 
-            this.$refs.title.innerText = `Welcome, ${data.identity.given_name}!`
+            this.$refs.title.innerText = `Welcome, ${data.pid.identity.given_name}!`
 
             this.loggedIn = true;
             this.loading = false;

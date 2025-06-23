@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"vc/pkg/model"
+	"vc/pkg/pid"
 	"vc/pkg/vcclient"
 )
 
@@ -30,15 +31,19 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
 		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
-		documentData := model.Identity{
-			GivenName:        id.Identities[0].GivenName,
-			FamilyName:       id.Identities[0].FamilyName,
-			BirthDate:        id.Identities[0].BirthDate,
-			BirthPlace:       id.Identities[0].BirthPlace,
-			Nationality:      id.Identities[0].Nationality,
-			ExpiryDate:       id.Identities[0].ExpiryDate,
-			IssuingAuthority: id.Identities[0].IssuingAuthority,
-			IssuingCountry:   id.Identities[0].IssuingCountry,
+		documentData := pid.Document{
+			Identity: &model.Identity{
+				GivenName:        id.Identities[0].GivenName,
+				FamilyName:       id.Identities[0].FamilyName,
+				BirthDate:        id.Identities[0].BirthDate,
+				BirthPlace:       id.Identities[0].BirthPlace,
+				Nationality:      id.Identities[0].Nationality,
+				ExpiryDate:       id.Identities[0].ExpiryDate,
+				IssuingAuthority: id.Identities[0].IssuingAuthority,
+				IssuingCountry:   id.Identities[0].IssuingCountry,
+			},
+			DocumentType:    model.CredentialTypeUrnEudiPid1,
+			AuthenticSource: "PID:00001",
 		}
 
 		var err error

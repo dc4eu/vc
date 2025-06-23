@@ -168,6 +168,9 @@ apigw:
 mock_as:
   api_server:
     addr: :8080
+  bootstrap_users:
+    - "100"
+    - "102"
   datastore_url: http://vc_dev_apigw:8080
 
 ui:

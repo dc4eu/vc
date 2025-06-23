@@ -34,9 +34,11 @@ func (c *usersClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
 
 		doc := &vcclient.AddPIDRequest{
-			Username:   strings.ToLower(id.Identities[0].FamilyName),
-			Password:   strings.ToLower(id.Identities[0].FamilyName),
-			Attributes: &id.Identities[0],
+			Username:        strings.ToLower(id.Identities[0].FamilyName),
+			Password:        strings.ToLower(id.Identities[0].FamilyName),
+			Identity:        &id.Identities[0],
+			DocumentType:    "generic.pid",
+			AuthenticSource: "generic.pid",
 		}
 
 		c.documents[pidNumber] = doc

@@ -8,6 +8,7 @@ import (
 	"vc/pkg/education"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
+	"vc/pkg/pid"
 	"vc/pkg/socialsecurity"
 
 	"google.golang.org/grpc"
@@ -128,7 +129,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		}
 
 	case model.CredentialTypeUrnEudiPid1:
-		doc := &model.Identity{}
+		doc := &pid.Document{}
 		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
 			return nil, err
 		}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -153,6 +154,18 @@ func (c *Client) makeIdentities(sourceFilePath string) error {
 	return nil
 }
 
+func (c *Client) shouldUpload(id string) bool {
+	if slices.Contains(c.cfg.MockAS.BootstrapUsers, id) {
+		return true
+	}
+
+	if len(c.cfg.MockAS.BootstrapUsers) == 0 {
+		return true
+	}
+
+	return false
+}
+
 func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 	b, err := os.ReadFile(jsonPath)
 	if err != nil {
@@ -164,14 +177,16 @@ func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 		return err
 	}
 
-	for _, body := range bodys {
-		resp, err := c.vcClient.Root.Upload(ctx, body)
-		if err != nil {
-			c.log.Error(err, "Upload", "resp", resp)
-			return err
-		}
+	for id, body := range bodys {
+		if c.shouldUpload(id) {
+			resp, err := c.vcClient.Root.Upload(ctx, body)
+			if err != nil {
+				c.log.Error(err, "Upload", "resp", resp)
+				return err
+			}
 
-		c.log.Debug("Upload", "resp", resp.StatusCode)
+			c.log.Debug("Upload", "resp", resp.StatusCode)
+		}
 	}
 
 	return nil
@@ -188,13 +203,15 @@ func (c *Client) userUpload(ctx context.Context, jsonPath string) error {
 		return err
 	}
 
-	for _, body := range bodys {
-		resp, err := c.vcClient.User.AddPID(ctx, body)
-		if err != nil {
-			c.log.Error(err, "User Upload", "resp", resp)
-			return err
+	for id, body := range bodys {
+		if c.shouldUpload(id) {
+			resp, err := c.vcClient.User.AddPID(ctx, body)
+			if err != nil {
+				c.log.Error(err, "User Upload", "resp", resp)
+				return err
+			}
+			c.log.Debug("User Upload", "resp", resp.StatusCode)
 		}
-		c.log.Debug("User Upload", "resp", resp.StatusCode)
 	}
 
 	return nil

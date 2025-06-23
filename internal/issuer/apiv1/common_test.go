@@ -8,6 +8,7 @@ import (
 	"vc/pkg/education"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/pid"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
@@ -24,10 +25,14 @@ var mockJWK = &apiv1_issuer.Jwk{
 }
 
 var (
-	mockPID = &model.Identity{
-		FamilyName: "test_family-name",
-		GivenName:  "test_given-name",
-		BirthDate:  "2000-01-01",
+	mockPID = &pid.Document{
+		Identity: &model.Identity{
+			FamilyName: "test_family-name",
+			GivenName:  "test_given-name",
+			BirthDate:  "2000-01-01",
+		},
+		DocumentType:    model.CredentialTypeUrnEudiPid1,
+		AuthenticSource: "test_authentic_source",
 	}
 
 	mockPDA1 = &socialsecurity.PDA1Document{

@@ -142,8 +142,9 @@ type Persistent struct {
 
 // MockAS holds the mock as configuration
 type MockAS struct {
-	APIServer    APIServer `yaml:"api_server" validate:"required"`
-	DatastoreURL string    `yaml:"datastore_url" validate:"required"`
+	APIServer      APIServer `yaml:"api_server" validate:"required"`
+	DatastoreURL   string    `yaml:"datastore_url" validate:"required"`
+	BootstrapUsers []string  `yaml:"bootstrap_users"`
 }
 
 // Verifier holds the verifier configuration

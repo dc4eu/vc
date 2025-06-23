@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"vc/pkg/model"
+	"vc/pkg/pid"
 	"vc/pkg/vcclient"
 
 	"github.com/google/uuid"
@@ -12,7 +13,13 @@ import (
 )
 
 func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
-	documentData, err := req.Identity.Marshal()
+	pid := pid.Document{
+		Identity:        req.Identity,
+		DocumentType:    req.DocumentType,
+		AuthenticSource: req.AuthenticSource,
+	}
+
+	documentData, err := pid.Marshal()
 	if err != nil {
 		c.log.Error(err, "failed to marshal document data")
 		return err
@@ -50,9 +57,11 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		return err
 	}
 	err = c.db.VCUsersColl.Save(ctx, &model.OAuthUsers{
-		Username: req.Username,
-		Password: string(passwordHash),
-		Identity: req.Identity,
+		Username:        req.Username,
+		Password:        string(passwordHash),
+		Identity:        req.Identity,
+		DocumentType:    req.DocumentType,
+		AuthenticSource: req.AuthenticSource,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to save user")
@@ -114,7 +123,11 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 	redirectURL.RawQuery = url.Values{"code": {authorizationContext.Code}, "state": {authorizationContext.State}}.Encode()
 
 	reply.Grant = true
-	reply.Identity = user.Identity
+	reply.Pid = &pid.Document{
+		Identity:        user.Identity,
+		DocumentType:    user.DocumentType,
+		AuthenticSource: user.AuthenticSource,
+	}
 	reply.RedirectURL = redirectURL.String()
 
 	return reply, nil

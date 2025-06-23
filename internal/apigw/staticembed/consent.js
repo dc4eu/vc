@@ -47,7 +47,7 @@ import Alpine from 'alpinejs';
 
 /**
  * @param {string} name 
- * @returns {string}
+ * @returns {string | null}
  */
 function getCookie(name) {
     return document.cookie
@@ -56,7 +56,7 @@ function getCookie(name) {
             cookie.trim().startsWith(`${name}=`),
         )
         ?.split("=")
-        .pop();
+        .pop() || null;
 }
 
 const baseUrl = window.location.origin;

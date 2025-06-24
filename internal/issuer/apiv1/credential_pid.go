@@ -41,7 +41,7 @@ func (c *pidClient) sdjwt(ctx context.Context, doc *pid.Document, jwk *apiv1_iss
 	_, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
-	body, err := doc.Marshal()
+	body, err := doc.Identity.Marshal()
 	if err != nil {
 		return "", err
 	}

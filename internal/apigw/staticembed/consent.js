@@ -176,10 +176,6 @@ Alpine.data("app", () => ({
             };
 
             const svg = await this.createCredentialSvgImageUri(
-                {
-                    uri: new URL("/static/person-identification-data-svg-example-01.svg", baseUrl).toString(),
-                    integrity: "sha256-037rNwIiS/qeKc16yxy3xJlAYYFGul1wJAcGjXjDVLw="
-                },
                 claims,
             );
 
@@ -286,16 +282,24 @@ Alpine.data("app", () => ({
     },
 
     /**
-     * @param {SvgTemplate} svg_template
      * @param {Record<string, string>} claims
      * @returns {Promise<string>}
      */
-    async createCredentialSvgImageUri(svg_template, claims) {
-        const res = await fetch(svg_template.uri);
-        let svg = await res.text();
+    async createCredentialSvgImageUri(claims) {
+        const url = new URL('/authorization/consent/svg-template', baseUrl);
 
-        for (let [key, value] of Object.entries(claims)) {
-            svg = svg.replaceAll(`{{${key}}}`, value);
+        const data = await this.fetchData(url.toString(), {});
+
+        let svg = atob(data.template);
+
+        for (const [svg_id, path] of Object.entries(data.svg_claims)) {
+            let newVal = "";
+
+            if (path in claims && typeof claims[path] === "string") {
+                newVal = claims[path];
+            }
+
+            svg = svg.replaceAll(`{{${svg_id}}}`, newVal);
         }
 
         return `data:image/svg+xml;base64,${btoa(svg)}`;

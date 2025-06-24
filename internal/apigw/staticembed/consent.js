@@ -41,7 +41,7 @@ import Alpine from 'alpinejs';
 
 /**
  * @typedef {Object} Credential
- * @property {string} vct
+ * @property {string} document_type
  * @property {string} name
  * @property {string} svg
  * @property {Record<string, string>} claims
@@ -167,7 +167,7 @@ Alpine.data("app", () => ({
             );
 
             this.credentials.push({
-                vct: "urn:eudi:pid:1",
+                document_type: data.pid.document_type,
                 name: "PID",
                 svg,
                 claims,

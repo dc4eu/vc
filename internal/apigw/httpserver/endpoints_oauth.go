@@ -135,17 +135,20 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 		return nil, err
 	}
 
-	request := &apiv1.OauthAuthorizationConsentRequest{
-		AuthMethod: authMethod.(string),
-	}
-	reply, err := s.apiv1.OAuthAuthorizationConsent(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
 	c.SetCookie("auth_method", authMethod.(string), 900, "/authorization/consent", "", false, false)
-	c.SetCookie("redirect_url", reply.RedirectURL, 900, "/authorization/consent", "", false, false)
 
+	if authMethod == "pid_auth" {
+		request := &apiv1.OauthAuthorizationConsentRequest{
+			AuthMethod: authMethod.(string),
+		}
+
+		reply, err := s.apiv1.OAuthAuthorizationConsent(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		c.SetCookie("redirect_url", reply.RedirectURL, 900, "/authorization/consent", "", false, false)
+	}
 
 	c.HTML(http.StatusOK, "index.html", nil)
 	return nil, nil

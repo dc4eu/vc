@@ -61,6 +61,17 @@ function getCookie(name) {
         .pop() || null;
 }
 
+/**
+ * Due to bfcache some state will persist across
+ * navigation events, so we 'manually' clear it.
+ * @see https://developer.mozilla.org/en-US/docs/Glossary/bfcache
+ */
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
 const baseUrl = window.location.origin;
 
 Alpine.data("app", () => ({
@@ -203,8 +214,8 @@ Alpine.data("app", () => ({
             const url = decodeURIComponent(rawRedirectUrl);
 
             if (immediate) {
-                this.loading = true;
-                window.location.replace(url);
+                this.redirect(url);
+                return;
             }
 
             this.pidAuthRedirectCountUp = 1;
@@ -220,14 +231,11 @@ Alpine.data("app", () => ({
                 ++this.pidAuthRedirectCountUp;
 
                 if (this.pidAuthRedirectCountUp >= this.pidAuthRedirectMaxCount) {
-                    this.loading = true;
-                    window.location.replace(url);
+                    clearInterval(increment);
+                    this.redirect(url);
+                    return;
                 }
             }, 1000);
-
-            setTimeout(() => {
-                clearInterval(increment);
-            }, this.pidAuthRedirectMaxCount * 1000);
 
         } catch (err) {
             if (err instanceof URIError) {
@@ -246,16 +254,12 @@ Alpine.data("app", () => ({
             console.error("Fatal: 'grantResponse' is null");
             return;
         }
-        window.location.replace(this.grantResponse.redirect_url);
+        this.redirect(this.grantResponse.redirect_url);
     },
 
     /** @param {Event} event */
     handleLogout(event) {
-        this.loggedIn = false;
-        this.$refs.title.innerHTML = "Authorize Consent";
-        this.grantResponse = null;
-        this.credentials = [];
-        this.pidAuthRedirectCountUp = null;
+        window.location.reload();
     },
 
     /**
@@ -295,7 +299,18 @@ Alpine.data("app", () => ({
         }
 
         return `data:image/svg+xml;base64,${btoa(svg)}`;
-    }
+    },
+
+    /** @param {string} url */
+    redirect(url) {
+        this.loading = true;
+
+        try {
+            window.location.href = (new URL(url)).toString();
+        } catch (err) {
+            this.error = `Error when redirecting: ${err}`;
+        }
+    },
 }));
 
 Alpine.start();

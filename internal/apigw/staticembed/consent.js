@@ -178,7 +178,7 @@ Alpine.data("app", () => ({
             this.loggedIn = true;
             this.loading = false;
         } catch (err) {
-            this.error = `Failed to login:`;
+            this.error = `Failed to login: ${err.message}`;
             this.loading = false;
         }
     },

@@ -61,6 +61,15 @@ function getCookie(name) {
         .pop() || null;
 }
 
+// Due to bfcache some state will persist across navigation events,
+// so we 'manually' clear it. 
+// Read more: https://developer.mozilla.org/en-US/docs/Glossary/bfcache
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
 const baseUrl = window.location.origin;
 
 Alpine.data("app", () => ({

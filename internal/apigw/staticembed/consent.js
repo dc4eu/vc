@@ -88,13 +88,19 @@ Alpine.data("app", () => ({
             authMethod !== "basic" &&
             authMethod !== "pid_auth"
         ) {
-            console.error("Fatal: unknown auth method", authMethod);
+            this.loginError = `Unknown auth method: '${authMethod}'`;
             return;
         }
 
         this.authMethod = authMethod
 
         this.loading = false;
+
+        this.$watch("loginError", (newVal) => {
+            if (typeof newVal === "string") {
+                console.error(`Error: ${newVal}`);
+            }
+        })
     },
 
     /** @param {SubmitEvent} event */
@@ -103,7 +109,7 @@ Alpine.data("app", () => ({
         this.loginError = null;
 
         if (!(this.$refs.loginForm instanceof HTMLFormElement)) {
-            console.error("Fatal: Login form not of type 'HtmlFormElement'");
+            this.loginError = "Login form not of type 'HtmlFormElement'";
             return;
         }
 
@@ -170,7 +176,7 @@ Alpine.data("app", () => ({
             this.loggedIn = true;
             this.loading = false;
         } catch (err) {
-            this.loginError = "Failed to login: " + err.message;
+            this.loginError = `Failed to login:`;
             this.loading = false;
         }
     },

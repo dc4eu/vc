@@ -79,6 +79,12 @@ Alpine.data("app", () => ({
     /** @type {"basic" | "pid_auth" | null} */
     authMethod: null,
 
+    /** @type {number | null} */
+    pidAuthRedirectCountUp: null,
+
+    /** @type {number} */
+    pidAuthRedirectMaxCount: 7,
+
     /** @type {string | null} */
     error: null,
 
@@ -183,6 +189,57 @@ Alpine.data("app", () => ({
         }
     },
 
+    /**
+     * @param {boolean} immediate - Immediately proceed to 'redirect_uri'
+     */
+    handleLoginPidAuth(immediate = false) {
+        const rawRedirectUrl = getCookie("pid_auth_redirect_url");
+        if (!rawRedirectUrl) {
+            this.error = "Missing 'pid_auth_redirect_url' cookie";
+            return;
+        }
+
+        try {
+            const url = decodeURIComponent(rawRedirectUrl);
+
+            if (immediate) {
+                this.loading = true;
+                window.location.replace(url);
+            }
+
+            this.pidAuthRedirectCountUp = 1;
+
+            const increment = setInterval(() => {
+                // We can stop the interval by setting
+                // this.pidAuthRedirectCountUp to 'null'
+                if (!this.pidAuthRedirectCountUp) {
+                    clearInterval(increment);
+                    return;
+                }
+
+                ++this.pidAuthRedirectCountUp;
+
+                if (this.pidAuthRedirectCountUp >= this.pidAuthRedirectMaxCount) {
+                    this.loading = true;
+                    window.location.replace(url);
+                }
+            }, 1000);
+
+            setTimeout(() => {
+                clearInterval(increment);
+            }, this.pidAuthRedirectMaxCount * 1000);
+
+        } catch (err) {
+            if (err instanceof URIError) {
+                this.error = `Invalid redirect_uri provided: ${err.message}`;
+            } else {
+                this.error = err.message;
+            }
+
+            this.pidAuthRedirectCountUp = null;
+        }
+    },
+
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
         if (!this.grantResponse) {
@@ -198,6 +255,7 @@ Alpine.data("app", () => ({
         this.$refs.title.innerHTML = "Authorize Consent";
         this.grantResponse = null;
         this.credentials = [];
+        this.pidAuthRedirectCountUp = null;
     },
 
     /**

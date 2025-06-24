@@ -50,8 +50,25 @@
             </template>
             <template x-if="!loading && !loggedIn && authMethod === 'pid_auth'">
                 <div>
-                    <p class="block has-text-centered">Authenticate with PID to continue.</p>
-                    <pre class="has-text-centered">🔒 pid_auth 🔒</pre>
+                    <template x-if="!pidAuthRedirectCountUp">
+                        <div class="has-text-centered">
+                            <p class="block">Authenticate with PID to continue.</p>
+                            <div class="is-flex is-justify-content-center">
+                                <button class="button is-success" @click="() => handleLoginPidAuth()">Start PID authentication</button>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="pidAuthRedirectCountUp">
+                        <div>
+                            <p class="block has-text-centered">Redirecting to Wallet in <span x-text="pidAuthRedirectMaxCount - pidAuthRedirectCountUp"></span>...</p>
+                            <progress class="progress is-info" :value="pidAuthRedirectCountUp" :max="pidAuthRedirectMaxCount" x-text="pidAuthRedirectCountUp">
+                            </progress>
+                            <div class="block is-flex is-justify-content-space-between">
+                                <button class="button is-danger is-outlined is-small" @click="handleLogout" title="Log out">Cancel</button>
+                                <button class="button is-success" @click="() => handleLoginPidAuth(true)" title="Proceed to Wallet immediately">Proceed now</button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </template>
             <template x-if="!loading && loggedIn">

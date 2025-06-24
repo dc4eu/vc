@@ -220,14 +220,11 @@ Alpine.data("app", () => ({
                 ++this.pidAuthRedirectCountUp;
 
                 if (this.pidAuthRedirectCountUp >= this.pidAuthRedirectMaxCount) {
+                    clearInterval(increment);
                     this.redirect(url);
                     return;
                 }
             }, 1000);
-
-            setTimeout(() => {
-                clearInterval(increment);
-            }, this.pidAuthRedirectMaxCount * 1000);
 
         } catch (err) {
             if (err instanceof URIError) {

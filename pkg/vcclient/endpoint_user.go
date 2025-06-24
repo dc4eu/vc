@@ -16,11 +16,10 @@ type userHandler struct {
 }
 
 type AddPIDRequest struct {
-	Username        string          `json:"username" validate:"required"`
-	Password        string          `json:"password" validate:"required"`
-	Identity        *model.Identity `json:"identity,omitempty" validate:"required"`
-	DocumentType    string          `json:"document_type" validate:"required"`
-	AuthenticSource string          `json:"authentic_source" validate:"required"`
+	Username string          `json:"username" validate:"required"`
+	Password string          `json:"password" validate:"required"`
+	Identity *model.Identity `json:"identity,omitempty" validate:"required"`
+	Meta     *model.MetaData `json:"meta,omitempty" validate:"required"`
 }
 
 func (s *userHandler) AddPID(ctx context.Context, body *AddPIDRequest) (*http.Response, error) {

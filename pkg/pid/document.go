@@ -6,9 +6,7 @@ import (
 )
 
 type Document struct {
-	Identity        *model.Identity `json:"identity,omitempty"  bson:"identity,omitempty"  validate:"required"`
-	DocumentType    string          `json:"document_type" bson:"document_type" validate:"required"`
-	AuthenticSource string          `json:"authentic_source" bson:"authentic_source" validate:"required"`
+	Identity *model.Identity `json:"identity,omitempty"  bson:"identity,omitempty"  validate:"required"`
 }
 
 func (d *Document) Marshal() (map[string]any, error) {

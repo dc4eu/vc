@@ -14,9 +14,7 @@ import (
 
 func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
 	pid := pid.Document{
-		Identity:        req.Identity,
-		DocumentType:    req.DocumentType,
-		AuthenticSource: req.AuthenticSource,
+		Identity: req.Identity,
 	}
 
 	documentData, err := pid.Marshal()
@@ -28,9 +26,9 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	// build a new document
 	uploadRequest := &UploadRequest{
 		Meta: &model.MetaData{
-			AuthenticSource:           req.AuthenticSource,
+			AuthenticSource:           req.Meta.AuthenticSource,
 			DocumentVersion:           "1.0.0",
-			DocumentType:              req.DocumentType,
+			DocumentType:              req.Meta.DocumentType,
 			DocumentID:                fmt.Sprintf("generic.pid.%s", uuid.NewString()),
 			RealData:                  false,
 			Collect:                   &model.Collect{},
@@ -60,8 +58,8 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		Username:        req.Username,
 		Password:        string(passwordHash),
 		Identity:        req.Identity,
-		DocumentType:    req.DocumentType,
-		AuthenticSource: req.AuthenticSource,
+		DocumentType:    req.Meta.DocumentType,
+		AuthenticSource: req.Meta.AuthenticSource,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to save user")
@@ -124,9 +122,7 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 
 	reply.Grant = true
 	reply.Pid = &pid.Document{
-		Identity:        user.Identity,
-		DocumentType:    user.DocumentType,
-		AuthenticSource: user.AuthenticSource,
+		Identity: user.Identity,
 	}
 	reply.RedirectURL = redirectURL.String()
 

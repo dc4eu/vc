@@ -30,10 +30,10 @@ type Client struct {
 	pda1Client            clients
 	ehicClient            clients
 	pidClient             clients
+	pidUserClient         clients
 	elmClient             clients
 	diplomaClient         clients
 	MicroCredentialClient clients
-	UserClient            clients
 }
 
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) {
@@ -82,22 +82,22 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		return nil, fmt.Errorf("new micro credential client: %w", err)
 	}
 
-	client.UserClient, err = NewUserClient(ctx, client)
+	client.pidUserClient, err = NewPIDUserClient(ctx, client)
 	if err != nil {
 		return nil, fmt.Errorf("new user client: %w", err)
+	}
+
+	for _, credentialType := range []string{"pid_user"} {
+		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
+		if err := client.userUpload(ctx, jsonPath); err != nil {
+			return nil, fmt.Errorf("user upload: %w", err)
+		}
 	}
 
 	for _, credentialType := range []string{"ehic", "pda1", "elm", "diploma", "microcredential"} { // pid is not working
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
 		if err := client.uploader(ctx, jsonPath); err != nil {
 			return nil, fmt.Errorf("uploader: %w", err)
-		}
-	}
-
-	for _, credentialType := range []string{"user"} {
-		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
-		if err := client.userUpload(ctx, jsonPath); err != nil {
-			return nil, fmt.Errorf("user upload: %w", err)
 		}
 	}
 
@@ -128,6 +128,7 @@ func (c *Client) makeIdentities(sourceFilePath string) error {
 			continue
 		}
 		dateOfBirth := strings.ReplaceAll(row[8], "/", "-")
+
 		c.identities[row[0]] = &vcclient.UploadRequest{
 			DocumentDataVersion: "1.0.0",
 			Identities: []model.Identity{

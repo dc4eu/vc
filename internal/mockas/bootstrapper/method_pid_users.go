@@ -7,10 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"vc/pkg/model"
 	"vc/pkg/vcclient"
 )
 
-type usersClient struct {
+type pidUsersClient struct {
 	client            *Client
 	documents         map[string]*vcclient.AddPIDRequest
 	credentialType    string
@@ -18,27 +19,31 @@ type usersClient struct {
 	exampleFilePaths  []string
 }
 
-func NewUserClient(ctx context.Context, client *Client) (*usersClient, error) {
-	usersClient := &usersClient{
+func NewPIDUserClient(ctx context.Context, client *Client) (*pidUsersClient, error) {
+	usersClient := &pidUsersClient{
 		client:            client,
 		documents:         map[string]*vcclient.AddPIDRequest{},
 		exampleCredential: []map[string]any{},
 		exampleFilePaths:  []string{},
-		credentialType:    "user",
+		credentialType:    "pid_user",
 	}
 
 	return usersClient, nil
 }
 
-func (c *usersClient) makeSourceData(sourceFilePath string) error {
+func (c *pidUsersClient) makeSourceData(sourceFilePath string) error {
 	for pidNumber, id := range c.client.identities {
 
 		doc := &vcclient.AddPIDRequest{
-			Username:        strings.ToLower(id.Identities[0].FamilyName),
-			Password:        strings.ToLower(id.Identities[0].FamilyName),
-			Identity:        &id.Identities[0],
-			DocumentType:    "generic.pid",
-			AuthenticSource: "generic.pid",
+			Username: strings.ToLower(id.Identities[0].FamilyName),
+			Password: strings.ToLower(id.Identities[0].FamilyName),
+			Identity: &id.Identities[0],
+			Meta: &model.MetaData{
+				AuthenticSource: "PID_Provider:00001",
+				DocumentType:    model.CredentialTypeUrnEudiPid1,
+				DocumentVersion: "1.0.0",
+				DocumentID:      fmt.Sprintf("pid_user_%s", pidNumber),
+			},
 		}
 
 		c.documents[pidNumber] = doc
@@ -47,7 +52,7 @@ func (c *usersClient) makeSourceData(sourceFilePath string) error {
 	return nil
 }
 
-func (c *usersClient) save2Disk() error {
+func (c *pidUsersClient) save2Disk() error {
 	b, err := json.MarshalIndent(c.documents, "", "  ")
 	if err != nil {
 		return err

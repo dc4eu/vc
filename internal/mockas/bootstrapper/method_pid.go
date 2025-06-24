@@ -15,35 +15,53 @@ type pidClient struct {
 	client         *Client
 	documents      map[string]*vcclient.UploadRequest
 	credentialType string
+	pidUsers       map[string]*vcclient.AddPIDRequest
 }
 
 func NewPIDClient(ctx context.Context, client *Client) (*pidClient, error) {
-	pda1Client := &pidClient{
+	pidClient := &pidClient{
 		client:         client,
 		documents:      map[string]*vcclient.UploadRequest{},
 		credentialType: "pid",
 	}
 
-	return pda1Client, nil
+	return pidClient, nil
+}
+
+func (c *pidClient) readPidUserFile(sourceFilePath string) error {
+	f, err := os.Open(sourceFilePath)
+	if err != nil {
+		return fmt.Errorf("open pid user file: %w", err)
+	}
+	defer f.Close()
+
+	decoder := json.NewDecoder(f)
+	if err := decoder.Decode(&c.pidUsers); err != nil {
+		return fmt.Errorf("decode pid user file: %w", err)
+	}
+
+	return nil
 }
 
 func (c *pidClient) makeSourceData(sourceFilePath string) error {
-	for pidNumber, id := range c.client.identities {
+	if err := c.readPidUserFile("../../../bootstrapping/pid_user.json"); err != nil {
+		return fmt.Errorf("read pid user file: %w", err)
+	}
+
+	for pidNumber, id := range c.pidUsers {
 		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
 		documentData := pid.Document{
 			Identity: &model.Identity{
-				GivenName:        id.Identities[0].GivenName,
-				FamilyName:       id.Identities[0].FamilyName,
-				BirthDate:        id.Identities[0].BirthDate,
-				BirthPlace:       id.Identities[0].BirthPlace,
-				Nationality:      id.Identities[0].Nationality,
-				ExpiryDate:       id.Identities[0].ExpiryDate,
-				IssuingAuthority: id.Identities[0].IssuingAuthority,
-				IssuingCountry:   id.Identities[0].IssuingCountry,
+				GivenName:        id.Identity.GivenName,
+				FamilyName:       id.Identity.FamilyName,
+				BirthDate:        id.Identity.BirthDate,
+				BirthPlace:       id.Identity.BirthPlace,
+				Nationality:      id.Identity.Nationality,
+				ExpiryDate:       id.Identity.ExpiryDate,
+				IssuingAuthority: id.Identity.IssuingAuthority,
+				IssuingCountry:   id.Identity.IssuingCountry,
 			},
-			DocumentType:    model.CredentialTypeUrnEudiPid1,
-			AuthenticSource: "PID:00001",
 		}
 
 		var err error
@@ -53,9 +71,9 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 		}
 
 		c.documents[pidNumber].Meta = &model.MetaData{
-			AuthenticSource: "PID:00001",
+			AuthenticSource: id.Meta.AuthenticSource,
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEudiPid1,
+			DocumentType:    id.Meta.DocumentType,
 			DocumentID:      fmt.Sprintf("document_id_pid_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
@@ -81,7 +99,7 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 			},
 		}
 
-		c.documents[pidNumber].Identities = id.Identities
+		c.documents[pidNumber].Identities = []model.Identity{*id.Identity}
 
 		c.documents[pidNumber].DocumentDataVersion = "1.0.0"
 	}

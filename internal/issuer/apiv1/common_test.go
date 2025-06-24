@@ -31,8 +31,6 @@ var (
 			GivenName:  "test_given-name",
 			BirthDate:  "2000-01-01",
 		},
-		DocumentType:    model.CredentialTypeUrnEudiPid1,
-		AuthenticSource: "test_authentic_source",
 	}
 
 	mockPDA1 = &socialsecurity.PDA1Document{

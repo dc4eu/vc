@@ -34,9 +34,9 @@ import Alpine from 'alpinejs';
  */
 
 /**
- * @typedef {Object} SvgTemplate
- * @property {string} uri
- * @property {string} integrity
+ * @typedef {Object} SvgTemplateResponse
+ * @property {string} template
+ * @property {Record<string, string[]>} svg_claims
  */
 
 /**
@@ -288,15 +288,19 @@ Alpine.data("app", () => ({
     async createCredentialSvgImageUri(claims) {
         const url = new URL('/authorization/consent/svg-template', baseUrl);
 
+        /** @type {SvgTemplateResponse} */
         const data = await this.fetchData(url.toString(), {});
 
         let svg = atob(data.template);
 
-        for (const [svg_id, path] of Object.entries(data.svg_claims)) {
+        for (const [svg_id, paths] of Object.entries(data.svg_claims)) {
             let newVal = "";
 
-            if (path in claims && typeof claims[path] === "string") {
-                newVal = claims[path];
+            for (const path of paths) {
+                if (path in claims && typeof claims[path] === "string") {
+                    newVal = claims[path];
+                    break;
+                }
             }
 
             svg = svg.replaceAll(`{{${svg_id}}}`, newVal);

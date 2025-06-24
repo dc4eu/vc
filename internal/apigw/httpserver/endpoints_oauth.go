@@ -158,8 +158,8 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 }
 
 type SVGResponse struct {
-	Template  string            `json:"template"`
-	SVGClaims map[string]string `json:"svg_claims"`
+	Template  string               `json:"template"`
+	SVGClaims map[string][]*string `json:"svg_claims"`
 }
 
 func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Context, c *gin.Context) (any, error) {
@@ -186,11 +186,11 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 
 	vctm := credentialConstructor.VCTM
 
-	svgClaims := make(map[string]string)
+	svgClaims := make(map[string][]*string)
 
 	for _, claim := range vctm.Claims {
 		if claim.SVGID != "" {
-			svgClaims[claim.SVGID] = *claim.Path[0]
+			svgClaims[claim.SVGID] = claim.Path
 		}
 	}
 

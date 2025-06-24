@@ -20,9 +20,16 @@ import Alpine from 'alpinejs';
  */
 
 /**
+ * @typedef {Object} PID
+ * @property {Identity} identity
+ * @property {string} document_type
+ * @property {string} authentic_source
+ */
+
+/**
  * @typedef {Object} GrantResponse
  * @property {boolean} grant
- * @property {Identity} identity
+ * @property {PID} pid
  * @property {string} redirect_url
  */
 
@@ -34,7 +41,7 @@ import Alpine from 'alpinejs';
 
 /**
  * @typedef {Object} Credential
- * @property {string} vct
+ * @property {string} document_type
  * @property {string} name
  * @property {string} svg
  * @property {Record<string, string>} claims
@@ -42,7 +49,7 @@ import Alpine from 'alpinejs';
 
 /**
  * @param {string} name 
- * @returns {string}
+ * @returns {string | null}
  */
 function getCookie(name) {
     return document.cookie
@@ -51,12 +58,10 @@ function getCookie(name) {
             cookie.trim().startsWith(`${name}=`),
         )
         ?.split("=")
-        .pop();
+        .pop() || null;
 }
 
 const baseUrl = window.location.origin;
-
-window.Alpine = Alpine;
 
 Alpine.data("app", () => ({
     /** @type {boolean} */
@@ -75,37 +80,52 @@ Alpine.data("app", () => ({
     authMethod: null,
 
     /** @type {string | null} */
-    loginError: null,
+    error: null,
 
     init() {
         const authMethod = getCookie("auth_method");
 
-        if (!["basic", "pid_auth"].includes(authMethod)) {
-            console.error("Fatal: unknown auth method", authMethod);
+        if (
+            !authMethod ||
+            authMethod !== "basic" &&
+            authMethod !== "pid_auth"
+        ) {
+            this.error = `Unknown auth method: '${authMethod}'`;
             return;
         }
 
         this.authMethod = authMethod
 
         this.loading = false;
+
+        this.$watch("error", (newVal) => {
+            if (typeof newVal === "string") {
+                console.error(`Error: ${newVal}`);
+            }
+        })
     },
 
     /** @param {SubmitEvent} event */
     async handleLoginBasic(event) {
         this.loading = true;
-        this.loginError = null;
+        this.error = null;
+
+        if (!(this.$refs.loginForm instanceof HTMLFormElement)) {
+            this.error = "Login form not of type 'HtmlFormElement'";
+            return;
+        }
 
         const formData = new FormData(this.$refs.loginForm);
 
         const username = formData.get("username");
         if (!username) {
-            this.loginError = "Username is required";
+            this.error = "Username is required";
             return;
         }
 
         const password = formData.get("password");
         if (!password) {
-            this.loginError = "Password is required";
+            this.error = "Password is required";
             return;
         }
 
@@ -127,7 +147,7 @@ Alpine.data("app", () => ({
 
         try {
             /** @type {GrantResponse} */ 
-            const data = await this.fetchData(url, options);
+            const data = await this.fetchData(url.toString(), options);
 
             this.grantResponse = data;
 
@@ -140,14 +160,14 @@ Alpine.data("app", () => ({
 
             const svg = await this.createCredentialSvgImageUri(
                 {
-                    uri: new URL("/static/person-identification-data-svg-example-01.svg", baseUrl),
+                    uri: new URL("/static/person-identification-data-svg-example-01.svg", baseUrl).toString(),
                     integrity: "sha256-037rNwIiS/qeKc16yxy3xJlAYYFGul1wJAcGjXjDVLw="
                 },
                 claims,
             );
 
             this.credentials.push({
-                vct: "urn:eudi:pid:1",
+                document_type: data.pid.document_type,
                 name: "PID",
                 svg,
                 claims,
@@ -158,13 +178,17 @@ Alpine.data("app", () => ({
             this.loggedIn = true;
             this.loading = false;
         } catch (err) {
-            this.loginError = "Failed to login: " + err.message;
+            this.error = `Failed to login:`;
             this.loading = false;
         }
     },
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
+        if (!this.grantResponse) {
+            console.error("Fatal: 'grantResponse' is null");
+            return;
+        }
         window.location.replace(this.grantResponse.redirect_url);
     },
 
@@ -191,7 +215,7 @@ Alpine.data("app", () => ({
 
                 throw new Error("Unauthorized/session expired");
             }
-            throw new Error(`HTTP error! status: ${response.status}, method: ${response.method}, url: ${url}`);
+            throw new Error(`HTTP error! status: ${response.status}, url: ${url}`);
         }
 
         const data = await response.json();

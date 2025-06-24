@@ -19,9 +19,9 @@
 <section class="section" x-data="app">
     <div class="vc-container container is-max-tablet">
         <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Authorize Consent</h1>
-        <template x-if="loginError">
+        <template x-if="error">
             <div class="notification is-danger">
-                <p x-text="loginError"></p>
+                <p x-text="error"></p>
             </div>
         </template>
         <div class="box">
@@ -71,7 +71,7 @@
                                                 <tbody>
                                                     <tr>
                                                         <th>Credential type</th>
-                                                        <td>urn:eudi:pid:1</td>
+                                                        <td x-text="credential.document_type"></td>
                                                     </tr>
                                                     <tr>
                                                         <th>Given Name</th>

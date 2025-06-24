@@ -46,8 +46,7 @@ type Apiv1 interface {
 
 	OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*openid4vci.ParResponse, error)
 	OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRequest) (*openid4vci.AuthorizationResponse, error)
-	//OAuthAuthorizationConsent(ctx context.Context, req *openid4vci.AuthorizationConsentRequest) (*openid4vci.AuthorizationConsentReply, error)
-	//OAuthAuthorizationConsentLogin(ctx context.Context, req *openid4vci.AuthorizationConsentLoginRequest) (*openid4vci.AuthorizationConsentLoginReply, error)
+	OAuthAuthorizationConsent(ctx context.Context, req *apiv1.OauthAuthorizationConsentRequest) (*apiv1.OAuthAuthorizationConsentResponse, error)
 	OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error)
 	OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error)
 

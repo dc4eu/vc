@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"vc/internal/apigw/apiv1"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 
@@ -134,7 +135,17 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 		return nil, err
 	}
 
+	request := &apiv1.OauthAuthorizationConsentRequest{
+		AuthMethod: authMethod.(string),
+	}
+	reply, err := s.apiv1.OAuthAuthorizationConsent(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
 	c.SetCookie("auth_method", authMethod.(string), 900, "/authorization/consent", "", false, false)
+	c.SetCookie("redirect_url", reply.RedirectURL, 900, "/authorization/consent", "", false, false)
+
 
 	c.HTML(http.StatusOK, "index.html", nil)
 	return nil, nil

@@ -22,6 +22,27 @@ import (
 	trace2 "go.opentelemetry.io/otel/trace"
 )
 
+func (s *Service) endpointVerification(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUpload")
+	defer span.End()
+
+	s.log.Debug("verification", "req", c.Request)
+
+	request := &apiv1.VerificationRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	reply, err := s.apiv1.Verification(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	return reply, nil
+}
+
 func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQRCode")
 	defer span.End()

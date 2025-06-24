@@ -78,7 +78,7 @@ Alpine.data("app", () => ({
     authMethod: null,
 
     /** @type {string | null} */
-    loginError: null,
+    error: null,
 
     init() {
         const authMethod = getCookie("auth_method");
@@ -88,7 +88,7 @@ Alpine.data("app", () => ({
             authMethod !== "basic" &&
             authMethod !== "pid_auth"
         ) {
-            this.loginError = `Unknown auth method: '${authMethod}'`;
+            this.error = `Unknown auth method: '${authMethod}'`;
             return;
         }
 
@@ -96,7 +96,7 @@ Alpine.data("app", () => ({
 
         this.loading = false;
 
-        this.$watch("loginError", (newVal) => {
+        this.$watch("error", (newVal) => {
             if (typeof newVal === "string") {
                 console.error(`Error: ${newVal}`);
             }
@@ -106,10 +106,10 @@ Alpine.data("app", () => ({
     /** @param {SubmitEvent} event */
     async handleLoginBasic(event) {
         this.loading = true;
-        this.loginError = null;
+        this.error = null;
 
         if (!(this.$refs.loginForm instanceof HTMLFormElement)) {
-            this.loginError = "Login form not of type 'HtmlFormElement'";
+            this.error = "Login form not of type 'HtmlFormElement'";
             return;
         }
 
@@ -117,13 +117,13 @@ Alpine.data("app", () => ({
 
         const username = formData.get("username");
         if (!username) {
-            this.loginError = "Username is required";
+            this.error = "Username is required";
             return;
         }
 
         const password = formData.get("password");
         if (!password) {
-            this.loginError = "Password is required";
+            this.error = "Password is required";
             return;
         }
 
@@ -176,7 +176,7 @@ Alpine.data("app", () => ({
             this.loggedIn = true;
             this.loading = false;
         } catch (err) {
-            this.loginError = `Failed to login:`;
+            this.error = `Failed to login:`;
             this.loading = false;
         }
     },

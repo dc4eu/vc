@@ -259,11 +259,7 @@ Alpine.data("app", () => ({
 
     /** @param {Event} event */
     handleLogout(event) {
-        this.loggedIn = false;
-        this.$refs.title.innerHTML = "Authorize Consent";
-        this.grantResponse = null;
-        this.credentials = [];
-        this.pidAuthRedirectCountUp = null;
+        window.location.reload();
     },
 
     /**

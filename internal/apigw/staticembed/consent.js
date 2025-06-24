@@ -193,9 +193,9 @@ Alpine.data("app", () => ({
      * @param {boolean} immediate - Immediately proceed to 'redirect_uri'
      */
     handleLoginPidAuth(immediate = false) {
-        const rawRedirectUrl = getCookie("redirect_url");
+        const rawRedirectUrl = getCookie("pid_auth_redirect_url");
         if (!rawRedirectUrl) {
-            this.error = "Missing redirect_url cookie";
+            this.error = "Missing 'pid_auth_redirect_url' cookie";
             return;
         }
 

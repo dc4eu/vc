@@ -147,7 +147,7 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 			return nil, err
 		}
 
-		c.SetCookie("redirect_url", reply.RedirectURL, 900, "/authorization/consent", "", false, false)
+		c.SetCookie("pid_auth_redirect_url", reply.RedirectURL, 900, "/authorization/consent", "", false, false)
 	}
 
 	c.HTML(http.StatusOK, "index.html", nil)

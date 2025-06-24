@@ -22,6 +22,8 @@ import Alpine from 'alpinejs';
 /**
  * @typedef {Object} PID
  * @property {Identity} identity
+ * @property {string} document_type
+ * @property {string} authentic_source
  */
 
 /**

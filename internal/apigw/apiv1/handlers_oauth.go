@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
@@ -170,9 +171,46 @@ func (c *Client) OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServer
 	return signedMetadata, nil
 }
 
-func (c *Client) OAuthAuthorizationConsent(ctx context.Context) (*model.AuthorizationContext, error) {
-	c.log.Debug("OAuthAuthorizationConsent request")
+type OauthAuthorizationConsentRequest struct {
+	AuthMethod string
+}
 
-	//return authorization, nil
-	return nil, nil
+type OAuthAuthorizationConsentResponse struct {
+	RedirectURL string
+}
+
+func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthorizationConsentRequest) (*OAuthAuthorizationConsentResponse, error) {
+	c.log.Debug("OAuthAuthorizationConsent request")
+	reply := &OAuthAuthorizationConsentResponse{}
+
+	requestURIURL, err := url.Parse("https://vc-interop-3.sunet.se:444/verification/request-object")
+	if err != nil {
+		c.log.Error(err, "failed to parse request URI URL")
+		return nil, err
+	}
+
+	requestURI := url.Values{
+		"id": []string{"1e19dbd2-af2e-4842-aa2f-3680e777db7e"},
+	}
+
+	requestURIURL.RawQuery = requestURI.Encode()
+
+	//http://demo.wwwallet.org/cb?client_id=wallet-enterprise-acme-verifier&request_uri=http://wallet-enterprise-acme-verifier:8005/verification/request-object?id=1e19dbd2-af2e-4842-aa2f-3680e777db7e
+	u, err := url.Parse("http://dev.wallet.sunet.se")
+	if err != nil {
+		c.log.Error(err, "failed to parse URL")
+		return nil, err
+	}
+	values := url.Values{
+		"client_id":   []string{"1003"},
+		"request_uri": []string{requestURIURL.String()},
+	}
+
+	u.RawQuery = values.Encode()
+
+	reply.RedirectURL = u.String()
+
+	c.log.Debug("OAuthAuthorizationConsent response", "redirectURL", reply.RedirectURL)
+
+	return reply, nil
 }

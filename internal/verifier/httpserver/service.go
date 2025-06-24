@@ -82,6 +82,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/direct-post-jwt/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
 
+	//masv
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verification/request-object", http.StatusOK, s.endpointVerification)
+
 	//openid4vp-web
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", http.StatusOK, s.endpointQuitVPFlow)

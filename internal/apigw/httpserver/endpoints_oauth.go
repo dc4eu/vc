@@ -201,9 +201,9 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 		}
 	}
 
-	uri := vctm.Display[0].Rendering.SVGTemplates[0].URI
+	svgTemplateURI := vctm.Display[0].Rendering.SVGTemplates[0].URI
 
-	response, err := http.Get(uri)
+	response, err := http.Get(svgTemplateURI)
 	if err != nil {
 		err := errors.New("fetching svg template failed")
 		span.SetStatus(codes.Error, err.Error())

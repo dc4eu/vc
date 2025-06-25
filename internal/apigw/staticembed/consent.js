@@ -96,6 +96,9 @@ Alpine.data("app", () => ({
     /** @type {number} */
     pidAuthRedirectMaxCount: 7,
 
+    /** @type {boolean} */
+    pidAuthConsent: false,
+
     /** @type {string | null} */
     error: null,
 
@@ -111,7 +114,17 @@ Alpine.data("app", () => ({
             return;
         }
 
-        this.authMethod = authMethod
+        this.authMethod = authMethod;
+
+        if (this.authMethod === "pid_auth") {
+
+            const pidAuthConsent = getCookie("pid_auth_consent");
+            
+            if (pidAuthConsent && pidAuthConsent === "true") {
+                this.pidAuthConsent = true;
+            }
+            this.pidAuthConsent = true; // TEMP
+        }
 
         this.loading = false;
 

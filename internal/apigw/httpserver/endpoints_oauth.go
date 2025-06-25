@@ -178,7 +178,14 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 		return nil, err
 	}
 
-	credentialConstructor := s.cfg.CredentialConstructor[scope]
+	credentialConstructor, ok := s.cfg.CredentialConstructor[scope]
+	if !ok {
+		err := errors.New("scope is not valid credential")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "scope is not valid credential")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, err
+	}
 
 	if err := credentialConstructor.LoadFile(ctx); err != nil {
 		return nil, err

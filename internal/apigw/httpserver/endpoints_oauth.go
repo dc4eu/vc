@@ -223,7 +223,6 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 
 	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
-		err := errors.New("reading svg template failed")
 		span.SetStatus(codes.Error, err.Error())
 		s.log.Error(err, "reading svg template failed")
 		c.AbortWithStatus(http.StatusBadRequest)

@@ -157,7 +157,7 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 	return nil, nil
 }
 
-type SVGResponse struct {
+type SVGTemplateReply struct {
 	Template  string               `json:"template"`
 	SVGClaims map[string][]*string `json:"svg_claims"`
 }
@@ -225,7 +225,7 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 
 	template := base64.StdEncoding.EncodeToString([]byte(responseData))
 
-	reply := SVGResponse{
+	reply := SVGTemplateReply{
 		Template:  template,
 		SVGClaims: svgClaims,
 	}

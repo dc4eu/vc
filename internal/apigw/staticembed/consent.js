@@ -320,7 +320,7 @@ Alpine.data("app", () => ({
             } else {
                 this.error = `Error: ${err.message}`;
             }
-            this.loggedIn = false;
+            window.location.hash = ROUTES.login;
         } finally {
             this.loading = false;
         }

@@ -2,38 +2,6 @@ import Alpine from 'alpinejs';
 import * as v from "valibot";
 
 /**
- * @typedef {Object} Schema
- * @property {string} name
- */
-
-/**
- * @typedef {Object} Identity
- * @property {string} authentic_source_person_id
- * @property {Schema} schema
- * @property {string} family_name
- * @property {string} given_name
- * @property {string} birth_date - Format: YYYY-MM-DD
- * @property {string} birth_place
- * @property {string[]} nationality
- * @property {string} issuing_authority
- * @property {string} issuing_country
- * @property {string} expiry_date - Format: YYYY-MM-DD
- */
-
-/**
- * @typedef {Object} PID
- * @property {Identity} identity
- * @property {string} document_type
- * @property {string} authentic_source
- */
-
-/**
- * @typedef {Object} GrantResponse
- * @property {boolean} grant
- * @property {string} redirect_url
- */
-
-/**
  * @typedef {Object} SvgTemplateResponse
  * @property {string} template
  * @property {Record<string, string[]>} svg_claims

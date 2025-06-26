@@ -112,7 +112,7 @@ Alpine.data("app", () => ({
             if (newVal) {
                 this.handleIsLoggedIn();
             } else {
-                this.$refs.title.innerText = "Authorization Consent";
+                this.handleIsNotLoggedIn();
             }
         });
 
@@ -277,6 +277,11 @@ Alpine.data("app", () => ({
 
             this.pidAuthRedirectCountUp = null;
         }
+    },
+
+    async handleIsNotLoggedIn() {
+        this.credentials = [];
+        this.$refs.title.innerText = "Authorization Consent";
     },
 
     async handleIsLoggedIn() {

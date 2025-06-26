@@ -195,7 +195,7 @@ func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthor
 
 	c.log.Debug("OAuthAuthorizationConsent request")
 
-	verifierRequestURI, err := url.Parse("https://vc-interop-3.sunet.se:444/verification/request-object")
+	verifierRequestURI, err := url.Parse("https://vc-interop-3.sunet.se/verification/request-object")
 	if err != nil {
 		c.log.Error(err, "failed to parse request URI URL")
 		return nil, err

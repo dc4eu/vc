@@ -53,7 +53,7 @@ type Apiv1 interface {
 
 	//Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
 
-	VerificationRequestObject(ctx context.Context, req *apiv1.VerificationRequestObjectRequest) (*apiv1.VerificationRequestObjectResponse, error)
+	VerificationRequestObject(ctx context.Context, req *apiv1.VerificationRequestObjectRequest) (string, error)
 	VerificationDirectPost(ctx context.Context, req *apiv1.VerificationDirectPostRequest) (*apiv1.VerificationDirectPostResponse, error)
 
 	// misc endpoints

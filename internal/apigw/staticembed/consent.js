@@ -125,7 +125,16 @@ Alpine.data("app", () => ({
             if (typeof newVal === "string") {
                 console.error(`Error: ${newVal}`);
             }
-        })
+        });
+
+        if (this.loggedIn) {
+            this.handleIsLoggedIn();
+        }
+        this.$watch("loggedIn", (newVal) => {
+            if (newVal) {
+                this.handleIsLoggedIn();
+            }
+        });
 
         this.loading = false;
     },
@@ -281,6 +290,46 @@ Alpine.data("app", () => ({
 
             this.pidAuthRedirectCountUp = null;
         }
+    },
+
+    async handleIsLoggedIn() {
+        this.loading = true;
+
+        const url = new URL("/user/lookup", baseUrl);
+
+        const options = {
+            method: "GET", 
+            headers: {
+                "Accept": "application/json", 
+                "Content-Type": "application/json; charset=utf-8",
+            }, 
+        };
+
+        try {
+            const UserLookupResponseSchema = v.required(v.object({
+                svg_template_claims: v.object({
+                    given_name: v.string(),
+                    family_name: v.string(),
+                    birth_date: v.string(),
+                }),
+            }));
+
+            const res = await this.fetchData(url.toString(), options);
+
+            const data = v.parse(UserLookupResponseSchema, res);
+
+            console.log(data)
+
+        } catch (err) {
+            if (err instanceof v.ValiError) {
+                this.error = err.message;
+            } else {
+                this.error = `Error: ${err.message}`;
+            }
+            this.loggedIn = false;
+        }
+
+        this.loading = false;
     },
 
     /** @param {SubmitEvent} event */

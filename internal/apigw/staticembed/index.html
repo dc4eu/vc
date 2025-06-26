@@ -65,7 +65,9 @@
                             <progress class="progress is-info" :value="pidAuthRedirectCountUp" :max="pidAuthRedirectMaxCount" x-text="pidAuthRedirectCountUp">
                             </progress>
                             <div class="block is-flex is-justify-content-space-between">
-                                <button class="button is-danger is-outlined is-small" @click="handleLogout" title="Log out">Cancel</button>
+                                <form method="POST" action="/user/cancel">
+                                    <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
+                                </form>
                                 <button class="button is-success" @click="() => handleLoginPidAuth(true)" title="Proceed to Wallet immediately">Proceed now</button>
                             </div>
                         </div>
@@ -91,22 +93,12 @@
                                                         <th>Credential type</th>
                                                         <td x-text="credential.document_type"></td>
                                                     </tr>
-                                                    <tr>
-                                                        <th>Given Name</th>
-                                                        <td x-text="credential.claims.given_name"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Family Name</th>
-                                                        <td x-text="credential.claims.family_name"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Birth date</th>
-                                                        <td x-text="credential.claims.birth_date"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Expiry date</th>
-                                                        <td x-text="credential.claims.expiry_date"></td>
-                                                    </tr>
+                                                    <template x-for="[key, value] of Object.entries(credential.claims)">
+                                                        <tr>
+                                                            <th x-text="key"></th>
+                                                            <td x-text="value"></td>
+                                                        </tr>
+                                                    </template>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -116,7 +108,9 @@
                         </div>
 
                         <div class="block is-flex is-justify-content-space-between">
-                            <button class="button is-danger is-outlined is-small" @click="handleLogout" title="Log out">Cancel</button>
+                            <form method="POST" action="/user/cancel">
+                                <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
+                            </form>
                             <input type="submit" value="Get credential" class="button is-success">
                         </div>
                     </form>

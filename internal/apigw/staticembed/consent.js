@@ -2,38 +2,6 @@ import Alpine from 'alpinejs';
 import * as v from "valibot";
 
 /**
- * @typedef {Object} Schema
- * @property {string} name
- */
-
-/**
- * @typedef {Object} Identity
- * @property {string} authentic_source_person_id
- * @property {Schema} schema
- * @property {string} family_name
- * @property {string} given_name
- * @property {string} birth_date - Format: YYYY-MM-DD
- * @property {string} birth_place
- * @property {string[]} nationality
- * @property {string} issuing_authority
- * @property {string} issuing_country
- * @property {string} expiry_date - Format: YYYY-MM-DD
- */
-
-/**
- * @typedef {Object} PID
- * @property {Identity} identity
- * @property {string} document_type
- * @property {string} authentic_source
- */
-
-/**
- * @typedef {Object} GrantResponse
- * @property {boolean} grant
- * @property {string} redirect_url
- */
-
-/**
  * @typedef {Object} SvgTemplateResponse
  * @property {string} template
  * @property {Record<string, string[]>} svg_claims
@@ -48,6 +16,28 @@ import * as v from "valibot";
  */
 
 /**
+ * @typedef {v.InferOutput<typeof BasicAuthResponseSchema>} BasicAuthResponse
+ */
+const BasicAuthResponseSchema = v.required(v.object({
+    grant: v.boolean(),
+    redirect_url: v.pipe(
+        v.string(),
+        v.url(),
+    )
+}));
+
+/**
+ * @typedef {v.InferOutput<typeof UserDataSchema>} UserData
+ */
+const UserDataSchema = v.required(v.object({
+    svg_template_claims: v.object({
+        given_name: v.string(),
+        family_name: v.string(),
+        birth_date: v.string(),
+    }),
+}));
+
+/**
  * @param {string} name 
  * @returns {string | null}
  */
@@ -59,6 +49,22 @@ function getCookie(name) {
         )
         ?.split("=")
         .pop() || null;
+}
+
+/**
+ * @param {string} key 
+ * @returns {string}
+ */
+function keyToLabel(key) {
+    if (key.includes("_")) {
+        let parts = key.split("_");
+
+        parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+
+        key = parts.join(" ");
+    }
+
+    return key;
 }
 
 /**
@@ -83,8 +89,8 @@ Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,
 
-    /** @type {GrantResponse | null} */
-    grantResponse: null,
+    /** @type {string | null} */
+    redirect_url: null,
 
     /** @type {Credential[]} */
     credentials: [],
@@ -105,6 +111,32 @@ Alpine.data("app", () => ({
     error: null,
 
     init() {
+        this.setAuthMethod();
+
+        this.hashState();
+
+        this.$watch("error", (newVal) => {
+            if (typeof newVal === "string") {
+                console.error(`Error: ${newVal}`);
+            }
+        });
+
+        if (this.loggedIn) {
+            this.handleIsLoggedIn();
+        } else {
+            this.loading = false;
+        }
+
+        this.$watch("loggedIn", (newVal) => {
+            if (newVal) {
+                this.handleIsLoggedIn();
+            } else {
+                this.handleIsNotLoggedIn();
+            }
+        });
+    },
+
+    setAuthMethod() {
         const authMethod = getCookie("auth_method");
 
         if (
@@ -117,25 +149,6 @@ Alpine.data("app", () => ({
         }
 
         this.authMethod = authMethod;
-
-        this.hashState();
-
-        this.$watch("error", (newVal) => {
-            if (typeof newVal === "string") {
-                console.error(`Error: ${newVal}`);
-            }
-        });
-
-        if (this.loggedIn) {
-            this.handleIsLoggedIn();
-        }
-        this.$watch("loggedIn", (newVal) => {
-            if (newVal) {
-                this.handleIsLoggedIn();
-            }
-        });
-
-        this.loading = false;
     },
 
     hashState() {
@@ -195,44 +208,11 @@ Alpine.data("app", () => ({
         };
 
         try {
-            const BasicAuthResponseSchema = v.required(v.object({
-                grant: v.boolean(),
-                redirect_url: v.pipe(
-                    v.string(),
-                    v.url(),
-                )
-            }))
-
             const res = await this.fetchData(url.toString(), options);
 
             const data = v.parse(BasicAuthResponseSchema, res);
 
-
-            this.grantResponse = data
-
-            console.log(data)
-
-            // this.grantResponse = data;
-
-            // const claims = {
-            //     given_name: data.pid.identity.given_name,
-            //     family_name: data.pid.identity.family_name,
-            //     birth_date: data.pid.identity.birth_date,
-            //     expiry_date: data.pid.identity.expiry_date,
-            // };
-
-            // const svg = await this.createCredentialSvgImageUri(
-            //     claims,
-            // );
-
-            // this.credentials.push({
-            //     document_type: data.pid.document_type,
-            //     name: "PID",
-            //     svg,
-            //     claims,
-            // });
-
-            // this.$refs.title.innerText = `Welcome, ${data.pid.identity.given_name}!`
+            this.redirect_url = data.redirect_url;
 
             window.location.hash = ROUTES.credentials;
         } catch (err) {
@@ -294,6 +274,11 @@ Alpine.data("app", () => ({
         }
     },
 
+    async handleIsNotLoggedIn() {
+        this.credentials = [];
+        this.$refs.title.innerText = "Authorization Consent";
+    },
+
     async handleIsLoggedIn() {
         this.loading = true;
 
@@ -308,44 +293,49 @@ Alpine.data("app", () => ({
         };
 
         try {
-            const UserLookupResponseSchema = v.required(v.object({
-                svg_template_claims: v.object({
-                    given_name: v.string(),
-                    family_name: v.string(),
-                    birth_date: v.string(),
-                }),
-            }));
-
             const res = await this.fetchData(url.toString(), options);
 
-            const data = v.parse(UserLookupResponseSchema, res);
+            const data = v.parse(UserDataSchema, res);
 
-            console.log(data)
+            const svg = await this.createCredentialSvgImageUri(
+                data.svg_template_claims,
+            );
 
+            /** @type {Record<string, string>} */
+            let claims = {};
+
+            for (let [key, value] of Object.entries(data.svg_template_claims)) {
+                key = keyToLabel(key);
+
+                claims[key] = value;
+            }
+
+            this.credentials.push({
+                document_type: "N/A",
+                name: "PID",
+                svg,
+                claims,
+            });
+
+            this.$refs.title.innerText = `Welcome, ${data.svg_template_claims.given_name}!`
         } catch (err) {
             if (err instanceof v.ValiError) {
                 this.error = err.message;
             } else {
                 this.error = `Error: ${err.message}`;
             }
-            this.loggedIn = false;
+            window.location.hash = ROUTES.login;
+        } finally {
+            this.loading = false;
         }
-
-        this.loading = false;
     },
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
-        if (!this.grantResponse) {
-            console.error("Fatal: 'grantResponse' is null");
-            return;
+        if (!this.redirect_url) {
+            this.error = "'redirect_url' is null";
         }
-        this.redirect(this.grantResponse.redirect_url);
-    },
-
-    /** @param {Event} event */
-    handleLogout(event) {
-        window.location.reload();
+        this.redirect(this.redirect_url);
     },
 
     /**
@@ -358,7 +348,7 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
-                this.grantResponse = null;
+                this.redirect_url = null;
                 this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");

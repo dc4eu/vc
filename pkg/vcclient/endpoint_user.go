@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/pid"
 )
 
 type userHandler struct {
@@ -41,9 +40,8 @@ type LoginPIDUserRequest struct {
 }
 
 type LoginPIDUserReply struct {
-	Grant       bool          `json:"grant" validate:"required"`
-	Pid         *pid.Document `json:"pid,omitempty"`
-	RedirectURL string        `json:"redirect_url,omitempty"`
+	Grant       bool   `json:"grant" validate:"required"`
+	RedirectURL string `json:"redirect_url,omitempty"`
 }
 
 func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*LoginPIDUserReply, *http.Response, error) {
@@ -63,4 +61,13 @@ type GetPIDRequest struct {
 
 type GetPIDReply struct {
 	Identity *model.Identity `json:"identity,omitempty"`
+}
+
+type UserLookupRequest struct {
+	Username   string `json:"-"`
+	AuthMethod string `json:"-"`
+}
+
+type UserLookupReply struct {
+	SVGTemplateClaims map[string]string `json:"svg_template_claims,omitempty"`
 }

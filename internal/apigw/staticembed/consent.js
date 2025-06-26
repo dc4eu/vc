@@ -293,10 +293,20 @@ Alpine.data("app", () => ({
         try {
             const res = await this.fetchData(url.toString(), options);
 
-            const data = v.parse(UserLookupResponseSchema, res);
+            const data = v.parse(UserDataSchema, res);
 
-            console.log(data)
+            const svg = await this.createCredentialSvgImageUri(
+                data.svg_template_claims,
+            );
 
+            this.credentials.push({
+                document_type: "N/A",
+                name: "PID",
+                svg,
+                claims: data.svg_template_claims,
+            });
+
+            this.$refs.title.innerText = `Welcome, ${data.svg_template_claims.given_name}!`
         } catch (err) {
             if (err instanceof v.ValiError) {
                 this.error = err.message;
@@ -304,9 +314,9 @@ Alpine.data("app", () => ({
                 this.error = `Error: ${err.message}`;
             }
             this.loggedIn = false;
+        } finally {
+            this.loading = false;
         }
-
-        this.loading = false;
     },
 
     /** @param {SubmitEvent} event */

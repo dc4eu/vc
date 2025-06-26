@@ -1,0 +1,7 @@
+# We only use node_modules for types, 
+# no need to save any of this.
+node_modules/
+*.lock
+*.lockb
+*-lock.json
+*-lock.yaml

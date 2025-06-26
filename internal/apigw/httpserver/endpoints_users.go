@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"errors"
+	"vc/pkg/model"
 	"vc/pkg/vcclient"
 
 	"github.com/gin-contrib/sessions"
@@ -58,6 +59,13 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 		return nil, err
 	}
 
+	session.Set("username", request.Username)
+	if err := session.Save(); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "session save error")
+		return nil, err
+	}
+
 	return reply, nil
 }
 
@@ -79,7 +87,7 @@ func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, 
 	request.AuthMethod = authMethod
 
 	switch authMethod {
-	case "basic_auth":
+	case model.AuthMethodBasic:
 		username, ok := session.Get("username").(string)
 		if !ok {
 			err := errors.New("username not found in session")
@@ -89,7 +97,7 @@ func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, 
 		}
 
 		request.Username = username
-	case "pid_auth":
+	case model.AuthMethodPID:
 
 	default:
 		err := errors.New("unsupported auth method for user lookup")

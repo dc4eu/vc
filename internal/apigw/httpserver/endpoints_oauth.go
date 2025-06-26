@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"vc/internal/apigw/apiv1"
+	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 
@@ -140,7 +141,7 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 
 	c.SetCookie("auth_method", authMethod.(string), 900, "/authorization/consent", "", false, false)
 
-	if authMethod == "pid_auth" {
+	if authMethod == model.AuthMethodPID {
 		request := &apiv1.OauthAuthorizationConsentRequest{
 			AuthMethod: authMethod.(string),
 		}

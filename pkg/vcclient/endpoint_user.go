@@ -41,7 +41,6 @@ type LoginPIDUserRequest struct {
 
 type LoginPIDUserReply struct {
 	Grant       bool   `json:"grant" validate:"required"`
-	Username    string `json:"username,omitempty"`
 	RedirectURL string `json:"redirect_url,omitempty"`
 }
 

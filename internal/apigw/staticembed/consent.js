@@ -107,7 +107,10 @@ Alpine.data("app", () => ({
 
         if (this.loggedIn) {
             this.handleIsLoggedIn();
+        } else {
+            this.loading = false;
         }
+        
         this.$watch("loggedIn", (newVal) => {
             if (newVal) {
                 this.handleIsLoggedIn();
@@ -115,8 +118,6 @@ Alpine.data("app", () => ({
                 this.handleIsNotLoggedIn();
             }
         });
-
-        this.loading = false;
     },
 
     setAuthMethod() {

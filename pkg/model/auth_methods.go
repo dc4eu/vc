@@ -1,6 +1,6 @@
 package model
 
 const (
-	AuthMethodPID   = "pid"
+	AuthMethodPID   = "pid_auth"
 	AuthMethodBasic = "basic"
 )

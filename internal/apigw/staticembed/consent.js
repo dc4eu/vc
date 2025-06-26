@@ -75,6 +75,11 @@ window.addEventListener("pageshow", (event) => {
 
 const baseUrl = window.location.origin;
 
+const ROUTES = {
+    login: "#/",
+    success: "#/success"
+}
+
 Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,
@@ -112,15 +117,33 @@ Alpine.data("app", () => ({
             return;
         }
 
-        this.authMethod = authMethod
+        this.authMethod = authMethod;
 
-        this.loading = false;
+        this.hashState();
 
         this.$watch("error", (newVal) => {
             if (typeof newVal === "string") {
                 console.error(`Error: ${newVal}`);
             }
         })
+
+        this.loading = false;
+    },
+
+    hashState() {
+        /** @param {string} hash */
+        const updateLoginState = (hash) => {
+            this.loggedIn = (hash === ROUTES.success);
+        };
+
+        updateLoginState(window.location.hash);
+
+        addEventListener("hashchange", (event) => {
+            this.loading = true;
+            const { hash } = new URL(event.newURL);
+            updateLoginState(hash);
+            this.loading = false;
+        });
     },
 
     /** @param {SubmitEvent} event */
@@ -200,7 +223,7 @@ Alpine.data("app", () => ({
 
             // this.$refs.title.innerText = `Welcome, ${data.pid.identity.given_name}!`
 
-            this.loggedIn = true;
+            window.location.hash = ROUTES.success;
         } catch (err) {
             if (err instanceof v.ValiError) {
                 this.error = err.message;

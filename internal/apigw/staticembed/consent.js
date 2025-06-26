@@ -30,7 +30,6 @@ import * as v from "valibot";
 /**
  * @typedef {Object} GrantResponse
  * @property {boolean} grant
- * @property {PID} pid
  * @property {string} redirect_url
  */
 
@@ -207,6 +206,9 @@ Alpine.data("app", () => ({
             const res = await this.fetchData(url.toString(), options);
 
             const data = v.parse(BasicAuthResponseSchema, res);
+
+
+            this.grantResponse = data
 
             console.log(data)
 

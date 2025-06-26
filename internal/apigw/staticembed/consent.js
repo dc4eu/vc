@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import * as v from "valibot";
 
 /**
  * @typedef {Object} Schema
@@ -29,7 +30,6 @@ import Alpine from 'alpinejs';
 /**
  * @typedef {Object} GrantResponse
  * @property {boolean} grant
- * @property {PID} pid
  * @property {string} redirect_url
  */
 
@@ -74,6 +74,11 @@ window.addEventListener("pageshow", (event) => {
 
 const baseUrl = window.location.origin;
 
+const ROUTES = {
+    login: "#/",
+    credentials: "#/credentials"
+}
+
 Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,
@@ -111,15 +116,42 @@ Alpine.data("app", () => ({
             return;
         }
 
-        this.authMethod = authMethod
+        this.authMethod = authMethod;
 
-        this.loading = false;
+        this.hashState();
 
         this.$watch("error", (newVal) => {
             if (typeof newVal === "string") {
                 console.error(`Error: ${newVal}`);
             }
-        })
+        });
+
+        if (this.loggedIn) {
+            this.handleIsLoggedIn();
+        }
+        this.$watch("loggedIn", (newVal) => {
+            if (newVal) {
+                this.handleIsLoggedIn();
+            }
+        });
+
+        this.loading = false;
+    },
+
+    hashState() {
+        /** @param {string} hash */
+        const updateLoginState = (hash) => {
+            this.loggedIn = (hash === ROUTES.credentials);
+        };
+
+        updateLoginState(window.location.hash);
+
+        addEventListener("hashchange", (event) => {
+            this.loading = true;
+            const { hash } = new URL(event.newURL);
+            updateLoginState(hash);
+            this.loading = false;
+        });
     },
 
     /** @param {SubmitEvent} event */
@@ -163,35 +195,53 @@ Alpine.data("app", () => ({
         };
 
         try {
-            /** @type {GrantResponse} */ 
-            const data = await this.fetchData(url.toString(), options);
+            const BasicAuthResponseSchema = v.required(v.object({
+                grant: v.boolean(),
+                redirect_url: v.pipe(
+                    v.string(),
+                    v.url(),
+                )
+            }))
 
-            this.grantResponse = data;
+            const res = await this.fetchData(url.toString(), options);
 
-            const claims = {
-                given_name: data.pid.identity.given_name,
-                family_name: data.pid.identity.family_name,
-                birth_date: data.pid.identity.birth_date,
-                expiry_date: data.pid.identity.expiry_date,
-            };
+            const data = v.parse(BasicAuthResponseSchema, res);
 
-            const svg = await this.createCredentialSvgImageUri(
-                claims,
-            );
 
-            this.credentials.push({
-                document_type: data.pid.document_type,
-                name: "PID",
-                svg,
-                claims,
-            });
+            this.grantResponse = data
 
-            this.$refs.title.innerText = `Welcome, ${data.pid.identity.given_name}!`
+            console.log(data)
 
-            this.loggedIn = true;
-            this.loading = false;
+            // this.grantResponse = data;
+
+            // const claims = {
+            //     given_name: data.pid.identity.given_name,
+            //     family_name: data.pid.identity.family_name,
+            //     birth_date: data.pid.identity.birth_date,
+            //     expiry_date: data.pid.identity.expiry_date,
+            // };
+
+            // const svg = await this.createCredentialSvgImageUri(
+            //     claims,
+            // );
+
+            // this.credentials.push({
+            //     document_type: data.pid.document_type,
+            //     name: "PID",
+            //     svg,
+            //     claims,
+            // });
+
+            // this.$refs.title.innerText = `Welcome, ${data.pid.identity.given_name}!`
+
+            window.location.hash = ROUTES.credentials;
         } catch (err) {
-            this.error = `Failed to login: ${err.message}`;
+            if (err instanceof v.ValiError) {
+                this.error = err.message;
+            } else {
+                this.error = `Failed to login: ${err.message}`;
+            }
+            this.loggedIn = false;
             this.loading = false;
         }
     },
@@ -242,6 +292,46 @@ Alpine.data("app", () => ({
 
             this.pidAuthRedirectCountUp = null;
         }
+    },
+
+    async handleIsLoggedIn() {
+        this.loading = true;
+
+        const url = new URL("/user/lookup", baseUrl);
+
+        const options = {
+            method: "GET", 
+            headers: {
+                "Accept": "application/json", 
+                "Content-Type": "application/json; charset=utf-8",
+            }, 
+        };
+
+        try {
+            const UserLookupResponseSchema = v.required(v.object({
+                svg_template_claims: v.object({
+                    given_name: v.string(),
+                    family_name: v.string(),
+                    birth_date: v.string(),
+                }),
+            }));
+
+            const res = await this.fetchData(url.toString(), options);
+
+            const data = v.parse(UserLookupResponseSchema, res);
+
+            console.log(data)
+
+        } catch (err) {
+            if (err instanceof v.ValiError) {
+                this.error = err.message;
+            } else {
+                this.error = `Error: ${err.message}`;
+            }
+            this.loggedIn = false;
+        }
+
+        this.loading = false;
     },
 
     /** @param {SubmitEvent} event */

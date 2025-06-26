@@ -1,0 +1,52 @@
+package httpserver
+
+import (
+	"context"
+	"vc/internal/apigw/apiv1"
+
+	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/codes"
+)
+
+// retrive Request object
+func (s *Service) endpointVerificationRequestObject(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointVerificationRequestObject")
+	defer span.End()
+
+	s.log.Debug("verification", "req", c.Request.Body)
+
+	request := &apiv1.VerificationRequestObjectRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	reply, err := s.apiv1.VerificationRequestObject(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	return reply, nil
+}
+
+func (s *Service) endpointVerificationDirectPost(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointVerificationDirectPost")
+	defer span.End()
+
+	s.log.Debug("verification", "req", c.Request)
+
+	request := &apiv1.VerificationDirectPostRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	reply, err := s.apiv1.VerificationDirectPost(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	return reply, nil
+}

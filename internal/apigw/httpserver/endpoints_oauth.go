@@ -151,6 +151,13 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 		}
 
 		c.SetCookie("pid_auth_redirect_url", reply.RedirectURL, 900, "/authorization/consent", "", false, false)
+		session.Set("verifier_context_id", reply.VerifierContextID)
+		if err := session.Save(); err != nil {
+			return nil, err
+		}
+
+		// in order to avoid the verifier context ID being sent to the client
+		reply.VerifierContextID = ""
 	}
 
 	c.HTML(http.StatusOK, "index.html", nil)

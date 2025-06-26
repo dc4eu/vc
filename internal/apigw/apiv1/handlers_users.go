@@ -82,10 +82,8 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 		return nil, fmt.Errorf("username %s not found", req.Username)
 	}
 
-	reply := &vcclient.LoginPIDUserReply{}
-
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return reply, fmt.Errorf("password mismatch for username %s", req.Username)
+		return nil, fmt.Errorf("password mismatch for username %s", req.Username)
 	}
 
 	if err := c.db.VCAuthorizationContextColl.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
@@ -120,11 +118,40 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 
 	redirectURL.RawQuery = url.Values{"code": {authorizationContext.Code}, "state": {authorizationContext.State}}.Encode()
 
-	reply.Grant = true
-	reply.Pid = &pid.Document{
-		Identity: user.Identity,
+	reply := &vcclient.LoginPIDUserReply{
+		Grant:       true,
+		RedirectURL: redirectURL.String(),
+		Username:    req.Username,
 	}
-	reply.RedirectURL = redirectURL.String()
+
+	return reply, nil
+}
+
+func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest) (*vcclient.UserLookupReply, error) {
+	c.log.Debug("UserLookup called")
+
+	svgTemplateClaims := map[string]string{}
+
+	switch req.AuthMethod {
+	case "basic_auth":
+		user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
+		if err != nil {
+			c.log.Error(err, "failed to get user", "username", req.Username)
+			return nil, fmt.Errorf("user %s not found: %w", req.Username, err)
+		}
+
+		svgTemplateClaims = map[string]string{
+			"given_name":  user.Identity.GivenName,
+			"family_name": user.Identity.FamilyName,
+			"birth_date":  user.Identity.BirthDate,
+		}
+	default:
+		return nil, fmt.Errorf("unsupported auth method for user lookup: %s", req.AuthMethod)
+	}
+
+	reply := &vcclient.UserLookupReply{
+		SVGTemplateClaims: svgTemplateClaims,
+	}
 
 	return reply, nil
 }

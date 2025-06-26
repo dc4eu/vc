@@ -2,16 +2,13 @@ package httpserver
 
 import (
 	"context"
-	"errors"
 	"vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
-	"vc/pkg/vcclient"
 
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,57 +37,6 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	}
 
 	return nil, nil
-}
-
-func (s *Service) endpointAddPIDUser(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointAddPIDUser")
-	defer span.End()
-
-	request := &vcclient.AddPIDRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	err := s.apiv1.AddPIDUser(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointLoginPIDUser")
-	defer span.End()
-	session := sessions.Default(c)
-
-	requestURI, ok := session.Get("request_uri").(string)
-	if !ok {
-		err := errors.New("request_uri not found in session")
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "endpointLoginPIDUser: request_uri not found in session")
-		return nil, err
-	}
-
-	s.log.Debug("endpointLoginPIDUser", "requestURI", requestURI)
-
-	s.log.Debug("endpointLoginPIDUser", "method", c.Request.Method, "path", c.Request.URL.Path, "headers", c.Request.Header)
-	request := &vcclient.LoginPIDUserRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	request.RequestURI = requestURI
-
-	reply, err := s.apiv1.LoginPIDUser(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	return reply, nil
 }
 
 func (s *Service) endpointNotification(ctx context.Context, c *gin.Context) (any, error) {

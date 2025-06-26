@@ -124,11 +124,3 @@ func (t *TransactionData) Base64Encode() (string, error) {
 	return encoded, nil
 }
 
-func (a *AuthorizationRequest_v2) Marshal() (string, error) {
-	bJSON, err := json.Marshal(a)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bJSON), nil
-}

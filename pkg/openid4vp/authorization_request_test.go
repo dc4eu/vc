@@ -28,7 +28,7 @@ func TestAuthorizationRequest(t *testing.T) {
 			err := json.Unmarshal(want, tt.have)
 			assert.NoError(t, err, "Unmarshal should not return an error")
 
-			got, err := tt.have.Marshal()
+			got, err := tt.have.MarshalJSON()
 			assert.NoError(t, err, "Marshal should not return an error")
 
 			assert.JSONEq(t, string(want), string(got), "JSON output should match golden file")

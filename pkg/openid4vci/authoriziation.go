@@ -78,6 +78,8 @@ type AuthorizationResponse struct {
 	RedirectURL string `json:"-"`
 
 	Scope string `json:"-"`
+
+	ClientID string `json:"-"`
 }
 
 // BindAuthorizationRequest binds the AuthorizationRequest

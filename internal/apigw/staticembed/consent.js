@@ -338,14 +338,6 @@ Alpine.data("app", () => ({
         this.redirect(this.redirect_url);
     },
 
-    /** @param {Event} event */
-    handleLogout(event) {
-        window.location.hash = ROUTES.login;
-        window.location.reload();
-
-        // TODO: we need to clear the session on the backend here.
-    },
-
     /**
      * @param {RequestInfo} url 
      * @param {RequestInit} options 

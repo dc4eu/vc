@@ -106,7 +106,9 @@
                         </div>
 
                         <div class="block is-flex is-justify-content-space-between">
-                            <button class="button is-danger is-outlined is-small" @click="handleLogout" title="Log out">Cancel</button>
+                            <form method="POST" action="/user/cancel">
+                                <button class="button is-danger is-outlined is-small" title="Log out" type="submit">Cancel</button>
+                            </form>
                             <input type="submit" value="Get credential" class="button is-success">
                         </div>
                     </form>

@@ -111,6 +111,8 @@ Alpine.data("app", () => ({
         this.$watch("loggedIn", (newVal) => {
             if (newVal) {
                 this.handleIsLoggedIn();
+            } else {
+                this.$refs.title.innerText = "Authorization Consent";
             }
         });
 

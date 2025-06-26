@@ -52,6 +52,22 @@ function getCookie(name) {
 }
 
 /**
+ * @param {string} key 
+ * @returns {string}
+ */
+function keyToLabel(key) {
+    if (key.includes("_")) {
+        let parts = key.split("_");
+
+        parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+
+        key = parts.join(" ");
+    }
+
+    return key;
+}
+
+/**
  * Due to bfcache some state will persist across
  * navigation events, so we 'manually' clear it.
  * @see https://developer.mozilla.org/en-US/docs/Glossary/bfcache
@@ -110,7 +126,7 @@ Alpine.data("app", () => ({
         } else {
             this.loading = false;
         }
-        
+
         this.$watch("loggedIn", (newVal) => {
             if (newVal) {
                 this.handleIsLoggedIn();
@@ -285,11 +301,20 @@ Alpine.data("app", () => ({
                 data.svg_template_claims,
             );
 
+            /** @type {Record<string, string>} */
+            let claims = {};
+
+            for (let [key, value] of Object.entries(data.svg_template_claims)) {
+                key = keyToLabel(key);
+
+                claims[key] = value;
+            }
+
             this.credentials.push({
                 document_type: "N/A",
                 name: "PID",
                 svg,
-                claims: data.svg_template_claims,
+                claims,
             });
 
             this.$refs.title.innerText = `Welcome, ${data.svg_template_claims.given_name}!`

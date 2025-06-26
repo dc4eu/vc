@@ -91,22 +91,12 @@
                                                         <th>Credential type</th>
                                                         <td x-text="credential.document_type"></td>
                                                     </tr>
-                                                    <tr>
-                                                        <th>Given Name</th>
-                                                        <td x-text="credential.claims.given_name"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Family Name</th>
-                                                        <td x-text="credential.claims.family_name"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Birth date</th>
-                                                        <td x-text="credential.claims.birth_date"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Expiry date</th>
-                                                        <td x-text="credential.claims.expiry_date"></td>
-                                                    </tr>
+                                                    <template x-for="[key, value] of Object.entries(credential.claims)">
+                                                        <tr>
+                                                            <th x-text="key"></th>
+                                                            <td x-text="value"></td>
+                                                        </tr>
+                                                    </template>
                                                 </tbody>
                                             </table>
                                         </div>

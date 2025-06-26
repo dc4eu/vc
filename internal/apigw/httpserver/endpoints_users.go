@@ -60,6 +60,7 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 	}
 
 	session.Set("username", request.Username)
+	session.Save()
 
 	return reply, nil
 }

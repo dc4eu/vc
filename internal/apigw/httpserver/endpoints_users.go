@@ -60,7 +60,11 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 	}
 
 	session.Set("username", request.Username)
-	session.Save()
+	if err := session.Save(); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "session save error")
+		return nil, err
+	}
 
 	return reply, nil
 }

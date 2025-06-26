@@ -47,6 +47,22 @@ import * as v from "valibot";
  * @property {Record<string, string>} claims
  */
 
+const BasicAuthResponseSchema = v.required(v.object({
+    grant: v.boolean(),
+    redirect_url: v.pipe(
+        v.string(),
+        v.url(),
+    )
+}));
+
+const UserLookupResponseSchema = v.required(v.object({
+    svg_template_claims: v.object({
+        given_name: v.string(),
+        family_name: v.string(),
+        birth_date: v.string(),
+    }),
+}));
+
 /**
  * @param {string} name 
  * @returns {string | null}
@@ -199,18 +215,9 @@ Alpine.data("app", () => ({
         };
 
         try {
-            const BasicAuthResponseSchema = v.required(v.object({
-                grant: v.boolean(),
-                redirect_url: v.pipe(
-                    v.string(),
-                    v.url(),
-                )
-            }))
-
             const res = await this.fetchData(url.toString(), options);
 
             const data = v.parse(BasicAuthResponseSchema, res);
-
 
             this.grantResponse = data
 
@@ -312,14 +319,6 @@ Alpine.data("app", () => ({
         };
 
         try {
-            const UserLookupResponseSchema = v.required(v.object({
-                svg_template_claims: v.object({
-                    given_name: v.string(),
-                    family_name: v.string(),
-                    birth_date: v.string(),
-                }),
-            }));
-
             const res = await this.fetchData(url.toString(), options);
 
             const data = v.parse(UserLookupResponseSchema, res);

@@ -15,6 +15,9 @@ import * as v from "valibot";
  * @property {Record<string, string>} claims
  */
 
+/**
+ * @typedef {v.InferOutput<typeof BasicAuthResponseSchema>} BasicAuthResponse
+ */
 const BasicAuthResponseSchema = v.required(v.object({
     grant: v.boolean(),
     redirect_url: v.pipe(
@@ -23,7 +26,10 @@ const BasicAuthResponseSchema = v.required(v.object({
     )
 }));
 
-const UserLookupResponseSchema = v.required(v.object({
+/**
+ * @typedef {v.InferOutput<typeof UserDataSchema>} UserData
+ */
+const UserDataSchema = v.required(v.object({
     svg_template_claims: v.object({
         given_name: v.string(),
         family_name: v.string(),

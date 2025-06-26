@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"errors"
+	"net/http"
 	"vc/pkg/model"
 	"vc/pkg/vcclient"
 
@@ -113,4 +114,43 @@ func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, 
 	}
 
 	return reply, nil
+}
+
+func (s *Service) endpointUserCancel(ctx context.Context, c *gin.Context) (any, error) {
+	_, span := s.tracer.Start(ctx, "httpserver:endpointUserCancel")
+	defer span.End()
+
+	session := sessions.Default(c)
+
+	clientId, ok := session.Get("client_id").(string)
+	if !ok {
+		err := errors.New("client_id not found in session")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointUserCancel: client_id not found in session")
+		return nil, err
+	}
+
+	session.Clear()
+
+	if err := session.Save(); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "session save error")
+		return nil, err
+	}
+
+	// Delete all cookies, not just session.
+	c.SetCookie("auth_method", "", -1, "/authorization/consent", "", false, false)
+	c.SetCookie("pid_auth_redirect_url", "", -1, "/authorization/consent", "", false, false)
+
+	client, ok := s.cfg.APIGW.OauthServer.Clients[clientId]
+	if !ok {
+		err := errors.New("invalid client_id")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointUserCancel: invalid client_id")
+		return nil, err
+	}
+
+	c.Redirect(http.StatusSeeOther, client.RedirectURI)
+
+	return nil, nil
 }

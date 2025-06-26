@@ -58,6 +58,7 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 		return nil, err
 	}
 
+	session.Set("client_id", reply.ClientID)
 	session.Set("scope", reply.Scope)
 	session.Set("auth_method", s.cfg.GetCredentialConstructorAuthMethod(reply.Scope))
 	session.Set("request_uri", request.RequestURI)

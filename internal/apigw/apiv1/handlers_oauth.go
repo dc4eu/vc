@@ -81,6 +81,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 	response := &openid4vci.AuthorizationResponse{
 		RedirectURL: redirectURL,
 		Scope:       authorization.Scope,
+		ClientID:    authorization.ClientID,
 	}
 
 	c.log.Debug("Authorize", "authorization", authorization)

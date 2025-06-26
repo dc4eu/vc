@@ -14,8 +14,8 @@
     "description": "Select the format and the fields you want to request",
     "input_descriptors": [
       {
+        "id": "SdJwtPID",
         "name": "Custom PID",
-        "purpose": "",
         "constraints": {
           "limit_disclosure": "required",
           "fields": [

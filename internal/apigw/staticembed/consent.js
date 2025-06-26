@@ -197,28 +197,6 @@ Alpine.data("app", () => ({
 
             this.redirect_url = data.redirect_url;
 
-            // this.grantResponse = data;
-
-            // const claims = {
-            //     given_name: data.pid.identity.given_name,
-            //     family_name: data.pid.identity.family_name,
-            //     birth_date: data.pid.identity.birth_date,
-            //     expiry_date: data.pid.identity.expiry_date,
-            // };
-
-            // const svg = await this.createCredentialSvgImageUri(
-            //     claims,
-            // );
-
-            // this.credentials.push({
-            //     document_type: data.pid.document_type,
-            //     name: "PID",
-            //     svg,
-            //     claims,
-            // });
-
-            // this.$refs.title.innerText = `Welcome, ${data.pid.identity.given_name}!`
-
             window.location.hash = ROUTES.credentials;
         } catch (err) {
             if (err instanceof v.ValiError) {

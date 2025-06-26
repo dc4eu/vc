@@ -22,26 +22,6 @@ import (
 	trace2 "go.opentelemetry.io/otel/trace"
 )
 
-func (s *Service) endpointVerification(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUpload")
-	defer span.End()
-
-	s.log.Debug("verification", "req", c.Request)
-
-	request := &apiv1.VerificationRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	reply, err := s.apiv1.Verification(ctx, request)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	return reply, nil
-}
 
 func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQRCode")
@@ -75,11 +55,13 @@ func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, erro
 	return reply, nil
 }
 
-func (s *Service) endpointGetAuthorizationRequest(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointGetAuthorizationRequest(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetAuthorizationRequest")
 	defer span.End()
 
-	sessionID := g.Query("id")
+	s.log.Debug("get authorization request", "req", c.Request)
+
+	sessionID := c.Query("id")
 	if sessionID == "" {
 		return nil, errors.New("id is empty")
 	}
@@ -96,27 +78,27 @@ type ResponseBody struct {
 	Response string `json:"response"`
 }
 
-func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointCallback(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCallback")
 	defer span.End()
 
-	sessionID := g.Param("session_id")
+	sessionID := c.Param("session_id")
 	if sessionID == "" {
 		return nil, errors.New("session_id is empty")
 	}
-	callbackID := g.Param("callback_id")
+	callbackID := c.Param("callback_id")
 	if callbackID == "" {
 		return nil, errors.New("callback_id is empty")
 	}
 
-	vpSession, err := s.saveRequestDataToVPSession(ctx, g, span, sessionID, callbackID)
+	vpSession, err := s.saveRequestDataToVPSession(ctx, c, span, sessionID, callbackID)
 	if err != nil {
 		return nil, err
 	}
 
 	//TODO refactorisera och flytta nedan till en authorization_response_parser
 	var request *openid4vp.AuthorizationResponse
-	if jwe := g.PostForm("response"); jwe != "" {
+	if jwe := c.PostForm("response"); jwe != "" {
 		decryptedPayload, err := openid4vp.DecryptJWE(jwe, vpSession.SessionEphemeralKeyPair.PrivateKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt JWE: %w", err)
@@ -137,12 +119,12 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 		if vpSession.EncryptDirectPostJWT {
 			return nil, errors.New("encrypted direct_post.jwt expected as response from wallet")
 		}
-		vpTokenStringArray := g.PostFormArray("vp_token")
-		presentationSubmissionString := g.PostForm("presentation_submission")
-		stateString := g.PostForm("state")
-		errorString := g.PostForm("error")
-		errorDescriptionString := g.PostForm("error_description")
-		errorURIString := g.PostForm("error_uri")
+		vpTokenStringArray := c.PostFormArray("vp_token")
+		presentationSubmissionString := c.PostForm("presentation_submission")
+		stateString := c.PostForm("state")
+		errorString := c.PostForm("error")
+		errorDescriptionString := c.PostForm("error_description")
+		errorURIString := c.PostForm("error_uri")
 
 		s.log.Debug("Received AuthorizationResponse (direct_post.jwt):",
 			"vpTokenStringArray", vpTokenStringArray,
@@ -189,11 +171,11 @@ func (s *Service) endpointCallback(ctx context.Context, g *gin.Context) (any, er
 	return reply, nil
 }
 
-func (s *Service) endpointGetVerificationResult(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointGetVerificationResult(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetVerificationResult")
 	defer span.End()
 
-	webSession := sessions.Default(g)
+	webSession := sessions.Default(c)
 	vpSessionID, err := s.extractVPSessionIDfrom(webSession)
 	if err != nil {
 		return nil, errors.New("no web session found or has expired")
@@ -207,11 +189,11 @@ func (s *Service) endpointGetVerificationResult(ctx context.Context, g *gin.Cont
 	return reply, nil
 }
 
-func (s *Service) endpointQuitVPFlow(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointQuitVPFlow(ctx context.Context, c *gin.Context) (any, error) {
 	_, span := s.tracer.Start(ctx, "httpserver:endpointQuitVPFlow")
 	defer span.End()
 
-	webSession := sessions.Default(g)
+	webSession := sessions.Default(c)
 	vpSessionID, err := s.extractVPSessionIDfrom(webSession)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
@@ -243,7 +225,7 @@ func (s *Service) extractVPSessionIDfrom(webSession sessions.Session) (string, e
 	return vpSessionID, nil
 }
 
-func (s *Service) endpointHealth(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}
 	reply, err := s.apiv1.Health(ctx, request)
 	if err != nil {
@@ -252,12 +234,12 @@ func (s *Service) endpointHealth(ctx context.Context, g *gin.Context) (any, erro
 	return reply, nil
 }
 
-func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetVPFlowDebugInfo")
 	defer span.End()
 
 	request := &apiv1.VPFlowDebugInfoRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -270,12 +252,12 @@ func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, g *gin.Context
 	return reply, nil
 }
 
-func (s *Service) endpointPaginatedVerificationRecords(ctx context.Context, g *gin.Context) (any, error) {
+func (s *Service) endpointPaginatedVerificationRecords(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointPaginatedVerificationRecords")
 	defer span.End()
 
 	request := &apiv1.PaginatedVerificationRecordsRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, g, request); err != nil {
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -286,8 +268,8 @@ func (s *Service) endpointPaginatedVerificationRecords(ctx context.Context, g *g
 		return nil, err
 	}
 
-	g.Header("Cache-Control", "no-store")
-	g.Header("Pragma", "no-cache")
+	c.Header("Cache-Control", "no-store")
+	c.Header("Pragma", "no-cache")
 
 	return reply, nil
 }
@@ -321,8 +303,8 @@ type RequestData struct {
 	Handler     string
 }
 
-func (s *Service) saveRequestDataToVPSession(ctx context.Context, g *gin.Context, span trace2.Span, sessionID string, callbackID string) (*openid4vp.VPInteractionSession, error) {
-	body, err := io.ReadAll(g.Request.Body)
+func (s *Service) saveRequestDataToVPSession(ctx context.Context, c *gin.Context, span trace2.Span, sessionID string, callbackID string) (*openid4vp.VPInteractionSession, error) {
+	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -332,37 +314,37 @@ func (s *Service) saveRequestDataToVPSession(ctx context.Context, g *gin.Context
 	)
 
 	requestData := &RequestData{
-		Method:           g.Request.Method,
-		URL:              g.Request.URL,
-		Proto:            g.Request.Proto,
-		ProtoMajor:       g.Request.ProtoMajor,
-		ProtoMinor:       g.Request.ProtoMinor,
-		Header:           g.Request.Header,
+		Method:           c.Request.Method,
+		URL:              c.Request.URL,
+		Proto:            c.Request.Proto,
+		ProtoMajor:       c.Request.ProtoMajor,
+		ProtoMinor:       c.Request.ProtoMinor,
+		Header:           c.Request.Header,
 		Body:             body,
-		ContentLength:    g.Request.ContentLength,
-		TransferEncoding: g.Request.TransferEncoding,
-		Close:            g.Request.Close,
-		Host:             g.Request.Host,
-		Form:             g.Request.Form,
-		PostForm:         g.Request.PostForm,
-		MultipartForm:    g.Request.MultipartForm,
-		Trailer:          g.Request.Trailer,
-		RemoteAddr:       g.Request.RemoteAddr,
-		RequestURI:       g.Request.RequestURI,
-		TLS:              g.Request.TLS,
-		ClientIP:         g.ClientIP(),
-		ContentType:      g.ContentType(),
-		UserAgent:        g.Request.UserAgent(),
-		Referer:          g.Request.Referer(),
-		Cookies:          g.Request.Cookies(),
-		FullPath:         g.FullPath(),
-		Handler:          g.HandlerName(),
+		ContentLength:    c.Request.ContentLength,
+		TransferEncoding: c.Request.TransferEncoding,
+		Close:            c.Request.Close,
+		Host:             c.Request.Host,
+		Form:             c.Request.Form,
+		PostForm:         c.Request.PostForm,
+		MultipartForm:    c.Request.MultipartForm,
+		Trailer:          c.Request.Trailer,
+		RemoteAddr:       c.Request.RemoteAddr,
+		RequestURI:       c.Request.RequestURI,
+		TLS:              c.Request.TLS,
+		ClientIP:         c.ClientIP(),
+		ContentType:      c.ContentType(),
+		UserAgent:        c.Request.UserAgent(),
+		Referer:          c.Request.Referer(),
+		Cookies:          c.Request.Cookies(),
+		FullPath:         c.FullPath(),
+		Handler:          c.HandlerName(),
 	}
 
 	requestDataJson := convertRequestDataToJson(requestData)
 	fmt.Println(requestDataJson)
 
-	g.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 	vpSession, err := s.apiv1.SaveRequestDataToVPSession(ctx, sessionID, callbackID, requestDataJson)
 	if err != nil {
 		return nil, err

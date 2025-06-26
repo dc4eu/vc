@@ -10,6 +10,7 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
+	"vc/pkg/openid4vp"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -176,24 +177,35 @@ type OauthAuthorizationConsentRequest struct {
 }
 
 type OAuthAuthorizationConsentResponse struct {
-	RedirectURL string
+	RedirectURL       string
+	VerifierContextID string `json:"-"`
 }
 
 func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthorizationConsentRequest) (*OAuthAuthorizationConsentResponse, error) {
-	c.log.Debug("OAuthAuthorizationConsent request")
-	reply := &OAuthAuthorizationConsentResponse{}
+	verifierID := oauth2.GenerateCryptographicNonceWithLength(32)
 
-	requestURIURL, err := url.Parse("https://vc-interop-3.sunet.se:444/verification/request-object")
+	verifierContext := &openid4vp.Context{
+		ID: verifierID,
+	}
+
+	if err := c.db.VCVerifierContextColl.Save(ctx, verifierContext); err != nil {
+		c.log.Error(err, "failed to save verifier context")
+		return nil, err
+	}
+
+	c.log.Debug("OAuthAuthorizationConsent request")
+
+	verifierRequestURI, err := url.Parse("https://vc-interop-3.sunet.se:444/verification/request-object")
 	if err != nil {
 		c.log.Error(err, "failed to parse request URI URL")
 		return nil, err
 	}
 
 	requestURI := url.Values{
-		"id": []string{"1e19dbd2-af2e-4842-aa2f-3680e777db7e"},
+		"id": []string{verifierID},
 	}
 
-	requestURIURL.RawQuery = requestURI.Encode()
+	verifierRequestURI.RawQuery = requestURI.Encode()
 
 	//http://demo.wwwallet.org/cb?client_id=wallet-enterprise-acme-verifier&request_uri=http://wallet-enterprise-acme-verifier:8005/verification/request-object?id=1e19dbd2-af2e-4842-aa2f-3680e777db7e
 	u, err := url.Parse("http://dev.wallet.sunet.se")
@@ -203,12 +215,15 @@ func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthor
 	}
 	values := url.Values{
 		"client_id":   []string{"1003"},
-		"request_uri": []string{requestURIURL.String()},
+		"request_uri": []string{verifierRequestURI.String()},
 	}
 
 	u.RawQuery = values.Encode()
 
-	reply.RedirectURL = u.String()
+	reply := &OAuthAuthorizationConsentResponse{
+		RedirectURL:       u.String(),
+		VerifierContextID: verifierID,
+	}
 
 	c.log.Debug("OAuthAuthorizationConsent response", "redirectURL", reply.RedirectURL)
 

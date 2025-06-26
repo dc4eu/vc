@@ -122,7 +122,7 @@ func (s *Service) endpointUserCancel(ctx context.Context, c *gin.Context) (any, 
 
 	session := sessions.Default(c)
 
-	client_id, ok := session.Get("client_id").(string)
+	clientId, ok := session.Get("client_id").(string)
 	if !ok {
 		err := errors.New("client_id not found in session")
 		span.SetStatus(codes.Error, err.Error())
@@ -138,7 +138,19 @@ func (s *Service) endpointUserCancel(ctx context.Context, c *gin.Context) (any, 
 		return nil, err
 	}
 
-	c.Redirect(http.StatusSeeOther, s.cfg.APIGW.OauthServer.Clients[client_id].RedirectURI)
+	// Delete all cookies, not just session.
+	c.SetCookie("auth_method", "", -1, "/authorization/consent", "", false, false)
+	c.SetCookie("pid_auth_redirect_url", "", -1, "/authorization/consent", "", false, false)
+
+	client, ok := s.cfg.APIGW.OauthServer.Clients[clientId]
+	if !ok {
+		err := errors.New("invalid client_id")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointUserCancel: invalid client_id")
+		return nil, err
+	}
+
+	c.Redirect(http.StatusSeeOther, client.RedirectURI)
 
 	return nil, nil
 }

@@ -66,7 +66,7 @@
                             </progress>
                             <div class="block is-flex is-justify-content-space-between">
                                 <form method="POST" action="/user/cancel">
-                                    <button class="button is-danger is-outlined is-small" title="Log out" type="submit">Cancel</button>
+                                    <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
                                 </form>
                                 <button class="button is-success" @click="() => handleLoginPidAuth(true)" title="Proceed to Wallet immediately">Proceed now</button>
                             </div>
@@ -109,7 +109,7 @@
 
                         <div class="block is-flex is-justify-content-space-between">
                             <form method="POST" action="/user/cancel">
-                                <button class="button is-danger is-outlined is-small" title="Log out" type="submit">Cancel</button>
+                                <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
                             </form>
                             <input type="submit" value="Get credential" class="button is-success">
                         </div>

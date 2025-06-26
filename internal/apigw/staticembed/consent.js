@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import * as v from "valibot";
 
 /**
  * @typedef {Object} Schema

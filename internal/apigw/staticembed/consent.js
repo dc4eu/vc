@@ -99,8 +99,8 @@ Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,
 
-    /** @type {GrantResponse | null} */
-    grantResponse: null,
+    /** @type {string | null} */
+    redirect_url: null,
 
     /** @type {Credential[]} */
     credentials: [],
@@ -219,9 +219,7 @@ Alpine.data("app", () => ({
 
             const data = v.parse(BasicAuthResponseSchema, res);
 
-            this.grantResponse = data
-
-            console.log(data)
+            this.redirect_url = data.redirect_url;
 
             // this.grantResponse = data;
 
@@ -339,11 +337,10 @@ Alpine.data("app", () => ({
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
-        if (!this.grantResponse) {
-            console.error("Fatal: 'grantResponse' is null");
-            return;
+        if (!this.redirect_url) {
+            this.error = "'redirect_url' is null";
         }
-        this.redirect(this.grantResponse.redirect_url);
+        this.redirect(this.redirect_url);
     },
 
     /** @param {Event} event */
@@ -361,7 +358,7 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
-                this.grantResponse = null;
+                this.redirect_url = null;
                 this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");

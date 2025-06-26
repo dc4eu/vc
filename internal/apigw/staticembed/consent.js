@@ -77,7 +77,7 @@ const baseUrl = window.location.origin;
 
 const ROUTES = {
     login: "#/",
-    success: "#/success"
+    credentials: "#/credentials"
 }
 
 Alpine.data("app", () => ({
@@ -142,7 +142,7 @@ Alpine.data("app", () => ({
     hashState() {
         /** @param {string} hash */
         const updateLoginState = (hash) => {
-            this.loggedIn = (hash === ROUTES.success);
+            this.loggedIn = (hash === ROUTES.credentials);
         };
 
         updateLoginState(window.location.hash);
@@ -232,7 +232,7 @@ Alpine.data("app", () => ({
 
             // this.$refs.title.innerText = `Welcome, ${data.pid.identity.given_name}!`
 
-            window.location.hash = ROUTES.success;
+            window.location.hash = ROUTES.credentials;
         } catch (err) {
             if (err instanceof v.ValiError) {
                 this.error = err.message;

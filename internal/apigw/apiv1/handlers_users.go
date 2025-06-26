@@ -121,7 +121,6 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 	reply := &vcclient.LoginPIDUserReply{
 		Grant:       true,
 		RedirectURL: redirectURL.String(),
-		Username:    req.Username,
 	}
 
 	return reply, nil
@@ -133,7 +132,7 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 	svgTemplateClaims := map[string]string{}
 
 	switch req.AuthMethod {
-	case "basic_auth":
+	case model.AuthMethodBasic:
 		user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
 		if err != nil {
 			c.log.Error(err, "failed to get user", "username", req.Username)

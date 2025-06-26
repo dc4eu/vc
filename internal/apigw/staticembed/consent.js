@@ -105,18 +105,7 @@ Alpine.data("app", () => ({
     error: null,
 
     init() {
-        const authMethod = getCookie("auth_method");
-
-        if (
-            !authMethod ||
-            authMethod !== "basic" &&
-            authMethod !== "pid_auth"
-        ) {
-            this.error = `Unknown auth method: '${authMethod}'`;
-            return;
-        }
-
-        this.authMethod = authMethod;
+        this.setAuthMethod();
 
         this.hashState();
 
@@ -136,6 +125,21 @@ Alpine.data("app", () => ({
         });
 
         this.loading = false;
+    },
+
+    setAuthMethod() {
+        const authMethod = getCookie("auth_method");
+
+        if (
+            !authMethod ||
+            authMethod !== "basic" &&
+            authMethod !== "pid_auth"
+        ) {
+            this.error = `Unknown auth method: '${authMethod}'`;
+            return;
+        }
+
+        this.authMethod = authMethod;
     },
 
     hashState() {

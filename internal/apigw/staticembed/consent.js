@@ -2,18 +2,20 @@ import Alpine from 'alpinejs';
 import * as v from "valibot";
 
 /**
- * @typedef {Object} SvgTemplateResponse
- * @property {string} template
- * @property {Record<string, string[]>} svg_claims
- */
-
-/**
  * @typedef {Object} Credential
  * @property {string} document_type
  * @property {string} name
  * @property {string} svg
  * @property {Record<string, string>} claims
  */
+
+/**
+ * @typedef {v.InferOutput<typeof SvgTemplateResponseSchema>} SvgTemplateResponse
+ */
+const SvgTemplateResponseSchema = v.required(v.object({
+    template: v.string(),
+    svg_claims: v.record(v.string(), v.array(v.string())),
+}));
 
 /**
  * @typedef {v.InferOutput<typeof BasicAuthResponseSchema>} BasicAuthResponse
@@ -368,8 +370,9 @@ Alpine.data("app", () => ({
     async createCredentialSvgImageUri(claims) {
         const url = new URL('/authorization/consent/svg-template', baseUrl);
 
-        /** @type {SvgTemplateResponse} */
-        const data = await this.fetchData(url.toString(), {});
+        const res = await this.fetchData(url.toString(), {});
+
+        const data = v.parse(SvgTemplateResponseSchema, res);
 
         let svg = atob(data.template);
 

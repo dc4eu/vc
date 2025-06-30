@@ -180,7 +180,11 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 		return nil, err
 	}
 
-	vctm, err := s.apiv1.GetVCTMFromScope(ctx, scope)
+	getVCTMFromScopeRequest := &apiv1.GetVCTMFromScopeRequest{
+		Scope: scope,
+	}
+
+	vctm, err := s.apiv1.GetVCTMFromScope(ctx, getVCTMFromScopeRequest)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		s.log.Error(err, "getting VCTM failed")
@@ -188,7 +192,11 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 		return nil, err
 	}
 
-	reply, err := s.apiv1.ConstructSVGTemplateReply(vctm)
+	svgTemplateRequest := &apiv1.SVGTemplateRequest{
+		VCTM: vctm,
+	}
+
+	reply, err := s.apiv1.SVGTemplateReply(ctx, svgTemplateRequest)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		s.log.Error(err, "getting SVG template failed")

@@ -335,7 +335,7 @@ Alpine.data("app", () => ({
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
         if (!this.redirectUrl) {
-            this.error = "'redirect_url' is null";
+            this.error = "'redirectUrl' is null";
         }
         this.redirect(this.redirectUrl);
     },

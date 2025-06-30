@@ -2,9 +2,7 @@ package httpserver
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
-	"io"
 	"net/http"
 	"vc/internal/apigw/apiv1"
 	"vc/pkg/model"
@@ -166,14 +164,9 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 	return nil, nil
 }
 
-type SVGTemplateReply struct {
-	Template  string               `json:"template"`
-	SVGClaims map[string][]*string `json:"svg_claims"`
-}
-
 func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointOAuthAuthorizationConsentSvgTemplate", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
-	_, span := s.tracer.Start(ctx, "httpserver:endpointOAuthAuthorizationConsentSvgTemplate")
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOAuthAuthorizationConsentSvgTemplate")
 	defer span.End()
 
 	session := sessions.Default(c)
@@ -187,63 +180,31 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 		return nil, err
 	}
 
-	credentialConstructor, ok := s.cfg.CredentialConstructor[scope]
-	if !ok {
-		err := errors.New("scope is not valid credential")
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "scope is not valid credential")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return nil, err
+	getVCTMFromScopeRequest := &apiv1.GetVCTMFromScopeRequest{
+		Scope: scope,
 	}
 
-	if err := credentialConstructor.LoadFile(ctx); err != nil {
-		return nil, err
-	}
-
-	vctm := credentialConstructor.VCTM
-
-	svgClaims := make(map[string][]*string)
-
-	for _, claim := range vctm.Claims {
-		if claim.SVGID != "" {
-			svgClaims[claim.SVGID] = claim.Path
-		}
-	}
-
-	svgTemplateURI := vctm.Display[0].Rendering.SVGTemplates[0].URI
-
-	response, err := http.Get(svgTemplateURI)
+	vctm, err := s.apiv1.GetVCTMFromScope(ctx, getVCTMFromScopeRequest)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "fetching svg template failed")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		err := errors.New("non ok response code from svg template origin")
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "non ok response code from svg template origin")
+		s.log.Error(err, "getting VCTM failed")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return nil, err
 	}
 
-	responseData, err := io.ReadAll(response.Body)
+	svgTemplateRequest := &apiv1.SVGTemplateRequest{
+		VCTM: vctm,
+	}
+
+	reply, err := s.apiv1.SVGTemplateReply(ctx, svgTemplateRequest)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "reading svg template failed")
+		s.log.Error(err, "getting SVG template failed")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return nil, err
-	}
-
-	template := base64.StdEncoding.EncodeToString([]byte(responseData))
-
-	reply := SVGTemplateReply{
-		Template:  template,
-		SVGClaims: svgClaims,
 	}
 
 	c.SetAccepted("application/json")
+
 	return reply, nil
 }

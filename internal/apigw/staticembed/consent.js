@@ -92,7 +92,7 @@ Alpine.data("app", () => ({
     loading: true,
 
     /** @type {string | null} */
-    redirect_url: null,
+    redirectUrl: null,
 
     /** @type {Credential[]} */
     credentials: [],
@@ -214,7 +214,7 @@ Alpine.data("app", () => ({
 
             const data = v.parse(BasicAuthResponseSchema, res);
 
-            this.redirect_url = data.redirect_url;
+            this.redirectUrl = data.redirect_url;
 
             window.location.hash = ROUTES.credentials;
         } catch (err) {
@@ -334,10 +334,10 @@ Alpine.data("app", () => ({
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
-        if (!this.redirect_url) {
+        if (!this.redirectUrl) {
             this.error = "'redirect_url' is null";
         }
-        this.redirect(this.redirect_url);
+        this.redirect(this.redirectUrl);
     },
 
     /**
@@ -350,7 +350,7 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
-                this.redirect_url = null;
+                this.redirectUrl = null;
                 this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");

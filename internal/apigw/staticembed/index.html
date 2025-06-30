@@ -44,7 +44,9 @@
                                 <label for="password" class="label">Password</label>
                                 <input id="password" name="password" class="input" type="password" placeholder="mysecret123" required>
                             </div>
-                            <input type="submit" class="button is-success is-justify-content-left" value="Log in" />
+                            <div class="is-flex is-justify-content-right">
+                                <input type="submit" class="button is-success" value="Log in" />
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -64,10 +66,7 @@
                             <p class="block has-text-centered">Redirecting to Wallet in <span x-text="pidAuthRedirectMaxCount - pidAuthRedirectCountUp"></span>...</p>
                             <progress class="progress is-info" :value="pidAuthRedirectCountUp" :max="pidAuthRedirectMaxCount" x-text="pidAuthRedirectCountUp">
                             </progress>
-                            <div class="block is-flex is-justify-content-space-between">
-                                <form method="POST" action="/user/cancel">
-                                    <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
-                                </form>
+                            <div class="block is-flex is-justify-content-right">
                                 <button class="button is-success" @click="() => handleLoginPidAuth(true)" title="Proceed to Wallet immediately">Proceed now</button>
                             </div>
                         </div>
@@ -107,10 +106,7 @@
                             </template>
                         </div>
 
-                        <div class="block is-flex is-justify-content-space-between">
-                            <form method="POST" action="/user/cancel">
-                                <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
-                            </form>
+                        <div class="block is-flex is-justify-content-right">
                             <input type="submit" value="Get credential" class="button is-success">
                         </div>
                     </form>

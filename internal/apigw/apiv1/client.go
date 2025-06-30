@@ -25,7 +25,7 @@ type Client struct {
 	log                        *logger.Log
 	tracer                     *trace.Tracer
 	datastoreClient            *vcclient.Client
-	cache                      *ttlcache.Cache[string, SVGTemplateReply]
+	svgTemplateCache           *ttlcache.Cache[string, SVGTemplateReply]
 	issuerMetadata             *openid4vci.CredentialIssuerMetadataParameters
 	issuerMetadataSigningKey   any
 	issuerMetadataSigningChain []string
@@ -37,11 +37,11 @@ type Client struct {
 // New creates a new instance of the public api
 func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:    cfg,
-		db:     db,
-		log:    log.New("apiv1"),
-		tracer: tracer,
-		cache:  ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
+		cfg:              cfg,
+		db:               db,
+		log:              log.New("apiv1"),
+		tracer:           tracer,
+		svgTemplateCache: ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
 	}
 
 	var err error
@@ -69,7 +69,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	}
 
 	// Delete expired cache items automatically
-	go c.cache.Start()
+	go c.svgTemplateCache.Start()
 
 	c.log.Info("Started")
 

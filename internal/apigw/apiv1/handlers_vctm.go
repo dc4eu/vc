@@ -34,8 +34,8 @@ func (c *Client) GetVCTMFromScope(ctx context.Context, scope string) (*sdjwt3.VC
 func (c *Client) ConstructSVGTemplateReply(vctm *sdjwt3.VCTM) (*SVGTemplateReply, error) {
 	svgTemplateURI := vctm.Display[0].Rendering.SVGTemplates[0].URI
 
-	if c.cache.Has(svgTemplateURI) {
-		cachedSvgTemplateReply := c.cache.Get(svgTemplateURI)
+	if c.svgTemplateCache.Has(svgTemplateURI) {
+		cachedSvgTemplateReply := c.svgTemplateCache.Get(svgTemplateURI)
 
 		cachedReply := cachedSvgTemplateReply.Value()
 
@@ -75,7 +75,7 @@ func (c *Client) ConstructSVGTemplateReply(vctm *sdjwt3.VCTM) (*SVGTemplateReply
 		SVGClaims: svgClaims,
 	}
 
-	c.cache.Set(svgTemplateURI, *reply, 2*time.Hour)
+	c.svgTemplateCache.Set(svgTemplateURI, *reply, 2*time.Hour)
 
 	return reply, nil
 }

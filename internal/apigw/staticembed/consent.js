@@ -1,4 +1,4 @@
-import Alpine from 'alpinejs';
+import Alpine from "alpinejs";
 import * as v from "valibot";
 
 /**
@@ -368,7 +368,7 @@ Alpine.data("app", () => ({
      * @returns {Promise<string>}
      */
     async createCredentialSvgImageUri(claims) {
-        const url = new URL('/authorization/consent/svg-template', baseUrl);
+        const url = new URL("/authorization/consent/svg-template", baseUrl);
 
         const res = await this.fetchData(url.toString(), {});
 

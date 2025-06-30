@@ -35,7 +35,7 @@ type Service struct {
 	tracer          *trace.Tracer
 	eventPublisher  apiv1.EventPublisher
 	httpHelpers     *httphelpers.Client
-	cache           *ttlcache.Cache[string, string]
+	cache           *ttlcache.Cache[string, any]
 	sessionsOptions sessions.Options
 	sessionsEncKey  string
 	sessionsAuthKey string
@@ -52,7 +52,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		tracer:          tracer,
 		server:          &http.Server{},
 		eventPublisher:  eventPublisher,
-		cache:           ttlcache.New(ttlcache.WithTTL[string, string](2 * time.Hour)),
+		cache:           ttlcache.New(ttlcache.WithTTL[string, any](2 * time.Hour)),
 		sessionsName:    "oauth_user_session",
 		sessionsAuthKey: oauth2.GenerateCryptographicNonceWithLength(32),
 		sessionsEncKey:  oauth2.GenerateCryptographicNonceWithLength(32),

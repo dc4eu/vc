@@ -203,6 +203,48 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 
 	vctm := credentialConstructor.VCTM
 
+	svgTemplateURI := vctm.Display[0].Rendering.SVGTemplates[0].URI
+
+	c.SetAccepted("application/json")
+
+	if s.cache.Has(svgTemplateURI) {
+		cachedSvgTemplateReply := s.cache.Get(svgTemplateURI)
+
+		cachedReply, ok := cachedSvgTemplateReply.Value().(SVGTemplateReply)
+		if ok {
+			return cachedReply, nil
+		}
+	}
+
+	s.log.Debug("SVG template not available in cache, fetching from origin")
+
+	response, err := http.Get(svgTemplateURI)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "fetching svg template failed")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err := errors.New("non ok response code from svg template origin")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "non ok response code from svg template origin")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, err
+	}
+
+	responseData, err := io.ReadAll(response.Body)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "reading svg template failed")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, err
+	}
+
+	template := base64.StdEncoding.EncodeToString([]byte(responseData))
+
 	svgClaims := make(map[string][]*string)
 
 	for _, claim := range vctm.Claims {
@@ -211,51 +253,12 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 		}
 	}
 
-	svgTemplateURI := vctm.Display[0].Rendering.SVGTemplates[0].URI
-
-	var template string
-
-	if s.cache.Has(svgTemplateURI) {
-		cachedTemplate := s.cache.Get(svgTemplateURI)
-
-		template = cachedTemplate.Value()
-	} else {
-		response, err := http.Get(svgTemplateURI)
-		if err != nil {
-			span.SetStatus(codes.Error, err.Error())
-			s.log.Error(err, "fetching svg template failed")
-			c.AbortWithStatus(http.StatusBadRequest)
-			return nil, err
-		}
-		defer response.Body.Close()
-
-		if response.StatusCode != http.StatusOK {
-			err := errors.New("non ok response code from svg template origin")
-			span.SetStatus(codes.Error, err.Error())
-			s.log.Error(err, "non ok response code from svg template origin")
-			c.AbortWithStatus(http.StatusBadRequest)
-			return nil, err
-		}
-
-		responseData, err := io.ReadAll(response.Body)
-		if err != nil {
-			span.SetStatus(codes.Error, err.Error())
-			s.log.Error(err, "reading svg template failed")
-			c.AbortWithStatus(http.StatusBadRequest)
-			return nil, err
-		}
-
-		template = base64.StdEncoding.EncodeToString([]byte(responseData))
-
-		s.cache.Set(svgTemplateURI, template, 2*time.Hour)
-
-	}
-
 	reply := SVGTemplateReply{
 		Template:  template,
 		SVGClaims: svgClaims,
 	}
 
-	c.SetAccepted("application/json")
+	s.cache.Set(svgTemplateURI, reply, 2*time.Hour)
+
 	return reply, nil
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"time"
 	"vc/internal/apigw/apiv1"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -212,32 +213,43 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 
 	svgTemplateURI := vctm.Display[0].Rendering.SVGTemplates[0].URI
 
-	response, err := http.Get(svgTemplateURI)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "fetching svg template failed")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return nil, err
-	}
-	defer response.Body.Close()
+	var template string
 
-	if response.StatusCode != http.StatusOK {
-		err := errors.New("non ok response code from svg template origin")
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "non ok response code from svg template origin")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return nil, err
-	}
+	if s.cache.Has(svgTemplateURI) {
+		cachedTemplate := s.cache.Get(svgTemplateURI)
 
-	responseData, err := io.ReadAll(response.Body)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "reading svg template failed")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return nil, err
-	}
+		template = cachedTemplate.Value()
+	} else {
+		response, err := http.Get(svgTemplateURI)
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "fetching svg template failed")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return nil, err
+		}
+		defer response.Body.Close()
 
-	template := base64.StdEncoding.EncodeToString([]byte(responseData))
+		if response.StatusCode != http.StatusOK {
+			err := errors.New("non ok response code from svg template origin")
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "non ok response code from svg template origin")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return nil, err
+		}
+
+		responseData, err := io.ReadAll(response.Body)
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "reading svg template failed")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return nil, err
+		}
+
+		template = base64.StdEncoding.EncodeToString([]byte(responseData))
+
+		s.cache.Set(svgTemplateURI, template, 2*time.Hour)
+
+	}
 
 	reply := SVGTemplateReply{
 		Template:  template,

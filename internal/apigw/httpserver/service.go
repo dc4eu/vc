@@ -4,7 +4,6 @@ import (
 	"context"
 	"html/template"
 	"net/http"
-	"time"
 	"vc/internal/apigw/apiv1"
 	"vc/internal/apigw/staticembed"
 	"vc/pkg/httphelpers"
@@ -21,8 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	"github.com/jellydator/ttlcache/v3"
 )
 
 // Service is the service object for httpserver
@@ -35,7 +32,6 @@ type Service struct {
 	tracer          *trace.Tracer
 	eventPublisher  apiv1.EventPublisher
 	httpHelpers     *httphelpers.Client
-	cache           *ttlcache.Cache[string, any]
 	sessionsOptions sessions.Options
 	sessionsEncKey  string
 	sessionsAuthKey string
@@ -52,7 +48,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		tracer:          tracer,
 		server:          &http.Server{},
 		eventPublisher:  eventPublisher,
-		cache:           ttlcache.New(ttlcache.WithTTL[string, any](2 * time.Hour)),
 		sessionsName:    "oauth_user_session",
 		sessionsAuthKey: oauth2.GenerateCryptographicNonceWithLength(32),
 		sessionsEncKey:  oauth2.GenerateCryptographicNonceWithLength(32),
@@ -162,9 +157,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	rgVerification := rgRoot.Group("/verification")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodGet, "/request-object", http.StatusOK, s.endpointVerificationRequestObject)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodPost, "/direct_post", http.StatusOK, s.endpointVerificationDirectPost)
-
-	// Delete expired cache items automatically
-	go s.cache.Start()
 
 	// Run http server
 	go func() {

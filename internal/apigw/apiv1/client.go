@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"time"
 	"vc/internal/apigw/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -9,6 +10,8 @@ import (
 	"vc/pkg/openid4vci"
 	"vc/pkg/trace"
 	"vc/pkg/vcclient"
+
+	"github.com/jellydator/ttlcache/v3"
 )
 
 //	@title		Datastore API
@@ -22,6 +25,7 @@ type Client struct {
 	log                        *logger.Log
 	tracer                     *trace.Tracer
 	datastoreClient            *vcclient.Client
+	cache                      *ttlcache.Cache[string, any]
 	issuerMetadata             *openid4vci.CredentialIssuerMetadataParameters
 	issuerMetadataSigningKey   any
 	issuerMetadataSigningChain []string
@@ -37,6 +41,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 		db:     db,
 		log:    log.New("apiv1"),
 		tracer: tracer,
+		cache:  ttlcache.New(ttlcache.WithTTL[string, any](2 * time.Hour)),
 	}
 
 	var err error
@@ -62,6 +67,9 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	if err != nil {
 		return nil, err
 	}
+
+	// Delete expired cache items automatically
+	go c.cache.Start()
 
 	c.log.Info("Started")
 

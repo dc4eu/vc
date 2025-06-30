@@ -56,7 +56,7 @@ type Apiv1 interface {
 	VerificationRequestObject(ctx context.Context, req *apiv1.VerificationRequestObjectRequest) (*apiv1.VerificationRequestObjectResponse, error)
 	VerificationDirectPost(ctx context.Context, req *apiv1.VerificationDirectPostRequest) (*apiv1.VerificationDirectPostResponse, error)
 
-	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*apiv1.GetVCTMFromScopeResponse, error)
+	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*apiv1.GetVCTMFromScopeReply, error)
 	SVGTemplateReply(ctx context.Context, req *apiv1.SVGTemplateRequest) (*apiv1.SVGTemplateReply, error)
 
 	// misc endpoints

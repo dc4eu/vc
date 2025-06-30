@@ -14,9 +14,9 @@ type GetVCTMFromScopeRequest struct {
 	Scope string
 }
 
-type GetVCTMFromScopeResponse = sdjwt3.VCTM
+type GetVCTMFromScopeReply = sdjwt3.VCTM
 
-func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequest) (*GetVCTMFromScopeResponse, error) {
+func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequest) (*GetVCTMFromScopeReply, error) {
 	credentialConstructor, ok := c.cfg.CredentialConstructor[req.Scope]
 	if !ok {
 		err := errors.New("scope is not valid credential")

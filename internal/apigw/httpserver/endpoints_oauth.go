@@ -196,5 +196,7 @@ func (s *Service) endpointOAuthAuthorizationConsentSvgTemplate(ctx context.Conte
 		return nil, err
 	}
 
+	c.SetAccepted("application/json")
+
 	return reply, nil
 }

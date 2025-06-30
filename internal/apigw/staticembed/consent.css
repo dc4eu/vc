@@ -53,3 +53,22 @@
     }
 }
 
+.vc-cancel-button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--bulma-text-50);
+    border-color: currentColor;
+
+    &:hover {
+        /* color: white; */
+        color: var(--bulma-danger);
+        background-color: var(--bulma-danger-95);
+    }
+
+    > .icon {
+        width: 1em;
+        height: 1em;
+        margin-bottom: 2px;
+    }
+}

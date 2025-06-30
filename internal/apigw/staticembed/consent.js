@@ -1,11 +1,5 @@
-import Alpine from 'alpinejs';
+import Alpine from "alpinejs";
 import * as v from "valibot";
-
-/**
- * @typedef {Object} SvgTemplateResponse
- * @property {string} template
- * @property {Record<string, string[]>} svg_claims
- */
 
 /**
  * @typedef {Object} Credential
@@ -14,6 +8,14 @@ import * as v from "valibot";
  * @property {string} svg
  * @property {Record<string, string>} claims
  */
+
+/**
+ * @typedef {v.InferOutput<typeof SvgTemplateResponseSchema>} SvgTemplateResponse
+ */
+const SvgTemplateResponseSchema = v.required(v.object({
+    template: v.string(),
+    svg_claims: v.record(v.string(), v.array(v.string())),
+}));
 
 /**
  * @typedef {v.InferOutput<typeof BasicAuthResponseSchema>} BasicAuthResponse
@@ -90,7 +92,7 @@ Alpine.data("app", () => ({
     loading: true,
 
     /** @type {string | null} */
-    redirect_url: null,
+    redirectUrl: null,
 
     /** @type {Credential[]} */
     credentials: [],
@@ -212,7 +214,7 @@ Alpine.data("app", () => ({
 
             const data = v.parse(BasicAuthResponseSchema, res);
 
-            this.redirect_url = data.redirect_url;
+            this.redirectUrl = data.redirect_url;
 
             window.location.hash = ROUTES.credentials;
         } catch (err) {
@@ -332,10 +334,10 @@ Alpine.data("app", () => ({
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
-        if (!this.redirect_url) {
-            this.error = "'redirect_url' is null";
+        if (!this.redirectUrl) {
+            this.error = "'redirectUrl' is null";
         }
-        this.redirect(this.redirect_url);
+        this.redirect(this.redirectUrl);
     },
 
     /**
@@ -348,7 +350,7 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
-                this.redirect_url = null;
+                this.redirectUrl = null;
                 this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");
@@ -366,10 +368,11 @@ Alpine.data("app", () => ({
      * @returns {Promise<string>}
      */
     async createCredentialSvgImageUri(claims) {
-        const url = new URL('/authorization/consent/svg-template', baseUrl);
+        const url = new URL("/authorization/consent/svg-template", baseUrl);
 
-        /** @type {SvgTemplateResponse} */
-        const data = await this.fetchData(url.toString(), {});
+        const res = await this.fetchData(url.toString(), {});
+
+        const data = v.parse(SvgTemplateResponseSchema, res);
 
         let svg = atob(data.template);
 

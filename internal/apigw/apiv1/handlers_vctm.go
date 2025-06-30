@@ -11,7 +11,7 @@ import (
 )
 
 type GetVCTMFromScopeRequest struct {
-	Scope string
+	Scope string `validate:"required"`
 }
 
 func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequest) (*sdjwt3.VCTM, error) {

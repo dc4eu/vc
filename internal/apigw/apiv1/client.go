@@ -25,7 +25,7 @@ type Client struct {
 	log                        *logger.Log
 	tracer                     *trace.Tracer
 	datastoreClient            *vcclient.Client
-	cache                      *ttlcache.Cache[string, any]
+	cache                      *ttlcache.Cache[string, SVGTemplateReply]
 	issuerMetadata             *openid4vci.CredentialIssuerMetadataParameters
 	issuerMetadataSigningKey   any
 	issuerMetadataSigningChain []string
@@ -41,7 +41,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 		db:     db,
 		log:    log.New("apiv1"),
 		tracer: tracer,
-		cache:  ttlcache.New(ttlcache.WithTTL[string, any](2 * time.Hour)),
+		cache:  ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
 	}
 
 	var err error

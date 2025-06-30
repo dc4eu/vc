@@ -37,10 +37,9 @@ func (c *Client) ConstructSVGTemplateReply(vctm *sdjwt3.VCTM) (*SVGTemplateReply
 	if c.cache.Has(svgTemplateURI) {
 		cachedSvgTemplateReply := c.cache.Get(svgTemplateURI)
 
-		cachedReply, ok := cachedSvgTemplateReply.Value().(*SVGTemplateReply)
-		if ok {
-			return cachedReply, nil
-		}
+		cachedReply := cachedSvgTemplateReply.Value()
+
+		return &cachedReply, nil
 	}
 
 	c.log.Debug("SVG template not available in cache, fetching from origin")
@@ -76,7 +75,7 @@ func (c *Client) ConstructSVGTemplateReply(vctm *sdjwt3.VCTM) (*SVGTemplateReply
 		SVGClaims: svgClaims,
 	}
 
-	c.cache.Set(svgTemplateURI, reply, 2*time.Hour)
+	c.cache.Set(svgTemplateURI, *reply, 2*time.Hour)
 
 	return reply, nil
 }

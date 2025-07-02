@@ -79,7 +79,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	s.gin.StaticFS("/static", http.FS(staticembed.FS))
 
-	f := template.Must(template.New("").ParseFS(staticembed.FS, "consent.html"))
+	f := template.Must(template.ParseFS(staticembed.FS, "*.html"))
 	s.gin.SetHTMLTemplate(f)
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)

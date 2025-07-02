@@ -374,6 +374,12 @@ func (s *Service) endpointOIDCMetadata(ctx context.Context, c *gin.Context) (any
 //	return reply, nil
 //}
 
+func (s *Service) endpointIndex(ctx context.Context, c *gin.Context) (any, error) {
+	c.Redirect(http.StatusTemporaryRedirect, "/offers")
+
+	return nil, nil
+}
+
 func (s *Service) endpointOffers(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOffers")
 	defer span.End()

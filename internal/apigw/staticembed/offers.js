@@ -1,6 +1,20 @@
 import Alpine from "alpinejs";
 import * as v from "valibot";
 
+
+const CredentialSchema = v.object({
+  name: v.string(),
+  description: v.string()
+});
+
+/**
+ * @typedef {v.InferOutput<typeof OffersLookupSchema>} OffersLookup
+ */
+const OffersLookupSchema = v.required(v.object({
+    credentials: v.record(v.string(), CredentialSchema),
+    wallets: v.record(v.string(), v.string())
+}))
+
 /**
  * @typedef {v.InferOutput<typeof CredentialOfferSchema>} CredentialOffer
  */
@@ -96,30 +110,38 @@ Alpine.data("app", () => ({
     },
 
     async lookupOffers() {
-        this.credentialOffer = null;
+        try {
+            this.credentialOffer = null;
 
-        const res = await fetch("/offers/lookup");
-        if (!res.ok) {
-            this.error = "Failed to fetch credential offers";
-            return;
+            const res = await fetch("/offers/lookup");
+            if (!res.ok) {
+                this.error = "Failed to fetch credential offers";
+                return;
+            }
+
+            const data = v.parse(OffersLookupSchema, (await res.json()));
+
+            this.credentials = data.credentials;
+            this.wallets = data.wallets;
+        } catch (err) {
+            this.error = err;
         }
-
-        const data = await res.json();
-
-        this.credentials = data.credentials;
-        this.wallets = data.wallets;
     },
 
     async getOfferData(credential, wallet) {
-        const res = await fetch(`/offers/${credential}/${wallet}`)
-        if (!res.ok) {
-            this.error = "Failed to fetch credential offer";
-            return;
+        try {
+            const res = await fetch(`/offers/${credential}/${wallet}`)
+            if (!res.ok) {
+                this.error = "Failed to fetch credential offer";
+                return;
+            }
+
+            const data = v.parse(CredentialOfferSchema, (await res.json()));
+
+            this.credentialOffer = data;
+        } catch (err) {
+            this.error = err;
         }
-
-        const data = await res.json();
-
-        this.credentialOffer = data;
     },
 
     handleCredentialOfferProceed() {

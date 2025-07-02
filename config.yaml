@@ -144,7 +144,7 @@ apigw:
     issuer_url: http://vc_dev_apigw:8080
     wallets:
       sunet_dev: 
-        label: SUNET dev wallet
+        label: SUNET Dev Wallet
         redirect_uri: https://dev.wallet.sunet.se/cb
       funke: 
         label: Funke Wallet
@@ -153,7 +153,7 @@ apigw:
         label: DC4EU Wallet
         redirect_uri: https://dc4eu.wwwallet.org/cb
       vanilla: 
-        label: Vanilla Wallet
+        label: Vanilla wwWallet
         redirect_uri: https://demo.wwwallet.org/cb
   trust_model:
     type: "openid_federation"

@@ -140,6 +140,13 @@ apigw:
     enabled: false
     users:
       admin: "secret123"
+  credential_offers:
+    issuer_url: http://vc_dev_apigw:8080
+    wallets:
+      SUNET Dev: https://dev.wallet.sunet.se
+      Funke: https://funke.wwwallet.org
+      DC4EU: https://dc4eu.wwwallet.org
+      Vanilla: https://demo.wwwallet.org
   trust_model:
     type: "openid_federation"
     trust_anchors:

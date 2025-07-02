@@ -172,11 +172,17 @@ type Metadata struct {
 	SigningChainPath string `yaml:"signing_chain_path" validate:"required"`
 }
 
+type CredentialOffers struct {
+	IssuerURL string            `yaml:"issuer_url" validate:"required"`
+	Wallets   map[string]string `yaml:"wallets" validate:"required"`
+}
+
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer      APIServer    `yaml:"api_server" validate:"required"`
-	OauthServer    OAuth2Server `yaml:"oauth_server" validate:"omitempty"`
-	IssuerMetadata Metadata     `yaml:"issuer_metadata" validate:"omitempty"`
+	APIServer        APIServer        `yaml:"api_server" validate:"required"`
+	CredentialOffers CredentialOffers `yaml:"credential_offers" validate:"omitempty"`
+	OauthServer      OAuth2Server     `yaml:"oauth_server" validate:"omitempty"`
+	IssuerMetadata   Metadata         `yaml:"issuer_metadata" validate:"omitempty"`
 }
 
 // OTEL holds the opentelemetry configuration

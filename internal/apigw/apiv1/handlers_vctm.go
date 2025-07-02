@@ -18,7 +18,7 @@ import (
 type CredentialOffer struct {
 	Name string
 	ID   string
-	QR   openid4vp.QRReply
+	QRs  map[string]openid4vp.QRReply
 }
 
 type GetAllCredentialOffersReply map[string]CredentialOffer
@@ -34,32 +34,37 @@ func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialO
 		vctm := credential.VCTM
 
 		data := map[string]any{
-			"credential_issuer":            "https://vc-interop-3.sunet.se",
+			"credential_issuer":            c.cfg.APIGW.CredentialOffers.IssuerURL,
 			"credential_configuration_ids": []string{vctm.VCT},
 			"grants": map[string]any{
 				"authorization_code": map[string]any{},
 			},
 		}
 
-		// Marshal to JSON
 		jsonBytes, err := json.Marshal(data)
 		if err != nil {
 			panic(err)
 		}
 
-		UrlQueryString := url.QueryEscape(string(jsonBytes))
+		UrlQueryString := url.PathEscape(string(jsonBytes))
 
-		offerUrl := "https://dev.wallet.sunet.se/cb?credential_offer=" + UrlQueryString
+		qrs := make(map[string]openid4vp.QRReply)
 
-		qr, err := openid4vp.GenerateQR(offerUrl, qrcode.Medium, 256)
-		if err != nil {
-			return nil, err
+		for walletLabel, walletURL := range c.cfg.APIGW.CredentialOffers.Wallets {
+			url := walletURL + "?credential_offer=" + UrlQueryString
+
+			qr, err := openid4vp.GenerateQR(url, qrcode.Medium, 256)
+			if err != nil {
+				return nil, err
+			}
+
+			qrs[walletLabel] = *qr
 		}
 
 		reply[credentialKey] = CredentialOffer{
 			Name: vctm.Name,
 			ID:   vctm.VCT,
-			QR:   *qr,
+			QRs:  qrs,
 		}
 	}
 

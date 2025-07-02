@@ -31,8 +31,12 @@
         <template id="{{ $id }}">
             <div class="box is-flex is-flex-direction-column is-align-items-center is-gap-1">
                 <h2 class="title has-text-centered has-text-weight-bold is-size-4">{{ $credential.Name }}</h2>
-                <img src="data:image/png;base64,{{ $credential.QR.Base64Image }}" alt="" />
-                <a class="button is-primary" href="{{ $credential.QR.URI }}">SUNET Dev Wallet</a>
+                <p class="block">Click the button you wish to issue the credential to:</p>
+                <div class="is-flex is-flex-wrap-wrap is-justify-content-center is-gap-1">
+                    {{ range $wallet, $qr := $credential.QRs }}
+                        <a class="button is-primary" href="{{ $qr.URI }}">{{ $wallet }} wallet</a>
+                    {{ end }}
+                </div>
             </div>
         </template>
     {{ end }}

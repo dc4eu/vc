@@ -75,11 +75,11 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	// Used in development to avoid bundling static files in the executable.
 	// When used, comment the four lines below these ones.
 	// s.gin.Static("/static", "./staticembed")
-	// s.gin.LoadHTMLFiles("./staticembed/index.html")
+	// s.gin.LoadHTMLFiles("./staticembed/consent.html")
 
 	s.gin.StaticFS("/static", http.FS(staticembed.FS))
 
-	f := template.Must(template.New("").ParseFS(staticembed.FS, "index.html"))
+	f := template.Must(template.New("").ParseFS(staticembed.FS, "consent.html"))
 	s.gin.SetHTMLTemplate(f)
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)

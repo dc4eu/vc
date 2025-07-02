@@ -172,9 +172,14 @@ type Metadata struct {
 	SigningChainPath string `yaml:"signing_chain_path" validate:"required"`
 }
 
+type CredentialOfferWallets struct {
+	Label       string `yaml:"label" validate:"required"`
+	RedirectURI string `yaml:"redirect_uri" validate:"required"`
+}
+
 type CredentialOffers struct {
-	IssuerURL string            `yaml:"issuer_url" validate:"required"`
-	Wallets   map[string]string `yaml:"wallets" validate:"required"`
+	IssuerURL string                            `yaml:"issuer_url" validate:"required"`
+	Wallets   map[string]CredentialOfferWallets `yaml:"wallets" validate:"required"`
 }
 
 // APIGW holds the datastore configuration

@@ -58,6 +58,7 @@ type Apiv1 interface {
 	VerificationDirectPost(ctx context.Context, req *apiv1.VerificationDirectPostRequest) (*apiv1.VerificationDirectPostResponse, error)
 
 	GetAllCredentialOffers(ctx context.Context) (*apiv1.GetAllCredentialOffersReply, error)
+	CredentialOffer(ctx context.Context, req *apiv1.CredentialOfferRequest) (*apiv1.CredentialOfferReply, error)
 	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*sdjwt3.VCTM, error)
 	SVGTemplateReply(ctx context.Context, req *apiv1.SVGTemplateRequest) (*apiv1.SVGTemplateReply, error)
 

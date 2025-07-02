@@ -15,60 +15,112 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
-type CredentialOffer struct {
-	Name string
-	ID   string
-	QRs  map[string]openid4vp.QRReply
+type GetAllCredentialOffersReply struct {
+	Credentials map[string]string `json:"credentials"`
+	Wallets     map[string]string `json:"wallets"`
 }
 
-type GetAllCredentialOffersReply map[string]CredentialOffer
-
 func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialOffersReply, error) {
-	reply := make(GetAllCredentialOffersReply)
 
-	for credentialKey, credential := range c.cfg.CredentialConstructor {
+	credentials := make(map[string]string)
+
+	for key, credential := range c.cfg.CredentialConstructor {
 		if err := credential.LoadFile(ctx); err != nil {
 			continue
 		}
 
 		vctm := credential.VCTM
 
-		data := map[string]any{
-			"credential_issuer":            c.cfg.APIGW.CredentialOffers.IssuerURL,
-			"credential_configuration_ids": []string{vctm.VCT},
-			"grants": map[string]any{
-				"authorization_code": map[string]any{},
-			},
-		}
+		credentials[key] = vctm.Name
 
-		jsonBytes, err := json.Marshal(data)
-		if err != nil {
-			panic(err)
-		}
-
-		UrlQueryString := url.PathEscape(string(jsonBytes))
-
-		qrs := make(map[string]openid4vp.QRReply)
-
-		for walletLabel, walletURL := range c.cfg.APIGW.CredentialOffers.Wallets {
-			url := walletURL + "?credential_offer=" + UrlQueryString
-
-			qr, err := openid4vp.GenerateQR(url, qrcode.Medium, 256)
-			if err != nil {
-				return nil, err
-			}
-
-			qrs[walletLabel] = *qr
-		}
-
-		reply[credentialKey] = CredentialOffer{
-			Name: vctm.Name,
-			ID:   vctm.VCT,
-			QRs:  qrs,
-		}
 	}
 
-	return &reply, nil
+	wallets := make(map[string]string)
+
+	for key, wallet := range c.cfg.APIGW.CredentialOffers.Wallets {
+		wallets[key] = wallet.Label
+	}
+
+	reply := &GetAllCredentialOffersReply{
+		Credentials: credentials,
+		Wallets:     wallets,
+	}
+
+	return reply, nil
+}
+
+type CredentialOfferRequest struct {
+	Scope    string `json:"scope" validate:"required"`
+	WalletID string `json:"wallet_id" validate:"required"`
+}
+
+type CredentialOfferReply struct {
+	Name string            `json:"name" validate:"required"`
+	ID   string            `json:"id" validate:"required"`
+	QR   openid4vp.QRReply `json:"qr" validate:"required"`
+}
+
+func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferRequest) (*CredentialOfferReply, error) {
+	vctmReq := &GetVCTMFromScopeRequest{
+		Scope: req.Scope,
+	}
+
+	vctm, err := c.GetVCTMFromScope(ctx, vctmReq)
+	if err != nil {
+		return nil, err
+	}
+
+	data := map[string]any{
+		"credential_issuer":            c.cfg.APIGW.CredentialOffers.IssuerURL,
+		"credential_configuration_ids": []string{vctm.VCT},
+		"grants": map[string]any{
+			"authorization_code": map[string]any{},
+		},
+	}
+
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	urlQueryString := url.PathEscape(string(jsonBytes))
+
+	wallet, ok := c.cfg.APIGW.CredentialOffers.Wallets[req.WalletID]
+	if !ok {
+		err := errors.New("invalid wallet id")
+		return nil, err
+	}
+
+	baseURL, err := url.Parse(wallet.RedirectURI)
+	if err != nil {
+		return nil, err
+	}
+
+	query := baseURL.Query()
+	query.Set("credential_offer", urlQueryString)
+	baseURL.RawQuery = query.Encode()
+
+	url := baseURL.String()
+
+	qr, err := openid4vp.GenerateQR(url, qrcode.Medium, 256)
+	if err != nil {
+		return nil, err
+	}
+
+	// Since we're using the qr method in a place it wasn't really
+	// intended for, blank any possible data we don't want sent to
+	// the client.
+	qr.RequestURI = ""
+	qr.SessionID = ""
+	qr.ClientID = ""
+
+	reply := &CredentialOfferReply{
+		Name: vctm.Name,
+		ID:   vctm.VCT,
+		QR:   *qr,
+	}
+
+	return reply, nil
 }
 
 type GetVCTMFromScopeRequest struct {

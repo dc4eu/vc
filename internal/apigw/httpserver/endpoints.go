@@ -390,3 +390,41 @@ func (s *Service) endpointOffers(ctx context.Context, c *gin.Context) (any, erro
 
 	return nil, nil
 }
+
+func (s *Service) endpointOffersLookup(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOffersData")
+	defer span.End()
+
+	reply, err := s.apiv1.GetAllCredentialOffers(ctx)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	c.SetAccepted("application/json")
+
+	return reply, nil
+}
+
+func (s *Service) endpointOffer(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOffersData")
+	defer span.End()
+
+	scope := c.Param("scope")
+	walletId := c.Param("wallet_id")
+
+	req := &apiv1.CredentialOfferRequest{
+		Scope:    scope,
+		WalletID: walletId,
+	}
+
+	reply, err := s.apiv1.CredentialOffer(ctx, req)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	c.SetAccepted("application/json")
+
+	return reply, nil
+}

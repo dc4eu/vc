@@ -143,10 +143,18 @@ apigw:
   credential_offers:
     issuer_url: http://vc_dev_apigw:8080
     wallets:
-      SUNET Dev: https://dev.wallet.sunet.se/cb
-      Funke: https://funke.wwwallet.org/cb
-      DC4EU: https://dc4eu.wwwallet.org/cb
-      Vanilla: https://demo.wwwallet.org/cb
+      sunet_dev: 
+        label: SUNET dev wallet
+        redirect_uri: https://dev.wallet.sunet.se/cb
+      funke: 
+        label: Funke Wallet
+        redirect_uri: https://funke.wwwallet.org/cb
+      dc4eu: 
+        label: DC4EU Wallet
+        redirect_uri: https://dc4eu.wwwallet.org/cb
+      vanilla: 
+        label: Vanilla Wallet
+        redirect_uri: https://demo.wwwallet.org/cb
   trust_model:
     type: "openid_federation"
     trust_anchors:

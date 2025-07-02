@@ -5,40 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Credential Offers</title>
     <link rel="stylesheet" href="/static/bulma.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "alpinejs": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/module.esm.min.js",
+            "valibot": "https://cdn.jsdelivr.net/npm/valibot@1.1.0/dist/index.min.js"
+        }
+    }
+    </script>
     <script src="/static/offers.js" type="module"></script>
 </head>
 <body>
-    <section class="section">
-        <div class="container is-max-tablet">
-            <div class="box">
-                <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Credential Offers</h1>
-                <div class="block">
-                    <p class="block has-text-centered">Select which credential you want to issue:</p>
-                    <div class="is-flex is-flex-wrap-wrap is-gap-1 is-justify-content-center">
-                        <div class="select">
-                            <select id="credential" name="credential">
-                                <option value="" disabled selected>Select credential</option>
-                                {{ range $id, $credential := .offers }}
-                                <option value="{{ $id }}">{{ $credential.Name }}</option>
-                                {{ end }}
-                            </select>
-                        </div>
+    <section class="section" x-data="app">
+        <div class="container is-max-tablet" style="max-width: 500px;">
+            <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Credential Offers</h1>
+            <template x-if="error">
+                <div class="notification is-danger">
+                    <p x-text="error"></p>
+                </div>
+            </template>
+            <template x-if="loading">
+                <div class="box">
+                    <div class="vc-loader">
+                        <span class="loader"></span>
                     </div>
                 </div>
-            <div id="cred" class="is-flex is-flex-direction-column is-align-items-center is-gap-1 pb-5"></div>
-            </div>
+            </template>
+            <template x-if="!loading && !credentialOffer">
+                <div class="box">
+                    <p class="block">Select which <em>type of credential</em> you want to issue. You also need to select what <em>wallet</em> to issue it to.</p>
+                    <form x-ref="offersForm" @submit.prevent="handleOffersForm">
+                        <div class="container is-max-tablet">
+                            <div class="field">
+                                <label class="label" for="credential">Credential</label>
+                                <div class="select">
+                                    <select id="credential" name="credential" required>
+                                        <option value="" disabled selected>Select credential</option>
+                                        <template x-for="(label, id) in credentials">
+                                            <option :value="id" x-text="label"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label" for="wallet">Wallet</label>
+                                <div class="radios">
+                                    <template x-for="(label, id) in wallets">
+                                        <label class="radio">
+                                            <input type="radio" name="wallet" :value="id" required />
+                                            <span x-text="label"></span>
+                                        </label>
+                                    </template>
+                                </div>
+                            </div>
+                            <input type="submit" value="Submit" class="button is-primary">
+                        </div>
+                    </form>
+                </div>
+            </template>
+            <template x-if="!loading && credentialOffer">
+                <div class="box is-flex is-flex-direction-column is-align-items-center is-gap-2">
+                    <h2 class="title has-text-centered has-text-weight-bold is-size-4" x-text="credentialOffer.name"></h2>
+                    <p class="has-text-centered">You can either scan the QR code with your mobile device or press the button below to proceed in the browser.</p>
+                    <img :src="`data:image/svg+xml;base64,${credentialOffer.qr.base64_image}`" alt="" />
+                    <p class="has-text-centered">You will be redirected to your wallet in order to begin the process.</p>
+                    <button class="block button is-primary" @click="handleCredentialOfferProceed">Proceed</button>
+                    <pre style="width: 100%" x-text="credentialOffer.qr.uri"></pre>
+                </div>
+            </template>
         </div>
     </section>
-    {{ range $id, $credential := .offers }}
-        <template id="{{ $id }}">
-            <h2 class="title has-text-centered has-text-weight-bold is-size-4">{{ $credential.Name }}</h2>
-            <p class="block">Click the button you wish to issue the credential to:</p>
-            <div class="is-flex is-flex-wrap-wrap is-justify-content-center is-gap-1">
-                {{ range $wallet, $qr := $credential.QRs }}
-                    <a class="button is-primary" href="{{ $qr.URI }}">{{ $wallet }} wallet</a>
-                {{ end }}
-            </div>
-        </template>
-    {{ end }}
 </body>
 </html>

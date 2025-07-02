@@ -5,6 +5,7 @@ function hashState() {
     const credRoot = document.querySelector("#cred");
 
     const updateHashState = (hash) => {
+        credRoot.innerHTML = "";
         const el = document.querySelector(hash);
         if (el) {
             credRoot.innerHTML = el.innerHTML;
@@ -17,7 +18,6 @@ function hashState() {
 
     window.addEventListener("hashchange", (event) => {
         const { hash } = new URL(event.newURL);
-        console.log(hash)
 
         updateHashState(hash);
     });

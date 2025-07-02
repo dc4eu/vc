@@ -15,14 +15,19 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
+type GetAllCredentialOffersCredential struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 type GetAllCredentialOffersReply struct {
-	Credentials map[string]string `json:"credentials"`
-	Wallets     map[string]string `json:"wallets"`
+	Credentials map[string]GetAllCredentialOffersCredential `json:"credentials"`
+	Wallets     map[string]string                           `json:"wallets"`
 }
 
 func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialOffersReply, error) {
 
-	credentials := make(map[string]string)
+	credentials := make(map[string]GetAllCredentialOffersCredential)
 
 	for key, credential := range c.cfg.CredentialConstructor {
 		if err := credential.LoadFile(ctx); err != nil {
@@ -31,7 +36,10 @@ func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialO
 
 		vctm := credential.VCTM
 
-		credentials[key] = vctm.Name
+		credentials[key] = GetAllCredentialOffersCredential{
+			Name:        vctm.Name,
+			Description: vctm.Description,
+		}
 
 	}
 

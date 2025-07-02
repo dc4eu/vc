@@ -42,8 +42,8 @@
                                 <div class="select">
                                     <select id="credential" name="credential" required>
                                         <option value="" disabled selected>Select credential</option>
-                                        <template x-for="(label, id) in credentials">
-                                            <option :value="id" x-text="label"></option>
+                                        <template x-for="(cred, id) in credentials">
+                                            <option :value="id" x-text="cred.name" :title="cred.description"></option>
                                         </template>
                                     </select>
                                 </div>

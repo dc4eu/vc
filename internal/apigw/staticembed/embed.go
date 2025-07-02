@@ -2,5 +2,5 @@ package staticembed
 
 import "embed"
 
-//go:embed consent.html consent.js consent.css bulma.min.css
+//go:embed *.html consent.js consent.css offers.js bulma.min.css
 var FS embed.FS

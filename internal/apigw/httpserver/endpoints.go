@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"net/http"
 	"vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
@@ -372,3 +373,20 @@ func (s *Service) endpointOIDCMetadata(ctx context.Context, c *gin.Context) (any
 //	}
 //	return reply, nil
 //}
+
+func (s *Service) endpointOffers(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOffers")
+	defer span.End()
+
+	reply, err := s.apiv1.GetAllCredentialOffers(ctx)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	c.HTML(http.StatusOK, "offers.html", map[string]*apiv1.GetAllCredentialOffersReply{
+		"offers": reply,
+	})
+
+	return nil, nil
+}

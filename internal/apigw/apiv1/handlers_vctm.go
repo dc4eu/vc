@@ -3,12 +3,68 @@ package apiv1
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
+	"vc/pkg/openid4vp"
 	"vc/pkg/sdjwt3"
+
+	"github.com/skip2/go-qrcode"
 )
+
+type CredentialOffer struct {
+	Name string
+	ID   string
+	QR   openid4vp.QRReply
+}
+
+type GetAllCredentialOffersReply map[string]CredentialOffer
+
+func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialOffersReply, error) {
+	reply := make(GetAllCredentialOffersReply)
+
+	for credentialKey, credential := range c.cfg.CredentialConstructor {
+		if err := credential.LoadFile(ctx); err != nil {
+			continue
+		}
+
+		vctm := credential.VCTM
+
+		data := map[string]any{
+			"credential_issuer":            "https://vc-interop-3.sunet.se",
+			"credential_configuration_ids": []string{vctm.VCT},
+			"grants": map[string]any{
+				"authorization_code": map[string]any{},
+			},
+		}
+
+		// Marshal to JSON
+		jsonBytes, err := json.Marshal(data)
+		if err != nil {
+			panic(err)
+		}
+
+		UrlQueryString := url.QueryEscape(string(jsonBytes))
+
+		offerUrl := "https://dev.wallet.sunet.se/cb?credential_offer=" + UrlQueryString
+
+		qr, err := openid4vp.GenerateQR(offerUrl, qrcode.Medium, 256)
+		if err != nil {
+			return nil, err
+		}
+
+		reply[credentialKey] = CredentialOffer{
+			Name: vctm.Name,
+			ID:   vctm.VCT,
+			QR:   *qr,
+		}
+	}
+
+	return &reply, nil
+}
 
 type GetVCTMFromScopeRequest struct {
 	Scope string `validate:"required"`

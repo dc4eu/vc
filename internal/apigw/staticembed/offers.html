@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credential Offers</title>
+    <link rel="stylesheet" href="/static/bulma.min.css">
+    <script src="/static/offers.js" type="module"></script>
+</head>
+<body>
+    <section class="section">
+        <div class="container is-max-tablet">
+            <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Credential Offers</h1>
+            <div class="block">
+                <p class="block has-text-centered">Select which credential you want to issue:</p>
+                <div class="is-flex is-flex-wrap-wrap is-gap-1 is-justify-content-center">
+                    <div class="select">
+                        <select id="credential" name="credential">
+                            <option value="">Select credential</option>
+                            {{ range $id, $credential := .offers }}
+                            <option value="{{ $id }}">{{ $credential.Name }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="cred"></div>
+        </div>
+    </section>
+    {{ range $id, $credential := .offers }}
+        <template id="{{ $id }}">
+            <div class="box is-flex is-flex-direction-column is-align-items-center is-gap-1">
+                <h2 class="title has-text-centered has-text-weight-bold is-size-4">{{ $credential.Name }}</h2>
+                <img src="data:image/png;base64,{{ $credential.QR.Base64Image }}" alt="" />
+                <a class="button is-primary" href="{{ $credential.QR.URI }}">SUNET Dev Wallet</a>
+            </div>
+        </template>
+    {{ end }}
+</body>
+</html>

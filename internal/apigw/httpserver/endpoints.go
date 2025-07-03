@@ -397,8 +397,8 @@ func (s *Service) endpointOffers(ctx context.Context, c *gin.Context) (any, erro
 	return nil, nil
 }
 
-func (s *Service) endpointOffersLookup(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOffersData")
+func (s *Service) endpointGetOffersLookup(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetOffersLookup")
 	defer span.End()
 
 	reply, err := s.apiv1.GetAllCredentialOffers(ctx)
@@ -412,8 +412,8 @@ func (s *Service) endpointOffersLookup(ctx context.Context, c *gin.Context) (any
 	return reply, nil
 }
 
-func (s *Service) endpointOffer(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOffersData")
+func (s *Service) endpointGetOffer(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetOffer")
 	defer span.End()
 
 	scope := c.Param("scope")

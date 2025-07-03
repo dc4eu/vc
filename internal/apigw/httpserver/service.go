@@ -105,8 +105,8 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/", http.StatusOK, s.endpointIndex)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers", http.StatusOK, s.endpointOffers)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/lookup", http.StatusOK, s.endpointOffersLookup)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/:scope/:wallet_id", http.StatusOK, s.endpointOffer)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/lookup", http.StatusOK, s.endpointGetOffersLookup)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/:scope/:wallet_id", http.StatusOK, s.endpointGetOffer)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "nonce", http.StatusOK, s.endpointOIDCNonce)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "credential", http.StatusOK, s.endpointOIDCCredential)

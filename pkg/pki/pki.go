@@ -87,6 +87,7 @@ func ParseKeyFromFile(path string) (any, error) {
 	return key, nil
 }
 
+
 func Base64EncodeCertificate(cert *x509.Certificate) string {
 	reply := base64.RawStdEncoding.EncodeToString(cert.Raw)
 	return reply

@@ -6,9 +6,9 @@ import (
 	"vc/pkg/openid4vp"
 )
 
-var format = map[string]openid4vp.Format{
-	"vc+sd-jwt": {Alg: []string{"ES256"}},
-}
+//var format = map[string]openid4vp.Format{
+//	"vc+sd-jwt": {Alg: []string{"ES256"}},
+//}
 
 var presentationRequestTypes = map[string]*openid4vp.PresentationRequestType{
 	"VCELM": {
@@ -78,10 +78,10 @@ func vcELMForEMREX(requestType *openid4vp.PresentationRequestType) *openid4vp.Pr
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     requestType.ID,
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "ELM", Path: []string{"$.elm"}},
 					},
 				},
@@ -100,10 +100,10 @@ func vcEHIC(requestType *openid4vp.PresentationRequestType) *openid4vp.Presentat
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     requestType.ID,
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "Personal ID", Path: []string{"$.personal_administrative_number"}},
 						{Name: "Document number", Path: []string{"$.document_number"}},
 						{Name: "Issuing country", Path: []string{"$.issuing_country"}},
@@ -129,10 +129,10 @@ func vcPID(requestType *openid4vp.PresentationRequestType) *openid4vp.Presentati
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     requestType.ID,
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "Family name", Path: []string{"$.family_name"}},
 						{Name: "Given name", Path: []string{"$.given_name"}},
 						{Name: "Date of birth", Path: []string{"$.birthdate"}},
@@ -159,10 +159,10 @@ func wwwEHIC(requestType *openid4vp.PresentationRequestType) *openid4vp.Presenta
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     requestType.ID,
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "Personal ID", Path: []string{"$.personal_administrative_number"}},
 						{Name: "Document number", Path: []string{"$.document_number"}},
 						{Name: "Issuing country", Path: []string{"$.issuing_country"}},
@@ -188,10 +188,10 @@ func wwwMinimalPIDAndEuropeanHealthInsuranceCard(requestType *openid4vp.Presenta
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     "minimalSdJwtPID",
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: pidVctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: pidVctList}},
 						{Name: "Family name", Path: []string{"$.family_name"}},
 						{Name: "Given name", Path: []string{"$.given_name"}},
 						{Name: "Date of birth", Path: []string{"$.birthdate"}},
@@ -205,10 +205,10 @@ func wwwMinimalPIDAndEuropeanHealthInsuranceCard(requestType *openid4vp.Presenta
 			},
 			{
 				ID:     "EuropeanHealthInsuranceCard",
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: ehicVctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: ehicVctList}},
 						{Name: "Personal ID", Path: []string{"$.personal_administrative_number"}},
 						{Name: "Document Number", Path: []string{"$.document_number"}},
 					},
@@ -246,14 +246,14 @@ func diploma() *openid4vp.PresentationDefinition {
 		ID:          "Bachelor",
 		Title:       "Bachelor Diploma",
 		Description: "Required Fields: VC type, Grade, EQF Level & Diploma Title",
-		Format:      format,
+		Format:      nil, //todo(masv): fix
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     "Bachelor",
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "Grade", Path: []string{"$.grade"}},
 						{Name: "EQF Level", Path: []string{"$.eqf_level"}},
 						{Name: "Diploma Title", Path: []string{"$.title"}},
@@ -275,10 +275,10 @@ func ehic() *openid4vp.PresentationDefinition {
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     "EuropeanHealthInsuranceCard",
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						//{Name: "Subject", Path: []string{"$.subject"}},
 						{Name: "Given Name", Path: []string{"$.subject.forename"}},
 						{Name: "Family Name", Path: []string{"$.subject.family_name"}},
@@ -305,10 +305,10 @@ func elm() *openid4vp.PresentationDefinition {
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     "ELM",
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "ELM", Path: []string{"$.elm"}},
 					},
 				},
@@ -328,10 +328,10 @@ func pda1() *openid4vp.PresentationDefinition {
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     "PDA1",
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "SSN", Path: []string{"$.social_security_pin"}},
 						{Name: "Nationality", Path: []string{"$.nationality"}},
 						{Name: "Member State of Application", Path: []string{"$.decision_legislation_applicable.member_state_which_legislation_applies"}},
@@ -351,14 +351,14 @@ func pid() *openid4vp.PresentationDefinition {
 		Title:       "PID",
 		Description: "Required Fields: VC type, Given Name ,Family Name, Birth Date",
 		Selectable:  true, // special field found i db4eu verifier
-		Format:      format,
+		Format:      nil, //todo(masv): fix
 		InputDescriptors: []openid4vp.InputDescriptor{
 			{
 				ID:     "PID",
-				Format: format,
+				Format: nil, //todo(masv): fix
 				Constraints: openid4vp.Constraints{
 					Fields: []openid4vp.Field{
-						{Name: "VC type", Path: []string{"$.vct"}, Filter: openid4vp.Filter{Type: "string", Enum: vctList}},
+						{Name: "VC type", Path: []string{"$.vct"}, Filter: &openid4vp.Filter{Type: "string", Enum: vctList}},
 						{Name: "Given Name", Path: []string{"$.given_name"}},
 						{Name: "Family Name", Path: []string{"$.family_name"}},
 						//TODO: birth_date??? - but wwW uses birthdate right now

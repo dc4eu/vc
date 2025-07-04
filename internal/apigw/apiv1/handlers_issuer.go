@@ -49,7 +49,7 @@ func (c *Client) OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, erro
 //	@Param			req	body		openid4vci.CredentialRequest			true	" "
 //	@Router			/credential [post]
 func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
-	c.log.Debug("credential", "req", req)
+	c.log.Debug("credential", "req", req.Proof.ProofType)
 
 	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.Headers.DPoP)
 	if err != nil {
@@ -61,6 +61,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	sig := strings.Split(req.Headers.DPoP, ".")[2]
 	c.log.Debug("DPoP JWT", "jti", jti, "sig", sig, "dpop JWK", sig)
+	c.log.Debug("Credential request header", "authorization", req.Headers.Authorization, "dpop", req.Headers.DPoP)
 
 	requestATH := req.Headers.HashAuthorizeToken()
 
@@ -69,22 +70,24 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	}
 
 	// "DPoP H4fFxp2hDZ-KY-_am35sXBJStQn9plmV_UC_bk20heA="
-	code := strings.TrimPrefix(req.Headers.Authorization, "DPoP ")
+	accessToken := strings.TrimPrefix(req.Headers.Authorization, "DPoP ")
 
-	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "mura", code)
+	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "accessToken", accessToken)
 
-	tDB, err := c.db.VCAuthorizationContextColl.GetWithToken(ctx, code)
+	authContext, err := c.db.VCAuthorizationContextColl.GetWithAccessToken(ctx, accessToken)
 	if err != nil {
 		c.log.Error(err, "failed to get authorization")
 		return nil, err
 	}
 
+	c.log.Debug("credential", "authContext", authContext)
+
 	document, err := c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 		Meta: &model.MetaData{
-			AuthenticSource: tDB.AuthenticSource,
-			DocumentType:    tDB.DocumentType,
+			AuthenticSource: authContext.AuthenticSource,
+			DocumentType:    authContext.DocumentType,
 		},
-		Identity: tDB.Identity,
+		Identity: authContext.Identity,
 	})
 	if err != nil {
 		c.log.Debug("failed to get document", "error", err)
@@ -98,6 +101,12 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	}
 	c.log.Debug("Here 0", "documentData", string(documentData))
 
+	jwk, err := req.Proof.ExtractJWK()
+	if err != nil {
+		c.log.Error(err, "failed to extract JWK from proof")
+		return nil, err
+	}
+
 	//	// Build SDJWT
 	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -107,18 +116,10 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	defer conn.Close()
 	client := apiv1_issuer.NewIssuerServiceClient(conn)
 
-	jwk := &apiv1_issuer.Jwk{
-		Kty: "EC",
-		Crv: "P-256",
-		X:   "FnNrw9qaiVVeL4-SVnVJcAR1elC3boHvxkFugO1vNFQ",
-		Y:   "y-aapQ2mMG8hSlKO4DYZjKD0WV3s1Osc0L8lL1xgeF0",
-	}
-	c.log.Debug("Here 1")
-
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		DocumentType: model.CredentialTypeUrnEudiPid1,
+		DocumentType: authContext.DocumentType,
 		DocumentData: documentData,
-		Jwk:          jwk, // This needs to be changed!
+		Jwk:          jwk,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to call MakeSDJWT")

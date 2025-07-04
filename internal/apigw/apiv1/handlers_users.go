@@ -75,27 +75,15 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	return nil
 }
 
-func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error) {
+func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) error {
 	c.log.Debug("LoginPIDUser called", "username", req.Username)
 	user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
 	if err != nil {
-		return nil, fmt.Errorf("username %s not found", req.Username)
+		return fmt.Errorf("username %s not found", req.Username)
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, fmt.Errorf("password mismatch for username %s", req.Username)
-	}
-
-	if err := c.db.VCAuthorizationContextColl.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
-		c.log.Error(err, "failed to consent for user", "username", req.Username)
-		return nil, fmt.Errorf("failed to consent for user %s: %w", req.Username, err)
-	}
-
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
-		RequestURI: req.RequestURI,
-	})
-	if err != nil {
-		c.log.Error(err, "failed to get authorization for user", "request_uri", req.RequestURI)
+		return fmt.Errorf("password mismatch for username %s", req.Username)
 	}
 
 	update := &model.AuthorizationContext{
@@ -104,30 +92,34 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 		AuthenticSource: user.AuthenticSource,
 	}
 	// Update the authorization with the user identity
-	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, req.RequestURI, update); err != nil {
-		return nil, err
+	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}, update); err != nil {
+		c.log.Error(err, "failed to add identity to authorization context")
+		return err
 	}
 
-	c.log.Debug("LoginPIDUser", "user", user, "auth", authorizationContext)
+	return nil
 
-	redirectURL, err := url.Parse(authorizationContext.RedirectURI)
-	if err != nil {
-		c.log.Error(err, "failed to parse redirect URI", "redirect_uri", authorizationContext.RedirectURI)
-		return nil, fmt.Errorf("failed to parse redirect URI %s: %w", authorizationContext.RedirectURI, err)
-	}
-
-	redirectURL.RawQuery = url.Values{"code": {authorizationContext.Code}, "state": {authorizationContext.State}}.Encode()
-
-	reply := &vcclient.LoginPIDUserReply{
-		Grant:       true,
-		RedirectURL: redirectURL.String(),
-	}
-
-	return reply, nil
 }
 
 func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest) (*vcclient.UserLookupReply, error) {
 	c.log.Debug("UserLookup called")
+
+	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+		RequestURI: req.RequestURI,
+	})
+	if err != nil {
+		c.log.Error(err, "failed to get authorization for user", "request_uri", req.RequestURI)
+	}
+
+	c.log.Debug("LoginPIDUser", "auth", authorizationContext)
+
+	redirectURL, err := url.Parse(authorizationContext.WalletURI)
+	if err != nil {
+		c.log.Error(err, "failed to parse redirect URI", "redirect_uri", authorizationContext.WalletURI)
+		return nil, fmt.Errorf("failed to parse redirect URI %s: %w", authorizationContext.WalletURI, err)
+	}
+
+	redirectURL.RawQuery = url.Values{"code": {authorizationContext.Code}, "state": {authorizationContext.State}}.Encode()
 
 	svgTemplateClaims := map[string]string{}
 
@@ -142,14 +134,33 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 		svgTemplateClaims = map[string]string{
 			"given_name":  user.Identity.GivenName,
 			"family_name": user.Identity.FamilyName,
-			"birth_date":  user.Identity.BirthDate,
+			"birthdate":   user.Identity.BirthDate,
 		}
+	case model.AuthMethodPID:
+		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{VerifierResponseCode: req.ResponseCode})
+		if err != nil {
+			c.log.Error(err, "failed to get authorization context")
+			return nil, err
+		}
+
+		svgTemplateClaims = map[string]string{
+			"given_name":  authorizationContext.Identity.GivenName,
+			"family_name": authorizationContext.Identity.FamilyName,
+			"birthdate":   authorizationContext.Identity.BirthDate,
+		}
+
 	default:
 		return nil, fmt.Errorf("unsupported auth method for user lookup: %s", req.AuthMethod)
 	}
 
+	if err := c.db.VCAuthorizationContextColl.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
+		c.log.Error(err, "failed to consent for user", "username", req.Username)
+		return nil, fmt.Errorf("failed to consent for user %s: %w", req.Username, err)
+	}
+
 	reply := &vcclient.UserLookupReply{
 		SVGTemplateClaims: svgTemplateClaims,
+		RedirectURL:       redirectURL.String(),
 	}
 
 	return reply, nil

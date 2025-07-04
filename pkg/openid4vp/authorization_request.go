@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"github.com/MicahParks/jwkset"
+	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
 type AuthorizationRequest_v2 struct {
@@ -32,6 +32,7 @@ type AuthorizationRequest_v2 struct {
 	// PresentationDefinition A string containing a Presentation Definition JSON object. See Section 5.4 for more details.
 	PresentationDefinition *PresentationDefinitionParameter `json:"presentation_definition,omitempty" bson:"presentation_definition,omitempty" validate:"required_without=PresentationDefinitionURI DCQLQuery Scope"`
 	ClientMetadata         *ClientMetadata                  `json:"client_metadata,omitempty" bson:"client_metadata,omitempty"`
+	IAT                    int64                            `json:"iat,omitempty" bson:"iat,omitempty" validate:"required"`
 	/////////
 
 	// PresentationDefinitionURI A string containing an HTTPS URL pointing to a resource where a Presentation Definition JSON object can be retrieved. See Section 5.5 for more details. dcql_query:A string containing a JSON-encoded DCQL query as defined in Section 6.
@@ -55,6 +56,10 @@ type PresentationDefinitionParameter struct {
 	// ID The Presentation Definition **MUST** contain an id property. The value of this property **MUST** be a string. The string **SHOULD** provide a unique ID for the desired context. For example, a UUID such as 32f54163-7166-48f1-93d8-f f217bdb0653 could provide an ID that is unique in a global context, while a simple string such as my_presentation_definition_1 could be suitably unique in a local context. The id property **SHOULD** be unique within the Presentation Definition itself, meaning no other id values should exist at any level with the same value.
 	ID string `json:"id,omitempty" bson:"id,omitempty" validate:"required"`
 
+	Title string `json:"title,omitempty" bson:"title,omitempty" validate:"omitempty"`
+
+	Description string `json:"description,omitempty" bson:"description,omitempty" validate:"omitempty"`
+
 	// InputDescriptors The Presentation Definition **MUST** contain an input_descriptors property. Its value **MUST** be an array of Input Descriptor Objects, the composition of which are described in the Input Descriptors section below.
 	InputDescriptors []InputDescriptor `json:"input_descriptors,omitempty" bson:"input_descriptors,omitempty" validate:"required"`
 
@@ -67,10 +72,10 @@ type PresentationDefinitionParameter struct {
 
 type ClientMetadata struct {
 	//	jwks: OPTIONAL. A JWKS as defined in [RFC7591]. It MAY contain one or more public keys, such as those used by the Wallet as an input to a key agreement that may be used for encryption of the Authorization Response (see Section 8.3), or where the Wallet will require the public key of the Verifier to generate the Verifiable Presentation. This allows the Verifier to pass ephemeral keys specific to this Authorization Request. Public keys included in this parameter MUST NOT be used to verify the signature of signed Authorization Requests.
-	JWKS jwkset.JWK `json:"jwks,omitempty" bson:"jwks,omitempty" validate:"omitempty"`
+	JWKS Keys `json:"jwks,omitempty" bson:"jwks,omitempty" validate:"omitempty"`
 	//
 	// vp_formats: REQUIRED when not available to the Wallet via another mechanism. As defined in Section 11.1.
-	VPFormats *VPFormats `json:"vp_formats,omitempty" bson:"vp_formats,omitempty"`
+	VPFormats map[string]map[string][]string `json:"vp_formats,omitempty" bson:"vp_formats,omitempty"`
 	// authorization_signed_response_alg: OPTIONAL. As defined in [JARM].
 	AuthorizationSignedResponseALG string `json:"authorization_signed_response_alg,omitempty" bson:"authorization_signed_response_alg,omitempty" validate:"omitempty,oneof=RS256 ES256 PS256 EdDSA"`
 	// authorization_encrypted_response_alg: OPTIONAL. As defined in [JARM].
@@ -79,7 +84,21 @@ type ClientMetadata struct {
 	AuthorizationEncryptedResponseENC string `json:"authorization_encrypted_response_enc,omitempty" bson:"authorization_encrypted_response_enc,omitempty" validate:"omitempty,oneof=A128CBC-HS256 A256CBC-HS512 A128GCM A256GCM"`
 }
 
-type VPFormats struct{}
+type Keys struct {
+	Keys []jwk.Key `json:"keys,omitempty" bson:"keys,omitempty" validate:"omitempty,dive"`
+}
+
+type JWK struct {
+	KTY string `json:"kty,omitempty" bson:"kty,omitempty" validate:"required,oneof=RSA EC OKP"`
+	X   string `json:"x,omitempty" bson:"x,omitempty" validate:"omitempty"`
+	Y   string `json:"y,omitempty" bson:"y,omitempty" validate:"omitempty"`
+	CRV string `json:"crv,omitempty" bson:"crv,omitempty" validate:"omitempty,oneof=P-256 P-384 P-521 Ed25519 Ed448 X25519 X448"`
+	N   string `json:"n,omitempty" bson:"n,omitempty" validate:"omitempty"`
+	KID string `json:"kid,omitempty" bson:"kid,omitempty" validate:"omitempty"`
+	E   string `json:"e,omitempty" bson:"e,omitempty" validate:"omitempty"`
+	Use string `json:"use,omitempty" bson:"use,omitempty" validate:"omitempty,oneof=sig enc"`
+	Alg string `json:"alg,omitempty" bson:"alg,omitempty"`
+}
 
 type TransactionData struct {
 	//type: REQUIRED. String that identifies the type of transaction data . This value determines parameters that can be included in the transaction_data object. The specific values are out of scope of this specification. It is RECOMMENDED to use collision-resistant names for type values.
@@ -105,13 +124,4 @@ func (t *TransactionData) Base64Encode() (string, error) {
 	}
 
 	return encoded, nil
-}
-
-func (a *AuthorizationRequest_v2) Marshal() (string, error) {
-	bJSON, err := json.Marshal(a)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bJSON), nil
 }

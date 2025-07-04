@@ -42,3 +42,7 @@ func TestParseCertificateFromFile(t *testing.T) {
 		})
 	}
 }
+
+func TestParseKeyFromFile(t *testing.T) {
+	
+}

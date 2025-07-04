@@ -54,7 +54,7 @@ func TestPDA1Credential(t *testing.T) {
 		token, err := client.pda1Client.sdjwt(ctx, mockPDA1, nil, &deterministicSalt)
 		assert.NoError(t, err)
 
-		_, bodyEncoded, _, _, err := sdjwt3.SplitToken(token)
+		_, bodyEncoded, _, _, _, err := sdjwt3.SplitToken(token)
 		assert.NoError(t, err)
 
 		body, err := sdjwt3.Base64Decode(bodyEncoded)
@@ -147,7 +147,7 @@ func TestEHICCredential(t *testing.T) {
 		token, err := client.ehicClient.sdjwt(ctx, doc, nil, &deterministicSalt)
 		assert.NoError(t, err)
 
-		_, bodyEncoded, _, _, err := sdjwt3.SplitToken(token)
+		_, bodyEncoded, _, _, _, err := sdjwt3.SplitToken(token)
 		assert.NoError(t, err)
 
 		body, err := sdjwt3.Base64Decode(bodyEncoded)

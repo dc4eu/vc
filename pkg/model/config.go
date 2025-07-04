@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -318,10 +319,10 @@ func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
 }
 
 // IssuerMetadata loads the issuing metadata from
-func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, any, []string, error) {
+func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, any, *x509.Certificate, []string, error) {
 	fileByte, err := os.ReadFile(cfg.APIGW.IssuerMetadata.Path)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	metadata := &openid4vci.CredentialIssuerMetadataParameters{}
@@ -329,16 +330,16 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 	switch filepath.Ext(cfg.APIGW.IssuerMetadata.Path) {
 	case ".json":
 		if err := json.Unmarshal(fileByte, &metadata); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 
 	case "yaml", ".yml":
 		if err := yaml.Unmarshal(fileByte, &metadata); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 
 	default:
-		return nil, nil, nil, errors.New("unsupported file type")
+		return nil, nil, nil, nil, errors.New("unsupported file type")
 	}
 
 	// ensure that the metadata is empty, should be procured/signed by the request or other automated process
@@ -346,12 +347,12 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 
 	privateKey, err := pki.ParseKeyFromFile(cfg.APIGW.IssuerMetadata.SigningKeyPath)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
-	_, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
+	cert, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	chainBase64Encoded := []string{}
@@ -359,7 +360,7 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 		chainBase64Encoded = append(chainBase64Encoded, pki.Base64EncodeCertificate(c))
 	}
 
-	return metadata, privateKey, chainBase64Encoded, nil
+	return metadata, privateKey, cert, chainBase64Encoded, nil
 }
 
 // LoadOAuth2Metadata loads OAuth2 metadata from file

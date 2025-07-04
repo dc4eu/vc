@@ -7,30 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateCryptographicNonce(t *testing.T) {
-	tts := []struct {
-		name string
-		n    int
-		want int
-	}{
-		{
-			name: "Generate 16 byte nonce",
-			n:    16,
-			want: 24,
-		},
-	}
-	for _, tt := range tts {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := GenerateCryptographicNonce(tt.n)
-			assert.NoError(t, err)
-
-			fmt.Println("Generated nonce:", got)
-
-			assert.Equal(t, tt.want, len(got))
-		})
-	}
-}
-
 func TestGenerateCryptographicNonceWithLength(t *testing.T) {
 	tts := []struct {
 		name string
@@ -38,14 +14,25 @@ func TestGenerateCryptographicNonceWithLength(t *testing.T) {
 		want int
 	}{
 		{
-			name: "Generate 32 byte nonce",
+			name: "Generate 32 character nonce",
 			n:    32,
 			want: 32,
+		},
+		{
+			name: "Generate 100 character nonce",
+			n:    100,
+			want: 52,
+		},
+		{
+			name: "Generate 100 character nonce",
+			n:    0,
+			want: 52,
 		},
 	}
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GenerateCryptographicNonceWithLength(tt.n)
+			got := GenerateCryptographicNonceFixedLength(tt.n)
+			fmt.Println("Generated nonce:", got)
 
 			assert.Equal(t, tt.want, len(got))
 		})

@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strings"
+	"vc/internal/gen/issuer/apiv1_issuer"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -111,6 +113,41 @@ type Proof struct {
 	JWT         string `json:"jwt,omitempty"`
 	LDPVP       string `json:"ldp_vp,omitempty"`
 	Attestation string `json:"attestation"`
+}
+
+func (p *Proof) ExtractJWK() (*apiv1_issuer.Jwk, error) {
+	if p.JWT == "" {
+		return nil, fmt.Errorf("JWT is empty")
+	}
+
+	headerBase64 := strings.Split(p.JWT, ".")[0]
+
+	headerByte, err := base64.RawStdEncoding.DecodeString(headerBase64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode JWT header: %w", err)
+	}
+
+	headerMap := map[string]any{}
+	if err := json.Unmarshal(headerByte, &headerMap); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JWT header: %w", err)
+	}
+
+	jwkMap, ok := headerMap["jwk"]
+	if !ok {
+		return nil, fmt.Errorf("jwk not found in JWT header")
+	}
+
+	jwkByte, err := json.Marshal(jwkMap)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal JWK: %w", err)
+	}
+
+	jwk := &apiv1_issuer.Jwk{}
+	if err := json.Unmarshal(jwkByte, jwk); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JWK: %w", err)
+	}
+
+	return jwk, nil
 }
 
 // CredentialResponseEncryption holds the JWK for encryption

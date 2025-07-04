@@ -9,11 +9,12 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"github.com/google/uuid"
 	"math/big"
 	"net"
 	"time"
 	"vc/pkg/openid4vp"
+
+	"github.com/google/uuid"
 )
 
 type ClientMetadata struct { //From: OpenID Connect Dynamic Client Registration

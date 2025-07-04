@@ -13,7 +13,7 @@ func (s *Service) endpointVerificationRequestObject(ctx context.Context, c *gin.
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointVerificationRequestObject")
 	defer span.End()
 
-	s.log.Debug("verification", "req", c.Request.Body)
+	s.log.Debug("verification request object", "req", c.Request.Body, "headers", c.Request.Header)
 
 	request := &apiv1.VerificationRequestObjectRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
@@ -34,7 +34,7 @@ func (s *Service) endpointVerificationDirectPost(ctx context.Context, c *gin.Con
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointVerificationDirectPost")
 	defer span.End()
 
-	s.log.Debug("verification", "req", c.Request)
+	s.log.Debug("verification direct post", "headers", c.Request.Header)
 
 	request := &apiv1.VerificationDirectPostRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {

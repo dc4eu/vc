@@ -45,6 +45,8 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 	defer span.End()
 	session := sessions.Default(c)
 
+	s.log.Debug("Authorize endpoint", "c.Request.URL", c.Request.URL.String(), "headers", c.Request.Header)
+
 	request := &openid4vci.AuthorizeRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
@@ -56,10 +58,10 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 		return nil, err
 	}
 
-	session.Set("client_id", reply.ClientID)
 	session.Set("scope", reply.Scope)
 	session.Set("auth_method", s.cfg.GetCredentialConstructorAuthMethod(reply.Scope))
 	session.Set("request_uri", request.RequestURI)
+	session.Set("session_id", reply.SessionID)
 	if err := session.Save(); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		s.log.Error(err, "session save error")
@@ -79,6 +81,8 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 func (s *Service) endpointOAuthToken(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointToken")
 	defer span.End()
+
+	session := sessions.Default(c)
 
 	tokenRequestHeader := &openid4vci.TokenRequestHeader{}
 	if err := c.BindHeader(tokenRequestHeader); err != nil {
@@ -103,13 +107,15 @@ func (s *Service) endpointOAuthToken(ctx context.Context, c *gin.Context) (any, 
 
 	s.log.Debug("Token endpoint", "redirectURI", request.RedirectURI, "reply", reply)
 
+	session.Clear()
+
 	c.SetAccepted("application/json")
 	c.Redirect(http.StatusPermanentRedirect, request.RedirectURI)
 
 	return reply, nil
 }
 
-func (s *Service) endpointOAuth2Metadata(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointOAuthMetadata(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointMetadata")
 	defer span.End()
 
@@ -129,8 +135,8 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 	defer span.End()
 
 	session := sessions.Default(c)
-	authMethod := session.Get("auth_method")
-	if authMethod == nil {
+	authMethod, ok := session.Get("auth_method").(string)
+	if !ok {
 		err := errors.New("auth_method not found in session")
 		span.SetStatus(codes.Error, err.Error())
 		s.log.Error(err, "auth_method not found in session")
@@ -138,13 +144,21 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 		return nil, err
 	}
 
-	c.SetCookie("auth_method", authMethod.(string), 900, "/authorization/consent", "", false, false)
+	c.SetCookie("auth_method", authMethod, 900, "/authorization/consent", "", false, false)
+
+	sessionID, ok := session.Get("session_id").(string)
+	if !ok {
+		err := errors.New("session_id not found in session")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "session_id not found in session")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, err
+	}
 
 	if authMethod == model.AuthMethodPID {
 		request := &apiv1.OauthAuthorizationConsentRequest{
-			AuthMethod: authMethod.(string),
+			SessionID: sessionID,
 		}
-
 		reply, err := s.apiv1.OAuthAuthorizationConsent(ctx, request)
 		if err != nil {
 			return nil, err
@@ -161,6 +175,30 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 	}
 
 	c.HTML(http.StatusOK, "consent.html", nil)
+	return nil, nil
+}
+func (s *Service) endpointOAuthAuthorizationConsentCallback(ctx context.Context, c *gin.Context) (any, error) {
+	session := sessions.Default(c)
+
+	request := &apiv1.OauthAuthorizationConsentCallbackRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		s.log.Error(err, "binding error")
+		return nil, err
+	}
+
+	session.Set("response_code", request.ResponseCode)
+	if err := session.Save(); err != nil {
+		s.log.Error(err, "session save error")
+		return nil, err
+	}
+
+	_, err := s.apiv1.OAuthAuthorizationConsentCallback(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Redirect(http.StatusFound, "/authorization/consent/#/credentials")
+
 	return nil, nil
 }
 

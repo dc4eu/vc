@@ -416,15 +416,13 @@ func (s *Service) endpointGetOffer(ctx context.Context, c *gin.Context) (any, er
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetOffer")
 	defer span.End()
 
-	scope := c.Param("scope")
-	walletId := c.Param("wallet_id")
-
-	req := &apiv1.CredentialOfferRequest{
-		Scope:    scope,
-		WalletID: walletId,
+	request := &apiv1.CredentialOfferRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 
-	reply, err := s.apiv1.CredentialOffer(ctx, req)
+	reply, err := s.apiv1.CredentialOffer(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

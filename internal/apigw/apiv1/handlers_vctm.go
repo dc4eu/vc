@@ -3,12 +3,12 @@ package apiv1
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+	"vc/pkg/openid4vci"
 	"vc/pkg/openid4vp"
 	"vc/pkg/sdjwt3"
 
@@ -58,8 +58,8 @@ func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialO
 }
 
 type CredentialOfferRequest struct {
-	Scope    string `json:"scope" validate:"required"`
-	WalletID string `json:"wallet_id" validate:"required"`
+	Scope    string `json:"scope" uri:"scope" binding:"required"`
+	WalletID string `json:"wallet_id" uri:"wallet_id" binding:"required"`
 }
 
 type CredentialOfferReply struct {
@@ -78,20 +78,18 @@ func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferReques
 		return nil, err
 	}
 
-	data := map[string]any{
-		"credential_issuer":            c.cfg.APIGW.CredentialOffers.IssuerURL,
-		"credential_configuration_ids": []string{vctm.VCT},
-		"grants": map[string]any{
+	offerParams := openid4vci.CredentialOfferParameters{
+		CredentialIssuer:           c.cfg.APIGW.CredentialOffers.IssuerURL,
+		CredentialConfigurationIDs: []string{vctm.VCT},
+		Grants: map[string]any{
 			"authorization_code": map[string]any{},
 		},
 	}
 
-	jsonBytes, err := json.Marshal(data)
+	credentialOffer, err := offerParams.CredentialOffer()
 	if err != nil {
 		return nil, err
 	}
-
-	urlQueryString := url.PathEscape(string(jsonBytes))
 
 	wallet, ok := c.cfg.APIGW.CredentialOffers.Wallets[req.WalletID]
 	if !ok {
@@ -104,11 +102,7 @@ func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferReques
 		return nil, err
 	}
 
-	query := baseURL.Query()
-	query.Set("credential_offer", urlQueryString)
-	baseURL.RawQuery = query.Encode()
-
-	url := baseURL.String()
+	url := baseURL.String() + "?" + credentialOffer.String()
 
 	qr, err := openid4vp.GenerateQR(url, qrcode.Medium, 256)
 	if err != nil {

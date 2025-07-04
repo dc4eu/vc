@@ -44,7 +44,9 @@
                                 <label for="password" class="label">Password</label>
                                 <input id="password" name="password" class="input" type="password" placeholder="mysecret123" required>
                             </div>
-                            <input type="submit" class="button is-success is-justify-content-left" value="Log in" />
+                            <div class="is-flex is-justify-content-right">
+                                <input type="submit" class="button is-success" value="Log in" />
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -53,7 +55,7 @@
                 <div>
                     <template x-if="!pidAuthRedirectCountUp">
                         <div class="has-text-centered">
-                            <p class="block">Authenticate with PID to continue.</p>
+                            <p class="block">Authenticate using your PID to continue. To begin, click the button below. You will be redirected to your wallet and prompted to present your PID.</p>
                             <div class="is-flex is-justify-content-center">
                                 <button class="button is-success" @click="() => handleLoginPidAuth()">Start PID authentication</button>
                             </div>
@@ -64,10 +66,7 @@
                             <p class="block has-text-centered">Redirecting to Wallet in <span x-text="pidAuthRedirectMaxCount - pidAuthRedirectCountUp"></span>...</p>
                             <progress class="progress is-info" :value="pidAuthRedirectCountUp" :max="pidAuthRedirectMaxCount" x-text="pidAuthRedirectCountUp">
                             </progress>
-                            <div class="block is-flex is-justify-content-space-between">
-                                <form method="POST" action="/user/cancel">
-                                    <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
-                                </form>
+                            <div class="block is-flex is-justify-content-right">
                                 <button class="button is-success" @click="() => handleLoginPidAuth(true)" title="Proceed to Wallet immediately">Proceed now</button>
                             </div>
                         </div>
@@ -107,10 +106,7 @@
                             </template>
                         </div>
 
-                        <div class="block is-flex is-justify-content-space-between">
-                            <form method="POST" action="/user/cancel">
-                                <button class="button is-danger is-outlined is-small" title="Log out and return to your wallet" type="submit">Cancel</button>
-                            </form>
+                        <div class="block is-flex is-justify-content-right">
                             <input type="submit" value="Get credential" class="button is-success">
                         </div>
                     </form>
@@ -118,6 +114,14 @@
                 </div>
             </template>
         </div>
+        <form class="is-flex is-justify-content-center mt-6" method="POST" action="/user/cancel">
+            <button class="vc-cancel-button button" title="Cancel the process and return to your wallet" type="submit">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/>
+                </svg>
+                Cancel and return
+            </button>
+        </form>
     </div> 
 </section>
 </body>

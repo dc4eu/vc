@@ -117,10 +117,10 @@
                                 <div x-data="{ checked: false }">
                                     <div class="vc-radio flex items-center cursor-pointer">
                                         <input name="credential" type="radio" :id="`credential:${index}`" :value="credential.vct" @change="checked = !checked; console.log(checked)" required class="peer h-4 w-4 cursor-pointer appearance-none rounded-full dark:bg-gray-800 border border-slate-400 transition-all bg-white" id="html">
-                                        <span class="absolute bg-primary w-2.5 h-2.5 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity duration-200 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        <span class="absolute bg-primary dark:bg-primary-light w-2.5 h-2.5 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity duration-200 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                         </span>
                                     </div>
-                                    <label :for="`credential:${index}`" class="vc-radio-label radio block" :class="{ 'outline-3 outline-double outline-primary-light bg-primary-light bg-opacity-10': checked }">
+                                    <label :for="`credential:${index}`" class="vc-radio-label radio block cursor-pointer" :class="{ 'outline-3 outline-double outline-primary-light bg-primary-light bg-opacity-10': checked }">
                                         <div class="block">
                                             <img class="vc-credential-card mb-2" width="829" height="504" :src="credential.svg" alt="">
                                             <table class="table-auto w-full">
@@ -150,7 +150,7 @@
             </template>
         </div>
         <form class="mt-6" method="POST" action="/user/cancel">
-            <button class="rounded-lg shadow-sm text-sm px-6 py-3 flex items-center justify-center gap-1 focus-visible:outline-2 bg-black bg-opacity-15 dark:bg-white dark:bg-opacity-15 hover:bg-opacity-25" title="Cancel the process and return to your wallet" type="submit">
+            <button class="rounded-lg shadow-sm text-sm px-6 py-3 flex items-center justify-center gap-1 focus-visible:outline-2 bg-black bg-opacity-15 dark:bg-white dark:bg-opacity-15 hover:bg-red-400 dark:hover:bg-red-500" title="Cancel the process and return to your wallet" type="submit">
                 <svg class="inline w-5" xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/>
                 </svg>

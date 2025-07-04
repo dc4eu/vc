@@ -16,17 +16,6 @@ import * as v from "valibot";
  */
 
 /**
- * @typedef {v.InferOutput<typeof BasicAuthResponseSchema>} BasicAuthResponse
- */
-const BasicAuthResponseSchema = v.required(v.object({
-    grant: v.boolean(),
-    redirect_url: v.pipe(
-        v.string(),
-        v.url(),
-    )
-}));
-
-/**
  * @typedef {v.InferOutput<typeof UserDataSchema>} UserData
  */
 const UserDataSchema = v.required(v.object({
@@ -209,11 +198,7 @@ Alpine.data("app", () => ({
         };
 
         try {
-            const res = await this.fetchData(url.toString(), options);
-
-            const data = v.parse(BasicAuthResponseSchema, res);
-
-            this.redirect_url = data.redirect_url;
+            await this.fetchData(url.toString(), options);
 
             window.location.hash = ROUTES.credentials;
         } catch (err) {

@@ -232,8 +232,6 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, err
 	}
 
-	//c.log.Debug("Decrypted JWE", "decryptedJWE", string(decryptedJWE))
-
 	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")

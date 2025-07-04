@@ -2,12 +2,6 @@ import Alpine from "alpinejs";
 import * as v from "valibot";
 
 /**
- * @typedef {Object} SvgTemplateResponse
- * @property {string} template
- * @property {Record<string, string[]>} svg_claims
- */
-
-/**
  * @typedef {Object} Credential
  * @property {string} document_type
  * @property {string} name
@@ -99,7 +93,7 @@ Alpine.data("app", () => ({
     loading: true,
 
     /** @type {string | null} */
-    redirect_url: null,
+    redirectUrl: null,
 
     /** @type {Credential[]} */
     credentials: [],
@@ -302,7 +296,7 @@ Alpine.data("app", () => ({
 
             const data = v.parse(UserDataSchema, res);
 
-            this.redirect_url = data.redirect_url;
+            this.redirectUrl = data.redirect_url;
 
             const svg = await this.createCredentialSvgImageUri(
                 data.svg_template_claims,
@@ -339,10 +333,10 @@ Alpine.data("app", () => ({
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
-        if (!this.redirect_url) {
+        if (!this.redirectUrl) {
             this.error = "'redirect_url' is null";
         }
-        this.redirect(this.redirect_url);
+        this.redirect(this.redirectUrl);
     },
 
     /**
@@ -355,7 +349,7 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
-                this.redirect_url = null;
+                this.redirectUrl = null;
                 this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");

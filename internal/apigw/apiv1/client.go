@@ -24,18 +24,20 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg                        *model.Cfg
-	db                         *db.Service
-	log                        *logger.Log
-	tracer                     *trace.Tracer
-	datastoreClient            *vcclient.Client
-	issuerMetadata             *openid4vci.CredentialIssuerMetadataParameters
-	issuerMetadataSigningKey   any
-	issuerMetadataSigningChain []string
-	oauth2Metadata             *oauth2.AuthorizationServerMetadata
-	oauth2MetadataSigningKey   any
-	oauth2MetadataSigningChain []string
+	cfg                         *model.Cfg
+	db                          *db.Service
+	log                         *logger.Log
+	tracer                      *trace.Tracer
+	datastoreClient             *vcclient.Client
+	issuerMetadata              *openid4vci.CredentialIssuerMetadataParameters
+	issuerMetadataSigningKey    any
+	issuerMetadataSigningCert   *x509.Certificate
+	issuerMetadataSigningChain  []string
+	oauth2Metadata              *oauth2.AuthorizationServerMetadata
+	oauth2MetadataSigningKey    any
+	oauth2MetadataSigningChain  []string
 	ephemeralEncryptionKeyCache *ttlcache.Cache[string, jwk.Key]
+	svgTemplateCache            *ttlcache.Cache[string, SVGTemplateReply]
 }
 
 // New creates a new instance of the public api
@@ -45,8 +47,8 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 		db:                          db,
 		log:                         log.New("apiv1"),
 		tracer:                      tracer,
-		svgTemplateCache: ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
+		svgTemplateCache:            ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
 	}
 
 	// Start the ephemeral encryption key cache
@@ -57,7 +59,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 
 	var err error
 	if c.cfg.APIGW.IssuerMetadata.Path != "" {
-		c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain, err = c.cfg.LoadIssuerMetadata(ctx)
+		c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningCert, c.issuerMetadataSigningChain, err = c.cfg.LoadIssuerMetadata(ctx)
 		if err != nil {
 			return nil, err
 		}

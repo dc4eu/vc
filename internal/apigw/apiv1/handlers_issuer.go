@@ -72,7 +72,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	// "DPoP H4fFxp2hDZ-KY-_am35sXBJStQn9plmV_UC_bk20heA="
 	accessToken := strings.TrimPrefix(req.Headers.Authorization, "DPoP ")
 
-	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "mura", accessToken)
+	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "accessToken", accessToken)
 
 	authContext, err := c.db.VCAuthorizationContextColl.GetWithAccessToken(ctx, accessToken)
 	if err != nil {

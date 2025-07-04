@@ -181,6 +181,11 @@ func (c *VCAuthorizationContextColl) Get(ctx context.Context, query *model.Autho
 		filter["verifier_response_code"] = bson.M{"$eq": query.VerifierResponseCode}
 	}
 
+	if query.EphemeralEncryptionKeyID != "" {
+		filter["ephemeral_encryption_key_id"] = bson.M{"$eq": query.EphemeralEncryptionKeyID}
+	}
+
+
 	if len(filter) == 0 {
 		span.SetStatus(codes.Error, "query cannot be empty")
 		return nil, errors.New("query cannot be empty")

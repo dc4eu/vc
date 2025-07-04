@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"vc/pkg/model"
@@ -125,6 +126,7 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 	if err := json.Unmarshal(presentationDefinition, &pd); err != nil {
 		return "", err
 	}
+	pd.Purpose = fmt.Sprintf("Present your credential(s) to get your %s", authorizationContext.Scope)
 
 	vf := map[string]map[string][]string{}
 	if err := json.Unmarshal(vpFormats, &vf); err != nil {

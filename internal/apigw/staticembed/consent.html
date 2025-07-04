@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authorize Consent</title>
-    <link rel="stylesheet" href="/static/bulma.min.css">
     <link rel="stylesheet" href="/static/styles.css">
     <script type="importmap">
     {
@@ -14,88 +13,126 @@
         }
     }
     </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    'xl': '1rem',
+                },
+                width: {
+                    '55': 55,
+                },
+                colors: {
+                    'primary': '#003476',
+                    'primary-hover': '#002b62',
+                    'primary-light': '#4169E1',
+                    'primary-light-hover': '#0F52BA',
+                    'extra-light': '#42B6E9',
+                    'extra-light-hover': '#5DB5D8',
+                },
+                screens: {
+                    '2xs': '360px',
+                    'xm': { 'max': '479px' },
+                },
+                keyframes: {
+                    'slide-in-up': {
+                        '0%': { transform: 'translateY(100%)' },
+                        '100%': { transform: 'translateY(0)' },
+                    },
+                    'slide-in-down': {
+                        '0%': { transform: 'translateY(-100%)' },
+                        '100%': { transform: 'translateY(0)' },
+                    },
+                    'quick-blur': {
+                        '0%': { filter: 'blur(2px)' },
+                        '100%': { filter: 'blur(0)' },
+                    },
+                },
+                animation: {
+                    'slide-in-up': 'slide-in-up 0.5s ease-out forwards',
+                    'slide-in-down': 'slide-in-down 0.5s ease-out forwards',
+                    'quick-blur': 'quick-blur 0.3s ease-in'
+                },
+            }
+        },
+    }
+    </script>
     <script type="module" src="/static/consent.js"></script>
 </head>
-<body>
-<section class="section" x-data="app">
-    <div class="vc-container container is-max-tablet">
-        <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Authorize Consent</h1>
+<body class="content-fade-in-appear-done content-fade-in-enter-done">
+<section class="flex-grow flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 min-h-dvh flex flex-col" x-data="app">
+    <div class="w-full flex flex-col items-center gap-7 px-6 py-8 text-black dark:text-white max-w-lg p-8">
+        <h1 class="text-3xl font-bold leading-tight tracking-tight text-gray-900 text-center dark:text-white" x-ref="title">Authorize Consent</h1>
         <template x-if="error">
-            <div class="notification is-danger">
+            <div class="flex items-center rounded-lg p-4 bg-red-600">
                 <p x-text="error"></p>
             </div>
         </template>
-        <div class="box">
+        <div class="relative w-full p-8 bg-white rounded-lg shadow dark:bg-gray-800">
             <template x-if="loading">
                 <div class="vc-loader">
-                    <span class="loader"></span>
+                    <span class="loader text-primary dark:text-primary-light"></span>
                 </div>
             </template>
             <template x-if="!loading && !loggedIn && authMethod === 'basic'">
-                <div>
-                    <p class="block has-text-centered">Authenticate with username and password to continue.</p>
+                <div class="space-y-4 md:space-y-6">
+                    <p class="pd-2">Authenticate with username and password to continue.</p>
                     <form x-ref="loginForm" @submit.prevent="handleLoginBasic">
-                        <div class="container is-max-tablet">
-                            <div class="field">
-                                <label for="username" class="label">Username</label>
-                                <input id="username" name="username" class="input" type="text" placeholder="johndoe" required>
+                        <div>
+                            <div class="mb-2">
+                                <label for="username" class="block text-s font-semibold mb-1">Username</label>
+                                <input id="username" name="username" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:inputDarkModeOverride" type="text" placeholder="johndoe" required>
                             </div>
-                            <div class="field">
-                                <label for="password" class="label">Password</label>
-                                <input id="password" name="password" class="input" type="password" placeholder="mysecret123" required>
+                            <div class="mb-2">
+                                <label for="password" class="block text-s font-semibold mb-1">Password</label>
+                                <input id="password" name="password" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:inputDarkModeOverride" type="password" placeholder="mysecret123" required>
                             </div>
-                            <div class="is-flex is-justify-content-right">
-                                <input type="submit" class="button is-success" value="Log in" />
-                            </div>
+                            <input type="submit" class="rounded-lg shadow-sm text-sm w-full px-4 py-2 mt-6 text-center text-white bg-primary hover:bg-primary-hover dark:text-white dark:hover:bg-primary-light-hover dark:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer" value="Log in" />
                         </div>
                     </form>
                 </div>
             </template>
-            <template x-if="!loading && !loggedIn && authMethod === 'pid_auth'">
-                <div>
-                    <template x-if="!pidAuthRedirectCountUp">
-                        <div class="has-text-centered">
-                            <p class="block">Authenticate using your PID to continue. To begin, click the button below. You will be redirected to your wallet and prompted to present your PID.</p>
-                            <div class="is-flex is-justify-content-center">
-                                <button class="button is-success" @click="() => handleLoginPidAuth()">Start PID authentication</button>
-                            </div>
-                        </div>
-                    </template>
-                    <template x-if="pidAuthRedirectCountUp">
-                        <div>
-                            <p class="block has-text-centered">Redirecting to Wallet in <span x-text="pidAuthRedirectMaxCount - pidAuthRedirectCountUp"></span>...</p>
-                            <progress class="progress is-info" :value="pidAuthRedirectCountUp" :max="pidAuthRedirectMaxCount" x-text="pidAuthRedirectCountUp">
-                            </progress>
-                            <div class="block is-flex is-justify-content-right">
-                                <button class="button is-success" @click="() => handleLoginPidAuth(true)" title="Proceed to Wallet immediately">Proceed now</button>
-                            </div>
-                        </div>
-                    </template>
+            <template x-if="!loading && !loggedIn && authMethod === 'pid_auth' && !pidAuthRedirectCountUp">
+                <div class="space-y-4 md:space-y-6">
+                    <p class="text-center">Authenticate using your PID to continue. To begin, click the button below. You will be redirected to your wallet and prompted to present your PID.</p>
+                    <button class="rounded-lg shadow-sm text-sm w-full px-4 py-2 mt-6 text-center text-white bg-primary hover:bg-primary-hover dark:text-white dark:hover:bg-primary-light-hover dark:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer" @click="() => handleLoginPidAuth()">Start PID authentication</button>
+                </div>
+            </template>
+            <template x-if="!loading && !loggedIn && authMethod === 'pid_auth' && pidAuthRedirectCountUp">
+                <div class="space-y-4 md:space-y-6">
+                    <p class="text-center">Redirecting to Wallet in <span x-text="pidAuthRedirectMaxCount - pidAuthRedirectCountUp"></span>...</p>
+                    <progress class="w-full rounded-lg bg-gray bg-opacity-15" :value="pidAuthRedirectCountUp" :max="pidAuthRedirectMaxCount" x-text="pidAuthRedirectCountUp">
+                    </progress>
+                    <button class="rounded-lg shadow-sm text-sm w-full px-4 py-2 mt-6 text-center text-white bg-primary hover:bg-primary-hover dark:text-white dark:hover:bg-primary-light-hover dark:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer" @click="() => handleLoginPidAuth(true)" title="Proceed to Wallet immediately">Proceed now</button>
                 </div>
             </template>
             <template x-if="!loading && loggedIn">
-                <div>
-                    <div class="block">
-                        <p>Select the credential you wish to retrieve by clicking on it:</p>
-                    </div>
+                <div class="space-y-4 md:space-y-6">
+                    <p>Select the credential you wish to retrieve by clicking on it:</p>
                     <form x-ref="credentialSelectionForm" @submit.prevent="handleCredentialSelection">
-                        <div class="field">
+                        <div class="relative">
                             <template x-for="(credential, index) in credentials">
-                                <div class="block control is-flex is-align-items-flex-start is-gap-1 is-justify-content-space-between">
-                                    <input class="vc-radio" type="radio" name="credential" :id="`credential:${index}`" :value="credential.vct" required>
-                                    <label :for="`credential:${index}`" class="vc-radio-label radio">
+                                <div x-data="{ checked: false }">
+                                    <div class="vc-radio flex items-center cursor-pointer">
+                                        <input name="credential" type="radio" :id="`credential:${index}`" :value="credential.vct" @change="checked = !checked; console.log(checked)" required class="peer h-4 w-4 cursor-pointer appearance-none rounded-full dark:bg-gray-800 border border-slate-400 transition-all bg-white" id="html">
+                                        <span class="absolute bg-primary dark:bg-primary-light w-2.5 h-2.5 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity duration-200 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        </span>
+                                    </div>
+                                    <label :for="`credential:${index}`" class="vc-radio-label radio block cursor-pointer" :class="{ 'outline-3 outline-double outline-primary-light bg-primary-light bg-opacity-10': checked }">
                                         <div class="block">
-                                            <img class="vc-credential-card" width="829" height="504" :src="credential.svg" alt="">
-                                            <table class="vc-table table">
+                                            <img class="vc-credential-card mb-2" width="829" height="504" :src="credential.svg" alt="">
+                                            <table class="table-auto w-full">
                                                 <tbody>
-                                                    <tr>
-                                                        <th>Credential type</th>
-                                                        <td x-text="credential.document_type"></td>
+                                                    <tr class="border-b border-black/20 dark:border-white/20">
+                                                        <th class="p-2 text-left">Credential type</th>
+                                                        <td class="p-2 text-left" x-text="credential.document_type"></td>
                                                     </tr>
                                                     <template x-for="[key, value] of Object.entries(credential.claims)">
-                                                        <tr>
-                                                            <th x-text="key"></th>
-                                                            <td x-text="value"></td>
+                                                        <tr class="[&:not(:last-child)]:border-b [&:not(:last-child)]:border-black/20 [&:not(:last-child)]:dark:border-white/20">
+                                                            <th class="p-2 text-left" x-text="key"></th>
+                                                            <td class="p-2 text-left" x-text="value"></td>
                                                         </tr>
                                                     </template>
                                                 </tbody>
@@ -106,17 +143,15 @@
                             </template>
                         </div>
 
-                        <div class="block is-flex is-justify-content-right">
-                            <input type="submit" value="Get credential" class="button is-success">
-                        </div>
+                        <input type="submit" value="Get credential" class="rounded-lg shadow-sm text-sm w-full px-4 py-2 mt-6 text-center text-white bg-primary hover:bg-primary-hover dark:text-white dark:hover:bg-primary-light-hover dark:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer">
                     </form>
                    
                 </div>
             </template>
         </div>
-        <form class="is-flex is-justify-content-center mt-6" method="POST" action="/user/cancel">
-            <button class="vc-cancel-button button" title="Cancel the process and return to your wallet" type="submit">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+        <form class="mt-6" method="POST" action="/user/cancel">
+            <button class="rounded-lg shadow-sm text-sm px-6 py-3 flex items-center justify-center gap-1 focus-visible:outline-2 bg-black bg-opacity-15 dark:bg-white dark:bg-opacity-15 hover:bg-red-400 dark:hover:bg-red-500" title="Cancel the process and return to your wallet" type="submit">
+                <svg class="inline w-5" xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/>
                 </svg>
                 Cancel and return

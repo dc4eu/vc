@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"testing"
+	"vc/internal/gen/issuer/apiv1_issuer"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -55,12 +56,24 @@ func TestValidate(t *testing.T) {
 		name string
 		jwt  string
 		jwk  string
-		want error
+		want *DPoP
 	}{
 		{
 			name: "mockJWT_1",
 			jwt:  mockJWT_1,
-			want: nil,
+			want: &DPoP{
+				JTI:        "",
+				HTM:        "",
+				HTU:        "",
+				ATH:        "",
+				Thumbprint: "",
+				JWK: &apiv1_issuer.Jwk{
+					Crv: "P-256",
+					Kty: "EC",
+					X:   "V_CJ7frHf5iHMMkrR4L9OW8QlAX8NHny6dX1IljrZ28",
+					Y:   "tGprUa5HX8hDsBVWwTHpHcsxcd1jhctB_T-6mg4W-Ng",
+				},
+			},
 		},
 		{
 			name: "mockJWT_2",
@@ -70,8 +83,11 @@ func TestValidate(t *testing.T) {
 	}
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := ValidateAndParseDPoPJWT(tt.jwt)
-			assert.Equal(t, tt.want, err, "Error should match expected error")
+			got, err := ValidateAndParseDPoPJWT(tt.jwt)
+			assert.NoError(t, err, "ValidateAndParseDPoPJWT should not return an error")
+
+			assert.Equal(t, tt.want, got, "Parsed DPoP should match expected value")
+			//assert.Equal(t, tt.want, err, "Error should match expected error")
 		})
 	}
 }

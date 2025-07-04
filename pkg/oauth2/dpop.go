@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"fmt"
+	"vc/internal/gen/issuer/apiv1_issuer"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v3/jwk"
@@ -29,6 +30,7 @@ type DPoP struct {
 
 	Thumbprint string `json:"thumbprint,omitempty"` // Optional, used for JWK thumbprint
 
+	JWK *apiv1_issuer.Jwk `json:"jwk,omitempty"` // JWK claim, optional
 }
 
 func (d *DPoP) Unmarshal(claims jwt.MapClaims) error {
@@ -91,6 +93,8 @@ func ValidateAndParseDPoPJWT(dPopJWT string) (*DPoP, error) {
 	dpopClaims := &DPoP{}
 	claims := jwt.MapClaims{}
 
+	jwkClaim := map[string]any{}
+
 	token, err := jwt.ParseWithClaims(dPopJWT, claims, func(token *jwt.Token) (any, error) {
 		j := token.Header["jwk"].(map[string]any)
 		fmt.Println("JWK in token header:", j)
@@ -107,6 +111,12 @@ func ValidateAndParseDPoPJWT(dPopJWT string) (*DPoP, error) {
 
 		if token.Header["typ"] != "dpop+jwt" {
 			return nil, fmt.Errorf("unexpected token type: %v", token.Header["typ"])
+		}
+
+		var ok bool
+		jwkClaim, ok = token.Header["jwk"].(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("jwk header not found in token")
 		}
 
 		alg := token.Header["alg"]
@@ -127,7 +137,22 @@ func ValidateAndParseDPoPJWT(dPopJWT string) (*DPoP, error) {
 		return nil, fmt.Errorf("failed to unmarshal claims into DPoP struct: %w", err)
 	}
 
-	fmt.Println("Parsed DPoP JWT:", token, "valid:", token.Valid)
+	jwkBytes, err := json.Marshal(jwkClaim) // Ensure the JWK is marshaled to JSON
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal JWK: %w", err)
+	}
+
+	jwk := &apiv1_issuer.Jwk{}
+	if err := json.Unmarshal(jwkBytes, &jwk); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JWK: %w", err)
+	}
+
+	jwk.KeyOps = []string{"verify"}
+	jwk.Ext = true
+
+	fmt.Println("Parsed DPoP JWT:", token, "valid:", token.Valid, "jwk", jwk)
+
+	dpopClaims.JWK = jwk
 
 	return dpopClaims, nil
 }

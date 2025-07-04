@@ -80,6 +80,8 @@ type AuthorizationResponse struct {
 	Scope string `json:"-"`
 
 	ClientID string `json:"-"`
+
+	SessionID string `json:"-"`
 }
 
 // BindAuthorizationRequest binds the AuthorizationRequest

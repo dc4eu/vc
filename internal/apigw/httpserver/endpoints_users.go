@@ -36,7 +36,16 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 	defer span.End()
 	session := sessions.Default(c)
 
-	requestURI, ok := session.Get("request_uri").(string)
+	s.log.Debug("endpointLoginPIDUser", "method", c.Request.Method, "path", c.Request.URL.Path, "headers", c.Request.Header)
+
+	request := &vcclient.LoginPIDUserRequest{}
+	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	var ok bool
+	request.RequestURI, ok = session.Get("request_uri").(string)
 	if !ok {
 		err := errors.New("request_uri not found in session")
 		span.SetStatus(codes.Error, err.Error())
@@ -44,17 +53,7 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 		return nil, err
 	}
 
-	s.log.Debug("endpointLoginPIDUser", "requestURI", requestURI)
-
-	s.log.Debug("endpointLoginPIDUser", "method", c.Request.Method, "path", c.Request.URL.Path, "headers", c.Request.Header)
-	request := &vcclient.LoginPIDUserRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-	request.RequestURI = requestURI
-
-	reply, err := s.apiv1.LoginPIDUser(ctx, request)
+	err := s.apiv1.LoginPIDUser(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
@@ -67,16 +66,28 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 		return nil, err
 	}
 
-	return reply, nil
+	return nil, nil
 }
 
 func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUserLookup")
 	defer span.End()
-
-	request := &vcclient.UserLookupRequest{}
-
 	session := sessions.Default(c)
+
+	requestURI, ok := session.Get("request_uri").(string)
+	if !ok {
+		err := errors.New("request_uri not found in session")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointLoginPIDUser: request_uri not found in session")
+		return nil, err
+	}
+
+	s.log.Debug("endpointLoginPIDUser", "requestURI", requestURI)
+
+	request := &vcclient.UserLookupRequest{
+		RequestURI: requestURI,
+	}
+
 	authMethod, ok := session.Get("auth_method").(string)
 	if !ok {
 		err := errors.New("auth_method not found in session")
@@ -99,6 +110,14 @@ func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, 
 
 		request.Username = username
 	case model.AuthMethodPID:
+		responseCode, ok := session.Get("response_code").(string)
+		if !ok {
+			err := errors.New("response_code not found in session")
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "endpointUserLookup: response_code not found in session")
+			return nil, err
+		}
+		request.ResponseCode = responseCode
 
 	default:
 		err := errors.New("unsupported auth method for user lookup")

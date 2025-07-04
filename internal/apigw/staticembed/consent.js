@@ -33,8 +33,9 @@ const UserDataSchema = v.required(v.object({
     svg_template_claims: v.object({
         given_name: v.string(),
         family_name: v.string(),
-        birth_date: v.string(),
+        birthdate: v.string(),
     }),
+    redirect_url: v.string(),
 }));
 
 /**
@@ -296,6 +297,8 @@ Alpine.data("app", () => ({
             const res = await this.fetchData(url.toString(), options);
 
             const data = v.parse(UserDataSchema, res);
+
+            this.redirect_url = data.redirect_url;
 
             const svg = await this.createCredentialSvgImageUri(
                 data.svg_template_claims,

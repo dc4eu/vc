@@ -3,6 +3,8 @@ package openid4vp
 import (
 	"encoding/base64"
 	"encoding/json"
+
+	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
 type AuthorizationRequest_v2 struct {
@@ -83,7 +85,7 @@ type ClientMetadata struct {
 }
 
 type Keys struct {
-	Keys []JWK `json:"keys,omitempty" bson:"keys,omitempty" validate:"omitempty,dive"`
+	Keys []jwk.Key `json:"keys,omitempty" bson:"keys,omitempty" validate:"omitempty,dive"`
 }
 
 type JWK struct {
@@ -123,4 +125,3 @@ func (t *TransactionData) Base64Encode() (string, error) {
 
 	return encoded, nil
 }
-

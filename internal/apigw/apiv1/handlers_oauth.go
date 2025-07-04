@@ -10,7 +10,6 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
-	"vc/pkg/openid4vp"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -27,17 +26,24 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 
 	requestURI := fmt.Sprintf("urn:ietf:params:oauth:request_uri:%s", uuid.NewString())
 
+	c.log.Debug("PAR", "state", req.State)
+
 	azt := model.AuthorizationContext{
-		Code:                uuid.NewString(),
-		RequestURI:          requestURI,
-		Scope:               req.Scope,
-		IsUsed:              false,
-		CodeChallenge:       req.CodeChallenge,
-		CodeChallengeMethod: req.CodeChallengeMethod,
-		State:               req.State,
-		ClientID:            req.ClientID,
-		RedirectURI:         req.RedirectURI,
-		ExpiresAt:           time.Now().Add(60 * time.Second).Unix(),
+		//VerifierContextID:        oauth2.GenerateCryptographicNonceWithLength(32),
+		SessionID:                uuid.NewString(),
+		Code:                     uuid.NewString(),
+		RequestURI:               requestURI,
+		Scope:                    req.Scope,
+		IsUsed:                   false,
+		CodeChallenge:            req.CodeChallenge,
+		CodeChallengeMethod:      req.CodeChallengeMethod,
+		State:                    req.State,
+		ClientID:                 req.ClientID,
+		WalletURI:                req.RedirectURI,
+		ExpiresAt:                time.Now().Add(60 * time.Second).Unix(),
+		Nonce:                    oauth2.GenerateCryptographicNonceFixedLength(32),
+		EphemeralEncryptionKeyID: oauth2.GenerateCryptographicNonceFixedLength(32),
+		VerifierResponseCode:     oauth2.GenerateCryptographicNonceFixedLength(32),
 	}
 
 	if err := c.db.VCAuthorizationContextColl.Save(ctx, &azt); err != nil {
@@ -61,30 +67,31 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 		RequestURI: req.RequestURI,
 		ClientID:   req.ClientID,
 	}
-	authorization, err := c.db.VCAuthorizationContextColl.Get(ctx, query)
-	c.log.Debug("Get authorization", "query", query, "authorization", authorization)
+	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, query)
+	c.log.Debug("Get authorization", "query", query, "authorization", authorizationContext)
 	if err != nil {
 		c.log.Error(err, "get error")
 		return nil, err
 	}
+	c.log.Debug("Authorization", "state", authorizationContext.State)
 
-	if authorization.IsUsed {
+	if authorizationContext.IsUsed {
 		c.log.Debug("Authorization already used")
 		return nil, errors.New("not allowed")
 	}
 
 	var redirectURL string
-	if !authorization.Consent {
+	if !authorizationContext.Consent {
 		redirectURL = "/authorization/consent"
 	}
 
 	response := &openid4vci.AuthorizationResponse{
 		RedirectURL: redirectURL,
-		Scope:       authorization.Scope,
-		ClientID:    authorization.ClientID,
+		Scope:       authorizationContext.Scope,
+		SessionID:   authorizationContext.SessionID,
 	}
 
-	c.log.Debug("Authorize", "authorization", authorization)
+	c.log.Debug("Authorize", "authorization", authorizationContext)
 
 	return response, nil
 }
@@ -93,20 +100,17 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error) {
 	c.log.Debug("OIDCToken", "req", req)
 
-	authorization, err := c.db.VCAuthorizationContextColl.ForfeitAuthorizationCode(ctx, &model.AuthorizationContext{
+	authorizationContext, err := c.db.VCAuthorizationContextColl.ForfeitAuthorizationCode(ctx, &model.AuthorizationContext{
 		Code: req.Code,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization")
 		return nil, err
 	}
+	c.log.Debug("Token", "state", authorizationContext.State)
 
 	// generating a new access token
-	accessToken, err := oauth2.GenerateCryptographicNonce(32)
-	if err != nil {
-		c.log.Error(err, "failed to generate access token")
-		return nil, err
-	}
+	accessToken := oauth2.GenerateCryptographicNonceFixedLength(32)
 	c.log.Debug("Generated access token", "access_token", accessToken)
 
 	// Bind the public key to the generated access token
@@ -115,9 +119,9 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		AccessToken:          accessToken,
 		TokenType:            "DPoP",
 		ExpiresIn:            3600, // 1 hour
-		Scope:                authorization.Scope,
-		State:                authorization.State,
-		CNonce:               "",
+		Scope:                authorizationContext.Scope,
+		State:                authorizationContext.State,
+		CNonce:               authorizationContext.Nonce,
 		CNonceExpiresIn:      0,
 		AuthorizationDetails: []openid4vci.AuthorizationDetailsParameter{},
 	}
@@ -127,7 +131,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		ExpiresAt:   time.Now().Add(time.Duration(reply.ExpiresIn) * time.Second).Unix(),
 	}
 
-	if err := c.db.VCAuthorizationContextColl.AddToken(ctx, authorization.Code, tokenDoc); err != nil {
+	if err := c.db.VCAuthorizationContextColl.AddToken(ctx, authorizationContext.Code, tokenDoc); err != nil {
 		c.log.Error(err, "failed to add token")
 		return nil, err
 	}
@@ -174,7 +178,8 @@ func (c *Client) OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServer
 }
 
 type OauthAuthorizationConsentRequest struct {
-	AuthMethod string
+	//AuthMethod string `json:"-"`
+	SessionID string `json:"-"`
 }
 
 type OAuthAuthorizationConsentResponse struct {
@@ -183,16 +188,12 @@ type OAuthAuthorizationConsentResponse struct {
 }
 
 func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthorizationConsentRequest) (*OAuthAuthorizationConsentResponse, error) {
-	verifierID := oauth2.GenerateCryptographicNonceWithLength(32)
-
-	verifierContext := &openid4vp.Context{
-		ID: verifierID,
-	}
-
-	if err := c.db.VCVerifierContextColl.Save(ctx, verifierContext); err != nil {
-		c.log.Error(err, "failed to save verifier context")
+	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{SessionID: req.SessionID})
+	if err != nil {
+		c.log.Error(err, "failed to get authorization context")
 		return nil, err
 	}
+	c.log.Debug("Authorization/consent", "state", authorizationContext.State)
 
 	c.log.Debug("OAuthAuthorizationConsent request")
 
@@ -203,19 +204,18 @@ func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthor
 	}
 
 	requestURI := url.Values{
-		"id": []string{verifierID},
+		"id": []string{authorizationContext.VerifierResponseCode},
 	}
 
 	verifierRequestURI.RawQuery = requestURI.Encode()
 
-	//http://demo.wwwallet.org/cb?client_id=wallet-enterprise-acme-verifier&request_uri=http://wallet-enterprise-acme-verifier:8005/verification/request-object?id=1e19dbd2-af2e-4842-aa2f-3680e777db7e
-	u, err := url.Parse("http://dev.wallet.sunet.se")
+	u, err := url.Parse(authorizationContext.WalletURI)
 	if err != nil {
 		c.log.Error(err, "failed to parse URL")
 		return nil, err
 	}
 	values := url.Values{
-		"client_id":   []string{"1003"},
+		"client_id":   []string{authorizationContext.ClientID},
 		"request_uri": []string{verifierRequestURI.String()},
 	}
 
@@ -223,10 +223,25 @@ func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthor
 
 	reply := &OAuthAuthorizationConsentResponse{
 		RedirectURL:       u.String(),
-		VerifierContextID: verifierID,
+		VerifierContextID: authorizationContext.VerifierResponseCode,
 	}
 
 	c.log.Debug("OAuthAuthorizationConsent response", "redirectURL", reply.RedirectURL)
+
+	return reply, nil
+}
+
+type OauthAuthorizationConsentCallbackRequest struct {
+	ResponseCode string `json:"response_code" form:"response_code" uri:"response_code"`
+}
+
+type OAuthAuthorizationConsentCallbackResponse struct {
+	//RedirectURL string `json:"-"`
+}
+
+func (c *Client) OAuthAuthorizationConsentCallback(ctx context.Context, req *OauthAuthorizationConsentCallbackRequest) (*OAuthAuthorizationConsentCallbackResponse, error) {
+	c.log.Debug("OAuthAuthorizationConsentCallback request", "req", req)
+	reply := &OAuthAuthorizationConsentCallbackResponse{}
 
 	return reply, nil
 }

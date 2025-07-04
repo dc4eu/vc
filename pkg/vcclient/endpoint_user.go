@@ -39,20 +39,14 @@ type LoginPIDUserRequest struct {
 	RequestURI string `json:"-"`
 }
 
-type LoginPIDUserReply struct {
-	Grant       bool   `json:"grant" validate:"required"`
-	RedirectURL string `json:"redirect_url,omitempty"`
-}
-
-func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*LoginPIDUserReply, *http.Response, error) {
+func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*http.Response, error) {
 	url := s.serviceBaseURL + "/pid/login"
-	reply := &LoginPIDUserReply{}
-	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, reply, false)
+	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, nil, false)
 	if err != nil {
-		return nil, resp, err
+		return resp, err
 	}
 
-	return reply, resp, nil
+	return resp, nil
 }
 
 type GetPIDRequest struct {
@@ -64,10 +58,13 @@ type GetPIDReply struct {
 }
 
 type UserLookupRequest struct {
-	Username   string `json:"-"`
-	AuthMethod string `json:"-"`
+	Username     string `json:"-"`
+	AuthMethod   string `json:"-"`
+	ResponseCode string `json:"-"`
+	RequestURI   string `json:"-"`
 }
 
 type UserLookupReply struct {
 	SVGTemplateClaims map[string]string `json:"svg_template_claims,omitempty"`
+	RedirectURL       string            `json:"redirect_url,omitempty"`
 }

@@ -2,6 +2,12 @@ import Alpine from "alpinejs";
 import * as v from "valibot";
 
 /**
+ * @typedef {Object} SvgTemplateResponse
+ * @property {string} template
+ * @property {Record<string, string[]>} svg_claims
+ */
+
+/**
  * @typedef {Object} Credential
  * @property {string} document_type
  * @property {string} name
@@ -93,7 +99,7 @@ Alpine.data("app", () => ({
     loading: true,
 
     /** @type {string | null} */
-    redirectUrl: null,
+    redirect_url: null,
 
     /** @type {Credential[]} */
     credentials: [],
@@ -211,11 +217,7 @@ Alpine.data("app", () => ({
         };
 
         try {
-            const res = await this.fetchData(url.toString(), options);
-
-            const data = v.parse(BasicAuthResponseSchema, res);
-
-            this.redirectUrl = data.redirect_url;
+            await this.fetchData(url.toString(), options);
 
             window.location.hash = ROUTES.credentials;
         } catch (err) {
@@ -337,10 +339,10 @@ Alpine.data("app", () => ({
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
-        if (!this.redirectUrl) {
-            this.error = "'redirectUrl' is null";
+        if (!this.redirect_url) {
+            this.error = "'redirect_url' is null";
         }
-        this.redirect(this.redirectUrl);
+        this.redirect(this.redirect_url);
     },
 
     /**
@@ -353,7 +355,7 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
-                this.redirectUrl = null;
+                this.redirect_url = null;
                 this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");
@@ -371,11 +373,10 @@ Alpine.data("app", () => ({
      * @returns {Promise<string>}
      */
     async createCredentialSvgImageUri(claims) {
-        const url = new URL("/authorization/consent/svg-template", baseUrl);
+        const url = new URL('/authorization/consent/svg-template', baseUrl);
 
-        const res = await this.fetchData(url.toString(), {});
-
-        const data = v.parse(SvgTemplateResponseSchema, res);
+        /** @type {SvgTemplateResponse} */
+        const data = await this.fetchData(url.toString(), {});
 
         let svg = atob(data.template);
 

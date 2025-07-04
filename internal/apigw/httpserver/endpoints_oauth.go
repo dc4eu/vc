@@ -160,7 +160,7 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 		reply.VerifierContextID = ""
 	}
 
-	c.HTML(http.StatusOK, "index.html", nil)
+	c.HTML(http.StatusOK, "consent.html", nil)
 	return nil, nil
 }
 

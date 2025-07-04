@@ -120,8 +120,6 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", err
 	}
 
-	c.log.Debug("verification requerst object", "context", authorizationContext)
-
 	pd := openid4vp.PresentationDefinitionParameter{}
 	if err := json.Unmarshal(presentationDefinition, &pd); err != nil {
 		return "", err
@@ -206,8 +204,6 @@ func (v *VerificationDirectPostRequest) GetKID() (string, error) {
 type VerificationDirectPostResponse struct {
 	PresentationDuringIssuanceSession string `json:"presentation_during_issuance_session"`
 	RedirectURI                       string `json:"redirect_uri"`
-	//Identity                          model.Identity `json:"-"`
-	//ResponseCode                      string         `json:"-"`
 }
 
 func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDirectPostRequest) (*VerificationDirectPostResponse, error) {

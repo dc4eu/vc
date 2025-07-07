@@ -149,8 +149,7 @@ type SVGTemplateRequest struct {
 }
 
 type SVGTemplateReply struct {
-	Template  string               `json:"template"`
-	SVGClaims map[string][]*string `json:"svg_claims"`
+	Template string `json:"template"`
 }
 
 func (c *Client) SVGTemplateReply(ctx context.Context, req *SVGTemplateRequest) (*SVGTemplateReply, error) {
@@ -184,17 +183,9 @@ func (c *Client) SVGTemplateReply(ctx context.Context, req *SVGTemplateRequest) 
 
 	template := base64.StdEncoding.EncodeToString([]byte(responseData))
 
-	svgClaims := make(map[string][]*string)
-
-	for _, claim := range req.VCTM.Claims {
-		if claim.SVGID != "" {
-			svgClaims[claim.SVGID] = claim.Path
-		}
-	}
 
 	reply := &SVGTemplateReply{
-		Template:  template,
-		SVGClaims: svgClaims,
+		Template: template,
 	}
 
 	c.svgTemplateCache.Set(svgTemplateURI, *reply, 2*time.Hour)

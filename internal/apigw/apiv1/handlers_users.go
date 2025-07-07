@@ -164,7 +164,7 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 
 	redirectURL.RawQuery = url.Values{"code": {authorizationContext.Code}, "state": {authorizationContext.State}}.Encode()
 
-	svgTemplateClaims := map[string]any{}
+	svgTemplateClaims := map[string]vcclient.SVGClaim{}
 
 	switch req.AuthMethod {
 	case model.AuthMethodBasic:
@@ -174,12 +174,25 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, fmt.Errorf("user %s not found: %w", req.Username, err)
 		}
 
-		svgTemplateClaims = map[string]any{
-			"given_name":  user.Identity.GivenName,
-			"family_name": user.Identity.FamilyName,
-			"birth_date":  user.Identity.BirthDate,
-			"expiry_date": user.Identity.ExpiryDate,
+		svgTemplateClaims = map[string]vcclient.SVGClaim{
+			"given_name": {
+				Label: "Given name",
+				Value: user.Identity.GivenName,
+			},
+			"family_name": {
+				Label: "Family name",
+				Value: user.Identity.FamilyName,
+			},
+			"birth_date": {
+				Label: "Birth date",
+				Value: user.Identity.BirthDate,
+			},
+			"expiry_date": {
+				Label: "Expiry date",
+				Value: user.Identity.ExpiryDate,
+			},
 		}
+
 	case model.AuthMethodPID:
 		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{VerifierResponseCode: req.ResponseCode})
 		if err != nil {
@@ -212,10 +225,24 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, err
 		}
 
-		svgTemplateClaims, err = sdjwt3.Filter(doc.DocumentData, jsonPaths.Displayable)
+		claimValues, err := sdjwt3.Filter(doc.DocumentData, jsonPaths.Displayable)
 		if err != nil {
 			c.log.Error(err, "failed to filter document data for SVG template claims")
 			return nil, fmt.Errorf("failed to filter document data for SVG template claims")
+		}
+
+		for _, claim := range req.VCTM.Claims {
+			value, ok := claimValues[claim.SVGID].(string)
+			if !ok {
+				continue
+			}
+
+			if claim.SVGID != "" {
+				svgTemplateClaims[claim.SVGID] = vcclient.SVGClaim{
+					Label: claim.Display[0].Label,
+					Value: value,
+				}
+			}
 		}
 
 	default:

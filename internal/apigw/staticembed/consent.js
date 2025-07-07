@@ -6,7 +6,7 @@ import * as v from "valibot";
  * @property {string} document_type
  * @property {string} name
  * @property {string} svg
- * @property {Record<string, string>} claims
+ * @property {Record<string, { label: string; value: string; }>} claims
  */
 
 /**
@@ -32,11 +32,10 @@ const BasicAuthResponseSchema = v.required(v.object({
  * @typedef {v.InferOutput<typeof UserDataSchema>} UserData
  */
 const UserDataSchema = v.required(v.object({
-    svg_template_claims: v.object({
-        given_name: v.string(),
-        family_name: v.string(),
-        birthdate: v.string(),
-    }),
+    svg_template_claims: v.record(v.string(), v.object({
+        label: v.string(),
+        value: v.string(),
+    })),
     redirect_url: v.string(),
 }));
 
@@ -302,23 +301,17 @@ Alpine.data("app", () => ({
                 data.svg_template_claims,
             );
 
-            /** @type {Record<string, string>} */
-            let claims = {};
-
-            for (let [key, value] of Object.entries(data.svg_template_claims)) {
-                key = keyToLabel(key);
-
-                claims[key] = value;
-            }
 
             this.credentials.push({
                 document_type: "N/A",
                 name: "PID",
                 svg,
-                claims,
+                claims: data.svg_template_claims,
             });
 
-            this.$refs.title.innerText = `Welcome, ${data.svg_template_claims.given_name}!`
+            if (data.svg_template_claims.given_name?.value) {
+                this.$refs.title.innerText = `Welcome, ${data.svg_template_claims.given_name.value}!`
+            }
         } catch (err) {
             if (err instanceof v.ValiError) {
                 this.error = err.message;
@@ -363,7 +356,7 @@ Alpine.data("app", () => ({
     },
 
     /**
-     * @param {Record<string, string>} claims
+     * @param {Record<string, { label: string; value: string; }>} claims
      * @returns {Promise<string>}
      */
     async createCredentialSvgImageUri(claims) {
@@ -374,17 +367,8 @@ Alpine.data("app", () => ({
 
         let svg = atob(data.template);
 
-        for (const [svg_id, paths] of Object.entries(data.svg_claims)) {
-            let newVal = "";
-
-            for (const path of paths) {
-                if (path in claims && typeof claims[path] === "string") {
-                    newVal = claims[path];
-                    break;
-                }
-            }
-
-            svg = svg.replaceAll(`{{${svg_id}}}`, newVal);
+        for (const [svg_id, claim] of Object.entries(claims)) {
+            svg = svg.replaceAll(`{{${svg_id}}}`, claim.value);
         }
 
         return `data:image/svg+xml;base64,${btoa(svg)}`;

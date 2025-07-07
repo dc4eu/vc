@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"vc/pkg/model"
 	"vc/pkg/pid"
+	"vc/pkg/sdjwt3"
 	"vc/pkg/vcclient"
 
 	"github.com/google/uuid"
@@ -104,7 +105,8 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 func (c *Client) UserAuthenticSourceLookup(ctx context.Context, req *vcclient.UserAuthenticSourceLookupRequest) (*vcclient.UserAuthenticSourceLookupReply, error) {
 	c.log.Debug("UserAuthenticSource called")
 
-	if req.SessionID != "" {
+	if req.AuthenticSource == "" && req.SessionID != "" {
+		c.log.Debug("userAuthenticSourceLookup called without authentic source, looking up by session ID", "session_id", req.SessionID)
 		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
 			SessionID: req.SessionID,
 		})
@@ -130,7 +132,9 @@ func (c *Client) UserAuthenticSourceLookup(ctx context.Context, req *vcclient.Us
 		}
 
 		return reply, nil
+
 	} else if req.AuthenticSource != "" {
+		c.log.Debug("userAuthenticSourceLookup called with authentic source", "authentic_source", req.AuthenticSource)
 		if err := c.db.VCAuthorizationContextColl.SetAuthenticSource(ctx, &model.AuthorizationContext{SessionID: req.SessionID}, req.AuthenticSource); err != nil {
 			c.log.Error(err, "failed to set authentic source")
 			return nil, fmt.Errorf("failed to set authentic source %s: %w", req.AuthenticSource, err)
@@ -160,7 +164,7 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 
 	redirectURL.RawQuery = url.Values{"code": {authorizationContext.Code}, "state": {authorizationContext.State}}.Encode()
 
-	svgTemplateClaims := map[string]string{}
+	svgTemplateClaims := map[string]any{}
 
 	switch req.AuthMethod {
 	case model.AuthMethodBasic:
@@ -170,10 +174,11 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, fmt.Errorf("user %s not found: %w", req.Username, err)
 		}
 
-		svgTemplateClaims = map[string]string{
+		svgTemplateClaims = map[string]any{
 			"given_name":  user.Identity.GivenName,
 			"family_name": user.Identity.FamilyName,
-			"birthdate":   user.Identity.BirthDate,
+			"birth_date":  user.Identity.BirthDate,
+			"expiry_date": user.Identity.ExpiryDate,
 		}
 	case model.AuthMethodPID:
 		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{VerifierResponseCode: req.ResponseCode})
@@ -182,10 +187,35 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, err
 		}
 
-		svgTemplateClaims = map[string]string{
-			"given_name":  authorizationContext.Identity.GivenName,
-			"family_name": authorizationContext.Identity.FamilyName,
-			"birthdate":   authorizationContext.Identity.BirthDate,
+		docs := c.documentCache.Get(authorizationContext.SessionID).Value()
+		if docs == nil {
+			c.log.Error(nil, "no documents found in cache for session")
+			return nil, fmt.Errorf("no documents found for session %s", authorizationContext.SessionID)
+		}
+
+		// TODO(masv): fix this monstrosity
+		authenticSource := ""
+		for _, doc := range docs {
+			authenticSource = doc.Meta.AuthenticSource
+			break
+		}
+
+		doc, ok := docs[authenticSource]
+		if !ok {
+			c.log.Error(nil, "no document found for authentic source")
+			return nil, fmt.Errorf("no document found for authentic source %s", authorizationContext.AuthenticSource)
+		}
+
+		jsonPaths, err := req.VCTM.ClaimJSONPath()
+		if err != nil {
+			c.log.Error(err, "failed to get JSON paths from VCTM claims")
+			return nil, err
+		}
+
+		svgTemplateClaims, err = sdjwt3.Filter(doc.DocumentData, jsonPaths.Displayable)
+		if err != nil {
+			c.log.Error(err, "failed to filter document data for SVG template claims")
+			return nil, fmt.Errorf("failed to filter document data for SVG template claims")
 		}
 
 	default:

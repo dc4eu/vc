@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"vc/internal/apigw/apiv1"
 	"vc/pkg/model"
 	"vc/pkg/vcclient"
 
@@ -99,6 +100,21 @@ func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, 
 	defer span.End()
 	session := sessions.Default(c)
 
+	scope, ok := session.Get("scope").(string)
+	if !ok {
+		err := errors.New("scope not found in session")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointUserLookup: scope not found in session")
+		return nil, err
+	}
+
+	vctm, err := s.apiv1.GetVCTMFromScope(ctx, &apiv1.GetVCTMFromScopeRequest{Scope: scope})
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointUserLookup: error getting VCTM from scope")
+		return nil, err
+	}
+
 	requestURI, ok := session.Get("request_uri").(string)
 	if !ok {
 		err := errors.New("request_uri not found in session")
@@ -122,6 +138,7 @@ func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, 
 	}
 
 	request.AuthMethod = authMethod
+	request.VCTM = vctm
 
 	switch authMethod {
 	case model.AuthMethodBasic:

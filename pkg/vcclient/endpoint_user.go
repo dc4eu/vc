@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/sdjwt3"
 )
 
 type userHandler struct {
@@ -58,15 +59,16 @@ type GetPIDReply struct {
 }
 
 type UserLookupRequest struct {
-	Username     string `json:"-"`
-	AuthMethod   string `json:"-"`
-	ResponseCode string `json:"-"`
-	RequestURI   string `json:"-"`
+	Username     string       `json:"-"`
+	AuthMethod   string       `json:"-"`
+	ResponseCode string       `json:"-"`
+	RequestURI   string       `json:"-"`
+	VCTM         *sdjwt3.VCTM `json:"-"`
 }
 
 type UserLookupReply struct {
-	SVGTemplateClaims map[string]string `json:"svg_template_claims,omitempty"`
-	RedirectURL       string            `json:"redirect_url,omitempty"`
+	SVGTemplateClaims map[string]any `json:"svg_template_claims,omitempty"`
+	RedirectURL       string         `json:"redirect_url,omitempty"`
 }
 
 type UserAuthenticSourceLookupRequest struct {

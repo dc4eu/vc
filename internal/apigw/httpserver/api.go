@@ -36,6 +36,7 @@ type Apiv1 interface {
 	SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error)
 	AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error
 	LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) error
+	UserAuthenticSourceLookup(ctx context.Context, req *vcclient.UserAuthenticSourceLookupRequest) (*vcclient.UserAuthenticSourceLookupReply, error)
 	UserLookup(ctx context.Context, req *vcclient.UserLookupRequest) (*vcclient.UserLookupReply, error)
 
 	// OpenID4VCI endpoints

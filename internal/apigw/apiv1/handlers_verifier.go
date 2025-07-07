@@ -8,10 +8,12 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"vc/internal/apigw/db"
 	"vc/pkg/model"
 	"vc/pkg/openid4vp"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwe"
 	"github.com/lestrrat-go/jwx/v3/jwk"
@@ -247,43 +249,30 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, err
 	}
 
-	identity := &model.Identity{
-		GivenName:  credential["given_name"].(string),
-		FamilyName: credential["family_name"].(string),
-		BirthDate:  credential["birthdate"].(string),
-	}
-
 	credentialConstructorCfg, ok := c.cfg.CredentialConstructor[authorizationContext.Scope]
 	if !ok {
 		c.log.Error(nil, "credential constructor not found for scope", "scope", authorizationContext.Scope)
 		return nil, errors.New("credential constructor not found for scope: " + authorizationContext.Scope)
 	}
 
-	var authenticSource string
-	switch credentialConstructorCfg.VCT {
-	case model.CredentialTypeUrnEudiDiploma1:
-		authenticSource = "DIPLOMA:00001"
-	case model.CredentialTypeUrnEudiEhic1:
-		authenticSource = "EHIC:00001"
-	case model.CredentialTypeUrnEudiElm1:
-		authenticSource = "ELM:00001"
-	case model.CredentialTypeUrnEudiPda11:
-		authenticSource = "PDA1:00001"
-	default:
-		c.log.Error(nil, "unsupported credential type", "vct", credentialConstructorCfg.VCT)
-		return nil, errors.New("unsupported credential type: " + credentialConstructorCfg.VCT)
+	identity := &model.Identity{
+		GivenName:  credential["given_name"].(string),
+		FamilyName: credential["family_name"].(string),
+		BirthDate:  credential["birthdate"].(string),
 	}
 
-	update := &model.AuthorizationContext{
-		Identity:        identity,
-		DocumentType:    credentialConstructorCfg.VCT,
-		AuthenticSource: authenticSource,
-	}
-
-	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid}, update); err != nil {
-		c.log.Error(err, "failed to add identity to authorization context")
+	documents, err := c.db.VCDatastoreColl.GetDocumentsWithIdentity(ctx, &db.GetDocumentQuery{
+		Meta: &model.MetaData{
+			DocumentType: credentialConstructorCfg.VCT,
+		},
+		Identity: identity,
+	})
+	if err != nil {
+		c.log.Debug("failed to get document", "error", err)
 		return nil, err
 	}
+
+	c.documentCache.Set(authorizationContext.SessionID, documents, ttlcache.DefaultTTL)
 
 	reply := &VerificationDirectPostResponse{
 		//ResponseCode: responseCode,

@@ -69,6 +69,31 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 	return nil, nil
 }
 
+func (s *Service) endpointUserAuthenticSourceLookup(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUserAuthenticSourceLookup")
+	defer span.End()
+	session := sessions.Default(c)
+
+	sessionID, ok := session.Get("session_id").(string)
+	if !ok {
+		err := errors.New("session_id not found in session")
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointUserAuthenticSourceLookup: session_id not found in session")
+		return nil, err
+	}
+
+	reply, err := s.apiv1.UserAuthenticSourceLookup(ctx, &vcclient.UserAuthenticSourceLookupRequest{
+		SessionID: sessionID,
+	})
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "endpointUserAuthenticSourceLookup: error looking up authentic sources")
+		return nil, err
+	}
+
+	return reply, nil
+}
+
 func (s *Service) endpointUserLookup(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUserLookup")
 	defer span.End()

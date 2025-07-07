@@ -185,7 +185,6 @@ func (c *VCAuthorizationContextColl) Get(ctx context.Context, query *model.Autho
 		filter["ephemeral_encryption_key_id"] = bson.M{"$eq": query.EphemeralEncryptionKeyID}
 	}
 
-
 	if len(filter) == 0 {
 		span.SetStatus(codes.Error, "query cannot be empty")
 		return nil, errors.New("query cannot be empty")
@@ -217,6 +216,41 @@ func (c *VCAuthorizationContextColl) AddToken(ctx context.Context, code string, 
 	update := bson.M{
 		"$set": bson.M{
 			"token": token,
+		},
+	}
+
+	_, err := c.Coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (c *VCAuthorizationContextColl) SetAuthenticSource(ctx context.Context, query *model.AuthorizationContext, authenticSource string) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:set_authentic_source")
+	defer span.End()
+
+	if authenticSource == "" {
+		span.SetStatus(codes.Error, "authentic source cannot be empty")
+		return errors.New("authentic source cannot be empty")
+	}
+
+	filter := bson.M{}
+
+	if query.SessionID != "" {
+		filter["session_id"] = bson.M{"$eq": query.SessionID}
+	}
+
+	if len(filter) == 0 {
+		span.SetStatus(codes.Error, "query cannot be empty")
+		return errors.New("query cannot be empty")
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"authentic_source": authenticSource,
 		},
 	}
 

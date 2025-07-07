@@ -125,14 +125,10 @@
                                             <img class="vc-credential-card mb-2" width="829" height="504" :src="credential.svg" alt="">
                                             <table class="table-auto w-full">
                                                 <tbody>
-                                                    <tr class="border-b border-black/20 dark:border-white/20">
-                                                        <th class="p-2 text-left">Credential type</th>
-                                                        <td class="p-2 text-left" x-text="credential.document_type"></td>
-                                                    </tr>
-                                                    <template x-for="[key, value] of Object.entries(credential.claims)">
+                                                    <template x-for="[svg_id, claim] of Object.entries(credential.claims)">
                                                         <tr class="[&:not(:last-child)]:border-b [&:not(:last-child)]:border-black/20 [&:not(:last-child)]:dark:border-white/20">
-                                                            <th class="p-2 text-left" x-text="key"></th>
-                                                            <td class="p-2 text-left" x-text="value"></td>
+                                                            <th class="p-2 text-sm text-left" x-text="claim.label"></th>
+                                                            <td class="p-2 text-sm text-left" x-text="claim.value"></td>
                                                         </tr>
                                                     </template>
                                                 </tbody>

@@ -66,9 +66,14 @@ type UserLookupRequest struct {
 	VCTM         *sdjwt3.VCTM `json:"-"`
 }
 
+type SVGClaim struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
+
 type UserLookupReply struct {
-	SVGTemplateClaims map[string]any `json:"svg_template_claims,omitempty"`
-	RedirectURL       string         `json:"redirect_url,omitempty"`
+	SVGTemplateClaims map[string]SVGClaim `json:"svg_template_claims,omitempty"`
+	RedirectURL       string              `json:"redirect_url,omitempty"`
 }
 
 type UserAuthenticSourceLookupRequest struct {

@@ -120,8 +120,6 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", err
 	}
 
-	c.log.Debug("verification requerst object", "context", authorizationContext)
-
 	pd := openid4vp.PresentationDefinitionParameter{}
 	if err := json.Unmarshal(presentationDefinition, &pd); err != nil {
 		return "", err
@@ -206,8 +204,6 @@ func (v *VerificationDirectPostRequest) GetKID() (string, error) {
 type VerificationDirectPostResponse struct {
 	PresentationDuringIssuanceSession string `json:"presentation_during_issuance_session"`
 	RedirectURI                       string `json:"redirect_uri"`
-	//Identity                          model.Identity `json:"-"`
-	//ResponseCode                      string         `json:"-"`
 }
 
 func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDirectPostRequest) (*VerificationDirectPostResponse, error) {
@@ -263,10 +259,25 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, errors.New("credential constructor not found for scope: " + authorizationContext.Scope)
 	}
 
+	var authenticSource string
+	switch credentialConstructorCfg.VCT {
+	case model.CredentialTypeUrnEudiDiploma1:
+		authenticSource = "DIPLOMA:00001"
+	case model.CredentialTypeUrnEudiEhic1:
+		authenticSource = "EHIC:00001"
+	case model.CredentialTypeUrnEudiElm1:
+		authenticSource = "ELM:00001"
+	case model.CredentialTypeUrnEudiPda11:
+		authenticSource = "PDA1:00001"
+	default:
+		c.log.Error(nil, "unsupported credential type", "vct", credentialConstructorCfg.VCT)
+		return nil, errors.New("unsupported credential type: " + credentialConstructorCfg.VCT)
+	}
+
 	update := &model.AuthorizationContext{
 		Identity:        identity,
 		DocumentType:    credentialConstructorCfg.VCT,
-		AuthenticSource: "EHIC:00001",
+		AuthenticSource: authenticSource,
 	}
 
 	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid}, update); err != nil {

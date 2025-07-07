@@ -62,6 +62,7 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 	session.Set("auth_method", s.cfg.GetCredentialConstructorAuthMethod(reply.Scope))
 	session.Set("request_uri", request.RequestURI)
 	session.Set("session_id", reply.SessionID)
+	session.Set("client_id", reply.ClientID)
 	if err := session.Save(); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		s.log.Error(err, "session save error")

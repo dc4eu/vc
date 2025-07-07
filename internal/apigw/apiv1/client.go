@@ -38,6 +38,7 @@ type Client struct {
 	oauth2MetadataSigningChain  []string
 	ephemeralEncryptionKeyCache *ttlcache.Cache[string, jwk.Key]
 	svgTemplateCache            *ttlcache.Cache[string, SVGTemplateReply]
+	documentCache               *ttlcache.Cache[string, map[string]model.CompleteDocument]
 }
 
 // New creates a new instance of the public api
@@ -49,6 +50,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 		tracer:                      tracer,
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
 		svgTemplateCache:            ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
+		documentCache:               ttlcache.New(ttlcache.WithTTL[string, map[string]model.CompleteDocument](5 * time.Minute)),
 	}
 
 	// Start the ephemeral encryption key cache
@@ -56,6 +58,8 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 
 	// Delete expired cache items automatically
 	go c.svgTemplateCache.Start()
+
+	go c.documentCache.Start()
 
 	var err error
 	if c.cfg.APIGW.IssuerMetadata.Path != "" {

@@ -1,8 +1,0 @@
-            <div id="qr_container" class="container is-max-tablet">
-                <form action="/action_page.php">
-                <p>Select your credentials by clicking on them and authorize the sharing of all selected credentials with the client:</p>
-                <input type="radio" id="pid" name="fav_language" value="pid">
-                <label for="html">HTML</label><br>
-                <button id="do-select-pid-btn" class="button is-success is-justify-content-left">Select</button>
-</form>
-            </div>

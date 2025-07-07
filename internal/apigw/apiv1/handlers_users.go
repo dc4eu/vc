@@ -101,6 +101,45 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 
 }
 
+func (c *Client) UserAuthenticSourceLookup(ctx context.Context, req *vcclient.UserAuthenticSourceLookupRequest) (*vcclient.UserAuthenticSourceLookupReply, error) {
+	c.log.Debug("UserAuthenticSource called")
+
+	if req.SessionID != "" {
+		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+			SessionID: req.SessionID,
+		})
+		if err != nil {
+			c.log.Error(err, "failed to get authorization context for authentic source lookup")
+			return nil, err
+		}
+
+		docs := c.documentCache.Get(authorizationContext.SessionID).Value()
+		if docs == nil {
+			c.log.Error(nil, "no documents found in cache for session", "session_id", req.SessionID)
+			return nil, fmt.Errorf("no documents found for session %s", req.SessionID)
+		}
+
+		authenticSources := []string{}
+
+		for _, doc := range docs {
+			authenticSources = append(authenticSources, doc.Meta.AuthenticSource)
+		}
+
+		reply := &vcclient.UserAuthenticSourceLookupReply{
+			AuthenticSources: authenticSources,
+		}
+
+		return reply, nil
+	} else if req.AuthenticSource != "" {
+		if err := c.db.VCAuthorizationContextColl.SetAuthenticSource(ctx, &model.AuthorizationContext{SessionID: req.SessionID}, req.AuthenticSource); err != nil {
+			c.log.Error(err, "failed to set authentic source")
+			return nil, fmt.Errorf("failed to set authentic source %s: %w", req.AuthenticSource, err)
+		}
+	}
+
+	return nil, nil
+}
+
 func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest) (*vcclient.UserLookupReply, error) {
 	c.log.Debug("UserLookup called")
 

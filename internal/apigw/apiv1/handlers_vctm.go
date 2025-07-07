@@ -26,7 +26,6 @@ type GetAllCredentialOffersReply struct {
 }
 
 func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialOffersReply, error) {
-
 	credentials := make(map[string]GetAllCredentialOffersCredential)
 
 	for key, credential := range c.cfg.CredentialConstructor {
@@ -146,7 +145,7 @@ func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequ
 }
 
 type SVGTemplateRequest struct {
-	VCTM *sdjwt3.VCTM
+	VCTM *sdjwt3.VCTM `json:"-"`
 }
 
 type SVGTemplateReply struct {

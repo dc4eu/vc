@@ -68,3 +68,12 @@ type UserLookupReply struct {
 	SVGTemplateClaims map[string]string `json:"svg_template_claims,omitempty"`
 	RedirectURL       string            `json:"redirect_url,omitempty"`
 }
+
+type UserAuthenticSourceLookupRequest struct {
+	AuthenticSource string `json:"authentic_source,omitempty"`
+	SessionID       string `json:"-"`
+}
+
+type UserAuthenticSourceLookupReply struct {
+	AuthenticSources []string `json:"authentic_sources,omitempty"`
+}

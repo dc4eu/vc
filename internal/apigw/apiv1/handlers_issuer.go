@@ -82,16 +82,36 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	c.log.Debug("credential", "authContext", authContext)
 
-	document, err := c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
-		Meta: &model.MetaData{
-			AuthenticSource: authContext.AuthenticSource,
-			DocumentType:    authContext.DocumentType,
-		},
-		Identity: authContext.Identity,
-	})
-	if err != nil {
-		c.log.Debug("failed to get document", "error", err)
-		return nil, err
+	document := &model.CompleteDocument{}
+
+	switch authContext.Scope {
+	case "ehic", "pda1", "diploma":
+		c.log.Debug("ehic/pda1/diploma scope detected")
+		docs := c.documentCache.Get(authContext.SessionID).Value()
+		if docs == nil {
+			c.log.Error(nil, "no documents found in cache for session", "session_id", authContext.SessionID)
+			return nil, errors.New("no documents found for session " + authContext.SessionID)
+		}
+		for _, doc := range docs {
+			document = &doc
+		}
+
+	case "pid":
+		c.log.Debug("pid scope detected")
+		document, err = c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
+			Meta: &model.MetaData{
+				AuthenticSource: authContext.AuthenticSource,
+				DocumentType:    authContext.DocumentType,
+			},
+			Identity: authContext.Identity,
+		})
+		if err != nil {
+			c.log.Debug("failed to get document", "error", err)
+			return nil, err
+		}
+
+	default:
+		c.log.Error(nil, "unsupported scope", "scope", authContext.Scope)
 	}
 
 	documentData, err := json.Marshal(document.DocumentData)
@@ -107,6 +127,9 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, err
 	}
 
+	c.log.Debug("Here 1", "jwk", jwk)
+	c.log.Debug("MakeSDJWT request", "documentType", document.Meta.DocumentType)
+
 	//	// Build SDJWT
 	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -117,7 +140,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	client := apiv1_issuer.NewIssuerServiceClient(conn)
 
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		DocumentType: authContext.DocumentType,
+		DocumentType: document.Meta.DocumentType,
 		DocumentData: documentData,
 		Jwk:          jwk,
 	})
@@ -125,6 +148,8 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		c.log.Error(err, "failed to call MakeSDJWT")
 		return nil, err
 	}
+
+	c.log.Debug("MakeSDJWT reply", "reply", reply)
 
 	if reply == nil {
 		c.log.Debug("MakeSDJWT reply is nil")

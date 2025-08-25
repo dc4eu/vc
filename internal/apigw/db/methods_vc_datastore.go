@@ -232,6 +232,7 @@ func (c *VCDatastoreColl) GetDocumentWithIdentity(ctx context.Context, query *Ge
 
 	opt := options.FindOne().SetProjection(bson.M{
 		"document_data": 1,
+		"meta":          1,
 	})
 
 	doc := &model.CompleteDocument{}

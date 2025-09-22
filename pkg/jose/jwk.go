@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/jwa"
@@ -23,7 +24,7 @@ type JWK struct {
 
 // ParseSigningKey parses the private key from the file
 func ParseSigningKey(signingKeyPath string) (*ecdsa.PrivateKey, error) {
-	keyByte, err := os.ReadFile(signingKeyPath)
+	keyByte, err := os.ReadFile(filepath.Clean(signingKeyPath))
 	if err != nil {
 		return nil, err
 	}

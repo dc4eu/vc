@@ -7,10 +7,11 @@ import (
 	"errors"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 func ParseX509CertificateFromFile(path string) (*x509.Certificate, []*x509.Certificate, error) {
-	pemData, err := os.ReadFile(path)
+	pemData, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -69,7 +70,7 @@ func parseChain(rest []byte, n int, storage map[int]*x509.Certificate) error {
 }
 
 func ParseKeyFromFile(path string) (any, error) {
-	pemData, err := os.ReadFile(path)
+	pemData, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,6 @@ func ParseKeyFromFile(path string) (any, error) {
 	}
 	return key, nil
 }
-
 
 func Base64EncodeCertificate(cert *x509.Certificate) string {
 	reply := base64.RawStdEncoding.EncodeToString(cert.Raw)

@@ -17,7 +17,7 @@ func getValidationSchema(schemaRef string, compiler *jsonschema.Compiler) (*json
 
 	case "file:":
 		filePath := strings.TrimPrefix(filepath.SplitList(schemaRef)[1:][0], "//")
-		schemaFile, err := os.ReadFile(filePath)
+		schemaFile, err := os.ReadFile(filepath.Clean(filePath))
 		if err != nil {
 			return nil, err
 		}

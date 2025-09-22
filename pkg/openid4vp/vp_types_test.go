@@ -1,6 +1,10 @@
 package openid4vp
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestExamplePresentationDefinition(t *testing.T) {
 	tests := []struct {
@@ -10,7 +14,8 @@ func TestExamplePresentationDefinition(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ExamplePresentationDefinition()
+			err := ExamplePresentationDefinition()
+			assert.NoError(t, err)
 		})
 	}
 }

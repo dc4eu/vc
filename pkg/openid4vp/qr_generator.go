@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/skip2/go-qrcode"
 	"image/png"
 	"net/url"
+
+	"github.com/skip2/go-qrcode"
 )
 
 func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QRReply, error) {
@@ -32,10 +33,12 @@ func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR
 	}
 
 	encoder := base64.NewEncoder(base64.StdEncoding, &buf)
-	err = png.Encode(encoder, qrCode.Image(size))
-	encoder.Close()
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert QRReply-code to PNG: %w", err)
+	if err := png.Encode(encoder, qrCode.Image(size)); err != nil {
+		return nil, err
+	}
+
+	if err := encoder.Close(); err != nil {
+		return nil, err
 	}
 
 	return &QRReply{

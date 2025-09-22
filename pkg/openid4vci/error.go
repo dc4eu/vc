@@ -15,7 +15,7 @@ func (e *Error) Error() string {
 // Credential errors
 const (
 	// ErrInvalidCredentialRequest The Credential Request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, or is otherwise malformed.
-	ErrInvalidCredentialRequest string = "invalid_credential_request"
+	ErrInvalidCredentialRequest string = "invalid_credential_request" // #nosec G101
 
 	// ErrUnsupportedCredentialType Requested Credential type is not supported.
 	ErrUnsupportedCredentialType = "unsupported_credential_type"
@@ -33,7 +33,7 @@ const (
 	ErrInvalidEncryptionParameters = "invalid_encryption_parameters"
 
 	// ErrCredentialRequestDenied The Credential Request has not been accepted by the Credential Issuer.
-	ErrCredentialRequestDenied = "credential_request_denied"
+	ErrCredentialRequestDenied = "credential_request_denied" // #nosec G101
 )
 
 const (

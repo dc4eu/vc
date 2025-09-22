@@ -14,7 +14,7 @@ test-verifier:
 
 gosec:
 	$(info Run gosec)
-	gosec -color -nosec -tests ./...
+	gosec -color -tests -exclude-dir=internal/gen ./...
 
 staticcheck:
 	$(info Run staticcheck)

@@ -19,13 +19,15 @@ func mockHappyHttServer(t *testing.T) *httptest.Server {
 	mux.HandleFunc("/api/v1/document", func(rw http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, req.URL.Path, "/api/v1/document")
 		assert.Equal(t, req.Method, http.MethodPost)
-		rw.Write(golden.Get(t, "documentGetReplyOK.golden"))
+		_, err := rw.Write(golden.Get(t, "documentGetReplyOK.golden"))
+		assert.NoError(t, err)
 	})
 
 	mux.HandleFunc("/api/v1/document/list", func(rw http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, req.URL.Path, "/api/v1/document/list")
 		assert.Equal(t, req.Method, http.MethodPost)
-		rw.Write(golden.Get(t, "documentListReplyOK.golden"))
+		_, err := rw.Write(golden.Get(t, "documentListReplyOK.golden"))
+		assert.NoError(t, err)
 	})
 
 	mux.HandleFunc("/authorize", func(rw http.ResponseWriter, req *http.Request) {
@@ -33,7 +35,8 @@ func mockHappyHttServer(t *testing.T) *httptest.Server {
 		assert.Equal(t, req.Method, http.MethodGet)
 		rw.WriteHeader(http.StatusFound)
 		//assert.Equal(t, req.Header.Get("Content-Type"), "application/json")
-		rw.Write(golden.Get(t, "oidcAuthorizeReplyOK.golden"))
+		_, err := rw.Write(golden.Get(t, "oidcAuthorizeReplyOK.golden"))
+		assert.NoError(t, err)
 	})
 
 	mux.HandleFunc("/op/par", func(rw http.ResponseWriter, req *http.Request) {
@@ -41,7 +44,8 @@ func mockHappyHttServer(t *testing.T) *httptest.Server {
 		assert.Equal(t, req.Method, http.MethodPost)
 		//rw.WriteHeader(http.StatusFound)
 		//assert.Equal(t, req.Header.Get("Content-Type"), "application/json")
-		rw.Write(golden.Get(t, "oidcAuthorizeReplyOK.golden"))
+		_, err := rw.Write(golden.Get(t, "oidcAuthorizeReplyOK.golden"))
+		assert.NoError(t, err)
 	})
 
 	server := httptest.NewServer(mux)

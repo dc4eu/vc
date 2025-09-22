@@ -8,6 +8,7 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
+	"vc/pkg/sdjwt3"
 	"vc/pkg/vcclient"
 )
 
@@ -34,7 +35,9 @@ type Apiv1 interface {
 	// datastore endpoints - disabled in production
 	SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error)
 	AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error
-	LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error)
+	LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) error
+	UserAuthenticSourceLookup(ctx context.Context, req *vcclient.UserAuthenticSourceLookupRequest) (*vcclient.UserAuthenticSourceLookupReply, error)
+	UserLookup(ctx context.Context, req *vcclient.UserLookupRequest) (*vcclient.UserLookupReply, error)
 
 	// OpenID4VCI endpoints
 	OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, error)
@@ -46,12 +49,20 @@ type Apiv1 interface {
 
 	OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*openid4vci.ParResponse, error)
 	OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRequest) (*openid4vci.AuthorizationResponse, error)
-	//OAuthAuthorizationConsent(ctx context.Context, req *openid4vci.AuthorizationConsentRequest) (*openid4vci.AuthorizationConsentReply, error)
-	//OAuthAuthorizationConsentLogin(ctx context.Context, req *openid4vci.AuthorizationConsentLoginRequest) (*openid4vci.AuthorizationConsentLoginReply, error)
+	OAuthAuthorizationConsent(ctx context.Context, req *apiv1.OauthAuthorizationConsentRequest) (*apiv1.OAuthAuthorizationConsentResponse, error)
+	OAuthAuthorizationConsentCallback(ctx context.Context, req *apiv1.OauthAuthorizationConsentCallbackRequest) (*apiv1.OAuthAuthorizationConsentCallbackResponse, error)
 	OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error)
 	OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error)
 
 	//Revoke(ctx context.Context, req *apiv1.RevokeRequest) (*apiv1.RevokeReply, error)
+
+	VerificationRequestObject(ctx context.Context, req *apiv1.VerificationRequestObjectRequest) (string, error)
+	VerificationDirectPost(ctx context.Context, req *apiv1.VerificationDirectPostRequest) (*apiv1.VerificationDirectPostResponse, error)
+
+	GetAllCredentialOffers(ctx context.Context) (*apiv1.GetAllCredentialOffersReply, error)
+	CredentialOffer(ctx context.Context, req *apiv1.CredentialOfferRequest) (*apiv1.CredentialOfferReply, error)
+	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*sdjwt3.VCTM, error)
+	SVGTemplateReply(ctx context.Context, req *apiv1.SVGTemplateRequest) (*apiv1.SVGTemplateReply, error)
 
 	// misc endpoints
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)

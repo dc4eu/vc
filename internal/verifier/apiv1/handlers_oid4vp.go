@@ -7,15 +7,16 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
-	"github.com/skip2/go-qrcode"
 	"math/big"
 	"sync/atomic"
 	"time"
 	"vc/pkg/openid4vp"
 	"vc/pkg/openid4vp/cryptohelpers"
 	"vc/pkg/openid4vp/jwthelpers"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"github.com/skip2/go-qrcode"
 )
 
 // QRCode creates a qr code that can be used by the holder (wallet) to fetch the authorization request
@@ -63,21 +64,15 @@ func (c *Client) GenerateQRCode(ctx context.Context, request *openid4vp.QRReques
 		return nil, err
 	}
 
-	schema := "http://"
-	if c.cfg.Verifier.APIServer.TLS.Enabled {
-		schema = "https://"
-	}
-
-	requestURI := fmt.Sprintf("%s%s%s/authorize?id=%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, sessionID)
-	clientID := c.cfg.Verifier.FQDN
-	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", clientID, requestURI)
+	requestURI := fmt.Sprintf("%s/authorize?id=%s", c.cfg.Verifier.ExternalServerURL, sessionID)
+	qrURI := fmt.Sprintf("openid4vp://authorize?client_id=%s&request_uri=%s", c.cfg.Verifier.ExternalServerURL, requestURI)
 
 	qr, err := openid4vp.GenerateQR(qrURI, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}
 	qr.RequestURI = requestURI
-	qr.ClientID = clientID
+	qr.ClientID = c.cfg.Verifier.ExternalServerURL
 	qr.SessionID = sessionID
 
 	return qr, nil
@@ -142,30 +137,25 @@ func (c *Client) createRequestObjectJWS(ctx context.Context, vpSession *openid4v
 		vpSession.PresentationDefinition = pd
 	}
 
-	schema := "http://"
-	if c.cfg.Verifier.APIServer.TLS.Enabled {
-		schema = "https://"
-	}
-	responseURI := fmt.Sprintf("%s%s%s/callback/direct-post-jwt/%s/%s", schema, c.cfg.Verifier.FQDN, c.cfg.Verifier.APIServer.ExternalPort, vpSession.SessionID, vpSession.CallbackID)
+	responseURI := fmt.Sprintf("%s/callback/direct-post-jwt/%s/%s", c.cfg.Verifier.ExternalServerURL, vpSession.SessionID, vpSession.CallbackID)
 
 	clientMetadata, err := cryptohelpers.BuildClientMetadataFromECDSAKey(vpSession.SessionEphemeralKeyPair.PrivateKey.(*ecdsa.PrivateKey), vpSession.EncryptDirectPostJWT)
 	if err != nil {
 		c.log.Error(err, "Failed to build client metadata")
 		return "", err
 	}
-	fqdn := c.cfg.Verifier.FQDN
 	now := jwt.NewNumericDate(time.Now())
 	claims := &jwthelpers.CustomClaims{
 		ResponseURI:            responseURI,
 		ClientIdScheme:         "x509_san_dns",
-		ClientId:               fqdn,
+		ClientId:               c.cfg.Verifier.ExternalServerURL,
 		ResponseType:           "vp_token",
 		ResponseMode:           "direct_post.jwt",
 		State:                  vpSession.State,
 		Nonce:                  vpSession.Nonce,
 		PresentationDefinition: vpSession.PresentationDefinition,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    fmt.Sprintf("%s%s", schema, c.cfg.Verifier.FQDN),
+			Issuer:    c.cfg.Verifier.ExternalServerURL,
 			Audience:  jwt.ClaimStrings{"https://self-issued.me/v2"},
 			ExpiresAt: jwt.NewNumericDate(vpSession.SessionExpires),
 			IssuedAt:  now,

@@ -49,20 +49,21 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		server:          &http.Server{},
 		eventPublisher:  eventPublisher,
 		sessionsName:    "oauth_user_session",
-		sessionsAuthKey: oauth2.GenerateCryptographicNonceWithLength(32),
-		sessionsEncKey:  oauth2.GenerateCryptographicNonceWithLength(32),
+		sessionsAuthKey: oauth2.GenerateCryptographicNonceFixedLength(32),
+		sessionsEncKey:  oauth2.GenerateCryptographicNonceFixedLength(32),
 		sessionsOptions: sessions.Options{
 			Path:     "/",
 			Domain:   "",
 			MaxAge:   900,
 			Secure:   false,
 			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
+			SameSite: http.SameSiteLaxMode,
 		},
 	}
 
 	if s.cfg.APIGW.APIServer.TLS.Enabled {
 		s.sessionsOptions.Secure = true
+		s.sessionsOptions.SameSite = http.SameSiteStrictMode
 	}
 
 	var err error
@@ -74,11 +75,11 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	// Used in development to avoid bundling static files in the executable.
 	// When used, comment the four lines below these ones.
 	// s.gin.Static("/static", "./staticembed")
-	// s.gin.LoadHTMLFiles("./staticembed/index.html")
+	// s.gin.LoadHTMLGlob("./staticembed/*.html")
 
 	s.gin.StaticFS("/static", http.FS(staticembed.FS))
 
-	f := template.Must(template.New("").ParseFS(staticembed.FS, "index.html"))
+	f := template.Must(template.ParseFS(staticembed.FS, "*.html"))
 	s.gin.SetHTMLTemplate(f)
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
@@ -101,6 +102,12 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	rgRestricted.Use(s.httpHelpers.Middleware.BasicAuth(ctx, s.cfg.APIGW.APIServer.BasicAuth.Users))
 
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/", http.StatusOK, s.endpointIndex)
+
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers", http.StatusOK, s.endpointOffers)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/lookup", http.StatusOK, s.endpointGetOffersLookup)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/:scope/:wallet_id", http.StatusOK, s.endpointGetOffer)
+
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "nonce", http.StatusOK, s.endpointOIDCNonce)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "credential", http.StatusOK, s.endpointOIDCCredential)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "credential-offer/:credential_offer_uuid", http.StatusOK, s.endpointOIDCredentialOfferURI)
@@ -108,12 +115,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRestricted, http.MethodPost, "notification", http.StatusNoContent, s.endpointOIDCNotification)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/openid-credential-issuer", http.StatusOK, s.endpointOIDCMetadata)
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuth2Metadata)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuthMetadata)
 	rgOAuthSession := rgRoot.Group("")
 	rgOAuthSession.Use(s.httpHelpers.Middleware.UserSession(s.sessionsName, s.sessionsAuthKey, s.sessionsEncKey, s.sessionsOptions))
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "op/par", http.StatusCreated, s.endpointOAuthPar)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorize", http.StatusPermanentRedirect, s.endpointOAuthAuthorize)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent", http.StatusNotModified, s.endpointOAuthAuthorizationConsent)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent/callback", http.StatusNotModified, s.endpointOAuthAuthorizationConsentCallback)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent/svg-template", http.StatusOK, s.endpointOAuthAuthorizationConsentSvgTemplate)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", 200, s.endpointHealth)
@@ -143,10 +152,19 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "/user/pid", http.StatusOK, s.endpointAddPIDUser)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "/user/pid/login", http.StatusOK, s.endpointLoginPIDUser)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "/user/lookup", http.StatusOK, s.endpointUserLookup)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "/user/cancel", http.StatusSeeOther, s.endpointUserCancel)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "/user/authentic_source/lookup", http.StatusOK, s.endpointUserAuthenticSourceLookup)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "/user/authentic_source/lookup", http.StatusOK, s.endpointUserAuthenticSourceLookup)
 
 	// SatosaCredential remove after refactoring
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "credential", http.StatusOK, s.endpointSatosaCredential)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodGet, "/credential/.well-known/jwks", http.StatusOK, s.endpointJWKS)
+
+	//verification endpoints
+	rgVerification := rgRoot.Group("/verification")
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodGet, "/request-object", http.StatusOK, s.endpointVerificationRequestObject)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodPost, "/direct_post", http.StatusOK, s.endpointVerificationDirectPost)
 
 	// Run http server
 	go func() {

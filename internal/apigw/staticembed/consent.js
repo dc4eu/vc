@@ -1,77 +1,195 @@
-import Alpine from 'alpinejs';
-
-/**
- * @typedef {Object} Schema
- * @property {string} name
- */
-
-/**
- * @typedef {Object} Identity
- * @property {string} authentic_source_person_id
- * @property {Schema} schema
- * @property {string} family_name
- * @property {string} given_name
- * @property {string} birth_date - Format: YYYY-MM-DD
- * @property {string} birth_place
- * @property {string[]} nationality
- * @property {string} issuing_authority
- * @property {string} issuing_country
- * @property {string} expiry_date - Format: YYYY-MM-DD
- */
-
-/**
- * @typedef {Object} GrantResponse
- * @property {boolean} grant
- * @property {Identity} identity
- * @property {string} redirect_url
- */
-
-/**
- * @typedef {Object} SvgTemplate
- * @property {string} uri
- * @property {string} integrity
- */
+import Alpine from "alpinejs";
+import * as v from "valibot";
 
 /**
  * @typedef {Object} Credential
- * @property {string} vct
+ * @property {string} document_type
  * @property {string} name
  * @property {string} svg
- * @property {Record<string, string>} claims
+ * @property {Record<string, { label: string; value: string; }>} claims
  */
+
+/**
+ * @typedef {v.InferOutput<typeof SvgTemplateResponseSchema>} SvgTemplateResponse
+ */
+const SvgTemplateResponseSchema = v.required(v.object({
+    template: v.string(),
+    svg_claims: v.record(v.string(), v.array(v.string())),
+}));
+
+/**
+ * @typedef {v.InferOutput<typeof BasicAuthResponseSchema>} BasicAuthResponse
+ */
+const BasicAuthResponseSchema = v.required(v.object({
+    grant: v.boolean(),
+    redirect_url: v.pipe(
+        v.string(),
+        v.url(),
+    )
+}));
+
+/**
+ * @typedef {v.InferOutput<typeof UserDataSchema>} UserData
+ */
+const UserDataSchema = v.required(v.object({
+    svg_template_claims: v.record(v.string(), v.object({
+        label: v.string(),
+        value: v.string(),
+    })),
+    redirect_url: v.string(),
+}));
+
+/**
+ * @param {string} name 
+ * @returns {string | null}
+ */
+function getCookie(name) {
+    return document.cookie
+        .split(";")
+        .find((cookie) =>
+            cookie.trim().startsWith(`${name}=`),
+        )
+        ?.split("=")
+        .pop() || null;
+}
+
+/**
+ * @param {string} key 
+ * @returns {string}
+ */
+function keyToLabel(key) {
+    if (key.includes("_")) {
+        let parts = key.split("_");
+
+        parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+
+        key = parts.join(" ");
+    }
+
+    return key;
+}
+
+/**
+ * Due to bfcache some state will persist across
+ * navigation events, so we 'manually' clear it.
+ * @see https://developer.mozilla.org/en-US/docs/Glossary/bfcache
+ */
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
 
 const baseUrl = window.location.origin;
 
-window.Alpine = Alpine;
+const ROUTES = {
+    login: "#/",
+    credentials: "#/credentials"
+}
 
 Alpine.data("app", () => ({
-    /** @type {GrantResponse | null} */
-    grantResponse: null,
+    /** @type {boolean} */
+    loading: true,
+
+    /** @type {string | null} */
+    redirectUrl: null,
 
     /** @type {Credential[]} */
     credentials: [],
 
     /** @type {boolean} */
     loggedIn: false,
-    
+
+    /** @type {"basic" | "pid_auth" | null} */
+    authMethod: null,
+
+    /** @type {number | null} */
+    pidAuthRedirectCountUp: null,
+
+    /** @type {number} */
+    pidAuthRedirectMaxCount: 7,
+
     /** @type {string | null} */
-    loginError: null,
+    error: null,
+
+    init() {
+        this.setAuthMethod();
+
+        this.hashState();
+
+        this.$watch("error", (newVal) => {
+            if (typeof newVal === "string") {
+                console.error(`Error: ${newVal}`);
+            }
+        });
+
+        if (this.loggedIn) {
+            this.handleIsLoggedIn();
+        } else {
+            this.loading = false;
+        }
+
+        this.$watch("loggedIn", (newVal) => {
+            if (newVal) {
+                this.handleIsLoggedIn();
+            } else {
+                this.handleIsNotLoggedIn();
+            }
+        });
+    },
+
+    setAuthMethod() {
+        const authMethod = getCookie("auth_method");
+
+        if (
+            !authMethod ||
+            authMethod !== "basic" &&
+            authMethod !== "pid_auth"
+        ) {
+            this.error = `Unknown auth method: '${authMethod}'`;
+            return;
+        }
+
+        this.authMethod = authMethod;
+    },
+
+    hashState() {
+        /** @param {string} hash */
+        const updateLoginState = (hash) => {
+            this.loggedIn = (hash === ROUTES.credentials);
+        };
+
+        updateLoginState(window.location.hash);
+
+        addEventListener("hashchange", (event) => {
+            this.loading = true;
+            const { hash } = new URL(event.newURL);
+            updateLoginState(hash);
+            this.loading = false;
+        });
+    },
 
     /** @param {SubmitEvent} event */
-    async handleLogin(event) {
-        this.loginError = null;
+    async handleLoginBasic(event) {
+        this.loading = true;
+        this.error = null;
+
+        if (!(this.$refs.loginForm instanceof HTMLFormElement)) {
+            this.error = "Login form not of type 'HtmlFormElement'";
+            return;
+        }
 
         const formData = new FormData(this.$refs.loginForm);
 
         const username = formData.get("username");
         if (!username) {
-            this.loginError = "Username is required";
+            this.error = "Username is required";
             return;
         }
 
         const password = formData.get("password");
         if (!password) {
-            this.loginError = "Password is required";
+            this.error = "Password is required";
             return;
         }
 
@@ -92,52 +210,126 @@ Alpine.data("app", () => ({
         };
 
         try {
-            /** @type {GrantResponse} */ 
-            const data = await this.fetchData(url, options);
+            await this.fetchData(url.toString(), options);
 
-            this.grantResponse = data;
+            window.location.hash = ROUTES.credentials;
+        } catch (err) {
+            if (err instanceof v.ValiError) {
+                this.error = err.message;
+            } else {
+                this.error = `Failed to login: ${err.message}`;
+            }
+            this.loggedIn = false;
+            this.loading = false;
+        }
+    },
 
-            const claims = {
-                given_name: data.identity.given_name,
-                family_name: data.identity.family_name,
-                birth_date: data.identity.birth_date,
-                expiry_date: data.identity.expiry_date,
-            };
+    /**
+     * @param {boolean} immediate - Immediately proceed to 'redirect_uri'
+     */
+    handleLoginPidAuth(immediate = false) {
+        const rawRedirectUrl = getCookie("pid_auth_redirect_url");
+        if (!rawRedirectUrl) {
+            this.error = "Missing 'pid_auth_redirect_url' cookie";
+            return;
+        }
+
+        try {
+            const url = decodeURIComponent(rawRedirectUrl);
+
+            if (immediate) {
+                this.redirect(url);
+                return;
+            }
+
+            this.pidAuthRedirectCountUp = 1;
+
+            const increment = setInterval(() => {
+                // We can stop the interval by setting
+                // this.pidAuthRedirectCountUp to 'null'
+                if (!this.pidAuthRedirectCountUp) {
+                    clearInterval(increment);
+                    return;
+                }
+
+                ++this.pidAuthRedirectCountUp;
+
+                if (this.pidAuthRedirectCountUp >= this.pidAuthRedirectMaxCount) {
+                    clearInterval(increment);
+                    this.redirect(url);
+                    return;
+                }
+            }, 1000);
+
+        } catch (err) {
+            if (err instanceof URIError) {
+                this.error = `Invalid redirect_uri provided: ${err.message}`;
+            } else {
+                this.error = err.message;
+            }
+
+            this.pidAuthRedirectCountUp = null;
+        }
+    },
+
+    async handleIsNotLoggedIn() {
+        this.credentials = [];
+        this.$refs.title.innerText = "Authorization Consent";
+    },
+
+    async handleIsLoggedIn() {
+        this.loading = true;
+
+        const url = new URL("/user/lookup", baseUrl);
+
+        const options = {
+            method: "GET", 
+            headers: {
+                "Accept": "application/json", 
+                "Content-Type": "application/json; charset=utf-8",
+            }, 
+        };
+
+        try {
+            const res = await this.fetchData(url.toString(), options);
+
+            const data = v.parse(UserDataSchema, res);
+
+            this.redirectUrl = data.redirect_url;
 
             const svg = await this.createCredentialSvgImageUri(
-                {
-                    uri: new URL("/static/person-identification-data-svg-example-01.svg", baseUrl),
-                    integrity: "sha256-037rNwIiS/qeKc16yxy3xJlAYYFGul1wJAcGjXjDVLw="
-                },
-                claims,
+                data.svg_template_claims,
             );
 
+
             this.credentials.push({
-                vct: "urn:eudi:pid:1",
+                document_type: "N/A",
                 name: "PID",
                 svg,
-                claims,
+                claims: data.svg_template_claims,
             });
 
-            this.$refs.title.innerText = `Welcome, ${data.identity.given_name}!`
-
-            this.loggedIn = true;
+            if (data.svg_template_claims.given_name?.value) {
+                this.$refs.title.innerText = `Welcome, ${data.svg_template_claims.given_name.value}!`
+            }
         } catch (err) {
-            this.loginError = "Failed to login: " + err.message;
+            if (err instanceof v.ValiError) {
+                this.error = err.message;
+            } else {
+                this.error = `Error: ${err.message}`;
+            }
+            window.location.hash = ROUTES.login;
+        } finally {
+            this.loading = false;
         }
     },
 
     /** @param {SubmitEvent} event */
     handleCredentialSelection(event) {
-        window.location.replace(this.grantResponse.redirect_url);
-    },
-
-    /** @param {Event} event */
-    handleLogout(event) {
-        this.loggedIn = false;
-        this.$refs.title.innerHTML = "Authorize Consent";
-        this.grantResponse = null;
-        this.credentials = [];
+        if (!this.redirectUrl) {
+            this.error = "'redirect_url' is null";
+        }
+        this.redirect(this.redirectUrl);
     },
 
     /**
@@ -150,12 +342,12 @@ Alpine.data("app", () => ({
         if (!response.ok) {
             if (response.status === 401) {
                 this.loggedIn = false;
-                this.grantResponse = null;
+                this.redirectUrl = null;
                 this.credentials = [];
 
                 throw new Error("Unauthorized/session expired");
             }
-            throw new Error(`HTTP error! status: ${response.status}, method: ${response.method}, url: ${url}`);
+            throw new Error(`HTTP error! status: ${response.status}, url: ${url}`);
         }
 
         const data = await response.json();
@@ -164,20 +356,34 @@ Alpine.data("app", () => ({
     },
 
     /**
-     * @param {SvgTemplate} svg_template
-     * @param {Record<string, string>} claims
+     * @param {Record<string, { label: string; value: string; }>} claims
      * @returns {Promise<string>}
      */
-    async createCredentialSvgImageUri(svg_template, claims) {
-        const res = await fetch(svg_template.uri);
-        let svg = await res.text();
+    async createCredentialSvgImageUri(claims) {
+        const url = new URL('/authorization/consent/svg-template', baseUrl);
 
-        for (let [key, value] of Object.entries(claims)) {
-            svg = svg.replaceAll(`{{${key}}}`, value);
+        /** @type {SvgTemplateResponse} */
+        const data = await this.fetchData(url.toString(), {});
+
+        let svg = atob(data.template);
+
+        for (const [svg_id, claim] of Object.entries(claims)) {
+            svg = svg.replaceAll(`{{${svg_id}}}`, claim.value);
         }
 
         return `data:image/svg+xml;base64,${btoa(svg)}`;
-    }
+    },
+
+    /** @param {string} url */
+    redirect(url) {
+        this.loading = true;
+
+        try {
+            window.location.href = (new URL(url)).toString();
+        } catch (err) {
+            this.error = `Error when redirecting: ${err}`;
+        }
+    },
 }));
 
 Alpine.start();

@@ -5,6 +5,7 @@
         "auditlog",
         "bson",
         "datastoreclient",
+        "DCQL",
         "DPOP",
         "eduseal",
         "ehic",
@@ -70,11 +71,13 @@
         "simplequeue",
         "skatteverket",
         "socialsecurity",
+        "staticembed",
         "stretchr",
         "SUNET",
         "SVGID",
         "swaggo",
         "timestamppb",
+        "ttlcache",
         "vcclient",
         "VCTM"
     ]

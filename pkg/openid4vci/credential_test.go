@@ -3,9 +3,12 @@ package openid4vci
 import (
 	"context"
 	"testing"
+	"vc/internal/gen/issuer/apiv1_issuer"
 
 	"github.com/stretchr/testify/assert"
 )
+
+var mockProofJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6Im9wZW5pZDR2Y2ktcHJvb2Yrand0IiwiandrIjp7ImNydiI6IlAtMjU2IiwiZXh0Ijp0cnVlLCJrZXlfb3BzIjpbInZlcmlmeSJdLCJrdHkiOiJFQyIsIngiOiJ1aGZ3M3pyOWJBWTlERDV0QkN0RVVfOVdNaFdvTWFlYVVSNGY3U2dKQzlvIiwieSI6ImJZR2JlV2xWYlJrNktxT1hRX0VUeWxaZ3NKMDR0Nld5UTZiZFhYMHUxV0UifX0.eyJub25jZSI6IiIsImF1ZCI6Imh0dHBzOi8vdmMtaW50ZXJvcC0zLnN1bmV0LnNlIiwiaXNzIjoiMTAwMyIsImlhdCI6MTc1MTM2ODI1NX0.ri7zfnClkmVYFPRxV5IWiatmXHjmDNcd9FGJJNngUFjvDkVIfeYKr-bb_aUXU0DgkesIi8XvyKM149tlP-e6gA"
 
 func TestCredentialValidation(t *testing.T) {
 	tts := []struct {
@@ -68,6 +71,39 @@ func TestHashAuthorizeToken(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.header.HashAuthorizeToken()
 			assert.Equal(t, tt.expected, got, "HashAuthorizeToken should return expected value")
+		})
+	}
+}
+
+func TestExtractJWK(t *testing.T) {
+	tts := []struct {
+		name string
+		have *Proof
+		want *apiv1_issuer.Jwk
+	}{
+		{
+			name: "test",
+			have: &Proof{
+				ProofType: "jwt",
+				JWT:       mockProofJWT,
+			},
+			want: &apiv1_issuer.Jwk{
+				Crv:    "P-256",
+				Kty:    "EC",
+				X:      "uhfw3zr9bAY9DD5tBCtEU_9WMhWoMaeaUR4f7SgJC9o",
+				Y:      "bYGbeWlVbRk6KqOXQ_ETylZgsJ04t6WyQ6bdXX0u1WE",
+				KeyOps: []string{"verify"},
+				Ext:    true,
+			},
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.have.ExtractJWK()
+			assert.NoError(t, err, "ExtractJWK should not return an error")
+			assert.NotNil(t, got, "JWK should not be nil")
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

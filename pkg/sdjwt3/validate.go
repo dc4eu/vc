@@ -11,7 +11,7 @@ import (
 
 // Validate validates a signed sdjwt
 func Validate(sdjwt string, pubkey crypto.PublicKey) (bool, error) {
-	header, body, signature, selectiveDisclosures, err := SplitToken(sdjwt)
+	header, body, signature, selectiveDisclosures, _, err := SplitToken(sdjwt)
 	if err != nil {
 		return false, err
 	}

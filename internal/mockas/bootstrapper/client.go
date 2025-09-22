@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -29,10 +30,10 @@ type Client struct {
 	pda1Client            clients
 	ehicClient            clients
 	pidClient             clients
+	pidUserClient         clients
 	elmClient             clients
 	diplomaClient         clients
 	MicroCredentialClient clients
-	UserClient            clients
 }
 
 func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) {
@@ -81,22 +82,22 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		return nil, fmt.Errorf("new micro credential client: %w", err)
 	}
 
-	client.UserClient, err = NewUserClient(ctx, client)
+	client.pidUserClient, err = NewPIDUserClient(ctx, client)
 	if err != nil {
 		return nil, fmt.Errorf("new user client: %w", err)
+	}
+
+	for _, credentialType := range []string{"pid_user"} {
+		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
+		if err := client.userUpload(ctx, jsonPath); err != nil {
+			return nil, fmt.Errorf("user upload: %w", err)
+		}
 	}
 
 	for _, credentialType := range []string{"ehic", "pda1", "elm", "diploma", "microcredential"} { // pid is not working
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
 		if err := client.uploader(ctx, jsonPath); err != nil {
 			return nil, fmt.Errorf("uploader: %w", err)
-		}
-	}
-
-	for _, credentialType := range []string{"user"} {
-		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
-		if err := client.userUpload(ctx, jsonPath); err != nil {
-			return nil, fmt.Errorf("user upload: %w", err)
 		}
 	}
 
@@ -127,6 +128,7 @@ func (c *Client) makeIdentities(sourceFilePath string) error {
 			continue
 		}
 		dateOfBirth := strings.ReplaceAll(row[8], "/", "-")
+
 		c.identities[row[0]] = &vcclient.UploadRequest{
 			DocumentDataVersion: "1.0.0",
 			Identities: []model.Identity{
@@ -153,6 +155,18 @@ func (c *Client) makeIdentities(sourceFilePath string) error {
 	return nil
 }
 
+func (c *Client) shouldUpload(id string) bool {
+	if slices.Contains(c.cfg.MockAS.BootstrapUsers, id) {
+		return true
+	}
+
+	if len(c.cfg.MockAS.BootstrapUsers) == 0 {
+		return true
+	}
+
+	return false
+}
+
 func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 	b, err := os.ReadFile(jsonPath)
 	if err != nil {
@@ -164,14 +178,16 @@ func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 		return err
 	}
 
-	for _, body := range bodys {
-		resp, err := c.vcClient.Root.Upload(ctx, body)
-		if err != nil {
-			c.log.Error(err, "Upload", "resp", resp)
-			return err
-		}
+	for id, body := range bodys {
+		if c.shouldUpload(id) {
+			resp, err := c.vcClient.Root.Upload(ctx, body)
+			if err != nil {
+				c.log.Error(err, "Upload", "resp", resp)
+				return err
+			}
 
-		c.log.Debug("Upload", "resp", resp.StatusCode)
+			c.log.Debug("Upload", "resp", resp.StatusCode)
+		}
 	}
 
 	return nil
@@ -188,13 +204,15 @@ func (c *Client) userUpload(ctx context.Context, jsonPath string) error {
 		return err
 	}
 
-	for _, body := range bodys {
-		resp, err := c.vcClient.User.AddPID(ctx, body)
-		if err != nil {
-			c.log.Error(err, "User Upload", "resp", resp)
-			return err
+	for id, body := range bodys {
+		if c.shouldUpload(id) {
+			resp, err := c.vcClient.User.AddPID(ctx, body)
+			if err != nil {
+				c.log.Error(err, "User Upload", "resp", resp)
+				return err
+			}
+			c.log.Debug("User Upload", "resp", resp.StatusCode)
 		}
-		c.log.Debug("User Upload", "resp", resp.StatusCode)
 	}
 
 	return nil

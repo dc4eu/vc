@@ -7,6 +7,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/pid"
 	"vc/pkg/sdjwt3"
 	"vc/pkg/trace"
 
@@ -36,11 +37,11 @@ func newPIDClient(ctx context.Context, client *Client, tracer *trace.Tracer, log
 	return c, nil
 }
 
-func (c *pidClient) sdjwt(ctx context.Context, doc *model.Identity, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+func (c *pidClient) sdjwt(ctx context.Context, doc *pid.Document, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
 	_, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
-	body, err := doc.Marshal()
+	body, err := doc.Identity.Marshal()
 	if err != nil {
 		return "", err
 	}

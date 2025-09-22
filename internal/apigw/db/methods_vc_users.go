@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
@@ -60,6 +61,11 @@ func (c *VCUsersColl) createIndex(ctx context.Context) error {
 func (c *VCUsersColl) Save(ctx context.Context, doc *model.OAuthUsers) error {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:users:save")
 	defer span.End()
+
+	if err := helpers.Check(ctx, c.Service.cfg, doc, c.log); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
 
 	_, err := c.Coll.InsertOne(ctx, doc)
 	if err != nil {

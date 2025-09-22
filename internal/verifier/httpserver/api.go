@@ -14,6 +14,7 @@ type Apiv1 interface {
 	GetAuthorizationRequest(ctx context.Context, sessionID string) (*openid4vp.AuthorizationRequest, error)
 	Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (*openid4vp.CallbackReply, error)
 
+
 	// vp-datastore
 	PaginatedVerificationRecords(ctx context.Context, request *apiv1.PaginatedVerificationRecordsRequest) (*apiv1.PaginatedVerificationRecordsReply, error)
 

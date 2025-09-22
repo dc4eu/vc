@@ -152,12 +152,12 @@ type PresentationDefinition struct {
 }
 
 type InputDescriptor struct {
-	ID          string            `json:"id"`
-	Name        string            `json:"name,omitempty"`
-	Purpose     string            `json:"purpose,omitempty"`
-	Format      map[string]Format `json:"format,omitempty"`
-	Group       []string          `json:"group,omitempty"`
-	Constraints Constraints       `json:"constraints"`
+	ID          string                         `json:"id"`
+	Name        string                         `json:"name,omitempty"`
+	Purpose     string                         `json:"purpose,omitempty"`
+	Format      map[string]map[string][]string `json:"format,omitempty"`
+	Group       []string                       `json:"group,omitempty"`
+	Constraints Constraints                    `json:"constraints"`
 }
 
 type Format struct {
@@ -172,12 +172,13 @@ type Constraints struct {
 type Field struct {
 	Name   string   `json:"name,omitempty"`
 	Path   []string `json:"path"`
-	Filter Filter   `json:"filter,omitempty"`
+	Filter *Filter  `json:"filter,omitempty"`
 }
 
 type Filter struct {
-	Type string   `json:"type,omitempty"`
-	Enum []string `json:"enum,omitempty"`
+	Type  string   `json:"type,omitempty"`
+	Enum  []string `json:"enum,omitempty"`
+	Const string   `json:"const,omitempty"`
 }
 
 type SubmissionRequirement struct {
@@ -219,13 +220,11 @@ func ExamplePresentationDefinition() error {
 			Description: "Required Fields: VC type, SSN, Forename, Family Name, Birthdate",
 			InputDescriptors: []InputDescriptor{
 				{
-					ID: "SatosaEHIC",
-					Format: map[string]Format{
-						"vc+sd-jwt": {Alg: []string{"ES256"}},
-					},
+					ID:     "SatosaEHIC",
+					Format: nil, // todo(masv): fix
 					Constraints: Constraints{
 						Fields: []Field{
-							{Name: "VC type", Path: []string{"$.vct"}, Filter: Filter{Type: "string", Enum: []string{"https://vc-interop-1.sunet.se/credential/ehic/1.0", "https://satosa-test-1.sunet.se/credential/ehic/1.0", "https://satosa-dev-1.sunet.se/credential/ehic/1.0", "EHICCredential"}}},
+							{Name: "VC type", Path: []string{"$.vct"}, Filter: &Filter{Type: "string", Enum: []string{"https://vc-interop-1.sunet.se/credential/ehic/1.0", "https://satosa-test-1.sunet.se/credential/ehic/1.0", "https://satosa-dev-1.sunet.se/credential/ehic/1.0", "EHICCredential"}}},
 							{Name: "SSN", Path: []string{"$.social_security_pin"}},
 							{Name: "Forename", Path: []string{"$.subject.forename"}},
 							{Name: "Family Name", Path: []string{"$.subject.family_name"}},

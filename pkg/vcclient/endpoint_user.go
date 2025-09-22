@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/sdjwt3"
 )
 
 type userHandler struct {
@@ -15,9 +16,10 @@ type userHandler struct {
 }
 
 type AddPIDRequest struct {
-	Username   string          `json:"username" validate:"required"`
-	Password   string          `json:"password" validate:"required"`
-	Attributes *model.Identity `json:"attributes,omitempty" validate:"required"`
+	Username string          `json:"username" validate:"required"`
+	Password string          `json:"password" validate:"required"`
+	Identity *model.Identity `json:"identity,omitempty" validate:"required"`
+	Meta     *model.MetaData `json:"meta,omitempty" validate:"required"`
 }
 
 func (s *userHandler) AddPID(ctx context.Context, body *AddPIDRequest) (*http.Response, error) {
@@ -38,21 +40,14 @@ type LoginPIDUserRequest struct {
 	RequestURI string `json:"-"`
 }
 
-type LoginPIDUserReply struct {
-	Grant       bool            `json:"grant" validate:"required"`
-	Identity    *model.Identity `json:"identity,omitempty"`
-	RedirectURL string          `json:"redirect_url,omitempty"`
-}
-
-func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*LoginPIDUserReply, *http.Response, error) {
+func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserRequest) (*http.Response, error) {
 	url := s.serviceBaseURL + "/pid/login"
-	reply := &LoginPIDUserReply{}
-	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, reply, false)
+	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, nil, false)
 	if err != nil {
-		return nil, resp, err
+		return resp, err
 	}
 
-	return reply, resp, nil
+	return resp, nil
 }
 
 type GetPIDRequest struct {
@@ -61,4 +56,31 @@ type GetPIDRequest struct {
 
 type GetPIDReply struct {
 	Identity *model.Identity `json:"identity,omitempty"`
+}
+
+type UserLookupRequest struct {
+	Username     string       `json:"-"`
+	AuthMethod   string       `json:"-"`
+	ResponseCode string       `json:"-"`
+	RequestURI   string       `json:"-"`
+	VCTM         *sdjwt3.VCTM `json:"-"`
+}
+
+type SVGClaim struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
+
+type UserLookupReply struct {
+	SVGTemplateClaims map[string]SVGClaim `json:"svg_template_claims,omitempty"`
+	RedirectURL       string              `json:"redirect_url,omitempty"`
+}
+
+type UserAuthenticSourceLookupRequest struct {
+	AuthenticSource string `json:"authentic_source,omitempty"`
+	SessionID       string `json:"-"`
+}
+
+type UserAuthenticSourceLookupReply struct {
+	AuthenticSources []string `json:"authentic_sources,omitempty"`
 }

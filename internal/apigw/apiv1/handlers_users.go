@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"vc/pkg/model"
+	"vc/pkg/pid"
+	"vc/pkg/sdjwt3"
 	"vc/pkg/vcclient"
 
 	"github.com/google/uuid"
@@ -12,7 +14,11 @@ import (
 )
 
 func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
-	documentData, err := req.Attributes.Marshal()
+	pid := pid.Document{
+		Identity: req.Identity,
+	}
+
+	documentData, err := pid.Marshal()
 	if err != nil {
 		c.log.Error(err, "failed to marshal document data")
 		return err
@@ -21,9 +27,9 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	// build a new document
 	uploadRequest := &UploadRequest{
 		Meta: &model.MetaData{
-			AuthenticSource:           "Generic_PID_Issuer",
+			AuthenticSource:           req.Meta.AuthenticSource,
 			DocumentVersion:           "1.0.0",
-			DocumentType:              model.CredentialTypeUrnEudiPid1,
+			DocumentType:              req.Meta.DocumentType,
 			DocumentID:                fmt.Sprintf("generic.pid.%s", uuid.NewString()),
 			RealData:                  false,
 			Collect:                   &model.Collect{},
@@ -32,7 +38,7 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 			CredentialValidTo:         0,
 			DocumentDataValidationRef: "",
 		},
-		Identities: []model.Identity{*req.Attributes},
+		Identities: []model.Identity{*req.Identity},
 		DocumentDisplay: &model.DocumentDisplay{
 			Version: "1.0.0",
 			Type:    "",
@@ -50,9 +56,11 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		return err
 	}
 	err = c.db.VCUsersColl.Save(ctx, &model.OAuthUsers{
-		Username: req.Username,
-		Password: string(passwordHash),
-		Identity: req.Attributes,
+		Username:        req.Username,
+		Password:        string(passwordHash),
+		Identity:        req.Identity,
+		DocumentType:    req.Meta.DocumentType,
+		AuthenticSource: req.Meta.AuthenticSource,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to save user")
@@ -68,23 +76,76 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 	return nil
 }
 
-func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) (*vcclient.LoginPIDUserReply, error) {
+func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) error {
 	c.log.Debug("LoginPIDUser called", "username", req.Username)
 	user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
 	if err != nil {
-		return nil, fmt.Errorf("username %s not found", req.Username)
+		return fmt.Errorf("username %s not found", req.Username)
 	}
-
-	reply := &vcclient.LoginPIDUserReply{}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return reply, fmt.Errorf("password mismatch for username %s", req.Username)
+		return fmt.Errorf("password mismatch for username %s", req.Username)
 	}
 
-	if err := c.db.VCAuthorizationContextColl.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
-		c.log.Error(err, "failed to consent for user", "username", req.Username)
-		return nil, fmt.Errorf("failed to consent for user %s: %w", req.Username, err)
+	update := &model.AuthorizationContext{
+		Identity:        user.Identity,
+		DocumentType:    user.DocumentType,
+		AuthenticSource: user.AuthenticSource,
 	}
+	// Update the authorization with the user identity
+	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}, update); err != nil {
+		c.log.Error(err, "failed to add identity to authorization context")
+		return err
+	}
+
+	return nil
+
+}
+
+func (c *Client) UserAuthenticSourceLookup(ctx context.Context, req *vcclient.UserAuthenticSourceLookupRequest) (*vcclient.UserAuthenticSourceLookupReply, error) {
+	c.log.Debug("UserAuthenticSource called")
+
+	if req.AuthenticSource == "" && req.SessionID != "" {
+		c.log.Debug("userAuthenticSourceLookup called without authentic source, looking up by session ID", "session_id", req.SessionID)
+		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+			SessionID: req.SessionID,
+		})
+		if err != nil {
+			c.log.Error(err, "failed to get authorization context for authentic source lookup")
+			return nil, err
+		}
+
+		docs := c.documentCache.Get(authorizationContext.SessionID).Value()
+		if docs == nil {
+			c.log.Error(nil, "no documents found in cache for session", "session_id", req.SessionID)
+			return nil, fmt.Errorf("no documents found for session %s", req.SessionID)
+		}
+
+		authenticSources := []string{}
+
+		for _, doc := range docs {
+			authenticSources = append(authenticSources, doc.Meta.AuthenticSource)
+		}
+
+		reply := &vcclient.UserAuthenticSourceLookupReply{
+			AuthenticSources: authenticSources,
+		}
+
+		return reply, nil
+
+	} else if req.AuthenticSource != "" {
+		c.log.Debug("userAuthenticSourceLookup called with authentic source", "authentic_source", req.AuthenticSource)
+		if err := c.db.VCAuthorizationContextColl.SetAuthenticSource(ctx, &model.AuthorizationContext{SessionID: req.SessionID}, req.AuthenticSource); err != nil {
+			c.log.Error(err, "failed to set authentic source")
+			return nil, fmt.Errorf("failed to set authentic source %s: %w", req.AuthenticSource, err)
+		}
+	}
+
+	return nil, nil
+}
+
+func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest) (*vcclient.UserLookupReply, error) {
+	c.log.Debug("UserLookup called")
 
 	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
 		RequestURI: req.RequestURI,
@@ -93,24 +154,110 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 		c.log.Error(err, "failed to get authorization for user", "request_uri", req.RequestURI)
 	}
 
-	// Update the authorization with the user identity
-	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, req.RequestURI, user.Identity); err != nil {
-		return nil, err
-	}
+	c.log.Debug("LoginPIDUser", "auth", authorizationContext)
 
-	c.log.Debug("LoginPIDUser", "user", user, "auth", authorizationContext)
-
-	redirectURL, err := url.Parse(authorizationContext.RedirectURI)
+	redirectURL, err := url.Parse(authorizationContext.WalletURI)
 	if err != nil {
-		c.log.Error(err, "failed to parse redirect URI", "redirect_uri", authorizationContext.RedirectURI)
-		return nil, fmt.Errorf("failed to parse redirect URI %s: %w", authorizationContext.RedirectURI, err)
+		c.log.Error(err, "failed to parse redirect URI", "redirect_uri", authorizationContext.WalletURI)
+		return nil, fmt.Errorf("failed to parse redirect URI %s: %w", authorizationContext.WalletURI, err)
 	}
 
 	redirectURL.RawQuery = url.Values{"code": {authorizationContext.Code}, "state": {authorizationContext.State}}.Encode()
 
-	reply.Grant = true
-	reply.Identity = user.Identity
-	reply.RedirectURL = redirectURL.String()
+	svgTemplateClaims := map[string]vcclient.SVGClaim{}
+
+	switch req.AuthMethod {
+	case model.AuthMethodBasic:
+		user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
+		if err != nil {
+			c.log.Error(err, "failed to get user", "username", req.Username)
+			return nil, fmt.Errorf("user %s not found: %w", req.Username, err)
+		}
+
+		svgTemplateClaims = map[string]vcclient.SVGClaim{
+			"given_name": {
+				Label: "Given name",
+				Value: user.Identity.GivenName,
+			},
+			"family_name": {
+				Label: "Family name",
+				Value: user.Identity.FamilyName,
+			},
+			"birth_date": {
+				Label: "Birth date",
+				Value: user.Identity.BirthDate,
+			},
+			"expiry_date": {
+				Label: "Expiry date",
+				Value: user.Identity.ExpiryDate,
+			},
+		}
+
+	case model.AuthMethodPID:
+		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{VerifierResponseCode: req.ResponseCode})
+		if err != nil {
+			c.log.Error(err, "failed to get authorization context")
+			return nil, err
+		}
+
+		docs := c.documentCache.Get(authorizationContext.SessionID).Value()
+		if docs == nil {
+			c.log.Error(nil, "no documents found in cache for session")
+			return nil, fmt.Errorf("no documents found for session %s", authorizationContext.SessionID)
+		}
+
+		// TODO(masv): fix this monstrosity
+		authenticSource := ""
+		for _, doc := range docs {
+			authenticSource = doc.Meta.AuthenticSource
+			break
+		}
+
+		doc, ok := docs[authenticSource]
+		if !ok {
+			c.log.Error(nil, "no document found for authentic source")
+			return nil, fmt.Errorf("no document found for authentic source %s", authorizationContext.AuthenticSource)
+		}
+
+		jsonPaths, err := req.VCTM.ClaimJSONPath()
+		if err != nil {
+			c.log.Error(err, "failed to get JSON paths from VCTM claims")
+			return nil, err
+		}
+
+		claimValues, err := sdjwt3.Filter(doc.DocumentData, jsonPaths.Displayable)
+		if err != nil {
+			c.log.Error(err, "failed to filter document data for SVG template claims")
+			return nil, fmt.Errorf("failed to filter document data for SVG template claims")
+		}
+
+		for _, claim := range req.VCTM.Claims {
+			value, ok := claimValues[claim.SVGID].(string)
+			if !ok {
+				continue
+			}
+
+			if claim.SVGID != "" {
+				svgTemplateClaims[claim.SVGID] = vcclient.SVGClaim{
+					Label: claim.Display[0].Label,
+					Value: value,
+				}
+			}
+		}
+
+	default:
+		return nil, fmt.Errorf("unsupported auth method for user lookup: %s", req.AuthMethod)
+	}
+
+	if err := c.db.VCAuthorizationContextColl.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
+		c.log.Error(err, "failed to consent for user", "username", req.Username)
+		return nil, fmt.Errorf("failed to consent for user %s: %w", req.Username, err)
+	}
+
+	reply := &vcclient.UserLookupReply{
+		SVGTemplateClaims: svgTemplateClaims,
+		RedirectURL:       redirectURL.String(),
+	}
 
 	return reply, nil
 }

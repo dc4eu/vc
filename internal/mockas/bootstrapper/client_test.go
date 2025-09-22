@@ -91,8 +91,8 @@ func TestCreateJSONSourceFiles(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("user", func(t *testing.T) {
-		client, err := NewUserClient(ctx, c)
+	t.Run("pid_user", func(t *testing.T) {
+		client, err := NewPIDUserClient(ctx, c)
 		assert.NoError(t, err)
 
 		err = client.makeSourceData("")

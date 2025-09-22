@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -58,7 +59,6 @@ type Common struct {
 	Tracing         OTEL                  `yaml:"tracing" validate:"required"`
 	Kafka           Kafka                 `yaml:"kafka" validate:"omitempty"`
 	CredentialOffer CredentialOfferConfig `yaml:"credential_offer" validate:"omitempty"`
-	SupportedPidVCT []string              `yaml:"supported_pid_vct" validate:"omitempty"`
 }
 
 type CredentialOfferConfig struct {
@@ -143,15 +143,16 @@ type Persistent struct {
 
 // MockAS holds the mock as configuration
 type MockAS struct {
-	APIServer    APIServer `yaml:"api_server" validate:"required"`
-	DatastoreURL string    `yaml:"datastore_url" validate:"required"`
+	APIServer      APIServer `yaml:"api_server" validate:"required"`
+	DatastoreURL   string    `yaml:"datastore_url" validate:"required"`
+	BootstrapUsers []string  `yaml:"bootstrap_users"`
 }
 
 // Verifier holds the verifier configuration
 type Verifier struct {
-	APIServer  APIServer  `yaml:"api_server" validate:"required"`
-	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
-	FQDN       string     `yaml:"fqdn" validate:"required"`
+	APIServer         APIServer  `yaml:"api_server" validate:"required"`
+	GRPCServer        GRPCServer `yaml:"grpc_server" validate:"required"`
+	ExternalServerURL string     `yaml:"external_server_url" validate:"required"`
 }
 
 // Datastore holds the datastore configuration
@@ -172,11 +173,22 @@ type Metadata struct {
 	SigningChainPath string `yaml:"signing_chain_path" validate:"required"`
 }
 
+type CredentialOfferWallets struct {
+	Label       string `yaml:"label" validate:"required"`
+	RedirectURI string `yaml:"redirect_uri" validate:"required"`
+}
+
+type CredentialOffers struct {
+	IssuerURL string                            `yaml:"issuer_url" validate:"required"`
+	Wallets   map[string]CredentialOfferWallets `yaml:"wallets" validate:"required"`
+}
+
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer      APIServer    `yaml:"api_server" validate:"required"`
-	OauthServer    OAuth2Server `yaml:"oauth_server" validate:"omitempty"`
-	IssuerMetadata Metadata     `yaml:"issuer_metadata" validate:"omitempty"`
+	APIServer        APIServer        `yaml:"api_server" validate:"required"`
+	CredentialOffers CredentialOffers `yaml:"credential_offers" validate:"omitempty"`
+	OauthServer      OAuth2Server     `yaml:"oauth_server" validate:"omitempty"`
+	IssuerMetadata   Metadata         `yaml:"issuer_metadata" validate:"omitempty"`
 }
 
 // OTEL holds the opentelemetry configuration
@@ -264,10 +276,19 @@ type Cfg struct {
 	CredentialConstructor map[string]*CredentialConstructor `yaml:"credential_constructor" validate:"omitempty"`
 }
 
+// GetCredentialConstructorAuthMethod returns the auth method for the given credential type or "basic" if not found
+func (c *Cfg) GetCredentialConstructorAuthMethod(credentialType string) string {
+	if constructor, ok := c.CredentialConstructor[credentialType]; ok {
+		return constructor.AuthMethod
+	}
+	return "basic"
+}
+
 type CredentialConstructor struct {
 	VCT          string       `yaml:"vct" validate:"required"`
 	VCTMFilePath string       `yaml:"vctm_file_path" validate:"required"`
 	VCTM         *sdjwt3.VCTM `yaml:"-"`
+	AuthMethod   string       `yaml:"auth_method" validate:"required,oneof=basic pid_auth"`
 }
 
 func (c *CredentialConstructor) LoadFile(ctx context.Context) error {
@@ -298,10 +319,10 @@ func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
 }
 
 // IssuerMetadata loads the issuing metadata from
-func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, any, []string, error) {
+func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, any, *x509.Certificate, []string, error) {
 	fileByte, err := os.ReadFile(cfg.APIGW.IssuerMetadata.Path)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	metadata := &openid4vci.CredentialIssuerMetadataParameters{}
@@ -309,16 +330,16 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 	switch filepath.Ext(cfg.APIGW.IssuerMetadata.Path) {
 	case ".json":
 		if err := json.Unmarshal(fileByte, &metadata); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 
 	case "yaml", ".yml":
 		if err := yaml.Unmarshal(fileByte, &metadata); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 
 	default:
-		return nil, nil, nil, errors.New("unsupported file type")
+		return nil, nil, nil, nil, errors.New("unsupported file type")
 	}
 
 	// ensure that the metadata is empty, should be procured/signed by the request or other automated process
@@ -326,12 +347,12 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 
 	privateKey, err := pki.ParseKeyFromFile(cfg.APIGW.IssuerMetadata.SigningKeyPath)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
-	_, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
+	cert, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	chainBase64Encoded := []string{}
@@ -339,7 +360,7 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 		chainBase64Encoded = append(chainBase64Encoded, pki.Base64EncodeCertificate(c))
 	}
 
-	return metadata, privateKey, chainBase64Encoded, nil
+	return metadata, privateKey, cert, chainBase64Encoded, nil
 }
 
 // LoadOAuth2Metadata loads OAuth2 metadata from file

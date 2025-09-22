@@ -232,6 +232,7 @@ func (c *VCDatastoreColl) GetDocumentWithIdentity(ctx context.Context, query *Ge
 
 	opt := options.FindOne().SetProjection(bson.M{
 		"document_data": 1,
+		"meta":          1,
 	})
 
 	doc := &model.CompleteDocument{}
@@ -241,6 +242,34 @@ func (c *VCDatastoreColl) GetDocumentWithIdentity(ctx context.Context, query *Ge
 	}
 
 	return doc, nil
+}
+
+// GetDocumentsWithIdentity returns matching document with identity if any, or error
+func (c *VCDatastoreColl) GetDocumentsWithIdentity(ctx context.Context, query *GetDocumentQuery) (map[string]model.CompleteDocument, error) {
+	filter := bson.M{
+		"meta.document_type":     bson.M{"$eq": query.Meta.DocumentType},
+		"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
+		"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
+		"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
+	}
+
+	cursor, err := c.Coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*model.CompleteDocument{}
+	if err := cursor.All(ctx, &res); err != nil {
+		return nil, err
+	}
+
+	docs := make(map[string]model.CompleteDocument, len(res))
+
+	for _, doc := range res {
+		docs[doc.Meta.AuthenticSource] = *doc
+	}
+
+	return docs, nil
 }
 
 // DocumentListQuery is the query to get document list

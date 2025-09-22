@@ -45,7 +45,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
-	VerifierWebEnabled := true //TODO: läs in via cfg
+	VerifierWebEnabled := false //TODO: läs in via cfg
 	if VerifierWebEnabled {
 		// extra middlewares (MUST be declared before Server.Default)
 		s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
@@ -82,9 +82,10 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/direct-post-jwt/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
 
+
 	//openid4vp-web
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", http.StatusOK, s.endpointQuitVPFlow)
+	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)
+	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", http.StatusOK, s.endpointQuitVPFlow)
 
 	//vp-datastore
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "vp-datastore/verification-records", http.StatusOK, s.endpointPaginatedVerificationRecords)
@@ -96,12 +97,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	//TODO: swagger är inte aktiverat i web_worker för docker - hantera att verifier lär behöva swagger samtidigt som den stödjer web (OBS! ui samt portal har ingen swagger alls)
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	rgAPIv1 := rgRoot.Group("api/v1")
-
-	if s.cfg.APIGW.APIServer.BasicAuth.Enabled {
-		rgAPIv1.Use(s.httpHelpers.Middleware.BasicAuth(ctx, s.cfg.APIGW.APIServer.BasicAuth.Users))
-	}
 
 	// Run http server
 	go func() {

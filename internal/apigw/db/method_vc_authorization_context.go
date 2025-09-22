@@ -85,7 +85,7 @@ func (c *VCAuthorizationContextColl) Consent(ctx context.Context, query *model.A
 	filter := bson.M{}
 
 	if query.RequestURI == "" {
-		return errors.New("code cannot be empty")
+		return errors.New("request_uri cannot be empty")
 	}
 
 	filter["request_uri"] = bson.M{"$eq": query.RequestURI}
@@ -128,6 +128,11 @@ func (c *VCAuthorizationContextColl) ForfeitAuthorizationCode(ctx context.Contex
 		filter["code"] = bson.M{"$eq": query.Code}
 	}
 
+	if len(filter) == 0 {
+		span.SetStatus(codes.Error, "query cannot be empty")
+		return nil, errors.New("query cannot be empty")
+	}
+
 	update := bson.M{
 		"$set": bson.M{
 			"is_used":   true,
@@ -137,8 +142,6 @@ func (c *VCAuthorizationContextColl) ForfeitAuthorizationCode(ctx context.Contex
 
 	var doc model.AuthorizationContext
 	if err := c.Coll.FindOneAndUpdate(ctx, filter, update).Decode(&doc); err != nil {
-		//err := c.Coll.FindOne(ctx, filter).Decode(&doc)
-		//if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
@@ -158,6 +161,10 @@ func (c *VCAuthorizationContextColl) Get(ctx context.Context, query *model.Autho
 
 	filter := bson.M{}
 
+	if query.SessionID != "" {
+		filter["session_id"] = bson.M{"$eq": query.SessionID}
+	}
+
 	if query.RequestURI != "" {
 		filter["request_uri"] = bson.M{"$eq": query.RequestURI}
 	}
@@ -168,6 +175,19 @@ func (c *VCAuthorizationContextColl) Get(ctx context.Context, query *model.Autho
 
 	if query.Code != "" {
 		filter["code"] = bson.M{"$eq": query.Code}
+	}
+
+	if query.VerifierResponseCode != "" {
+		filter["verifier_response_code"] = bson.M{"$eq": query.VerifierResponseCode}
+	}
+
+	if query.EphemeralEncryptionKeyID != "" {
+		filter["ephemeral_encryption_key_id"] = bson.M{"$eq": query.EphemeralEncryptionKeyID}
+	}
+
+	if len(filter) == 0 {
+		span.SetStatus(codes.Error, "query cannot be empty")
+		return nil, errors.New("query cannot be empty")
 	}
 
 	var doc model.AuthorizationContext
@@ -208,7 +228,43 @@ func (c *VCAuthorizationContextColl) AddToken(ctx context.Context, code string, 
 	return nil
 }
 
-func (c VCAuthorizationContextColl) GetWithToken(ctx context.Context, token string) (*model.AuthorizationContext, error) {
+func (c *VCAuthorizationContextColl) SetAuthenticSource(ctx context.Context, query *model.AuthorizationContext, authenticSource string) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:set_authentic_source")
+	defer span.End()
+
+	if authenticSource == "" {
+		span.SetStatus(codes.Error, "authentic source cannot be empty")
+		return errors.New("authentic source cannot be empty")
+	}
+
+	filter := bson.M{}
+
+	if query.SessionID != "" {
+		filter["session_id"] = bson.M{"$eq": query.SessionID}
+	}
+
+	if len(filter) == 0 {
+		span.SetStatus(codes.Error, "query cannot be empty")
+		return errors.New("query cannot be empty")
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"authentic_source": authenticSource,
+		},
+	}
+
+	_, err := c.Coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+// GetWithAccessToken retrieves an authorization context by its access token
+func (c VCAuthorizationContextColl) GetWithAccessToken(ctx context.Context, token string) (*model.AuthorizationContext, error) {
 	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:get_with_token")
 	defer span.End()
 
@@ -231,22 +287,39 @@ func (c VCAuthorizationContextColl) GetWithToken(ctx context.Context, token stri
 	return &doc, nil
 }
 
-func (c *VCAuthorizationContextColl) AddIdentity(ctx context.Context, requestURI string, identity *model.Identity) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:add_identity")
+func (c *VCAuthorizationContextColl) AddIdentity(ctx context.Context, query *model.AuthorizationContext, input *model.AuthorizationContext) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:add_identity_kid")
 	defer span.End()
 
-	if requestURI == "" {
-		span.SetStatus(codes.Error, "requestURI cannot be empty")
-		return errors.New("requestURI cannot be empty")
+	if query == nil {
+		span.SetStatus(codes.Error, "query cannot be nil")
+		return errors.New("query cannot be nil")
 	}
 
-	filter := bson.M{
-		"request_uri": bson.M{"$eq": requestURI},
+	if input.Identity == nil {
+		span.SetStatus(codes.Error, "identity cannot be nil")
+		return errors.New("identity cannot be nil")
+	}
+
+	filter := bson.M{}
+
+	if query.SessionID != "" {
+		filter["session_id"] = bson.M{"$eq": query.SessionID}
+	}
+
+	if query.RequestURI != "" {
+		filter["request_uri"] = bson.M{"$eq": query.RequestURI}
+	}
+
+	if query.EphemeralEncryptionKeyID != "" {
+		filter["ephemeral_encryption_key_id"] = bson.M{"$eq": query.EphemeralEncryptionKeyID}
 	}
 
 	update := bson.M{
 		"$set": bson.M{
-			"identity": identity,
+			"identity":         input.Identity,
+			"document_type":    input.DocumentType,
+			"authentic_source": input.AuthenticSource,
 		},
 	}
 
@@ -258,30 +331,3 @@ func (c *VCAuthorizationContextColl) AddIdentity(ctx context.Context, requestURI
 
 	return nil
 }
-
-//func (c *VCOauthColl) Update(ctx context.Context, query *model.Authorization) error {
-//	ctx, span := c.Service.tracer.Start(ctx, "db:vc:authorization_context:update")
-//	defer span.End()
-//
-//	if query == nil {
-//		span.SetStatus(codes.Error, "query cannot be nil")
-//		return errors.New("query cannot be nil")
-//	}
-//
-//	filter := bson.M{
-//		"request_uri": bson.M{"$eq": query.RequestURI},
-//		"client_id":   bson.M{"$eq": query.ClientID},
-//	}
-//
-//	update := bson.M{
-//		"$set": query,
-//	}
-//
-//	_, err := c.Coll.UpdateOne(ctx, filter, update)
-//	if err != nil {
-//		span.SetStatus(codes.Error, err.Error())
-//		return err
-//	}
-//
-//	return nil
-//}

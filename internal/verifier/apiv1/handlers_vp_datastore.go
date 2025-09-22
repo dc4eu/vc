@@ -24,7 +24,7 @@ type VPResult struct {
 
 type VCResult struct {
 	ValidSelectiveDisclosures []*openid4vp.Disclosure `json:"valid_selective_disclosures" bson:"valid_selective_disclosures"`
-	Claims                    map[string]interface{}  `json:"claims" bson:"claims"`
+	Claims                    map[string]any          `json:"claims" bson:"claims"`
 }
 
 type PaginatedVerificationRecordsReply struct {
@@ -35,6 +35,8 @@ type PaginatedVerificationRecordsReply struct {
 }
 
 func (c *Client) PaginatedVerificationRecords(ctx context.Context, request *PaginatedVerificationRecordsRequest) (*PaginatedVerificationRecordsReply, error) {
+	c.log.Debug("PaginatedVerificationRecords request", "request", request)
+
 	if request.RequestedSequenceEnd < request.RequestedSequenceStart {
 		return nil, fmt.Errorf(
 			"requested_sequence_end (%d) must be greater than or equal to requested_sequence_start (%d)",

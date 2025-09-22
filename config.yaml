@@ -14,37 +14,44 @@ common:
     qr:
       recovery_level: 2
       size: 256
-  supported_pid_vct: 
-    - "urn:eudi:pid:1"
 
 credential_constructor:
   "pid":
     vct: "urn:eudi:pid:1"
     vctm_file_path: "/metadata/vctm_pid.json"
+    auth_method: basic
   "ehic":
     vct: "urn:eudi:ehic:1"
     vctm_file_path: "/metadata/vctm_ehic.json"
+    auth_method: pid_auth
   "pda1":
     vct: "urn:eudi:pda1:1"
     vctm_file_path: "/metadata/vctm_pda1.json"
+    auth_method: pid_auth
   "elm":
     vct: "urn:eudi:elm:1"
     vctm_file_path: "/metadata/vctm_elm.json"
+    auth_method: pid_auth
   "diploma":
     vct: "urn:eudi:diploma:1"
     vctm_file_path: "/metadata/vctm_diploma.json"
+    auth_method: pid_auth
   "micro_credential":
     vct: "urn:eudi:micro_credential:1"
     vctm_file_path: "/metadata/vctm_microcredential.json"
+    auth_method: pid_auth
   "openbadge_complete":
     vct: "urn:eudi:openbadge_complete:1"
     vctm_file_path: "/metadata/vctm_elm.json"
+    auth_method: pid_auth
   "openbadge_basic":
     vct: "urn:eudi:openbadge_basic:1"
     vctm_file_path: "/metadata/vctm_elm.json"
+    auth_method: pid_auth
   "openbadge_endorsements":
     vct: "urn:eudi:openbadge_endorsements:1"
     vctm_file_path: "/metadata/vctm_elm.json"
+    auth_method: pid_auth
 
   kafka:
     enabled: false
@@ -110,7 +117,7 @@ verifier:
   grpc_server:
     addr: vc_dev_verifier:8090
   #Replace fqdn with same as in x5c_san_dns cert (used to build web-links etc. example: "vcverifier.sunet.se") - ip is only used when working in local dev env.
-  fqdn: "172.16.50.6"
+  external_server_url: "http://vc_dev_verifier:8080"
 
 registry:
   api_server:
@@ -133,6 +140,21 @@ apigw:
     enabled: false
     users:
       admin: "secret123"
+  credential_offers:
+    issuer_url: http://vc_dev_apigw:8080
+    wallets:
+      sunet_dev: 
+        label: SUNET Dev Wallet
+        redirect_uri: https://dev.wallet.sunet.se/cb
+      funke: 
+        label: Funke Wallet
+        redirect_uri: https://funke.wwwallet.org/cb
+      dc4eu: 
+        label: DC4EU Wallet
+        redirect_uri: https://dc4eu.wwwallet.org/cb
+      vanilla: 
+        label: Vanilla wwWallet
+        redirect_uri: https://demo.wwwallet.org/cb
   trust_model:
     type: "openid_federation"
     trust_anchors:
@@ -148,8 +170,11 @@ apigw:
         type: "confidential"
         redirect_uri: "https://dev.wallet.sunet.se"
         scopes:
-          - "pid:sd_jwt_vc"
+          - "pid"
           - "diploma"
+          - "ehic"
+          - "pda1"
+          - "elm"
   issuer_metadata:
     path: "/metadata/issuer_metadata.json"
     signing_key_path: "/pki/apigw.key"
@@ -158,6 +183,9 @@ apigw:
 mock_as:
   api_server:
     addr: :8080
+  bootstrap_users:
+    - "100"
+    - "102"
   datastore_url: http://vc_dev_apigw:8080
 
 ui:
@@ -177,9 +205,3 @@ ui:
       base_url: http://vc_dev_mockas:8080
     verifier:
       base_url: http://vc_dev_verifier:8080
-
-portal:
-  api_server:
-    addr: :8080
-  apigw_api_server:
-    addr: http://vc_dev_apigw:8080

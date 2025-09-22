@@ -200,7 +200,7 @@ func (s *Service) endpointQuitVPFlow(ctx context.Context, c *gin.Context) (any, 
 	}
 	webSession.Clear()
 	webSession.Options(sessions.Options{MaxAge: -1})
-	err := webSession.Save()
+	err = webSession.Save()
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

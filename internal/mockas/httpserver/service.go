@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"net/http"
+	"time"
 	"vc/internal/mockas/apiv1"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
@@ -26,11 +27,13 @@ type Service struct {
 // New creates a new httpserver service
 func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
 	s := &Service{
-		cfg:    cfg,
-		log:    log.New("httpserver"),
-		apiv1:  apiv1,
-		gin:    gin.New(),
-		server: &http.Server{},
+		cfg:   cfg,
+		log:   log.New("httpserver"),
+		apiv1: apiv1,
+		gin:   gin.New(),
+		server: &http.Server{
+			ReadHeaderTimeout: 3 * time.Second,
+		},
 		tracer: tracer,
 	}
 

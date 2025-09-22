@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"vc/internal/verifier/db"
 	"vc/pkg/logger"
@@ -63,8 +64,8 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 	return c, nil
 }
 
-func LoadKeyPairFromPEMFile(filepath string) (*openid4vp.KeyPair, error) {
-	data, err := os.ReadFile(filepath)
+func LoadKeyPairFromPEMFile(filePath string) (*openid4vp.KeyPair, error) {
+	data, err := os.ReadFile(filepath.Clean(filePath))
 	if err != nil {
 		return nil, fmt.Errorf("unable to read key file: %w", err)
 	}
@@ -133,7 +134,7 @@ func parseRawEd25519(b []byte) (ed25519.PrivateKey, bool) {
 }
 
 func (c *Client) loadCertFromPEMFile(path string) (*openid4vp.CertData, error) {
-	pemData, err := os.ReadFile(path)
+	pemData, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read cert PEM file: %w", err)
 	}

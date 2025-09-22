@@ -29,7 +29,7 @@ func NewPIDClient(ctx context.Context, client *Client) (*pidClient, error) {
 }
 
 func (c *pidClient) readPidUserFile(sourceFilePath string) error {
-	f, err := os.Open(sourceFilePath)
+	f, err := os.Open(filepath.Clean(sourceFilePath))
 	if err != nil {
 		return fmt.Errorf("open pid user file: %w", err)
 	}
@@ -115,7 +115,7 @@ func (c *pidClient) save2Disk() error {
 
 	filePath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", c.credentialType))
 
-	if err := os.WriteFile(filePath, b, 0644); err != nil {
+	if err := os.WriteFile(filepath.Clean(filePath), b, 0600); err != nil {
 		return err
 	}
 

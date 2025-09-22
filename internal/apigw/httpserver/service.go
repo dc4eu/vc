@@ -4,6 +4,7 @@ import (
 	"context"
 	"html/template"
 	"net/http"
+	"time"
 	"vc/internal/apigw/apiv1"
 	"vc/internal/apigw/staticembed"
 	"vc/pkg/httphelpers"
@@ -41,12 +42,14 @@ type Service struct {
 // New creates a new httpserver service
 func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, log *logger.Log) (*Service, error) {
 	s := &Service{
-		cfg:             cfg,
-		log:             log.New("httpserver"),
-		apiv1:           apiv1,
-		gin:             gin.New(),
-		tracer:          tracer,
-		server:          &http.Server{},
+		cfg:    cfg,
+		log:    log.New("httpserver"),
+		apiv1:  apiv1,
+		gin:    gin.New(),
+		tracer: tracer,
+		server: &http.Server{
+			ReadHeaderTimeout: 3 * time.Second,
+		},
 		eventPublisher:  eventPublisher,
 		sessionsName:    "oauth_user_session",
 		sessionsAuthKey: oauth2.GenerateCryptographicNonceFixedLength(32),

@@ -95,7 +95,7 @@ func (c *diplomaClient) save2Disk() error {
 
 	filePath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", c.credentialType))
 
-	if err := os.WriteFile(filePath, b, 0644); err != nil {
+	if err := os.WriteFile(filepath.Clean(filePath), b, 0600); err != nil {
 		return err
 	}
 
@@ -104,7 +104,7 @@ func (c *diplomaClient) save2Disk() error {
 
 func (c *diplomaClient) loadExampleFiles() error {
 	for _, filePath := range c.exampleFilePaths {
-		b, err := os.ReadFile(filePath)
+		b, err := os.ReadFile(filepath.Clean(filePath))
 		if err != nil {
 			return err
 		}

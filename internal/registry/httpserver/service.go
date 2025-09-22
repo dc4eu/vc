@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"net/http"
+	"time"
 	"vc/internal/registry/apiv1"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
@@ -31,7 +32,9 @@ func New(ctx context.Context, cfg *model.Cfg, api *apiv1.Client, tracer *trace.T
 		apiv1:  api,
 		gin:    gin.New(),
 		tracer: tracer,
-		server: &http.Server{},
+		server: &http.Server{
+			ReadHeaderTimeout: 3 * time.Second,
+		},
 	}
 
 	var err error

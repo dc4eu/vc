@@ -89,7 +89,7 @@ func (c *elmClient) save2Disk() error {
 
 	filePath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", c.credentialType))
 
-	if err := os.WriteFile(filePath, b, 0644); err != nil {
+	if err := os.WriteFile(filepath.Clean(filePath), b, 0600); err != nil {
 		return err
 	}
 
@@ -98,7 +98,7 @@ func (c *elmClient) save2Disk() error {
 
 func (c *elmClient) loadExampleFiles() error {
 	for _, filePath := range c.exampleELMFilePaths {
-		b, err := os.ReadFile(filePath)
+		b, err := os.ReadFile(filepath.Clean(filePath))
 		if err != nil {
 			return err
 		}

@@ -165,7 +165,12 @@ func (c *Client) SVGTemplateReply(ctx context.Context, req *SVGTemplateRequest) 
 
 	c.log.Debug("SVG template not available in cache, fetching from origin")
 
-	response, err := http.Get(svgTemplateURI)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, svgTemplateURI, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +187,6 @@ func (c *Client) SVGTemplateReply(ctx context.Context, req *SVGTemplateRequest) 
 	}
 
 	template := base64.StdEncoding.EncodeToString([]byte(responseData))
-
 
 	reply := &SVGTemplateReply{
 		Template: template,

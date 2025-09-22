@@ -97,10 +97,14 @@ func (c *Client) createJWK(ctx context.Context) error {
 		return err
 	}
 
-	key.Set("kid", "default_signing_key_id")
+	if err := key.Set("kid", "default_signing_key_id"); err != nil {
+		return err
+	}
 
 	if c.cfg.Issuer.JWTAttribute.Kid != "" {
-		key.Set("kid", c.cfg.Issuer.JWTAttribute.Kid)
+		if err := key.Set("kid", c.cfg.Issuer.JWTAttribute.Kid); err != nil {
+			return err
+		}
 	}
 
 	var jwkBytes []byte

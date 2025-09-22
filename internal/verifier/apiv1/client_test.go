@@ -15,7 +15,7 @@ import (
 )
 
 func dummyPKCS8KeyParser(t *testing.T, path string) *rsa.PrivateKey {
-	d, err := os.ReadFile(path)
+	d, err := os.ReadFile(filepath.Clean(path))
 	assert.NoError(t, err)
 
 	block, _ := pem.Decode(d)
@@ -26,7 +26,7 @@ func dummyPKCS8KeyParser(t *testing.T, path string) *rsa.PrivateKey {
 }
 
 func dummyPKCS1KeyParser(t *testing.T, path string) *rsa.PrivateKey {
-	d, err := os.ReadFile(path)
+	d, err := os.ReadFile(filepath.Clean(path))
 	assert.NoError(t, err)
 
 	block, _ := pem.Decode(d)

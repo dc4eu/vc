@@ -168,7 +168,7 @@ func (c *Client) shouldUpload(id string) bool {
 }
 
 func (c *Client) uploader(ctx context.Context, jsonPath string) error {
-	b, err := os.ReadFile(jsonPath)
+	b, err := os.ReadFile(filepath.Clean(jsonPath))
 	if err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func (c *Client) uploader(ctx context.Context, jsonPath string) error {
 }
 
 func (c *Client) userUpload(ctx context.Context, jsonPath string) error {
-	b, err := os.ReadFile(jsonPath)
+	b, err := os.ReadFile(filepath.Clean(jsonPath))
 	if err != nil {
 		return err
 	}

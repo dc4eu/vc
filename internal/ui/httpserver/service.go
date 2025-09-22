@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"net/http"
+	"time"
 	"vc/internal/ui/apiv1"
 	"vc/pkg/httphelpers"
 	"vc/pkg/trace"
@@ -46,7 +47,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		tracer: tracer,
 		apiv1:  apiv1,
 		gin:    gin.New(),
-		server: &http.Server{},
+		server: &http.Server{
+			ReadHeaderTimeout: 3 * time.Second,
+		},
 		sessionConfig: &sessionConfig{
 			name:                       "vc_ui_auth_session",
 			inactivityTimeoutInSeconds: cfg.UI.SessionInactivityTimeoutInSeconds,

@@ -60,7 +60,7 @@ func (c *pidUsersClient) save2Disk() error {
 
 	filePath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", c.credentialType))
 
-	if err := os.WriteFile(filePath, b, 0644); err != nil {
+	if err := os.WriteFile(filepath.Clean(filePath), b, 0600); err != nil {
 		return err
 	}
 

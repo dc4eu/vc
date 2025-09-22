@@ -3,7 +3,8 @@ package jsonschema
 import (
 	"regexp"
 
-	"github.com/goccy/go-json"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 )
 
 // Schema represents a JSON Schema as per the 2020-12 draft, containing all
@@ -59,9 +60,9 @@ type Schema struct {
 	PropertyNames        *Schema    `json:"propertyNames,omitempty"`        // Can be a boolean or a schema, controls property names validation.
 
 	// Any validation keywords, see https://json-schema.org/draft/2020-12/json-schema-validation#section-6.1
-	Type  SchemaType    `json:"type,omitempty"`  // Can be a single type or an array of types.
-	Enum  []interface{} `json:"enum,omitempty"`  // Enumerated values for the property.
-	Const *ConstValue   `json:"const,omitempty"` // Constant value for the property.
+	Type  SchemaType  `json:"type,omitempty"`  // Can be a single type or an array of types.
+	Enum  []any       `json:"enum,omitempty"`  // Enumerated values for the property.
+	Const *ConstValue `json:"const,omitempty"` // Constant value for the property.
 
 	// Numeric validation keywords, see https://json-schema.org/draft/2020-12/json-schema-validation#section-6.2
 	MultipleOf       *Rat `json:"multipleOf,omitempty"`       // Number must be a multiple of this value, strictly greater than 0.
@@ -100,13 +101,13 @@ type Schema struct {
 	ContentSchema    *Schema `json:"contentSchema,omitempty"`    // Schema for validating the content.
 
 	// Meta-data for schema and instance description, see https://json-schema.org/draft/2020-12/json-schema-validation#name-a-vocabulary-for-basic-meta
-	Title       *string       `json:"title,omitempty"`       // A short summary of the schema.
-	Description *string       `json:"description,omitempty"` // A detailed description of the purpose of the schema.
-	Default     interface{}   `json:"default,omitempty"`     // Default value of the instance.
-	Deprecated  *bool         `json:"deprecated,omitempty"`  // Indicates that the schema is deprecated.
-	ReadOnly    *bool         `json:"readOnly,omitempty"`    // Indicates that the property is read-only.
-	WriteOnly   *bool         `json:"writeOnly,omitempty"`   // Indicates that the property is write-only.
-	Examples    []interface{} `json:"examples,omitempty"`    // Examples of the instance data that validates against this schema.
+	Title       *string `json:"title,omitempty"`       // A short summary of the schema.
+	Description *string `json:"description,omitempty"` // A detailed description of the purpose of the schema.
+	Default     any     `json:"default,omitempty"`     // Default value of the instance.
+	Deprecated  *bool   `json:"deprecated,omitempty"`  // Indicates that the schema is deprecated.
+	ReadOnly    *bool   `json:"readOnly,omitempty"`    // Indicates that the property is read-only.
+	WriteOnly   *bool   `json:"writeOnly,omitempty"`   // Indicates that the property is write-only.
+	Examples    []any   `json:"examples,omitempty"`    // Examples of the instance data that validates against this schema.
 }
 
 // newSchema parses JSON schema data and returns a Schema object.
@@ -173,6 +174,59 @@ func (s *Schema) initializeSchema(compiler *Compiler, parent *Schema) {
 	// They should inherit through parent-child relationship via GetCompiler()
 	initializeNestedSchemas(s, compiler)
 	s.resolveReferences()
+}
+
+// initializeSchemaWithoutReferences sets up the schema structure without resolving references.
+// This is used by CompileBatch to defer reference resolution until all schemas are compiled.
+func (s *Schema) initializeSchemaWithoutReferences(compiler *Compiler, parent *Schema) {
+	// Only set compiler if it's not nil (for constructor usage)
+	if compiler != nil {
+		s.compiler = compiler
+	}
+	s.parent = parent
+
+	// Get effective compiler for initialization
+	effectiveCompiler := s.GetCompiler()
+
+	parentBaseURI := s.getParentBaseURI()
+	if parentBaseURI == "" {
+		parentBaseURI = effectiveCompiler.DefaultBaseURI
+	}
+	if s.ID != "" {
+		if isValidURI(s.ID) {
+			s.uri = s.ID
+			s.baseURI = getBaseURI(s.ID)
+		} else {
+			resolvedURL := resolveRelativeURI(parentBaseURI, s.ID)
+			s.uri = resolvedURL
+			s.baseURI = getBaseURI(resolvedURL)
+		}
+	} else {
+		s.baseURI = parentBaseURI
+	}
+
+	if s.baseURI == "" {
+		if s.uri != "" && isValidURI(s.uri) {
+			s.baseURI = getBaseURI(s.uri)
+		}
+	}
+
+	if s.Anchor != "" {
+		s.setAnchor(s.Anchor)
+	}
+
+	if s.DynamicAnchor != "" {
+		s.setDynamicAnchor(s.DynamicAnchor)
+	}
+
+	if s.uri != "" && isValidURI(s.uri) {
+		root := s.getRootSchema()
+		root.setSchema(s.uri, s)
+	}
+
+	// Initialize nested schemas but without resolving references
+	initializeNestedSchemasWithoutReferences(s, compiler)
+	// Note: We don't call s.resolveReferences() here - that's deferred
 }
 
 // initializeNestedSchemas initializes all nested or related schemas as defined in the structure.
@@ -245,6 +299,77 @@ func initializeNestedSchemas(s *Schema, compiler *Compiler) {
 	}
 }
 
+// initializeNestedSchemasWithoutReferences initializes all nested or related schemas
+// without resolving references. Used by CompileBatch.
+func initializeNestedSchemasWithoutReferences(s *Schema, compiler *Compiler) {
+	if s.Defs != nil {
+		for _, def := range s.Defs {
+			def.initializeSchemaWithoutReferences(compiler, s)
+		}
+	}
+	// Initialize logical schema groupings
+	initializeSchemasWithoutReferences(s.AllOf, compiler, s)
+	initializeSchemasWithoutReferences(s.AnyOf, compiler, s)
+	initializeSchemasWithoutReferences(s.OneOf, compiler, s)
+
+	// Initialize conditional schemas
+	if s.Not != nil {
+		s.Not.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.If != nil {
+		s.If.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.Then != nil {
+		s.Then.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.Else != nil {
+		s.Else.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.DependentSchemas != nil {
+		for _, depSchema := range s.DependentSchemas {
+			depSchema.initializeSchemaWithoutReferences(compiler, s)
+		}
+	}
+
+	// Initialize array and object schemas
+	if s.PrefixItems != nil {
+		for _, item := range s.PrefixItems {
+			item.initializeSchemaWithoutReferences(compiler, s)
+		}
+	}
+	if s.Items != nil {
+		s.Items.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.Contains != nil {
+		s.Contains.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.AdditionalProperties != nil {
+		s.AdditionalProperties.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.Properties != nil {
+		for _, prop := range *s.Properties {
+			prop.initializeSchemaWithoutReferences(compiler, s)
+		}
+	}
+	if s.PatternProperties != nil {
+		for _, prop := range *s.PatternProperties {
+			prop.initializeSchemaWithoutReferences(compiler, s)
+		}
+	}
+	if s.UnevaluatedProperties != nil {
+		s.UnevaluatedProperties.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.UnevaluatedItems != nil {
+		s.UnevaluatedItems.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.ContentSchema != nil {
+		s.ContentSchema.initializeSchemaWithoutReferences(compiler, s)
+	}
+	if s.PropertyNames != nil {
+		s.PropertyNames.initializeSchemaWithoutReferences(compiler, s)
+	}
+}
+
 // setAnchor creates or updates the anchor mapping for the current schema and propagates it to parent schemas.
 func (s *Schema) setAnchor(anchor string) {
 	if s.anchors == nil {
@@ -257,8 +382,12 @@ func (s *Schema) setAnchor(anchor string) {
 		root.anchors = make(map[string]*Schema)
 	}
 
-	if _, ok := root.anchors[anchor]; !ok {
-		root.anchors[anchor] = s
+	// Only set anchor at root level if it's in the same scope as root
+	// If this schema has its own $id that's different from root, it's in a different scope
+	if s.ID == "" || s.ID == root.ID {
+		if _, ok := root.anchors[anchor]; !ok {
+			root.anchors[anchor] = s
+		}
 	}
 }
 
@@ -301,7 +430,7 @@ func (s *Schema) getSchema(ref string) (*Schema, error) {
 		return schema.resolveAnchor(anchor)
 	}
 
-	return nil, ErrFailedToResolveReference
+	return nil, ErrReferenceResolution
 }
 
 // initializeSchemas iteratively initializes a list of nested schemas.
@@ -309,6 +438,16 @@ func initializeSchemas(schemas []*Schema, compiler *Compiler, parent *Schema) {
 	for _, schema := range schemas {
 		if schema != nil {
 			schema.initializeSchema(compiler, parent)
+		}
+	}
+}
+
+// initializeSchemasWithoutReferences iteratively initializes a list of nested schemas
+// without resolving references. Used by CompileBatch.
+func initializeSchemasWithoutReferences(schemas []*Schema, compiler *Compiler, parent *Schema) {
+	for _, schema := range schemas {
+		if schema != nil {
+			schema.initializeSchemaWithoutReferences(compiler, parent)
 		}
 	}
 }
@@ -326,6 +465,7 @@ func (s *Schema) GetSchemaURI() string {
 	return ""
 }
 
+// GetSchemaLocation returns the schema location with the given anchor
 func (s *Schema) GetSchemaLocation(anchor string) string {
 	uri := s.GetSchemaURI()
 
@@ -368,9 +508,49 @@ func (s *Schema) MarshalJSON() ([]byte, error) {
 		return json.Marshal(s.Boolean)
 	}
 
-	// Marshal as a normal struct
+	// Custom marshaling to handle the const field properly
 	type Alias Schema
-	return json.Marshal((*Alias)(s))
+	alias := (*Alias)(s)
+
+	// Marshal to a map to handle const field manually
+	data, err := json.Marshal(alias)
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]any
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, err
+	}
+
+	// Handle the const field manually
+	if s.Const != nil {
+		result["const"] = s.Const.Value
+	}
+
+	return json.Marshal(result)
+}
+
+// MarshalJSONTo implements json.MarshalerTo for JSON v2 with proper option support
+func (s *Schema) MarshalJSONTo(enc *jsontext.Encoder, opts json.Options) error {
+	if s.Boolean != nil {
+		return json.MarshalEncode(enc, s.Boolean, opts)
+	}
+
+	// Use the existing MarshalJSON method which already handles the const field properly
+	// and then ensure the result is marshaled with the provided options
+	data, err := s.MarshalJSON()
+	if err != nil {
+		return err
+	}
+
+	// Parse and re-marshal with deterministic options
+	var result map[string]any
+	if err := json.Unmarshal(data, &result); err != nil {
+		return err
+	}
+
+	return json.MarshalEncode(enc, result, opts)
 }
 
 // UnmarshalJSON handles unmarshaling JSON data into the Schema type.
@@ -391,7 +571,7 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 	*s = Schema(alias)
 
 	// Special handling for the const field
-	var raw map[string]json.RawMessage
+	var raw map[string]jsontext.Value
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
@@ -415,6 +595,18 @@ func (sm SchemaMap) MarshalJSON() ([]byte, error) {
 		m[k] = v
 	}
 	return json.Marshal(m)
+}
+
+// MarshalJSONTo implements json.MarshalerTo for JSON v2 with proper option support
+func (sm *SchemaMap) MarshalJSONTo(enc *jsontext.Encoder, opts json.Options) error {
+	if sm == nil {
+		return json.MarshalEncode(enc, nil, opts)
+	}
+	m := make(map[string]*Schema)
+	for k, v := range *sm {
+		m[k] = v
+	}
+	return json.MarshalEncode(enc, m, opts)
 }
 
 // UnmarshalJSON ensures that JSON objects are correctly parsed into SchemaMap,
@@ -458,7 +650,7 @@ func (r *SchemaType) UnmarshalJSON(data []byte) error {
 
 // ConstValue represents a constant value in a JSON Schema.
 type ConstValue struct {
-	Value interface{}
+	Value any
 	IsSet bool
 }
 
@@ -484,9 +676,6 @@ func (cv *ConstValue) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON handles marshaling the ConstValue type back to JSON.
 func (cv ConstValue) MarshalJSON() ([]byte, error) {
-	if !cv.IsSet {
-		return []byte("null"), nil
-	}
 	if cv.Value == nil {
 		return []byte("null"), nil
 	}

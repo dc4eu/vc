@@ -13,7 +13,7 @@ import (
 // If the instance fails to conform to all conditions in the array, it returns a EvaluationError detailing the specific failures.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-anyof
-func evaluateAnyOf(schema *Schema, data interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateAnyOf(schema *Schema, data any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if len(schema.AnyOf) == 0 {
 		return nil, nil // No anyOf constraints to validate against.
 	}
@@ -32,8 +32,7 @@ func evaluateAnyOf(schema *Schema, data interface{}, evaluatedProps map[string]b
 
 			if result != nil {
 				results = append(results, result.SetEvaluationPath(fmt.Sprintf("/anyOf/%d", i)).
-					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/anyOf/%d", i))).
-					SetInstanceLocation(""),
+					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/anyOf/%d", i))),
 				)
 
 				if result.IsValid() {
@@ -50,7 +49,6 @@ func evaluateAnyOf(schema *Schema, data interface{}, evaluatedProps map[string]b
 
 	if valid {
 		return results, nil // Return nil only if at least one schema succeeds
-	} else {
-		return results, NewEvaluationError("anyOf", "any_of_item_mismatch", "Value does not match anyOf schema")
 	}
+	return results, NewEvaluationError("anyOf", "any_of_item_mismatch", "Value does not match anyOf schema")
 }

@@ -16,12 +16,12 @@ import (
 // If a property does not conform, it returns a EvaluationError detailing the issue with that property.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-properties
-func evaluateProperties(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, _ map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateProperties(schema *Schema, object map[string]any, evaluatedProps map[string]bool, _ map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if schema.Properties == nil {
 		return nil, nil // No properties defined, nothing to do.
 	}
 
-	invalid_properties := []string{}
+	invalidProperties := []string{}
 	results := []*EvaluationResult{}
 
 	for propName, propSchema := range *schema.Properties {
@@ -39,7 +39,7 @@ func evaluateProperties(schema *Schema, object map[string]interface{}, evaluated
 				results = append(results, result)
 
 				if !result.IsValid() {
-					invalid_properties = append(invalid_properties, propName)
+					invalidProperties = append(invalidProperties, propName)
 				}
 			}
 		} else if isRequired(schema, propName) && !defaultIsSpecified(propSchema) {
@@ -55,23 +55,23 @@ func evaluateProperties(schema *Schema, object map[string]interface{}, evaluated
 				results = append(results, result)
 
 				if !result.IsValid() {
-					invalid_properties = append(invalid_properties, propName)
+					invalidProperties = append(invalidProperties, propName)
 				}
 			}
 		}
 	}
 
-	if len(invalid_properties) == 1 {
-		return results, NewEvaluationError("properties", "property_mismatch", "Property {property} does not match the schema", map[string]interface{}{
-			"property": fmt.Sprintf("'%s'", invalid_properties[0]),
+	if len(invalidProperties) == 1 {
+		return results, NewEvaluationError("properties", "property_mismatch", "Property {property} does not match the schema", map[string]any{
+			"property": fmt.Sprintf("'%s'", invalidProperties[0]),
 		})
-	} else if len(invalid_properties) > 1 {
-		slices.Sort(invalid_properties)
-		quotedProperties := make([]string, len(invalid_properties))
-		for i, prop := range invalid_properties {
+	} else if len(invalidProperties) > 1 {
+		slices.Sort(invalidProperties)
+		quotedProperties := make([]string, len(invalidProperties))
+		for i, prop := range invalidProperties {
 			quotedProperties[i] = fmt.Sprintf("'%s'", prop)
 		}
-		return results, NewEvaluationError("properties", "properties_mismatch", "Properties {properties} do not match their schemas", map[string]interface{}{
+		return results, NewEvaluationError("properties", "properties_mismatch", "Properties {properties} do not match their schemas", map[string]any{
 			"properties": strings.Join(quotedProperties, ", "),
 		})
 	}

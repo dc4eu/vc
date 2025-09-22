@@ -223,6 +223,10 @@ func (c *Cache) Unregister(ctx context.Context, u string) error {
 	return c.ctrl.Remove(ctx, u)
 }
 
+func (c *Cache) Shutdown(ctx context.Context) error {
+	return c.ctrl.ShutdownContext(ctx)
+}
+
 // CachedSet is a thin shim over jwk.Cache that allows the user to cloak
 // jwk.Cache as if it's a `jwk.Set`. Behind the scenes, the `jwk.Set` is
 // retrieved from the `jwk.Cache` for every operation.
@@ -277,7 +281,7 @@ func (*cachedSet) Clear() error {
 }
 
 // Set is a no-op for `jwk.CachedSet`, as the `jwk.Set` should be treated read-only
-func (*cachedSet) Set(_ string, _ interface{}) error {
+func (*cachedSet) Set(_ string, _ any) error {
 	return fmt.Errorf(`(jwk.cachedSet).Set: jwk.CachedSet is immutable`)
 }
 
@@ -302,7 +306,7 @@ func (cs *cachedSet) Clone() (Set, error) {
 }
 
 // Get returns the value of non-Key field stored in the jwk.Set
-func (cs *cachedSet) Get(name string, dst interface{}) error {
+func (cs *cachedSet) Get(name string, dst any) error {
 	set, err := cs.cached()
 	if err != nil {
 		return err

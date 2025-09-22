@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "keygen",
@@ -12,6 +12,7 @@ go_library(
         "//internal/ecutil",
         "//jwa",
         "//jwe/internal/concatkdf",
+        "//internal/tokens",
         "//jwk",
     ],
 )

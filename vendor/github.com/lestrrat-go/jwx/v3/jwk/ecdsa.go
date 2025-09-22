@@ -145,7 +145,7 @@ var ecdsaConvertibleTypes = []reflect.Type{
 	reflect.TypeOf((*ECDSAPublicKey)(nil)).Elem(),
 }
 
-func ecdsaJWKToRaw(keyif Key, hint interface{}) (interface{}, error) {
+func ecdsaJWKToRaw(keyif Key, hint any) (any, error) {
 	var isECDH bool
 
 	extracted, err := extractEmbeddedKey(keyif, ecdsaConvertibleTypes)
@@ -269,7 +269,7 @@ func makeECDSAPublicKey(src Key) (Key, error) {
 		case ECDSADKey:
 			continue
 		default:
-			var v interface{}
+			var v any
 			if err := src.Get(k, &v); err != nil {
 				return nil, fmt.Errorf(`ecdsa: makeECDSAPublicKey: failed to get field %q: %w`, k, err)
 			}
@@ -311,7 +311,7 @@ func (k ecdsaPublicKey) Thumbprint(hash crypto.Hash) ([]byte, error) {
 
 	var key ecdsa.PublicKey
 	if err := Export(&k, &key); err != nil {
-		return nil, fmt.Errorf(`failed to materialize ecdsa.PublicKey for thumbprint generation: %w`, err)
+		return nil, fmt.Errorf(`failed to export ecdsa.PublicKey for thumbprint generation: %w`, err)
 	}
 
 	xbuf := ecutil.AllocECPointBuffer(key.X, key.Curve)
@@ -335,7 +335,7 @@ func (k ecdsaPrivateKey) Thumbprint(hash crypto.Hash) ([]byte, error) {
 
 	var key ecdsa.PrivateKey
 	if err := Export(&k, &key); err != nil {
-		return nil, fmt.Errorf(`failed to materialize ecdsa.PrivateKey for thumbprint generation: %w`, err)
+		return nil, fmt.Errorf(`failed to export ecdsa.PrivateKey for thumbprint generation: %w`, err)
 	}
 
 	xbuf := ecutil.AllocECPointBuffer(key.X, key.Curve)

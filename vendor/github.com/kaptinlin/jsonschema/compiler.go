@@ -3,17 +3,27 @@ package jsonschema
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
-	"sync"
-
+	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 )
+
+// FormatDef defines a custom format validation rule
+type FormatDef struct {
+	// Type specifies which JSON Schema type this format applies to (optional)
+	// Supported values: "string", "number", "integer", "boolean", "array", "object"
+	// Empty string means applies to all types
+	Type string
+
+	// Validate is the validation function
+	Validate func(any) bool
+}
 
 // Compiler represents a JSON Schema compiler that manages schema compilation and caching.
 type Compiler struct {
@@ -22,17 +32,21 @@ type Compiler struct {
 	allSchemas     []*Schema                                          // All compiled schemas, including those without IDs
 	unresolvedRefs map[string][]*Schema                               // Track schemas that have unresolved references by URI
 	Decoders       map[string]func(string) ([]byte, error)            // Decoders for various encoding formats.
-	MediaTypes     map[string]func([]byte) (interface{}, error)       // Media type handlers for unmarshalling data.
+	MediaTypes     map[string]func([]byte) (any, error)               // Media type handlers for unmarshalling data.
 	Loaders        map[string]func(url string) (io.ReadCloser, error) // Functions to load schemas from URLs.
 	DefaultBaseURI string                                             // Base URI used to resolve relative references.
 	AssertFormat   bool                                               // Flag to enforce format validation.
 
 	// JSON encoder/decoder configuration
-	jsonEncoder func(v interface{}) ([]byte, error)
-	jsonDecoder func(data []byte, v interface{}) error
+	jsonEncoder func(v any) ([]byte, error)
+	jsonDecoder func(data []byte, v any) error
 
 	// Default function registry
 	defaultFuncs map[string]DefaultFunc // Registry for dynamic default value functions
+
+	// Custom format registry
+	customFormats   map[string]*FormatDef // Registry for custom format definitions
+	customFormatsRW sync.RWMutex          // Protects concurrent access to custom formats
 }
 
 // DefaultFunc represents a function that can generate dynamic default values
@@ -45,11 +59,12 @@ func NewCompiler() *Compiler {
 		allSchemas:     make([]*Schema, 0),
 		unresolvedRefs: make(map[string][]*Schema),
 		Decoders:       make(map[string]func(string) ([]byte, error)),
-		MediaTypes:     make(map[string]func([]byte) (interface{}, error)),
+		MediaTypes:     make(map[string]func([]byte) (any, error)),
 		Loaders:        make(map[string]func(url string) (io.ReadCloser, error)),
 		DefaultBaseURI: "",
 		AssertFormat:   false,
 		defaultFuncs:   make(map[string]DefaultFunc),
+		customFormats:  make(map[string]*FormatDef),
 
 		// Default to standard library JSON implementation
 		jsonEncoder: json.Marshal,
@@ -60,13 +75,13 @@ func NewCompiler() *Compiler {
 }
 
 // WithEncoderJSON configures custom JSON encoder implementation
-func (c *Compiler) WithEncoderJSON(encoder func(v interface{}) ([]byte, error)) *Compiler {
+func (c *Compiler) WithEncoderJSON(encoder func(v any) ([]byte, error)) *Compiler {
 	c.jsonEncoder = encoder
 	return c
 }
 
 // WithDecoderJSON configures custom JSON decoder implementation
-func (c *Compiler) WithDecoderJSON(decoder func(data []byte, v interface{}) error) *Compiler {
+func (c *Compiler) WithDecoderJSON(decoder func(data []byte, v any) error) *Compiler {
 	c.jsonDecoder = decoder
 	return c
 }
@@ -134,7 +149,7 @@ func (c *Compiler) Compile(jsonSchema []byte, uris ...string) (*Schema, error) {
 // trackUnresolvedReferences tracks which schemas have unresolved references to which URIs
 // This method should be called with mutex locked
 func (c *Compiler) trackUnresolvedReferences(schema *Schema) {
-	unresolvedURIs := schema.getUnresolvedReferenceURIs()
+	unresolvedURIs := schema.GetUnresolvedReferenceURIs()
 	for _, uri := range unresolvedURIs {
 		if c.unresolvedRefs[uri] == nil {
 			c.unresolvedRefs[uri] = make([]*Schema, 0)
@@ -178,7 +193,7 @@ func (c *Compiler) resolveSchemaURL(url string) (*Schema, error) {
 
 	data, err := io.ReadAll(body)
 	if err != nil {
-		return nil, ErrFailedToReadData
+		return nil, ErrDataRead
 	}
 
 	compiledSchema, err := c.Compile(data, id)
@@ -239,7 +254,7 @@ func (c *Compiler) RegisterDecoder(encodingName string, decoderFunc func(string)
 }
 
 // RegisterMediaType adds a new unmarshal function for a specific media type.
-func (c *Compiler) RegisterMediaType(mediaTypeName string, unmarshalFunc func([]byte) (interface{}, error)) *Compiler {
+func (c *Compiler) RegisterMediaType(mediaTypeName string, unmarshalFunc func([]byte) (any, error)) *Compiler {
 	c.MediaTypes[mediaTypeName] = unmarshalFunc
 	return c
 }
@@ -280,26 +295,26 @@ func (c *Compiler) initDefaults() {
 
 // setupMediaTypes configures default media type handlers.
 func (c *Compiler) setupMediaTypes() {
-	c.MediaTypes["application/json"] = func(data []byte) (interface{}, error) {
-		var temp interface{}
+	c.MediaTypes["application/json"] = func(data []byte) (any, error) {
+		var temp any
 		if err := c.jsonDecoder(data, &temp); err != nil {
-			return nil, ErrJSONUnmarshalError
+			return nil, ErrJSONUnmarshal
 		}
 		return temp, nil
 	}
 
-	c.MediaTypes["application/xml"] = func(data []byte) (interface{}, error) {
-		var temp interface{}
+	c.MediaTypes["application/xml"] = func(data []byte) (any, error) {
+		var temp any
 		if err := xml.Unmarshal(data, &temp); err != nil {
-			return nil, ErrXMLUnmarshalError
+			return nil, ErrXMLUnmarshal
 		}
 		return temp, nil
 	}
 
-	c.MediaTypes["application/yaml"] = func(data []byte) (interface{}, error) {
-		var temp interface{}
+	c.MediaTypes["application/yaml"] = func(data []byte) (any, error) {
+		var temp any
 		if err := yaml.Unmarshal(data, &temp); err != nil {
-			return nil, ErrYAMLUnmarshalError
+			return nil, ErrYAMLUnmarshal
 		}
 		return temp, nil
 	}
@@ -319,7 +334,7 @@ func (c *Compiler) setupLoaders() {
 
 		resp, err := client.Do(req)
 		if err != nil {
-			return nil, ErrFailedToFetch
+			return nil, ErrNetworkFetch
 		}
 
 		if resp.StatusCode != http.StatusOK {
@@ -327,7 +342,7 @@ func (c *Compiler) setupLoaders() {
 			if err != nil {
 				return nil, err
 			}
-			return nil, ErrInvalidHTTPStatusCode
+			return nil, ErrInvalidStatusCode
 		}
 
 		return resp.Body, nil
@@ -347,7 +362,7 @@ func (c *Compiler) CompileBatch(schemas map[string][]byte) (map[string]*Schema, 
 	for id, schemaBytes := range schemas {
 		schema, err := newSchema(schemaBytes)
 		if err != nil {
-			return nil, fmt.Errorf("failed to compile schema %s: %w", id, err)
+			return nil, fmt.Errorf("%w: %s: %w", ErrSchemaCompilation, id, err)
 		}
 
 		if schema.ID == "" {
@@ -357,7 +372,8 @@ func (c *Compiler) CompileBatch(schemas map[string][]byte) (map[string]*Schema, 
 
 		// Initialize schema structure but skip reference resolution
 		schema.compiler = c
-		// We'll resolve references in the second pass
+		// Initialize basic properties without resolving references
+		schema.initializeSchemaWithoutReferences(c, nil)
 
 		compiledSchemas[id] = schema
 
@@ -377,34 +393,30 @@ func (c *Compiler) CompileBatch(schemas map[string][]byte) (map[string]*Schema, 
 	return compiledSchemas, nil
 }
 
-/* Performance Optimization Summary:
+// RegisterFormat registers a custom format.
+// The optional typeName parameter specifies which JSON Schema type the format applies to
+// (e.g., "string", "number"). If omitted, the format applies to all types.
+func (c *Compiler) RegisterFormat(name string, validator func(any) bool, typeName ...string) *Compiler {
+	c.customFormatsRW.Lock()
+	defer c.customFormatsRW.Unlock()
 
-Current Implementation: Smart Dependency Tracking
-- Time Complexity: O(k) where k = number of schemas with dependencies
-- Best for: Mixed workloads with some interdependent schemas
-- Memory overhead: Low (only tracks unresolved references)
+	var t string
+	if len(typeName) > 0 {
+		t = typeName[0]
+	}
 
-Alternative Approaches:
+	c.customFormats[name] = &FormatDef{
+		Type:     t,
+		Validate: validator,
+	}
+	return c
+}
 
-1. Lazy Resolution (commented above):
-   - Time Complexity: O(1) for compilation, O(1) for validation (first time may be slower)
-   - Best for: Large numbers of schemas where many references are never validated
-   - Memory overhead: Minimal
-   - Tradeoff: Slower first validation, faster compilation
+// UnregisterFormat removes a custom format.
+func (c *Compiler) UnregisterFormat(name string) *Compiler {
+	c.customFormatsRW.Lock()
+	defer c.customFormatsRW.Unlock()
 
-2. Batch Compilation (CompileBatch method):
-   - Time Complexity: O(n) for batch, O(1) for individual schemas
-   - Best for: Known sets of interdependent schemas
-   - Memory overhead: Low
-   - Tradeoff: Requires knowledge of all schemas upfront
-
-3. Original Naive Approach (replaced):
-   - Time Complexity: O(n²)
-   - Performance degrades significantly with many schemas
-   - Not recommended for production use
-
-Recommendation:
-- Use CompileBatch() for known sets of related schemas
-- Use regular Compile() for dynamic/incremental schema addition
-- Consider lazy resolution for very large schema sets with sparse validation
-*/
+	delete(c.customFormats, name)
+	return c
+}

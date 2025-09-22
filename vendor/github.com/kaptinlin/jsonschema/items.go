@@ -17,12 +17,12 @@ import (
 // If any array element does not conform, it returns a EvaluationError detailing the issue.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-items
-func evaluateItems(schema *Schema, array []interface{}, _ map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateItems(schema *Schema, array []any, _ map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if schema.Items == nil {
 		return nil, nil // // No 'items' constraints to validate against
 	}
 
-	invalid_indexs := []string{}
+	invalidIndexes := []string{}
 	results := []*EvaluationResult{}
 
 	// Number of prefix items to skip before regular item validation
@@ -44,19 +44,19 @@ func evaluateItems(schema *Schema, array []interface{}, _ map[string]bool, evalu
 					evaluatedItems[i] = true // Mark the item as evaluated if it passes schema validation.
 				} else {
 					results = append(results, result)
-					invalid_indexs = append(invalid_indexs, strconv.Itoa(i))
+					invalidIndexes = append(invalidIndexes, strconv.Itoa(i))
 				}
 			}
 		}
 	}
 
-	if len(invalid_indexs) == 1 {
-		return results, NewEvaluationError("items", "item_mismatch", "Item at index {index} does not match the schema", map[string]interface{}{
-			"index": invalid_indexs[0],
+	if len(invalidIndexes) == 1 {
+		return results, NewEvaluationError("items", "item_mismatch", "Item at index {index} does not match the schema", map[string]any{
+			"index": invalidIndexes[0],
 		})
-	} else if len(invalid_indexs) > 1 {
-		return results, NewEvaluationError("items", "items_mismatch", "Items at index {indexs} do not match the schema", map[string]interface{}{
-			"indexs": strings.Join(invalid_indexs, ", "),
+	} else if len(invalidIndexes) > 1 {
+		return results, NewEvaluationError("items", "items_mismatch", "Items at index {indexs} do not match the schema", map[string]any{
+			"indexs": strings.Join(invalidIndexes, ", "),
 		})
 	}
 	return results, nil

@@ -14,16 +14,16 @@ import (
 // If the instance fails to conform to any dependent schema when the associated property is present, it returns a EvaluationError.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-dependentschemas
-func evaluateDependentSchemas(schema *Schema, instance interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateDependentSchemas(schema *Schema, instance any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if len(schema.DependentSchemas) == 0 {
 		return nil, nil // No dependentSchemas constraints to validate against.
 	}
 
-	object, ok := instance.(map[string]interface{})
+	object, ok := instance.(map[string]any)
 	if !ok {
 		return nil, nil // instance is not an object, dependentSchemas do not apply.
 	}
-	invalid_properties := []string{}
+	invalidProperties := []string{}
 	results := []*EvaluationResult{}
 
 	for propName, depSchema := range schema.DependentSchemas {
@@ -42,22 +42,22 @@ func evaluateDependentSchemas(schema *Schema, instance interface{}, evaluatedPro
 					mergeStringMaps(evaluatedProps, schemaEvaluatedProps)
 					mergeIntMaps(evaluatedItems, schemaEvaluatedItems)
 				} else {
-					invalid_properties = append(invalid_properties, propName)
+					invalidProperties = append(invalidProperties, propName)
 				}
 			}
 		}
 	}
 
-	if len(invalid_properties) == 1 {
-		return results, NewEvaluationError("dependentSchemas", "dependent_schema_mismatch", "Property {property} does not match the dependent schema", map[string]interface{}{
-			"property": fmt.Sprintf("'%s'", invalid_properties[0]),
+	if len(invalidProperties) == 1 {
+		return results, NewEvaluationError("dependentSchemas", "dependent_schema_mismatch", "Property {property} does not match the dependent schema", map[string]any{
+			"property": fmt.Sprintf("'%s'", invalidProperties[0]),
 		})
-	} else if len(invalid_properties) > 1 {
-		quotedProperties := make([]string, len(invalid_properties))
-		for i, prop := range invalid_properties {
+	} else if len(invalidProperties) > 1 {
+		quotedProperties := make([]string, len(invalidProperties))
+		for i, prop := range invalidProperties {
 			quotedProperties[i] = fmt.Sprintf("'%s'", prop)
 		}
-		return results, NewEvaluationError("dependentSchemas", "dependent_schemas_mismatch", "Properties {properties} do not match the dependent schemas", map[string]interface{}{
+		return results, NewEvaluationError("dependentSchemas", "dependent_schemas_mismatch", "Properties {properties} do not match the dependent schemas", map[string]any{
 			"properties": strings.Join(quotedProperties, ", "),
 		})
 	}

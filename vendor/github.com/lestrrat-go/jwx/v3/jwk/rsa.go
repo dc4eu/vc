@@ -119,7 +119,7 @@ var rsaConvertibleKeys = []reflect.Type{
 	reflect.TypeOf((*RSAPublicKey)(nil)).Elem(),
 }
 
-func rsaJWKToRaw(key Key, hint interface{}) (interface{}, error) {
+func rsaJWKToRaw(key Key, hint any) (any, error) {
 	extracted, err := extractEmbeddedKey(key, rsaConvertibleKeys)
 	if err != nil {
 		return nil, fmt.Errorf(`failed to extract embedded key: %w`, err)
@@ -127,7 +127,7 @@ func rsaJWKToRaw(key Key, hint interface{}) (interface{}, error) {
 	switch key := extracted.(type) {
 	case RSAPrivateKey:
 		switch hint.(type) {
-		case *rsa.PrivateKey, *interface{}:
+		case *rsa.PrivateKey, *any:
 		default:
 			return nil, fmt.Errorf(`invalid destination object type %T for private RSA JWK: %w`, hint, ContinueError())
 		}
@@ -207,7 +207,7 @@ func rsaJWKToRaw(key Key, hint interface{}) (interface{}, error) {
 		return &privkey, nil
 	case RSAPublicKey:
 		switch hint.(type) {
-		case *rsa.PublicKey, *interface{}:
+		case *rsa.PublicKey, *any:
 		default:
 			return nil, fmt.Errorf(`invalid destination object type %T for public RSA JWK: %w`, hint, ContinueError())
 		}
@@ -247,7 +247,7 @@ func makeRSAPublicKey(src Key) (Key, error) {
 		case RSADKey, RSADPKey, RSADQKey, RSAPKey, RSAQKey, RSAQIKey:
 			continue
 		default:
-			var v interface{}
+			var v any
 			if err := src.Get(k, &v); err != nil {
 				return nil, fmt.Errorf(`rsa: makeRSAPublicKey: failed to get field %q: %w`, k, err)
 			}
@@ -276,7 +276,7 @@ func (k rsaPrivateKey) Thumbprint(hash crypto.Hash) ([]byte, error) {
 
 	var key rsa.PrivateKey
 	if err := Export(&k, &key); err != nil {
-		return nil, fmt.Errorf(`failed to materialize RSA private key: %w`, err)
+		return nil, fmt.Errorf(`failed to export RSA private key: %w`, err)
 	}
 	return rsaThumbprint(hash, &key.PublicKey)
 }
@@ -287,7 +287,7 @@ func (k rsaPublicKey) Thumbprint(hash crypto.Hash) ([]byte, error) {
 
 	var key rsa.PublicKey
 	if err := Export(&k, &key); err != nil {
-		return nil, fmt.Errorf(`failed to materialize RSA public key: %w`, err)
+		return nil, fmt.Errorf(`failed to export RSA public key: %w`, err)
 	}
 	return rsaThumbprint(hash, &key)
 }

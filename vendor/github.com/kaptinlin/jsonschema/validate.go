@@ -2,17 +2,24 @@ package jsonschema
 
 import (
 	"reflect"
+	"strings"
 )
 
 // Validate checks if the given instance conforms to the schema.
 // This method automatically detects the input type and delegates to the appropriate validation method.
-func (s *Schema) Validate(instance interface{}) *EvaluationResult {
+func (s *Schema) Validate(instance any) *EvaluationResult {
 	switch data := instance.(type) {
 	case []byte:
 		return s.ValidateJSON(data)
-	case map[string]interface{}:
+	case map[string]any:
 		return s.ValidateMap(data)
 	default:
+		// Check if it's a []byte type definition (like json.RawMessage)
+		if isByteSlice(instance) {
+			if bytes, ok := convertToByteSlice(instance); ok {
+				return s.ValidateJSON(bytes)
+			}
+		}
 		return s.ValidateStruct(instance)
 	}
 }
@@ -35,29 +42,29 @@ func (s *Schema) ValidateJSON(data []byte) *EvaluationResult {
 
 // ValidateStruct validates Go struct data directly using reflection.
 // This method uses cached reflection data for optimal performance.
-func (s *Schema) ValidateStruct(instance interface{}) *EvaluationResult {
+func (s *Schema) ValidateStruct(instance any) *EvaluationResult {
 	dynamicScope := NewDynamicScope()
 	result, _, _ := s.evaluate(instance, dynamicScope)
 	return result
 }
 
-// ValidateMap validates map[string]interface{} data directly.
+// ValidateMap validates map[string]any data directly.
 // This method provides optimal performance for pre-parsed JSON data.
-func (s *Schema) ValidateMap(data map[string]interface{}) *EvaluationResult {
+func (s *Schema) ValidateMap(data map[string]any) *EvaluationResult {
 	dynamicScope := NewDynamicScope()
 	result, _, _ := s.evaluate(data, dynamicScope)
 	return result
 }
 
 // parseJSONData safely parses []byte data as JSON
-func (s *Schema) parseJSONData(data []byte) (interface{}, error) {
-	var parsed interface{}
+func (s *Schema) parseJSONData(data []byte) (any, error) {
+	var parsed any
 	return parsed, s.GetCompiler().jsonDecoder(data, &parsed)
 }
 
 // processJSONBytes handles []byte input with smart JSON parsing
-func (s *Schema) processJSONBytes(jsonBytes []byte) (interface{}, error) {
-	var parsed interface{}
+func (s *Schema) processJSONBytes(jsonBytes []byte) (any, error) {
+	var parsed any
 	if err := s.GetCompiler().jsonDecoder(jsonBytes, &parsed); err == nil {
 		return parsed, nil
 	}
@@ -71,9 +78,26 @@ func (s *Schema) processJSONBytes(jsonBytes []byte) (interface{}, error) {
 	return jsonBytes, nil
 }
 
-func (s *Schema) evaluate(instance interface{}, dynamicScope *DynamicScope) (*EvaluationResult, map[string]bool, map[int]bool) {
+func (s *Schema) evaluate(instance any, dynamicScope *DynamicScope) (*EvaluationResult, map[string]bool, map[int]bool) {
 	// Handle []byte input
 	instance = s.preprocessByteInput(instance)
+
+	// Check for circular reference before processing
+	if dynamicScope.Contains(s) {
+		// Determine if this is a problematic circular reference
+		if s.isProblematicCircularReference(dynamicScope) {
+			result := NewEvaluationResult(s)
+			// For problematic circular references, we perform basic validation without following references
+			// This prevents infinite recursion while still validating according to schema constraints
+			evaluatedProps := make(map[string]bool)
+			evaluatedItems := make(map[int]bool)
+
+			// Process basic validation without references to avoid infinite loop
+			s.processBasicValidationWithoutRefs(instance, result, evaluatedProps, evaluatedItems)
+
+			return result, evaluatedProps, evaluatedItems
+		}
+	}
 
 	dynamicScope.Push(s)
 	defer dynamicScope.Pop()
@@ -106,7 +130,7 @@ func (s *Schema) evaluate(instance interface{}, dynamicScope *DynamicScope) (*Ev
 }
 
 // preprocessByteInput handles []byte input intelligently
-func (s *Schema) preprocessByteInput(instance interface{}) interface{} {
+func (s *Schema) preprocessByteInput(instance any) any {
 	jsonBytes, ok := instance.([]byte)
 	if !ok {
 		return instance
@@ -129,7 +153,7 @@ type jsonParseError struct {
 }
 
 // processReferences handles $ref and $dynamicRef evaluation
-func (s *Schema) processReferences(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processReferences(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	// Handle JSON parse errors
 	if _, ok := instance.(*jsonParseError); ok {
 		//nolint:errcheck
@@ -159,7 +183,7 @@ func (s *Schema) processReferences(instance interface{}, dynamicScope *DynamicSc
 }
 
 // processDynamicRef handles $dynamicRef evaluation
-func (s *Schema) processDynamicRef(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processDynamicRef(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	anchorSchema := s.ResolvedDynamicRef
 	_, anchor := splitRef(s.DynamicRef)
 
@@ -186,7 +210,7 @@ func (s *Schema) processDynamicRef(instance interface{}, dynamicScope *DynamicSc
 }
 
 // processValidationKeywords handles all validation keywords
-func (s *Schema) processValidationKeywords(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processValidationKeywords(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	// Basic type validation
 	s.processBasicValidation(instance, result)
 
@@ -203,8 +227,42 @@ func (s *Schema) processValidationKeywords(instance interface{}, dynamicScope *D
 	s.processContentValidation(instance, dynamicScope, result, evaluatedProps, evaluatedItems)
 }
 
+// processBasicValidationWithoutRefs handles basic validation without following references (for circular reference cases)
+func (s *Schema) processBasicValidationWithoutRefs(instance any, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+	// Process basic validation that doesn't involve references
+	s.processBasicValidation(instance, result)
+
+	// Process type-specific validation but without following schema references
+	if s.hasNumericValidation() {
+		errors := evaluateNumeric(s, instance)
+		s.addErrors(result, errors)
+	}
+
+	if s.hasStringValidation() {
+		errors := evaluateString(s, instance)
+		s.addErrors(result, errors)
+	}
+
+	if s.Format != nil {
+		if err := evaluateFormat(s, instance); err != nil {
+			//nolint:errcheck
+			result.AddError(err)
+		}
+	}
+
+	// For object validation, only validate basic constraints without following references
+	if s.hasObjectValidation() {
+		s.processObjectValidationWithoutRefs(instance, result, evaluatedProps)
+	}
+
+	// For array validation, validate basic constraints without following item references
+	if s.hasArrayValidation() {
+		s.processArrayValidationWithoutRefs(instance, result, evaluatedItems)
+	}
+}
+
 // processBasicValidation handles basic validation keywords
-func (s *Schema) processBasicValidation(instance interface{}, result *EvaluationResult) {
+func (s *Schema) processBasicValidation(instance any, result *EvaluationResult) {
 	if s.Type != nil {
 		if err := evaluateType(s, instance); err != nil {
 			//nolint:errcheck
@@ -228,7 +286,7 @@ func (s *Schema) processBasicValidation(instance interface{}, result *Evaluation
 }
 
 // processLogicalOperations handles allOf, anyOf, oneOf, not
-func (s *Schema) processLogicalOperations(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processLogicalOperations(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	if s.AllOf != nil {
 		results, err := evaluateAllOf(s, instance, evaluatedProps, evaluatedItems, dynamicScope)
 		s.addResultsAndError(result, results, err)
@@ -258,7 +316,7 @@ func (s *Schema) processLogicalOperations(instance interface{}, dynamicScope *Dy
 }
 
 // processConditionalLogic handles if/then/else
-func (s *Schema) processConditionalLogic(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processConditionalLogic(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	if s.If != nil || s.Then != nil || s.Else != nil {
 		results, err := evaluateConditional(s, instance, evaluatedProps, evaluatedItems, dynamicScope)
 		s.addResultsAndError(result, results, err)
@@ -266,7 +324,7 @@ func (s *Schema) processConditionalLogic(instance interface{}, dynamicScope *Dyn
 }
 
 // processTypeSpecificValidation handles array, object, string, and numeric validation
-func (s *Schema) processTypeSpecificValidation(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processTypeSpecificValidation(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	// Array validation
 	if s.hasArrayValidation() {
 		results, errors := evaluateArray(s, instance, evaluatedProps, evaluatedItems, dynamicScope)
@@ -309,7 +367,7 @@ func (s *Schema) processTypeSpecificValidation(instance interface{}, dynamicScop
 }
 
 // processContentValidation handles content encoding/media type/schema
-func (s *Schema) processContentValidation(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processContentValidation(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	if s.ContentEncoding != nil || s.ContentMediaType != nil || s.ContentSchema != nil {
 		contentResult, err := evaluateContent(s, instance, evaluatedProps, evaluatedItems, dynamicScope)
 		if contentResult != nil {
@@ -324,7 +382,7 @@ func (s *Schema) processContentValidation(instance interface{}, dynamicScope *Dy
 }
 
 // processUnevaluatedValidation handles unevaluated properties and items
-func (s *Schema) processUnevaluatedValidation(instance interface{}, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
+func (s *Schema) processUnevaluatedValidation(instance any, dynamicScope *DynamicScope, result *EvaluationResult, evaluatedProps map[string]bool, evaluatedItems map[int]bool) {
 	if s.UnevaluatedProperties != nil {
 		results, err := evaluateUnevaluatedProperties(s, instance, evaluatedProps, evaluatedItems, dynamicScope)
 		s.addResultsAndError(result, results, err)
@@ -385,18 +443,18 @@ func (s *Schema) addErrors(result *EvaluationResult, errors []*EvaluationError) 
 	}
 }
 
-func (s *Schema) evaluateBoolean(instance interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool) *EvaluationError {
+func (s *Schema) evaluateBoolean(instance any, evaluatedProps map[string]bool, evaluatedItems map[int]bool) *EvaluationError {
 	if s.Boolean == nil {
 		return nil
 	}
 
 	if *s.Boolean {
 		switch v := instance.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			for key := range v {
 				evaluatedProps[key] = true
 			}
-		case []interface{}:
+		case []any:
 			for index := range v {
 				evaluatedItems[index] = true
 			}
@@ -408,9 +466,9 @@ func (s *Schema) evaluateBoolean(instance interface{}, evaluatedProps map[string
 }
 
 // evaluateObject groups the validation of all object-specific keywords.
-func evaluateObject(schema *Schema, data interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
-	// Fast path: direct map[string]interface{} type
-	if object, ok := data.(map[string]interface{}); ok {
+func evaluateObject(schema *Schema, data any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
+	// Fast path: direct map[string]any type
+	if object, ok := data.(map[string]any); ok {
 		return evaluateObjectMap(schema, object, evaluatedProps, evaluatedItems, dynamicScope)
 	}
 
@@ -438,8 +496,8 @@ func evaluateObject(schema *Schema, data interface{}, evaluatedProps map[string]
 	return nil, nil
 }
 
-// evaluateObjectMap handles validation for map[string]interface{} (original implementation)
-func evaluateObjectMap(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
+// evaluateObjectMap handles validation for map[string]any (original implementation)
+func evaluateObjectMap(schema *Schema, object map[string]any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
 	var results []*EvaluationResult
 	var errors []*EvaluationError
 
@@ -490,7 +548,7 @@ func evaluateObjectMap(schema *Schema, object map[string]interface{}, evaluatedP
 }
 
 // validateObjectConstraints validates object-specific constraints
-func validateObjectConstraints(schema *Schema, object map[string]interface{}) []*EvaluationError {
+func validateObjectConstraints(schema *Schema, object map[string]any) []*EvaluationError {
 	var errors []*EvaluationError
 
 	if schema.MaxProperties != nil {
@@ -521,7 +579,7 @@ func validateObjectConstraints(schema *Schema, object map[string]interface{}) []
 }
 
 // validateNumeric groups the validation of all numeric-specific keywords.
-func evaluateNumeric(schema *Schema, data interface{}) []*EvaluationError {
+func evaluateNumeric(schema *Schema, data any) []*EvaluationError {
 	dataType := getDataType(data)
 	if dataType != "number" && dataType != "integer" {
 		return nil
@@ -530,7 +588,7 @@ func evaluateNumeric(schema *Schema, data interface{}) []*EvaluationError {
 	value := NewRat(data)
 	if value == nil {
 		return []*EvaluationError{
-			NewEvaluationError("type", "invalid_numberic", "Value is {received} but should be numeric", map[string]interface{}{
+			NewEvaluationError("type", "invalid_numberic", "Value is {received} but should be numeric", map[string]any{
 				"actual_type": dataType,
 			}),
 		}
@@ -573,7 +631,7 @@ func evaluateNumeric(schema *Schema, data interface{}) []*EvaluationError {
 }
 
 // validateString groups the validation of all string-specific keywords.
-func evaluateString(schema *Schema, data interface{}) []*EvaluationError {
+func evaluateString(schema *Schema, data any) []*EvaluationError {
 	value, ok := data.(string)
 	if !ok {
 		return nil
@@ -604,8 +662,8 @@ func evaluateString(schema *Schema, data interface{}) []*EvaluationError {
 }
 
 // validateArray groups the validation of all array-specific keywords.
-func evaluateArray(schema *Schema, data interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
-	items, ok := data.([]interface{})
+func evaluateArray(schema *Schema, data any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
+	items, ok := data.([]any)
 	if !ok {
 		return nil, nil
 	}
@@ -614,7 +672,7 @@ func evaluateArray(schema *Schema, data interface{}, evaluatedProps map[string]b
 	var errors []*EvaluationError
 
 	// Process array schema validations
-	arrayValidations := []func(*Schema, []interface{}, map[string]bool, map[int]bool, *DynamicScope) ([]*EvaluationResult, *EvaluationError){
+	arrayValidations := []func(*Schema, []any, map[string]bool, map[int]bool, *DynamicScope) ([]*EvaluationResult, *EvaluationError){
 		evaluatePrefixItems,
 		evaluateItems,
 		evaluateContains,
@@ -638,7 +696,7 @@ func evaluateArray(schema *Schema, data interface{}, evaluatedProps map[string]b
 }
 
 // validateArrayConstraints validates array-specific constraints
-func validateArrayConstraints(schema *Schema, items []interface{}) []*EvaluationError {
+func validateArrayConstraints(schema *Schema, items []any) []*EvaluationError {
 	var errors []*EvaluationError
 
 	if schema.MaxItems != nil {
@@ -718,4 +776,186 @@ func (ds *DynamicScope) LookupDynamicAnchor(anchor string) *Schema {
 	}
 
 	return nil
+}
+
+// Contains checks if a schema is already in the dynamic scope (circular reference detection)
+func (ds *DynamicScope) Contains(schema *Schema) bool {
+	for _, s := range ds.schemas {
+		if s == schema {
+			return true
+		}
+	}
+	return false
+}
+
+// isByteSlice checks if the given value is a []byte type definition (like json.RawMessage)
+func isByteSlice(v any) bool {
+	rv := reflect.ValueOf(v)
+	return rv.Kind() == reflect.Slice && rv.Type().Elem().Kind() == reflect.Uint8
+}
+
+// convertToByteSlice converts a []byte type definition to []byte
+func convertToByteSlice(v any) ([]byte, bool) {
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Slice && rv.Type().Elem().Kind() == reflect.Uint8 {
+		return rv.Bytes(), true
+	}
+	return nil, false
+}
+
+// processObjectValidationWithoutRefs validates object constraints without following schema references
+func (s *Schema) processObjectValidationWithoutRefs(instance any, result *EvaluationResult, evaluatedProps map[string]bool) {
+	// Fast path: direct map[string]any type
+	if object, ok := instance.(map[string]any); ok {
+		// Validate basic object constraints
+		errors := validateObjectConstraints(s, object)
+		s.addErrors(result, errors)
+
+		// Check additional properties constraint for circular references
+		if s.AdditionalProperties != nil {
+			s.checkAdditionalPropertiesForCircular(object, result, evaluatedProps)
+		} else {
+			// Mark all properties as evaluated if no additional properties constraint
+			for key := range object {
+				evaluatedProps[key] = true
+			}
+		}
+		return
+	}
+
+	// For struct types, validate basic constraints
+	rv := reflect.ValueOf(instance)
+	for rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			return
+		}
+		rv = rv.Elem()
+	}
+
+	if rv.Kind() == reflect.Struct {
+		// Convert struct to map for constraint validation
+		objectMap := make(map[string]any)
+		structType := rv.Type()
+		for i := 0; i < rv.NumField(); i++ {
+			field := structType.Field(i)
+			if field.IsExported() {
+				fieldValue := rv.Field(i)
+				if fieldValue.CanInterface() {
+					objectMap[field.Name] = fieldValue.Interface()
+					evaluatedProps[field.Name] = true
+				}
+			}
+		}
+
+		errors := validateObjectConstraints(s, objectMap)
+		s.addErrors(result, errors)
+
+		// Check additional properties for struct as well
+		if s.AdditionalProperties != nil {
+			s.checkAdditionalPropertiesForCircular(objectMap, result, evaluatedProps)
+		}
+	}
+}
+
+// processArrayValidationWithoutRefs validates array constraints without following item schema references
+func (s *Schema) processArrayValidationWithoutRefs(instance any, result *EvaluationResult, evaluatedItems map[int]bool) {
+	items, ok := instance.([]any)
+	if !ok {
+		return
+	}
+
+	// Only validate basic array constraints, not item schemas
+	errors := validateArrayConstraints(s, items)
+	s.addErrors(result, errors)
+
+	// Mark all items as evaluated to prevent further processing
+	for i := range items {
+		evaluatedItems[i] = true
+	}
+}
+
+// checkAdditionalPropertiesForCircular validates additionalProperties constraint for circular references
+func (s *Schema) checkAdditionalPropertiesForCircular(object map[string]any, result *EvaluationResult, evaluatedProps map[string]bool) {
+	// Check if additionalProperties is false (no additional properties allowed)
+	if s.AdditionalProperties.Boolean != nil && !*s.AdditionalProperties.Boolean {
+		// Get list of properties defined in the schema
+		allowedProps := make(map[string]bool)
+		if s.Properties != nil {
+			for prop := range *s.Properties {
+				allowedProps[prop] = true
+			}
+		}
+
+		// Check if all object properties are allowed
+		for prop := range object {
+			if !allowedProps[prop] {
+				//nolint:errcheck
+				result.AddError(NewEvaluationError("additionalProperties", "additional_property_false",
+					"Additional property '{property}' not allowed", map[string]any{
+						"property": prop,
+					}))
+			} else {
+				evaluatedProps[prop] = true
+			}
+		}
+	} else {
+		// Mark all properties as evaluated if additional properties are allowed
+		for key := range object {
+			evaluatedProps[key] = true
+		}
+	}
+}
+
+// isProblematicCircularReference determines if this circular reference would cause infinite recursion
+func (s *Schema) isProblematicCircularReference(scope *DynamicScope) bool {
+	depth := 0
+	for _, schema := range scope.schemas {
+		if schema == s {
+			depth++
+		}
+	}
+
+	// Use different thresholds based on the type of reference and context
+
+	// For metaschema validation (remote references), be very permissive
+	// These are legitimate validation scenarios, not circular references
+	if s.ID != "" && strings.Contains(s.ID, "json-schema.org") {
+		return depth > 5 // High threshold for metaschema
+	}
+
+	// For schemas that are clearly self-referential by design, allow more depth
+	if s.hasSelfReferentialPattern() {
+		return depth > 10 // Allow reasonable nesting for self-referential schemas
+	}
+
+	// For other cases, use a moderate threshold
+	return depth > 3
+}
+
+// hasSelfReferentialPattern checks if schema has patterns designed for self-reference
+func (s *Schema) hasSelfReferentialPattern() bool {
+	// Schema has a property that references itself
+	if s.Properties != nil {
+		for _, prop := range *s.Properties {
+			if prop.Ref == "#" {
+				return true
+			}
+		}
+	}
+
+	// Schema has array items that reference itself
+	if s.Items != nil && s.Items.Ref == "#" {
+		return true
+	}
+
+	// Schema has definitions that might create recursive patterns
+	if s.Defs != nil {
+		for _, def := range s.Defs {
+			if def.Ref == "#" {
+				return true
+			}
+		}
+	}
+
+	return false
 }

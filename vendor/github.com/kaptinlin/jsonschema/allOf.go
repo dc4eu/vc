@@ -15,12 +15,12 @@ import (
 // If the instance fails to conform to any schema or boolean in the array, it returns a EvaluationError detailing the specific failure.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-allof
-func evaluateAllOf(schema *Schema, instance interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateAllOf(schema *Schema, instance any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if len(schema.AllOf) == 0 {
 		return nil, nil // No allOf constraints to validate against.
 	}
 
-	invalid_indexs := []string{}
+	invalidIndexes := []string{}
 	results := []*EvaluationResult{}
 
 	for i, subSchema := range schema.AllOf {
@@ -39,22 +39,21 @@ func evaluateAllOf(schema *Schema, instance interface{}, evaluatedProps map[stri
 
 			if result != nil {
 				results = append(results, result.SetEvaluationPath(fmt.Sprintf("/allOf/%d", i)).
-					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/allOf/%d", i))).
-					SetInstanceLocation(""),
+					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/allOf/%d", i))),
 				)
 
 				if !result.IsValid() {
-					invalid_indexs = append(invalid_indexs, strconv.Itoa(i))
+					invalidIndexes = append(invalidIndexes, strconv.Itoa(i))
 				}
 			}
 		}
 	}
 
-	if len(invalid_indexs) == 0 {
+	if len(invalidIndexes) == 0 {
 		return results, nil
 	}
 
-	return results, NewEvaluationError("allOf", "all_of_item_mismatch", "Value does not match the allOf schema at index {indexs}", map[string]interface{}{
-		"indexs": strings.Join(invalid_indexs, ", "),
+	return results, NewEvaluationError("allOf", "all_of_item_mismatch", "Value does not match the allOf schema at index {indexs}", map[string]any{
+		"indexs": strings.Join(invalidIndexes, ", "),
 	})
 }

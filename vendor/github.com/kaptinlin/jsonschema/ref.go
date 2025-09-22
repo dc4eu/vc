@@ -56,11 +56,11 @@ func (s *Schema) resolveRefWithFullURL(ref string) (*Schema, error) {
 	}
 
 	// If not found in the current schema or its parents, look for the reference in the compiler
-	if resolved, err := s.GetCompiler().GetSchema(ref); err != nil {
-		return nil, ErrFailedToResolveGlobalReference
-	} else {
-		return resolved, nil
+	resolved, err := s.GetCompiler().GetSchema(ref)
+	if err != nil {
+		return nil, ErrGlobalReferenceResolution
 	}
+	return resolved, nil
 }
 
 // resolveJSONPointer resolves a JSON Pointer within the schema based on JSON Schema structure.
@@ -76,7 +76,7 @@ func (s *Schema) resolveJSONPointer(pointer string) (*Schema, error) {
 	for i, segment := range segments {
 		decodedSegment, err := url.PathUnescape(strings.ReplaceAll(strings.ReplaceAll(segment, "~1", "/"), "~0", "~"))
 		if err != nil {
-			return nil, ErrFailedToDecodeSegmentWithJSONPointer
+			return nil, ErrJSONPointerSegmentDecode
 		}
 
 		nextSchema, found := findSchemaInSegment(currentSchema, decodedSegment, previousSegment)
@@ -189,13 +189,19 @@ func (s *Schema) ResolveUnresolvedReferences() {
 func (s *Schema) resolveReferences() {
 	// Resolve the root reference if this schema itself is a reference
 	if s.Ref != "" {
-		resolved, _ := s.resolveRef(s.Ref) // Resolve against root schema
-		s.ResolvedRef = resolved
+		resolved, err := s.resolveRef(s.Ref)
+		if err == nil {
+			s.ResolvedRef = resolved
+		}
+		// If resolution fails, leave ResolvedRef as nil and validation will handle this gracefully
 	}
 
 	if s.DynamicRef != "" {
-		resolved, _ := s.resolveRef(s.DynamicRef) // Resolve dynamic references against root schema
-		s.ResolvedDynamicRef = resolved
+		resolved, err := s.resolveRef(s.DynamicRef)
+		if err == nil {
+			s.ResolvedDynamicRef = resolved
+		}
+		// If resolution fails, leave ResolvedDynamicRef as nil and validation will handle this gracefully
 	}
 
 	// Recursively resolve references within definitions
@@ -261,8 +267,8 @@ func resolveUnresolvedInList(schemas []*Schema) {
 	}
 }
 
-// getUnresolvedReferenceURIs returns a list of URIs that this schema references but are not yet resolved
-func (s *Schema) getUnresolvedReferenceURIs() []string {
+// GetUnresolvedReferenceURIs returns a list of URIs that this schema references but are not yet resolved
+func (s *Schema) GetUnresolvedReferenceURIs() []string {
 	var unresolvedURIs []string
 
 	// Check direct references
@@ -277,14 +283,14 @@ func (s *Schema) getUnresolvedReferenceURIs() []string {
 	// Recursively check nested schemas
 	if s.Defs != nil {
 		for _, defSchema := range s.Defs {
-			unresolvedURIs = append(unresolvedURIs, defSchema.getUnresolvedReferenceURIs()...)
+			unresolvedURIs = append(unresolvedURIs, defSchema.GetUnresolvedReferenceURIs()...)
 		}
 	}
 
 	if s.Properties != nil {
 		for _, propSchema := range *s.Properties {
 			if propSchema != nil {
-				unresolvedURIs = append(unresolvedURIs, propSchema.getUnresolvedReferenceURIs()...)
+				unresolvedURIs = append(unresolvedURIs, propSchema.GetUnresolvedReferenceURIs()...)
 			}
 		}
 	}
@@ -295,30 +301,30 @@ func (s *Schema) getUnresolvedReferenceURIs() []string {
 	unresolvedURIs = append(unresolvedURIs, getUnresolvedFromList(s.OneOf)...)
 
 	if s.Not != nil {
-		unresolvedURIs = append(unresolvedURIs, s.Not.getUnresolvedReferenceURIs()...)
+		unresolvedURIs = append(unresolvedURIs, s.Not.GetUnresolvedReferenceURIs()...)
 	}
 
 	if s.Items != nil {
-		unresolvedURIs = append(unresolvedURIs, s.Items.getUnresolvedReferenceURIs()...)
+		unresolvedURIs = append(unresolvedURIs, s.Items.GetUnresolvedReferenceURIs()...)
 	}
 
 	if s.PrefixItems != nil {
 		for _, schema := range s.PrefixItems {
-			unresolvedURIs = append(unresolvedURIs, schema.getUnresolvedReferenceURIs()...)
+			unresolvedURIs = append(unresolvedURIs, schema.GetUnresolvedReferenceURIs()...)
 		}
 	}
 
 	if s.AdditionalProperties != nil {
-		unresolvedURIs = append(unresolvedURIs, s.AdditionalProperties.getUnresolvedReferenceURIs()...)
+		unresolvedURIs = append(unresolvedURIs, s.AdditionalProperties.GetUnresolvedReferenceURIs()...)
 	}
 
 	if s.Contains != nil {
-		unresolvedURIs = append(unresolvedURIs, s.Contains.getUnresolvedReferenceURIs()...)
+		unresolvedURIs = append(unresolvedURIs, s.Contains.GetUnresolvedReferenceURIs()...)
 	}
 
 	if s.PatternProperties != nil {
 		for _, schema := range *s.PatternProperties {
-			unresolvedURIs = append(unresolvedURIs, schema.getUnresolvedReferenceURIs()...)
+			unresolvedURIs = append(unresolvedURIs, schema.GetUnresolvedReferenceURIs()...)
 		}
 	}
 
@@ -330,7 +336,7 @@ func getUnresolvedFromList(schemas []*Schema) []string {
 	var unresolvedURIs []string
 	for _, schema := range schemas {
 		if schema != nil {
-			unresolvedURIs = append(unresolvedURIs, schema.getUnresolvedReferenceURIs()...)
+			unresolvedURIs = append(unresolvedURIs, schema.GetUnresolvedReferenceURIs()...)
 		}
 	}
 	return unresolvedURIs

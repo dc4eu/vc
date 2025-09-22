@@ -11,7 +11,7 @@ package jsonschema
 // This function serves as a central feature for conditional logic application in JSON Schema validation.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-if
-func evaluateConditional(schema *Schema, instance interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateConditional(schema *Schema, instance any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if schema.If == nil {
 		// If there's no 'if' condition defined, nothing to validate conditionally.
 		return nil, nil
@@ -25,8 +25,7 @@ func evaluateConditional(schema *Schema, instance interface{}, evaluatedProps ma
 	if ifResult != nil {
 		//nolint:errcheck
 		ifResult.SetEvaluationPath("/if").
-			SetSchemaLocation(schema.GetSchemaLocation("/if")).
-			SetInstanceLocation("")
+			SetSchemaLocation(schema.GetSchemaLocation("/if"))
 
 		results = append(results, ifResult)
 
@@ -41,19 +40,17 @@ func evaluateConditional(schema *Schema, instance interface{}, evaluatedProps ma
 				if thenResult != nil {
 					//nolint:errcheck
 					thenResult.SetEvaluationPath("/then").
-						SetSchemaLocation(schema.GetSchemaLocation("/then")).
-						SetInstanceLocation("")
+						SetSchemaLocation(schema.GetSchemaLocation("/then"))
 
 					results = append(results, thenResult)
 
 					if !thenResult.IsValid() {
 						return results, NewEvaluationError("then", "if_then_mismatch",
 							"Value meets the 'if' condition but does not match the 'then' schema")
-					} else {
-						// Merge maps only if 'then' condition is successfully validated
-						mergeStringMaps(evaluatedProps, thenEvaluatedProps)
-						mergeIntMaps(evaluatedItems, thenEvaluatedItems)
 					}
+					// Merge maps only if 'then' condition is successfully validated
+					mergeStringMaps(evaluatedProps, thenEvaluatedProps)
+					mergeIntMaps(evaluatedItems, thenEvaluatedItems)
 				}
 			}
 		} else if schema.Else != nil {
@@ -64,11 +61,10 @@ func evaluateConditional(schema *Schema, instance interface{}, evaluatedProps ma
 				if !elseResult.IsValid() {
 					return results, NewEvaluationError("else", "if_else_mismatch",
 						"Value fails the 'if' condition and does not match the 'else' schema")
-				} else {
-					// Merge maps only if 'else' condition is successfully validated
-					mergeStringMaps(evaluatedProps, elseEvaluatedProps)
-					mergeIntMaps(evaluatedItems, elseEvaluatedItems)
 				}
+				// Merge maps only if 'else' condition is successfully validated
+				mergeStringMaps(evaluatedProps, elseEvaluatedProps)
+				mergeIntMaps(evaluatedItems, elseEvaluatedItems)
 			}
 		}
 	}

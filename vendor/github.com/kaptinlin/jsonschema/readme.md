@@ -171,6 +171,56 @@ result := schema.Validate(data)
 
 **📖 Full Documentation**: [docs/constructor.md](docs/constructor.md)
 
+## Struct Tag Schema Generation
+
+Generate JSON Schemas directly from Go struct definitions using familiar tag syntax:
+
+```go
+type User struct {
+    Name  string `jsonschema:"required,minLength=2,maxLength=50"`
+    Email string `jsonschema:"required,format=email"`
+    Age   int    `jsonschema:"minimum=18,maximum=120"`
+}
+
+// Generate schema from struct tags
+schema := jsonschema.FromStruct[User]()
+result := schema.Validate(userData)
+```
+
+### Code Generation Tool
+
+For optimal performance, use the `schemagen` command-line tool to generate compiled schemas:
+
+```bash
+# Install the generator
+go install github.com/kaptinlin/jsonschema/cmd/schemagen@latest
+
+# Generate schemas for current package
+schemagen
+
+# Add to your struct files for automatic generation
+//go:generate schemagen
+```
+
+### Try It Out
+
+Explore example implementations and practice with the tool:
+
+```bash
+# Navigate to example directory
+cd cmd/schemagen/exampledata
+
+# Run schemagen on the examples
+schemagen
+
+# View generated schema files
+ls -la *_schema.go
+```
+
+The example directory contains comprehensive struct definitions demonstrating various validation patterns, circular references, and advanced features.
+
+**📖 Full Documentation**: [docs/tags.md](docs/tags.md)
+
 ### Custom Compiler for Schemas
 
 Set custom compilers on schemas for isolated function registries:
@@ -272,16 +322,6 @@ if !result.IsValid() {
         fmt.Printf("Error: %s\n", err.Error())
     }
 }
-```
-
-### Custom Error Messages
-
-```go
-schema := `{
-    "type": "string",
-    "minLength": 5,
-    "errorMessage": "Name must be at least 5 characters long"
-}`
 ```
 
 ## Testing

@@ -15,12 +15,12 @@ import (
 // If the instance conforms to more than one or none of the schemas, it returns a EvaluationError detailing the specific failures or the lack of a valid schema.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-oneof
-func evaluateOneOf(schema *Schema, instance interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateOneOf(schema *Schema, instance any, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if len(schema.OneOf) == 0 {
 		return nil, nil // No oneOf constraints to validate against.
 	}
 
-	valid_indexs := []string{}
+	validIndexes := []string{}
 	results := []*EvaluationResult{}
 	var tempEvaluatedProps map[string]bool
 	var tempEvaluatedItems map[int]bool
@@ -30,12 +30,11 @@ func evaluateOneOf(schema *Schema, instance interface{}, evaluatedProps map[stri
 			result, schemaEvaluatedProps, schemaEvaluatedItems := subSchema.evaluate(instance, dynamicScope)
 			if result != nil {
 				results = append(results, result.SetEvaluationPath(fmt.Sprintf("/oneOf/%d", i)).
-					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/oneOf/%d", i))).
-					SetInstanceLocation(""),
+					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/oneOf/%d", i))),
 				)
 
 				if result.IsValid() {
-					valid_indexs = append(valid_indexs, strconv.Itoa(i))
+					validIndexes = append(validIndexes, strconv.Itoa(i))
 					tempEvaluatedProps = schemaEvaluatedProps
 					tempEvaluatedItems = schemaEvaluatedItems
 				}
@@ -43,18 +42,18 @@ func evaluateOneOf(schema *Schema, instance interface{}, evaluatedProps map[stri
 		}
 	}
 
-	if len(valid_indexs) == 1 {
+	if len(validIndexes) == 1 {
 		// Merge maps only if exactly one schema or boolean condition is successfully validated
 		mergeStringMaps(evaluatedProps, tempEvaluatedProps)
 		mergeIntMaps(evaluatedItems, tempEvaluatedItems)
 		return results, nil
 	}
 
-	if len(valid_indexs) > 1 {
-		return results, NewEvaluationError("oneOf", "one_of_multiple_matches", "Value should match exactly one schema but matches multiple at indexes {matches}", map[string]interface{}{
-			"matches": strings.Join(valid_indexs, ", "),
+	if len(validIndexes) > 1 {
+		return results, NewEvaluationError("oneOf", "one_of_multiple_matches", "Value should match exactly one schema but matches multiple at indexes {matches}", map[string]any{
+			"matches": strings.Join(validIndexes, ", "),
 		})
-	} else { // If no conditions are met, return error
-		return results, NewEvaluationError("oneOf", "one_of_item_mismatch", "Value does not match the oneOf schema")
 	}
+	// If no conditions are met, return error
+	return results, NewEvaluationError("oneOf", "one_of_item_mismatch", "Value does not match the oneOf schema")
 }

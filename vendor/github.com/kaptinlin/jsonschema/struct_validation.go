@@ -19,6 +19,7 @@ type FieldInfo struct {
 	Index     int          // Field index in the struct
 	JSONName  string       // JSON field name (after processing tags)
 	Omitempty bool         // Whether the field has omitempty tag
+	Omitzero  bool         // Whether the field has omitzero tag
 	Type      reflect.Type // Field type
 }
 
@@ -50,7 +51,7 @@ func parseStructType(structType reflect.Type) *FieldCache {
 			continue
 		}
 
-		jsonName, omitempty := parseJSONTag(field.Tag.Get("json"), field.Name)
+		jsonName, omitempty, omitzero := parseJSONTag(field.Tag.Get("json"), field.Name)
 		if jsonName == "-" {
 			continue // Skip fields marked with json:"-"
 		}
@@ -59,6 +60,7 @@ func parseStructType(structType reflect.Type) *FieldCache {
 			Index:     i,
 			JSONName:  jsonName,
 			Omitempty: omitempty,
+			Omitzero:  omitzero,
 			Type:      field.Type,
 		}
 		cache.FieldCount++
@@ -67,10 +69,10 @@ func parseStructType(structType reflect.Type) *FieldCache {
 	return cache
 }
 
-// parseJSONTag parses a JSON struct tag and returns the field name and omitempty flag
-func parseJSONTag(tag, defaultName string) (string, bool) {
+// parseJSONTag parses a JSON struct tag and returns the field name, omitempty and omitzero flags
+func parseJSONTag(tag, defaultName string) (string, bool, bool) {
 	if tag == "" {
-		return defaultName, false
+		return defaultName, false, false
 	}
 
 	if commaIdx := strings.IndexByte(tag, ','); commaIdx >= 0 {
@@ -78,10 +80,38 @@ func parseJSONTag(tag, defaultName string) (string, bool) {
 		if name == "" {
 			name = defaultName
 		}
-		return name, strings.Contains(tag[commaIdx:], "omitempty")
+		options := tag[commaIdx:]
+		omitempty := strings.Contains(options, "omitempty")
+		omitzero := strings.Contains(options, "omitzero")
+		return name, omitempty, omitzero
 	}
 
-	return tag, false
+	return tag, false, false
+}
+
+// isZeroValue checks if a reflect.Value represents a zero value for omitzero behavior
+// This uses the IsZero() method when available, following Go 1.24 omitzero semantics
+func isZeroValue(rv reflect.Value) bool {
+	// Check if the value has an IsZero method (like time.Time, custom types)
+	if rv.CanInterface() {
+		if zeroChecker, ok := rv.Interface().(interface{ IsZero() bool }); ok {
+			return zeroChecker.IsZero()
+		}
+	}
+
+	// Fall back to reflect.Value.IsZero() for built-in types
+	return rv.IsZero()
+}
+
+// shouldOmitField determines if a field should be omitted based on omitempty/omitzero tags
+func shouldOmitField(fieldInfo FieldInfo, fieldValue reflect.Value) bool {
+	if fieldInfo.Omitzero && isZeroValue(fieldValue) {
+		return true
+	}
+	if fieldInfo.Omitempty && isEmptyValue(fieldValue) {
+		return true
+	}
+	return false
 }
 
 // isEmptyValue checks if a reflect.Value represents an empty value for omitempty behavior
@@ -149,8 +179,8 @@ func isMissingValue(rv reflect.Value) bool {
 	}
 }
 
-// extractValue safely gets the interface{} value from a reflect.Value
-func extractValue(rv reflect.Value) interface{} {
+// extractValue safely gets the any value from a reflect.Value
+func extractValue(rv reflect.Value) any {
 	// Handle pointers by dereferencing them first
 	for rv.Kind() == reflect.Ptr {
 		if rv.IsNil() {
@@ -173,7 +203,7 @@ func extractValue(rv reflect.Value) interface{} {
 }
 
 // evaluateObjectStruct handles validation for Go structs
-func evaluateObjectStruct(schema *Schema, structValue reflect.Value, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
+func evaluateObjectStruct(schema *Schema, structValue reflect.Value, evaluatedProps map[string]bool, _ map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
 	results := []*EvaluationResult{}
 	errors := []*EvaluationError{}
 
@@ -246,8 +276,8 @@ func evaluateObjectStruct(schema *Schema, structValue reflect.Value, evaluatedPr
 
 // evaluateObjectReflectMap handles validation for reflect map types
 func evaluateObjectReflectMap(schema *Schema, mapValue reflect.Value, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, []*EvaluationError) {
-	// Convert reflect map to map[string]interface{} and use existing logic
-	object := make(map[string]interface{})
+	// Convert reflect map to map[string]any and use existing logic
+	object := make(map[string]any)
 
 	for _, key := range mapValue.MapKeys() {
 		if key.Kind() == reflect.String {
@@ -272,12 +302,14 @@ func evaluatePropertiesStruct(schema *Schema, structValue reflect.Value, fieldCa
 
 		fieldInfo, exists := fieldCache.FieldsByName[propName]
 		if !exists {
-			// Field doesn't exist in struct, validate as nil
-			result, _, _ := propSchema.evaluate(nil, dynamicScope)
-			if result != nil {
-				results = append(results, result)
-				if !result.IsValid() {
-					invalidProperties = append(invalidProperties, propName)
+			// Field doesn't exist in struct, only validate as nil if required and no default
+			if isRequired(schema, propName) && !defaultIsSpecified(propSchema) {
+				result, _, _ := propSchema.evaluate(nil, dynamicScope)
+				if result != nil {
+					results = append(results, result)
+					if !result.IsValid() {
+						invalidProperties = append(invalidProperties, propName)
+					}
 				}
 			}
 			continue
@@ -286,8 +318,8 @@ func evaluatePropertiesStruct(schema *Schema, structValue reflect.Value, fieldCa
 		// Get field value
 		fieldValue := structValue.Field(fieldInfo.Index)
 
-		// Handle omitempty: skip validation if field is empty and has omitempty tag
-		if fieldInfo.Omitempty && isEmptyValue(fieldValue) {
+		// Handle omitempty/omitzero: skip validation if field should be omitted
+		if shouldOmitField(fieldInfo, fieldValue) {
 			continue
 		}
 
@@ -347,21 +379,21 @@ func evaluatePropertyCountStruct(schema *Schema, structValue reflect.Value, fiel
 	actualCount := 0
 	for _, fieldInfo := range fieldCache.FieldsByName {
 		fieldValue := structValue.Field(fieldInfo.Index)
-		if !fieldInfo.Omitempty || !isEmptyValue(fieldValue) {
+		if !shouldOmitField(fieldInfo, fieldValue) {
 			actualCount++
 		}
 	}
 
 	if schema.MaxProperties != nil && float64(actualCount) > *schema.MaxProperties {
 		return NewEvaluationError("maxProperties", "too_many_properties",
-			"Value should have at most {max_properties} properties", map[string]interface{}{
+			"Value should have at most {max_properties} properties", map[string]any{
 				"max_properties": *schema.MaxProperties,
 			})
 	}
 
 	if schema.MinProperties != nil && float64(actualCount) < *schema.MinProperties {
 		return NewEvaluationError("minProperties", "too_few_properties",
-			"Value should have at least {min_properties} properties", map[string]interface{}{
+			"Value should have at least {min_properties} properties", map[string]any{
 				"min_properties": *schema.MinProperties,
 			})
 	}
@@ -379,7 +411,7 @@ func evaluatePatternPropertiesStruct(schema *Schema, structValue reflect.Value, 
 		}
 
 		fieldValue := structValue.Field(fieldInfo.Index)
-		if fieldInfo.Omitempty && isEmptyValue(fieldValue) {
+		if shouldOmitField(fieldInfo, fieldValue) {
 			continue
 		}
 
@@ -413,7 +445,7 @@ func evaluateAdditionalPropertiesStruct(schema *Schema, structValue reflect.Valu
 		}
 
 		fieldValue := structValue.Field(fieldInfo.Index)
-		if fieldInfo.Omitempty && isEmptyValue(fieldValue) {
+		if shouldOmitField(fieldInfo, fieldValue) {
 			continue
 		}
 
@@ -447,7 +479,7 @@ func evaluateAdditionalPropertiesStruct(schema *Schema, structValue reflect.Valu
 }
 
 // evaluatePropertyNamesStruct validates struct property names
-func evaluatePropertyNamesStruct(schema *Schema, structValue reflect.Value, fieldCache *FieldCache, evaluatedProps map[string]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluatePropertyNamesStruct(schema *Schema, structValue reflect.Value, fieldCache *FieldCache, _ map[string]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
 	if schema.PropertyNames == nil {
 		return nil, nil
 	}
@@ -457,7 +489,7 @@ func evaluatePropertyNamesStruct(schema *Schema, structValue reflect.Value, fiel
 
 	for jsonName, fieldInfo := range fieldCache.FieldsByName {
 		fieldValue := structValue.Field(fieldInfo.Index)
-		if fieldInfo.Omitempty && isEmptyValue(fieldValue) {
+		if shouldOmitField(fieldInfo, fieldValue) {
 			continue
 		}
 
@@ -502,7 +534,7 @@ func evaluateDependentRequiredStruct(schema *Schema, structValue reflect.Value, 
 				depFieldInfo, depExists := fieldCache.FieldsByName[requiredProp]
 				if !depExists {
 					return NewEvaluationError("dependentRequired", "dependent_required_missing",
-						"Property {property} is required when {dependent_property} is present", map[string]interface{}{
+						"Property {property} is required when {dependent_property} is present", map[string]any{
 							"property":           requiredProp,
 							"dependent_property": propName,
 						})
@@ -511,7 +543,7 @@ func evaluateDependentRequiredStruct(schema *Schema, structValue reflect.Value, 
 				depFieldValue := structValue.Field(depFieldInfo.Index)
 				if isMissingValue(depFieldValue) {
 					return NewEvaluationError("dependentRequired", "dependent_required_missing",
-						"Property {property} is required when {dependent_property} is present", map[string]interface{}{
+						"Property {property} is required when {dependent_property} is present", map[string]any{
 							"property":           requiredProp,
 							"dependent_property": propName,
 						})
@@ -526,11 +558,11 @@ func evaluateDependentRequiredStruct(schema *Schema, structValue reflect.Value, 
 // createValidationError creates a validation error with proper formatting for single or multiple items
 func createValidationError(errorType, keyword string, singleTemplate, multiTemplate string, invalidItems []string) *EvaluationError {
 	if len(invalidItems) == 1 {
-		return NewEvaluationError(keyword, errorType, singleTemplate, map[string]interface{}{
+		return NewEvaluationError(keyword, errorType, singleTemplate, map[string]any{
 			"property": invalidItems[0],
 		})
 	} else if len(invalidItems) > 1 {
-		return NewEvaluationError(keyword, errorType, multiTemplate, map[string]interface{}{
+		return NewEvaluationError(keyword, errorType, multiTemplate, map[string]any{
 			"properties": strings.Join(invalidItems, ", "),
 		})
 	}

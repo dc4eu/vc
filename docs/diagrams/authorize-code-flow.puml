@@ -1,0 +1,13 @@
+@startuml
+
+autonumber
+user -> wallet: select wanted credential
+wallet -> oauth: /op/par
+wallet -> oauth: /authorize
+oauth -> oauth: /authorization/consent
+user -> oauth: username & password
+wallet -> oauth: /token
+wallet -> issuer: /credential
+issuer -> wallet: credential
+
+@enduml

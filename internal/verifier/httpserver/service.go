@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"net/http"
+	"time"
 	"vc/internal/verifier/apiv1"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
@@ -36,7 +37,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		apiv1:  apiv1,
 		gin:    gin.New(),
 		tracer: tracer,
-		server: &http.Server{},
+		server: &http.Server{
+			ReadHeaderTimeout: 3 * time.Second,
+		},
 	}
 
 	var err error
@@ -81,7 +84,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qr-code", http.StatusOK, s.endpointQRCode)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/direct-post-jwt/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
-
 
 	//openid4vp-web
 	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)

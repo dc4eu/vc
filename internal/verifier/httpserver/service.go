@@ -50,7 +50,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		// extra middlewares (MUST be declared before Server.Default)
 		s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
 
-		//TODO: refactorisera och flytta in nedan till någon middleware struct inkl. fixa egna properties för allt som ska vara dynamiskt
+		//TODO: refactorisera och flytta in nedan till någon middleware struct inkl. fixa egna properties istället för att använda UI's - för allt som ska vara dynamiskt
 		store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
 		store.Options(sessions.Options{
 			Path:     "/",
@@ -91,7 +91,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "vp-datastore/verification-records", http.StatusOK, s.endpointPaginatedVerificationRecords)
 
 	// for dev purpose only
-	//TODO: OBS! nedan endpoint behöver säkerhet innan mer känsliga nycklar och/eller data börjar användas (tillåts dock ej redan om vc satt till production)
+	//TODO: OBS! nedan endpoint behöver säkerhet innan mer känsliga nycklar och/eller data börjar användas (tillåts dock ej alldig om vc satt till production)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "debug/vp-flow", http.StatusOK, s.endpointGetVPFlowDebugInfo)
 
 	//TODO: swagger är inte aktiverat i web_worker för docker - hantera att verifier lär behöva swagger samtidigt som den stödjer web (OBS! ui samt portal har ingen swagger alls)

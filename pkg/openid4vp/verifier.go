@@ -30,24 +30,19 @@ type ProcessType int
 
 const (
 	FULL_VALIDATION ProcessType = iota
-
-	// DEPRECATED: ta bort nedan alternativ då det inte längre känns aktuellt
-	ONLY_EXTRACT_JSON
 )
 
 func (p ProcessType) String() string {
 	switch p {
 	case FULL_VALIDATION:
 		return "FULL_VALIDATION"
-	case ONLY_EXTRACT_JSON:
-		return "ONLY_EXTRACT_JSON"
 	default:
 		return "UNKNOWN"
 	}
 }
 
 func isValidProcessType(p ProcessType) bool {
-	return p == FULL_VALIDATION || p == ONLY_EXTRACT_JSON
+	return p == FULL_VALIDATION
 }
 
 type ValidationOptions struct {
@@ -63,20 +58,9 @@ type AuthorizationResponseWrapper struct {
 	// resources etc
 	vpSession    *VPInteractionSession
 	trustService *TrustService
-
-	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
-
-	// Deprecated: to be removed, use trustService instead
-	holderPublicKey any
-
-	// Deprecated: to be removed, use trustService instead
-	jwePrivateKey any
-
-	// Deprecated: to be removed, use trustService instead
-	issuerPublicKey any
 }
 
-// Process
+// Process executes all verification checks based on the process configuration
 func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *AuthorizationResponse, processConfig *ProcessConfig, vpSession *VPInteractionSession, trustService *TrustService) error {
 	if authorizationResponse == nil {
 		return errors.New("no authorizationResponse provided")
@@ -119,7 +103,7 @@ func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *Authoriz
 		return err
 	}
 
-	if processConfig.ProcessType == FULL_VALIDATION && !processConfig.ValidationOptions.SkipVPSignatureChecks {
+	if !processConfig.ValidationOptions.SkipVPSignatureChecks {
 		if err := arw.checkAllVPsIntegrity(); err != nil {
 			return err
 		}
@@ -127,11 +111,6 @@ func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *Authoriz
 
 	if err := arw.extractAllEmbeddedVCs(); err != nil {
 		return err
-	}
-
-	if processConfig.ProcessType == ONLY_EXTRACT_JSON {
-		// break here since everything now is extracted
-		return nil
 	}
 
 	if !processConfig.ValidationOptions.SkipVCSignatureChecks {
@@ -144,12 +123,13 @@ func (arw *AuthorizationResponseWrapper) Process(authorizationResponse *Authoriz
 		return err
 	}
 
-	//TODO: fortsätt impl av verifieringsprocessen här....
+	//TODO: fortsätt impl av verifieringsprocessen här.... ex. har allt som begärts av verifiern erhållits och är verifierade, ex alla credentials och attribut?
 
 	return nil
-
 }
 
+// extractAllVPTokens parses all vp_tokens from the authorization response and populates the vpList with valid presentations.
+// Returns an error if no vp_tokens are found or if a token's format is unsupported or invalid.
 func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 	if len(arw.authorizationResponse.VPTokens) == 0 {
 		return errors.New("no vp_token found in response")
@@ -164,8 +144,6 @@ func (arw *AuthorizationResponseWrapper) extractAllVPTokens() error {
 			}
 
 			vp.IndexInVPTokenArray = index
-			vp.holderPublicKey = arw.holderPublicKey
-			vp.jwePrivateKey = arw.jwePrivateKey
 
 			if err := vp.extractVPToken(); err != nil {
 				return err
@@ -193,6 +171,7 @@ func (arw *AuthorizationResponseWrapper) checkAllVPsIntegrity() error {
 	return nil
 }
 
+// extractAllEmbeddedVCs extracts all Verifiable Credentials (VCs) from each Verifiable Presentation (VP) in the vpList.
 func (arw *AuthorizationResponseWrapper) extractAllEmbeddedVCs() error {
 	for _, vp := range arw.vpList {
 		err := vp.extractVerifiableCredentials()
@@ -203,6 +182,7 @@ func (arw *AuthorizationResponseWrapper) extractAllEmbeddedVCs() error {
 	return nil
 }
 
+// checkAllVCsIntegrity verifies the integrity of all Verifiable Credentials (VCs) within each Verifiable Presentation (VP).
 func (arw *AuthorizationResponseWrapper) checkAllVCsIntegrity() error {
 	for _, vp := range arw.vpList {
 		err := vp.checkVerifiableCredentialsIntegrity()
@@ -213,6 +193,7 @@ func (arw *AuthorizationResponseWrapper) checkAllVCsIntegrity() error {
 	return nil
 }
 
+// checkAllSelectiveDisclosures validates all selective disclosures within the Verifiable Presentations in the vpList.
 func (arw *AuthorizationResponseWrapper) checkAllSelectiveDisclosures() error {
 	for _, vp := range arw.vpList {
 		err := vp.checkSelectiveDisclosures()
@@ -284,7 +265,7 @@ type VerifiablePresentationWrapper struct {
 	PayloadDecodedMap    map[string]interface{}
 	HolderSignatureBytes []byte
 
-	//TODO: JSON-structure based vp_token
+	//TODO: fields for JSON-structure based vp_token here
 
 	//Common for both JWT and JSON based vp
 	IndexInVPTokenArray    int
@@ -294,18 +275,6 @@ type VerifiablePresentationWrapper struct {
 	// resources etc
 	vpSession    *VPInteractionSession
 	trustService *TrustService
-
-	//TODO(mk): remove key fields below when implemented so they are fetch from their real location(s)
-
-	// Deprecated: to be removed, use trustService instead
-	holderPublicKey interface{}
-
-	// Deprecated: to be removed, use trustService instead
-	jwePrivateKey interface{}
-
-	// Deprecated: to be removed, use trustService instead
-	issuerPublicKey interface{} //FOR NOW: All embedded vc's in a vp must currently be signed by the same issuer key
-
 }
 
 // VerifiableCredentialWrapper represents the structure for validating a Verifiable Credential (can be used both as is and within a verifiable presentation)
@@ -324,12 +293,12 @@ type VerifiableCredentialWrapper struct {
 	PayloadDecoded                      string
 	PayloadDecodedMap                   map[string]interface{}
 	IssuerSignatureBytes                []byte
-	RevealedSelectiveDisclosuresDecoded []string
+	RevealedSelectiveDisclosuresDecoded []string //i.e. from the jwt's ~sd1~sd2
 	HolderBindingJWT                    string
 
 	ValidSelectiveDisclosures []*Disclosure
 
-	//TODO: ldp_vc based vc
+	//TODO: fields for ldp_vc based vc here?
 
 	// resources etc
 	vpSession    *VPInteractionSession
@@ -365,10 +334,14 @@ func (vp *VerifiablePresentationWrapper) extractVPToken() error {
 	return nil
 }
 
+// extractVerifiableCredentials extracts and validates verifiable credentials from a Verifiable Presentation.
+// It ensures the correctness of the format, validates paths, and processes supported credential types.
 func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 	if vp.PresentationSubmission == nil {
 		return errors.New("no presentation submission found")
 	}
+
+	//TODO: make the extraction of VCs below more advances to handle more than one VC within the same VP
 	if len(vp.PresentationSubmission.DescriptorMap) != 1 {
 		return errors.New("only one PresentationSubmission.DescriptorMap is currently supported")
 	}
@@ -391,7 +364,7 @@ func (vp *VerifiablePresentationWrapper) extractVerifiableCredentials() error {
 		}
 
 		vc := &VerifiableCredentialWrapper{
-			RawToken:     vp.RawToken, //In first supported scenario the vp and vc is the same (direct_post.jwt with vc+sd-jwt)
+			RawToken:     vp.RawToken, //In first supported scenario from dc4eu and www wallet the vp and vc is the same (direct_post.jwt with vc+sd-jwt)
 			Format:       descriptor.Format,
 			vpSession:    vp.vpSession,
 			trustService: vp.trustService,
@@ -421,8 +394,9 @@ func (vp *VerifiablePresentationWrapper) checkVPTokenIntegrity() error {
 	parsedToken, err := jwt.Parse(vp.RawJWSPartOfToken, func(token *jwt.Token) (any, error) {
 		alg := token.Method.Alg()
 		fmt.Printf("\nFound vp_token signing alg: %s\n", alg)
-		//TODO(mk): find and extract holderPublicKey from the real source using vp.trustService.GetPublicKey...(...)
-		return vp.holderPublicKey, nil
+		var pubKey interface{}
+		//TODO: find and extract the public key that this vp has been signed with using ~vp.trustService.GetPublicKey...(...)
+		return pubKey, nil
 	})
 	if err != nil {
 		return fmt.Errorf("VP JWT-verification failed: %w", err)
@@ -558,22 +532,10 @@ func (vc *VerifiableCredentialWrapper) checkRevealedSelectiveDisclosures() error
 	sdHashAlg := sdAlgResults.String()
 
 	// extracts all _sd values on all levels in JSON
-	//fmt.Printf("vc.PayloadDecoded (len=%d): %q\n", len(vc.PayloadDecoded), vc.PayloadDecoded)
 	sdList, err := extractSDListDeep(vc.PayloadDecoded)
 	if err != nil {
 		return err
 	}
-
-	//Nedan kod har tidigare använts men då bara tagit ut _sd från rootnivån i jsonen.
-	//
-	//var sdList []string
-	//sdResults := gjson.Get(vc.PayloadDecoded, "_sd")
-	//if sdResults.Exists() && sdResults.IsArray() {
-	//	sdResults.ForEach(func(_, value gjson.Result) bool {
-	//		sdList = append(sdList, value.String())
-	//		return true
-	//	})
-	//}
 
 	err = vc.validateSelectiveDisclosures(sdList, sdHashAlg)
 	if err != nil {
@@ -612,6 +574,7 @@ type parsedVPToken struct {
 	signatureEncoded string
 }
 
+// parseVPToken parses the raw Verifiable Presentation token, handling JWS and JWE formats, and extracts its components.
 func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) {
 	parsedVPToken := &parsedVPToken{
 		// just to simplify debug
@@ -635,8 +598,7 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 	if len(tokenParts) == 5 {
 		// vp_token is a JWE (decrypt it first)
 		fmt.Println("vp_token is a JWE - decrypting it to a JWT!")
-		//TODO(mk): find and extract jwePrivateKey from the real source == the verifiers private key (the wallet encrypted using the verifiers public key)
-		jwtBytes, err := DecryptJWE(vp.RawToken, vp.jwePrivateKey)
+		jwtBytes, err := DecryptJWE(vp.RawToken, vp.vpSession.SessionEphemeralKeyPair.PrivateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -645,7 +607,6 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 		vp.RawToken = string(jwtBytes)
 		vp.RawTokenHasBeenDecryptedFromJWE = true
 		return vp.parseVPToken()
-		//return nil, fmt.Errorf("JWE (encrypted) not supported yet!")
 	}
 
 	parsedVPToken.headerEncoded = tokenParts[0]
@@ -661,7 +622,7 @@ func (vp *VerifiablePresentationWrapper) parseVPToken() (*parsedVPToken, error) 
 
 func (vp *VerifiablePresentationWrapper) checkVerifiableCredentialsIntegrity() error {
 	for _, vc := range vp.vcList {
-		err := vc.checkIntegrity(vp.issuerPublicKey)
+		err := vc.checkVCIntegrity()
 		if err != nil {
 			return err
 		}
@@ -669,8 +630,7 @@ func (vp *VerifiablePresentationWrapper) checkVerifiableCredentialsIntegrity() e
 	return nil
 }
 
-func (vc *VerifiableCredentialWrapper) checkIntegrity(issuerPublicKey interface{}) error {
-
+func (vc *VerifiableCredentialWrapper) checkVCIntegrity() error {
 	rawX5C, ok := vc.HeaderDecodedMap["x5c"]
 	if !ok {
 		return fmt.Errorf("missing 'x5c'")

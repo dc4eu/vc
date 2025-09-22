@@ -65,12 +65,6 @@ function resetAndHideIndexContainer() {
         presentationRequestTypeIDSelect.value = defaultOption1.value;
     }
 
-    const documentTypeSelect = document.getElementById("documentTypeSelect");
-    const defaultOption2 = Array.from(documentTypeSelect.options).find(opt => opt.defaultSelected);
-    if (defaultOption2) {
-        documentTypeSelect.value = defaultOption2.value;
-    }
-
     getElementById("encryptWalletResponseCB").checked = getElementById("encryptWalletResponseCB").defaultChecked;
 
     hideElement("indexContainer");
@@ -120,7 +114,6 @@ function resetVerificationContainer() {
 }
 
 async function startVPFlow() {
-    const documentTypeValue = getElementById("documentTypeSelect").value;
     const presentationRequestTypeValue = getElementById("presentationRequestTypeIDSelect").value;
     const encryptWalletResponse = getElementById("encryptWalletResponseCB").checked;
 
@@ -129,6 +122,10 @@ async function startVPFlow() {
     showElement("qrContainer");
 
     try {
+        if (presentationRequestTypeValue == "") {
+            throw new Error(`Select type of credentials to verify`);
+        }
+
         const response = await fetch(new URL("/qr-code", baseUrl), {
             method: "POST",
             headers: {
@@ -137,7 +134,6 @@ async function startVPFlow() {
             },
             body: JSON.stringify({
                 presentation_request_type_id: presentationRequestTypeValue,
-                document_type: documentTypeValue,
                 encrypt_direct_post_jwt: encryptWalletResponse,
             })
         });
@@ -173,10 +169,8 @@ async function startVPFlow() {
         const qrInfoText = document.getElementById("qrInfoText");
         qrInfoText.classList.remove("is-hidden");
 
-        //example: https://demo.wwwallet.org/cb?client_id=verifier.wwwallet.org&request_uri=https%3A%2F%2Fverifier.wwwallet.org%2Fverification%2Frequest-object%3Fid%3D2f96a24e-90cc-4b30-a904-912e9980df10
         const params = new URLSearchParams({
             client_id: data.client_id,
-            //request_uri: encodeURIComponent(data.request_uri)
             request_uri: data.request_uri
         });
 
@@ -305,7 +299,6 @@ async function quitVPFlow() {
         }
     } catch (error) {
         console.error("Error during quitvpflow:", error);
-        //TODO: ska man och i så fall var ska man visa detta i GUI't?
     }
 }
 
@@ -314,17 +307,9 @@ document.addEventListener('DOMContentLoaded', function () {
     startVPFlowButton.addEventListener('click', function () {
         startVPFlow();
     });
-    
+
     const presentationRequestTypeIDSelect = document.getElementById('presentationRequestTypeIDSelect');
     presentationRequestTypeIDSelect.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            startVPFlowButton.click();
-        }
-    });
-
-    const documentTypeSelect = document.getElementById('documentTypeSelect');
-    documentTypeSelect.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
             event.preventDefault();
             startVPFlowButton.click();

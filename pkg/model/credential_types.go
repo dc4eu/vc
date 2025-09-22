@@ -1,5 +1,6 @@
 package model
 
+// same as document_type
 const (
 	CredentialTypeUrnEudiEhic1            = "urn:eudi:ehic:1"
 	CredentialTypeUrnEudiPda11            = "urn:eudi:pda1:1"

@@ -22,7 +22,6 @@ import (
 	trace2 "go.opentelemetry.io/otel/trace"
 )
 
-
 func (s *Service) endpointQRCode(ctx context.Context, g *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQRCode")
 	defer span.End()

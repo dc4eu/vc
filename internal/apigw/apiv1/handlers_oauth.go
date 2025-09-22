@@ -47,11 +47,11 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 	}
 
 	if err := c.db.VCAuthorizationContextColl.Save(ctx, &azt); err != nil {
-		c.log.Error(err, "save error")
+		c.log.Error(err, "authorizationContext not saved")
 		return nil, err
 	}
 
-	c.log.Debug("save success")
+	c.log.Debug("authorizationContext saved")
 
 	response := &openid4vci.ParResponse{
 		RequestURI: requestURI,

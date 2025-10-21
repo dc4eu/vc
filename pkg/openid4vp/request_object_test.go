@@ -10,29 +10,27 @@ import (
 
 func TestAuthorizationRequest(t *testing.T) {
 	tts := []struct {
-		name     string
-		wantPath string
-		have     *AuthorizationRequest_v2
+		name       string
+		goldenPath string
 	}{
 		{
-			name:     "Valid Request",
-			wantPath: "authorization_request_jwt_body.golden",
-			have:     &AuthorizationRequest_v2{},
+			name:       "Valid Request",
+			goldenPath: "request_object_from_spec.json",
 		},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			want := golden.Get(t, tt.wantPath)
+			want := golden.Get(t, tt.goldenPath)
 
-			err := json.Unmarshal(want, tt.have)
+			mura := &RequestObject{}
+			err := json.Unmarshal(want, &mura)
 			assert.NoError(t, err, "Unmarshal should not return an error")
 
-			got, err := tt.have.MarshalJson()
+			got, err := json.Marshal(mura)
 			assert.NoError(t, err, "Marshal should not return an error")
 
 			assert.JSONEq(t, string(want), string(got), "JSON output should match golden file")
-
 		})
 	}
 }

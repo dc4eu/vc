@@ -4,27 +4,22 @@ import (
 	"context"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/verifier/apiv1"
-	"vc/pkg/openid4vp"
+	"vc/pkg/model"
+	"vc/pkg/oauth2"
 )
 
 type Apiv1 interface {
-
-	// openid4vp
-	GenerateQRCode(ctx context.Context, request *openid4vp.QRRequest) (*openid4vp.QRReply, error)
-	GetAuthorizationRequest(ctx context.Context, sessionID string) (*openid4vp.AuthorizationRequest, error)
-	Callback(ctx context.Context, sessionID string, callbackID string, request *openid4vp.AuthorizationResponse) (*openid4vp.CallbackReply, error)
-
+	// oauth2
+	OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error)
 
 	// vp-datastore
 	PaginatedVerificationRecords(ctx context.Context, request *apiv1.PaginatedVerificationRecordsRequest) (*apiv1.PaginatedVerificationRecordsReply, error)
 
 	// openid4vp-web
-	GetVerificationResult(ctx context.Context, sessionID string) (*apiv1.VerificationResult, error)
-
-	// ui-web dev/test support
-	GetVPFlowDebugInfo(ctx context.Context, request *apiv1.VPFlowDebugInfoRequest) (*apiv1.VPFlowDebugInfoReply, error)
-	SaveRequestDataToVPSession(ctx context.Context, sessionID string, callbackID string, request *openid4vp.JsonRequestData) (*openid4vp.VPInteractionSession, error)
 
 	// misc
+	CredentialInfo(ctx context.Context) (map[string]*model.CredentialConstructor, error)
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
+
+	GetRequestObject(ctx context.Context, req *apiv1.GetRequestObjectRequest) (map[string]any, error)
 }

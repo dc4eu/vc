@@ -17,7 +17,6 @@ type Service struct {
 	log      *logger.Log
 	cfg      *model.Cfg
 	rootHash []byte
-	data     [][]byte
 	quitChan chan struct{}
 	ticker   *time.Ticker
 	db       *db.Service

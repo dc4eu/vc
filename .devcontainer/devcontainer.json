@@ -17,7 +17,8 @@
 				"zenor.makefile-creator",
 				"Plex.vscode-protolint",
 				"ms-azuretools.vscode-docker",
-				"zenghongtu.vscode-asciiflow2"
+				"zenghongtu.vscode-asciiflow2",
+				"Gruntfuggly.todo-tree"
 			]
 		}
 	},

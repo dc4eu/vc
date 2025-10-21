@@ -1,0 +1,23 @@
+{
+  "iss": "redirect_uri:https://client.example.org/cb",
+  "aud": "https://self-issued.me/v2",
+  "response_type": "vp_token",
+  "client_id": "redirect_uri:https://client.example.org/cb",
+  "redirect_uri": "https//client.example.org/cb",
+  "dcql_query": {
+    "credentials": [
+      {
+        "id": "some_identity_credential",
+        "format": "dc+sd-jwt",
+        "meta": {
+          "vct_values": [ "https://credentials.example.com/identity_credential" ]
+        },
+        "claims": [
+            {"path": ["last_name"]},
+            {"path": ["first_name"]}
+        ]
+      }
+    ]
+  },
+  "nonce": "n-0S6_WzA2Mj"
+}

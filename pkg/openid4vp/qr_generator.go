@@ -3,7 +3,6 @@ package openid4vp
 import (
 	"bytes"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"image/png"
 	"net/url"
@@ -11,23 +10,13 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
-func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QRReply, error) {
-	parsedURI, err := url.ParseRequestURI(qrURI)
-	if err != nil || parsedURI.Scheme == "" || parsedURI.Host == "" {
-		return nil, errors.New("invalid URL format")
-	}
-
+func GenerateQR(uri *url.URL, recoveryLevel qrcode.RecoveryLevel, size int) (*QRReply, error) {
 	if size == 0 {
 		size = 256
 	}
 
-	maxChars := getMaxChars(recoveryLevel)
-	if len(qrURI) > maxChars {
-		return nil, fmt.Errorf("URL is too long, max allowed: %d characters for this error correction level", maxChars)
-	}
-
 	var buf bytes.Buffer
-	qrCode, err := qrcode.New(qrURI, recoveryLevel)
+	qrCode, err := qrcode.New(uri.String(), recoveryLevel)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create QRReply-code: %w", err)
 	}
@@ -43,21 +32,6 @@ func GenerateQR(qrURI string, recoveryLevel qrcode.RecoveryLevel, size int) (*QR
 
 	return &QRReply{
 		Base64Image: buf.String(),
-		URI:         qrURI,
+		URI:         uri.String(),
 	}, nil
-}
-
-func getMaxChars(recoveryLevel qrcode.RecoveryLevel) int {
-	switch recoveryLevel {
-	case qrcode.Low:
-		return 2953
-	case qrcode.Medium:
-		return 2331
-	case qrcode.High:
-		return 1663
-	case qrcode.Highest:
-		return 1273
-	default:
-		return 1273
-	}
 }

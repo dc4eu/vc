@@ -38,18 +38,6 @@ func generateDocument(t *testing.T) map[string]any {
 	return docMap
 }
 
-var mockEHICJSON = `{
-	"personal_administrative_number": "123123123",
-	"issuing_authority": {
-		"id": "1231231",
-		"name": "SUNET"
-	},
-	"issuing_country": "SE",
-	"date_of_expiry": "2038-01-19",
-	"date_of_issuance": "2021-01-19",
-	"document_number": "123123123"
-}`
-
 func mockEHICMap(t *testing.T) map[string]any {
 	docMap := map[string]any{}
 

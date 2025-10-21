@@ -19,7 +19,7 @@ func (r *renderingHandler) Content(ctx context.Context, c *gin.Context, code int
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	ctx, span := r.client.tracer.Start(ctx, "httphelpers:Render:Content")
+	_, span := r.client.tracer.Start(ctx, "httphelpers:Render:Content")
 	defer span.End()
 
 	switch c.NegotiateFormat(gin.MIMEJSON, gin.MIMEPlain, gin.MIMEHTML, "*/*") {

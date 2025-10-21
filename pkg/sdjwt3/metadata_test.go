@@ -8,13 +8,14 @@ import (
 	"gotest.tools/v3/golden"
 )
 
+var (
+	mockPathDegreesPtr       = "degrees"
+	mockPathNamePtr          = "name"
+	mockPathAddressPtr       = "address"
+	mockPathStreetAddressPtr = "street_address"
+)
+
 func TestMetadata(t *testing.T) {
-	var (
-		degreesPrt    = "degrees"
-		namePrt       = "name"
-		addressPrt    = "address"
-		streetAddress = "street_address"
-	)
 	tts := []struct {
 		name string
 		have VCTM
@@ -84,7 +85,7 @@ func TestMetadata(t *testing.T) {
 				},
 				Claims: []Claim{
 					{
-						Path: []*string{&namePrt},
+						Path: []*string{&mockPathNamePtr},
 						Display: []ClaimDisplay{
 							{
 								Lang:        "de-DE",
@@ -100,7 +101,7 @@ func TestMetadata(t *testing.T) {
 						SD: "allowed",
 					},
 					{
-						Path: []*string{&addressPrt},
+						Path: []*string{&mockPathAddressPtr},
 						Display: []ClaimDisplay{
 							{
 								Lang:        "de-DE",
@@ -116,7 +117,7 @@ func TestMetadata(t *testing.T) {
 						SD: "always",
 					},
 					{
-						Path: []*string{&addressPrt, &streetAddress},
+						Path: []*string{&mockPathAddressPtr, &mockPathStreetAddressPtr},
 						Display: []ClaimDisplay{
 							{
 								Lang:  "de-DE",
@@ -131,7 +132,7 @@ func TestMetadata(t *testing.T) {
 						SVGID: "address_street_address",
 					},
 					{
-						Path: []*string{&degreesPrt, nil},
+						Path: []*string{&mockPathDegreesPtr, nil},
 						Display: []ClaimDisplay{
 							{
 								Lang:        "de-DE",
@@ -165,4 +166,74 @@ func TestMetadata(t *testing.T) {
 		})
 	}
 
+}
+
+func TestAttributes(t *testing.T) {
+	tts := []struct {
+		name string
+		have VCTM
+		want []*ClaimsV2
+	}{
+		{
+			name: "one attribute",
+			have: VCTM{
+				Claims: []Claim{
+					{
+						Path: []*string{&mockPathNamePtr},
+						SD:   "always",
+					},
+				},
+			},
+			want: []*ClaimsV2{
+				{
+					Path: "name",
+					SD:   "always",
+					Next: nil,
+				},
+			},
+		},
+		{
+			name: "two attribute in the same path and one single attribute",
+			have: VCTM{
+				Claims: []Claim{
+					{
+						Path: []*string{&mockPathAddressPtr, &mockPathStreetAddressPtr},
+						SD:   "never",
+					},
+					{
+						Path: []*string{&mockPathNamePtr},
+						SD:   "always",
+					},
+				},
+			},
+			want: []*ClaimsV2{
+				{
+					Path: "name",
+					SD:   "always",
+					Next: nil,
+				},
+				{
+					Path: "address",
+					SD:   "always",
+					Next: &ClaimsV2{
+						Path: "street_address",
+						SD:   "always",
+						Next: nil,
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.have.Attributes()
+			assert.Equal(t, tt.want, got)
+
+			b, err := json.Marshal(got)
+			assert.NoError(t, err)
+
+			t.Logf("Attributes: %v", string(b))
+		})
+	}
 }

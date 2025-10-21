@@ -20,7 +20,6 @@ type AuthorizationResponse struct {
 
 func (v *AuthorizationResponse) UnmarshalJSON(data []byte) error {
 	// no recursion
-	type Alias AuthorizationResponse
 	aux := struct {
 		IDToken                string                  `json:"id_token,omitempty"`
 		VPTokens               json.RawMessage         `json:"vp_token,omitempty"`
@@ -72,7 +71,7 @@ func (v *AuthorizationResponse) UnmarshalJSON(data []byte) error {
 		v.VPTokens = []VPTokenRaw{{JWT: singleStr}}
 		return nil
 	}
-	var singleObj map[string]interface{}
+	var singleObj map[string]any
 	if err := json.Unmarshal(aux.VPTokens, &singleObj); err == nil {
 		v.VPTokens = []VPTokenRaw{{JSON: singleObj}}
 		return nil

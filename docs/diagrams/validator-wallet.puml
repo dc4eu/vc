@@ -1,0 +1,7 @@
+@startuml
+
+autonumber
+validator -> wallet: GET /authorize?..
+wallet -> validator: POST /request/<uuid> 
+
+@enduml

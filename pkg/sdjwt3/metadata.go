@@ -19,6 +19,12 @@ type VCTM struct {
 	ExtendsIntegrity   string        `json:"extends#integrity"`
 }
 
+type ClaimsV2 struct {
+	Path string    `json:"path"`
+	SD   string    `json:"sd"`
+	Next *ClaimsV2 `json:"mura"`
+}
+
 func (v *VCTM) Encode() ([]string, error) {
 	json, err := json.Marshal(v)
 	if err != nil {
@@ -28,7 +34,28 @@ func (v *VCTM) Encode() ([]string, error) {
 	encoded := base64.URLEncoding.EncodeToString(json)
 
 	return []string{encoded}, nil
+}
 
+// Attributes parse vctm claims and return a map of labels and their paths for each language
+func (v *VCTM) Attributes() map[string]map[string][]string {
+	reply := map[string]map[string][]string{}
+
+	for _, c := range v.Claims {
+		for _, d := range c.Display {
+			if _, ok := reply[d.Lang]; !ok {
+				reply[d.Lang] = map[string][]string{}
+			}
+
+			//label := strings.Join(strings.Split(strings.ToLower(d.Label), " "), "_")
+			label := d.Label
+
+			for _, p := range c.Path {
+				reply[d.Lang][label] = append(reply[d.Lang][label], *p)
+			}
+		}
+	}
+
+	return reply
 }
 
 // VCTMDisplay is the display of the VCTM

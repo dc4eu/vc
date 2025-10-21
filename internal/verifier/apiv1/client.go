@@ -16,6 +16,7 @@ import (
 	"vc/internal/verifier/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/oauth2"
 	"vc/pkg/openid4vp"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -23,11 +24,14 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg              *model.Cfg
-	db               *db.Service
-	log              *logger.Log
-	verifierKeyPair  *openid4vp.KeyPair
-	verifierX509Cert *openid4vp.CertData
+	cfg                        *model.Cfg
+	db                         *db.Service
+	log                        *logger.Log
+	verifierKeyPair            *openid4vp.KeyPair
+	verifierX509Cert           *openid4vp.CertData
+	oauth2Metadata             *oauth2.AuthorizationServerMetadata
+	oauth2MetadataSigningKey   any
+	oauth2MetadataSigningChain []string
 
 	trustService *openid4vp.TrustService
 
@@ -41,6 +45,24 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		cfg: cfg,
 		db:  db,
 		log: log.New("apiv1"),
+	}
+
+	if c.cfg.Verifier.OAuthServer.Metadata.Path != "" {
+		var err error
+		c.oauth2Metadata, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain, err = c.cfg.Verifier.OAuthServer.LoadOAuth2Metadata(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Load all vct metadata files and populate its data in cfg
+	for vct, credentialInfo := range cfg.CredentialConstructor {
+		if err := credentialInfo.LoadFile(ctx); err != nil {
+			c.log.Error(err, "Failed to load credential constructor", "type", vct)
+			return nil, err
+		}
+
+		credentialInfo.Attributes = credentialInfo.VCTM.Attributes()
 	}
 
 	c.trustService = &openid4vp.TrustService{}

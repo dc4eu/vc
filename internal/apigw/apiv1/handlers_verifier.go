@@ -139,20 +139,20 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", err
 	}
 
-	authorizationRequest := openid4vp.AuthorizationRequest_v2{
-		ResponseURI:            "https://vc-interop-3.sunet.se/verification/direct_post",
-		AUD:                    "https://self-issued.me/v2",
-		ISS:                    authorizationContext.ClientID,
-		ClientIDScheme:         "x509_san_dns",
-		ClientID:               authorizationContext.ClientID,
-		ResponseType:           "vp_token",
-		ResponseMode:           "direct_post.jwt",
-		State:                  authorizationContext.State,
-		Nonce:                  authorizationContext.Nonce,
-		PresentationDefinition: &pd,
+	authorizationRequest := openid4vp.RequestObject{
+		ResponseURI: "https://vc-interop-3.sunet.se/verification/direct_post",
+		AUD:         "https://self-issued.me/v2",
+		ISS:         authorizationContext.ClientID,
+		//ClientIDScheme:         "x509_san_dns",
+		ClientID:     authorizationContext.ClientID,
+		ResponseType: "vp_token",
+		ResponseMode: "direct_post.jwt",
+		State:        authorizationContext.State,
+		Nonce:        authorizationContext.Nonce,
+		//PresentationDefinition: &pd,
 		ClientMetadata: &openid4vp.ClientMetadata{
 			VPFormats: vf,
-			JWKS: openid4vp.Keys{
+			JWKS: &openid4vp.Keys{
 				Keys: []jwk.Key{ephemeralPublicJWK},
 			},
 			AuthorizationEncryptedResponseALG: "ECDH-ES",

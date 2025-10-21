@@ -8,7 +8,6 @@ import (
 	"vc/internal/gen/status/apiv1_status"
 	apiv1_mockas "vc/internal/mockas/apiv1"
 	"vc/internal/ui/apiv1"
-	apiv1_verifier "vc/internal/verifier/apiv1"
 	"vc/pkg/model"
 	"vc/pkg/vcclient"
 
@@ -187,19 +186,6 @@ func (s *Service) endpointMockNext(ctx context.Context, c *gin.Context) (any, er
 	}
 
 	reply, err := s.apiv1.MockNext(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
-func (s *Service) endpointGetVPFlowDebugInfo(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1_verifier.VPFlowDebugInfoRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		return nil, err
-	}
-
-	reply, err := s.apiv1.GetVPFlowDebugInfo(ctx, request)
 	if err != nil {
 		return nil, err
 	}

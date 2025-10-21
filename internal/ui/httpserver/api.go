@@ -6,7 +6,6 @@ import (
 	"vc/internal/gen/status/apiv1_status"
 	apiv1_mockas "vc/internal/mockas/apiv1"
 	"vc/internal/ui/apiv1"
-	apiv1_verifier "vc/internal/verifier/apiv1"
 	"vc/pkg/model"
 	"vc/pkg/vcclient"
 )
@@ -35,5 +34,4 @@ type Apiv1 interface {
 
 	// verifier
 	HealthVerifier(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)
-	GetVPFlowDebugInfo(ctx context.Context, request *apiv1_verifier.VPFlowDebugInfoRequest) (any, error)
 }

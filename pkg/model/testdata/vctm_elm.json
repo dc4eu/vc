@@ -1,0 +1,76 @@
+{
+  "vct": "urn:eudi:elm:1",
+  "name": "ELM Credential",
+  "description": "European Learning Model (ELM) Credential.",
+  "$comment": "",
+  "display": [
+    {
+      "lang": "en-US",
+      "name": "ELM Credential",
+      "description": "Portable European Learning Model (ELM) Credential.",
+      "rendering": {
+        "simple": {
+          "logo": {
+            "uri": "https://raw.githubusercontent.com/dc4eu/vc/0e825e08b94818845bbe91dcc7b1a1f319ba3585/images/emrex.png"
+          }
+        }
+      }
+    }
+  ],
+  "claims": [
+        {
+      "path": [
+         "elm",
+         "credentialSubject",
+         "givenName",
+         "und"
+      ],
+      "sd": "always",
+      "svg_id": "given_name",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Given name",
+          "description": "Given name of the individual who holds the ELM credential."
+        }
+      ]
+    },
+        {
+      "path": [
+         "elm",
+         "credentialSubject",
+         "familyName",
+         "und"
+      ],
+      "sd": "always",
+      "svg_id": "family_name",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Family name",
+          "description": "Family name of the individual who holds the ELM credential."
+        }
+      ]
+    },
+            {
+      "path": [
+         "elm",
+         "credentialSubject",
+         "hasClaim[0]",
+         "awardedBy",
+         "awardingBody",
+         "legalName",
+         "en"
+      ],
+      "sd": "always",
+      "svg_id": "awarding_body",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Awarding body",
+          "description": "The legal name of the awarding body that issued the ELM credential."
+        }
+      ]
+    }
+  ]
+}

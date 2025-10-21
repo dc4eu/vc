@@ -1,7 +1,6 @@
 package apiv1
 
 import (
-	"bytes"
 	"context"
 	"testing"
 	"vc/pkg/logger"
@@ -10,8 +9,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 )
-
-var nonRandom = bytes.NewReader([]byte("01234567890123456789012345678901234567890123456789ABCDEF"))
 
 // Sometimes this test does not behave deterministically
 func TestCreateJWK(t *testing.T) {

@@ -186,7 +186,7 @@ func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, 
 
 	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	conn, err := grpc.Dial(c.cfg.Registry.GRPCServer.Addr, optInsecure)
+	conn, err := grpc.NewClient(c.cfg.Registry.GRPCServer.Addr, optInsecure)
 	if err != nil {
 		return nil, err
 	}

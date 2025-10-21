@@ -73,13 +73,6 @@ func TestValidationIdentity(t *testing.T) {
 	}
 }
 
-var identity = &model.Identity{
-	Schema: &model.IdentitySchema{
-		Name: "SE",
-	},
-	BirthDate: "1970-01-01",
-}
-
 func TestStruct(t *testing.T) {
 	type Name struct {
 		First string `validate:"required"`

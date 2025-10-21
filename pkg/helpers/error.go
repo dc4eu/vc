@@ -128,11 +128,6 @@ func formatValidationErrors(err validator.ValidationErrors) []map[string]any {
 	return v
 }
 
-func formatValidationErrorsDocumentDataV2(err *jsonschema.EvaluationResult) []map[string]any {
-
-	return nil
-}
-
 func formatValidationErrorsDocumentData(err *jsonschema.EvaluationResult) []map[string]any {
 	reply := []map[string]any{}
 	for _, e := range err.Details {

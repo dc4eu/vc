@@ -150,9 +150,10 @@ type MockAS struct {
 
 // Verifier holds the verifier configuration
 type Verifier struct {
-	APIServer         APIServer  `yaml:"api_server" validate:"required"`
-	GRPCServer        GRPCServer `yaml:"grpc_server" validate:"required"`
-	ExternalServerURL string     `yaml:"external_server_url" validate:"required"`
+	APIServer         APIServer   `yaml:"api_server" validate:"required"`
+	GRPCServer        GRPCServer  `yaml:"grpc_server" validate:"required"`
+	ExternalServerURL string      `yaml:"external_server_url" validate:"required"`
+	OAuthServer       OAuthServer `yaml:"oauth_server" validate:"omitempty"`
 }
 
 // Datastore holds the datastore configuration
@@ -167,7 +168,7 @@ type BasicAuth struct {
 	Enabled bool              `yaml:"enabled"`
 }
 
-type Metadata struct {
+type IssuerMetadata struct {
 	Path             string `yaml:"path" validate:"required"`
 	SigningKeyPath   string `yaml:"signing_key_path" validate:"required"`
 	SigningChainPath string `yaml:"signing_chain_path" validate:"required"`
@@ -187,8 +188,8 @@ type CredentialOffers struct {
 type APIGW struct {
 	APIServer        APIServer        `yaml:"api_server" validate:"required"`
 	CredentialOffers CredentialOffers `yaml:"credential_offers" validate:"omitempty"`
-	OauthServer      OAuth2Server     `yaml:"oauth_server" validate:"omitempty"`
-	IssuerMetadata   Metadata         `yaml:"issuer_metadata" validate:"omitempty"`
+	OauthServer      OAuthServer      `yaml:"oauth_server" validate:"omitempty"`
+	IssuerMetadata   IssuerMetadata   `yaml:"issuer_metadata" validate:"omitempty"`
 }
 
 // OTEL holds the opentelemetry configuration
@@ -198,11 +199,17 @@ type OTEL struct {
 	Timeout int64  `yaml:"timeout" default:"10"`
 }
 
-// OAuth2Server holds the oauth server configuration
-type OAuth2Server struct {
+// OAuthServer holds the oauth server configuration
+type OAuthServer struct {
 	TokenEndpoint string         `yaml:"token_endpoint" validate:"required"`
 	Clients       oauth2.Clients `yaml:"clients" validate:"required"`
-	Metadata      Metadata       `yaml:"metadata" validate:"required"`
+	Metadata      OAuthMetadata  `yaml:"metadata" validate:"required"`
+}
+
+type OAuthMetadata struct {
+	Path             string `yaml:"path" validate:"required"`
+	SigningKeyPath   string `yaml:"signing_key_path" validate:"required"`
+	SigningChainPath string `yaml:"signing_chain_path" validate:"required"`
 }
 
 // UI holds the user-interface configuration
@@ -285,10 +292,11 @@ func (c *Cfg) GetCredentialConstructorAuthMethod(credentialType string) string {
 }
 
 type CredentialConstructor struct {
-	VCT          string       `yaml:"vct" validate:"required"`
-	VCTMFilePath string       `yaml:"vctm_file_path" validate:"required"`
-	VCTM         *sdjwt3.VCTM `yaml:"-"`
-	AuthMethod   string       `yaml:"auth_method" validate:"required,oneof=basic pid_auth"`
+	VCT          string                         `yaml:"vct" json:"vct" validate:"required"`
+	VCTMFilePath string                         `yaml:"vctm_file_path" json:"vctm_file_path" validate:"required"`
+	VCTM         *sdjwt3.VCTM                   `yaml:"-" json:"-"`
+	AuthMethod   string                         `yaml:"auth_method" json:"auth_method" validate:"required,oneof=basic pid_auth"`
+	Attributes   map[string]map[string][]string `yaml:"attributes" json:"attributes_v2" validate:"omitempty,dive,required"`
 }
 
 func (c *CredentialConstructor) LoadFile(ctx context.Context) error {
@@ -306,6 +314,8 @@ func (c *CredentialConstructor) LoadFile(ctx context.Context) error {
 		return err
 	}
 
+	c.VCT = c.VCTM.VCT
+
 	return nil
 }
 
@@ -318,16 +328,16 @@ func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
 	return enabled
 }
 
-// IssuerMetadata loads the issuing metadata from
-func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, any, *x509.Certificate, []string, error) {
-	fileByte, err := os.ReadFile(cfg.APIGW.IssuerMetadata.Path)
+// LoadAndSign loads and signs metadata the issuing metadata from
+func (cfg *IssuerMetadata) LoadAndSign(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, any, *x509.Certificate, []string, error) {
+	fileByte, err := os.ReadFile(cfg.Path)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
 
 	metadata := &openid4vci.CredentialIssuerMetadataParameters{}
 
-	switch filepath.Ext(cfg.APIGW.IssuerMetadata.Path) {
+	switch filepath.Ext(cfg.Path) {
 	case ".json":
 		if err := json.Unmarshal(fileByte, &metadata); err != nil {
 			return nil, nil, nil, nil, err
@@ -345,12 +355,12 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 	// ensure that the metadata is empty, should be procured/signed by the request or other automated process
 	metadata.SignedMetadata = ""
 
-	privateKey, err := pki.ParseKeyFromFile(cfg.APIGW.IssuerMetadata.SigningKeyPath)
+	privateKey, err := pki.ParseKeyFromFile(cfg.SigningKeyPath)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
 
-	cert, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
+	cert, chain, err := pki.ParseX509CertificateFromFile(cfg.SigningChainPath)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -364,15 +374,15 @@ func (cfg *Cfg) LoadIssuerMetadata(ctx context.Context) (*openid4vci.CredentialI
 }
 
 // LoadOAuth2Metadata loads OAuth2 metadata from file
-func (cfg *Cfg) LoadOAuth2Metadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, any, []string, error) {
-	fileByte, err := os.ReadFile(cfg.APIGW.OauthServer.Metadata.Path)
+func (cfg *OAuthServer) LoadOAuth2Metadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, any, []string, error) {
+	fileByte, err := os.ReadFile(cfg.Metadata.Path)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
 	metadata := &oauth2.AuthorizationServerMetadata{}
 
-	switch filepath.Ext(cfg.APIGW.IssuerMetadata.Path) {
+	switch filepath.Ext(cfg.Metadata.Path) {
 	case ".json":
 		if err := json.Unmarshal(fileByte, &metadata); err != nil {
 			return nil, nil, nil, err
@@ -391,12 +401,12 @@ func (cfg *Cfg) LoadOAuth2Metadata(ctx context.Context) (*oauth2.AuthorizationSe
 	// ensure that the metadata is empty, should be procured/signed by the request or other automated process
 	metadata.SignedMetadata = ""
 
-	privateKey, err := pki.ParseKeyFromFile(cfg.APIGW.IssuerMetadata.SigningKeyPath)
+	privateKey, err := pki.ParseKeyFromFile(cfg.Metadata.SigningKeyPath)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	_, chain, err := pki.ParseX509CertificateFromFile(cfg.APIGW.IssuerMetadata.SigningChainPath)
+	_, chain, err := pki.ParseX509CertificateFromFile(cfg.Metadata.SigningChainPath)
 	if err != nil {
 		return nil, nil, nil, err
 	}

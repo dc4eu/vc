@@ -91,7 +91,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	rgVerifier := rgRoot.Group("verifier")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodGet, "health", http.StatusOK, s.endpointHealthVerifier)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgVerifier, http.MethodPost, "debug/vp-flow", http.StatusOK, s.endpointGetVPFlowDebugInfo)
 
 	rgMockAS := rgRoot.Group("mockas")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgMockAS, http.MethodGet, "health", http.StatusOK, s.endpointHealthMockAS)

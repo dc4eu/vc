@@ -110,11 +110,14 @@ func (m *middlewareHandler) BasicAuth(ctx context.Context, users map[string]stri
 
 	return func(c *gin.Context) {
 		user, pass, ok := c.Request.BasicAuth()
-		password, ok := users[user]
-		if !ok || pass != password {
-			c.AbortWithStatus(401)
-			return
+		if ok {
+			password, ok := users[user]
+			if !ok || pass != password {
+				c.AbortWithStatus(401)
+				return
+			}
 		}
+
 		c.Next()
 		m.log.Info("basic_auth", "user", user, "req_id", c.GetString("req_id"))
 	}

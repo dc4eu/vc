@@ -20,6 +20,10 @@ staticcheck:
 	$(info Run staticcheck)
 	staticcheck ./...
 
+vulncheck:
+	$(info Run vulncheck)
+	govulncheck -show verbose ./...
+
 start:
 	$(info Run!)
 	docker compose -f docker-compose.yaml up -d --remove-orphans
@@ -81,8 +85,6 @@ build-wallet:
 
 docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
 
-docker-build-debug: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui-debug
-
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
 	docker build --tag $(DOCKER_TAG_GOBUILD) --file dockerfiles/gobuild .
@@ -90,18 +92,6 @@ docker-build-gobuild:
 docker-build-verifier:
 	$(info Docker Building verifier with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker .
-
-docker-build-verifier-debug:
-	$(info Docker Building verifier with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier --tag $(DOCKER_TAG_VERIFIER) --file dockerfiles/web_worker_debug .
-
-docker-build-and-restart-verifier:
-	$(info docker-build-verifier)
-	$(MAKE) docker-build-verifier
-	$(info stop-verifier)
-	docker compose -f docker-compose.yaml rm -s -f verifier
-	$(info start-verifier)
-	docker compose -f docker-compose.yaml up -d --remove-orphans verifier
 
 docker-build-registry:
 	$(info Docker Building registry with tag: $(VERSION))
@@ -111,49 +101,21 @@ docker-build-persistent:
 	$(info Docker Building persistent with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=persistent --tag $(DOCKER_TAG_PERSISTENT) --file dockerfiles/worker .
 
-docker-build-persistent-debug:
-	$(info Docker Building persistent with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=persistent --tag $(DOCKER_TAG_PERSISTENT) --file dockerfiles/worker_debug .
-
 docker-build-mockas:
 	$(info Docker Building mockas with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=mockas --tag $(DOCKER_TAG_MOCKAS) --file dockerfiles/worker .
-
-docker-build-mockas-debug:
-	$(info Docker Building mockas with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=mockas --tag $(DOCKER_TAG_MOCKAS) --file dockerfiles/worker_debug .
 
 docker-build-apigw:
 	$(info Docker building apigw with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker .
 
-docker-build-apigw-debug:
-	$(info Docker building apigw with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=apigw --build-arg VERSION=$(VERSION) --tag $(DOCKER_TAG_APIGW) --file dockerfiles/worker_debug .
-
 docker-build-issuer:
 	$(info Docker building issuer with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker .
 
-docker-build-issuer-debug:
-	$(info Docker building issuer with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=issuer --tag $(DOCKER_TAG_ISSUER) --file dockerfiles/worker_debug .
-
 docker-build-ui:
 	$(info Docker building ui with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/web_worker .
-
-docker-build-ui-debug:
-	$(info Docker building ui with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=ui --tag $(DOCKER_TAG_UI) --file dockerfiles/web_worker_debug .
-
-docker-build-and-restart-ui:
-	$(info docker-build-ui)
-	$(MAKE) docker-build-ui
-	$(info stop-ui)
-	docker compose -f docker-compose.yaml rm -s -f ui
-	$(info start-ui)
-	docker compose -f docker-compose.yaml up -d --remove-orphans ui
 
 docker-build-wallet:
 	$(info Docker building wallet with tag: $(VERSION))
@@ -334,4 +296,5 @@ vscode:
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
 	go install golang.org/x/tools/cmd/deadcode@latest && \
 	go install github.com/securego/gosec/v2/cmd/gosec@latest && \
+	go install golang.org/x/vuln/cmd/govulncheck@latest && \
 	go install honnef.co/go/tools/cmd/staticcheck@latest

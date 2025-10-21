@@ -2,8 +2,9 @@ package openid4vp
 
 import (
 	"crypto"
-	"github.com/golang-jwt/jwt/v5"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
@@ -29,6 +30,7 @@ type PresentationRequestType struct {
 }
 
 // QRReply is a collection of fields representing a QRReply code
+// TODO(masv): not sure if the type should include uri,request_uri,client_id,session_id
 type QRReply struct {
 	Base64Image string `json:"base64_image" bson:"base64_image" validate:"required"`
 	URI         string `json:"uri" bson:"uri" validate:"required"`
@@ -118,10 +120,6 @@ type JsonRequestData struct {
 }
 
 type InteractionStatus string
-
-type AuthorizationRequest struct {
-	RequestObjectJWS string `json:"request_object"`
-}
 
 type CallbackReply struct {
 }

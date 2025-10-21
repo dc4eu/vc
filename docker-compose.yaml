@@ -65,6 +65,7 @@ services:
     restart: always
     volumes:
       - ./config.yaml:/config.yaml:ro
+      - ./metadata/:/metadata/:ro
       - ./developer_tools/private_verifier_ec256.pem:/private_verifier_ec256.pem:ro
       - ./developer_tools/public_verifier_ec256.pem:/public_verifier_ec256.pem:ro
       - ./developer_tools/private_verifier_rsa.pem:/private_verifier_rsa.pem:ro
@@ -148,21 +149,6 @@ services:
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.20
-
-  portal:
-    image: docker.sunet.se/dc4eu/portal:latest
-    container_name: "vc_dev_portal"
-    restart: always
-    volumes:
-      - ./config.yaml:/config.yaml:ro
-      - ./issuing_metadata.json:/issuing_metadata.json:ro
-    depends_on:
-      - apigw
-    networks:
-      vc-dev-net:
-        ipv4_address: 172.16.50.24
-    environment:
-      - "VC_CONFIG_YAML=config.yaml"
 
   jaeger:
     image: jaegertracing/all-in-one:latest

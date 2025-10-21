@@ -20,6 +20,8 @@ var nonRandom = bytes.NewReader([]byte("0123456789012345678901234567890123456789
 
 // mockGenerateECDSAKey generates a mock ECDSA key and a self-signed base65 encoded certificate
 func mockGenerateECDSAKey(t *testing.T) (crypto.PrivateKey, string) {
+	t.Helper()
+
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), nonRandom)
 	assert.NoError(t, err)
 

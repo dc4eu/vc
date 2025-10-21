@@ -39,7 +39,6 @@ func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialO
 			Name:        vctm.Name,
 			Description: vctm.Description,
 		}
-
 	}
 
 	wallets := make(map[string]string)
@@ -101,9 +100,9 @@ func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferReques
 		return nil, err
 	}
 
-	url := baseURL.String() + "?" + credentialOffer.String()
+	credentialOfferURL := baseURL.JoinPath("?", credentialOffer.String())
 
-	qr, err := openid4vp.GenerateQR(url, qrcode.Medium, 256)
+	qr, err := openid4vp.GenerateQR(credentialOfferURL, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}

@@ -80,23 +80,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
-	//openid4vp
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "qr-code", http.StatusOK, s.endpointQRCode)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "authorize", http.StatusOK, s.endpointGetAuthorizationRequest)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "callback/direct-post-jwt/:session_id/:callback_id", http.StatusOK, s.endpointCallback)
+	// oauth2
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuthMetadata)
 
-	//openid4vp-web
-	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "verificationresult", http.StatusOK, s.endpointGetVerificationResult)
-	//s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "quitvpflow", http.StatusOK, s.endpointQuitVPFlow)
+	// credential attributes convey information about attributes, vct and other attributes in vctm, used by the web frontend
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/credential/attributes", http.StatusOK, s.endpointCredentialInfo)
 
-	//vp-datastore
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "vp-datastore/verification-records", http.StatusOK, s.endpointPaginatedVerificationRecords)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/request-object/:id", http.StatusOK, s.endpointGetRequestObject)
 
-	// for dev purpose only
-	//TODO: OBS! nedan endpoint behöver säkerhet innan mer känsliga nycklar och/eller data börjar användas (tillåts dock ej alldig om vc satt till production)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "debug/vp-flow", http.StatusOK, s.endpointGetVPFlowDebugInfo)
-
-	//TODO: swagger är inte aktiverat i web_worker för docker - hantera att verifier lär behöva swagger samtidigt som den stödjer web (OBS! ui samt portal har ingen swagger alls)
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

@@ -7,7 +7,6 @@ import (
 	apiv1_apigw "vc/internal/apigw/apiv1"
 	"vc/internal/gen/status/apiv1_status"
 	apiv1_mockas "vc/internal/mockas/apiv1"
-	apiv1_verifier "vc/internal/verifier/apiv1"
 	"vc/pkg/model"
 	"vc/pkg/vcclient"
 )
@@ -178,14 +177,6 @@ func (c *Client) HealthMockAS(ctx context.Context, req *apiv1_status.StatusReque
 
 type VPFlowDebugInfoRequest struct {
 	SessionID string `json:"session_id" binding:"required,uuid"`
-}
-
-func (c *Client) GetVPFlowDebugInfo(ctx context.Context, req *apiv1_verifier.VPFlowDebugInfoRequest) (any, error) {
-	reply, err := c.verifierClient.GetVPFlowDebugInfo(req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
 }
 
 func (c *Client) SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error) {

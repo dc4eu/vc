@@ -63,14 +63,14 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 
 	var err error
 	if c.cfg.APIGW.IssuerMetadata.Path != "" {
-		c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningCert, c.issuerMetadataSigningChain, err = c.cfg.LoadIssuerMetadata(ctx)
+		c.issuerMetadata, c.issuerMetadataSigningKey, c.issuerMetadataSigningCert, c.issuerMetadataSigningChain, err = c.cfg.APIGW.IssuerMetadata.LoadAndSign(ctx)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if c.cfg.APIGW.OauthServer.Metadata.Path != "" {
-		c.oauth2Metadata, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain, err = c.cfg.LoadOAuth2Metadata(ctx)
+		c.oauth2Metadata, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain, err = c.cfg.APIGW.OauthServer.LoadOAuth2Metadata(ctx)
 		if err != nil {
 			return nil, err
 		}

@@ -53,25 +53,28 @@
             </template>
             <template x-if="!loading && credentialAttributesMap && selectedCredentialAttributes">
                 <div class="box container">
-                    <form>
+                    <form class="block">
                         <div class="field">
                             <p class="title is-size-6">Fields</p>
                             <div class="buttons">
                                 <button class="button is-small is-info is-light" @click.prevent="handleAttributesToggle('all')">Select all</button>
                                 <button class="button is-small is-info is-light" @click.prevent="handleAttributesToggle('none')">Select none</button>
                             </div>
-                            <ul x-ref="fieldsList">
-                                <template x-for="[label, path] of Object.entries(selectedCredentialAttributes.attributes_v2['en-US'])">
-                                    <li>
-                                        <label class="checkbox">
-                                            <input type="checkbox" name="path.join('.')" />
-                                            <span x-text="label"></span>
-                                        </label>
-                                    </li>
-                                </template>
-                            </ul>
+                            <div class="vc-attributes-list">
+                                <ul x-ref="fieldsList">
+                                    <template x-for="[label, path] of Object.entries(selectedCredentialAttributes)">
+                                        <li>
+                                            <label class="checkbox">
+                                                <input type="checkbox" :name="path" />
+                                                <span x-text="label"></span>
+                                            </label>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
                         </div>
                     </form>
+                    <button class="button is-small is-danger is-outlined" @click.prevent="handleCancel">Cancel</button>
                 </div>
             </template>
         </div>

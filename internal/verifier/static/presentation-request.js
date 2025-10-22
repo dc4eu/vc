@@ -41,7 +41,7 @@ Alpine.data("app", () => ({
     /** @type {CredentialAttributesMap | null} */
     credentialAttributesMap: null,
 
-     /** @type {CredentialAttributes | null} */
+     /** @type {Record<string, string> | null} */
     selectedCredentialAttributes: null,
 
     /** @type {string | null} */
@@ -90,7 +90,11 @@ Alpine.data("app", () => ({
             return;
         }
 
-        this.selectedCredentialAttributes = this.credentialAttributesMap[credential];
+        this.selectedCredentialAttributes = {}
+        for (const [label, path] of Object.entries(this.credentialAttributesMap[credential].attributes_v2['en-US'])) {
+            this.selectedCredentialAttributes[label] = path.join(".");
+        }
+
 
         this.loading = false;
     },
@@ -112,8 +116,8 @@ Alpine.data("app", () => ({
         }
     },
 
-    selectNoneAttributes() {
-
+    handleCancel() {
+        this.selectedCredentialAttributes = null;
     },
 
     /**

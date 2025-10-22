@@ -22,3 +22,20 @@
         transform: rotate(360deg);
     }
 } 
+
+.vc-attributes-list {
+    border-radius: var(--bulma-box-radius);
+    background-color: var(--bulma-pre-background);
+    
+
+    > ul {
+        padding: var(--bulma-box-padding);
+        max-height: 300px;
+        overflow: scroll;
+        mask-image: linear-gradient(
+            to bottom, 
+            black calc(100% - 16px), 
+            transparent 100%
+        );
+    }
+}

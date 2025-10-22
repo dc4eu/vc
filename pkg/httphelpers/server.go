@@ -57,6 +57,25 @@ func (s *serverHandler) RegEndpoint(ctx context.Context, rg *gin.RouterGroup, me
 	})
 }
 
+// RegStreamEndpoint registers an endpoint with the gin router
+func (s *serverHandler) RegStreamEndpoint(ctx context.Context, rg *gin.RouterGroup, method, path string, defaultStatus int, ch chan string, handler func(context.Context, *gin.Context, chan string) (any, error)) {
+	rg.Handle(method, path, func(c *gin.Context) {
+		k := fmt.Sprintf("api_endpoint %s:%s%s", method, rg.BasePath(), path)
+		ctx, span := s.client.tracer.Start(ctx, k)
+		defer span.End()
+
+		res, err := handler(ctx, c, ch)
+		if err != nil {
+			s.log.Debug("RegStreamEndpoint", "err", err)
+			statusCode := StatusCode(ctx, err)
+			s.client.Rendering.Content(ctx, c, statusCode, gin.H{"error": helpers.NewErrorFromError(err)})
+			return
+		}
+
+		s.client.Rendering.Content(ctx, c, defaultStatus, res)
+	})
+}
+
 // SetGinProductionMode sets the gin mode to production or debug
 func (s *serverHandler) SetGinProductionMode() {
 	switch s.client.cfg.Common.Production {

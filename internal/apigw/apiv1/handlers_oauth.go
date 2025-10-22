@@ -29,7 +29,6 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 	c.log.Debug("PAR", "state", req.State)
 
 	azt := model.AuthorizationContext{
-		//VerifierContextID:        oauth2.GenerateCryptographicNonceWithLength(32),
 		SessionID:                uuid.NewString(),
 		Code:                     uuid.NewString(),
 		RequestURI:               requestURI,

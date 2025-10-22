@@ -23,12 +23,12 @@ func (s *Service) endpointCredentialInfo(ctx context.Context, c *gin.Context) (a
 }
 
 func (s *Service) endpointGetRequestObject(ctx context.Context, c *gin.Context) (any, error) {
-	s.log.Debug("endpointGetRequestObject")
-
 	request := &apiv1.GetRequestObjectRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}
+
+	s.log.Debug("endpointGetRequestObject", "id", request.ID)
 
 	reply, err := s.apiv1.GetRequestObject(ctx, request)
 	if err != nil {

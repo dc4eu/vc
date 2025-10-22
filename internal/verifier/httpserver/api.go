@@ -22,4 +22,7 @@ type Apiv1 interface {
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 
 	GetRequestObject(ctx context.Context, req *apiv1.GetRequestObjectRequest) (map[string]any, error)
+
+	// UI
+	UIPresentationDefinition(ctx context.Context, req *apiv1.UIPresentationDefinitionRequest) (map[string]any, error)
 }

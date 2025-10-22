@@ -2,12 +2,14 @@ package httpserver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 	"vc/internal/verifier/apiv1"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/oauth2"
 	"vc/pkg/trace"
 
 	"github.com/gin-contrib/sessions"
@@ -20,13 +22,17 @@ import (
 
 // Service is the service object for httpserver
 type Service struct {
-	cfg         *model.Cfg
-	log         *logger.Log
-	server      *http.Server
-	apiv1       Apiv1
-	gin         *gin.Engine
-	tracer      *trace.Tracer
-	httpHelpers *httphelpers.Client
+	cfg             *model.Cfg
+	log             *logger.Log
+	server          *http.Server
+	apiv1           Apiv1
+	gin             *gin.Engine
+	tracer          *trace.Tracer
+	httpHelpers     *httphelpers.Client
+	sessionsOptions sessions.Options
+	sessionsEncKey  string
+	sessionsAuthKey string
+	sessionsName    string
 }
 
 // New creates a new httpserver service
@@ -40,6 +46,22 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		server: &http.Server{
 			ReadHeaderTimeout: 3 * time.Second,
 		},
+		sessionsName:    "oauth_user_session",
+		sessionsAuthKey: oauth2.GenerateCryptographicNonceFixedLength(32),
+		sessionsEncKey:  oauth2.GenerateCryptographicNonceFixedLength(32),
+		sessionsOptions: sessions.Options{
+			Path:     "/",
+			Domain:   "",
+			MaxAge:   900,
+			Secure:   false,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+		},
+	}
+
+	if s.cfg.Verifier.APIServer.TLS.Enabled {
+		s.sessionsOptions.Secure = true
+		s.sessionsOptions.SameSite = http.SameSiteStrictMode
 	}
 
 	var err error
@@ -86,7 +108,24 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	// credential attributes convey information about attributes, vct and other attributes in vctm, used by the web frontend
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/credential/attributes", http.StatusOK, s.endpointCredentialInfo)
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/request-object/:id", http.StatusOK, s.endpointGetRequestObject)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/request-object", http.StatusOK, s.endpointGetRequestObject)
+
+	rgUI, err := rgRoot.Group("/ui"), error(nil)
+	if err != nil {
+		return nil, err
+	}
+	rgUI.Use(s.httpHelpers.Middleware.UserSession(s.sessionsName, s.sessionsAuthKey, s.sessionsEncKey, s.sessionsOptions))
+	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodPost, "/presentation-definition", http.StatusOK, s.endpointUIPresentationDefinition)
+
+	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/notify", http.StatusOK, s.endpointUINotify)
+
+	go func() {
+		for i := 0; i < 3; i++ {
+			msg := gin.H{"message": fmt.Sprintf("hello %d", i)}
+			uiNotify("123").Submit(msg)
+			time.Sleep(1 * time.Second)
+		}
+	}()
 
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

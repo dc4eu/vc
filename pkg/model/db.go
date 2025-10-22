@@ -2,7 +2,7 @@ package model
 
 // AuthorizationContext is the model for the authorization token in the database
 type AuthorizationContext struct {
-	SessionID string `json:"session_id" bson:"session_id" validate:"required"`
+	SessionID                string    `json:"session_id" bson:"session_id" validate:"required"`
 	Scope                    string    `json:"scope" bson:"scope" validate:"required"`
 	Code                     string    `json:"code" bson:"code"`
 	RequestURI               string    `json:"request_uri" bson:"request_uri" validate:"required"`
@@ -43,4 +43,8 @@ type CodeChallenge struct {
 	CodeChallenge       string `json:"code_challenge" bson:"code_challenge" validate:"required"`
 	CodeChallengeMethod string `json:"code_challenge_method" bson:"code_challenge_method" validate:"required,oneof=S256 plain"`
 	LastUsed            int64  `json:"last_used" bson:"last_used"`
+}
+
+type ValidationContext struct {
+	SessionID string `json:"session_id" bson:"session_id" validate:"required"`
 }

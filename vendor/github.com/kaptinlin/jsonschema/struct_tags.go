@@ -3,6 +3,7 @@ package jsonschema
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -50,6 +51,18 @@ func (e *StructTagError) Unwrap() error {
 // Note: Since schemagen is in cmd/schemagen and we're in the main package,
 // we'll reimplement the required components adapted for runtime use
 
+// RequiredSort controls how required field names are ordered
+type RequiredSort string
+
+const (
+	// RequiredSortAlphabetical sorts required fields alphabetically for deterministic output
+	RequiredSortAlphabetical RequiredSort = "alphabetical"
+
+	// RequiredSortNone does not sort required fields, preserving the order from struct field iteration
+	// Note: May be non-deterministic due to map iteration in TagParser
+	RequiredSortNone RequiredSort = "none"
+)
+
 // StructTagOptions holds configuration for struct tag schema generation
 type StructTagOptions struct {
 	TagName             string              // tag name to parse (default: "jsonschema")
@@ -60,6 +73,7 @@ type StructTagOptions struct {
 	CacheEnabled        bool                // whether to enable schema caching (default: true)
 	ErrorHandler        func(error)         // optional error handler for processing errors
 	SchemaVersion       string              // $schema URI to include in generated schemas (empty string = omit $schema, default = Draft 2020-12)
+	RequiredSort        RequiredSort        // controls ordering of required fields (default: RequiredSortAlphabetical)
 
 	// Schema-level properties using map approach
 	SchemaProperties map[string]any // flexible configuration for any schema property
@@ -103,6 +117,7 @@ func DefaultStructTagOptions() *StructTagOptions {
 		CustomValidators:    make(map[string]any),
 		CacheEnabled:        true,
 		SchemaVersion:       "https://json-schema.org/draft/2020-12/schema", // default to JSON Schema Draft 2020-12
+		RequiredSort:        RequiredSortAlphabetical,                       // default to alphabetical sorting for determinism
 
 		// Schema-level properties - empty by default (not set)
 		SchemaProperties: nil, // nil = no schema properties set
@@ -217,6 +232,10 @@ func FromStructWithOptions[T any](options *StructTagOptions) *Schema {
 		schema.Defs = defsMap
 	}
 
+	// Resolve all references to ensure ResolvedRef fields are populated
+	// This is critical for validation to work correctly with nested structs
+	schema.resolveReferences()
+
 	// Clean up visited state
 	generator.visited = make(map[reflect.Type]int)
 
@@ -323,6 +342,14 @@ func (g *structTagGenerator) generateSchemaWithDependencyAnalysis(structType ref
 				required = append(required, fieldInfo.JSONName)
 			}
 		}
+	}
+
+	// Sort required fields based on RequiredSort option
+	if len(required) > 0 {
+		if g.options.RequiredSort == RequiredSortAlphabetical {
+			sort.Strings(required)
+		}
+		// For RequiredSortNone, keep the order as-is from struct field iteration
 	}
 
 	// Create the object schema
@@ -445,7 +472,7 @@ func (g *structTagGenerator) getSchemaFromTypeWithMapping(fieldType reflect.Type
 	case reflect.Slice, reflect.Array:
 		return g.handleArrayType(fieldType)
 	case reflect.Map:
-		return Object(), nil
+		return g.handleMapType(fieldType)
 	case reflect.Struct:
 		return g.handleStructType(fieldType)
 	case reflect.Interface:
@@ -500,6 +527,37 @@ func (g *structTagGenerator) handleArrayType(fieldType reflect.Type) (*Schema, e
 	}
 	// Create array schema with type constraints
 	return Array(Items(elemSchema)), nil
+}
+
+// handleMapType handles map types with additionalProperties for value types
+func (g *structTagGenerator) handleMapType(fieldType reflect.Type) (*Schema, error) {
+	valueType := fieldType.Elem()
+
+	// Handle pointer value types
+	for valueType.Kind() == reflect.Ptr {
+		valueType = valueType.Elem()
+	}
+
+	// If value is a struct, use handleStructType to get proper $ref
+	if valueType.Kind() == reflect.Struct {
+		valueSchema, err := g.handleStructType(valueType)
+		if err != nil {
+			// Fall back to basic object schema if struct schema fails
+			return nil, err
+		}
+
+		// Create object schema with additionalProperties as $ref to the struct type
+		return Object(AdditionalPropsSchema(valueSchema)), nil
+	}
+
+	// For non-struct values, generate appropriate type schema
+	valueSchema, err := g.getSchemaFromTypeWithMapping(valueType)
+	if err != nil {
+		// If unable to generate value schema, fallback to basic object
+		return Object(), err
+	}
+	// Create object schema with additionalProperties for the value type
+	return Object(AdditionalPropsSchema(valueSchema)), nil
 }
 
 // handleStructType handles struct types with circular reference detection and deduplication
@@ -663,8 +721,8 @@ func createSchemaFromParam(param string) *Schema {
 
 	// Check if it's a custom struct type
 	if isCustomStructType(param) {
-		// For now, create a reference to the type
-		// TODO: In a full implementation, we might want to generate the schema for the referenced type
+		// Create a basic object schema for custom types.
+		// Full schema generation for referenced types is handled separately via the Compiler.
 		return &Schema{Type: SchemaType{"object"}, Description: &param}
 	}
 
@@ -946,8 +1004,15 @@ func createRuntimeValidatorMapping() map[string]validatorFunc {
 
 			// Convert default value based on field type
 			value := params[0]
+
+			// Unwrap pointer type to get the underlying type
+			actualType := fieldType
+			if fieldType.Kind() == reflect.Ptr {
+				actualType = fieldType.Elem()
+			}
+
 			//exhaustive:ignore - we only handle types that need conversion for default values
-			switch fieldType.Kind() {
+			switch actualType.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 				if intVal, err := strconv.Atoi(value); err == nil {
 					return []Keyword{Default(intVal)}
@@ -1120,9 +1185,6 @@ func createRuntimeValidatorMapping() map[string]validatorFunc {
 			}
 			return nil
 		},
-
-		// TODO: Add more complex validators from schemagen as needed
-		// (prefixItems, patternProperties, dependentRequired, dependentSchemas, if/then/else, etc.)
 
 		// Array advanced validators - prefixItems
 		"prefixItems": func(_ reflect.Type, params []string) []Keyword {

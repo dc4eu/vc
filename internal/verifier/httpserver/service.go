@@ -2,10 +2,10 @@ package httpserver
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 	"vc/internal/verifier/apiv1"
+	"vc/internal/verifier/notify"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -29,6 +29,7 @@ type Service struct {
 	gin             *gin.Engine
 	tracer          *trace.Tracer
 	httpHelpers     *httphelpers.Client
+	notify          *notify.Service
 	sessionsOptions sessions.Options
 	sessionsEncKey  string
 	sessionsAuthKey string
@@ -36,12 +37,13 @@ type Service struct {
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notify.Service, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
 	s := &Service{
 		cfg:    cfg,
 		log:    log.New("httpserver"),
 		apiv1:  apiv1,
 		gin:    gin.New(),
+		notify: notify,
 		tracer: tracer,
 		server: &http.Server{
 			ReadHeaderTimeout: 3 * time.Second,
@@ -118,14 +120,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodPost, "/presentation-definition", http.StatusOK, s.endpointUIPresentationDefinition)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/notify", http.StatusOK, s.endpointUINotify)
-
-	go func() {
-		for i := 0; i < 3; i++ {
-			msg := gin.H{"message": fmt.Sprintf("hello %d", i)}
-			uiNotify("123").Submit(msg)
-			time.Sleep(1 * time.Second)
-		}
-	}()
 
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

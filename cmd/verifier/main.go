@@ -11,6 +11,7 @@ import (
 	"vc/internal/verifier/apiv1"
 	"vc/internal/verifier/db"
 	"vc/internal/verifier/httpserver"
+	"vc/internal/verifier/notify"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
@@ -57,12 +58,18 @@ func main() {
 		panic(err)
 	}
 
+	notifyService, err := notify.New(ctx, cfg, log)
+	services["notifyService"] = notifyService
+	if err != nil {
+		panic(err)
+	}
+
 	apiv1, err := apiv1.New(ctx, dbService, cfg, log)
 	if err != nil {
 		panic(err)
 	}
 
-	httpserver, err := httpserver.New(ctx, cfg, apiv1, tracer, log)
+	httpserver, err := httpserver.New(ctx, cfg, apiv1, notifyService, tracer, log)
 	services["httpserver"] = httpserver
 	if err != nil {
 		panic(err)

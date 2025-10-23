@@ -24,5 +24,5 @@ type Apiv1 interface {
 	GetRequestObject(ctx context.Context, req *apiv1.GetRequestObjectRequest) (map[string]any, error)
 
 	// UI
-	UIPresentationDefinition(ctx context.Context, req *apiv1.UIPresentationDefinitionRequest) (map[string]any, error)
+	UIPresentationDefinition(ctx context.Context, req *apiv1.UIPresentationDefinitionRequest) (*apiv1.UIPresentationDefinitionReply, error)
 }

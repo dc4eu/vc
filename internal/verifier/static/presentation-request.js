@@ -21,6 +21,26 @@ const credentialAttributesMapSchema = v.record(
     credentialAttributesSchema,
 );
 
+/** @typedef {v.InferOutput<typeof dcqlQuerySchema>} DCQLQuery */
+const dcqlQuerySchema = v.object({
+    credentials: v.array(v.object({
+        id: v.string(),
+        format: v.union([
+            v.literal("vc+sd-jwt"),
+        ]),
+        meta: v.intersect([
+            v.object({
+                vct_values: v.array(v.string()),
+            }),
+            v.record(v.string(), v.union([v.string(), v.array(v.string())])),
+        ]),
+        claims: v.array(v.object({
+            path: v.array(v.string()),
+        })),
+    })),
+});
+
+
 /**
  * Due to bfcache some state will persist across
  * navigation events, so we 'manually' clear it.

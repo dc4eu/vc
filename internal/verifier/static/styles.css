@@ -39,3 +39,13 @@
         );
     }
 }
+
+.vc-dcql-query-details {
+    padding: var(--bulma-box-padding);
+    border-radius: var(--bulma-box-radius);
+    background-color: var(--bulma-pre-background);
+
+    > pre {
+        padding: 1rem 0 0 0;
+    }
+}

@@ -43,6 +43,11 @@ const dcqlQuerySchema = v.object({
     credentials: v.array(dcqlQueryCredentialSchema),
 });
 
+/** @typedef {v.InferOutput<typeof presentationDefinitionSchema>} PresentationDefinition */
+const presentationDefinitionSchema = v.object({
+    qr_code: v.string(),
+    redirect_uri: v.string(),
+});
 
 /**
  * Due to bfcache some state will persist across
@@ -69,6 +74,12 @@ Alpine.data("app", () => ({
 
      /** @type {{ id: string; vct: string; claims: Record<string, string[]>; } | null} */
     credentialAttributes: null,
+
+    /** @type {DCQLQuery | null} */
+    dcqlQuery: null,
+
+    /** @type {PresentationDefinition | null} */
+    presentationDefinition: null,
 
     async init() {
         await this.lookupCredentialsList();
@@ -199,6 +210,8 @@ Alpine.data("app", () => ({
             return;
         }
 
+        this.dcqlQuery = dcql_query;
+
         try {
             const res = await this.fetchData(
                 new URL("/ui/presentation-definition", baseUrl), 
@@ -212,12 +225,19 @@ Alpine.data("app", () => ({
                     })
                 },
             );
+
+            // Temporarily set to blank strings to move on to the next step
+            // this.presentationDefinition = v.parse(presentationDefinitionSchema, res);
+            this.presentationDefinition = {
+                qr_code: "",
+                redirect_uri: "",
+            }
         } catch (error) {
             this.error = `Error during posting of dcql query: ${error}`;
             return;
         }
 
-        alert("OK");
+        this.loading = false;
     },
 
     /**

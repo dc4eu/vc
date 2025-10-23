@@ -21,23 +21,26 @@ const credentialAttributesMapSchema = v.record(
     credentialAttributesSchema,
 );
 
+/** @typedef {v.InferOutput<typeof dcqlQueryCredentialSchema>} DCQLQueryCredential */
+const dcqlQueryCredentialSchema = v.object({
+    id: v.string(),
+    format: v.union([
+        v.literal("vc+sd-jwt"),
+    ]),
+    meta: v.intersect([
+        v.object({
+            vct_values: v.array(v.string()),
+        }),
+        v.record(v.string(), v.union([v.string(), v.array(v.string())])),
+    ]),
+    claims: v.array(v.object({
+        path: v.array(v.string()),
+    })),
+});
+
 /** @typedef {v.InferOutput<typeof dcqlQuerySchema>} DCQLQuery */
 const dcqlQuerySchema = v.object({
-    credentials: v.array(v.object({
-        id: v.string(),
-        format: v.union([
-            v.literal("vc+sd-jwt"),
-        ]),
-        meta: v.intersect([
-            v.object({
-                vct_values: v.array(v.string()),
-            }),
-            v.record(v.string(), v.union([v.string(), v.array(v.string())])),
-        ]),
-        claims: v.array(v.object({
-            path: v.array(v.string()),
-        })),
-    })),
+    credentials: v.array(dcqlQueryCredentialSchema),
 });
 
 
@@ -61,7 +64,7 @@ Alpine.data("app", () => ({
     /** @type {CredentialAttributesMap | null} */
     credentialAttributesMap: null,
 
-     /** @type {Record<string, string> | null} */
+     /** @type {{ id: string; vct: string; claims: Record<string, string[]>; } | null} */
     selectedCredentialAttributes: null,
 
     /** @type {string | null} */
@@ -110,11 +113,19 @@ Alpine.data("app", () => ({
             return;
         }
 
-        this.selectedCredentialAttributes = {}
-        for (const [label, path] of Object.entries(this.credentialAttributesMap[credential].attributes_v2['en-US'])) {
-            this.selectedCredentialAttributes[label] = path.join(".");
+        const chosenCredential = this.credentialAttributesMap[credential];
+
+        /** @type {Record<string, string[]>} */
+        const claims = {}
+        for (const [label, path] of Object.entries(chosenCredential.attributes_v2['en-US'])) {
+            claims[label] = path;
         }
 
+        this.selectedCredentialAttributes = {
+            id: credential,
+            vct: chosenCredential.vct,
+            claims,
+        }
 
         this.loading = false;
     },
@@ -136,8 +147,77 @@ Alpine.data("app", () => ({
         }
     },
 
-    handleCancel() {
+    handleCancelAttributesSelection() {
         this.selectedCredentialAttributes = null;
+    },
+
+    /** @param {SubmitEvent} event */
+    async handleAttributesSelectionForm(event) {
+        this.error = null;
+        this.loading = true;
+
+        if (!this.selectedCredentialAttributes) {
+            this.error = "Selected attributes list is null";
+            return;
+        }
+        
+        if (!(this.$refs.attributesSelectionForm instanceof HTMLFormElement)) {
+            this.error = "Attributes selection form not of type 'HtmlFormElement'";
+            return;
+        }
+
+        const formData = new FormData(this.$refs.attributesSelectionForm);
+
+        /** @type {DCQLQueryCredential["claims"]} */
+        const claims = [];
+        for (const field of formData.getAll("attribute[]")) {
+            const path = this.selectedCredentialAttributes.claims[field.toString()];
+
+            if (!path) continue;
+
+            claims.push({ path });
+        }
+
+        /** @satisfies {DCQLQueryCredential} */
+        const credential = {
+            id: this.selectedCredentialAttributes.id,
+            format: "vc+sd-jwt",
+            meta: {
+                vct_values: [this.selectedCredentialAttributes.vct]
+            },
+            claims,
+        };
+
+        /** @satisfies {DCQLQuery} */
+        const dcqlQuery = {
+            credentials: [credential],
+        };
+
+        const { output: dcql_query, success } = v.safeParse(dcqlQuerySchema, dcqlQuery);
+        if (!success) {
+            this.error = "Invalid DCQL query";
+            return;
+        }
+
+        try {
+            const res = await this.fetchData(
+                new URL("/ui/presentation-definition", baseUrl), 
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        dcql_query,
+                    })
+                },
+            );
+        } catch (error) {
+            this.error = `Error during posting of dcql query: ${error}`;
+            return;
+        }
+
+        alert("OK");
     },
 
     /**

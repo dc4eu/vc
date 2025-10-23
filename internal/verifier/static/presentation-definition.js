@@ -158,8 +158,10 @@ Alpine.data("app", () => ({
         }
     },
 
-    handleCancelAttributesSelection() {
+    handleResetCancel() {
         this.credentialAttributes = null;
+        this.dcqlQuery = null;
+        this.presentationDefinition = null;
     },
 
     /** @param {SubmitEvent} event */

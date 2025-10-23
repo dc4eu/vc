@@ -34,10 +34,10 @@
             </template>
             <template x-if="!loading && credentialAttributesMap && !selectedCredentialAttributes">
                 <div class="box container">
-                    <p class="title is-size-5">Configure your presentation request</p>
+                    <p class="title is-size-6">Configure your presentation request</p>
                     <form x-ref="credentialSelectionForm" @submit.prevent="handleCredentialSelectionForm">
-                        <div class="field">
-                            <div class="select">
+                        <div class="field block">
+                            <div class="select is-fullwidth">
                                 <select name="credential" required>
                                     <option disabled selected>Choose type of credential to verify</option>
                                     <template x-for="[id, credAttrs] in Object.entries(credentialAttributesMap)">
@@ -47,14 +47,16 @@
                                 </select>
                             </div>
                         </div>
-                        <input type="submit" value="Next" class="button is-info">
+                        <div class="mt-5 is-flex is-justify-content-flex-end is-align-items-center">
+                            <input type="submit" value="Next" class="button is-info">
+                        </div>
                     </form>
                 </div>
             </template>
             <template x-if="!loading && credentialAttributesMap && selectedCredentialAttributes">
                 <div class="box container">
-                    <form class="block" x-ref="attributesSelectionForm" @submit.prevent="handleAttributesSelectionForm">
-                        <div class="field">
+                    <form x-ref="attributesSelectionForm" @submit.prevent="handleAttributesSelectionForm">
+                        <div class="field block">
                             <p class="title is-size-6">Fields</p>
                             <div class="buttons">
                                 <button class="button is-small is-info is-light" @click.prevent="handleAttributesToggle('all')">Select all</button>
@@ -73,9 +75,11 @@
                                 </ul>
                             </div>
                         </div>
-                        <input type="submit" value="Create request" class="button is-info">
+                        <div class="mt-5 is-flex is-flex-direction-row-reverse is-justify-content-space-between is-align-items-center">
+                            <input type="submit" value="Create request" class="button is-info">
+                            <button class="button is-small is-danger is-outlined" @click.prevent="handleCancelAttributesSelection">Cancel</button>
+                        </div>
                     </form>
-                    <button class="button is-small is-danger is-outlined" @click.prevent="handleCancelAttributesSelection">Cancel</button>
                 </div>
             </template>
         </div>

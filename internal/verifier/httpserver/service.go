@@ -99,7 +99,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 		s.gin.LoadHTMLGlob("./static/*.html")
 
 		s.gin.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "presentation-request.html", nil)
+			c.HTML(http.StatusOK, "presentation-definition.html", nil)
 		})
 	}
 

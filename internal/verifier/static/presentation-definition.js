@@ -15,8 +15,8 @@ const credentialAttributesSchema = v.object({
     ),
 });
 
-/** @typedef {v.InferOutput<typeof credentialAttributesMapSchema>} CredentialAttributesMap */
-const credentialAttributesMapSchema = v.record(
+/** @typedef {v.InferOutput<typeof credentialsList>} CredentialsList */
+const credentialsList = v.record(
     v.string(),
     credentialAttributesSchema,
 );
@@ -61,17 +61,17 @@ Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,
 
-    /** @type {CredentialAttributesMap | null} */
-    credentialAttributesMap: null,
-
-     /** @type {{ id: string; vct: string; claims: Record<string, string[]>; } | null} */
-    selectedCredentialAttributes: null,
-
     /** @type {string | null} */
     error: null,
 
+    /** @type {CredentialsList | null} */
+    credentialsList: null,
+
+     /** @type {{ id: string; vct: string; claims: Record<string, string[]>; } | null} */
+    credentialAttributes: null,
+
     async init() {
-        await this.lookupCredentialAttributes();
+        await this.lookupCredentialsList();
         this.loading = false;
 
         this.$watch("error", (newVal) => {
@@ -82,12 +82,12 @@ Alpine.data("app", () => ({
       
     },
 
-    async lookupCredentialAttributes() {
+    async lookupCredentialsList() {
         const res = await this.fetchData(new URL("/credential/attributes", baseUrl), {});
 
-        const data = v.parse(credentialAttributesMapSchema, res);
+        const data = v.parse(credentialsList, res);
 
-        this.credentialAttributesMap = data;
+        this.credentialsList = data;
     },
 
     /** @param {SubmitEvent} event */
@@ -108,12 +108,12 @@ Alpine.data("app", () => ({
             return;
         }
 
-        if (!this.credentialAttributesMap || !this.credentialAttributesMap[credential]) {
+        if (!this.credentialsList || !this.credentialsList[credential]) {
             this.error = "Credential is missing or invalid";
             return;
         }
 
-        const chosenCredential = this.credentialAttributesMap[credential];
+        const chosenCredential = this.credentialsList[credential];
 
         /** @type {Record<string, string[]>} */
         const claims = {}
@@ -121,7 +121,7 @@ Alpine.data("app", () => ({
             claims[label] = path;
         }
 
-        this.selectedCredentialAttributes = {
+        this.credentialAttributes = {
             id: credential,
             vct: chosenCredential.vct,
             claims,
@@ -148,7 +148,7 @@ Alpine.data("app", () => ({
     },
 
     handleCancelAttributesSelection() {
-        this.selectedCredentialAttributes = null;
+        this.credentialAttributes = null;
     },
 
     /** @param {SubmitEvent} event */
@@ -156,7 +156,7 @@ Alpine.data("app", () => ({
         this.error = null;
         this.loading = true;
 
-        if (!this.selectedCredentialAttributes) {
+        if (!this.credentialAttributes) {
             this.error = "Selected attributes list is null";
             return;
         }
@@ -171,7 +171,7 @@ Alpine.data("app", () => ({
         /** @type {DCQLQueryCredential["claims"]} */
         const claims = [];
         for (const field of formData.getAll("attribute[]")) {
-            const path = this.selectedCredentialAttributes.claims[field.toString()];
+            const path = this.credentialAttributes.claims[field.toString()];
 
             if (!path) continue;
 
@@ -180,10 +180,10 @@ Alpine.data("app", () => ({
 
         /** @satisfies {DCQLQueryCredential} */
         const credential = {
-            id: this.selectedCredentialAttributes.id,
+            id: this.credentialAttributes.id,
             format: "vc+sd-jwt",
             meta: {
-                vct_values: [this.selectedCredentialAttributes.vct]
+                vct_values: [this.credentialAttributes.vct]
             },
             claims,
         };

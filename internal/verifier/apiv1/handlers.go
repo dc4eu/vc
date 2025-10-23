@@ -20,17 +20,16 @@ func (c *Client) CredentialInfo(ctx context.Context) (map[string]*model.Credenti
 }
 
 type UIPresentationDefinitionRequest struct {
-	// Define fields as per requirements
+	DCQLQuery *openid4vp.DCQL `json:"dcql_query" validate:"required"`
 }
 
 type UIPresentationDefinitionReply struct {
-	DCQLQuery            map[string]any  `json:"dcql_query"`
-	AuthorizationRequest *openid4vp.DCQL `json:"authorization_request"`
-	QRCode               string          `json:"qr_code"`
+	AuthorizationRequest string `json:"authorization_request"`
+	QRCode               string `json:"qr_code"`
 }
 
 // UIPresentationDefinition handles the UI presentation definition request, reply Authorization Request that contains a Request URI and DCQL query, the latter for UI to show.
-func (c *Client) UIPresentationDefinition(ctx context.Context, req *UIPresentationDefinitionRequest) (map[string]any, error) {
+func (c *Client) UIPresentationDefinition(ctx context.Context, req *UIPresentationDefinitionRequest) (*UIPresentationDefinitionReply, error) {
 	c.log.Debug("uIPresentationDefinition")
 
 	return nil, nil

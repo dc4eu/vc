@@ -84,12 +84,14 @@
             </template>
             <template x-if="!loading && credentialsList && credentialAttributes && presentationDefinition">
                 <div class="box container">
-                    <div class="block">
-                        <details class="vc-dcql-query-details">
-                            <summary>View DCQL Query</summary>
-                            <pre><code x-text="JSON.stringify(dcqlQuery, null, 2)"></code></pre>
-                        </details>
-                    </div>
+                    <template x-if="dcqlQuery">
+                        <div class="block">
+                            <details class="vc-dcql-query-details">
+                                <summary>View DCQL Query</summary>
+                                <pre><code x-text="JSON.stringify(dcqlQuery, null, 2)"></code></pre>
+                            </details>
+                        </div>
+                    </template>
                     <div class="mt-5 is-flex is-justify-content-flex-start is-align-items-center">
                         <button class="button is-small is-danger is-outlined" @click.prevent="handleResetCancel">Cancel</button>
                     </div>

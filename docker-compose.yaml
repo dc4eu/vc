@@ -71,6 +71,7 @@ services:
       - ./developer_tools/private_verifier_rsa.pem:/private_verifier_rsa.pem:ro
       - ./developer_tools/public_verifier_rsa.pem:/public_verifier_rsa.pem:ro
       - ./developer_tools/verifier_x509_cert.pem:/verifier_x509_cert.pem:ro
+      - ./internal/verifier/static:/static:ro
     depends_on:
       - mongo
     networks:

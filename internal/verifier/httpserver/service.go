@@ -72,10 +72,10 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 		return nil, err
 	}
 
-	VerifierWebEnabled := false //TODO: läs in via cfg
+	VerifierWebEnabled := true //TODO: läs in via cfg
 	if VerifierWebEnabled {
 		// extra middlewares (MUST be declared before Server.Default)
-		s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
+		// s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
 
 		//TODO: refactorisera och flytta in nedan till någon middleware struct inkl. fixa egna properties istället för att använda UI's - för allt som ska vara dynamiskt
 		store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
@@ -96,9 +96,10 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 
 	if VerifierWebEnabled {
 		s.gin.Static("/static", "./static")
-		s.gin.LoadHTMLFiles("./static/index.html")
+		s.gin.LoadHTMLGlob("./static/*.html")
+
 		s.gin.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "index.html", nil)
+			c.HTML(http.StatusOK, "presentation-definition.html", nil)
 		})
 	}
 

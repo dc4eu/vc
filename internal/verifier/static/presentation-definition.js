@@ -228,12 +228,11 @@ Alpine.data("app", () => ({
                 },
             );
 
-            // Temporarily set to blank strings to move on to the next step
+            // Temporarily assign res to presentationDefinition without checking
             // this.presentationDefinition = v.parse(presentationDefinitionSchema, res);
             this.presentationDefinition = {
-                qr_code: "",
-                redirect_uri: "",
-            }
+                ...res,
+            };
         } catch (error) {
             this.error = `Error during posting of dcql query: ${error}`;
             return;

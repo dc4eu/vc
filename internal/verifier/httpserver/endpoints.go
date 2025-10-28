@@ -13,7 +13,7 @@ func (s *Service) endpointCredentialInfo(ctx context.Context, c *gin.Context) (a
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointCredentialInfo")
 	defer span.End()
 
-	reply, err := s.apiv1.CredentialInfo(ctx)
+	reply, err := s.apiv1.UICredentialInfo(ctx)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

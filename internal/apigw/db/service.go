@@ -103,7 +103,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		return nil, err
 	}
 
-	service.VCVerifierContextColl, err = NewVCVerifierContextColl(ctx, service, "verifier_context", log.New("VCVerifierContextColl"))
+	service.VCVerifierContextColl, err = NewVCVerifierContextColl(ctx, service, "apigw_context", log.New("VCVerifierContextColl"))
 	if err != nil {
 		service.log.Error(err, "failed to create verifier collection")
 		return nil, err

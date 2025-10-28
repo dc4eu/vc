@@ -13,6 +13,8 @@ import (
 func (s *Service) endpointUIPresentationDefinition(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointUIPresentationDefinition")
 
+	//session := sessions.Default(c)
+
 	request := &apiv1.UIPresentationDefinitionRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
@@ -29,11 +31,11 @@ func (s *Service) endpointUIPresentationDefinition(ctx context.Context, c *gin.C
 func (s *Service) endpointUINotify(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointUINotify")
 
-	sess := sessions.Default(c)
+	session := sessions.Default(c)
 
-	sess.Set("session_id", uuid.NewString())
+	session.Set("session_id", uuid.NewString())
 
-	sessionID := sess.Get("session_id").(string)
+	sessionID := session.Get("session_id").(string)
 	s.log.Debug("notifyEndpoint", "sessionID", sessionID)
 
 	listener := s.notify.OpenListener(sessionID)

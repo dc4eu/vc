@@ -1,6 +1,7 @@
 package openid4vp
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"testing"
@@ -77,6 +78,28 @@ func TestGenerateQR(t *testing.T) {
 				assert.Equal(t, tt.want.qrReply.Base64Image, got.Base64Image)
 			}
 
+		})
+	}
+}
+
+func TestGenerateQRV2(t *testing.T) {
+	tts := []struct {
+		name string
+		data string
+		want string
+	}{
+		{
+			name: "valid data",
+			data: "openid4vp://authorize?key=val",
+			want: mockQRCode,
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GenerateQRV2(context.Background(), tt.data)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

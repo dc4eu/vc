@@ -13,7 +13,6 @@ import (
 	"vc/pkg/trace"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -72,55 +71,32 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 		return nil, err
 	}
 
-	VerifierWebEnabled := true //TODO: läs in via cfg
-	if VerifierWebEnabled {
-		// extra middlewares (MUST be declared before Server.Default)
-		// s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
-
-		//TODO: refactorisera och flytta in nedan till någon middleware struct inkl. fixa egna properties istället för att använda UI's - för allt som ska vara dynamiskt
-		store := cookie.NewStore([]byte(cfg.UI.SessionCookieAuthenticationKey), []byte(cfg.UI.SessionStoreEncryptionKey))
-		store.Options(sessions.Options{
-			Path:     "/",
-			MaxAge:   600,
-			Secure:   cfg.Verifier.APIServer.TLS.Enabled,
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-		})
-		s.gin.Use(sessions.Sessions("vp_flow_web_session", store))
-	}
-
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.Verifier.APIServer.Addr)
 	if err != nil {
 		return nil, err
 	}
 
-	if VerifierWebEnabled {
-		s.gin.Static("/static", "./static")
-		s.gin.LoadHTMLGlob("./static/*.html")
+	s.gin.Static("/static", "./static")
+	s.gin.LoadHTMLGlob("./static/*.html")
 
-		s.gin.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "presentation-definition.html", nil)
-		})
-	}
+	s.gin.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "presentation-definition.html", nil)
+	})
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
 	// oauth2
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuthMetadata)
 
-	// credential attributes convey information about attributes, vct and other attributes in vctm, used by the web frontend
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/credential/attributes", http.StatusOK, s.endpointCredentialInfo)
-
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/request-object", http.StatusOK, s.endpointGetRequestObject)
 
-	rgUI, err := rgRoot.Group("/ui"), error(nil)
-	if err != nil {
-		return nil, err
-	}
+	rgUI := rgRoot.Group("/ui")
 	rgUI.Use(s.httpHelpers.Middleware.UserSession(s.sessionsName, s.sessionsAuthKey, s.sessionsEncKey, s.sessionsOptions))
-	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodPost, "/presentation-definition", http.StatusOK, s.endpointUIPresentationDefinition)
 
+	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodPost, "/presentation-definition", http.StatusOK, s.endpointUIPresentationDefinition)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/notify", http.StatusOK, s.endpointUINotify)
+	// credential attributes convey information about attributes, vct and other attributes in vctm, used by the web frontend
+	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/credential/attributes", http.StatusOK, s.endpointCredentialInfo)
 
 	rgDocs := rgRoot.Group("/swagger")
 	rgDocs.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

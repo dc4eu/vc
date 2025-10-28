@@ -94,7 +94,7 @@ Alpine.data("app", () => ({
     },
 
     async lookupCredentialsList() {
-        const res = await this.fetchData(new URL("/credential/attributes", baseUrl), {});
+        const res = await this.fetchData(new URL("/ui/credential/attributes", baseUrl), {});
 
         const data = v.parse(credentialsList, res);
 

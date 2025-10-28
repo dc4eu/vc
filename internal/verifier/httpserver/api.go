@@ -18,11 +18,11 @@ type Apiv1 interface {
 	// openid4vp-web
 
 	// misc
-	CredentialInfo(ctx context.Context) (map[string]*model.CredentialConstructor, error)
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 
 	GetRequestObject(ctx context.Context, req *apiv1.GetRequestObjectRequest) (map[string]any, error)
 
 	// UI
 	UIPresentationDefinition(ctx context.Context, req *apiv1.UIPresentationDefinitionRequest) (*apiv1.UIPresentationDefinitionReply, error)
+	UICredentialInfo(ctx context.Context) (map[string]*model.CredentialConstructor, error)
 }

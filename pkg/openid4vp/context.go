@@ -23,7 +23,7 @@ func (r *RequestObject) CreateAuthorizationRequestURI(ctx context.Context, verif
 		return "", err
 	}
 
-	q.Set("requestURI", requestObjectURL)
+	q.Set("request_uri", requestObjectURL)
 	u.RawQuery = q.Encode()
 
 	return u.String(), nil

@@ -84,9 +84,11 @@
             </template>
             <template x-if="!loading && credentialsList && credentialAttributes && presentationDefinition">
                 <div class="box container">
-                    <!-- Temporarily print response from presentation definition endpoint -->
+                    <div class="block is-flex is-justify-content-center">
+                        <img :src="`data:image/svg+xml;base64,${presentationDefinition.qr_code}`" alt="" />
+                    </div>
                     <div class="block">
-                        <pre><code x-text="JSON.stringify(presentationDefinition, null, 2)"></code></pre>
+                        <pre class="has-border-radius" x-text="presentationDefinition.authorization_request"></pre>
                     </div>
                     <template x-if="dcqlQuery">
                         <div class="block">

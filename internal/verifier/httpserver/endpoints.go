@@ -3,7 +3,6 @@ package httpserver
 import (
 	"context"
 	"vc/internal/gen/status/apiv1_status"
-	"vc/internal/verifier/apiv1"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/codes"
@@ -16,22 +15,6 @@ func (s *Service) endpointCredentialInfo(ctx context.Context, c *gin.Context) (a
 	reply, err := s.apiv1.UICredentialInfo(ctx)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	return reply, nil
-}
-
-func (s *Service) endpointGetRequestObject(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.GetRequestObjectRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		return nil, err
-	}
-
-	s.log.Debug("endpointGetRequestObject", "id", request.ID)
-
-	reply, err := s.apiv1.GetRequestObject(ctx, request)
-	if err != nil {
 		return nil, err
 	}
 

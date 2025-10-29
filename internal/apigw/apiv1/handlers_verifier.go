@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 	"vc/internal/apigw/db"
@@ -18,66 +17,6 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwe"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 )
-
-var presentationDefinition = []byte(
-	`{
-    "id": "CustomVerifiableId",
-    "title": "PID ARF v1.8",
-    "description": "Select the format and the fields you want to request",
-    "input_descriptors": [
-      {
-        "id": "SdJwtPID",
-        "name": "Custom PID",
-        "constraints": {
-          "limit_disclosure": "required",
-          "fields": [
-            {
-              "name": "VC type",
-              "path": [
-                "$.vct"
-              ],
-              "filter": {
-                "type": "string",
-                "const": "urn:eudi:pid:1"
-              }
-            },
-            {
-              "name": "First name",
-              "path": [
-                "$.given_name"
-              ],
-              "filter": {}
-            },
-             {
-              "name": "Family name",
-              "path": [
-                "$.family_name"
-              ],
-              "filter": {}
-            },
-            {
-              "name": "Birth date",
-              "path": [
-                "$.birthdate"
-              ],
-              "filter": {}
-            }
-          ]
-        },
-        "format": {
-          "vc+sd-jwt": {
-            "sd-jwt_alg_values": [
-              "ES256"
-            ],
-            "kb-jwt_alg_values": [
-              "ES256"
-            ]
-          }
-        }
-      }
-    ]
-}
-`)
 
 var vpFormats = []byte(
 	`{
@@ -109,8 +48,6 @@ type VerificationRequestObjectRequest struct {
 	ID string `form:"id" uri:"id"`
 }
 
-type VerificationRequestObjectResponse struct{}
-
 func (c *Client) VerificationRequestObject(ctx context.Context, req *VerificationRequestObjectRequest) (string, error) {
 	c.log.Debug("Verification request object", "req", req)
 
@@ -121,13 +58,6 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		c.log.Error(err, "failed to get authorization context")
 		return "", err
 	}
-
-	pd := openid4vp.PresentationDefinitionParameter{}
-	if err := json.Unmarshal(presentationDefinition, &pd); err != nil {
-		return "", err
-	}
-
-	pd.InputDescriptors[0].Purpose = fmt.Sprintf("Present your credential(s) to get your %s", authorizationContext.Scope)
 
 	vf := map[string]map[string][]string{}
 	if err := json.Unmarshal(vpFormats, &vf); err != nil {
@@ -140,16 +70,14 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 	}
 
 	authorizationRequest := openid4vp.RequestObject{
-		ResponseURI: "https://vc-interop-3.sunet.se/verification/direct_post",
-		AUD:         "https://self-issued.me/v2",
-		ISS:         authorizationContext.ClientID,
-		//ClientIDScheme:         "x509_san_dns",
+		ResponseURI:  "https://vc-interop-3.sunet.se/verification/direct_post",
+		AUD:          "https://self-issued.me/v2",
+		ISS:          authorizationContext.ClientID,
 		ClientID:     authorizationContext.ClientID,
 		ResponseType: "vp_token",
 		ResponseMode: "direct_post.jwt",
 		State:        authorizationContext.State,
 		Nonce:        authorizationContext.Nonce,
-		//PresentationDefinition: &pd,
 		ClientMetadata: &openid4vp.ClientMetadata{
 			VPFormats: vf,
 			JWKS: &openid4vp.Keys{

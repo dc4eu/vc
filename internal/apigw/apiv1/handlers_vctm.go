@@ -107,13 +107,6 @@ func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferReques
 		return nil, err
 	}
 
-	// Since we're using the qr method in a place it wasn't really
-	// intended for, blank any possible data we don't want sent to
-	// the client.
-	qr.RequestURI = ""
-	qr.SessionID = ""
-	qr.ClientID = ""
-
 	reply := &CredentialOfferReply{
 		Name: vctm.Name,
 		ID:   vctm.VCT,

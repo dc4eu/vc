@@ -39,9 +39,6 @@ func TestGenerateQR(t *testing.T) {
 				qrReply: &QRReply{
 					Base64Image: mockQRCode,
 					URI:         "openid4vp://authorize?key=val",
-					RequestURI:  "",
-					ClientID:    "",
-					SessionID:   "",
 				},
 			},
 		},
@@ -58,9 +55,6 @@ func TestGenerateQR(t *testing.T) {
 				qrReply: &QRReply{
 					Base64Image: "",
 					URI:         "",
-					RequestURI:  "",
-					ClientID:    "",
-					SessionID:   "",
 				},
 			},
 		},
@@ -74,7 +68,6 @@ func TestGenerateQR(t *testing.T) {
 				got, err := GenerateQR(uri, tt.args.recoveryLevel, tt.args.size)
 				assert.Equal(t, tt.want.err, err)
 				assert.Equal(t, tt.want.qrReply.URI, got.URI)
-				assert.Equal(t, tt.want.qrReply.RequestURI, got.RequestURI)
 				assert.Equal(t, tt.want.qrReply.Base64Image, got.Base64Image)
 			}
 

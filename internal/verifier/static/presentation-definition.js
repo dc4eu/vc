@@ -216,7 +216,7 @@ Alpine.data("app", () => ({
 
         try {
             const res = await this.fetchData(
-                new URL("/ui/presentation-definition", baseUrl), 
+                new URL("/ui/interaction", baseUrl), 
                 {
                     method: "POST",
                     headers: {

@@ -93,7 +93,6 @@ authentic_sources:
       PDA1:
         profile: "SD-JWT"
 
-
 issuer:
   identifier: "SUNET_v1"
   api_server:

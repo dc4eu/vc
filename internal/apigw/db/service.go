@@ -41,7 +41,6 @@ type Service struct {
 	VCUsersColl                *VCUsersColl
 	VCCodeChallengeColl        *VCCodeChallengeColl
 	VCCredentialOfferColl      *VCCredentialOfferColl
-	VCVerifierContextColl      *VCVerifierContextColl
 }
 
 // New creates a new database service
@@ -100,12 +99,6 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	service.VCCredentialOfferColl, err = NewCredentialOfferColl(ctx, "credential_offer", service, log.New("VCCredentialOfferColl"))
 	if err != nil {
 		service.log.Error(err, "failed to create credential offer collection")
-		return nil, err
-	}
-
-	service.VCVerifierContextColl, err = NewVCVerifierContextColl(ctx, service, "apigw_context", log.New("VCVerifierContextColl"))
-	if err != nil {
-		service.log.Error(err, "failed to create verifier collection")
 		return nil, err
 	}
 

@@ -46,7 +46,7 @@ const dcqlQuerySchema = v.object({
 /** @typedef {v.InferOutput<typeof presentationDefinitionSchema>} PresentationDefinition */
 const presentationDefinitionSchema = v.object({
     qr_code: v.string(),
-    redirect_uri: v.string(),
+    authorization_request: v.string(),
 });
 
 /**
@@ -228,11 +228,7 @@ Alpine.data("app", () => ({
                 },
             );
 
-            // Temporarily assign res to presentationDefinition without checking
-            // this.presentationDefinition = v.parse(presentationDefinitionSchema, res);
-            this.presentationDefinition = {
-                ...res,
-            };
+            this.presentationDefinition = v.parse(presentationDefinitionSchema, res);
         } catch (error) {
             this.error = `Error during posting of dcql query: ${error}`;
             return;

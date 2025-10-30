@@ -4,7 +4,6 @@ import (
 	"context"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/verifier/apiv1"
-	"vc/pkg/model"
 	"vc/pkg/oauth2"
 )
 
@@ -12,17 +11,13 @@ type Apiv1 interface {
 	// oauth2
 	OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error)
 
-	// vp-datastore
-	PaginatedVerificationRecords(ctx context.Context, request *apiv1.PaginatedVerificationRecordsRequest) (*apiv1.PaginatedVerificationRecordsReply, error)
-
-	// openid4vp-web
-
 	// misc
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 
-	GetRequestObject(ctx context.Context, req *apiv1.GetRequestObjectRequest) (map[string]any, error)
+	// Verification
+	VerificationRequestObject(ctx context.Context, req *apiv1.VerificationRequestObjectRequest) (string, error)
 
 	// UI
-	UIPresentationDefinition(ctx context.Context, req *apiv1.UIPresentationDefinitionRequest) (*apiv1.UIPresentationDefinitionReply, error)
-	UICredentialInfo(ctx context.Context) (map[string]*model.CredentialConstructor, error)
+	UIInteraction(ctx context.Context, req *apiv1.UIInteractionRequest) (*apiv1.UIInteractionReply, error)
+	UIMetadata(ctx context.Context) (*apiv1.UIMetadataReply, error)
 }

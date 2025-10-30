@@ -3,8 +3,6 @@ package db
 import (
 	"context"
 	"time"
-	"vc/pkg/openid4vp"
-	"vc/pkg/openid4vp/db"
 
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/logger"
@@ -16,10 +14,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// DB is the interface for the database
-type DB interface {
-}
-
 // Service is the database service
 type Service struct {
 	dbClient   *mongo.Client
@@ -28,9 +22,7 @@ type Service struct {
 	tracer     *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	VPInteractionSessionColl *VPInteractionSessionColl
-	VerificationRecordColl   *VerificationRecordColl
-	ContextColl              *ContextColl
+	AuthorizationContextColl *AuthorizationContextColl
 }
 
 // New creates a new database service
@@ -49,17 +41,10 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		return nil, err
 	}
 
-	service.VPInteractionSessionColl = &VPInteractionSessionColl{
-		repo: db.NewInMemoryRepo[openid4vp.VPInteractionSession](100),
-	}
-
-	service.VerificationRecordColl = &VerificationRecordColl{
-		repo: db.NewInMemoryRepo[openid4vp.VerificationRecord](1500),
-	}
-
 	var err error
-	service.ContextColl, err = NewContextColl(ctx, service, "verifier_context", service.log.New("verifier_context"))
+	service.AuthorizationContextColl, err = NewAuthorizationContextColl(ctx, "verifier_authorization_context", service, log.New("verifier_authorization_context"))
 	if err != nil {
+		service.log.Error(err, "failed to create authorization context collection")
 		return nil, err
 	}
 

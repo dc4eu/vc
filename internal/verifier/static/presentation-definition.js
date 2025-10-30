@@ -94,7 +94,7 @@ Alpine.data("app", () => ({
     },
 
     async lookupCredentialsList() {
-        const res = await this.fetchData(new URL("/ui/credential/attributes", baseUrl), {});
+        const res = await this.fetchData(new URL("/ui/metadata", baseUrl), {});
 
         const data = v.parse(credentialsList, res);
 
@@ -216,7 +216,7 @@ Alpine.data("app", () => ({
 
         try {
             const res = await this.fetchData(
-                new URL("/ui/presentation-definition", baseUrl), 
+                new URL("/ui/interaction", baseUrl), 
                 {
                     method: "POST",
                     headers: {

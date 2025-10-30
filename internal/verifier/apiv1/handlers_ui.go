@@ -8,78 +8,84 @@ import (
 	"github.com/google/uuid"
 )
 
-func (c *Client) UICredentialInfo(ctx context.Context) (map[string]*model.CredentialConstructor, error) {
-	reply := c.cfg.CredentialConstructor
+type UIMetadataReply struct {
+	Credentials      map[string]*model.CredentialConstructor `json:"credentials"`
+	SupportedWallets map[string]string                       `json:"supported_wallets"`
+}
 
-	for _, constructor := range reply {
+func (c *Client) UIMetadata(ctx context.Context) (*UIMetadataReply, error) {
+
+	reply := &UIMetadataReply{}
+	reply.Credentials = c.cfg.CredentialConstructor
+
+	for _, constructor := range reply.Credentials {
 		constructor.AuthMethod = ""
 		constructor.VCTMFilePath = ""
 		constructor.VCTM = nil
 	}
 
+	reply.SupportedWallets = c.cfg.Verifier.SupportedWallets
+
 	return reply, nil
 }
 
-type UIPresentationDefinitionRequest struct {
+type UIInteractionRequest struct {
 	DCQLQuery *openid4vp.DCQL `json:"dcql_query" validate:"required"`
+
+	// SessionID from http server endpoint
+	SessionID string `json:"-"`
 }
 
-type UIPresentationDefinitionReply struct {
+type UIInteractionReply struct {
 	AuthorizationRequest string `json:"authorization_request"`
 	QRCode               string `json:"qr_code"`
 }
 
-// UIPresentationDefinition handles the UI presentation definition request, reply Authorization Request that contains a Request URI and DCQL query, the latter for UI to show.
-func (c *Client) UIPresentationDefinition(ctx context.Context, req *UIPresentationDefinitionRequest) (*UIPresentationDefinitionReply, error) {
+// UIInteraction handles front-end interactions, replying with an Authorization Request that contains a Request URI and DCQL query, the latter for UI to show.
+func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (*UIInteractionReply, error) {
 	c.log.Debug("uIPresentationDefinition", "dcql_query", req.DCQLQuery)
 
-	id := uuid.NewString()
 	nonce := uuid.NewString()
 	state := uuid.NewString()
+	requestObjectID := uuid.NewString()
 
-	context := &openid4vp.Context{
-		Nonce: nonce,
-		ID:    id,
-		AuthorizationRequest: &openid4vp.RequestObject{
-			ISS:          "vc-interop-3.sunet.se",
-			AUD:          "https://self-issued.me/v2",
-			IAT:          0,
-			ResponseType: "vp_token",
-			ClientID:     "x509_san_dns:vc-interop-3.sunet.se",
-			RedirectURI:  "",
-			Scope:        "",
-			State:        state,
-			Nonce:        nonce,
-			ResponseMode: "direct_post.jwt",
-			DCQLQuery:    req.DCQLQuery,
-			ClientMetadata: &openid4vp.ClientMetadata{
-				JWKS:                                &openid4vp.Keys{},
-				EncryptedResponseEncValuesSupported: []string{},
-				VPFormatsSupported:                  map[string]map[string][]string{},
-				VPFormats: map[string]map[string][]string{
-					"vc+sd-jwt": {
-						"sd-jwt_alg_values": {"ES256"},
-						"kb-jwt_alg_values": {"ES256"}},
-				},
-				AuthorizationSignedResponseALG:    "",
-				AuthorizationEncryptedResponseALG: "ECDH-ES",
-				AuthorizationEncryptedResponseENC: "A256GCM",
-			},
-			RequestURIMethod: "",
-			TransactionData:  []openid4vp.TransactionData{},
-			VerifierInfo:     []openid4vp.VerifierInfo{},
-			ResponseURI:      "https://vc-interop-3.sunet.se:444/verification/direct_post",
-		},
+	authorizationContext := &model.AuthorizationContext{
+		SessionID:                req.SessionID,
+		Scope:                    "",
+		Code:                     "",
+		RequestURI:               "",
+		WalletURI:                "",
+		IsUsed:                   false,
+		State:                    state,
+		ClientID:                 "x509_san_dns:vc-interop-3.sunet.se",
+		ExpiresAt:                0,
+		CodeChallenge:            "",
+		CodeChallengeMethod:      "",
+		LastUsed:                 0,
+		SavedAt:                  0,
+		Consent:                  false,
+		AuthenticSource:          "",
+		DocumentType:             "",
+		Identity:                 &model.Identity{},
+		Token:                    &model.Token{},
+		Nonce:                    nonce,
+		EphemeralEncryptionKeyID: uuid.NewString(),
+		VerifierResponseCode:     "",
+		RequestObjectID:          requestObjectID,
 	}
 
-	if err := c.db.ContextColl.Save(ctx, context); err != nil {
+	authorizationObject := &openid4vp.RequestObject{
+		ClientID: authorizationContext.ClientID,
+	}
+
+	if err := c.db.AuthorizationContextColl.Save(ctx, authorizationContext); err != nil {
 		return nil, err
 	}
 
-	reply := &UIPresentationDefinitionReply{}
+	reply := &UIInteractionReply{}
 
 	var err error
-	reply.AuthorizationRequest, err = context.AuthorizationRequest.CreateAuthorizationRequestURI(ctx, "https://vc-interop-3.sunet.se:444", id)
+	reply.AuthorizationRequest, err = authorizationObject.CreateAuthorizationRequestURI(ctx, c.cfg.Verifier.ExternalServerURL, requestObjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -90,14 +96,4 @@ func (c *Client) UIPresentationDefinition(ctx context.Context, req *UIPresentati
 	}
 
 	return reply, nil
-}
-
-type GetRequestObjectRequest struct {
-	ID string `form:"id" validate:"required"`
-}
-
-func (c *Client) GetRequestObject(ctx context.Context, req *GetRequestObjectRequest) (map[string]any, error) {
-	c.log.Debug("getRequestObject", "id", req.ID)
-
-	return nil, nil
 }

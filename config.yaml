@@ -93,7 +93,6 @@ authentic_sources:
       PDA1:
         profile: "SD-JWT"
 
-
 issuer:
   identifier: "SUNET_v1"
   api_server:
@@ -118,6 +117,8 @@ verifier:
     addr: vc_dev_verifier:8090
   #Replace fqdn with same as in x5c_san_dns cert (used to build web-links etc. example: "vcverifier.sunet.se") - ip is only used when working in local dev env.
   external_server_url: "http://vc_dev_verifier:8080"
+  supported_wallets:
+    "SUNET dev": "https://dev.wallet.sunet.se/"
 
 registry:
   api_server:

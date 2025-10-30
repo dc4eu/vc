@@ -8,19 +8,39 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/codes"
 )
 
-func (s *Service) endpointUIPresentationDefinition(ctx context.Context, c *gin.Context) (any, error) {
-	s.log.Debug("endpointUIPresentationDefinition")
+func (s *Service) endpointUIMetadata(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUIMetadata")
+	defer span.End()
 
-	//session := sessions.Default(c)
+	reply, err := s.apiv1.UIMetadata(ctx)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
 
-	request := &apiv1.UIPresentationDefinitionRequest{}
+	return reply, nil
+}
+
+func (s *Service) endpointUIInteraction(ctx context.Context, c *gin.Context) (any, error) {
+	s.log.Debug("endpointUIInteraction")
+
+	session := sessions.Default(c)
+	session.Set("session_id", uuid.NewString())
+	if err := session.Save(); err != nil {
+		return nil, err
+	}
+
+	request := &apiv1.UIInteractionRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}
 
-	reply, err := s.apiv1.UIPresentationDefinition(ctx, request)
+	request.SessionID = session.Get("session_id").(string)
+
+	reply, err := s.apiv1.UIInteraction(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +52,6 @@ func (s *Service) endpointUINotify(ctx context.Context, c *gin.Context) (any, er
 	s.log.Debug("endpointUINotify")
 
 	session := sessions.Default(c)
-
-	session.Set("session_id", uuid.NewString())
 
 	sessionID := session.Get("session_id").(string)
 	s.log.Debug("notifyEndpoint", "sessionID", sessionID)

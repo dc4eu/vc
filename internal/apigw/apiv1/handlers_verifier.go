@@ -19,6 +19,75 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
+var vpFormats = []byte(
+	`{
+      "vc+sd-jwt": {
+        "sd-jwt_alg_values": [
+          "ES256"
+        ],
+        "kb-jwt_alg_values": [
+          "ES256"
+        ]
+      },
+      "dc+sd-jwt": {
+        "sd-jwt_alg_values": [
+          "ES256"
+        ],
+        "kb-jwt_alg_values": [
+          "ES256"
+        ]
+      },
+      "mso_mdoc": {
+        "alg": [
+          "ES256"
+        ]
+      }
+    }
+`)
+
+var dcqlQuery = []byte(
+	`{
+  "credentials": [
+    {
+      "id": "CustomVerifiableId1_5",
+      "format": "vc+sd-jwt",
+      "meta": {
+        "vct_values": [
+          "urn:eu.europa.ec.eudi:pid:1"
+        ]
+      },
+      "claims": [
+        {
+          "path": [
+            "given_name"
+          ]
+        },
+        {
+          "path": [
+            "given_name_birth"
+          ]
+        },
+        {
+          "path": [
+            "family_name"
+          ]
+        }
+      ]
+    }
+  ],
+  "credential_sets": [
+    {
+      "options": [
+        [
+          "CustomVerifiableId1_5"
+        ]
+      ],
+      "purpose": "Purpose not specified"
+    }
+  ]
+}
+`)
+
 var presentationDefinition = []byte(
 	`{
     "id": "CustomVerifiableId",
@@ -79,37 +148,9 @@ var presentationDefinition = []byte(
 }
 `)
 
-var vpFormats = []byte(
-	`{
-      "vc+sd-jwt": {
-        "sd-jwt_alg_values": [
-          "ES256"
-        ],
-        "kb-jwt_alg_values": [
-          "ES256"
-        ]
-      },
-      "dc+sd-jwt": {
-        "sd-jwt_alg_values": [
-          "ES256"
-        ],
-        "kb-jwt_alg_values": [
-          "ES256"
-        ]
-      },
-      "mso_mdoc": {
-        "alg": [
-          "ES256"
-        ]
-      }
-    }
-`)
-
 type VerificationRequestObjectRequest struct {
 	ID string `form:"id" uri:"id"`
 }
-
-type VerificationRequestObjectResponse struct{}
 
 func (c *Client) VerificationRequestObject(ctx context.Context, req *VerificationRequestObjectRequest) (string, error) {
 	c.log.Debug("Verification request object", "req", req)
@@ -122,7 +163,12 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", err
 	}
 
-	pd := openid4vp.PresentationDefinitionParameter{}
+	dcql := &openid4vp.DCQL{}
+	if err := json.Unmarshal(dcqlQuery, &dcql); err != nil {
+		return "", err
+	}
+
+	pd := &openid4vp.PresentationDefinitionParameter{}
 	if err := json.Unmarshal(presentationDefinition, &pd); err != nil {
 		return "", err
 	}
@@ -140,16 +186,17 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 	}
 
 	authorizationRequest := openid4vp.RequestObject{
-		ResponseURI: "https://vc-interop-3.sunet.se/verification/direct_post",
-		AUD:         "https://self-issued.me/v2",
-		ISS:         authorizationContext.ClientID,
-		//ClientIDScheme:         "x509_san_dns",
-		ClientID:     authorizationContext.ClientID,
-		ResponseType: "vp_token",
-		ResponseMode: "direct_post.jwt",
-		State:        authorizationContext.State,
-		Nonce:        authorizationContext.Nonce,
-		//PresentationDefinition: &pd,
+		ResponseURI:            "https://vc-interop-3.sunet.se/verification/direct_post",
+		AUD:                    "https://self-issued.me/v2",
+		ISS:                    authorizationContext.ClientID,
+		ClientID:               authorizationContext.ClientID,
+		ResponseType:           "vp_token",
+		ResponseMode:           "direct_post.jwt",
+		State:                  authorizationContext.State,
+		Nonce:                  authorizationContext.Nonce,
+		DCQLQuery:              dcql,
+		PresentationDefinition: pd,
+
 		ClientMetadata: &openid4vp.ClientMetadata{
 			VPFormats: vf,
 			JWKS: &openid4vp.Keys{

@@ -1,6 +1,7 @@
 package openid4vp
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"testing"
@@ -38,9 +39,6 @@ func TestGenerateQR(t *testing.T) {
 				qrReply: &QRReply{
 					Base64Image: mockQRCode,
 					URI:         "openid4vp://authorize?key=val",
-					RequestURI:  "",
-					ClientID:    "",
-					SessionID:   "",
 				},
 			},
 		},
@@ -57,9 +55,6 @@ func TestGenerateQR(t *testing.T) {
 				qrReply: &QRReply{
 					Base64Image: "",
 					URI:         "",
-					RequestURI:  "",
-					ClientID:    "",
-					SessionID:   "",
 				},
 			},
 		},
@@ -73,10 +68,31 @@ func TestGenerateQR(t *testing.T) {
 				got, err := GenerateQR(uri, tt.args.recoveryLevel, tt.args.size)
 				assert.Equal(t, tt.want.err, err)
 				assert.Equal(t, tt.want.qrReply.URI, got.URI)
-				assert.Equal(t, tt.want.qrReply.RequestURI, got.RequestURI)
 				assert.Equal(t, tt.want.qrReply.Base64Image, got.Base64Image)
 			}
 
+		})
+	}
+}
+
+func TestGenerateQRV2(t *testing.T) {
+	tts := []struct {
+		name string
+		data string
+		want string
+	}{
+		{
+			name: "valid data",
+			data: "openid4vp://authorize?key=val",
+			want: mockQRCode,
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GenerateQRV2(context.Background(), tt.data)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

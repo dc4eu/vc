@@ -38,7 +38,8 @@ type RequestObject struct {
 	ResponseMode string `json:"response_mode,omitempty" uri:"response_mode" validate:"omitempty,oneof=form_post direct_post direct_post.jwt dc_api.jwt"`
 
 	//dcql_query
-	DCQLQuery *DCQL `json:"dcql_query,omitempty" bson:"dcql_query,omitempty" validate:"omitempty,dive"`
+	DCQLQuery              *DCQL                            `json:"dcql_query,omitempty" bson:"dcql_query,omitempty" validate:"omitempty,dive"`
+	PresentationDefinition *PresentationDefinitionParameter `json:"presentation_definition,omitempty" bson:"presentation_definition,omitempty" validate:"omitempty,dive"`
 
 	// ClientMetadata OPTIONAL. A JSON object containing the Verifier metadata values. It MUST be UTF-8 encoded.
 	ClientMetadata *ClientMetadata `json:"client_metadata,omitempty" validate:"omitempty"`
@@ -68,7 +69,6 @@ type VerifierInfo struct {
 }
 
 type ClientMetadata struct {
-
 	// JWKS OPTIONAL. A JSON Web Key Set, as defined in [RFC7591], that contains one or more public keys, such as those used by the Wallet as an input to a key agreement that may be used for encryption of the Authorization Response (see Section 8.3), or where the Wallet will require the public key of the Verifier to generate a Verifiable Presentation. This allows the Verifier to pass ephemeral keys specific to this Authorization Request. Public keys included in this parameter MUST NOT be used to verify the signature of signed Authorization Requests. Each JWK in the set MUST have a kid (Key ID) parameter that uniquely identifies the key within the context of the request.
 	JWKS *Keys `json:"jwks,omitempty" bson:"jwks,omitempty" validate:"omitempty"`
 
@@ -90,23 +90,6 @@ type ClientMetadata struct {
 	AuthorizationEncryptedResponseALG string `json:"authorization_encrypted_response_alg,omitempty" bson:"authorization_encrypted_response_alg,omitempty" validate:"omitempty,oneof=RSA-OAEP-256 ECDH-ES A128GCMKW A256GCMKW"`
 	// authorization_encrypted_response_enc: OPTIONAL. As defined in [JARM].
 	AuthorizationEncryptedResponseENC string `json:"authorization_encrypted_response_enc,omitempty" bson:"authorization_encrypted_response_enc,omitempty" validate:"omitempty,oneof=A128CBC-HS256 A256CBC-HS512 A128GCM A256GCM"`
-}
-type PresentationDefinitionParameter struct {
-	// ID The Presentation Definition **MUST** contain an id property. The value of this property **MUST** be a string. The string **SHOULD** provide a unique ID for the desired context. For example, a UUID such as 32f54163-7166-48f1-93d8-f f217bdb0653 could provide an ID that is unique in a global context, while a simple string such as my_presentation_definition_1 could be suitably unique in a local context. The id property **SHOULD** be unique within the Presentation Definition itself, meaning no other id values should exist at any level with the same value.
-	ID string `json:"id,omitempty" bson:"id,omitempty" validate:"required"`
-
-	Title string `json:"title,omitempty" bson:"title,omitempty" validate:"omitempty"`
-
-	Description string `json:"description,omitempty" bson:"description,omitempty" validate:"omitempty"`
-
-	// InputDescriptors The Presentation Definition **MUST** contain an input_descriptors property. Its value **MUST** be an array of Input Descriptor Objects, the composition of which are described in the Input Descriptors section below.
-	InputDescriptors []InputDescriptor `json:"input_descriptors,omitempty" bson:"input_descriptors,omitempty" validate:"required"`
-
-	// Name The Presentation Definition **MAY** contain a name property. If present, its value **SHOULD** be a human-friendly string intended to constitute a distinctive designation of the Presentation Definition.
-	Name string `json:"name,omitempty" bson:"name,omitempty"`
-
-	// Purpose The Presentation Definition **MAY** contain a purpose property. If present, its value **MUST** be a string that describes the purpose for which the Presentation Definition's inputs are being used for.
-	Purpose string `json:"purpose,omitempty" bson:"purpose,omitempty"`
 }
 
 type Keys struct {

@@ -8,7 +8,21 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/codes"
 )
+
+func (s *Service) endpointUIMetadata(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUIMetadata")
+	defer span.End()
+
+	reply, err := s.apiv1.UIMetadata(ctx)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	return reply, nil
+}
 
 func (s *Service) endpointUIInteraction(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointUIInteraction")

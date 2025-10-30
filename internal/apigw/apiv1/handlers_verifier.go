@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 	"vc/internal/apigw/db"
@@ -44,6 +45,109 @@ var vpFormats = []byte(
     }
 `)
 
+var dcqlQuery = []byte(
+	`{
+  "credentials": [
+    {
+      "id": "CustomVerifiableId1_5",
+      "format": "vc+sd-jwt",
+      "meta": {
+        "vct_values": [
+          "urn:eu.europa.ec.eudi:pid:1"
+        ]
+      },
+      "claims": [
+        {
+          "path": [
+            "given_name"
+          ]
+        },
+        {
+          "path": [
+            "given_name_birth"
+          ]
+        },
+        {
+          "path": [
+            "family_name"
+          ]
+        }
+      ]
+    }
+  ],
+  "credential_sets": [
+    {
+      "options": [
+        [
+          "CustomVerifiableId1_5"
+        ]
+      ],
+      "purpose": "Purpose not specified"
+    }
+  ]
+}
+`)
+
+var presentationDefinition = []byte(
+	`{
+    "id": "CustomVerifiableId",
+    "title": "PID ARF v1.8",
+    "description": "Select the format and the fields you want to request",
+    "input_descriptors": [
+      {
+        "id": "SdJwtPID",
+        "name": "Custom PID",
+        "constraints": {
+          "limit_disclosure": "required",
+          "fields": [
+            {
+              "name": "VC type",
+              "path": [
+                "$.vct"
+              ],
+              "filter": {
+                "type": "string",
+                "const": "urn:eudi:pid:1"
+              }
+            },
+            {
+              "name": "First name",
+              "path": [
+                "$.given_name"
+              ],
+              "filter": {}
+            },
+             {
+              "name": "Family name",
+              "path": [
+                "$.family_name"
+              ],
+              "filter": {}
+            },
+            {
+              "name": "Birth date",
+              "path": [
+                "$.birthdate"
+              ],
+              "filter": {}
+            }
+          ]
+        },
+        "format": {
+          "vc+sd-jwt": {
+            "sd-jwt_alg_values": [
+              "ES256"
+            ],
+            "kb-jwt_alg_values": [
+              "ES256"
+            ]
+          }
+        }
+      }
+    ]
+}
+`)
+
 type VerificationRequestObjectRequest struct {
 	ID string `form:"id" uri:"id"`
 }
@@ -59,6 +163,18 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", err
 	}
 
+	dcql := &openid4vp.DCQL{}
+	if err := json.Unmarshal(dcqlQuery, &dcql); err != nil {
+		return "", err
+	}
+
+	pd := &openid4vp.PresentationDefinitionParameter{}
+	if err := json.Unmarshal(presentationDefinition, &pd); err != nil {
+		return "", err
+	}
+
+	pd.InputDescriptors[0].Purpose = fmt.Sprintf("Present your credential(s) to get your %s", authorizationContext.Scope)
+
 	vf := map[string]map[string][]string{}
 	if err := json.Unmarshal(vpFormats, &vf); err != nil {
 		return "", err
@@ -70,14 +186,17 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 	}
 
 	authorizationRequest := openid4vp.RequestObject{
-		ResponseURI:  "https://vc-interop-3.sunet.se/verification/direct_post",
-		AUD:          "https://self-issued.me/v2",
-		ISS:          authorizationContext.ClientID,
-		ClientID:     authorizationContext.ClientID,
-		ResponseType: "vp_token",
-		ResponseMode: "direct_post.jwt",
-		State:        authorizationContext.State,
-		Nonce:        authorizationContext.Nonce,
+		ResponseURI:            "https://vc-interop-3.sunet.se/verification/direct_post",
+		AUD:                    "https://self-issued.me/v2",
+		ISS:                    authorizationContext.ClientID,
+		ClientID:               authorizationContext.ClientID,
+		ResponseType:           "vp_token",
+		ResponseMode:           "direct_post.jwt",
+		State:                  authorizationContext.State,
+		Nonce:                  authorizationContext.Nonce,
+		DCQLQuery:              dcql,
+		PresentationDefinition: pd,
+
 		ClientMetadata: &openid4vp.ClientMetadata{
 			VPFormats: vf,
 			JWKS: &openid4vp.Keys{

@@ -8,14 +8,23 @@ import (
 	"github.com/google/uuid"
 )
 
-func (c *Client) UICredentialInfo(ctx context.Context) (map[string]*model.CredentialConstructor, error) {
-	reply := c.cfg.CredentialConstructor
+type UIMetadataReply struct {
+	Credentials      map[string]*model.CredentialConstructor `json:"credentials"`
+	SupportedWallets map[string]string                       `json:"supported_wallets"`
+}
 
-	for _, constructor := range reply {
+func (c *Client) UIMetadata(ctx context.Context) (*UIMetadataReply, error) {
+
+	reply := &UIMetadataReply{}
+	reply.Credentials = c.cfg.CredentialConstructor
+
+	for _, constructor := range reply.Credentials {
 		constructor.AuthMethod = ""
 		constructor.VCTMFilePath = ""
 		constructor.VCTM = nil
 	}
+
+	reply.SupportedWallets = c.cfg.Verifier.SupportedWallets
 
 	return reply, nil
 }

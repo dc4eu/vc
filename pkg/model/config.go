@@ -150,11 +150,12 @@ type MockAS struct {
 
 // Verifier holds the verifier configuration
 type Verifier struct {
-	APIServer         APIServer      `yaml:"api_server" validate:"required"`
-	GRPCServer        GRPCServer     `yaml:"grpc_server" validate:"required"`
-	ExternalServerURL string         `yaml:"external_server_url" validate:"required"`
-	OAuthServer       OAuthServer    `yaml:"oauth_server" validate:"omitempty"`
-	IssuerMetadata    IssuerMetadata `yaml:"issuer_metadata" validate:"omitempty"`
+	APIServer         APIServer         `yaml:"api_server" validate:"required"`
+	GRPCServer        GRPCServer        `yaml:"grpc_server" validate:"required"`
+	ExternalServerURL string            `yaml:"external_server_url" validate:"required"`
+	OAuthServer       OAuthServer       `yaml:"oauth_server" validate:"omitempty"`
+	IssuerMetadata    IssuerMetadata    `yaml:"issuer_metadata" validate:"omitempty"`
+	SupportedWallets  map[string]string `yaml:"supported_wallets" validate:"omitempty"`
 }
 
 // Datastore holds the datastore configuration

@@ -4,7 +4,6 @@ import (
 	"context"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/verifier/apiv1"
-	"vc/pkg/model"
 	"vc/pkg/oauth2"
 )
 
@@ -20,5 +19,5 @@ type Apiv1 interface {
 
 	// UI
 	UIInteraction(ctx context.Context, req *apiv1.UIInteractionRequest) (*apiv1.UIInteractionReply, error)
-	UICredentialInfo(ctx context.Context) (map[string]*model.CredentialConstructor, error)
+	UIMetadata(ctx context.Context) (*apiv1.UIMetadataReply, error)
 }

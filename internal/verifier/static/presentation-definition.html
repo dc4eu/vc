@@ -90,6 +90,11 @@
                     <div class="block">
                         <pre class="has-border-radius" x-text="presentationDefinition.authorization_request"></pre>
                     </div>
+                    <div class="block buttons is-centered">
+                        <template x-for="[label, uri] in Object.entries(redirectUris)">
+                            <a :href="uri" class="button" x-text="label"></a>
+                        </template>
+                    </div>
                     <template x-if="dcqlQuery">
                         <div class="block">
                             <details class="vc-dcql-query-details">

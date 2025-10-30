@@ -21,6 +21,12 @@ const credentialsList = v.record(
     credentialAttributesSchema,
 );
 
+/** @typedef {v.InferOutput<typeof metadataResponseSchema>} MetadataResponse */
+const metadataResponseSchema = v.object({
+    credentials: credentialsList,
+    supported_wallets: v.record(v.string(), v.string()),
+})
+
 /** @typedef {v.InferOutput<typeof dcqlQueryCredentialSchema>} DCQLQueryCredential */
 const dcqlQueryCredentialSchema = v.object({
     id: v.string(),
@@ -72,6 +78,9 @@ Alpine.data("app", () => ({
     /** @type {CredentialsList | null} */
     credentialsList: null,
 
+    /** @type {Record<string, string> | null} */
+    walletInstances: null,
+
      /** @type {{ id: string; vct: string; claims: Record<string, string[]>; } | null} */
     credentialAttributes: null,
 
@@ -80,6 +89,9 @@ Alpine.data("app", () => ({
 
     /** @type {PresentationDefinition | null} */
     presentationDefinition: null,
+
+    /** @type {Record<string, string> | null} */
+    redirectUris: null,
 
     async init() {
         await this.lookupCredentialsList();
@@ -96,9 +108,10 @@ Alpine.data("app", () => ({
     async lookupCredentialsList() {
         const res = await this.fetchData(new URL("/ui/metadata", baseUrl), {});
 
-        const data = v.parse(credentialsList, res);
+        const data = v.parse(metadataResponseSchema, res);
 
-        this.credentialsList = data;
+        this.credentialsList = data.credentials;
+        this.walletInstances = data.supported_wallets;
     },
 
     /** @param {SubmitEvent} event */
@@ -173,6 +186,11 @@ Alpine.data("app", () => ({
             this.error = "Selected attributes list is null";
             return;
         }
+
+        if (!this.walletInstances) {
+            this.error = "Wallet instances list is null";
+            return;
+        }
         
         if (!(this.$refs.attributesSelectionForm instanceof HTMLFormElement)) {
             this.error = "Attributes selection form not of type 'HtmlFormElement'";
@@ -229,6 +247,19 @@ Alpine.data("app", () => ({
             );
 
             this.presentationDefinition = v.parse(presentationDefinitionSchema, res);
+
+            const presDefURI = new URL(this.presentationDefinition.authorization_request);
+
+            for (const [label, url] of Object.entries(this.walletInstances)) {
+                const uri = new URL(url);
+
+                uri.search = presDefURI.search
+                uri.hash = presDefURI.hash
+
+                if (!this.redirectUris) this.redirectUris = {};
+
+                this.redirectUris[`Open with ${label}`] = uri.toString();
+            }
         } catch (error) {
             this.error = `Error during posting of dcql query: ${error}`;
             return;

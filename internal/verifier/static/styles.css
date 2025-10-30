@@ -1,3 +1,7 @@
+.has-border-radius {
+    border-radius: var(--bulma-box-radius);
+}
+
 .vc-loader {
     min-height: 100px;
     display: grid;

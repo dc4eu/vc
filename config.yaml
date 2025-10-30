@@ -118,7 +118,7 @@ verifier:
   #Replace fqdn with same as in x5c_san_dns cert (used to build web-links etc. example: "vcverifier.sunet.se") - ip is only used when working in local dev env.
   external_server_url: "http://vc_dev_verifier:8080"
   supported_wallets:
-    "SUNET dev": "https://dev.wallet.sunet.se/"
+    "SUNET dev": "https://dev.wallet.sunet.se/cb"
 
 registry:
   api_server:

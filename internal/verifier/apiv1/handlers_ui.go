@@ -43,7 +43,7 @@ type UIInteractionReply struct {
 
 // UIInteraction handles front-end interactions, replying with an Authorization Request that contains a Request URI and DCQL query, the latter for UI to show.
 func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (*UIInteractionReply, error) {
-	c.log.Debug("uIPresentationDefinition", "dcql_query", req.DCQLQuery)
+	c.log.Debug("uiInteraction", "dcql_query", req.DCQLQuery)
 
 	nonce := uuid.NewString()
 	state := uuid.NewString()

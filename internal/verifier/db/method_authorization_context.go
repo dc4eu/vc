@@ -42,18 +42,21 @@ func (c *AuthorizationContextColl) createIndex(ctx context.Context) error {
 
 	indexRequestURIUniq := mongo.IndexModel{
 		Keys: bson.D{
-			bson.E{Key: "request_uri", Value: 1},
+			bson.E{Key: "session_id", Value: 1},
 		},
-		Options: options.Index().SetName("oauth_request_uri_uniq").SetUnique(true),
+		Options: options.Index().SetName("session_iduniq").SetUnique(true),
 	}
-	indexCodeUniq := mongo.IndexModel{
-		Keys: bson.D{
-			bson.E{Key: "code", Value: 1},
-		},
-		Options: options.Index().SetName("oauth_code_uniq").SetUnique(true),
-	}
+	//indexCodeUniq := mongo.IndexModel{
+	//	Keys: bson.D{
+	//		bson.E{Key: "code", Value: 1},
+	//	},
+	//	Options: options.Index().SetName("oauth_code_uniq").SetUnique(true),
+	//}
 
-	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{indexRequestURIUniq, indexCodeUniq})
+	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{
+		indexRequestURIUniq,
+		//indexCodeUniq,
+	})
 	if err != nil {
 		return err
 	}

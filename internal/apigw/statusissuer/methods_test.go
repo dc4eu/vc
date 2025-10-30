@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"vc/internal/verifier/db"
+	"vc/internal/apigw/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"

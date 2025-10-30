@@ -64,6 +64,9 @@ type Apiv1 interface {
 	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*sdjwt3.VCTM, error)
 	SVGTemplateReply(ctx context.Context, req *apiv1.SVGTemplateRequest) (*apiv1.SVGTemplateReply, error)
 
+	// Status lists endpoints
+	StatusLists(ctx context.Context, req *apiv1.StatusListsRequest) (string, error)
+
 	// misc endpoints
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 }

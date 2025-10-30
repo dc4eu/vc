@@ -50,7 +50,9 @@ func (s *Service) Submit(id string, msg any) {
 func (s *Service) Close(ctx context.Context) error {
 	for id, b := range s.CH {
 		s.log.Debug("close broadcaster", "id", id)
-		b.Close()
+		if err := b.Close(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

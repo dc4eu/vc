@@ -12,7 +12,6 @@ import (
 	"vc/internal/verifier/db"
 	"vc/internal/verifier/httpserver"
 	"vc/internal/verifier/notify"
-	"vc/internal/verifier/statusissuer"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
@@ -55,12 +54,6 @@ func main() {
 
 	dbService, err := db.New(ctx, cfg, tracer, log)
 	services["dbService"] = dbService
-	if err != nil {
-		panic(err)
-	}
-
-	statusIssuer, err := statusissuer.New(ctx, dbService, log)
-	services["statusIssuer"] = statusIssuer
 	if err != nil {
 		panic(err)
 	}

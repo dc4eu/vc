@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"time"
 	"vc/internal/apigw/db"
+	"vc/internal/apigw/statusissuer"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -29,6 +30,7 @@ type Client struct {
 	log                         *logger.Log
 	tracer                      *trace.Tracer
 	datastoreClient             *vcclient.Client
+	statusIssuer                *statusissuer.Service
 	issuerMetadata              *openid4vci.CredentialIssuerMetadataParameters
 	issuerMetadataSigningKey    any
 	issuerMetadataSigningCert   *x509.Certificate
@@ -42,10 +44,11 @@ type Client struct {
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, db *db.Service, statusIssuer *statusissuer.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:                         cfg,
 		db:                          db,
+		statusIssuer:                statusIssuer,
 		log:                         log.New("apiv1"),
 		tracer:                      tracer,
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),

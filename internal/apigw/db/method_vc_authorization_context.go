@@ -7,10 +7,9 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -43,13 +42,13 @@ func (c *VCAuthorizationContextColl) createIndex(ctx context.Context) error {
 
 	indexRequestURIUniq := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "request_uri", Value: 1},
+			bson.E{Key: "request_uri", Value: 1},
 		},
 		Options: options.Index().SetName("oauth_request_uri_uniq").SetUnique(true),
 	}
 	indexCodeUniq := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "code", Value: 1},
+			bson.E{Key: "code", Value: 1},
 		},
 		Options: options.Index().SetName("oauth_code_uniq").SetUnique(true),
 	}

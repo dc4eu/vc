@@ -45,8 +45,8 @@ func (c *StatusListMetadataColl) initMetadataDoc(ctx context.Context) error {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			doc = &StatusListMetadataDoc{
-				CurrentSection: 1,
-				Sections:       []int64{1},
+				CurrentSection: 0,
+				Sections:       []int64{0},
 			}
 			_, err := c.Coll.InsertOne(ctx, doc)
 			return err
@@ -68,13 +68,13 @@ func (c *StatusListMetadataColl) GetCurrentSection(ctx context.Context) (int64, 
 	return doc.CurrentSection, nil
 }
 
-func (c *StatusListMetadataColl) createNewSection(ctx context.Context) error {
+func (c *StatusListMetadataColl) UpdateCurrentSection(ctx context.Context, newSection int64) error {
 	doc := &StatusListMetadataDoc{}
 	if err := c.Coll.FindOne(ctx, bson.M{}).Decode(doc); err != nil {
 		return err
 	}
 
-	doc.CurrentSection = doc.CurrentSection + 1
+	doc.CurrentSection = newSection
 	doc.Sections = append(doc.Sections, doc.CurrentSection)
 
 	update := bson.M{

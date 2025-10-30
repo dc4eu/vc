@@ -6,9 +6,9 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // VCConsentColl is consent collection
@@ -31,9 +31,7 @@ func (c *VCConsentColl) createIndex(ctx context.Context) error {
 				Key: "authentic_source", Value: 1,
 			},
 		},
-		Options: &options.IndexOptions{
-			Unique: &[]bool{true}[0],
-		},
+		Options: options.Index().SetUnique(true),
 	}
 	_, err := c.Coll.Indexes().CreateOne(ctx, indexModel)
 	if err != nil {

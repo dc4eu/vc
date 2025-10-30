@@ -89,14 +89,6 @@ type VPTokenRaw struct {
 	JSON map[string]interface{} `json:"json,omitempty"`
 }
 
-func (vp *VPTokenRaw) isJWTBased() bool {
-	return vp.JWT != ""
-}
-
-func (vp *VPTokenRaw) isJSONBased() bool {
-	return vp.JSON != nil
-}
-
 //
 //func (vp *VPTokenRaw) UnmarshalJSON(data []byte) error {
 //	var jwt string

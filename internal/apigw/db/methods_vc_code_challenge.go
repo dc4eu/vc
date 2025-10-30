@@ -7,10 +7,10 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -43,7 +43,7 @@ func (c *VCCodeChallengeColl) createIndex(ctx context.Context) error {
 
 	indexCodeChallengeUniq := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "code_challenge", Value: 1},
+			bson.E{Key: "code_challenge", Value: 1},
 		},
 		Options: options.Index().SetName("auth_code_uniq").SetUnique(true),
 	}
@@ -117,7 +117,7 @@ func (c *VCCodeChallengeColl) Grant(ctx context.Context, codeVerifier, codeChall
 	}
 
 	err := c.Coll.FindOneAndUpdate(ctx, filter, bson.M{
-		"$set": bson.M{"last_used": primitive.NewDateTimeFromTime(time.Now())},
+		"$set": bson.M{"last_used": bson.NewDateTimeFromTime(time.Now())},
 	}).Err()
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())

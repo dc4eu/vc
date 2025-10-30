@@ -11,6 +11,7 @@ import (
 	"vc/internal/apigw/httpserver"
 	"vc/internal/apigw/inbound"
 	"vc/internal/apigw/outbound"
+	"vc/internal/apigw/statusissuer"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
@@ -52,6 +53,12 @@ func main() {
 		panic(err)
 	}
 
+	statusIssuerService, err := statusissuer.New(ctx, dbService, log)
+	services["statusIssuerService"] = statusIssuerService
+	if err != nil {
+		panic(err)
+	}
+
 	var eventPublisher apiv1.EventPublisher
 	if cfg.IsAsyncEnabled(mainLog) {
 		var err error
@@ -62,7 +69,7 @@ func main() {
 		}
 	}
 
-	apiv1Client, err := apiv1.New(ctx, dbService, tracer, cfg, log)
+	apiv1Client, err := apiv1.New(ctx, dbService, statusIssuerService, tracer, cfg, log)
 	if err != nil {
 		panic(err)
 	}

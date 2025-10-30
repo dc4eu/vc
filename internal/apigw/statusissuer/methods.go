@@ -8,6 +8,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 const (
@@ -44,6 +47,53 @@ func (s *Service) Append(ctx context.Context, file *os.File, status uint8) error
 	return nil
 }
 
+func (s *Service) CreateNewSectionIfNeeded(ctx context.Context) (int64, error) {
+	currentSection, err := s.db.StatusListMetadata.GetCurrentSection(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	countFilter := bson.M{
+		"section": currentSection,
+		"decoy":   true,
+	}
+	numberOfDecoyDocs, err := s.db.StatusListColl.CountDocs(ctx, countFilter)
+	if err != nil {
+		return 0, err
+	}
+
+	if numberOfDecoyDocs <= 1000 {
+		newSection := currentSection + 1
+		if err := s.db.StatusListColl.CreateNewSection(ctx, newSection); err != nil {
+			return 0, err
+		}
+
+		// Update current section in metadata
+
+		if err := s.db.StatusListMetadata.UpdateCurrentSection(ctx, newSection); err != nil {
+			return 0, err
+		}
+		return newSection, nil
+	}
+
+	return currentSection, nil
+}
+
+// AddStatus adds a new status to the status list and returns the section and index of the new status record
+func (s *Service) AddStatus(ctx context.Context, status uint8) (int64, int64, error) {
+	currentSection, err := s.CreateNewSectionIfNeeded(ctx)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	index, err := s.db.StatusListColl.Add(ctx, currentSection, status)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return currentSection, index, nil
+}
+
 func (s *Service) CompressAndEncode(ctx context.Context, statuses []uint8) (string, error) {
 	var b bytes.Buffer
 	w, err := zlib.NewWriterLevel(&b, zlib.BestCompression)
@@ -65,6 +115,9 @@ func (s *Service) CompressAndEncode(ctx context.Context, statuses []uint8) (stri
 }
 
 func (s *Service) base64URLEncode(ctx context.Context, data []uint8) string {
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	return base64.URLEncoding.EncodeToString(data)
 }
 

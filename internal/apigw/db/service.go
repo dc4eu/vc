@@ -10,8 +10,8 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/trace"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -41,6 +41,8 @@ type Service struct {
 	VCUsersColl                *VCUsersColl
 	VCCodeChallengeColl        *VCCodeChallengeColl
 	VCCredentialOfferColl      *VCCredentialOfferColl
+	StatusListColl             *StatusListColl
+	StatusListMetadata         *StatusListMetadataColl
 }
 
 // New creates a new database service
@@ -102,6 +104,16 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		return nil, err
 	}
 
+	service.StatusListColl, err = NewStatusListColl(ctx, "status_list_v2", service, log.New("status_list_v2"))
+	if err != nil {
+		return nil, err
+	}
+
+	service.StatusListMetadata, err = NewStatusListMetadataColl(ctx, "status_list_metadata", service, log.New("status_list_metadata"))
+	if err != nil {
+		return nil, err
+	}
+
 	service.log.Info("Started")
 
 	return service, nil
@@ -112,7 +124,7 @@ func (s *Service) connect(ctx context.Context) error {
 	ctx, span := s.tracer.Start(ctx, "apigw:db:connect")
 	defer span.End()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
+	client, err := mongo.Connect(options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
 	if err != nil {
 		return err
 	}

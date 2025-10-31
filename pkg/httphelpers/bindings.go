@@ -3,6 +3,8 @@ package httphelpers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"reflect"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 
@@ -24,13 +26,30 @@ func (b *bindingHandler) FastAndSimple(ctx context.Context, c *gin.Context, v an
 }
 
 func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) error {
-	if err := c.ShouldBind(v); err != nil {
-		b.log.Debug("error", "error", err)
-		return err
-	}
+	//if err := c.ShouldBind(v); err != nil {
+	//	b.log.Debug("error", "error", err)
+	//	return err
+	//}
 
 	if err := c.BindUri(v); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (b *bindingHandler) RequestV2(ctx context.Context, c *gin.Context, v any) error {
+	typ := reflect.TypeOf(v)
+	fmt.Println("type", typ, typ.Kind())
+
+	for i := 0; i < typ.NumField(); i++ {
+		// Get the field, returns https://golang.org/pkg/reflect/#StructField
+		field := typ.Field(i)
+
+		// Get the field tag value
+		tag := field.Tag.Get("uri")
+
+		fmt.Printf("%d. %v (%v), tag: '%v'\n", i+1, field.Name, field.Type.Name(), tag)
 	}
 
 	return nil

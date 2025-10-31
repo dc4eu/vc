@@ -2,9 +2,11 @@ package apiv1
 
 import "context"
 
+//	type StatusListsRequestHeaders struct {
+//		Accept string `header:"Accept" validate:"required"`
+//	}
 type StatusListsRequest struct {
-	ID          string `uri:"id" validate:"required"`
-	ContentType string `header:"Content-Type" validate:"required"`
+	ID string `json:"id" uri:"id" validate:"required"`
 }
 
 func (c *Client) StatusLists(ctx context.Context, req *StatusListsRequest) (string, error) {

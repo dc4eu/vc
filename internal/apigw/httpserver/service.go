@@ -128,7 +128,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent/svg-template", http.StatusOK, s.endpointOAuthAuthorizationConsentSvgTemplate)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "statuslists/1", http.StatusOK, s.endpointStatusLists)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "statuslists/:id", http.StatusOK, s.endpointStatusLists)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", 200, s.endpointHealth)
 

@@ -13,7 +13,7 @@ func (s *Service) endpointStatusLists(ctx context.Context, c *gin.Context) (any,
 	defer span.End()
 
 	request := &apiv1.StatusListsRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
+	if err := s.httpHelpers.Binding.RequestV2(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}

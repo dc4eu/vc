@@ -26,6 +26,7 @@ type Client struct {
 	issuerMetadataSigningCert   *x509.Certificate
 	issuerMetadataSigningChain  []string
 	ephemeralEncryptionKeyCache *ttlcache.Cache[string, jwk.Key]
+	requestObjectCache          *ttlcache.Cache[string, *openid4vp.RequestObject]
 
 	trustService *openid4vp.TrustService
 }
@@ -37,10 +38,13 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		db:                          db,
 		log:                         log.New("apiv1"),
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
+		requestObjectCache:          ttlcache.New(ttlcache.WithTTL[string, *openid4vp.RequestObject](5 * time.Minute)),
 	}
 
 	// Start the ephemeral encryption key cache
 	go c.ephemeralEncryptionKeyCache.Start()
+
+	go c.requestObjectCache.Start()
 
 	var err error
 	if c.cfg.Verifier.OAuthServer.Metadata.Path != "" {

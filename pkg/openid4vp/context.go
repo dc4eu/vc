@@ -10,17 +10,12 @@ func (r *RequestObject) CreateAuthorizationRequestURI(ctx context.Context, verif
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
-	u, err := url.JoinPath("openid4vp", "cb")
-	if err != nil {
-		return "", err
+	u := url.URL{
+		Scheme: "openid4vp",
+		Path:   "cb",
 	}
 
-	uu, err := url.Parse(u)
-	if err != nil {
-		return "", err
-	}
-
-	q := uu.Query()
+	q := u.Query()
 	q.Set("client_id", r.ClientID)
 
 	requestObjectURL, err := r.createRequestURI(ctx, verifierHost, id)
@@ -28,10 +23,10 @@ func (r *RequestObject) CreateAuthorizationRequestURI(ctx context.Context, verif
 		return "", err
 	}
 
-	q.Set("requestURI", requestObjectURL)
-	uu.RawQuery = q.Encode()
+	q.Set("request_uri", requestObjectURL)
+	u.RawQuery = q.Encode()
 
-	return uu.String(), nil
+	return u.String(), nil
 }
 
 func (r *RequestObject) createRequestURI(ctx context.Context, verifierHost, id string) (string, error) {

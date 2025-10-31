@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -27,18 +26,10 @@ func (s *Service) endpointUIMetadata(ctx context.Context, c *gin.Context) (any, 
 func (s *Service) endpointUIInteraction(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointUIInteraction")
 
-	session := sessions.Default(c)
-	session.Set("session_id", uuid.NewString())
-	if err := session.Save(); err != nil {
-		return nil, err
-	}
-
 	request := &apiv1.UIInteractionRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}
-
-	request.SessionID = session.Get("session_id").(string)
 
 	reply, err := s.apiv1.UIInteraction(ctx, request)
 	if err != nil {

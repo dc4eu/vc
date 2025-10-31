@@ -89,13 +89,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuthMetadata)
 
 	sgVerification := rgRoot.Group("/verification")
-	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodPost, "/direct_post", http.StatusOK, s.endpointVerificationRequestObject)
+	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodGet, "/request-object", http.StatusOK, s.endpointVerificationRequestObject)
+	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodPost, "/direct_post", http.StatusOK, s.endpointVerificationDirectPost)
 
 	rgUI := rgRoot.Group("/ui")
 	rgUI.Use(s.httpHelpers.Middleware.UserSession(s.sessionsName, s.sessionsAuthKey, s.sessionsEncKey, s.sessionsOptions))
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodPost, "/interaction", http.StatusOK, s.endpointUIInteraction)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/notify", http.StatusOK, s.endpointUINotify)
-	// credential attributes convey information about attributes, vct and other attributes in vctm, used by the web frontend
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/metadata", http.StatusOK, s.endpointUIMetadata)
 
 	rgDocs := rgRoot.Group("/swagger")

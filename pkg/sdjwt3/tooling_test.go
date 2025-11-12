@@ -18,8 +18,82 @@ var (
 )
 
 var (
+	mockHeaderV3        = "eyJhbGciOiAiRVMyNTYiLCAidHlwIjogImRjK3NkLWp3dCIsICJraWQiOiAiZG9jLXNpZ25lci0wNS0yNS0yMDIyIn0"
+	mockTokenV3         = "eyJfc2QiOiBbIjA5dktySk1PbHlUV00wc2pwdV9wZE9CVkJRMk0xeTNLaHBINTE1blhrcFkiLCAiMnJzakdiYUMwa3k4bVQwcEpyUGlvV1RxMF9kYXcxc1g3NnBvVWxnQ3diSSIsICJFa084ZGhXMGRIRUpidlVIbEVfVkNldUM5dVJFTE9pZUxaaGg3WGJVVHRBIiwgIklsRHpJS2VpWmREd3BxcEs2WmZieXBoRnZ6NUZnbldhLXNONndxUVhDaXciLCAiSnpZakg0c3ZsaUgwUjNQeUVNZmVadTZKdDY5dTVxZWhabzdGN0VQWWxTRSIsICJQb3JGYnBLdVZ1Nnh5bUphZ3ZrRnNGWEFiUm9jMkpHbEFVQTJCQTRvN2NJIiwgIlRHZjRvTGJnd2Q1SlFhSHlLVlFaVTlVZEdFMHc1cnREc3JaemZVYW9tTG8iLCAiamRyVEU4WWNiWTRFaWZ1Z2loaUFlX0JQZWt4SlFaSUNlaVVRd1k5UXF4SSIsICJqc3U5eVZ1bHdRUWxoRmxNXzNKbHpNYVNGemdsaFFHMERwZmF5UXdMVUs0Il0sICJpc3MiOiAiaHR0cHM6Ly9leGFtcGxlLmNvbS9pc3N1ZXIiLCAiaWF0IjogMTY4MzAwMDAwMCwgImV4cCI6IDE4ODMwMDAwMDAsICJ2Y3QiOiAiaHR0cHM6Ly9jcmVkZW50aWFscy5leGFtcGxlLmNvbS9pZGVudGl0eV9jcmVkZW50aWFsIiwgIl9zZF9hbGciOiAic2hhLTI1NiIsICJjbmYiOiB7Imp3ayI6IHsia3R5IjogIkVDIiwgImNydiI6ICJQLTI1NiIsICJ4IjogIlRDQUVSMTladnUzT0hGNGo0VzR2ZlNWb0hJUDFJTGlsRGxzN3ZDZUdlbWMiLCAieSI6ICJaeGppV1diWk1RR0hWV0tWUTRoYlNJaXJzVmZ1ZWNDRTZ0NGpUOUYySFpRIn19fQ"
+	mockSignatureV3     = "XURsFs2def7z9ldt9UDafvkIjtmaR76a-vBqiBcieJuQWwn0gFzxgDGoMv2xcZ3IruzXnugNjOT__R-luaB_GA"
+	mockSDV3GivenName   = "WyIyR0xDNDJzS1F2ZUNmR2ZyeU5STjl3IiwgImdpdmVuX25hbWUiLCAiSm9obiJd"
+	mockSDV3Email       = "WyI2SWo3dE0tYTVpVlBHYm9TNXRtdlZBIiwgImVtYWlsIiwgImpvaG5kb2VAZXhhbXBsZS5jb20iXQ"
+	mockSDV3PhoneNumber = "WyJlSThaV205UW5LUHBOUGVOZW5IZGhRIiwgInBob25lX251bWJlciIsICIrMS0yMDItNTU1LTAxMDEiXQ"
+	mockSDV3Address     = "WyJRZ19PNjR6cUF4ZTQxMmExMDhpcm9BIiwgImFkZHJlc3MiLCB7InN0cmVldF9hZGRyZXNzIjogIjEyMyBNYWluIFN0IiwgImxvY2FsaXR5IjogIkFueXRvd24iLCAicmVnaW9uIjogIkFueXN0YXRlIiwgImNvdW50cnkiOiAiVVMifV0"
+	mockSDV3Birthdate   = "WyJBSngtMDk1VlBycFR0TjRRTU9xUk9BIiwgImJpcnRoZGF0ZSIsICIxOTQwLTAxLTAxIl0"
+	mockSDV3IsOver18    = "WyJQYzMzSk0yTGNoY1VfbEhnZ3ZfdWZRIiwgImlzX292ZXJfMTgiLCB0cnVlXQ"
+	mockSDV3IsOver22    = "WyJHMDJOU3JRZmpGWFE3SW8wOXN5YWpBIiwgImlzX292ZXJfMjEiLCB0cnVlXQ"
+	mockSDV3IsOver65    = "WyJsa2x4RjVqTVlsR1RQVW92TU5JdkNBIiwgImlzX292ZXJfNjUiLCB0cnVlXQ"
+
+	mockSDJWTFullV3  = mockHeaderV3 + "." + mockTokenV3 + "." + mockSignatureV3 + "~" + mockSDV3GivenName + "~" + mockSDV3Email + "~" + mockSDV3PhoneNumber + "~" + mockSDV3Address + "~" + mockSDV3Birthdate + "~" + mockSDV3IsOver18 + "~" + mockSDV3IsOver22 + "~" + mockSDV3IsOver65 + "~"
+	mockSDJWTLigthV3 = mockHeaderV3 + "." + mockTokenV3 + "." + mockSignatureV3 + "~" + mockSDV3GivenName + "~"
+)
+
+var (
 	mockTokenWithselectiveDisclosure       = mockToken + mockSelectiveDisclosure + "~"
 	mockTokenWithselectiveDisclosureWithKB = mockTokenWithselectiveDisclosure + mockKB
+)
+
+var (
+	mockCredential = map[string]any{
+		"_sd": []any{
+			"8-6ocBCm_wKShqKH1K-tNZ7uatfhuZ_m-4lbctNm8Es",
+			"HL2rCebrsfu8zceQaVsPjNGG4sDqPKWWQs_b3wJAy4k",
+			"gVI455Eu7veIUMAeBQjBv3JbJxyF-P89gdnmDkhaR-s",
+			"s8TDppzc9jiSm6-z_VAERB4K6r3hjMlYx7lRrdhG90w",
+			"y2IBSojcg7acn-_PPJDJ8oODFyH93FlKg4Rk_kTltNs",
+			"uNA0RiRM50aR3YpE1Gx550UllnecRbFnIKUPpr-8mEE",
+			"f4R11Ho330Ya8Yk-DRCGvrAGENM5jFe9QnP4jNG6iJg",
+			"WPmZWG4vg_DrSb3mz-UNuX-Wcia1vcGBxKsDZfokq5M",
+			"FoemAME-2zylWaTeGOPJejtW2FePZalWzlfzYyAyII0",
+			"zEJ0QwYumAHM4CJgV3fXa2xx63SCFkWDK9ZNLgWUUQI",
+			"MaiSPQY_LScquBC4m1pQ8ss86CqqoB6gBQ2o9IWmYwg",
+			"FKXtHQ8ecZMVq4WUuCH-SDdvSOpa6Xx-GU1yi9MilHw",
+			"mOGUpoT8eH6yeh-jahP4FjxbgzqNgVTN6kswatFzTdQ",
+			"CoJ_JfBF1v-L2fTkLJG7yKoMPsGMWthhriil41NVicg",
+			"tIBcL8MPk8Mx5Ukkgs6QhbML2N0Wg8I5v5MS7UwECe0",
+			"HgYkmvhmto_DbzASKphqhaM-_OZatAEpzDc7HQSzc2Q",
+			"B-ygWJ4qAVdhbrFVdb_uZB1dH4o5QVcOSKCiZi87rcE",
+			"PjFstdGhywb1ZmoJY92vYhwV7cvuevgWvUjNRna8bkY",
+			"vQ8mDmcIhijcaHPDIoSS7X5e9HdppX6qYnPdQ94xD7E",
+			"LdidnJg4lV7jrdl6-izq1WzetQHHz3r6As11FcYH1lk",
+			"dFKROOcSRjK3f-nroZrjohkJA_p8vkOM0u8dhV5A8Xk",
+			"BVxHFhKfWYwX16xtHIRu1y_uKfN5cLXR4HIQUyo82LU",
+			"YOvphs3yIgKlh-JLzo1DxiNZd-LMvV4dUO0tdyXOPZs",
+			"bln6qDUPAEhY4RFhEvuoJIOnPHHIui-JgCU3I5Db93c",
+			"49AxzE-RmPPJNrtO0S9yq7eUAcdpcM3Tiok6a6agmrY",
+			"zYI_3v0rguQ8UfG0edJ2exxpdZqzx1agk74I7e_0PWA",
+		},
+		"_sd_alg":                    "sha-256",
+		"authentic_source_person_id": "authentic_source_person_id_102",
+		"cnf": map[string]any{
+			"jwk": map[string]any{
+				"crv":     "P-256",
+				"ext":     true,
+				"key_ops": []any{"verify"},
+				"kty":     "EC",
+				"x":       "bGvPcUX4XTSKWy-U6qPVNU52iSOj6ngjjJx6HShwFsM",
+				"y":       "pYUxXgTHcE3vAghOnufSYTOjPYSFJDUkusgW8D2lH2Q",
+			},
+		},
+		"exp":               1.782910597e+09,
+		"expiry_date":       "2033-01-01",
+		"iss":               "https://vc-interop-3.sunet.se",
+		"issuing_authority": "SUNET",
+		"issuing_country":   "SE",
+		"given_name":        "Gary",
+		"family_name":       "Oldman",
+		"nbf":               1.751374597e+09,
+		"schema": map[string]any{
+			"name": "DefaultSchema",
+		},
+		"vct": "urn:eudi:pid:1",
+	}
 )
 
 func TestSplitToken(t *testing.T) {
@@ -244,70 +318,138 @@ func TestConstruct(t *testing.T) {
 		{
 			name:  "empty",
 			token: mockBody,
-			want: map[string]any{
-				"_sd": []any{
-					"8-6ocBCm_wKShqKH1K-tNZ7uatfhuZ_m-4lbctNm8Es",
-					"HL2rCebrsfu8zceQaVsPjNGG4sDqPKWWQs_b3wJAy4k",
-					"gVI455Eu7veIUMAeBQjBv3JbJxyF-P89gdnmDkhaR-s",
-					"s8TDppzc9jiSm6-z_VAERB4K6r3hjMlYx7lRrdhG90w",
-					"y2IBSojcg7acn-_PPJDJ8oODFyH93FlKg4Rk_kTltNs",
-					"uNA0RiRM50aR3YpE1Gx550UllnecRbFnIKUPpr-8mEE",
-					"f4R11Ho330Ya8Yk-DRCGvrAGENM5jFe9QnP4jNG6iJg",
-					"WPmZWG4vg_DrSb3mz-UNuX-Wcia1vcGBxKsDZfokq5M",
-					"FoemAME-2zylWaTeGOPJejtW2FePZalWzlfzYyAyII0",
-					"zEJ0QwYumAHM4CJgV3fXa2xx63SCFkWDK9ZNLgWUUQI",
-					"MaiSPQY_LScquBC4m1pQ8ss86CqqoB6gBQ2o9IWmYwg",
-					"FKXtHQ8ecZMVq4WUuCH-SDdvSOpa6Xx-GU1yi9MilHw",
-					"mOGUpoT8eH6yeh-jahP4FjxbgzqNgVTN6kswatFzTdQ",
-					"CoJ_JfBF1v-L2fTkLJG7yKoMPsGMWthhriil41NVicg",
-					"tIBcL8MPk8Mx5Ukkgs6QhbML2N0Wg8I5v5MS7UwECe0",
-					"HgYkmvhmto_DbzASKphqhaM-_OZatAEpzDc7HQSzc2Q",
-					"B-ygWJ4qAVdhbrFVdb_uZB1dH4o5QVcOSKCiZi87rcE",
-					"PjFstdGhywb1ZmoJY92vYhwV7cvuevgWvUjNRna8bkY",
-					"vQ8mDmcIhijcaHPDIoSS7X5e9HdppX6qYnPdQ94xD7E",
-					"LdidnJg4lV7jrdl6-izq1WzetQHHz3r6As11FcYH1lk",
-					"dFKROOcSRjK3f-nroZrjohkJA_p8vkOM0u8dhV5A8Xk",
-					"BVxHFhKfWYwX16xtHIRu1y_uKfN5cLXR4HIQUyo82LU",
-					"YOvphs3yIgKlh-JLzo1DxiNZd-LMvV4dUO0tdyXOPZs",
-					"bln6qDUPAEhY4RFhEvuoJIOnPHHIui-JgCU3I5Db93c",
-					"49AxzE-RmPPJNrtO0S9yq7eUAcdpcM3Tiok6a6agmrY",
-					"zYI_3v0rguQ8UfG0edJ2exxpdZqzx1agk74I7e_0PWA",
-				},
-				"_sd_alg":                    "sha-256",
-				"authentic_source_person_id": "authentic_source_person_id_102",
-				"cnf": map[string]any{
-					"jwk": map[string]any{
-						"crv":     "P-256",
-						"ext":     true,
-						"key_ops": []any{"verify"},
-						"kty":     "EC",
-						"x":       "bGvPcUX4XTSKWy-U6qPVNU52iSOj6ngjjJx6HShwFsM",
-						"y":       "pYUxXgTHcE3vAghOnufSYTOjPYSFJDUkusgW8D2lH2Q",
-					},
-				},
-				"exp":               1.782910597e+09,
-				"expiry_date":       "2033-01-01",
-				"iss":               "https://vc-interop-3.sunet.se",
-				"issuing_authority": "SUNET",
-				"issuing_country":   "SE",
-				"given_name":        "Gary",
-				"family_name":       "Oldman",
-				"nbf":               1.751374597e+09,
-				"schema": map[string]any{
-					"name": "DefaultSchema",
-				},
-				"vct": "urn:eudi:pid:1",
+			want:  mockCredential,
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := t.Context()
+			have := golden.Get(t, "vp_token_2.golden")
+			got, err := Construct(ctx, string(have))
+			assert.NoError(t, err)
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestDiscloserParse(t *testing.T) {
+	type want struct {
+		discloser *Discloser
+		err       error
+	}
+	tts := []struct {
+		name  string
+		input string
+		want  want
+	}{
+		{
+			name:  "empty",
+			input: "",
+			want:  want{nil, errors.New("empty selective disclosure")},
+		},
+		{
+			name:  "valid",
+			input: "WyJKaGx4UzBjcmI3Qk9KZ3pIYjkyMm5nIiwiZ2l2ZW5fbmFtZSIsIkdhcnkiXQ",
+			want: want{&Discloser{
+				Salt:      "JhlxS0crb7BOJgzHb922ng",
+				ClaimName: "given_name",
+				Value:     "Gary",
+			}, nil,
+			},
+		},
+		{
+			name:  "object",
+			input: mockSDV3Address,
+			want: want{&Discloser{
+				Salt:      "Qg_O64zqAxe412a108iroA",
+				ClaimName: "address",
+				Value:     map[string]any{"country": "US", "locality": "Anytown", "region": "Anystate", "street_address": "123 Main St"},
+			}, nil,
 			},
 		},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			have := golden.Get(t, "vp_token_2.golden")
-			got, err := Construct(string(have))
-			assert.NoError(t, err)
+			ctx := t.Context()
+			got, err := DiscloserParse(ctx, tt.input)
 
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want.err, err)
+			assert.Equal(t, tt.want.discloser, got)
+		})
+	}
+}
+
+func TestCredentialParser(t *testing.T) {
+	type want struct {
+		credential map[string]any
+		err        error
+	}
+	tts := []struct {
+		name  string
+		token string
+		want  want
+	}{
+		{
+			name:  "valid light",
+			token: mockSDJWTLigthV3,
+			want: want{
+				credential: map[string]any{
+					"cnf": map[string]any{
+						"jwk": map[string]any{
+							"crv": "P-256",
+							"kty": "EC",
+							"x":   "TCAER19Zvu3OHF4j4W4vfSVoHIP1ILilDls7vCeGemc",
+							"y":   "ZxjiWWbZMQGHVWKVQ4hbSIirsVfuecCE6t4jT9F2HZQ",
+						},
+					},
+					"exp":        1.883e+09,
+					"iat":        1.683e+09,
+					"iss":        "https://example.com/issuer",
+					"vct":        "https://credentials.example.com/identity_credential",
+					"given_name": "John",
+				},
+			},
+		},
+		{
+			name:  "valid full",
+			token: mockSDJWTFullV3,
+			want: want{
+				credential: map[string]any{
+					"cnf": map[string]any{
+						"jwk": map[string]any{
+							"crv": "P-256",
+							"kty": "EC",
+							"x":   "TCAER19Zvu3OHF4j4W4vfSVoHIP1ILilDls7vCeGemc",
+							"y":   "ZxjiWWbZMQGHVWKVQ4hbSIirsVfuecCE6t4jT9F2HZQ",
+						},
+					},
+					"exp":          1.883e+09,
+					"iat":          1.683e+09,
+					"iss":          "https://example.com/issuer",
+					"vct":          "https://credentials.example.com/identity_credential",
+					"given_name":   "John",
+					"phone_number": "+1-202-555-0101",
+					"email":        "johndoe@example.com",
+					"address":      map[string]any{"country": "US", "locality": "Anytown", "region": "Anystate", "street_address": "123 Main St"},
+					"birthdate":    "1940-01-01",
+					"is_over_18":   true,
+					"is_over_21":   true,
+					"is_over_65":   true,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := t.Context()
+			got, err := CredentialParser(ctx, tt.token)
+
+			assert.Equal(t, tt.want.err, err)
+			assert.Equal(t, tt.want.credential, got)
 		})
 	}
 }

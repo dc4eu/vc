@@ -164,8 +164,13 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		c.log.Debug("No credentials returned from issuer")
 		return nil, helpers.ErrNoDocumentFound
 	case 1:
+		credential := reply.Credentials[0].Credential
+		response.Credentials = []openid4vci.Credential{
+			{
+				Credential: credential,
+			},
+		}
 		c.log.Debug("Single credential returned from issuer")
-		response.Credential = reply.Credentials[0].Credential
 		return response, nil
 	default:
 		c.log.Debug("Multiple credentials returned from issuer")

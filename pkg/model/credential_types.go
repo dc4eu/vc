@@ -9,3 +9,4 @@ const (
 	CredentialTypeUrnEudiElm1             = "urn:eudi:elm:1"              // #nosec G101
 	CredentialTypeUrnEudiMicroCredential1 = "urn:eudi:micro_credential:1" // #nosec G101
 )
+

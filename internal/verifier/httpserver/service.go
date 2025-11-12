@@ -79,13 +79,15 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 	s.gin.Static("/static", "./static")
 	s.gin.LoadHTMLGlob("./static/*.html")
 
-	s.gin.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "presentation-definition.html", nil)
-	})
+	//s.gin.GET("/", func(c *gin.Context) {
+	//	c.HTML(http.StatusOK, "presentation-definition.html", nil)
+	//})
 
-	s.gin.GET("/callback", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "callback.html", nil)
-	})
+	//S.gin.GET("/callback", func(c *gin.Context) {
+	//	c.HTML(http.StatusOK, "callback.html", nil)
+	//})
+
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/", http.StatusOK, s.endpointIndex)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
@@ -99,6 +101,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 	sgVerification := rgOAuthSession.Group("/verification")
 	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodGet, "request-object", http.StatusOK, s.endpointVerificationRequestObject)
 	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodPost, "direct_post", http.StatusOK, s.endpointVerificationDirectPost)
+	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodGet, "callback", http.StatusOK, s.endpointVerificationCallback)
 
 	rgUI := rgOAuthSession.Group("/ui")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodPost, "/interaction", http.StatusOK, s.endpointUIInteraction)

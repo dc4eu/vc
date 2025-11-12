@@ -58,6 +58,8 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 		return nil, err
 	}
 
+	s.log.Debug("endpointAuthorize", "scope", reply.Scope, "auth_method", s.cfg.GetCredentialConstructorAuthMethod(reply.Scope))
+
 	session.Set("scope", reply.Scope)
 	session.Set("auth_method", s.cfg.GetCredentialConstructorAuthMethod(reply.Scope))
 	session.Set("request_uri", request.RequestURI)
@@ -82,6 +84,8 @@ func (s *Service) endpointOAuthAuthorize(ctx context.Context, c *gin.Context) (a
 func (s *Service) endpointOAuthToken(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointToken")
 	defer span.End()
+
+	s.log.Debug("endpointOAuthToken")
 
 	session := sessions.Default(c)
 
@@ -137,6 +141,7 @@ func (s *Service) endpointOAuthAuthorizationConsent(ctx context.Context, c *gin.
 
 	session := sessions.Default(c)
 	authMethod, ok := session.Get("auth_method").(string)
+	s.log.Debug("endpointOAuthAuthorizationConsent", "authMethod", authMethod)
 	if !ok {
 		err := errors.New("auth_method not found in session")
 		span.SetStatus(codes.Error, err.Error())

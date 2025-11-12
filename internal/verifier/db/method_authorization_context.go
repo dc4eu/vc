@@ -191,6 +191,10 @@ func (c *AuthorizationContextColl) Get(ctx context.Context, query *model.Authori
 		filter["request_object_id"] = bson.M{"$eq": query.RequestObjectID}
 	}
 
+	if query.State != "" {
+		filter["state"] = bson.M{"$eq": query.State}
+	}
+
 	if len(filter) == 0 {
 		span.SetStatus(codes.Error, "query cannot be empty")
 		return nil, errors.New("query cannot be empty")

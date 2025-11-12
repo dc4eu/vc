@@ -16,10 +16,14 @@ func (c *Client) OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServer
 		return nil, err
 	}
 
+	c.log.Debug("after signing")
+
 	if err := helpers.Check(ctx, c.cfg, signedMetadata, c.log); err != nil {
 		c.log.Error(err, "metadata check error")
 		return nil, err
 	}
+
+	c.log.Debug("after check")
 
 	return signedMetadata, nil
 }

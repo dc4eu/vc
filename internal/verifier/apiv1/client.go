@@ -9,6 +9,7 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vp"
+	"vc/pkg/sdjwt3"
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"
@@ -27,6 +28,7 @@ type Client struct {
 	issuerMetadataSigningChain  []string
 	ephemeralEncryptionKeyCache *ttlcache.Cache[string, jwk.Key]
 	requestObjectCache          *ttlcache.Cache[string, *openid4vp.RequestObject]
+	credentialCache             *ttlcache.Cache[string, []sdjwt3.CredentialCache]
 
 	trustService *openid4vp.TrustService
 }
@@ -39,6 +41,7 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		log:                         log.New("apiv1"),
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
 		requestObjectCache:          ttlcache.New(ttlcache.WithTTL[string, *openid4vp.RequestObject](5 * time.Minute)),
+		credentialCache:             ttlcache.New(ttlcache.WithTTL[string, []sdjwt3.CredentialCache](5 * time.Minute)),
 	}
 
 	// Start the ephemeral encryption key cache

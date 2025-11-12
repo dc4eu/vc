@@ -3,12 +3,23 @@ package httpserver
 import (
 	"context"
 	"io"
+	"net/http"
 	"vc/internal/verifier/apiv1"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/codes"
 )
+
+func (s *Service) endpointIndex(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointIndex")
+	defer span.End()
+
+	c.HTML(http.StatusOK, "presentation-definition.html", nil)
+
+	return nil, nil
+}
 
 func (s *Service) endpointUIMetadata(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUIMetadata")
@@ -25,6 +36,10 @@ func (s *Service) endpointUIMetadata(ctx context.Context, c *gin.Context) (any, 
 
 func (s *Service) endpointUIInteraction(ctx context.Context, c *gin.Context) (any, error) {
 	s.log.Debug("endpointUIInteraction")
+
+	session := sessions.Default(c)
+	session.Set("session_id", uuid.NewString())
+	session.Save()
 
 	request := &apiv1.UIInteractionRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {

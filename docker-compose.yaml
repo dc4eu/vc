@@ -65,6 +65,7 @@ services:
     restart: always
     volumes:
       - ./config.yaml:/config.yaml:ro
+      - ./developer_tools/pki/:/pki:ro
       - ./metadata/:/metadata/:ro
       - ./developer_tools/private_verifier_ec256.pem:/private_verifier_ec256.pem:ro
       - ./developer_tools/public_verifier_ec256.pem:/public_verifier_ec256.pem:ro

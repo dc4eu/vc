@@ -56,7 +56,7 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 
 	authorizationContext := &model.AuthorizationContext{
 		SessionID:                sessionID,
-		Scope:                    "",
+		Scope:                    req.DCQLQuery.Credentials[0].ID,
 		Code:                     "",
 		RequestURI:               "",
 		WalletURI:                "",

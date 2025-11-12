@@ -18,8 +18,9 @@ import (
 // OIDCAuth  https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-authorization-endpoint
 func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*openid4vci.ParResponse, error) {
 	c.log.Debug("OAuthPar", "req", req)
-	if !c.cfg.APIGW.OauthServer.Clients.Allow(req.ClientID, req.RedirectURI, req.Scope) {
-		return nil, oauth2.ErrInvalidClient
+	allow, err := c.cfg.APIGW.OauthServer.Clients.Allow(req.ClientID, req.RedirectURI, req.Scope)
+	if !allow {
+		return nil, errors.Join(oauth2.ErrInvalidClient, err)
 	}
 
 	c.log.Debug("par")
@@ -37,7 +38,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		CodeChallenge:            req.CodeChallenge,
 		CodeChallengeMethod:      req.CodeChallengeMethod,
 		State:                    req.State,
-		ClientID:                 req.ClientID,
+		ClientID:                 "x509_san_dns:vc-interop-3.sunet.se",
 		WalletURI:                req.RedirectURI,
 		ExpiresAt:                time.Now().Add(60 * time.Second).Unix(),
 		Nonce:                    oauth2.GenerateCryptographicNonceFixedLength(32),
@@ -64,7 +65,8 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 	c.log.Debug("Authorize", "req", req)
 	query := &model.AuthorizationContext{
 		RequestURI: req.RequestURI,
-		ClientID:   req.ClientID,
+		//ClientID:   req.ClientID,
+		ClientID: "x509_san_dns:vc-interop-3.sunet.se",
 	}
 	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, query)
 	c.log.Debug("Get authorization", "query", query, "authorization", authorizationContext)

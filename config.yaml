@@ -119,6 +119,22 @@ verifier:
   external_server_url: "http://vc_dev_verifier:8080"
   supported_wallets:
     "SUNET dev": "https://dev.wallet.sunet.se/cb"
+  oauth_server:
+    token_endpoint: "http://vc_dev_verifier:8080/token"
+    metadata:
+      path: /metadata/oauth2_metadata.json
+      signing_key_path: "/pki/apigw.key"
+      signing_chain_path: "/pki/apigw.crt"
+    clients:
+      "1003":
+        type: "confidential"
+        redirect_uri: "https://dev.wallet.sunet.se"
+        scopes:
+          - "pid"
+          - "diploma"
+          - "ehic"
+          - "pda1"
+          - "elm"
 
 registry:
   api_server:

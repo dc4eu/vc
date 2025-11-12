@@ -130,6 +130,6 @@ func (m *middlewareHandler) Gzip(ctx context.Context) gin.HandlerFunc {
 
 func (m *middlewareHandler) UserSession(name, authKey, encKey string, opts sessions.Options) gin.HandlerFunc {
 	store := cookie.NewStore([]byte(authKey), []byte(encKey))
-	store.Options(opts)
+	//store.Options(opts)
 	return sessions.Sessions(name, store)
 }

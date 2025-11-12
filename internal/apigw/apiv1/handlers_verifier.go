@@ -290,7 +290,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, err
 	}
 
-	credential, err := responseParameters.BuildCredential()
+	credential, err := responseParameters.BuildCredential(ctx)
 	if err != nil {
 		c.log.Error(err, "failed to build credential from response parameters")
 		return nil, err

@@ -1,6 +1,7 @@
 package openid4vp
 
 import (
+	"context"
 	"vc/pkg/sdjwt3"
 )
 
@@ -17,8 +18,8 @@ type ResponseParameters struct {
 }
 
 // BuildCredential unwraps the VPToken from the ResponseParameters
-func (r *ResponseParameters) BuildCredential() (map[string]any, error) {
-	credential, err := sdjwt3.Construct(r.VPToken)
+func (r *ResponseParameters) BuildCredential(ctx context.Context) (map[string]any, error) {
+	credential, err := sdjwt3.Construct(ctx, r.VPToken)
 	if err != nil {
 		return nil, err
 	}

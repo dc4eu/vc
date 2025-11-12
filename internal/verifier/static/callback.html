@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifier</title>
+    <link rel="stylesheet" href="/static/bulma.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "alpinejs": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/module.esm.min.js",
+            "valibot": "https://cdn.jsdelivr.net/npm/valibot@1.1.0/dist/index.min.js"
+        }
+    }
+    </script>
+    <script src="/static/callback.js" type="module"></script>
+</head>
+<body>
+    <section class="section" x-data="app">
+        <div class="container" style="max-width: 500px;">
+            <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Verifier</h1>
+            <template x-if="error">
+                <div class="notification is-danger">
+                    <p x-text="error"></p>
+                </div>
+            </template>
+            <template x-if="loading">
+                <div class="box container">
+                    <div class="vc-loader">
+                        <span class="loader"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+</body>
+</html>

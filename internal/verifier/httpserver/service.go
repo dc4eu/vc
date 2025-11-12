@@ -79,14 +79,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 	s.gin.Static("/static", "./static")
 	s.gin.LoadHTMLGlob("./static/*.html")
 
-	//s.gin.GET("/", func(c *gin.Context) {
-	//	c.HTML(http.StatusOK, "presentation-definition.html", nil)
-	//})
-
-	//S.gin.GET("/callback", func(c *gin.Context) {
-	//	c.HTML(http.StatusOK, "callback.html", nil)
-	//})
-
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/", http.StatusOK, s.endpointIndex)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)

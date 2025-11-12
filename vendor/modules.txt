@@ -104,6 +104,9 @@ github.com/gabriel-vasile/mimetype/internal/json
 github.com/gabriel-vasile/mimetype/internal/magic
 github.com/gabriel-vasile/mimetype/internal/markup
 github.com/gabriel-vasile/mimetype/internal/scan
+# github.com/gin-contrib/cors v1.7.6
+## explicit; go 1.23.0
+github.com/gin-contrib/cors
 # github.com/gin-contrib/gzip v1.2.4
 ## explicit; go 1.24.0
 github.com/gin-contrib/gzip
@@ -122,11 +125,6 @@ github.com/gin-gonic/gin/codec/json
 github.com/gin-gonic/gin/internal/bytesconv
 github.com/gin-gonic/gin/internal/fs
 github.com/gin-gonic/gin/render
-# github.com/go-jose/go-jose/v4 v4.1.3
-## explicit; go 1.24.0
-github.com/go-jose/go-jose/v4
-github.com/go-jose/go-jose/v4/cipher
-github.com/go-jose/go-jose/v4/json
 # github.com/go-json-experiment/json v0.0.0-20250910080747-cc2cfa0554c3
 ## explicit; go 1.25
 github.com/go-json-experiment/json
@@ -492,15 +490,6 @@ github.com/swaggo/gin-swagger
 # github.com/swaggo/swag v1.16.6
 ## explicit; go 1.18
 github.com/swaggo/swag
-# github.com/tidwall/gjson v1.18.0
-## explicit; go 1.12
-github.com/tidwall/gjson
-# github.com/tidwall/match v1.2.0
-## explicit; go 1.15
-github.com/tidwall/match
-# github.com/tidwall/pretty v1.2.1
-## explicit; go 1.16
-github.com/tidwall/pretty
 # github.com/tiendc/go-deepcopy v1.7.1
 ## explicit; go 1.18
 github.com/tiendc/go-deepcopy

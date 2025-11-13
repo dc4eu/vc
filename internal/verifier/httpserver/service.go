@@ -76,6 +76,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 		return nil, err
 	}
 
+	// templating functions
+	s.gin.SetFuncMap(template.FuncMap{
+		"toJSON": func(v any) string {
+			b, _ := json.MarshalIndent(v, "", "  ")
+			return string(b)
+		},
+	})
+
 	s.gin.Static("/static", "./static")
 	s.gin.LoadHTMLGlob("./static/*.html")
 

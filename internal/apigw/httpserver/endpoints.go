@@ -88,6 +88,7 @@ func (s *Service) endpointDeleteDocumentIdentity(ctx context.Context, c *gin.Con
 	}
 	return nil, nil
 }
+
 func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetDocument")
 	defer span.End()

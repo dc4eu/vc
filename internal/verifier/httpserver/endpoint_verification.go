@@ -54,7 +54,7 @@ func (s *Service) endpointVerificationCallback(ctx context.Context, c *gin.Conte
 		return nil, err
 	}
 
-	c.HTML(http.StatusOK, "callback.html", nil)
+	c.HTML(http.StatusOK, "callback.html", reply)
 
-	return reply, nil
+	return nil, nil
 }

@@ -49,6 +49,8 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 
 	go c.requestObjectCache.Start()
 
+	go c.credentialCache.Start()
+
 	var err error
 	if c.cfg.Verifier.OAuthServer.Metadata.Path != "" {
 		c.oauth2Metadata, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain, err = c.cfg.Verifier.OAuthServer.LoadOAuth2Metadata(ctx)

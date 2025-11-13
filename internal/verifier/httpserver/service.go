@@ -2,7 +2,9 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"text/template"
 	"time"
 	"vc/internal/verifier/apiv1"
 	"vc/internal/verifier/notify"

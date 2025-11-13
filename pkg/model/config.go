@@ -188,10 +188,11 @@ type CredentialOffers struct {
 
 // APIGW holds the datastore configuration
 type APIGW struct {
-	APIServer        APIServer        `yaml:"api_server" validate:"required"`
-	CredentialOffers CredentialOffers `yaml:"credential_offers" validate:"omitempty"`
-	OauthServer      OAuthServer      `yaml:"oauth_server" validate:"omitempty"`
-	IssuerMetadata   IssuerMetadata   `yaml:"issuer_metadata" validate:"omitempty"`
+	APIServer         APIServer        `yaml:"api_server" validate:"required"`
+	CredentialOffers  CredentialOffers `yaml:"credential_offers" validate:"omitempty"`
+	OauthServer       OAuthServer      `yaml:"oauth_server" validate:"omitempty"`
+	IssuerMetadata    IssuerMetadata   `yaml:"issuer_metadata" validate:"omitempty"`
+	ExternalServerURL string           `yaml:"external_server_url" validate:"required"`
 }
 
 // OTEL holds the opentelemetry configuration

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
@@ -38,7 +39,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		CodeChallenge:            req.CodeChallenge,
 		CodeChallengeMethod:      req.CodeChallengeMethod,
 		State:                    req.State,
-		ClientID:                 "x509_san_dns:vc-interop-3.sunet.se",
+		ClientID:                 fmt.Sprintf("x509_san_dns:%s", strings.TrimLeft(c.cfg.APIGW.ExternalServerURL, "https://")),
 		WalletURI:                req.RedirectURI,
 		ExpiresAt:                time.Now().Add(60 * time.Second).Unix(),
 		Nonce:                    oauth2.GenerateCryptographicNonceFixedLength(32),
@@ -65,8 +66,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 	c.log.Debug("Authorize", "req", req)
 	query := &model.AuthorizationContext{
 		RequestURI: req.RequestURI,
-		//ClientID:   req.ClientID,
-		ClientID: "x509_san_dns:vc-interop-3.sunet.se",
+		ClientID:   fmt.Sprintf("x509_san_dns:%s", strings.TrimLeft(c.cfg.APIGW.ExternalServerURL, "https://")),
 	}
 	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, query)
 	c.log.Debug("Get authorization", "query", query, "authorization", authorizationContext)
@@ -199,7 +199,7 @@ func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthor
 
 	c.log.Debug("OAuthAuthorizationConsent request")
 
-	verifierRequestURI, err := url.Parse("https://vc-interop-3.sunet.se/verification/request-object")
+	verifierRequestURI, err := url.Parse(c.cfg.APIGW.ExternalServerURL + "/verification/request-object")
 	if err != nil {
 		c.log.Error(err, "failed to parse request URI URL")
 		return nil, err

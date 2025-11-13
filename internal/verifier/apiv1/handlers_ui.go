@@ -3,6 +3,7 @@ package apiv1
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 	"vc/pkg/model"
 	"vc/pkg/openid4vp"
@@ -62,7 +63,7 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 		WalletURI:                "",
 		IsUsed:                   false,
 		State:                    state,
-		ClientID:                 "x509_san_dns:vc-interop-3.sunet.se",
+		ClientID:                 fmt.Sprintf("x509_san_dns:%s", strings.TrimLeft(c.cfg.Verifier.ExternalServerURL, "https://")),
 		ExpiresAt:                0,
 		CodeChallenge:            "",
 		CodeChallengeMethod:      "",
@@ -87,7 +88,7 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 	requestObject := &openid4vp.RequestObject{
 		ResponseURI:  fmt.Sprintf("%s/verification/direct_post", c.cfg.Verifier.ExternalServerURL),
 		AUD:          "https://self-issued.me/v2",
-		ISS:          "vc-interop-3.sunet.se",
+		ISS:          strings.TrimLeft(c.cfg.Verifier.ExternalServerURL, "https://"),
 		ClientID:     authorizationContext.ClientID,
 		ResponseType: "vp_token",
 		ResponseMode: "direct_post.jwt",

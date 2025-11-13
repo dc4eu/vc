@@ -186,7 +186,7 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 	}
 
 	authorizationRequest := openid4vp.RequestObject{
-		ResponseURI:            "https://vc-interop-3.sunet.se/verification/direct_post",
+		ResponseURI:            c.cfg.APIGW.ExternalServerURL + "/verification/direct_post",
 		AUD:                    "https://self-issued.me/v2",
 		ISS:                    authorizationContext.ClientID,
 		ClientID:               authorizationContext.ClientID,
@@ -323,7 +323,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 
 	reply := &VerificationDirectPostResponse{
 		//ResponseCode: responseCode,
-		RedirectURI: "https://vc-interop-3.sunet.se/authorization/consent/callback/?response_code=" + authorizationContext.VerifierResponseCode,
+		RedirectURI: c.cfg.APIGW.ExternalServerURL + "/authorization/consent/callback/?response_code=" + authorizationContext.VerifierResponseCode,
 	}
 	return reply, nil
 }

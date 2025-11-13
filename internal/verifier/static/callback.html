@@ -9,8 +9,7 @@
     <script type="importmap">
     {
         "imports": {
-            "alpinejs": "https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/module.esm.min.js",
-            "valibot": "https://cdn.jsdelivr.net/npm/valibot@1.1.0/dist/index.min.js"
+            "@andypf/json-viewer": "https://cdn.jsdelivr.net/npm/@andypf/json-viewer@2.2.0/+esm"
         }
     }
     </script>
@@ -19,19 +18,54 @@
 <body>
     <section class="section" x-data="app">
         <div class="container" style="max-width: 500px;">
-            <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Verifier</h1>
-            <template x-if="error">
-                <div class="notification is-danger">
-                    <p x-text="error"></p>
+            <h1 class="title has-text-centered has-text-weight-bold is-size-2">Verification result</h1>
+            <div class="box container">
+                <div class="block is-flex is-justify-content-center is-align-items-center is-flex-direction-column is-fullwidth">
+                    <svg class="has-text-success mb-2" style="width:100px" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>
+                    <p class="title is-size-4 has-text-success">Success</p>
                 </div>
-            </template>
-            <template x-if="loading">
-                <div class="box container">
-                    <div class="vc-loader">
-                        <span class="loader"></span>
+                <hr>
+                {{range .CredentialData}}
+                    <div class="block">
+                        <h2 class="title is-size-5 mb-2">Credential claims</h2>
+                        {{if eq (len .Claims) 0}}
+                            <p><em>No claims available.</em></p>
+                        {{else}}
+                            <div class="table-container">
+                                <table class="table is-fullwidth is-hoverable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Value</th>
+                                        </tr>
+                                    </thead>
+                                    {{range .Claims}}
+                                    <tr>
+                                        <td>{{.ClaimName}}</td>
+                                        <td><code>{{.Value}}</code></td>
+                                    </tr>
+                                    {{end}}
+                                </table>
+                            </div>
+                        {{end}}
                     </div>
-                </div>
-            </template>
+                    <div class="block">
+                        <h2 class="title is-size-5 mb-2">Credential data</h2>
+                        <div class="has-border-radius is-overflow-hidden">
+                            <andypf-json-viewer 
+                                indent="2"
+                                expanded="false"
+                                theme="google-dark"
+                                show-data-types="true"
+                                show-toolbar="false"
+                                expand-icon-type="arrow"
+                                show-copy="true"
+                                show-size="true"
+                            >{{toJSON .Credential}}</andypf-json-viewer>
+                        </div>
+                    </div>
+                {{end}}
+            </div>
         </div>
     </section>
 </body>

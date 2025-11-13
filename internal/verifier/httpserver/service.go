@@ -2,7 +2,9 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"text/template"
 	"time"
 	"vc/internal/verifier/apiv1"
 	"vc/internal/verifier/notify"
@@ -75,6 +77,14 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 	if err != nil {
 		return nil, err
 	}
+
+	// templating functions
+	s.gin.SetFuncMap(template.FuncMap{
+		"toJSON": func(v any) string {
+			b, _ := json.MarshalIndent(v, "", "  ")
+			return string(b)
+		},
+	})
 
 	s.gin.Static("/static", "./static")
 	s.gin.LoadHTMLGlob("./static/*.html")

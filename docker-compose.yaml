@@ -81,6 +81,26 @@ services:
     environment:
       - "VC_CONFIG_YAML=config.yaml"
 
+  verifier-proxy:
+    container_name: "vc_dev_verifier_proxy"
+    image: docker.sunet.se/dc4eu/verifier-proxy:latest
+    restart: always
+    volumes:
+      - ./config.yaml:/config.yaml:ro
+      - ./developer_tools/pki/:/pki:ro
+      - ./developer_tools/private_rsa.pem:/private_rsa.pem:ro
+      - ./internal/verifier_proxy/httpserver/static:/static:ro
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mongo-init-verifier-proxy:
+        condition: service_completed_successfully
+    networks:
+      vc-dev-net:
+        ipv4_address: 172.16.50.7
+    environment:
+      - "VC_CONFIG_YAML=config.yaml"
+
   registry:
     container_name: "vc_dev_registry"
     image: docker.sunet.se/dc4eu/registry:latest
@@ -151,6 +171,29 @@ services:
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.20
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  mongo-init-verifier-proxy:
+    image: mongo:7.0
+    container_name: "vc_dev_mongo_init_verifier_proxy"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./bootstrapping/verifier-proxy:/scripts:ro
+    networks:
+      vc-dev-net:
+    environment:
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=verifier_proxy
+    command: bash -c "cd /scripts && ./bootstrap.sh"
+    restart: "no"
 
   jaeger:
     image: jaegertracing/all-in-one:latest

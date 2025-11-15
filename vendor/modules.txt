@@ -1,3 +1,7 @@
+# dario.cat/mergo v1.0.2
+## explicit; go 1.13
+# github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1
+## explicit; go 1.16
 # github.com/IBM/sarama v1.46.2
 ## explicit; go 1.24.0
 github.com/IBM/sarama
@@ -9,6 +13,8 @@ github.com/KyleBanks/depth
 github.com/MichaelFraser99/go-sd-jwt/disclosure
 github.com/MichaelFraser99/go-sd-jwt/internal/error
 github.com/MichaelFraser99/go-sd-jwt/internal/salt
+# github.com/Microsoft/go-winio v0.6.2
+## explicit; go 1.21
 # github.com/PaesslerAG/gval v1.2.4
 ## explicit; go 1.15
 github.com/PaesslerAG/gval
@@ -64,6 +70,8 @@ github.com/bytedance/sonic/loader/internal/abi
 github.com/bytedance/sonic/loader/internal/iasm/expr
 github.com/bytedance/sonic/loader/internal/iasm/x86_64
 github.com/bytedance/sonic/loader/internal/rt
+# github.com/cenkalti/backoff/v4 v4.3.0
+## explicit; go 1.18
 # github.com/cenkalti/backoff/v5 v5.0.3
 ## explicit; go 1.23
 github.com/cenkalti/backoff/v5
@@ -74,6 +82,16 @@ github.com/cloudwego/base64x/internal/native
 github.com/cloudwego/base64x/internal/native/avx2
 github.com/cloudwego/base64x/internal/native/sse
 github.com/cloudwego/base64x/internal/rt
+# github.com/containerd/errdefs v1.0.0
+## explicit; go 1.20
+# github.com/containerd/errdefs/pkg v0.3.0
+## explicit; go 1.22
+# github.com/containerd/log v0.1.0
+## explicit; go 1.20
+# github.com/containerd/platforms v0.2.1
+## explicit; go 1.20
+# github.com/cpuguy83/dockercfg v0.3.2
+## explicit; go 1.13
 # github.com/creasty/defaults v1.8.0
 ## explicit; go 1.14
 github.com/creasty/defaults
@@ -83,6 +101,14 @@ github.com/davecgh/go-spew/spew
 # github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0
 ## explicit; go 1.17
 github.com/decred/dcrd/dcrec/secp256k1/v4
+# github.com/distribution/reference v0.6.0
+## explicit; go 1.20
+# github.com/docker/docker v28.5.1+incompatible
+## explicit
+# github.com/docker/go-connections v0.6.0
+## explicit; go 1.18
+# github.com/docker/go-units v0.5.0
+## explicit
 # github.com/dustin/go-broadcast v0.0.0-20211018055107-71439988bd91
 ## explicit; go 1.16
 github.com/dustin/go-broadcast
@@ -95,6 +121,10 @@ github.com/eapache/go-xerial-snappy
 # github.com/eapache/queue v1.1.0
 ## explicit
 github.com/eapache/queue
+# github.com/ebitengine/purego v0.8.4
+## explicit; go 1.18
+# github.com/felixge/httpsnoop v1.0.4
+## explicit; go 1.13
 # github.com/gabriel-vasile/mimetype v1.4.10
 ## explicit; go 1.21
 github.com/gabriel-vasile/mimetype
@@ -144,6 +174,8 @@ github.com/go-logr/stdr
 # github.com/go-logr/zapr v1.3.0
 ## explicit; go 1.18
 github.com/go-logr/zapr
+# github.com/go-ole/go-ole v1.2.6
+## explicit; go 1.12
 # github.com/go-openapi/jsonpointer v0.22.1
 ## explicit; go 1.24.0
 github.com/go-openapi/jsonpointer
@@ -393,12 +425,30 @@ github.com/lestrrat-go/option/v2
 # github.com/lithammer/shortuuid/v4 v4.2.0
 ## explicit; go 1.21
 github.com/lithammer/shortuuid/v4
+# github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0
+## explicit; go 1.16
+# github.com/magiconair/properties v1.8.10
+## explicit; go 1.19
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
 # github.com/mattn/go-sqlite3 v1.14.32
 ## explicit; go 1.19
 github.com/mattn/go-sqlite3
+# github.com/moby/docker-image-spec v1.3.1
+## explicit; go 1.18
+# github.com/moby/go-archive v0.1.0
+## explicit; go 1.23.0
+# github.com/moby/patternmatcher v0.6.0
+## explicit; go 1.19
+# github.com/moby/sys/sequential v0.6.0
+## explicit; go 1.17
+# github.com/moby/sys/user v0.4.0
+## explicit; go 1.17
+# github.com/moby/sys/userns v0.1.0
+## explicit; go 1.21
+# github.com/moby/term v0.5.0
+## explicit; go 1.18
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 ## explicit
 github.com/modern-go/concurrent
@@ -411,6 +461,12 @@ github.com/montanaflynn/stats
 # github.com/moogar0880/problems v1.0.1
 ## explicit; go 1.24
 github.com/moogar0880/problems
+# github.com/morikuni/aec v1.0.0
+## explicit
+# github.com/opencontainers/go-digest v1.0.0
+## explicit; go 1.13
+# github.com/opencontainers/image-spec v1.1.1
+## explicit; go 1.18
 # github.com/pelletier/go-toml/v2 v2.2.4
 ## explicit; go 1.21.0
 github.com/pelletier/go-toml/v2
@@ -431,6 +487,8 @@ github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
+# github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c
+## explicit; go 1.14
 # github.com/quic-go/qpack v0.5.1
 ## explicit; go 1.22
 github.com/quic-go/qpack
@@ -469,9 +527,13 @@ github.com/segmentio/asm/cpu/arm64
 github.com/segmentio/asm/cpu/cpuid
 github.com/segmentio/asm/cpu/x86
 github.com/segmentio/asm/internal/unsafebytes
+# github.com/shirou/gopsutil/v4 v4.25.6
+## explicit; go 1.23
 # github.com/shopspring/decimal v1.4.0
 ## explicit; go 1.10
 github.com/shopspring/decimal
+# github.com/sirupsen/logrus v1.9.3
+## explicit; go 1.13
 # github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 ## explicit; go 1.13
 github.com/skip2/go-qrcode
@@ -490,9 +552,15 @@ github.com/swaggo/gin-swagger
 # github.com/swaggo/swag v1.16.6
 ## explicit; go 1.18
 github.com/swaggo/swag
+# github.com/testcontainers/testcontainers-go v0.40.0
+## explicit; go 1.24.0
 # github.com/tiendc/go-deepcopy v1.7.1
 ## explicit; go 1.18
 github.com/tiendc/go-deepcopy
+# github.com/tklauser/go-sysconf v0.3.12
+## explicit; go 1.13
+# github.com/tklauser/numcpus v0.6.1
+## explicit; go 1.13
 # github.com/twitchyliquid64/golang-asm v0.15.1
 ## explicit; go 1.13
 github.com/twitchyliquid64/golang-asm/asm/arch
@@ -540,6 +608,8 @@ github.com/xuri/nfp
 # github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78
 ## explicit; go 1.17
 github.com/youmark/pkcs8
+# github.com/yusufpapurcu/wmi v1.2.4
+## explicit; go 1.16
 # go.mongodb.org/mongo-driver v1.17.4
 ## explicit; go 1.18
 go.mongodb.org/mongo-driver/bson
@@ -647,6 +717,8 @@ go.mongodb.org/mongo-driver/v2/x/mongo/driver/wiremessage
 ## explicit; go 1.24.0
 go.opentelemetry.io/auto/sdk
 go.opentelemetry.io/auto/sdk/internal/telemetry
+# go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0
+## explicit; go 1.23.0
 # go.opentelemetry.io/contrib/propagators/jaeger v1.38.0
 ## explicit; go 1.23.0
 go.opentelemetry.io/contrib/propagators/jaeger
@@ -958,7 +1030,7 @@ gorm.io/gorm/logger
 gorm.io/gorm/migrator
 gorm.io/gorm/schema
 gorm.io/gorm/utils
-# gotest.tools/v3 v3.5.1
+# gotest.tools/v3 v3.5.2
 ## explicit; go 1.17
 gotest.tools/v3/assert
 gotest.tools/v3/assert/cmp

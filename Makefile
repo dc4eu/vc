@@ -4,7 +4,7 @@ NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 CURRENT_BRANCH 			:= $(shell git rev-parse --abbrev-ref HEAD)
-SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet
+SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet verifier-proxy
 
 test: test-verifier
 
@@ -51,9 +51,10 @@ DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
 DOCKER_TAG_WALLET 		:= docker.sunet.se/dc4eu/wallet:$(VERSION)
+DOCKER_TAG_VERIFIER_PROXY := docker.sunet.se/dc4eu/verifier-proxy:$(VERSION)
 
 
-build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui
+build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui build-verifier-proxy
 
 build-verifier:
 	$(info Building verifier)
@@ -83,7 +84,11 @@ build-wallet:
 	$(info Building wallet)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_wallet ${LDFLAGS} ./cmd/wallet/main.go
 
-docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
+build-verifier-proxy:
+	$(info Building verifier-proxy)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier-proxy ${LDFLAGS} ./cmd/verifier-proxy/main.go
+
+docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui docker-build-verifier-proxy
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
@@ -120,6 +125,10 @@ docker-build-ui:
 docker-build-wallet:
 	$(info Docker building wallet with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=wallet --tag $(DOCKER_TAG_WALLET) --file dockerfiles/worker .
+
+docker-build-verifier-proxy:
+	$(info Docker building verifier-proxy with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/web_worker .
 
 docker-push-gobuild:
 	$(info Pushing docker images)

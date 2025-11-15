@@ -74,14 +74,14 @@ type AuthorizeParams struct {
 
 // AuthorizeResponse holds the authorization response
 type AuthorizeResponse struct {
-	SessionID    string
-	QRCodeData   string
-	DeepLinkURL  string
-	PollURL      string
-	StatusCode   int
-	Body         string
-	ErrorCode    string
-	ErrorDesc    string
+	SessionID   string
+	QRCodeData  string
+	DeepLinkURL string
+	PollURL     string
+	StatusCode  int
+	Body        string
+	ErrorCode   string
+	ErrorDesc   string
 }
 
 // StartAuthorization initiates the authorization flow
@@ -217,9 +217,9 @@ func (c *OIDCClientSimulator) GetUserInfo(accessToken string) (map[string]any, e
 
 // WalletSimulator simulates an EU Digital Identity Wallet
 type WalletSimulator struct {
-	suite      *IntegrationSuite
-	httpClient *http.Client
-	walletID   string
+	suite       *IntegrationSuite
+	httpClient  *http.Client
+	walletID    string
 	credentials map[string]any
 }
 
@@ -270,9 +270,9 @@ func (w *WalletSimulator) CreateVPToken(nonce, audience string) (string, error) 
 	// Create a simple JWT payload with minimal claims
 	// Note: We use uncommon claim names to avoid overwriting OIDC ID token claims
 	claims := map[string]any{
-		"wallet_iss": w.walletID,  // Use wallet_iss instead of iss to avoid conflict
-		"wallet_sub": w.walletID,  // Use wallet_sub instead of sub
-		"wallet_aud": audience,    // Use wallet_aud instead of aud
+		"wallet_iss": w.walletID, // Use wallet_iss instead of iss to avoid conflict
+		"wallet_sub": w.walletID, // Use wallet_sub instead of sub
+		"wallet_aud": audience,   // Use wallet_aud instead of aud
 		"exp":        time.Now().Add(10 * time.Minute).Unix(),
 		"iat":        time.Now().Add(10 * time.Minute).Unix(),
 		"vct":        "eu.europa.ec.eudi.pid.1", // Verifiable Credential Type
@@ -281,7 +281,7 @@ func (w *WalletSimulator) CreateVPToken(nonce, audience string) (string, error) 
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(claims))
-	
+
 	// Sign with test secret (in real scenario, would use wallet's private key)
 	tokenString, err := token.SignedString([]byte("test-wallet-secret"))
 	if err != nil {
@@ -290,9 +290,9 @@ func (w *WalletSimulator) CreateVPToken(nonce, audience string) (string, error) 
 
 	// Create a minimal disclosure: [<salt>, <claim-name>, <claim-value>]
 	disclosure := []any{
-		"_salt123",      // Salt for disclosure
-		"given_name",    // Claim name
-		"John",          // Claim value
+		"_salt123",   // Salt for disclosure
+		"given_name", // Claim name
+		"John",       // Claim value
 	}
 	disclosureJSON, _ := json.Marshal(disclosure)
 	disclosureB64 := base64.RawURLEncoding.EncodeToString(disclosureJSON)
@@ -300,7 +300,7 @@ func (w *WalletSimulator) CreateVPToken(nonce, audience string) (string, error) 
 	// Format as SD-JWT: <jwt>~<disclosure>~<key_binding>
 	// For testing: jwt~disclosure~  (empty key binding)
 	sdJWT := fmt.Sprintf("%s~%s~", tokenString, disclosureB64)
-	
+
 	return sdJWT, nil
 }
 

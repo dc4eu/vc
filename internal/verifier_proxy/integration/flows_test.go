@@ -26,7 +26,7 @@ func TestIntegration_BasicAuthorizationFlow(t *testing.T) {
 
 	// Step 1: Start authorization flow
 	t.Log("Step 1: Authorization request")
-	
+
 	authReq := &apiv1.AuthorizeRequest{
 		ResponseType:        "code",
 		ClientID:            client.ClientID,
@@ -66,7 +66,7 @@ func TestIntegration_BasicAuthorizationFlow(t *testing.T) {
 
 	// Step 2: Simulate wallet requesting presentation definition
 	t.Log("Step 2: Get request object")
-	
+
 	getReqObjReq := &apiv1.GetRequestObjectRequest{
 		SessionID: sessionID,
 	}
@@ -83,7 +83,7 @@ func TestIntegration_BasicAuthorizationFlow(t *testing.T) {
 
 	// Step 3: Simulate wallet submitting VP token
 	t.Log("Step 3: Submit VP token")
-	
+
 	// Create mock VP token
 	wallet := NewWalletSimulator(suite, "test-wallet-123")
 	vpToken, err := wallet.CreateVPToken(session.OpenID4VP.RequestObjectNonce, suite.cfg.VerifierProxy.ExternalURL)
@@ -92,8 +92,8 @@ func TestIntegration_BasicAuthorizationFlow(t *testing.T) {
 	}
 
 	directPostReq := &apiv1.DirectPostRequest{
-		VPToken: vpToken,
-		State:   sessionID,
+		VPToken:                vpToken,
+		State:                  sessionID,
 		PresentationSubmission: `{"id":"submission-1","definition_id":"pd-1"}`,
 	}
 
@@ -120,7 +120,7 @@ func TestIntegration_BasicAuthorizationFlow(t *testing.T) {
 
 	// Step 4: Exchange authorization code for tokens
 	t.Log("Step 4: Token exchange")
-	
+
 	tokenReq := &apiv1.TokenRequest{
 		GrantType:    "authorization_code",
 		Code:         authCode,
@@ -167,7 +167,7 @@ func TestIntegration_BasicAuthorizationFlow(t *testing.T) {
 
 	// Step 5: Get user info
 	t.Log("Step 5: Get user info")
-	
+
 	userInfoReq := &apiv1.UserInfoRequest{
 		AccessToken: tokenResp.AccessToken,
 	}
@@ -236,8 +236,8 @@ func TestIntegration_PKCEValidation(t *testing.T) {
 		vpToken, _ := wallet.CreateVPToken(session.OpenID4VP.RequestObjectNonce, suite.cfg.VerifierProxy.ExternalURL)
 
 		directPostReq := &apiv1.DirectPostRequest{
-			VPToken: vpToken,
-			State:   authResp.SessionID,
+			VPToken:                vpToken,
+			State:                  authResp.SessionID,
 			PresentationSubmission: `{"id":"submission-1","definition_id":"pd-1"}`,
 		}
 		suite.apiv1.ProcessDirectPost(suite.ctx, directPostReq)
@@ -285,8 +285,8 @@ func TestIntegration_PKCEValidation(t *testing.T) {
 		vpToken, _ := wallet.CreateVPToken(session.OpenID4VP.RequestObjectNonce, suite.cfg.VerifierProxy.ExternalURL)
 
 		directPostReq := &apiv1.DirectPostRequest{
-			VPToken: vpToken,
-			State:   authResp.SessionID,
+			VPToken:                vpToken,
+			State:                  authResp.SessionID,
 			PresentationSubmission: `{"id":"submission-1","definition_id":"pd-1"}`,
 		}
 		suite.apiv1.ProcessDirectPost(suite.ctx, directPostReq)
@@ -341,8 +341,8 @@ func TestIntegration_CodeReplayPrevention(t *testing.T) {
 	vpToken, _ := wallet.CreateVPToken(session.OpenID4VP.RequestObjectNonce, suite.cfg.VerifierProxy.ExternalURL)
 
 	directPostReq := &apiv1.DirectPostRequest{
-		VPToken: vpToken,
-		State:   authResp.SessionID,
+		VPToken:                vpToken,
+		State:                  authResp.SessionID,
 		PresentationSubmission: `{"id":"submission-1","definition_id":"pd-1"}`,
 	}
 	suite.apiv1.ProcessDirectPost(suite.ctx, directPostReq)
@@ -489,8 +489,8 @@ func TestIntegration_InvalidClient(t *testing.T) {
 		vpToken, _ := wallet.CreateVPToken(session.OpenID4VP.RequestObjectNonce, suite.cfg.VerifierProxy.ExternalURL)
 
 		directPostReq := &apiv1.DirectPostRequest{
-			VPToken: vpToken,
-			State:   authResp.SessionID,
+			VPToken:                vpToken,
+			State:                  authResp.SessionID,
 			PresentationSubmission: `{"id":"submission-1","definition_id":"pd-1"}`,
 		}
 		suite.apiv1.ProcessDirectPost(suite.ctx, directPostReq)

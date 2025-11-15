@@ -143,6 +143,10 @@ verifier_proxy:
       enabled: false
   external_url: "http://vc_dev_verifier_proxy:8080"
   oidc:
+    # OIDC Provider identifier (issuer of ID tokens and access tokens)
+    # This identifies the verifier-proxy as an OpenID Provider
+    # NOT related to verifiable credential issuance (see cmd/issuer/)
+    # Must match the 'iss' claim in ID tokens sent to relying parties
     issuer: "http://vc_dev_verifier_proxy:8080"
     signing_key_path: "/private_rsa.pem"
     id_token_duration: 3600

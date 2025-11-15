@@ -1,0 +1,362 @@
+package apiv1
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strings"
+	"time"
+	"vc/internal/verifier_proxy/db"
+	"vc/pkg/oauth2"
+
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
+)
+
+// AuthorizeRequest represents an OIDC authorization request
+type AuthorizeRequest struct {
+	ResponseType        string `form:"response_type" binding:"required"`
+	ClientID            string `form:"client_id" binding:"required"`
+	RedirectURI         string `form:"redirect_uri" binding:"required"`
+	Scope               string `form:"scope" binding:"required"`
+	State               string `form:"state"`
+	Nonce               string `form:"nonce"`
+	CodeChallenge       string `form:"code_challenge"`
+	CodeChallengeMethod string `form:"code_challenge_method"`
+	ResponseMode        string `form:"response_mode"`
+	Display             string `form:"display"`
+	Prompt              string `form:"prompt"`
+	MaxAge              int    `form:"max_age"`
+	UILocales           string `form:"ui_locales"`
+	IDTokenHint         string `form:"id_token_hint"`
+	LoginHint           string `form:"login_hint"`
+	ACRValues           string `form:"acr_values"`
+}
+
+// AuthorizeResponse represents the response to an authorization request
+type AuthorizeResponse struct {
+	SessionID      string `json:"session_id"`
+	QRCodeData     string `json:"qr_code_data"`
+	QRCodeImageURL string `json:"qr_code_image_url"`
+	DeepLinkURL    string `json:"deep_link_url"`
+	PollURL        string `json:"poll_url"`
+}
+
+// Authorize handles the OIDC authorization request
+func (c *Client) Authorize(ctx context.Context, req *AuthorizeRequest) (*AuthorizeResponse, error) {
+	ctx, span := c.tracer.Start(ctx, "apiv1:authorize")
+	defer span.End()
+
+	// Validate client
+	client, err := c.db.Clients.GetByClientID(ctx, req.ClientID)
+	if err != nil {
+		c.log.Error(err, "Failed to get client")
+		return nil, ErrServerError
+	}
+	if client == nil {
+		c.log.Info("Client not found", "client_id", req.ClientID)
+		return nil, ErrInvalidClient
+	}
+
+	// Validate redirect URI
+	if !c.validateRedirectURI(req.RedirectURI, client.RedirectURIs) {
+		c.log.Info("Invalid redirect URI", "redirect_uri", req.RedirectURI)
+		return nil, ErrInvalidRequest
+	}
+
+	// Validate response type
+	if !c.contains(client.ResponseTypes, req.ResponseType) {
+		c.log.Info("Unsupported response type", "response_type", req.ResponseType)
+		return nil, ErrInvalidRequest
+	}
+
+	// Validate scope
+	requestedScopes := strings.Split(req.Scope, " ")
+	if !c.validateScopes(requestedScopes, client.AllowedScopes) {
+		c.log.Info("Invalid scope requested")
+		return nil, ErrInvalidScope
+	}
+
+	// Validate PKCE if required
+	if client.RequirePKCE && req.CodeChallenge == "" {
+		c.log.Info("PKCE required but no code_challenge provided")
+		return nil, ErrInvalidRequest
+	}
+
+	// Create session
+	sessionID := c.generateSessionID()
+	session := &db.Session{
+		ID:        sessionID,
+		CreatedAt: time.Now(),
+		// Session expires after the configured duration (used by GetRequestObject to reject expired sessions)
+		ExpiresAt: time.Now().Add(time.Duration(c.cfg.VerifierProxy.OIDC.SessionDuration) * time.Second),
+		Status:    db.SessionStatusPending,
+		OIDCRequest: db.OIDCRequest{
+			ClientID:            req.ClientID,
+			RedirectURI:         req.RedirectURI,
+			Scope:               req.Scope,
+			State:               req.State,
+			Nonce:               req.Nonce,
+			CodeChallenge:       req.CodeChallenge,
+			CodeChallengeMethod: req.CodeChallengeMethod,
+			ResponseType:        req.ResponseType,
+			ResponseMode:        req.ResponseMode,
+			Display:             req.Display,
+			Prompt:              req.Prompt,
+			MaxAge:              req.MaxAge,
+			UILocales:           strings.Split(req.UILocales, " "),
+			IDTokenHint:         req.IDTokenHint,
+			LoginHint:           req.LoginHint,
+			ACRValues:           strings.Split(req.ACRValues, " "),
+		},
+	}
+
+	// Create presentation definition based on requested scopes
+	presentationDefinition, err := c.createPresentationDefinition(requestedScopes)
+	if err != nil {
+		c.log.Error(err, "Failed to create presentation definition")
+		return nil, ErrServerError
+	}
+	session.OpenID4VP.PresentationDefinition = presentationDefinition
+
+	// Save session
+	if err := c.db.Sessions.Create(ctx, session); err != nil {
+		c.log.Error(err, "Failed to create session")
+		return nil, ErrServerError
+	}
+
+	// Generate OpenID4VP authorization request
+	authzReqURL := fmt.Sprintf("openid4vp://?client_id=%s&request_uri=%s/verification/request-object/%s",
+		c.cfg.VerifierProxy.ExternalURL,
+		c.cfg.VerifierProxy.ExternalURL,
+		sessionID,
+	)
+
+	return &AuthorizeResponse{
+		SessionID:      sessionID,
+		QRCodeData:     authzReqURL,
+		QRCodeImageURL: fmt.Sprintf("/qr/%s", sessionID),
+		DeepLinkURL:    authzReqURL,
+		PollURL:        fmt.Sprintf("/poll/%s", sessionID),
+	}, nil
+}
+
+// TokenRequest represents an OIDC token request
+type TokenRequest struct {
+	GrantType    string `form:"grant_type" binding:"required"`
+	Code         string `form:"code"`
+	RedirectURI  string `form:"redirect_uri"`
+	ClientID     string `form:"client_id"`
+	ClientSecret string `form:"client_secret"`
+	CodeVerifier string `form:"code_verifier"`
+	RefreshToken string `form:"refresh_token"`
+}
+
+// TokenResponse represents an OIDC token response
+type TokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+	IDToken      string `json:"id_token"`
+	Scope        string `json:"scope,omitempty"`
+}
+
+// Token handles the OIDC token request
+func (c *Client) Token(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+	ctx, span := c.tracer.Start(ctx, "apiv1:token")
+	defer span.End()
+
+	switch req.GrantType {
+	case "authorization_code":
+		return c.handleAuthorizationCodeGrant(ctx, req)
+	case "refresh_token":
+		return c.handleRefreshTokenGrant(ctx, req)
+	default:
+		return nil, ErrUnsupportedGrantType
+	}
+}
+
+func (c *Client) handleAuthorizationCodeGrant(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+	// Get session by authorization code
+	session, err := c.db.Sessions.GetByAuthorizationCode(ctx, req.Code)
+	if err != nil {
+		c.log.Error(err, "Failed to get session by code")
+		return nil, ErrServerError
+	}
+	if session == nil {
+		c.log.Info("Session not found for code")
+		return nil, ErrInvalidGrant
+	}
+
+	// Check if code has already been used
+	if session.Tokens.AuthorizationCodeUsed {
+		c.log.Info("Authorization code already used", "session_id", session.ID)
+		// TODO: Revoke all tokens for this session
+		return nil, ErrInvalidGrant
+	}
+
+	// Check if code has expired
+	if time.Now().After(session.Tokens.CodeExpiresAt) {
+		c.log.Info("Authorization code expired", "session_id", session.ID)
+		return nil, ErrInvalidGrant
+	}
+
+	// Authenticate client
+	client, err := c.db.Clients.GetByClientID(ctx, req.ClientID)
+	if err != nil {
+		c.log.Error(err, "Failed to get client")
+		return nil, ErrServerError
+	}
+	if client == nil {
+		return nil, ErrInvalidClient
+	}
+
+	if err := c.authenticateClient(client, req.ClientSecret); err != nil {
+		c.log.Info("Client authentication failed")
+		return nil, ErrInvalidClient
+	}
+
+	// Verify client ID matches
+	if session.OIDCRequest.ClientID != req.ClientID {
+		c.log.Info("Client ID mismatch")
+		return nil, ErrInvalidGrant
+	}
+
+	// Verify redirect URI matches
+	if session.OIDCRequest.RedirectURI != req.RedirectURI {
+		c.log.Info("Redirect URI mismatch")
+		return nil, ErrInvalidGrant
+	}
+
+	// Validate PKCE if present
+	if session.OIDCRequest.CodeChallenge != "" {
+		if err := oauth2.ValidatePKCE(req.CodeVerifier, session.OIDCRequest.CodeChallenge, session.OIDCRequest.CodeChallengeMethod); err != nil {
+			c.log.Info("PKCE validation failed")
+			return nil, ErrInvalidGrant
+		}
+	}
+
+	// Mark code as used
+	// IMPORTANT: We must update the in-memory session object before calling Update()
+	// to prevent overwriting the database flag set by MarkCodeAsUsed()
+	if err := c.db.Sessions.MarkCodeAsUsed(ctx, session.ID); err != nil {
+		c.log.Error(err, "Failed to mark code as used")
+		return nil, ErrServerError
+	}
+	// Sync the in-memory session to reflect the database change
+	session.Tokens.AuthorizationCodeUsed = true
+
+	// Generate tokens
+	accessToken := c.generateAccessToken()
+	refreshToken := c.generateRefreshToken()
+
+	// Generate ID token
+	idToken, err := c.generateIDToken(session, client)
+	if err != nil {
+		c.log.Error(err, "Failed to generate ID token")
+		return nil, ErrServerError
+	}
+
+	// Update session with tokens
+	session.Tokens.AccessToken = accessToken
+	session.Tokens.AccessTokenExpiresAt = time.Now().Add(time.Duration(c.cfg.VerifierProxy.OIDC.AccessTokenDuration) * time.Second)
+	session.Tokens.IDToken = idToken
+	session.Tokens.RefreshToken = refreshToken
+	session.Tokens.RefreshTokenExpiresAt = time.Now().Add(time.Duration(c.cfg.VerifierProxy.OIDC.RefreshTokenDuration) * time.Second)
+	session.Tokens.TokenType = "Bearer"
+	session.Status = db.SessionStatusTokenIssued
+
+	if err := c.db.Sessions.Update(ctx, session); err != nil {
+		c.log.Error(err, "Failed to update session")
+		return nil, ErrServerError
+	}
+
+	return &TokenResponse{
+		AccessToken:  accessToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    c.cfg.VerifierProxy.OIDC.AccessTokenDuration,
+		RefreshToken: refreshToken,
+		IDToken:      idToken,
+		Scope:        session.OIDCRequest.Scope,
+	}, nil
+}
+
+func (c *Client) handleRefreshTokenGrant(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+	// TODO: Implement refresh token grant
+	return nil, ErrUnsupportedGrantType
+}
+
+// generateIDToken creates a signed ID token
+func (c *Client) generateIDToken(session *db.Session, client *db.Client) (string, error) {
+	now := time.Now()
+
+	// Generate subject identifier
+	walletID := session.OpenID4VP.WalletID
+	sub := c.generateSubjectIdentifier(walletID, client.ClientID)
+
+	claims := jwt.MapClaims{
+		"iss":   c.cfg.VerifierProxy.OIDC.Issuer,
+		"sub":   sub,
+		"aud":   client.ClientID,
+		"exp":   now.Add(1 * time.Hour).Unix(), // TODO: configurable
+		"iat":   now.Unix(),
+		"nonce": session.OIDCRequest.Nonce,
+	}
+
+	// Add verified claims
+	for k, v := range session.VerifiedClaims {
+		claims[k] = v
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims) // TODO: configurable algorithm
+
+	// Sign token
+	tokenString, err := token.SignedString(c.oidcSigningKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+// Helper functions
+
+func (c *Client) validateRedirectURI(uri string, allowed []string) bool {
+	for _, allowedURI := range allowed {
+		if uri == allowedURI {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Client) validateScopes(requested []string, allowed []string) bool {
+	for _, scope := range requested {
+		if !c.contains(allowed, scope) {
+			return false
+		}
+	}
+	return true
+}
+
+func (c *Client) contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Client) authenticateClient(client *db.Client, clientSecret string) error {
+	if client.TokenEndpointAuthMethod == "none" {
+		return nil // Public client
+	}
+
+	if client.ClientSecretHash == "" {
+		return errors.New("client secret not configured")
+	}
+
+	return bcrypt.CompareHashAndPassword([]byte(client.ClientSecretHash), []byte(clientSecret))
+}

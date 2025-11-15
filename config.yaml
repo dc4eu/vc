@@ -136,6 +136,40 @@ verifier:
           - "pda1"
           - "elm"
 
+verifier_proxy:
+  api_server:
+    addr: :8080
+    tls:
+      enabled: false
+  external_url: "http://vc_dev_verifier_proxy:8080"
+  oidc:
+    issuer: "http://vc_dev_verifier_proxy:8080"
+    signing_key_path: "/private_rsa.pem"
+    id_token_duration: 3600
+    access_token_duration: 3600
+    refresh_token_duration: 86400
+    subject_type: "pairwise"
+    subject_salt: "change-this-in-production"
+  openid4vp:
+    presentation_timeout: 300
+    supported_credentials:
+      - vct: "urn:eudi:pid:1"
+        scopes:
+          - "profile"
+          - "pid"
+      - vct: "urn:eudi:ehic:1"
+        scopes:
+          - "ehic"
+      - vct: "urn:eudi:pda1:1"
+        scopes:
+          - "pda1"
+      - vct: "urn:eudi:elm:1"
+        scopes:
+          - "elm"
+      - vct: "urn:eudi:diploma:1"
+        scopes:
+          - "diploma"
+
 registry:
   api_server:
     addr: :8080

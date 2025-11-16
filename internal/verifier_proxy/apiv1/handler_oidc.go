@@ -295,11 +295,14 @@ func (c *Client) generateIDToken(session *db.Session, client *db.Client) (string
 	walletID := session.OpenID4VP.WalletID
 	sub := c.generateSubjectIdentifier(walletID, client.ClientID)
 
+	// Get token expiration from config
+	idTokenTTL := time.Duration(c.cfg.VerifierProxy.OIDC.IDTokenDuration) * time.Second
+
 	claims := jwt.MapClaims{
 		"iss":   c.cfg.VerifierProxy.OIDC.Issuer,
 		"sub":   sub,
 		"aud":   client.ClientID,
-		"exp":   now.Add(1 * time.Hour).Unix(), // TODO: configurable
+		"exp":   now.Add(idTokenTTL).Unix(),
 		"iat":   now.Unix(),
 		"nonce": session.OIDCRequest.Nonce,
 	}
@@ -309,7 +312,9 @@ func (c *Client) generateIDToken(session *db.Session, client *db.Client) (string
 		claims[k] = v
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims) // TODO: configurable algorithm
+	// Get signing method from config
+	signingMethod := c.getSigningMethod()
+	token := jwt.NewWithClaims(signingMethod, claims)
 
 	// Sign token
 	tokenString, err := token.SignedString(c.oidcSigningKey)

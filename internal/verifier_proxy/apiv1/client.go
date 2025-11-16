@@ -21,6 +21,7 @@ import (
 	"vc/pkg/openid4vp"
 	"vc/pkg/trace"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 )
@@ -282,3 +283,25 @@ func (c *Client) generateSubjectIdentifier(walletID string, clientID string) str
 	return privateKey, publicKey, nil
 }
 */
+
+// getSigningMethod returns the JWT signing method based on the configured algorithm
+func (c *Client) getSigningMethod() jwt.SigningMethod {
+	switch c.cfg.VerifierProxy.OIDC.SigningAlg {
+	case "RS256":
+		return jwt.SigningMethodRS256
+	case "RS384":
+		return jwt.SigningMethodRS384
+	case "RS512":
+		return jwt.SigningMethodRS512
+	case "ES256":
+		return jwt.SigningMethodES256
+	case "ES384":
+		return jwt.SigningMethodES384
+	case "ES512":
+		return jwt.SigningMethodES512
+	default:
+		// Default to RS256 for backward compatibility
+		c.log.Info("Unknown signing algorithm in config, defaulting to RS256", "algorithm", c.cfg.VerifierProxy.OIDC.SigningAlg)
+		return jwt.SigningMethodRS256
+	}
+}

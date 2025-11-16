@@ -192,6 +192,11 @@ fi
 
 echo_info "✓ ngrok tunnel: $NGROK_URL"
 
+# Save ngrok URL for Playwright automation
+echo "$NGROK_URL" > .ngrok-url
+CLEANUP_FILES+=(".ngrok-url")
+echo_info "Saved ngrok URL to .ngrok-url for automation scripts"
+
 # Step 5: Generate conformance configuration
 echo_step "5/8 Generating conformance configuration..."
 

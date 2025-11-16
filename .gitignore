@@ -13,3 +13,17 @@ developer_tools/*.cnf
 .~lock.*.csv#
 developer_tools/pki/*
 !developer_tools/pki/create_pki.sh
+
+# Working documents (not tracked in git)
+PR_STRATEGY.md
+COMMIT_PLAN.md
+
+# OIDC Conformance testing artifacts
+config.conformance.yaml
+.ngrok-url
+ngrok.log
+verifier-proxy.log
+playwright-screenshots/
+
+# VS Code MCP configuration (contains personal tokens)
+.vscode/mcp.json

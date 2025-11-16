@@ -1,6 +1,6 @@
-# OIDC Conformance Testing Scripts
+# OIDC Conformance Testing
 
-This directory contains automated testing tools for validating the verifier-proxy OIDC Provider implementation against the OpenID Connect Conformance Suite.
+This directory contains scripts and documentation for validating the verifier-proxy OIDC Provider implementation against the OpenID Connect Conformance Suite.
 
 ## Quick Start
 
@@ -17,6 +17,46 @@ This will:
 5. Start verifier-proxy
 6. Validate all endpoints
 7. Display conformance suite setup instructions
+
+## Automated Testing with Playwright MCP
+
+For browser automation of conformance tests, use the Playwright MCP integration with VS Code:
+
+### Setup
+
+1. **Install Playwright Chrome Extension** in your browser
+   - Get it from: https://github.com/microsoft/playwright-mcp
+
+2. **Configure VS Code MCP** by creating `.vscode/mcp.json`:
+   ```json
+   {
+     "servers": {
+       "playwright": {
+         "type": "stdio",
+         "command": "npx",
+         "args": ["@playwright/mcp@latest", "--extension"],
+         "env": {
+           "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "your-token-here"
+         }
+       }
+     }
+   }
+   ```
+
+3. **Log into the conformance suite** manually at https://www.certification.openid.net/
+
+### Usage
+
+With the MCP server configured, you can use GitHub Copilot Chat in VS Code to:
+- Navigate to conformance tests
+- Run automated tests that don't require wallet interaction
+- Monitor test results
+- Extract test data
+
+Example prompts:
+- "Navigate to my test plan in the conformance suite"
+- "Run the oidcc-registration-sector-uri test"
+- "Check the results of the last test"
 
 ## Scripts
 
@@ -251,28 +291,39 @@ tail -f ngrok.log
 tail -f verifier-proxy.log
 ```
 
-## Known Limitations
+## Test Automation
 
-### 1. Wallet Interaction Required
+### Fully Automated Tests
 
-The verifier-proxy implements OpenID4VP which requires wallet interaction for the authorization flow. The conformance suite expects traditional OIDC flow.
+The following tests can run without user interaction:
 
-**Workarounds**:
-- Implement a "conformance mode" that bypasses wallet requirements
-- Use a mock wallet for automated responses
-- Focus on endpoints that don't require wallet (discovery, JWKS, registration)
+- ✅ **oidcc-discovery-endpoint-verification** - Discovery metadata validation
+- ✅ **oidcc-registration-sector-uri** - Sector identifier URI validation
+- ✅ **oidcc-redirect-uri-regfrag** - Registration endpoint validation (error cases)
+- ✅ **oidcc-registration-sector-bad** - Registration endpoint validation (error cases)
 
-### 2. Test Client Credentials
+### Tests Requiring User Authentication
 
-The conformance suite creates clients dynamically. Make sure dynamic registration is working properly (test with `conformance_validator.py`).
+Most authorization flow tests require manual wallet/user authentication:
 
-## Success Criteria
+- ⚠️ **oidcc-server** - Basic authorization flows
+- ⚠️ **oidcc-idtoken-rs256** - ID token validation
+- ⚠️ **oidcc-userinfo-get** - UserInfo endpoint
+- ⚠️ All prompt/scope/claims tests
 
-For certification, you should achieve:
-- ✅ 100% pass rate on discovery tests
-- ✅ 100% pass rate on JWKS tests
-- ✅ 100% pass rate on registration tests
-- ✅ 95%+ pass rate on authorization/token tests
+For these tests, the Playwright MCP automation can:
+- Navigate to tests
+- Click "Proceed with test" buttons
+- Monitor test progress
+- But manual authentication is still required
+
+### Test Client Credentials
+
+The conformance suite creates clients dynamically via the registration endpoint. Ensure dynamic registration is working properly by running the validator:
+
+```bash
+./scripts/conformance_validator.py https://your-ngrok-url.ngrok.io
+```
 
 ## References
 
@@ -281,10 +332,11 @@ For certification, you should achieve:
 - [Testing Guide](https://openid.net/certification/testing/)
 - [RFC 7591 - Dynamic Registration](https://tools.ietf.org/html/rfc7591)
 - [RFC 7592 - Registration Management](https://tools.ietf.org/html/rfc7592)
+- [Playwright MCP](https://github.com/microsoft/playwright-mcp)
 
-## Support
+## Files
 
-For issues with:
-- **ngrok**: https://ngrok.com/docs
-- **Conformance Suite**: https://gitlab.com/openid/conformance-suite/-/wikis/home
-- **verifier-proxy**: See main project README
+- `run-oidc-conformance.sh` - Main conformance environment setup script
+- `conformance_validator.py` - Standalone endpoint validation tool
+- `README-conformance.md` - This documentation file
+

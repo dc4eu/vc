@@ -97,7 +97,7 @@ func (ce *ClaimsExtractor) extractNestedClaim(claims map[string]any, path string
 
 	// Split path by dots for nested access
 	parts := strings.Split(path, ".")
-	
+
 	current := claims
 	for i, part := range parts {
 		value, ok := current[part]
@@ -129,7 +129,7 @@ func (ce *ClaimsExtractor) ApplyClaimTransforms(claims map[string]any, transform
 	}
 
 	transformedClaims := make(map[string]any)
-	
+
 	// Copy all claims first
 	for key, value := range claims {
 		transformedClaims[key] = value

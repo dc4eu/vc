@@ -22,7 +22,7 @@ func TestClaimsExtractor_ExtractNestedClaim(t *testing.T) {
 		{
 			name: "simple claim",
 			claims: map[string]any{
-				"given_name": "John",
+				"given_name":  "John",
 				"family_name": "Doe",
 			},
 			path: "given_name",
@@ -90,7 +90,7 @@ func TestClaimsExtractor_ExtractNestedClaim(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := ce.extractNestedClaim(tt.claims, tt.path)
-			
+
 			if tt.wantError {
 				assert.Error(t, err)
 				return
@@ -135,7 +135,7 @@ func TestClaimsExtractor_MapClaimsToOIDC(t *testing.T) {
 				"family_name": "Doe",
 				"birthdate":   "1990-01-01",
 				"_sd":         []string{"hash1", "hash2"}, // Should be filtered
-				"_sd_alg":     "sha-256",                   // Should be filtered
+				"_sd_alg":     "sha-256",                  // Should be filtered
 			},
 			claimMappings: map[string]string{
 				"*": "*",
@@ -617,15 +617,15 @@ func TestClaimsExtractor_ExtractAndMapClaims_Integration(t *testing.T) {
 	t.Run("complete pipeline - PID basic", func(t *testing.T) {
 		// Simulate a simple SD-JWT VP token (would normally come from sdjwt3.CredentialParser)
 		// For testing, we'll skip actual VP parsing and test the mapping/transform pipeline
-		
+
 		vpClaims := map[string]any{
-			"given_name":   "John",
-			"family_name":  "Doe",
-			"birthdate":    "1990-01-15",
-			"age_over_18":  true,
-			"nationality":  "SE",
-			"_sd":          []string{"hash1"},
-			"_sd_alg":      "sha-256",
+			"given_name":  "John",
+			"family_name": "Doe",
+			"birthdate":   "1990-01-15",
+			"age_over_18": true,
+			"nationality": "SE",
+			"_sd":         []string{"hash1"},
+			"_sd_alg":     "sha-256",
 		}
 
 		claimMappings := map[string]string{
@@ -680,11 +680,11 @@ func TestClaimsExtractor_ExtractAndMapClaims_Integration(t *testing.T) {
 		}
 
 		claimMappings := map[string]string{
-			"card_number":       "ehic_card_number",
-			"forename":          "given_name",
-			"surname":           "family_name",
-			"dob":               "birthdate",
-			"institution.name":  "insurance_provider",
+			"card_number":         "ehic_card_number",
+			"forename":            "given_name",
+			"surname":             "family_name",
+			"dob":                 "birthdate",
+			"institution.name":    "insurance_provider",
 			"institution.country": "insurance_country",
 		}
 

@@ -36,7 +36,7 @@ type Client struct {
 	ephemeralEncryptionKeyCache *ttlcache.Cache[string, jwk.Key]
 	requestObjectCache          *ttlcache.Cache[string, *openid4vp.RequestObject]
 	presentationBuilder         *openid4vp.PresentationBuilder // Template-based presentation request builder
-	claimsExtractor             *openid4vp.ClaimsExtractor      // Claims extraction and mapping
+	claimsExtractor             *openid4vp.ClaimsExtractor     // Claims extraction and mapping
 }
 
 // New creates a new instance of the verifier proxy API
@@ -282,6 +282,3 @@ func (c *Client) generateSubjectIdentifier(walletID string, clientID string) str
 	return privateKey, publicKey, nil
 }
 */
-
-
-

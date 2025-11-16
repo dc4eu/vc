@@ -187,8 +187,9 @@ type OIDCConfig struct {
 
 // OpenID4VPConfig holds OpenID4VP-specific configuration
 type OpenID4VPConfig struct {
-	PresentationTimeout  int                         `yaml:"presentation_timeout" validate:"required"`
-	SupportedCredentials []SupportedCredentialConfig `yaml:"supported_credentials" validate:"required"`
+	PresentationTimeout     int                         `yaml:"presentation_timeout" validate:"required"`
+	SupportedCredentials    []SupportedCredentialConfig `yaml:"supported_credentials" validate:"required"`
+	PresentationRequestsDir string                      `yaml:"presentation_requests_dir,omitempty"` // Optional: directory with presentation request templates
 }
 
 // SupportedCredentialConfig maps credential types to OIDC scopes

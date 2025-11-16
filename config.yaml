@@ -156,6 +156,10 @@ verifier_proxy:
     subject_salt: "change-this-in-production"
   openid4vp:
     presentation_timeout: 300
+    # Template-based presentation requests (optional)
+    # When configured, DCQL queries are loaded from YAML templates
+    # Falls back to supported_credentials if templates not found or disabled
+    presentation_requests_dir: "/presentation_requests"
     supported_credentials:
       - vct: "urn:eudi:pid:1"
         scopes:

@@ -362,9 +362,9 @@ func TestConfigurableTokenExpiration(t *testing.T) {
 	assert.NoError(t, err)
 
 	tests := []struct {
-		name           string
+		name            string
 		idTokenDuration int // in seconds
-		expectedTTL    time.Duration
+		expectedTTL     time.Duration
 	}{
 		{
 			name:            "1 hour expiration",
@@ -439,10 +439,10 @@ func TestConfigurableSigningAlgorithm(t *testing.T) {
 	assert.NoError(t, err)
 
 	tests := []struct {
-		name             string
-		signingAlg       string
-		expectedMethod   jwt.SigningMethod
-		expectedAlgName  string
+		name            string
+		signingAlg      string
+		expectedMethod  jwt.SigningMethod
+		expectedAlgName string
 	}{
 		{
 			name:            "RS256 algorithm",

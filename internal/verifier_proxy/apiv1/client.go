@@ -3,9 +3,14 @@ package apiv1
 import (
 	"context"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/pem"
+	"fmt"
+	"os"
 	"time"
 	"vc/internal/verifier_proxy/db"
 	"vc/pkg/logger"
@@ -46,12 +51,49 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, tracer *trace.Trac
 	go c.requestObjectCache.Start()
 
 	// Load OIDC signing key
-	// TODO: Load from config path
+	if err := c.loadSigningKey(); err != nil {
+		return nil, fmt.Errorf("failed to load signing key: %w", err)
+	}
 	c.oidcSigningAlg = "RS256"
 
 	c.log.Info("Started")
 
 	return c, nil
+}
+
+// loadSigningKey loads the RSA private key from the configured path
+func (c *Client) loadSigningKey() error {
+	keyPath := c.cfg.VerifierProxy.OIDC.SigningKeyPath
+	if keyPath == "" {
+		return fmt.Errorf("signing_key_path not configured")
+	}
+
+	keyData, err := os.ReadFile(keyPath)
+	if err != nil {
+		return fmt.Errorf("failed to read key file: %w", err)
+	}
+
+	block, _ := pem.Decode(keyData)
+	if block == nil {
+		return fmt.Errorf("failed to parse PEM block")
+	}
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		// Try PKCS8 format
+		key, err2 := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err2 != nil {
+			return fmt.Errorf("failed to parse private key (tried PKCS1 and PKCS8): %w", err)
+		}
+		var ok bool
+		privateKey, ok = key.(*rsa.PrivateKey)
+		if !ok {
+			return fmt.Errorf("key is not RSA private key")
+		}
+	}
+
+	c.oidcSigningKey = privateKey
+	return nil
 }
 
 // generateSessionID creates a cryptographically random session identifier

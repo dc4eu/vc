@@ -3,9 +3,12 @@ package apiv1
 import (
 	"bytes"
 	"context"
+	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"image/png"
+	"math/big"
 	"time"
 	"vc/internal/verifier_proxy/db"
 	"vc/pkg/sdjwt3"
@@ -123,7 +126,8 @@ func (c *Client) GetDiscoveryMetadata(ctx context.Context) (*DiscoveryMetadata, 
 		TokenEndpoint:                    baseURL + "/token",
 		UserInfoEndpoint:                 baseURL + "/userinfo",
 		JwksURI:                          baseURL + "/jwks",
-		ResponseTypesSupported:           []string{"code"},
+		RegistrationEndpoint:             baseURL + "/register",
+		ResponseTypesSupported:           []string{"code", "id_token", "token id_token"},
 		SubjectTypesSupported:            []string{"public", "pairwise"},
 		IDTokenSigningAlgValuesSupported: []string{"RS256", "ES256"},
 		ScopesSupported:                  []string{"openid", "profile", "email"},
@@ -131,7 +135,7 @@ func (c *Client) GetDiscoveryMetadata(ctx context.Context) (*DiscoveryMetadata, 
 			"sub", "name", "given_name", "family_name", "email",
 			"email_verified", "birthdate", "address",
 		},
-		GrantTypesSupported:               []string{"authorization_code", "refresh_token"},
+		GrantTypesSupported:               []string{"authorization_code", "implicit", "refresh_token"},
 		CodeChallengeMethodsSupported:     []string{"S256"},
 		TokenEndpointAuthMethodsSupported: []string{"client_secret_basic", "client_secret_post", "none"},
 	}
@@ -148,13 +152,25 @@ func (c *Client) GetDiscoveryMetadata(ctx context.Context) (*DiscoveryMetadata, 
 
 // GetJWKS returns the JSON Web Key Set
 func (c *Client) GetJWKS(ctx context.Context) (*JWKS, error) {
-	// Convert to JWK (simplified - in production, use proper JOSE library)
+	// Get the RSA public key from the signing key
+	privateKey, ok := c.oidcSigningKey.(*rsa.PrivateKey)
+	if !ok || privateKey == nil {
+		return nil, fmt.Errorf("signing key not loaded or not RSA")
+	}
+
+	publicKey := &privateKey.PublicKey
+
+	// Convert RSA public key components to base64url encoding
+	n := base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes())
+	e := base64.RawURLEncoding.EncodeToString(big.NewInt(int64(publicKey.E)).Bytes())
+
 	jwk := JWK{
 		Kty: "RSA",
 		Use: "sig",
 		Kid: "default",
 		Alg: "RS256",
-		// N and E would be populated from actual key
+		N:   n,
+		E:   e,
 	}
 
 	return &JWKS{

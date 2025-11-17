@@ -92,47 +92,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "jwks", http.StatusOK, s.endpointJWKS)
 
 	// OIDC Endpoints with rate limiting
-	rgRoot.GET("/authorize", s.authorizeLimiter.Middleware(), func(c *gin.Context) {
-		k := "api_endpoint GET:/authorize"
-		ctx, span := s.tracer.Start(ctx, k)
-		defer span.End()
-		res, err := s.endpointAuthorize(ctx, c)
-		if err != nil {
-			s.log.Debug("endpointAuthorize", "err", err)
-			c.JSON(httphelpers.StatusCode(ctx, err), gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, res)
-	})
-
-	rgRoot.POST("/token", s.tokenLimiter.Middleware(), func(c *gin.Context) {
-		k := "api_endpoint POST:/token"
-		ctx, span := s.tracer.Start(ctx, k)
-		defer span.End()
-		res, err := s.endpointToken(ctx, c)
-		if err != nil {
-			s.log.Debug("endpointToken", "err", err)
-			c.JSON(httphelpers.StatusCode(ctx, err), gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, res)
-	})
+	// These endpoints use manual registration to apply rate limiting middleware
+	s.setupOIDCRateLimitedEndpoints(ctx, rgRoot)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "userinfo", http.StatusOK, s.endpointUserInfo)
 
-	// Dynamic Client Registration with rate limiting (RFC 7591, 7592)
-	rgRoot.POST("/register", s.registerLimiter.Middleware(), func(c *gin.Context) {
-		k := "api_endpoint POST:/register"
-		ctx, span := s.tracer.Start(ctx, k)
-		defer span.End()
-		res, err := s.endpointRegisterClient(ctx, c)
-		if err != nil {
-			s.log.Debug("endpointRegisterClient", "err", err)
-			c.JSON(httphelpers.StatusCode(ctx, err), gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusCreated, res)
-	})
+	// Dynamic Client Registration (RFC 7591, 7592)
+	// POST /register is rate-limited and handled by setupOIDCRateLimitedEndpoints
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "register/:client_id", http.StatusOK, s.endpointGetClientConfiguration)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPut, "register/:client_id", http.StatusOK, s.endpointUpdateClient)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodDelete, "register/:client_id", http.StatusNoContent, s.endpointDeleteClient)

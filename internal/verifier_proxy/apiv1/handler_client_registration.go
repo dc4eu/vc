@@ -180,8 +180,8 @@ func (c *Client) RegisterClient(ctx context.Context, req *ClientRegistrationRequ
 		RequestURIs:                 req.RequestURIs,
 		CodeChallengeMethod:         req.CodeChallengeMethod,
 		RegistrationAccessTokenHash: ratHash,
-		ClientIDIssuedAt:            now,
-		ClientSecretExpiresAt:       time.Time{}, // Never expires
+		ClientIDIssuedAt:            now.Unix(),
+		ClientSecretExpiresAt:       0, // Never expires (0 means no expiration per RFC 7591)
 	}
 
 	err = c.db.Clients.Create(ctx, client)
@@ -251,8 +251,8 @@ func (c *Client) GetClientInformation(ctx context.Context, clientID string, regi
 	response := &ClientInformationResponse{
 		ClientRegistrationResponse: ClientRegistrationResponse{
 			ClientID:                clientID,
-			ClientIDIssuedAt:        client.ClientIDIssuedAt.Unix(),
-			ClientSecretExpiresAt:   0,
+			ClientIDIssuedAt:        client.ClientIDIssuedAt,
+			ClientSecretExpiresAt:   client.ClientSecretExpiresAt,
 			RedirectURIs:            client.RedirectURIs,
 			TokenEndpointAuthMethod: client.TokenEndpointAuthMethod,
 			GrantTypes:              client.GrantTypes,
@@ -369,8 +369,8 @@ func (c *Client) UpdateClient(ctx context.Context, clientID string, registration
 
 	response := &ClientRegistrationResponse{
 		ClientID:                clientID,
-		ClientIDIssuedAt:        client.ClientIDIssuedAt.Unix(),
-		ClientSecretExpiresAt:   0,
+		ClientIDIssuedAt:        client.ClientIDIssuedAt,
+		ClientSecretExpiresAt:   client.ClientSecretExpiresAt,
 		RedirectURIs:            client.RedirectURIs,
 		TokenEndpointAuthMethod: client.TokenEndpointAuthMethod,
 		GrantTypes:              client.GrantTypes,

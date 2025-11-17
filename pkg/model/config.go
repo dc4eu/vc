@@ -158,6 +158,40 @@ type Verifier struct {
 	SupportedWallets  map[string]string `yaml:"supported_wallets" validate:"omitempty"`
 }
 
+// VerifierProxy holds the verifier proxy configuration
+type VerifierProxy struct {
+	APIServer   APIServer       `yaml:"api_server" validate:"required"`
+	ExternalURL string          `yaml:"external_url" validate:"required"`
+	OIDC        OIDCConfig      `yaml:"oidc" validate:"required"`
+	OpenID4VP   OpenID4VPConfig `yaml:"openid4vp" validate:"required"`
+}
+
+// OIDCConfig holds OIDC-specific configuration
+type OIDCConfig struct {
+	Issuer               string `yaml:"issuer" validate:"required"`
+	SigningKeyPath       string `yaml:"signing_key_path" validate:"required"`
+	SigningAlg           string `yaml:"signing_alg" validate:"required,oneof=RS256 RS384 RS512 ES256 ES384 ES512"`
+	SessionDuration      int    `yaml:"session_duration" validate:"required"`       // in seconds
+	CodeDuration         int    `yaml:"code_duration" validate:"required"`          // in seconds
+	AccessTokenDuration  int    `yaml:"access_token_duration" validate:"required"`  // in seconds
+	IDTokenDuration      int    `yaml:"id_token_duration" validate:"required"`      // in seconds
+	RefreshTokenDuration int    `yaml:"refresh_token_duration" validate:"required"` // in seconds
+	SubjectType          string `yaml:"subject_type" validate:"required,oneof=public pairwise"`
+	SubjectSalt          string `yaml:"subject_salt" validate:"required"`
+}
+
+// OpenID4VPConfig holds OpenID4VP-specific configuration
+type OpenID4VPConfig struct {
+	PresentationTimeout  int                         `yaml:"presentation_timeout" validate:"required"`
+	SupportedCredentials []SupportedCredentialConfig `yaml:"supported_credentials" validate:"required"`
+}
+
+// SupportedCredentialConfig maps credential types to OIDC scopes
+type SupportedCredentialConfig struct {
+	VCT    string   `yaml:"vct" validate:"required"`
+	Scopes []string `yaml:"scopes" validate:"required"`
+}
+
 // Datastore holds the datastore configuration
 type Datastore struct {
 	APIServer  APIServer  `yaml:"api_server" validate:"required"`
@@ -278,6 +312,7 @@ type Cfg struct {
 	APIGW                 APIGW                             `yaml:"apigw" validate:"omitempty"`
 	Issuer                Issuer                            `yaml:"issuer" validate:"omitempty"`
 	Verifier              Verifier                          `yaml:"verifier" validate:"omitempty"`
+	VerifierProxy         VerifierProxy                     `yaml:"verifier_proxy" validate:"omitempty"`
 	Datastore             Datastore                         `yaml:"datastore" validate:"omitempty"`
 	Registry              Registry                          `yaml:"registry" validate:"omitempty"`
 	Persistent            Persistent                        `yaml:"persistent" validate:"omitempty"`

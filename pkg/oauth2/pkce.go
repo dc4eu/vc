@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 )
 
 // https://www.rfc-editor.org/rfc/inline-errata/rfc7636.html
@@ -20,6 +21,14 @@ const (
 
 	// CodeChallengeMethodS256 SHA256 hash transformation
 	CodeChallengeMethodS256 = "S256"
+)
+
+var (
+	// ErrInvalidRequest indicates invalid request parameters
+	ErrInvalidRequest = errors.New("invalid_request")
+
+	// ErrInvalidGrant indicates invalid grant
+	ErrInvalidGrant = errors.New("invalid_grant")
 )
 
 // CreateCodeVerifier creates a code verifier. 4.1 Client Creates a Code Verifier
@@ -40,4 +49,22 @@ func CreateCodeChallenge(codeChallengeMethod, codeVerifier string) string {
 	}
 
 	return codeVerifier
+}
+
+// ValidatePKCE validates the code verifier against the code challenge
+func ValidatePKCE(codeVerifier, codeChallenge, codeChallengeMethod string) error {
+	if codeChallenge == "" {
+		return nil // PKCE not used
+	}
+
+	if codeVerifier == "" {
+		return ErrInvalidRequest // Code verifier required when challenge is present
+	}
+
+	computedChallenge := CreateCodeChallenge(codeChallengeMethod, codeVerifier)
+	if computedChallenge != codeChallenge {
+		return ErrInvalidGrant
+	}
+
+	return nil
 }

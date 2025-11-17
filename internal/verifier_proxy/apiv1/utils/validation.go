@@ -9,6 +9,10 @@ import (
 	"vc/pkg/oauth2"
 )
 
+// Package utils provides validation utilities for the verifier-proxy API.
+// URL validation leverages Go's net/url package for parsing and standard checks,
+// with additional security features (SSRF prevention) layered on top.
+
 // ValidateRedirectURI validates a redirect URI against a list of allowed URIs.
 // Returns true if the URI is in the allowed list (exact match required).
 func ValidateRedirectURI(uri string, allowedURIs []string) bool {
@@ -20,25 +24,95 @@ func ValidateRedirectURI(uri string, allowedURIs []string) bool {
 	return false
 }
 
+// urlValidationOptions configures URL validation behavior
+type urlValidationOptions struct {
+	requireHTTPS  bool
+	requireHost   bool
+	allowFragment bool
+	blockSSRF     bool
+}
+
+// parseAndValidateURL is the core validation function that parses and validates URLs.
+// It leverages net/url.Parse() and url.URL struct methods for all standard validations,
+// with additional security checks (SSRF prevention) layered on top.
+func parseAndValidateURL(rawURL, fieldName string, opts urlValidationOptions) (*url.URL, error) {
+	// Let net/url do the parsing and basic validation
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		if fieldName == "redirect_uri" {
+			return nil, fmt.Errorf("invalid %s: %w", fieldName, err)
+		}
+		return nil, fmt.Errorf("invalid %s URL: %w", fieldName, err)
+	}
+
+	// Use url.URL.Scheme for scheme validation
+	// If HTTPS is required and there's no scheme or wrong scheme, prioritize that error
+	if opts.requireHTTPS {
+		if u.Scheme == "" || u.Scheme != "https" {
+			return nil, fmt.Errorf("%s must use https scheme", fieldName)
+		}
+	} else if u.Scheme == "" {
+		return nil, fmt.Errorf("%s must have a scheme", fieldName)
+	}
+
+	// Use url.URL.Fragment for fragment validation
+	if !opts.allowFragment && u.Fragment != "" {
+		return nil, fmt.Errorf("%s must not contain a fragment", fieldName)
+	}
+
+	// Use url.URL.Host for host validation
+	if opts.requireHost && u.Host == "" {
+		return nil, fmt.Errorf("%s must have a host", fieldName)
+	}
+
+	// Add SSRF prevention on top of stdlib validation
+	if opts.blockSSRF {
+		// Use url.URL.Hostname() to extract hostname without port
+		if err := checkSSRF(u.Hostname()); err != nil {
+			return nil, err
+		}
+	}
+
+	return u, nil
+}
+
+// checkSSRF performs SSRF (Server-Side Request Forgery) prevention checks
+func checkSSRF(hostname string) error {
+	// Check for localhost
+	if strings.ToLower(hostname) == "localhost" {
+		return fmt.Errorf("localhost URLs are not allowed")
+	}
+
+	// Resolve hostname to IP addresses
+	ips, err := net.LookupIP(hostname)
+	if err != nil {
+		return fmt.Errorf("failed to resolve hostname: %w", err)
+	}
+
+	// Check each resolved IP address using net.IP methods
+	for _, ip := range ips {
+		if err := validateIPAddress(ip); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // ValidateRedirectURIFormat validates that a redirect URI conforms to OAuth 2.0 requirements.
 // Per RFC 6749:
 // - Must have a scheme
 // - Must not contain a fragment
+//
+// Uses net/url.Parse() for parsing and url.URL struct methods for validation.
 func ValidateRedirectURIFormat(uri string) error {
-	parsed, err := url.Parse(uri)
-	if err != nil {
-		return fmt.Errorf("invalid redirect_uri: %w", err)
-	}
-
-	if parsed.Scheme == "" {
-		return fmt.Errorf("redirect_uri must have a scheme")
-	}
-
-	if parsed.Fragment != "" {
-		return fmt.Errorf("redirect_uri must not contain a fragment")
-	}
-
-	return nil
+	_, err := parseAndValidateURL(uri, "redirect_uri", urlValidationOptions{
+		requireHTTPS:  false,
+		requireHost:   false,
+		allowFragment: false,
+		blockSSRF:     false,
+	})
+	return err
 }
 
 // ValidateScopes validates that all requested scopes are in the allowed list.
@@ -64,25 +138,16 @@ func ValidatePKCE(codeVerifier, codeChallenge, codeChallengeMethod string) error
 // - Must use HTTPS scheme
 // - Must not contain a fragment
 // - Must have a host
+//
+// Uses net/url.Parse() for parsing and url.URL struct methods for validation.
 func ValidateHTTPSURI(uri, fieldName string) error {
-	parsed, err := url.Parse(uri)
-	if err != nil {
-		return fmt.Errorf("invalid %s URL: %w", fieldName, err)
-	}
-
-	if parsed.Scheme != "https" {
-		return fmt.Errorf("%s must use https scheme", fieldName)
-	}
-
-	if parsed.Fragment != "" {
-		return fmt.Errorf("%s must not contain a fragment", fieldName)
-	}
-
-	if parsed.Host == "" {
-		return fmt.Errorf("%s must have a host", fieldName)
-	}
-
-	return nil
+	_, err := parseAndValidateURL(uri, fieldName, urlValidationOptions{
+		requireHTTPS:  true,
+		requireHost:   true,
+		allowFragment: false,
+		blockSSRF:     false,
+	})
+	return err
 }
 
 // ValidateURI validates a URI with SSRF (Server-Side Request Forgery) prevention.
@@ -93,46 +158,28 @@ func ValidateHTTPSURI(uri, fieldName string) error {
 // - localhost hostname
 //
 // When requireHTTPS is true, also enforces HTTPS scheme.
+//
+// Uses net/url.Parse() for parsing, url.URL struct methods for standard validation,
+// and net.IP methods (IsLoopback, IsLinkLocalUnicast, etc.) for security checks.
 func ValidateURI(uri string, requireHTTPS bool) error {
-	parsed, err := url.Parse(uri)
-	if err != nil {
-		return fmt.Errorf("invalid URL: %w", err)
-	}
-
-	// Enforce HTTPS if required
-	if requireHTTPS && parsed.Scheme != "https" {
-		return fmt.Errorf("URL must use https scheme")
-	}
-
-	// Check for localhost
-	if strings.ToLower(parsed.Hostname()) == "localhost" {
-		return fmt.Errorf("localhost URLs are not allowed")
-	}
-
-	// Resolve hostname to IP addresses
-	ips, err := net.LookupIP(parsed.Hostname())
-	if err != nil {
-		return fmt.Errorf("failed to resolve hostname: %w", err)
-	}
-
-	// Check each resolved IP address
-	for _, ip := range ips {
-		if err := validateIPAddress(ip); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err := parseAndValidateURL(uri, "URL", urlValidationOptions{
+		requireHTTPS:  requireHTTPS,
+		requireHost:   false,
+		allowFragment: false,
+		blockSSRF:     true,
+	})
+	return err
 }
 
-// validateIPAddress checks if an IP address is in a blocked range
+// validateIPAddress checks if an IP address is in a blocked range.
+// Uses net.IP methods from the standard library for IP validation.
 func validateIPAddress(ip net.IP) error {
-	// Check for loopback (127.0.0.0/8, ::1)
+	// Check for loopback (127.0.0.0/8, ::1) using net.IP.IsLoopback()
 	if ip.IsLoopback() {
 		return fmt.Errorf("loopback addresses are not allowed")
 	}
 
-	// Check for link-local (169.254.0.0/16, fe80::/10)
+	// Check for link-local (169.254.0.0/16, fe80::/10) using net.IP methods
 	if ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
 		return fmt.Errorf("link-local addresses are not allowed")
 	}
@@ -145,7 +192,7 @@ func validateIPAddress(ip net.IP) error {
 	return nil
 }
 
-// isPrivateIP checks if an IP is in a private range
+// isPrivateIP checks if an IP is in a private range using net.ParseCIDR and net.IPNet.Contains
 func isPrivateIP(ip net.IP) bool {
 	// Private IPv4 ranges
 	privateRanges := []string{

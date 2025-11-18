@@ -26,13 +26,13 @@ func NewAttributeMapper(mappings map[string]model.CredentialMapping, log *logger
 
 // MapAttributes maps SAML attributes to credential claims
 // DEPRECATED: Use ClaimTransformer.TransformClaims() instead
-func (m *AttributeMapper) MapAttributes(samlAttrs map[string][]string, samlType string) (map[string]interface{}, error) {
+func (m *AttributeMapper) MapAttributes(samlAttrs map[string][]string, samlType string) (map[string]any, error) {
 	mapping, ok := m.mappings[samlType]
 	if !ok {
 		return nil, fmt.Errorf("no attribute mapping found for SAML type: %s", samlType)
 	}
 
-	claims := make(map[string]interface{})
+	claims := make(map[string]any)
 
 	for samlAttr, attrCfg := range mapping.Attributes {
 		values, exists := samlAttrs[samlAttr]
@@ -48,7 +48,7 @@ func (m *AttributeMapper) MapAttributes(samlAttrs map[string][]string, samlType 
 			continue
 		}
 
-		var value interface{}
+		var value any
 		if len(values) == 1 {
 			value = values[0]
 		} else if len(values) > 1 {

@@ -46,8 +46,8 @@ func (s *Service) ProcessAssertion(ctx context.Context, samlResponseEncoded stri
 	return nil, fmt.Errorf("SAML support not compiled in")
 }
 
-// MapToClaims stub
-func (s *Service) MapToClaims(ctx context.Context, assertion *Assertion, credentialType string) (map[string]interface{}, error) {
+// MapToClaims is a stub that returns an error
+func (s *Service) MapToClaims(ctx context.Context, assertion *Assertion, credentialType string) (map[string]any, error) {
 	return nil, fmt.Errorf("SAML support not compiled in")
 }
 

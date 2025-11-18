@@ -59,7 +59,7 @@ func TestTransformClaims_SimpleMapping(t *testing.T) {
 
 	transformer := NewClaimTransformer(mappings)
 
-	attributes := map[string]interface{}{
+	attributes := map[string]any{
 		"urn:oid:2.5.4.42": "John",
 		"urn:oid:2.5.4.4":  "Doe",
 	}
@@ -85,7 +85,7 @@ func TestTransformClaims_NestedMapping(t *testing.T) {
 
 	transformer := NewClaimTransformer(mappings)
 
-	attributes := map[string]interface{}{
+	attributes := map[string]any{
 		"urn:oid:2.5.4.42": "John",
 		"urn:oid:2.5.4.4":  "Doe",
 		"urn:oid:2.5.4.10": "ACME Corp",
@@ -99,7 +99,7 @@ func TestTransformClaims_NestedMapping(t *testing.T) {
 	identity, exists := doc["identity"]
 	assert.True(t, exists)
 
-	identityMap, ok := identity.(map[string]interface{})
+	identityMap, ok := identity.(map[string]any)
 	assert.True(t, ok)
 	assert.Equal(t, "John", identityMap["given_name"])
 	assert.Equal(t, "Doe", identityMap["family_name"])
@@ -119,7 +119,7 @@ func TestTransformClaims_RequiredAttributeMissing(t *testing.T) {
 
 	transformer := NewClaimTransformer(mappings)
 
-	attributes := map[string]interface{}{
+	attributes := map[string]any{
 		"urn:oid:2.5.4.42": "John",
 		// Missing required family_name
 	}
@@ -142,7 +142,7 @@ func TestTransformClaims_OptionalAttributeMissing(t *testing.T) {
 
 	transformer := NewClaimTransformer(mappings)
 
-	attributes := map[string]interface{}{
+	attributes := map[string]any{
 		"urn:oid:2.5.4.42": "John",
 		// Missing optional organization - should be OK
 	}
@@ -167,7 +167,7 @@ func TestTransformClaims_DefaultValue(t *testing.T) {
 
 	transformer := NewClaimTransformer(mappings)
 
-	attributes := map[string]interface{}{
+	attributes := map[string]any{
 		"urn:oid:2.5.4.42": "John",
 		// Missing country - should use default
 	}
@@ -226,7 +226,7 @@ func TestTransformClaims_WithTransformations(t *testing.T) {
 
 	transformer := NewClaimTransformer(mappings)
 
-	attributes := map[string]interface{}{
+	attributes := map[string]any{
 		"urn:oid:0.9.2342.19200300.100.1.3": "JOHN.DOE@EXAMPLE.COM",
 		"urn:oid:2.5.4.42":                  "  John  ",
 	}
@@ -238,39 +238,39 @@ func TestTransformClaims_WithTransformations(t *testing.T) {
 }
 
 func TestSetNestedValue_Simple(t *testing.T) {
-	doc := make(map[string]interface{})
+	doc := make(map[string]any)
 	err := setNestedValue(doc, "name", "John")
 	assert.NoError(t, err)
 	assert.Equal(t, "John", doc["name"])
 }
 
 func TestSetNestedValue_Nested(t *testing.T) {
-	doc := make(map[string]interface{})
+	doc := make(map[string]any)
 	err := setNestedValue(doc, "person.name", "John")
 	assert.NoError(t, err)
 
 	person, exists := doc["person"]
 	assert.True(t, exists)
 
-	personMap, ok := person.(map[string]interface{})
+	personMap, ok := person.(map[string]any)
 	assert.True(t, ok)
 	assert.Equal(t, "John", personMap["name"])
 }
 
 func TestSetNestedValue_DeepNesting(t *testing.T) {
-	doc := make(map[string]interface{})
+	doc := make(map[string]any)
 	err := setNestedValue(doc, "a.b.c.d", "value")
 	assert.NoError(t, err)
 
 	// Navigate down the structure
-	a, _ := doc["a"].(map[string]interface{})
-	b, _ := a["b"].(map[string]interface{})
-	c, _ := b["c"].(map[string]interface{})
+	a, _ := doc["a"].(map[string]any)
+	b, _ := a["b"].(map[string]any)
+	c, _ := b["c"].(map[string]any)
 	assert.Equal(t, "value", c["d"])
 }
 
 func TestSetNestedValue_MultipleValues(t *testing.T) {
-	doc := make(map[string]interface{})
+	doc := make(map[string]any)
 
 	err := setNestedValue(doc, "identity.given_name", "John")
 	assert.NoError(t, err)
@@ -281,21 +281,21 @@ func TestSetNestedValue_MultipleValues(t *testing.T) {
 	err = setNestedValue(doc, "identity.email", "john@example.com")
 	assert.NoError(t, err)
 
-	identity, _ := doc["identity"].(map[string]interface{})
+	identity, _ := doc["identity"].(map[string]any)
 	assert.Equal(t, "John", identity["given_name"])
 	assert.Equal(t, "Doe", identity["family_name"])
 	assert.Equal(t, "john@example.com", identity["email"])
 }
 
 func TestSetNestedValue_EmptyPath(t *testing.T) {
-	doc := make(map[string]interface{})
+	doc := make(map[string]any)
 	err := setNestedValue(doc, "", "value")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "empty path")
 }
 
 func TestSetNestedValue_PathConflict(t *testing.T) {
-	doc := make(map[string]interface{})
+	doc := make(map[string]any)
 
 	// Set a simple value
 	doc["person"] = "John"
@@ -307,7 +307,7 @@ func TestSetNestedValue_PathConflict(t *testing.T) {
 }
 
 func TestGetNestedValue_Simple(t *testing.T) {
-	doc := map[string]interface{}{
+	doc := map[string]any{
 		"name": "John",
 	}
 
@@ -317,8 +317,8 @@ func TestGetNestedValue_Simple(t *testing.T) {
 }
 
 func TestGetNestedValue_Nested(t *testing.T) {
-	doc := map[string]interface{}{
-		"person": map[string]interface{}{
+	doc := map[string]any{
+		"person": map[string]any{
 			"name": "John",
 		},
 	}
@@ -329,7 +329,7 @@ func TestGetNestedValue_Nested(t *testing.T) {
 }
 
 func TestGetNestedValue_NotFound(t *testing.T) {
-	doc := map[string]interface{}{
+	doc := map[string]any{
 		"name": "John",
 	}
 
@@ -338,7 +338,7 @@ func TestGetNestedValue_NotFound(t *testing.T) {
 }
 
 func TestGetNestedValue_EmptyPath(t *testing.T) {
-	doc := map[string]interface{}{}
+	doc := map[string]any{}
 
 	_, exists := getNestedValue(doc, "")
 	assert.False(t, exists)
@@ -363,7 +363,7 @@ func TestTransformClaims_ComplexRealWorld(t *testing.T) {
 
 	transformer := NewClaimTransformer(mappings)
 
-	attributes := map[string]interface{}{
+	attributes := map[string]any{
 		"urn:oid:2.5.4.42":                  "Magnus",
 		"urn:oid:2.5.4.4":                   "Svensson",
 		"urn:oid:0.9.2342.19200300.100.1.3": "MAGNUS.SVENSSON@EXAMPLE.SE",
@@ -380,7 +380,7 @@ func TestTransformClaims_ComplexRealWorld(t *testing.T) {
 	identity, exists := doc["identity"]
 	assert.True(t, exists)
 
-	identityMap, ok := identity.(map[string]interface{})
+	identityMap, ok := identity.(map[string]any)
 	assert.True(t, ok)
 	assert.Equal(t, "Magnus", identityMap["given_name"])
 	assert.Equal(t, "Svensson", identityMap["family_name"])

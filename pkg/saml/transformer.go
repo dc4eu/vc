@@ -51,15 +51,15 @@ func (t *ClaimTransformer) GetMapping(credentialType string) (*CredentialMapping
 // Protocol-agnostic - attributes can come from SAML, OIDC, or other sources
 func (t *ClaimTransformer) TransformClaims(
 	credentialType string,
-	attributes map[string]interface{},
-) (map[string]interface{}, error) {
+	attributes map[string]any,
+) (map[string]any, error) {
 	mapping, err := t.GetMapping(credentialType)
 	if err != nil {
 		return nil, err
 	}
 
 	// Build nested document structure using dot notation
-	doc := make(map[string]interface{})
+	doc := make(map[string]any)
 
 	for oid, attrMapping := range mapping.Attributes {
 		value, exists := attributes[oid]
@@ -88,7 +88,7 @@ func (t *ClaimTransformer) TransformClaims(
 }
 
 // applyTransform applies a transformation to a value
-func applyTransform(value interface{}, transform string) interface{} {
+func applyTransform(value any, transform string) any {
 	if transform == "" {
 		return value
 	}
@@ -113,7 +113,7 @@ func applyTransform(value interface{}, transform string) interface{} {
 
 // setNestedValue sets a value in a map using dot-notation path
 // Example: "identity.family_name" creates map[identity][family_name] = value
-func setNestedValue(doc map[string]interface{}, path string, value interface{}) error {
+func setNestedValue(doc map[string]any, path string, value any) error {
 	if path == "" {
 		return fmt.Errorf("empty path")
 	}
@@ -136,12 +136,12 @@ func setNestedValue(doc map[string]interface{}, path string, value interface{}) 
 		next, exists := current[key]
 		if !exists {
 			// Create new map
-			newMap := make(map[string]interface{})
+			newMap := make(map[string]any)
 			current[key] = newMap
 			current = newMap
 		} else {
 			// Key exists - ensure it's a map
-			nextMap, ok := next.(map[string]interface{})
+			nextMap, ok := next.(map[string]any)
 			if !ok {
 				return fmt.Errorf("path conflict: %s is not a map", strings.Join(parts[:i+1], "."))
 			}
@@ -157,7 +157,7 @@ func setNestedValue(doc map[string]interface{}, path string, value interface{}) 
 
 // getNestedValue retrieves a value from a map using dot-notation path
 // Used for validation/testing
-func getNestedValue(doc map[string]interface{}, path string) (interface{}, bool) {
+func getNestedValue(doc map[string]any, path string) (any, bool) {
 	if path == "" {
 		return nil, false
 	}
@@ -179,7 +179,7 @@ func getNestedValue(doc map[string]interface{}, path string) (interface{}, bool)
 			return nil, false
 		}
 
-		nextMap, ok := next.(map[string]interface{})
+		nextMap, ok := next.(map[string]any)
 		if !ok {
 			return nil, false
 		}

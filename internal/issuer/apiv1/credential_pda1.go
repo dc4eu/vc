@@ -3,11 +3,13 @@ package apiv1
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtv4"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
@@ -94,6 +96,55 @@ func (c *pda1Client) sdjwt(ctx context.Context, doc *socialsecurity.PDA1Document
 	ds := []string{
 		personalAdministrative_number.EncodedValue,
 		documentNumber.EncodedValue,
+	}
+
+	signedToken = sdjwt3.Combine(signedToken, ds, "")
+
+	return signedToken, nil
+}
+
+func (c *pda1Client) sdjwtV4(ctx context.Context, doc []byte, jwk *apiv1_issuer.Jwk, salt *string) (string, error) {
+	_, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	body := map[string]any{}
+	err := json.Unmarshal(doc, &body)
+	if err != nil {
+		return "", err
+	}
+
+	body["nbf"] = int64(time.Now().Unix())
+	body["exp"] = time.Now().Add(365 * 24 * time.Hour).Unix()
+	body["iss"] = c.client.cfg.Issuer.JWTAttribute.Issuer
+	body["_sd_alg"] = "sha-256"
+	body["jti"] = uuid.NewString()
+	body["vct"] = c.credentialConstructor.VCT
+
+	body["cnf"] = map[string]any{
+		"jwk": jwk,
+	}
+
+	header := map[string]any{
+		"typ": "vc+sd-jwt",
+		"kid": c.client.kid,
+		"alg": "ES256",
+	}
+
+	header["vctm"], err = c.credentialConstructor.VCTM.Encode()
+	if err != nil {
+		return "", err
+	}
+
+	sdClient := sdjwtv4.New()
+
+	token, ds, err := sdClient.MakeCredential(sha256.New(), body, c.credentialConstructor.VCTM)
+	if err != nil {
+		return "", err
+	}
+
+	signedToken, err := sdjwt3.Sign(header, token, jwt.SigningMethodES256, c.client.privateKey)
+	if err != nil {
+		return "", err
 	}
 
 	signedToken = sdjwt3.Combine(signedToken, ds, "")

@@ -1,9 +1,8 @@
 package sdjwt3
 
 import (
-	"crypto/sha256"
 	"encoding/base64"
-	"fmt"
+	"hash"
 
 	"encoding/json"
 )
@@ -15,22 +14,31 @@ type Discloser struct {
 }
 
 // Hash returns the hash of the discloser and its base64 representation
-func (d *Discloser) Hash() (string, string, []any, error) {
-	fmt.Println("value", d.Value)
-	t := []any{d.Salt, d.ClaimName, d.Value}
+func (d *Discloser) Hash(hasher hash.Hash) (string, string, []any, error) {
+	disclosureArray := []any{d.Salt, d.ClaimName, d.Value}
 
-	b, err := json.Marshal(t)
+	switch d.Value.(type) {
+	case map[string]any:
+		v := d.Value.(map[string]any)
+
+		disclosureArray = []any{d.Salt, d.ClaimName, v}
+	}
+
+	disclosureBytes, err := json.Marshal(disclosureArray)
 	if err != nil {
 		return "", "", nil, err
 	}
 
-	selectiveDisclosure := base64.RawURLEncoding.EncodeToString(b)
+	selectiveDisclosure := base64.RawURLEncoding.EncodeToString(disclosureBytes)
 
-	s := sha256.Sum256(b)
+	_, err = hasher.Write([]byte(selectiveDisclosure))
+	if err != nil {
+		return "", "", nil, err
+	}
 
-	b64 := base64.RawURLEncoding.EncodeToString(s[:])
+	hashed := base64.RawURLEncoding.EncodeToString(hasher.Sum(nil))
 
-	return b64, selectiveDisclosure, t, nil
+	return hashed, selectiveDisclosure, disclosureArray, nil
 }
 
 type CredentialCache struct {

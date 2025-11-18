@@ -2,16 +2,18 @@ package sdjwtv4
 
 import (
 	"fmt"
+	"hash"
 	"vc/pkg/sdjwt3"
 )
 
 // MakeCredential creates a SD-JWT credential from the provided data and VCTM.
-func (c *Client) MakeCredential(data map[string]any, vctm *sdjwt3.VCTM) (map[string]any, []string, error) {
+func (c *Client) MakeCredential(hashMethod hash.Hash, data map[string]any, vctm *sdjwt3.VCTM) (map[string]any, []string, error) {
 	//data["_sd"] = []any{}
 
 	diclosurs := []string{}
 
 	data["_sd_alg"] = "sha256"
+	salt := "mockSalt"
 
 	for _, claim := range vctm.Claims {
 		if len(claim.Path) == 1 {
@@ -22,11 +24,11 @@ func (c *Client) MakeCredential(data map[string]any, vctm *sdjwt3.VCTM) (map[str
 						data["_sd"] = []any{}
 					}
 					hash := sdjwt3.Discloser{
-						Salt:      "mockSalt",
+						Salt:      salt,
 						ClaimName: *path,
 						Value:     data[*path],
 					}
-					sdHash, sdB64, _, err := hash.Hash()
+					sdHash, sdB64, _, err := hash.Hash(hashMethod)
 					if err != nil {
 						return nil, nil, err
 					}
@@ -49,12 +51,12 @@ func (c *Client) MakeCredential(data map[string]any, vctm *sdjwt3.VCTM) (map[str
 							current["_sd"] = []any{}
 						}
 						hash := sdjwt3.Discloser{
-							Salt:      "mockSalt",
+							Salt:      salt,
 							ClaimName: *path,
 							Value:     current[*path],
 						}
 						fmt.Println("value 2", current[*path])
-						sdHash, sdB64, _, err := hash.Hash()
+						sdHash, sdB64, _, err := hash.Hash(hashMethod)
 						if err != nil {
 							return nil, nil, err
 						}
@@ -85,3 +87,6 @@ func (c *Client) MakeCredential(data map[string]any, vctm *sdjwt3.VCTM) (map[str
 
 	return data, diclosurs, nil
 }
+
+// encodedDisclosureArray := make([]byte, base64.RawURLEncoding.EncodedLen(len(dBytes)))
+// 	base64.RawURLEncoding.Encode(encodedDisclosureArray, dBytes)

@@ -1,6 +1,7 @@
 package sdjwtv4
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"testing"
 	"vc/pkg/sdjwt3"
@@ -14,6 +15,8 @@ var (
 	mockAttributeAddressStreet     = "street"
 	mockAttributeAddressPostal     = "postal"
 	mockAttributeAddressPostalCode = "code"
+	mockAttributeWorkCountries     = "work_countries"
+	mockAttributeWorkCountriesSE   = "SE"
 
 	mockVCTM_v1 = &sdjwt3.VCTM{
 		Claims: []sdjwt3.Claim{
@@ -73,6 +76,26 @@ var (
 			},
 			{
 				Path: []*string{&mockAttributeAddress},
+				SD:   "always",
+			},
+		},
+	}
+
+	// mockVCTM_v7 tests array handling
+	mockVCTM_v7 = &sdjwt3.VCTM{
+		Claims: []sdjwt3.Claim{
+			{
+				Path: []*string{&mockAttributeWorkCountries},
+				SD:   "always",
+			},
+		},
+	}
+
+	// mockVCTM_v8 tests value in array
+	mockVCTM_v8 = &sdjwt3.VCTM{
+		Claims: []sdjwt3.Claim{
+			{
+				Path: []*string{&mockAttributeWorkCountriesSE},
 				SD:   "always",
 			},
 		},
@@ -192,12 +215,56 @@ func TestMakeCredential(t *testing.T) {
 			},
 			wantDisclosures: []string{"WyJtb2NrU2FsdCIsInBvc3RhbCIseyJjaXR5IjoiTWV0cm9wb2xpcyIsImNvZGUiOiIxMjM0NSJ9XQ", "WyJtb2NrU2FsdCIsImFkZHJlc3MiLHsiX3NkIjpbImtpY0w5NFBPNmVQZEVjT3otaHNlZFZmUmZKR1JCTDdueUJMZHlEaDdncVEiXSwic3RyZWV0IjoiMTIzIE1haW4gU3QifV0"},
 		},
+		{
+			name: "work_countries array selective disclosure",
+			data: map[string]any{"first_name": "John", "address": map[string]any{"street": "123 Main St", "postal": map[string]any{"code": "12345", "city": "Metropolis"}}, "work_countries": []any{"SE", "FI"}},
+			vctm: mockVCTM_v7,
+			want: map[string]any{
+				"_sd": []any{
+					"6BAP5EILZUnPW0JgFT8Lh8GLQS6_ByjJLvAGmoHqmzI",
+				},
+				"_sd_alg":    "sha256",
+				"first_name": "John",
+				"address": map[string]any{
+					"street": "123 Main St",
+					"postal": map[string]any{
+						"code": "12345",
+						"city": "Metropolis",
+					},
+				},
+			},
+			wantDisclosures: []string{"WyJtb2NrU2FsdCIsIndvcmtfY291bnRyaWVzIixbIlNFIiwiRkkiXV0"},
+		},
+		//{
+		//	name: "SE in work_countries array selective disclosure",
+		//	data: map[string]any{"first_name": "John", "address": map[string]any{"street": "123 Main St", "postal": map[string]any{"code": "12345", "city": "Metropolis"}}, "work_countries": []any{"SE", "FI"}},
+		//	vctm: mockVCTM_v8,
+		//	want: map[string]any{
+		//		"_sd": []any{
+		//			"6BAP5EILZUnPW0JgFT8Lh8GLQS6_ByjJLvAGmoHqmzI",
+		//		},
+		//		"_sd_alg":    "sha256",
+		//		"first_name": "John",
+		//		"address": map[string]any{
+		//			"street": "123 Main St",
+		//			"postal": map[string]any{
+		//				"code": "12345",
+		//				"city": "Metropolis",
+		//			},
+		//		},
+		//		"work_countries": []any{
+		//			map[string]any{"...": "asdasd"},
+		//			"FI",
+		//		},
+		//	},
+		//	wantDisclosures: []string{"WyJtb2NrU2FsdCIsIndvcmtfY291bnRyaWVzIixbIlNFIiwiRkkiXV0"},
+		//},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			client := New()
-			got, disclosures, err := client.MakeCredential(tt.data, tt.vctm)
+			got, disclosures, err := client.MakeCredential(sha256.New(), tt.data, tt.vctm)
 			assert.NoError(t, err)
 
 			assert.Equal(t, tt.wantDisclosures, disclosures)

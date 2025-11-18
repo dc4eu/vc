@@ -9,7 +9,6 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 	"vc/pkg/pid"
-	"vc/pkg/socialsecurity"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -63,22 +62,22 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	var err error
 	switch req.DocumentType {
 	case model.CredentialTypeUrnEudiPda11:
-		doc := &socialsecurity.PDA1Document{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.pda1Client.sdjwt(ctx, doc, req.JWK, nil)
+		//doc := &socialsecurity.PDA1Document{}
+		//	if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+		//		return nil, err
+		//	}
+		token, err = c.pda1Client.sdjwtV4(ctx, req.DocumentData, req.JWK, nil)
 		if err != nil {
 			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err
 		}
 
 	case model.CredentialTypeUrnEudiEhic1:
-		doc := &socialsecurity.EHICDocument{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.ehicClient.sdjwt(ctx, doc, req.JWK, nil)
+		//doc := &socialsecurity.EHICDocument{}
+		//if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
+		//	return nil, err
+		//}
+		token, err = c.ehicClient.sdjwtV4(ctx, req.DocumentData, req.JWK, nil)
 		if err != nil {
 			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
 			return nil, err

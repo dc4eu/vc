@@ -77,6 +77,7 @@
         "SUNET",
         "SVGID",
         "swaggo",
+        "testcontainers",
         "timestamppb",
         "ttlcache",
         "vcclient",

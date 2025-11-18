@@ -82,5 +82,6 @@
         "ttlcache",
         "vcclient",
         "VCTM"
-    ]
+    ],
+    "makefile.configureOnOpen": false
 }

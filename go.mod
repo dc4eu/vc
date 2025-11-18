@@ -27,6 +27,7 @@ require (
 	github.com/lestrrat-go/jwx/v3 v3.0.12
 	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/moogar0880/problems v1.0.1
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/files v1.0.1

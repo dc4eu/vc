@@ -21,13 +21,12 @@ func TestUnwrapVPToken(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := t.Context()
 			have := golden.Get(t, tt.vpTokenPath)
 			responseParameters := &ResponseParameters{
 				VPToken: string(have),
 			}
 
-			got, err := responseParameters.BuildCredential(ctx)
+			got, err := responseParameters.BuildCredential()
 			assert.NoError(t, err, "Unwrapping VPToken should not return an error")
 
 			fmt.Println("Unwrapped VPToken:", got)

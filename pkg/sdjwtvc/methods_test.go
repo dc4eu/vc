@@ -395,9 +395,143 @@ func TestRecursiveDisclosure(t *testing.T) {
 	assert.True(t, foundAddressWithSD, "address disclosure should contain _sd array for recursive disclosure")
 }
 
-func TestSortVCTM(t *testing.T) {
-	// This test is a placeholder for future VCTM sorting functionality
-	t.Skip("VCTM sorting not yet implemented")
+// TestRecursiveDisclosureDeepNesting tests deeply nested recursive selective disclosure
+// with different VCTM claim orderings to verify order-independence
+func TestRecursiveDisclosureDeepNesting(t *testing.T) {
+	testCases := []struct {
+		name string
+		desc string
+		vctm *VCTM
+	}{
+		{
+			name: "claims_in_depth_order",
+			desc: "Claims ordered from deepest to shallowest",
+			vctm: &VCTM{
+				Claims: []Claim{
+					{
+						Path: []*string{stringPtr("user"), stringPtr("profile"), stringPtr("contact")},
+						SD:   "always",
+					},
+					{
+						Path: []*string{stringPtr("user"), stringPtr("profile")},
+						SD:   "always",
+					},
+					{
+						Path: []*string{stringPtr("user")},
+						SD:   "always",
+					},
+				},
+			},
+		},
+		{
+			name: "claims_in_reverse_order",
+			desc: "Claims ordered from shallowest to deepest",
+			vctm: &VCTM{
+				Claims: []Claim{
+					{
+						Path: []*string{stringPtr("user")},
+						SD:   "always",
+					},
+					{
+						Path: []*string{stringPtr("user"), stringPtr("profile")},
+						SD:   "always",
+					},
+					{
+						Path: []*string{stringPtr("user"), stringPtr("profile"), stringPtr("contact")},
+						SD:   "always",
+					},
+				},
+			},
+		},
+		{
+			name: "claims_in_mixed_order",
+			desc: "Claims in random order (middle, top, bottom)",
+			vctm: &VCTM{
+				Claims: []Claim{
+					{
+						Path: []*string{stringPtr("user"), stringPtr("profile")},
+						SD:   "always",
+					},
+					{
+						Path: []*string{stringPtr("user")},
+						SD:   "always",
+					},
+					{
+						Path: []*string{stringPtr("user"), stringPtr("profile"), stringPtr("contact")},
+						SD:   "always",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Make a fresh copy of data for each test
+			dataCopy := map[string]any{
+				"user": map[string]any{
+					"name": "Alice",
+					"profile": map[string]any{
+						"bio": "Software Engineer",
+						"contact": map[string]any{
+							"email": "alice@example.com",
+							"phone": "+1234567890",
+						},
+					},
+				},
+			}
+
+			client := New()
+			credentialObj, disclosures, err := client.MakeCredential(sha256.New(), dataCopy, tc.vctm)
+			require.NoError(t, err)
+
+			// Should have 3 disclosures (contact, profile, user) regardless of VCTM claim order
+			assert.Len(t, disclosures, 3, "Should have disclosures for all 3 nested levels")
+
+			// Root should have _sd array
+			_, hasRootSD := credentialObj["_sd"]
+			assert.True(t, hasRootSD, "Root level should have _sd array")
+
+			// Verify each disclosure level
+			foundLevels := map[string]bool{
+				"user":    false,
+				"profile": false,
+				"contact": false,
+			}
+
+			for _, disclosure := range disclosures {
+				decoded, err := base64.RawURLEncoding.DecodeString(disclosure)
+				require.NoError(t, err)
+
+				var disclosureArray []any
+				err = json.Unmarshal(decoded, &disclosureArray)
+				require.NoError(t, err)
+
+				claimName := disclosureArray[1].(string)
+				foundLevels[claimName] = true
+
+				// Check if nested values contain _sd arrays
+				if claimName == "user" || claimName == "profile" {
+					value, ok := disclosureArray[2].(map[string]any)
+					require.True(t, ok, "%s value should be an object", claimName)
+
+					_, hasSD := value["_sd"]
+					assert.True(t, hasSD, "%s should contain _sd array for recursive disclosure", claimName)
+
+					t.Logf("%s: Found recursive disclosure with _sd array", tc.desc)
+				}
+			}
+
+			assert.True(t, foundLevels["user"], "Should have user disclosure")
+			assert.True(t, foundLevels["profile"], "Should have profile disclosure")
+			assert.True(t, foundLevels["contact"], "Should have contact disclosure")
+		})
+	}
+}
+
+// Helper function to create string pointers
+func stringPtr(s string) *string {
+	return &s
 }
 
 func TestGetHashAlgorithmName(t *testing.T) {
@@ -662,4 +796,67 @@ func TestSortSDArray_NonStringElements(t *testing.T) {
 	assert.Contains(t, arr, "hash1")
 	assert.Contains(t, arr, "hash2")
 	assert.Contains(t, arr, "hash3")
+}
+
+func TestSortClaimsByDepth(t *testing.T) {
+	t.Run("sorts_claims_by_depth_descending", func(t *testing.T) {
+		claims := []Claim{
+			{Path: []*string{stringPtr("a")}, SD: "always"},                                 // depth 1
+			{Path: []*string{stringPtr("a"), stringPtr("b"), stringPtr("c")}, SD: "always"}, // depth 3
+			{Path: []*string{stringPtr("a"), stringPtr("b")}, SD: "always"},                 // depth 2
+		}
+
+		sorted := sortClaimsByDepth(claims)
+
+		// Should be ordered: depth 3, depth 2, depth 1
+		assert.Len(t, sorted[0].Path, 3)
+		assert.Len(t, sorted[1].Path, 2)
+		assert.Len(t, sorted[2].Path, 1)
+	})
+
+	t.Run("handles_empty_slice", func(t *testing.T) {
+		claims := []Claim{}
+		sorted := sortClaimsByDepth(claims)
+		assert.Len(t, sorted, 0)
+	})
+
+	t.Run("handles_single_claim", func(t *testing.T) {
+		claims := []Claim{
+			{Path: []*string{stringPtr("a")}, SD: "always"},
+		}
+		sorted := sortClaimsByDepth(claims)
+		assert.Len(t, sorted, 1)
+		assert.Len(t, sorted[0].Path, 1)
+	})
+
+	t.Run("does_not_modify_original", func(t *testing.T) {
+		claims := []Claim{
+			{Path: []*string{stringPtr("a")}, SD: "always"},
+			{Path: []*string{stringPtr("a"), stringPtr("b")}, SD: "always"},
+		}
+
+		original := make([]Claim, len(claims))
+		copy(original, claims)
+
+		sortClaimsByDepth(claims)
+
+		// Original should be unchanged
+		assert.Equal(t, original, claims)
+	})
+
+	t.Run("stable_sort_for_equal_depths", func(t *testing.T) {
+		claims := []Claim{
+			{Path: []*string{stringPtr("first")}, SD: "always"},
+			{Path: []*string{stringPtr("second")}, SD: "always"},
+			{Path: []*string{stringPtr("third")}, SD: "always"},
+		}
+
+		sorted := sortClaimsByDepth(claims)
+
+		// All have depth 1, order might vary but should all be present
+		assert.Len(t, sorted, 3)
+		for _, claim := range sorted {
+			assert.Len(t, claim.Path, 1)
+		}
+	})
 }

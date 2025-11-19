@@ -157,8 +157,12 @@ func (c *Client) MakeCredentialWithOptions(hashMethod hash.Hash, data map[string
 	}
 	data["_sd_alg"] = algName
 
+	// Sort claims by depth (deepest first) to ensure child claims are processed
+	// before parent claims in recursive selective disclosure scenarios
+	sortedClaims := sortClaimsByDepth(vctm.Claims)
+
 	// Process claims recursively
-	for _, claim := range vctm.Claims {
+	for _, claim := range sortedClaims {
 		if claim.SD == "always" && len(claim.Path) > 0 {
 			disclosure, hash, err := c.processClaimPath(data, claim.Path, hashMethod)
 			if err != nil {
@@ -573,4 +577,28 @@ func isSHA3_512(h hash.Hash) bool {
 		}
 	}
 	return true
+}
+
+// sortClaimsByDepth sorts claims by path depth (deepest first) to ensure
+// child claims are processed before parent claims in recursive selective disclosure.
+// This makes the VCTM claim order independent - users can specify claims in any order.
+func sortClaimsByDepth(claims []Claim) []Claim {
+	if len(claims) == 0 {
+		return claims
+	}
+
+	// Create a copy to avoid modifying the original
+	sorted := make([]Claim, len(claims))
+	copy(sorted, claims)
+
+	// Sort by path length (descending - deepest first)
+	for i := 0; i < len(sorted)-1; i++ {
+		for j := i + 1; j < len(sorted); j++ {
+			if len(sorted[i].Path) < len(sorted[j].Path) {
+				sorted[i], sorted[j] = sorted[j], sorted[i]
+			}
+		}
+	}
+
+	return sorted
 }

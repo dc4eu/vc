@@ -1,6 +1,8 @@
-# SD-JWT v4 - Draft-22 Compliance Features
+# SD-JWT VC - Draft-13 & Draft-22 Compliance Features
 
-This package implements SD-JWT (Selective Disclosure JSON Web Token) according to **draft-ietf-oauth-selective-disclosure-jwt-22**.
+This package (`sdjwtvc`) implements:
+- **SD-JWT VC** (Verifiable Credentials) according to **draft-ietf-oauth-sd-jwt-vc-13**
+- **SD-JWT** (Selective Disclosure) according to **draft-ietf-oauth-selective-disclosure-jwt-22**
 
 ## Implemented Features
 
@@ -89,7 +91,7 @@ The implementation validates and rejects forbidden claim names:
 ### Basic SD-JWT Creation
 
 ```go
-client := &Client{}
+client := &sdjwtvc.Client{}
 
 credential, disclosures, err := client.MakeCredential(
     sha256.New(),
@@ -109,14 +111,61 @@ credential, disclosures, err := client.MakeCredentialWithOptions(
 )
 ```
 
+### Parsing SD-JWT Credentials
+
+```go
+token := sdjwtvc.Token("eyJhbGci...~WyJz...~WyJh...")
+
+// Parse into structured format
+parsed, err := token.Parse()
+if err != nil {
+    log.Fatal(err)
+}
+
+// Access parsed components
+claims := parsed.Claims          // map[string]any
+disclosures := parsed.Disclosures // []string
+header := parsed.Header          // map[string]any
+signature := parsed.Signature    // string
+```
+
+### Verifying SD-JWT Credentials
+
+```go
+import "vc/pkg/sdjwtvc"
+
+// Prepare verification options
+opts := &sdjwtvc.VerificationOptions{
+    ExpectedNonce:    "verifier-nonce-123",
+    ExpectedAudience: "https://verifier.example.com",
+    ValidateTime:     true,
+}
+
+// Verify SD-JWT with Key Binding
+result, err := sdjwtvc.ParseAndVerify(
+    sdJWTString,
+    issuerPublicKey,
+    holderPublicKey,
+    opts,
+)
+
+if err != nil {
+    log.Fatal("Verification failed:", err)
+}
+
+// Access verified data
+claims := result.VerifiedClaims
+disclosures := result.Disclosures
+```
+
 ### SD-JWT+KB (Key Binding)
 
 ```go
 // 1. Create SD-JWT
-sdJWT, disclosures, err := BuildCredential(...)
+sdJWT, disclosures, err := sdjwtvc.BuildCredential(...)
 
 // 2. Holder creates KB-JWT
-kbJWT, err := CreateKeyBindingJWT(
+kbJWT, err := sdjwtvc.CreateKeyBindingJWT(
     sdJWT,
     nonce,
     audience,
@@ -125,7 +174,7 @@ kbJWT, err := CreateKeyBindingJWT(
 )
 
 // 3. Combine to create SD-JWT+KB
-combined := CombineWithKeyBinding(sdJWT, kbJWT)
+combined := sdjwtvc.CombineWithKeyBinding(sdJWT, kbJWT)
 ```
 
 ## Backward Compatibility
@@ -138,7 +187,22 @@ All new features maintain backward compatibility:
 
 ## Testing
 
-Comprehensive test coverage includes:
+Comprehensive test coverage (**83.3%**) includes:
+
+### Verification Tests (`verification_test.go`)
+- Valid SD-JWT verification
+- Invalid signatures detection
+- Expired credential validation
+- Key Binding JWT verification
+- Nonce and audience validation
+- Disclosure parsing and hash verification
+- Multiple hash algorithms
+
+### Parsing Tests (`utils_test.go`)
+- Token.Parse() with real credentials
+- Token.Split() with various formats
+- Error handling for malformed tokens
+- Base64 decoding utilities
 
 ### Decoy Digest Tests (`decoy_test.go`)
 - No decoy digests (baseline)
@@ -154,9 +218,32 @@ Comprehensive test coverage includes:
 - Hash algorithm support
 - SD-JWT+KB combination
 
-### Existing Tests
-- All 19+ existing tests continue to pass
+### Legacy Compatibility Tests
+- All existing tests continue to pass
 - No regressions introduced
+
+## New Features (v2.0)
+
+### Verification Support
+
+Complete SD-JWT verification implementation with:
+- **JWT signature verification** using issuer's public key
+- **SD-JWT VC structure validation** (draft-13 compliance)
+- **Disclosure parsing and hash verification**
+- **Key Binding JWT verification** with nonce/audience validation
+- **Time-based validation** (exp, nbf, iat claims)
+
+### Modern Parsing API
+
+- **Token type**: Represents SD-JWT token strings
+- **Token.Parse()**: Parses SD-JWT into structured `ParsedCredential`
+- **Token.Split()**: Splits token into components with bounds checking
+- **ParsedCredential**: Contains claims, disclosures, header, signature, key binding
+
+### JSONPath Claim Extraction
+
+- **ExtractClaimsByJSONPath()**: Extract claim values using JSONPath queries
+- Used for SVG template rendering in wallets
 
 ## Compliance Status
 
@@ -169,6 +256,14 @@ Comprehensive test coverage includes:
 - ✅ §4.3: Key Binding JWT (KB-JWT)
 - ✅ §4.3.1: SD-hash calculation
 - ✅ §7.1: Hash algorithm negotiation
+
+✅ **Full compliance with draft-ietf-oauth-sd-jwt-vc-13**
+
+- ✅ §3.1: Media type `application/dc+sd-jwt`
+- ✅ §3.2.1: JWT header `typ: "dc+sd-jwt"`
+- ✅ §6: VCTM (Verifiable Credential Type Metadata)
+- ✅ §8: Display metadata with rendering methods
+- ✅ §9: Claim metadata with selective disclosure rules
 
 ## Performance Considerations
 

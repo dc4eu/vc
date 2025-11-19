@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 	"vc/pkg/model"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -128,7 +128,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, errors.New("vp_token does not contain expected scope: " + auth.Scope)
 	}
 
-	header, body, signature, selectiveDisclosure, keyBinding, err := sdjwt3.SplitToken(vpToken)
+	header, body, signature, selectiveDisclosure, keyBinding, err := sdjwtvc.Token(vpToken).Split()
 	if err != nil {
 		c.log.Error(err, "failed to split sd-jwt")
 		return nil, err
@@ -142,16 +142,16 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 
 	c.log.Debug("verification", "vp_token", vpToken)
 
-	token, err := sdjwt3.CredentialParser(ctx, vpToken)
+	parsed, err := sdjwtvc.Token(vpToken).Parse()
 	if err != nil {
 		c.log.Error(err, "failed to parse sd-jwt credential")
 		return nil, err
 	}
 	responseCode := uuid.NewString()
 
-	c.credentialCache.Set(responseCode, []sdjwt3.CredentialCache{
+	c.credentialCache.Set(responseCode, []sdjwtvc.CredentialCache{
 		{
-			Credential: token,
+			Credential: parsed.Claims,
 			Claims:     nil,
 		},
 	}, ttlcache.DefaultTTL)
@@ -170,7 +170,7 @@ type VerificationCallbackRequest struct {
 }
 
 type VerificationCallbackResponse struct {
-	CredentialData []sdjwt3.CredentialCache `json:"credential_data"`
+	CredentialData []sdjwtvc.CredentialCache `json:"credential_data"`
 }
 
 func (c *Client) VerificationCallback(ctx context.Context, req *VerificationCallbackRequest) (*VerificationCallbackResponse, error) {

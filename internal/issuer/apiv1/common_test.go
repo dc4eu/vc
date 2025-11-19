@@ -2,6 +2,8 @@ package apiv1
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
 	"testing"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/auditlog"
@@ -136,8 +138,22 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 	audit, err := auditlog.New(ctx, cfg, log.New("audit"))
 	assert.NoError(t, err)
 
+	// Load VCTM files for all credential constructors
+	for _, constructor := range cfg.CredentialConstructor {
+		err := constructor.LoadFile(ctx)
+		assert.NoError(t, err)
+	}
+
 	client, err := New(ctx, audit, cfg, tracer, log.New("apiv1"))
 	assert.NoError(t, err)
+
+	// Override key if RSA is requested for testing
+	if keyType == "rsa" {
+		rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
+		assert.NoError(t, err)
+		client.privateKey = rsaKey
+		client.publicKey = &rsaKey.PublicKey
+	}
 
 	return client
 }

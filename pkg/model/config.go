@@ -12,7 +12,7 @@ import (
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/pki"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 
 	"gopkg.in/yaml.v2"
 )
@@ -406,10 +406,28 @@ func (c *Cfg) GetCredentialConstructorAuthMethod(credentialType string) string {
 	return "basic"
 }
 
+// GetCredentialConstructorByType returns the credential constructor for a given credential type
+// It checks both the direct config key and the VCT field
+func (c *Cfg) GetCredentialConstructorByType(credentialType string) *CredentialConstructor {
+	// First try direct lookup by config key
+	if constructor, ok := c.CredentialConstructor[credentialType]; ok {
+		return constructor
+	}
+
+	// Then check VCT field in all constructors
+	for _, constructor := range c.CredentialConstructor {
+		if constructor.VCT == credentialType {
+			return constructor
+		}
+	}
+
+	return nil
+}
+
 type CredentialConstructor struct {
 	VCT          string                         `yaml:"vct" json:"vct" validate:"required"`
 	VCTMFilePath string                         `yaml:"vctm_file_path" json:"vctm_file_path" validate:"required"`
-	VCTM         *sdjwt3.VCTM                   `yaml:"-" json:"-"`
+	VCTM         *sdjwtvc.VCTM                   `yaml:"-" json:"-"`
 	AuthMethod   string                         `yaml:"auth_method" json:"auth_method" validate:"required,oneof=basic pid_auth"`
 	Attributes   map[string]map[string][]string `yaml:"attributes" json:"attributes_v2" validate:"omitempty,dive,required"`
 }

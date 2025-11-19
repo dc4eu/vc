@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `sdjwtv4` package has been updated to comply with **SD-JWT VC draft-13** while maintaining full support for **VCTM (Verifiable Credential Type Metadata)** as requested.
+The `sdjwtvc` package has been updated to comply with **SD-JWT VC draft-13** while maintaining full support for **VCTM (Verifiable Credential Type Metadata)** as requested.
 
 **Specification**: https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/13/
 
@@ -167,11 +167,11 @@ As requested, **full VCTM support has been maintained** despite VCTM being defin
 
 ## Testing
 
-All tests pass with **92.9% code coverage**:
+All tests pass with **83.3% code coverage**:
 
 ```bash
-$ go test ./pkg/sdjwtv4 -cover
-ok      vc/pkg/sdjwtv4  4.032s  coverage: 92.9% of statements
+$ go test ./pkg/sdjwtvc -cover
+ok      vc/pkg/sdjwtvc  4.032s  coverage: 83.3% of statements
 ```
 
 Tests updated to verify `dc+sd-jwt` media type.

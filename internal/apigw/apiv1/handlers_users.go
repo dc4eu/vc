@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"vc/pkg/model"
 	"vc/pkg/pid"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 	"vc/pkg/vcclient"
 
 	"github.com/google/uuid"
@@ -225,10 +225,10 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, err
 		}
 
-		claimValues, err := sdjwt3.Filter(doc.DocumentData, jsonPaths.Displayable)
+		claimValues, err := sdjwtvc.ExtractClaimsByJSONPath(doc.DocumentData, jsonPaths.Displayable)
 		if err != nil {
-			c.log.Error(err, "failed to filter document data for SVG template claims")
-			return nil, fmt.Errorf("failed to filter document data for SVG template claims")
+			c.log.Error(err, "failed to extract claim values from document data")
+			return nil, fmt.Errorf("failed to extract claim values from document data")
 		}
 
 		for _, claim := range req.VCTM.Claims {

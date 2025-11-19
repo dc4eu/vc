@@ -128,7 +128,7 @@ docker-build-wallet:
 
 docker-build-verifier-proxy:
 	$(info Docker building verifier-proxy with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/web_worker .
+	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/worker .
 
 docker-push-gobuild:
 	$(info Pushing docker images)

@@ -615,7 +615,7 @@ func TestClaimsExtractor_ExtractAndMapClaims_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("complete pipeline - PID basic", func(t *testing.T) {
-		// Simulate a simple SD-JWT VP token (would normally come from sdjwt3.CredentialParser)
+		// Simulate a simple SD-JWT VP token (would normally come from sdjwtvc.CredentialParser)
 		// For testing, we'll skip actual VP parsing and test the mapping/transform pipeline
 
 		vpClaims := map[string]any{

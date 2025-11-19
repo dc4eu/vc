@@ -3,6 +3,10 @@ package apiv1
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
 	"os"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/auditlog"
@@ -24,22 +28,12 @@ type Client struct {
 	log        *logger.Log
 	tracer     *trace.Tracer
 	auditLog   *auditlog.Service
-	privateKey *ecdsa.PrivateKey
-	publicKey  *ecdsa.PublicKey
+	privateKey any // Can be *ecdsa.PrivateKey or *rsa.PrivateKey
+	publicKey  any // Can be *ecdsa.PublicKey or *rsa.PublicKey
 	jwkClaim   jwt.MapClaims
 	jwkBytes   []byte
 	jwkProto   *apiv1_issuer.Jwk
 	kid        string
-
-	ehicClient                 *ehicClient
-	pda1Client                 *pda1Client
-	elmClient                  *elmClient
-	diplomaClient              *diplomaClient
-	microCredentialClient      *microCredentialClient
-	openBadgeCompleteClient    *openbadgeCompleteClient
-	openBadgeBasicClient       *openbadgeBasicClient
-	openBadgeEndorsementClient *openbadgeEndorsementsClient
-	pidClient                  *pidClient
 }
 
 // New creates a new instance of the public api
@@ -51,52 +45,6 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 		auditLog: auditLog,
 		jwkProto: &apiv1_issuer.Jwk{},
 		jwkClaim: jwt.MapClaims{},
-	}
-
-	var err error
-	c.ehicClient, err = newEHICClient(ctx, c, tracer, c.log.New("ehic"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.pda1Client, err = newPDA1Client(ctx, c, tracer, c.log.New("pda1"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.elmClient, err = newElmClient(ctx, c, tracer, c.log.New("elm"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.diplomaClient, err = newDiplomaClient(ctx, c, tracer, c.log.New("diploma"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.microCredentialClient, err = newMicroCredentialClient(ctx, c, tracer, c.log.New("microCredential"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.openBadgeCompleteClient, err = newOpenbadgeCompleteClient(ctx, c, tracer, c.log.New("openbadgeComplete"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.openBadgeBasicClient, err = newOpenbadgeBasicClient(ctx, c, tracer, c.log.New("openbadgeBasic"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.openBadgeEndorsementClient, err = newOpenbadgeEndorsementsClient(ctx, c, tracer, c.log.New("openbadgeEndorsement"))
-	if err != nil {
-		return nil, err
-	}
-
-	c.pidClient, err = newPIDClient(ctx, c, tracer, c.log.New("pid"))
-	if err != nil {
-		return nil, err
 	}
 
 	if err := c.initKeys(ctx); err != nil {
@@ -111,7 +59,7 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 func (c *Client) initKeys(ctx context.Context) error {
 	keyByte, err := os.ReadFile(c.cfg.Issuer.SigningKeyPath)
 	if err != nil {
-		c.log.Error(err, "Failed to read signing key, please create a ECDSA prime256v1 key and save it to the path")
+		c.log.Error(err, "Failed to read signing key")
 		return err
 	}
 
@@ -119,16 +67,61 @@ func (c *Client) initKeys(ctx context.Context) error {
 		return helpers.ErrPrivateKeyMissing
 	}
 
-	c.privateKey, err = jwt.ParseECPrivateKeyFromPEM(keyByte)
+	// Try to parse as PKCS8 first (supports both RSA and ECDSA)
+	c.privateKey, err = c.parsePrivateKey(keyByte)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to parse private key: %w", err)
 	}
 
-	c.publicKey = &c.privateKey.PublicKey
+	// Extract public key based on key type
+	switch key := c.privateKey.(type) {
+	case *ecdsa.PrivateKey:
+		c.publicKey = &key.PublicKey
+	case *rsa.PrivateKey:
+		c.publicKey = &key.PublicKey
+	default:
+		return fmt.Errorf("unsupported key type: %T", c.privateKey)
+	}
 
 	if err := c.createJWK(ctx); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// parsePrivateKey attempts to parse a private key from PEM format
+// Supports ECDSA and RSA keys in various formats (PKCS8, PKCS1, EC)
+func (c *Client) parsePrivateKey(keyByte []byte) (any, error) {
+	block, _ := pem.Decode(keyByte)
+	if block == nil {
+		return nil, fmt.Errorf("failed to decode PEM block")
+	}
+
+	// Try PKCS8 format first (preferred, supports both RSA and ECDSA)
+	if key, err := x509.ParsePKCS8PrivateKey(block.Bytes); err == nil {
+		return key, nil
+	}
+
+	// Try EC private key format
+	if key, err := x509.ParseECPrivateKey(block.Bytes); err == nil {
+		return key, nil
+	}
+
+	// Try PKCS1 RSA private key format
+	if key, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
+		return key, nil
+	}
+
+	// Try using jwt library's parser as fallback for EC keys
+	if key, err := jwt.ParseECPrivateKeyFromPEM(keyByte); err == nil {
+		return key, nil
+	}
+
+	// Try using jwt library's parser as fallback for RSA keys
+	if key, err := jwt.ParseRSAPrivateKeyFromPEM(keyByte); err == nil {
+		return key, nil
+	}
+
+	return nil, fmt.Errorf("unable to parse private key in any supported format")
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 )
 
 type userHandler struct {
@@ -63,7 +63,7 @@ type UserLookupRequest struct {
 	AuthMethod   string       `json:"-"`
 	ResponseCode string       `json:"-"`
 	RequestURI   string       `json:"-"`
-	VCTM         *sdjwt3.VCTM `json:"-"`
+	VCTM         *sdjwtvc.VCTM `json:"-"`
 }
 
 type SVGClaim struct {

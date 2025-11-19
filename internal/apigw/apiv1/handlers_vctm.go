@@ -10,7 +10,7 @@ import (
 	"time"
 	"vc/pkg/openid4vci"
 	"vc/pkg/openid4vp"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 
 	"github.com/skip2/go-qrcode"
 )
@@ -120,7 +120,7 @@ type GetVCTMFromScopeRequest struct {
 	Scope string `validate:"required"`
 }
 
-func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequest) (*sdjwt3.VCTM, error) {
+func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequest) (*sdjwtvc.VCTM, error) {
 	credentialConstructor, ok := c.cfg.CredentialConstructor[req.Scope]
 	if !ok {
 		err := errors.New("scope is not valid credential")
@@ -137,7 +137,7 @@ func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequ
 }
 
 type SVGTemplateRequest struct {
-	VCTM *sdjwt3.VCTM `json:"-"`
+	VCTM *sdjwtvc.VCTM `json:"-"`
 }
 
 type SVGTemplateReply struct {

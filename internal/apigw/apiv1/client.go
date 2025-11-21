@@ -38,7 +38,7 @@ type Client struct {
 	oauth2MetadataSigningChain  []string
 	ephemeralEncryptionKeyCache *ttlcache.Cache[string, jwk.Key]
 	svgTemplateCache            *ttlcache.Cache[string, SVGTemplateReply]
-	documentCache               *ttlcache.Cache[string, map[string]model.CompleteDocument]
+	documentCache               *ttlcache.Cache[string, map[string]*model.CompleteDocument]
 }
 
 // New creates a new instance of the public api
@@ -50,7 +50,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 		tracer:                      tracer,
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
 		svgTemplateCache:            ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
-		documentCache:               ttlcache.New(ttlcache.WithTTL[string, map[string]model.CompleteDocument](5 * time.Minute)),
+		documentCache:               ttlcache.New(ttlcache.WithTTL[string, map[string]*model.CompleteDocument](5 * time.Minute)),
 	}
 
 	// Start the ephemeral encryption key cache
@@ -80,9 +80,18 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	issuerIdentifier := cfg.Issuer.Identifier
 	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
 
-	c.datastoreClient, err = vcclient.New(&vcclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL})
+	c.datastoreClient, err = vcclient.New(&vcclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL}, c.log)
 	if err != nil {
 		return nil, err
+	}
+
+	for scope, credentialInfo := range cfg.CredentialConstructor {
+		if err := credentialInfo.LoadVCTMetadata(ctx, scope); err != nil {
+			c.log.Error(err, "Failed to load credential constructor", "scope", scope)
+			return nil, err
+		}
+
+		credentialInfo.Attributes = credentialInfo.VCTM.Attributes()
 	}
 
 	c.log.Info("Started")

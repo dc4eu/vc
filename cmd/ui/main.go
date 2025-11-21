@@ -52,7 +52,7 @@ func main() {
 	}
 
 	var eventPublisher apiv1.EventPublisher
-	if cfg.IsAsyncEnabled(mainLog) {
+	if cfg.Common.Kafka.Enabled {
 		var err error
 		eventPublisher, err = outbound.New(ctx, cfg, tracer, log)
 		services["eventPublisher"] = eventPublisher
@@ -60,7 +60,7 @@ func main() {
 			panic(err)
 		}
 	} else {
-		log.Info("EventPublisher disabled in config")
+		mainLog.Info("EventPublisher disabled in config")
 	}
 
 	apiClient, err := apiv1.New(ctx, cfg, tracer, eventPublisher, log)

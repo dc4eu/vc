@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"vc/pkg/httphelpers"
+
+	"github.com/gin-gonic/gin"
 )
 
 // setupOIDCRateLimitedEndpoints registers OIDC endpoints that require rate limiting.

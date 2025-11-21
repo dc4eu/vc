@@ -5,6 +5,7 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+	"vc/pkg/vcclient"
 )
 
 // APIGWClient client type for apigw
@@ -38,7 +39,7 @@ func (c *APIGWClient) Health() (any, error) {
 }
 
 // Upload sends POST to apigw /api/v1/upload
-func (c *APIGWClient) Upload(req *apiv1_apigw.UploadRequest) (any, error) {
+func (c *APIGWClient) Upload(req *vcclient.UploadRequest) (any, error) {
 	reply, err := c.DoPostJSON("/api/v1/upload", req)
 	if err != nil {
 		return nil, err

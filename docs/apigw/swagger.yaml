@@ -26,20 +26,20 @@ definitions:
           required: true
           example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
         type: string
-      document_type:
-        description: |-
-          required: true
-          example: PDA1
-        type: string
       identities:
         items:
           $ref: '#/definitions/model.Identity'
         type: array
+      vct:
+        description: |-
+          required: true
+          example: urn:eudi:pid:1
+        type: string
     required:
     - authentic_source
     - document_id
-    - document_type
     - identities
+    - vct
     type: object
   apiv1.DeleteDocumentIdentityRequest:
     properties:
@@ -58,16 +58,16 @@ definitions:
           required: true
           example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
         type: string
-      document_type:
+      vct:
         description: |-
           required: true
-          example: PDA1
+          example: urn:eudi:pid:1
         type: string
     required:
     - authentic_source
     - authentic_source_person_id
     - document_id
-    - document_type
+    - vct
     type: object
   apiv1.DeleteDocumentRequest:
     properties:
@@ -81,15 +81,15 @@ definitions:
           required: true
           example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
         type: string
-      document_type:
+      vct:
         description: |-
           required: true
-          example: PDA1
+          example: urn:eudi:pid:1
         type: string
     required:
     - authentic_source
     - document_id
-    - document_type
+    - vct
     type: object
   apiv1.DocumentListReply:
     properties:
@@ -102,14 +102,14 @@ definitions:
     properties:
       authentic_source:
         type: string
-      document_type:
-        type: string
       identity:
         $ref: '#/definitions/model.Identity'
       valid_from:
         type: integer
       valid_to:
         type: integer
+      vct:
+        type: string
     required:
     - identity
     type: object
@@ -134,15 +134,15 @@ definitions:
         type: string
       collect_id:
         type: string
-      document_type:
-        type: string
       identity:
         $ref: '#/definitions/model.Identity'
+      vct:
+        type: string
     required:
     - authentic_source
     - collect_id
-    - document_type
     - identity
+    - vct
     type: object
   apiv1.GetDocumentReply:
     properties:
@@ -155,12 +155,12 @@ definitions:
         type: string
       document_id:
         type: string
-      document_type:
+      vct:
         type: string
     required:
     - authentic_source
     - document_id
-    - document_type
+    - vct
     type: object
   apiv1.IdentityMappingReply:
     properties:
@@ -191,25 +191,25 @@ definitions:
         type: string
       document_id:
         type: string
-      document_type:
+      vct:
         type: string
     required:
     - authentic_source
     - document_id
-    - document_type
+    - vct
     type: object
   apiv1.RevokeDocumentRequest:
     properties:
       authentic_source:
         type: string
-      document_type:
-        type: string
       revocation:
         $ref: '#/definitions/model.Revocation'
+      vct:
+        type: string
     required:
     - authentic_source
-    - document_type
     - revocation
+    - vct
     type: object
   apiv1.RevokeReply:
     properties:
@@ -225,30 +225,10 @@ definitions:
         type: string
       document_id:
         type: string
-      document_type:
-        type: string
       revocation_id:
         type: string
-    type: object
-  apiv1.UploadRequest:
-    properties:
-      document_data:
-        additionalProperties: {}
-        type: object
-      document_data_version:
+      vct:
         type: string
-      document_display:
-        $ref: '#/definitions/model.DocumentDisplay'
-      identities:
-        items:
-          $ref: '#/definitions/model.Identity'
-        type: array
-      meta:
-        $ref: '#/definitions/model.MetaData'
-    required:
-    - document_data
-    - document_data_version
-    - meta
     type: object
   apiv1_issuer.Credential:
     properties:
@@ -261,6 +241,12 @@ definitions:
         type: string
       d:
         type: string
+      ext:
+        type: boolean
+      key_ops:
+        items:
+          type: string
+        type: array
       kid:
         type: string
       kty:
@@ -442,7 +428,7 @@ definitions:
         type: string
       expiry_date:
         description: |-
-          required: true
+          required: false
           example: Date (and if possible time)
         type: string
       family_name:
@@ -463,12 +449,12 @@ definitions:
         type: string
       issuing_authority:
         description: |-
-          required: true
+          required: false
           example:
         type: string
       issuing_country:
         description: |-
-          required: true
+          required: false
           example:
         type: string
       issuing_jurisdiction:
@@ -610,18 +596,6 @@ definitions:
           required: true
           example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
         type: string
-      document_type:
-        description: |-
-          required: true
-          example: PDA1
-        enum:
-        - urn:eudi:elm:1
-        - urn:eudi:diploma:1
-        - urn:eudi:micro_credential:1
-        - urn:eudi:pid:1
-        - urn:eudi:ehic:1
-        - urn:eudi:pda1:1
-        type: string
       document_version:
         description: |-
           required: true
@@ -637,11 +611,17 @@ definitions:
         allOf:
         - $ref: '#/definitions/model.Revocation'
         description: Revocation is a collection of fields representing a revocation
+      vct:
+        description: |-
+          VCT is the Verifiable Credential Type
+          required: true
+          example: "urn:eudi:pid:1"
+        type: string
     required:
     - authentic_source
     - document_id
-    - document_type
     - document_version
+    - vct
     type: object
   model.Revocation:
     properties:
@@ -679,7 +659,7 @@ definitions:
         type: string
       document_id:
         type: string
-      document_type:
+      vct:
         type: string
     type: object
   openid4vci.CredentialRequest:
@@ -721,8 +701,6 @@ definitions:
           and present in the credential_configurations_supported parameter of the
           Issuer metadata for the requested Credential. The proof object MUST contain
           the following:'
-      vct:
-        type: string
     type: object
   openid4vci.CredentialRequestHeader:
     properties:
@@ -796,6 +774,26 @@ definitions:
         type: string
       qr_base64:
         type: string
+    type: object
+  vcclient.UploadRequest:
+    properties:
+      document_data:
+        additionalProperties: {}
+        type: object
+      document_data_version:
+        type: string
+      document_display:
+        $ref: '#/definitions/model.DocumentDisplay'
+      identities:
+        items:
+          $ref: '#/definitions/model.Identity'
+        type: array
+      meta:
+        $ref: '#/definitions/model.MetaData'
+    required:
+    - document_data
+    - document_data_version
+    - meta
     type: object
 info:
   contact: {}
@@ -1173,7 +1171,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/apiv1.UploadRequest'
+          $ref: '#/definitions/vcclient.UploadRequest'
       produces:
       - application/json
       responses:

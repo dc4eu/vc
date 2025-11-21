@@ -328,8 +328,8 @@ func (c *AuthorizationContextColl) AddIdentity(ctx context.Context, query *model
 	update := bson.M{
 		"$set": bson.M{
 			"identity":         input.Identity,
-			"document_type":    input.DocumentType,
 			"authentic_source": input.AuthenticSource,
+			"vct":              input.VCT,
 		},
 	}
 

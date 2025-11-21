@@ -51,7 +51,7 @@ type CredentialRequest struct {
 	// CredentialIdentifier REQUIRED when credential_identifiers parameter was returned from the Token Response. It MUST NOT be used otherwise. It is a String that identifies a Credential that is being requested to be issued. When this parameter is used, the format parameter and any other Credential format specific parameters such as those defined in Appendix A MUST NOT be present.
 	CredentialResponseEncryption *CredentialResponseEncryption `json:"credential_response_encryption"`
 
-	VCT string `json:"vct"`
+	//VCT string `json:"vct" validate:"required"`
 }
 
 // IsAccessTokenDPoP checks if the Authorize header belong to DPoP proof

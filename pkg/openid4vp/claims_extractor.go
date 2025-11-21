@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 )
 
 // ClaimsExtractor extracts and maps claims from VP tokens to OIDC claims
@@ -36,13 +36,13 @@ func (ce *ClaimsExtractor) ExtractClaimsFromVPToken(ctx context.Context, vpToken
 		return nil, fmt.Errorf("VP token is empty")
 	}
 
-	// Use sdjwt3.CredentialParser to extract disclosed claims
-	claims, err := sdjwt3.CredentialParser(ctx, vpToken)
+	// Use sdjwtvc.Token.Parse() to extract disclosed claims
+	parsed, err := sdjwtvc.Token(vpToken).Parse()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse VP token: %w", err)
 	}
 
-	return claims, nil
+	return parsed.Claims, nil
 }
 
 // MapClaimsToOIDC maps VP claims to OIDC claims using the template's claim mappings

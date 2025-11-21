@@ -8,18 +8,10 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
+	"vc/pkg/vcclient"
 
 	"go.opentelemetry.io/otel/codes"
 )
-
-// UploadRequest is the request for Upload
-type UploadRequest struct {
-	Meta                *model.MetaData        `json:"meta" validate:"required"`
-	Identities          []model.Identity       `json:"identities,omitempty" validate:"dive"`
-	DocumentDisplay     *model.DocumentDisplay `json:"document_display,omitempty"`
-	DocumentData        map[string]any         `json:"document_data" validate:"required"`
-	DocumentDataVersion string                 `json:"document_data_version,omitempty" validate:"required,semver"`
-}
 
 // Upload uploads a document with a set of attributes
 //
@@ -31,9 +23,9 @@ type UploadRequest struct {
 //	@Produce		json
 //	@Success		200	"Success"
 //	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		UploadRequest			true	" "
+//	@Param			req	body		vcclient.UploadRequest	true	" "
 //	@Router			/upload [post]
-func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
+func (c *Client) Upload(ctx context.Context, req *vcclient.UploadRequest) error {
 	if req.Meta.Collect == nil || req.Meta.Collect.ID == "" {
 		collect := &model.Collect{
 			ID: req.Meta.DocumentID,
@@ -55,11 +47,11 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{
 		CredentialIssuer: c.cfg.Issuer.IssuerURL,
 		CredentialConfigurationIDs: []string{
-			req.Meta.DocumentType,
+			req.Meta.VCT,
 		},
 		Grants: map[string]any{
 			"authorization_code": openid4vci.GrantAuthorizationCode{
-				IssuerState: fmt.Sprintf("collect_id=%s&document_type=%s&authentic_source=%s", req.Meta.Collect.ID, req.Meta.DocumentType, req.Meta.AuthenticSource),
+				IssuerState: fmt.Sprintf("collect_id=%s&vct=%s&authentic_source=%s", req.Meta.Collect.ID, req.Meta.VCT, req.Meta.AuthenticSource),
 			},
 		},
 	}
@@ -131,6 +123,7 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 	}
 
 	if err := helpers.ValidateDocumentData(ctx, upload, c.log); err != nil {
+		c.log.Error(err, "failed to validate document data")
 		return err
 	}
 
@@ -149,7 +142,7 @@ func (c *Client) Upload(ctx context.Context, req *UploadRequest) error {
 // NotificationRequest is the request for Notification
 type NotificationRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`
-	DocumentType    string `json:"document_type" validate:"required"`
+	VCT             string `json:"vct" validate:"required"`
 	DocumentID      string `json:"document_id" validate:"required"`
 }
 
@@ -173,7 +166,7 @@ type NotificationReply struct {
 func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
 	qrCode, err := c.db.VCDatastoreColl.GetQR(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
-		DocumentType:    req.DocumentType,
+		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,
 	})
 	if err != nil {
@@ -236,8 +229,8 @@ type AddDocumentIdentityRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`
 
 	// required: true
-	// example: PDA1
-	DocumentType string `json:"document_type" validate:"required"`
+	// example: urn:eudi:pid:1
+	VCT string `json:"vct" validate:"required"`
 
 	// required: true
 	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
@@ -261,7 +254,7 @@ type AddDocumentIdentityRequest struct {
 func (c *Client) AddDocumentIdentity(ctx context.Context, req *AddDocumentIdentityRequest) error {
 	err := c.db.VCDatastoreColl.AddDocumentIdentity(ctx, &db.AddDocumentIdentityQuery{
 		AuthenticSource: req.AuthenticSource,
-		DocumentType:    req.DocumentType,
+		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,
 		Identities:      req.Identities,
 	})
@@ -279,8 +272,8 @@ type DeleteDocumentIdentityRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`
 
 	// required: true
-	// example: PDA1
-	DocumentType string `json:"document_type" validate:"required"`
+	// example: urn:eudi:pid:1
+	VCT string `json:"vct" validate:"required"`
 
 	// required: true
 	// example: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8
@@ -306,7 +299,7 @@ type DeleteDocumentIdentityRequest struct {
 func (c *Client) DeleteDocumentIdentity(ctx context.Context, req *DeleteDocumentIdentityRequest) error {
 	err := c.db.VCDatastoreColl.DeleteDocumentIdentity(ctx, &db.DeleteDocumentIdentityQuery{
 		AuthenticSource:         req.AuthenticSource,
-		DocumentType:            req.DocumentType,
+		VCT:                     req.VCT,
 		DocumentID:              req.DocumentID,
 		AuthenticSourcePersonID: req.AuthenticSourcePersonID,
 	})
@@ -328,8 +321,8 @@ type DeleteDocumentRequest struct {
 	DocumentID string `json:"document_id" validate:"required"`
 
 	// required: true
-	// example: PDA1
-	DocumentType string `json:"document_type" validate:"required"`
+	// example: urn:eudi:pid:1
+	VCT string `json:"vct" validate:"required"`
 }
 
 // DeleteDocument deletes a specific document
@@ -347,7 +340,7 @@ type DeleteDocumentRequest struct {
 func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
 	err := c.db.VCDatastoreColl.Delete(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
-		DocumentType:    req.DocumentType,
+		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,
 	})
 	if err != nil {
@@ -360,7 +353,7 @@ func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest)
 // GetDocumentRequest is the request for GetDocument
 type GetDocumentRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`
-	DocumentType    string `json:"document_type" validate:"required"`
+	VCT             string `json:"vct" validate:"required"`
 	DocumentID      string `json:"document_id" validate:"required"`
 }
 
@@ -385,7 +378,7 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 	query := &db.GetDocumentQuery{
 		Meta: &model.MetaData{
 			AuthenticSource: req.AuthenticSource,
-			DocumentType:    req.DocumentType,
+			VCT:             req.VCT,
 			DocumentID:      req.DocumentID,
 		},
 	}
@@ -404,7 +397,7 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 type DocumentListRequest struct {
 	AuthenticSource string          `json:"authentic_source"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
-	DocumentType    string          `json:"document_type"`
+	VCT             string          `json:"vct"`
 	ValidFrom       int64           `json:"valid_from"`
 	ValidTo         int64           `json:"valid_to"`
 }
@@ -430,7 +423,7 @@ func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*D
 	docs, err := c.db.VCDatastoreColl.DocumentList(ctx, &db.DocumentListQuery{
 		AuthenticSource: req.AuthenticSource,
 		Identity:        req.Identity,
-		DocumentType:    req.DocumentType,
+		VCT:             req.VCT,
 		ValidFrom:       req.ValidFrom,
 		ValidTo:         req.ValidTo,
 	})
@@ -446,7 +439,7 @@ func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*D
 // GetDocumentCollectIDRequest is the request for GetDocumentAttestation
 type GetDocumentCollectIDRequest struct {
 	AuthenticSource string          `json:"authentic_source" validate:"required"`
-	DocumentType    string          `json:"document_type" validate:"required"`
+	VCT             string          `json:"vct" validate:"required"`
 	CollectID       string          `json:"collect_id" validate:"required"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
 }
@@ -473,7 +466,7 @@ func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentColle
 		Identity: req.Identity,
 		Meta: &model.MetaData{
 			AuthenticSource: req.AuthenticSource,
-			DocumentType:    req.DocumentType,
+			VCT:             req.VCT,
 			Collect: &model.Collect{
 				ID: req.CollectID,
 			},
@@ -495,7 +488,7 @@ func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentColle
 // RevokeDocumentRequest is the request for RevokeDocument
 type RevokeDocumentRequest struct {
 	AuthenticSource string            `json:"authentic_source" validate:"required"`
-	DocumentType    string            `json:"document_type" validate:"required"`
+	VCT             string            `json:"vct" validate:"required"`
 	Revocation      *model.Revocation `json:"revocation" validate:"required"`
 }
 
@@ -521,7 +514,7 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 
 	doc, err := c.db.VCDatastoreColl.GetByRevocationID(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
-		DocumentType:    req.DocumentType,
+		VCT:             req.VCT,
 		Revocation:      &model.Revocation{ID: req.Revocation.ID},
 	})
 	if err != nil {
@@ -550,7 +543,7 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 func (c *Client) SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error) {
 	docs, hasMore, err := c.db.VCDatastoreColl.SearchDocuments(ctx, &db.SearchDocumentsQuery{
 		AuthenticSource: req.AuthenticSource,
-		DocumentType:    req.DocumentType,
+		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,
 		CollectID:       req.CollectID,
 

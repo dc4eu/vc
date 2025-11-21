@@ -9,7 +9,7 @@ import (
 // MakeSDJWT creates an sd-jwt and return it, else error
 func (s *Service) MakeSDJWT(ctx context.Context, in *apiv1_issuer.MakeSDJWTRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
 	reply, err := s.apiv1.MakeSDJWT(ctx, &apiv1.CreateCredentialRequest{
-		DocumentType: in.DocumentType,
+		Scope:        in.Scope,
 		DocumentData: in.DocumentData,
 		JWK:          in.Jwk,
 	})

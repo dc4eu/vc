@@ -20,7 +20,7 @@ type Apiv1 interface {
 	// apigw
 	HealthAPIGW(ctx context.Context, request *apiv1_status.StatusRequest) (any, error)
 	DocumentList(ctx context.Context, request *apiv1.DocumentListRequest) (*apiv1_apigw.DocumentListReply, error)
-	Upload(ctx context.Context, request *apiv1_apigw.UploadRequest) (any, error)
+	Upload(ctx context.Context, request *vcclient.UploadRequest) (any, error)
 	Credential(ctx context.Context, request *apiv1.CredentialRequest) (any, error)
 	GetDocument(ctx context.Context, request *apiv1.GetDocumentRequest) (any, error)
 	Notification(ctx context.Context, reguest *apiv1.NotificationRequest) (any, error)

@@ -2,12 +2,15 @@ package apiv1
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
+	"strings"
 	"testing"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/pkg/logger"
-	"vc/pkg/model"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var mockEhic = []byte(`
@@ -30,16 +33,34 @@ var mockEhic = []byte(`
 }
   `)
 
+var mockPidData = []byte(`
+{
+  "family_name": "Doe",
+  "given_name": "John",
+  "birth_date": "1990-01-15",
+  "authentic_source": "test-source"
+}
+`)
+
+var mockDiplomaData = []byte(`
+{
+  "degree": "Master of Science",
+  "field_of_study": "Computer Science",
+  "graduation_date": "2020-06-15"
+}
+`)
+
 func TestMakeSDJWT(t *testing.T) {
-	tts := []struct {
+	tests := []struct {
 		name    string
 		request *CreateCredentialRequest
-		want    *CreateCredentialReply
+		wantErr bool
+		errMsg  string
 	}{
 		{
-			name: "Test EHIC SD-JWT Creation",
+			name: "successful EHIC credential creation",
 			request: &CreateCredentialRequest{
-				DocumentType: model.CredentialTypeUrnEudiEhic1,
+				Scope:        "ehic",
 				DocumentData: mockEhic,
 				JWK: &apiv1_issuer.Jwk{
 					Kty: "EC",
@@ -48,26 +69,305 @@ func TestMakeSDJWT(t *testing.T) {
 					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
 				},
 			},
-			want: &CreateCredentialReply{
-				Data: []*apiv1_issuer.Credential{
-					{
-						Credential: "eyJhbGciOiJFUzI1NiIsImtpZCI6ImRlZmF1bHRfc2lnbmluZ19rZXlfaWQiLCJ0eXAiOiJ2YytzZC1qd3QiLCJ2Y3RtIjpbImV5SjJZM1FpT2lKMWNtNDZaWFZrYVRwbGFHbGpPakVpTENKdVlXMWxJam9pUkVNMFJWVWdSVWhKUXlCVFJDMUtWMVFnVmtOVVRTSXNJbVJsYzJOeWFYQjBhVzl1SWpvaVJFTTBSVlVnUlhWeWIzQmxZVzRnU0dWaGJIUm9JRWx1YzNWeVlXNWpaU0JEWVhKa0lDaEZTRWxES1NCVFJDMUtWMVFnVm1WeWFXWnBZV0pzWlNCRGNtVmtaVzUwYVdGc0lGUjVjR1VnVFdWMFlXUmhkR0VzSUdKaGMyVmtJRzl1SUdsbGRHWXRiMkYxZEdndGMyUXRhbmQwTFhaaklDaGtjbUZtZENBd09Ta3NJSFZ6YVc1bklHRWdjMmx1WjJ4bElHeGhibWQxWVdkbElIUmhaeUFvWlc0dFZWTXBMaUlzSWlSamIyMXRaVzUwSWpvaVNXMXdiR1Z0Wlc1MFlYUnBiMjRnYjJZZ2RHaGxJRVJETkVWVklGWkRWRTBnYldGNUlISmxjWFZwY21VZ1RXVnRZbVZ5SUZOMFlYUmxMWE53WldOcFptbGpJR05zWVhKcFptbGpZWFJwYjI1eklIUnZJR0ZzYVdkdUlIZHBkR2dnYm1GMGFXOXVZV3dnY0c5c2FXTnBaWE1nWjI5MlpYSnVhVzVuSUhSb1pTQmthWE53YkdGNUlHOW1JR2x1WTJ4MVpHVmtJR05zWVdsdGN5NGlMQ0prYVhOd2JHRjVJanBiZXlKc1lXNW5Jam9pWlc0dFZWTWlMQ0p1WVcxbElqb2lSVWhKUXlCVFJDMUtWMVFnVmtNaUxDSmtaWE5qY21sd2RHbHZiaUk2SWtWMWNtOXdaV0Z1SUVobFlXeDBhQ0JKYm5OMWNtRnVZMlVnUTJGeVpDQW9SVWhKUXlrZ1UwUXRTbGRVSUZaRElpd2ljbVZ1WkdWeWFXNW5JanA3SW5OcGJYQnNaU0k2ZXlKc2IyZHZJanA3SW5WeWFTSTZJbWgwZEhCek9pOHZaR1Z0YnkxcGMzTjFaWEl1ZDNkM1lXeHNaWFF1YjNKbkwzQjFZbXhwWXk5amNtVmtjeTlsYUdsakwyVjFjbTl3WldGdUxXaGxZV3gwYUMxcGJuTjFjbUZ1WTJVdFkyRnlaQzF6ZG1jdFpHTTBaWFV0TURFdWMzWm5JaXdpZFhKcEkybHVkR1ZuY21sMGVTSTZJbk5vWVRJMU5pMUVNSEl6V1RabmEzRXhSalppTVZZM2Rsa3lXVFpLTTFFMFN6Vk1PRTA1VGpCUE1WQXlVVE5TTkZNMVZEMGlMQ0poYkhSZmRHVjRkQ0k2SWlKOUxDSmlZV05yWjNKdmRXNWtYMk52Ykc5eUlqb2lJaXdpZEdWNGRGOWpiMnh2Y2lJNklpSjlMQ0p6ZG1kZmRHVnRjR3hoZEdWeklqcGJleUoxY21raU9pSm9kSFJ3Y3pvdkwyUmxiVzh0YVhOemRXVnlMbmQzZDJGc2JHVjBMbTl5Wnk5d2RXSnNhV012WTNKbFpITXZaV2hwWXk5bGRYSnZjR1ZoYmkxb1pXRnNkR2d0YVc1emRYSmhibU5sTFdOaGNtUXRjM1puTFdSak5HVjFMVEF4TG5OMlp5SXNJblZ5YVNOcGJuUmxaM0pwZEhraU9pSnphR0V5TlRZdGEwbFdLMWRYU0RCaFJsSlBibXRtZVRWbmNYZ3ZZMUpwZGxKT2EwTnlhMDVDVFdkSVozbHpUbkp1TUQwaUxDSndjbTl3WlhKMGFXVnpJanA3SW05eWFXVnVkR0YwYVc5dUlqb2liR0Z1WkhOallYQmxJaXdpWTI5c2IzSmZjMk5vWlcxbElqb2liR2xuYUhRaUxDSmpiMjUwY21GemRDSTZJbTV2Y20xaGJDSjlmVjE5ZlYwc0ltTnNZV2x0Y3lJNlczc2ljR0YwYUNJNld5SndaWEp6YjI1aGJGOWhaRzFwYm1semRISmhkR2wyWlY5dWRXMWlaWElpWFN3aVpHbHpjR3hoZVNJNlczc2liR0Z1WnlJNkltVnVMVlZUSWl3aWJHRmlaV3dpT2lKVGIyTnBZV3dnVTJWamRYSnBkSGtnVUVsT0lpd2laR1Z6WTNKcGNIUnBiMjRpT2lKVmJtbHhkV1VnY0dWeWMyOXVZV3dnYVdSbGJuUnBabWxsY2lCMWMyVmtJR0o1SUhOdlkybGhiQ0J6WldOMWNtbDBlU0J6WlhKMmFXTmxjeTRpZlYwc0luTmtJam9pWVd4M1lYbHpJaXdpYzNablgybGtJam9pY0dWeWMyOXVZV3hmWVdSdGFXNXBjM1J5WVhScGRtVmZiblZ0WW1WeVh6WWlmU3g3SW5CaGRHZ2lPbHNpYVhOemRXbHVaMTloZFhSb2IzSnBkSGtpWFN3aVpHbHpjR3hoZVNJNlczc2liR0Z1WnlJNkltVnVMVlZUSWl3aWJHRmlaV3dpT2lKSmMzTjFhVzVuSUdGMWRHaHZjbWwwZVNKOVhTd2ljMlFpT2lKdVpYWmxjaUo5TEhzaWNHRjBhQ0k2V3lKcGMzTjFhVzVuWDJGMWRHaHZjbWwwZVNJc0ltbGtJbDBzSW1ScGMzQnNZWGtpT2x0N0lteGhibWNpT2lKbGJpMVZVeUlzSW14aFltVnNJam9pU1hOemRXbHVaeUJoZFhSb2IzSnBkSGtnYVdRaUxDSmtaWE5qY21sd2RHbHZiaUk2SWtWSVNVTWdhWE56ZFdsdVp5QmhkWFJvYjNKcGRIa2dkVzVwY1hWbElHbGtaVzUwYVdacFpYSXVJbjFkTENKelpDSTZJbTVsZG1WeUluMHNleUp3WVhSb0lqcGJJbWx6YzNWcGJtZGZZWFYwYUc5eWFYUjVJaXdpYm1GdFpTSmRMQ0prYVhOd2JHRjVJanBiZXlKc1lXNW5Jam9pWlc0dFZWTWlMQ0pzWVdKbGJDSTZJa2x6YzNWcGJtY2dZWFYwYUc5eWFYUjVJRzVoYldVaUxDSmtaWE5qY21sd2RHbHZiaUk2SWtWSVNVTWdhWE56ZFdsdVp5QmhkWFJvYjNKcGRIa2dibUZ0WlM0aWZWMHNJbk5rSWpvaWJtVjJaWElpZlN4N0luQmhkR2dpT2xzaWFYTnpkV2x1WjE5amIzVnVkSEo1SWwwc0ltUnBjM0JzWVhraU9sdDdJbXhoYm1jaU9pSmxiaTFWVXlJc0lteGhZbVZzSWpvaVNYTnpkV2x1WnlCamIzVnVkSEo1SWl3aVpHVnpZM0pwY0hScGIyNGlPaUpGU0VsRElHbHpjM1ZwYm1jZ1kyOTFiblJ5ZVM0aWZWMHNJbk5rSWpvaWJtVjJaWElpTENKemRtZGZhV1FpT2lKcGMzTjFhVzVuWDJOdmRXNTBjbmxmTWlKOUxIc2ljR0YwYUNJNld5SmtZWFJsWDI5bVgyVjRjR2x5ZVNKZExDSmthWE53YkdGNUlqcGJleUpzWVc1bklqb2laVzR0VlZNaUxDSnNZV0psYkNJNklrVjRjR2x5ZVNCa1lYUmxJaXdpWkdWelkzSnBjSFJwYjI0aU9pSkZTRWxESUdWNGNHbHlZWFJwYjI0Z1pHRjBaUzRpZlYwc0luTmtJam9pYm1WMlpYSWlMQ0p6ZG1kZmFXUWlPaUprWVhSbFgyOW1YMlY0Y0dseWVWODVJbjBzZXlKd1lYUm9JanBiSW1SaGRHVmZiMlpmYVhOemRXRnVZMlVpWFN3aVpHbHpjR3hoZVNJNlczc2liR0Z1WnlJNkltVnVMVlZUSWl3aWJHRmlaV3dpT2lKSmMzTjFaU0JrWVhSbElpd2laR1Z6WTNKcGNIUnBiMjRpT2lKRlNFbERJSFpoYkdsa2FYUjVJSE4wWVhKMElHUmhkR1V1SW4xZExDSnpaQ0k2SW01bGRtVnlJbjBzZXlKd1lYUm9JanBiSW1GMWRHaGxiblJwWTE5emIzVnlZMlVpWFN3aVpHbHpjR3hoZVNJNlczc2liR0Z1WnlJNkltVnVMVlZUSWl3aWJHRmlaV3dpT2lKRGIyMXdaWFJsYm5RZ2FXNXpkR2wwZFhScGIyNGlmVjBzSW5Oa0lqb2libVYyWlhJaWZTeDdJbkJoZEdnaU9sc2lZWFYwYUdWdWRHbGpYM052ZFhKalpTSXNJbWxrSWwwc0ltUnBjM0JzWVhraU9sdDdJbXhoYm1jaU9pSmxiaTFWVXlJc0lteGhZbVZzSWpvaVEyOXRjR1YwWlc1MElHbHVjM1JwZEhWMGFXOXVJR2xrSWl3aVpHVnpZM0pwY0hScGIyNGlPaUpKWkdWdWRHbG1hV1Z5SUc5bUlIUm9aU0JqYjIxd1pYUmxiblFnYVc1emFYUjFkR2x2YmlCaGN5QnlaV2RwYzNSbGNtVmtJR2x1SUhSb1pTQkZSVk5UU1NCSmJuTjBhWFIxZEdsdmJpQlNaWEJ2YzJsMGIzSjVMaUo5WFN3aWMyUWlPaUp1WlhabGNpSXNJbk4yWjE5cFpDSTZJbUYxZEdobGJuUnBZMTl6YjNWeVkyVmZhV1JmTjJFaWZTeDdJbkJoZEdnaU9sc2lZWFYwYUdWdWRHbGpYM052ZFhKalpTSXNJbTVoYldVaVhTd2laR2x6Y0d4aGVTSTZXM3NpYkdGdVp5STZJbVZ1TFZWVElpd2liR0ZpWld3aU9pSkRiMjF3WlhSbGJuUWdhVzV6ZEdsMGRYUnBiMjRnYm1GdFpTSXNJbVJsYzJOeWFYQjBhVzl1SWpvaVRtRnRaU0J2WmlCMGFHVWdZMjl0Y0dWMFpXNTBJR2x1YzJsMGRYUnBiMjRnWVhNZ2NtVm5hWE4wWlhKbFpDQnBiaUIwYUdVZ1JVVlRVMGtnU1c1emRHbDBkWFJwYjI0Z1VtVndiM05wZEc5eWVTNGlmVjBzSW5Oa0lqb2libVYyWlhJaUxDSnpkbWRmYVdRaU9pSmhkWFJvWlc1MGFXTmZjMjkxY21ObFgyNWhiV1ZmTjJJaWZTeDdJbkJoZEdnaU9sc2laVzVrYVc1blgyUmhkR1VpWFN3aVpHbHpjR3hoZVNJNlczc2liR0Z1WnlJNkltVnVMVlZUSWl3aWJHRmlaV3dpT2lKRmJtUnBibWNnWkdGMFpTSXNJbVJsYzJOeWFYQjBhVzl1SWpvaVJXNWtJR1JoZEdVZ2IyWWdkR2hsSUdsdWMzVnlZVzVqWlNCamIzWmxjbUZuWlM0aWZWMHNJbk5rSWpvaWJtVjJaWElpZlN4N0luQmhkR2dpT2xzaWMzUmhjblJwYm1kZlpHRjBaU0pkTENKa2FYTndiR0Y1SWpwYmV5SnNZVzVuSWpvaVpXNHRWVk1pTENKc1lXSmxiQ0k2SWxOMFlYSjBhVzVuSUdSaGRHVWlMQ0prWlhOamNtbHdkR2x2YmlJNklsTjBZWEowSUdSaGRHVWdiMllnZEdobElHbHVjM1Z5WVc1alpTQmpiM1psY21GblpTNGlmVjBzSW5Oa0lqb2libVYyWlhJaWZTeDdJbkJoZEdnaU9sc2laRzlqZFcxbGJuUmZiblZ0WW1WeUlsMHNJbVJwYzNCc1lYa2lPbHQ3SW14aGJtY2lPaUpsYmkxVlV5SXNJbXhoWW1Wc0lqb2lSRzlqZFcxbGJuUWdiblZ0WW1WeUlpd2laR1Z6WTNKcGNIUnBiMjRpT2lKRlNFbERJSFZ1YVhGMVpTQmtiMk4xYldWdWRDQnBaR1Z1ZEdsbWFXVnlMaUo5WFN3aWMyUWlPaUpoYkhkaGVYTWlMQ0p6ZG1kZmFXUWlPaUprYjJOMWJXVnVkRjl1ZFcxaVpYSmZPQ0o5WFN3aWMyTm9aVzFoWDNWeWJDSTZJaUlzSW5OamFHVnRZVjkxY213amFXNTBaV2R5YVhSNUlqb2lJaXdpWlhoMFpXNWtjeUk2SWlJc0ltVjRkR1Z1WkhNamFXNTBaV2R5YVhSNUlqb2ljMmhoTWpVMkxXZ3dSREY0V0RCMVdqVnlNMDg0WWpob00xUTJiRXRZU2pkUk1WRTJaakZaTldwMk0wWTBlVGRuV0ZVOUluMD0iXX0.eyJfc2QiOlsiNUlTQURrZVplZ0FSWG9Jb1N2WVdUOXRKUm9oQlJMVzlEaDQ1MUlUbkVUYyIsIjFVR0JxRUg1Q1o1QVRMbEtNelFaT0ZIOVZtb09hMW1QdzU0VnpHRW5NUEEiXSwiX3NkX2FsZyI6InNoYTI1NiIsImF1dGhlbnRpY19zb3VyY2UiOnsiaWQiOiJDTEVJU1MiLCJuYW1lIjoiU1VORVQifSwiY25mIjp7Imp3ayI6eyJraWQiOiJSdXp0X1g3YzFlZUc1Tm90ZVAtZkNvWmlQTmVzUHNvR3NFcUJSeEpVamFVIiwiY3J2IjoiUC0yNTYiLCJrdHkiOiJFQyIsIngiOiIzZE91cG1uSmNUSW5sX2VJOHR5Vk95RTE3ZlJKX3hwSllYakN6SUtzTkZJIiwieSI6IlFIZEJ3dEw2VE5fVXRIdEI2Q1ZwQVVULW5LWXMzTXlvdXowOFo2Um1OUmciLCJrZXlfb3BzIjpbInZlcmlmeSJdLCJleHQiOnRydWV9fSwiZGF0ZV9vZl9leHBpcnkiOiIyMDI2LTA0LTEyIiwiZGF0ZV9vZl9pc3N1YW5jZSI6IjIwMjMtMTEtMTgiLCJlbmRpbmdfZGF0ZSI6IjIwMjYtMDYtMjQiLCJleHAiOjE3OTUwMTIyMzUsImlzcyI6Imh0dHBzOi8vdmMtaW50ZXJvcC0zLnN1bmV0LnNlIiwiaXNzdWluZ19hdXRob3JpdHkiOnsiaWQiOiJDTEVJU1MiLCJuYW1lIjoiU1VORVQifSwiaXNzdWluZ19jb3VudHJ5IjoiRlIiLCJqdGkiOiJhMjBmZjRkZi1hZTI2LTQ0ODEtODY4My04ZDQ1NzE0MjI2ZWEiLCJuYmYiOjE3NjM0NzYyMzUsInN0YXJ0aW5nX2RhdGUiOiIyMDI1LTA2LTI0IiwidmN0IjoidXJuOmV1ZGk6ZWhpYzoxIn0.6h-Q46OUH9VX1MtYWNhVZeBTA9g8KzeW-UfrBej1T15b4OGKJjWcHu8v1DaI4SuPBFCuQfT-X9klp6K6c8wVOw~WyJtb2NrU2FsdCIsInBlcnNvbmFsX2FkbWluaXN0cmF0aXZlX251bWJlciIsIjU3MzgxNTQ0Il0~WyJtb2NrU2FsdCIsImRvY3VtZW50X251bWJlciIsIjgwMjQ2ODAyNDYwMDAzNDgzMDA1Il0~",
-					},
+			wantErr: false,
+		},
+		{
+			name: "successful PID credential creation",
+			request: &CreateCredentialRequest{
+				Scope:        "pid",
+				DocumentData: mockPidData,
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
 				},
 			},
+			wantErr: false,
+		},
+		{
+			name: "successful diploma credential creation",
+			request: &CreateCredentialRequest{
+				Scope:        "diploma",
+				DocumentData: mockDiplomaData,
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "unsupported scope",
+			request: &CreateCredentialRequest{
+				Scope:        "unsupported_scope",
+				DocumentData: mockEhic,
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+				},
+			},
+			wantErr: true,
+			errMsg:  "unsupported scope",
+		},
+		{
+			name: "missing scope",
+			request: &CreateCredentialRequest{
+				Scope:        "",
+				DocumentData: mockEhic,
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing document data",
+			request: &CreateCredentialRequest{
+				Scope:        "ehic",
+				DocumentData: nil,
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing JWK",
+			request: &CreateCredentialRequest{
+				Scope:        "ehic",
+				DocumentData: mockEhic,
+				JWK:          nil,
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid JSON in document data",
+			request: &CreateCredentialRequest{
+				Scope:        "ehic",
+				DocumentData: []byte(`{invalid json`),
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+				},
+			},
+			wantErr: true,
 		},
 	}
 
-	for _, tt := range tts {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			log := logger.NewSimple("test")
 			client := mockNewClient(ctx, t, "ecdsa", log)
 
 			got, err := client.MakeSDJWT(ctx, tt.request)
-			assert.NoError(t, err)
 
-			assert.Equal(t, tt.want, got)
+			if tt.wantErr {
+				assert.Error(t, err)
+				if tt.errMsg != "" {
+					assert.Contains(t, err.Error(), tt.errMsg)
+				}
+				return
+			}
+
+			require.NoError(t, err)
+			assert.NotNil(t, got)
+			assert.NotEmpty(t, got.Data)
+			assert.NotEmpty(t, got.Data[0].Credential)
+
+			// Verify it's a valid SD-JWT structure
+			parts := strings.Split(got.Data[0].Credential, "~")
+			assert.GreaterOrEqual(t, len(parts), 1, "SD-JWT should have at least JWT part")
+
+			// Parse JWT header and payload
+			jwtParts := strings.Split(parts[0], ".")
+			assert.Len(t, jwtParts, 3, "JWT should have 3 parts (header.payload.signature)")
+
+			// Decode and verify header
+			headerBytes, err := base64.RawURLEncoding.DecodeString(jwtParts[0])
+			require.NoError(t, err, "should decode JWT header")
+
+			var header map[string]interface{}
+			err = json.Unmarshal(headerBytes, &header)
+			require.NoError(t, err, "should parse JWT header JSON")
+
+			assert.Contains(t, header, "alg", "header should contain alg")
+			assert.Contains(t, header, "typ", "header should contain typ")
+			assert.Equal(t, "dc+sd-jwt", header["typ"], "typ should be dc+sd-jwt")
+
+			// Decode and verify payload
+			payloadBytes, err := base64.RawURLEncoding.DecodeString(jwtParts[1])
+			require.NoError(t, err, "should decode JWT payload")
+
+			var payload map[string]interface{}
+			err = json.Unmarshal(payloadBytes, &payload)
+			require.NoError(t, err, "should parse JWT payload JSON")
+
+			// Verify standard claims
+			assert.Contains(t, payload, "iss", "payload should contain iss")
+			assert.Contains(t, payload, "nbf", "payload should contain nbf")
+			assert.Contains(t, payload, "exp", "payload should contain exp")
+			assert.Contains(t, payload, "jti", "payload should contain jti")
+			assert.Contains(t, payload, "vct", "payload should contain vct")
+			assert.Contains(t, payload, "cnf", "payload should contain cnf (confirmation)")
+			assert.Contains(t, payload, "_sd_alg", "payload should contain _sd_alg")
+
+			// Verify issuer
+			assert.Equal(t, "https://test-issuer.sunet.se", payload["iss"])
+
+			// Verify hash algorithm
+			assert.Equal(t, "sha-256", payload["_sd_alg"])
+		})
+	}
+}
+
+func TestMakeSDJWT_WithRSAKey(t *testing.T) {
+	ctx := context.Background()
+	log := logger.NewSimple("test")
+	client := mockNewClient(ctx, t, "rsa", log)
+
+	request := &CreateCredentialRequest{
+		Scope:        "ehic",
+		DocumentData: mockEhic,
+		JWK: &apiv1_issuer.Jwk{
+			Kty: "EC",
+			Crv: "P-256",
+			X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+			Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+		},
+	}
+
+	got, err := client.MakeSDJWT(ctx, request)
+
+	require.NoError(t, err)
+	assert.NotNil(t, got)
+	assert.NotEmpty(t, got.Data)
+	assert.NotEmpty(t, got.Data[0].Credential)
+
+	// Parse and verify RSA algorithm
+	parts := strings.Split(got.Data[0].Credential, "~")
+	jwtParts := strings.Split(parts[0], ".")
+
+	headerBytes, err := base64.RawURLEncoding.DecodeString(jwtParts[0])
+	require.NoError(t, err)
+
+	var header map[string]interface{}
+	err = json.Unmarshal(headerBytes, &header)
+	require.NoError(t, err)
+
+	// RSA 2048 key should result in RS256
+	assert.Equal(t, "RS256", header["alg"], "2048-bit RSA key should use RS256")
+}
+
+func TestMakeSDJWT_VerifySelectiveDisclosure(t *testing.T) {
+	ctx := context.Background()
+	log := logger.NewSimple("test")
+	client := mockNewClient(ctx, t, "ecdsa", log)
+
+	request := &CreateCredentialRequest{
+		Scope:        "ehic",
+		DocumentData: mockEhic,
+		JWK: &apiv1_issuer.Jwk{
+			Kty: "EC",
+			Crv: "P-256",
+			X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+			Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+		},
+	}
+
+	got, err := client.MakeSDJWT(ctx, request)
+	require.NoError(t, err)
+
+	// Parse SD-JWT
+	parts := strings.Split(got.Data[0].Credential, "~")
+	assert.GreaterOrEqual(t, len(parts), 2, "SD-JWT should have disclosures")
+
+	// Check JWT payload for _sd arrays
+	jwtParts := strings.Split(parts[0], ".")
+	payloadBytes, err := base64.RawURLEncoding.DecodeString(jwtParts[1])
+	require.NoError(t, err)
+
+	var payload map[string]interface{}
+	err = json.Unmarshal(payloadBytes, &payload)
+	require.NoError(t, err)
+
+	// Verify selective disclosures are present
+	// The payload should have _sd array or nested objects with _sd arrays
+	hasSD := false
+	if _, ok := payload["_sd"]; ok {
+		hasSD = true
+	}
+
+	// Check nested objects recursively
+	var checkForSD func(m map[string]interface{}) bool
+	checkForSD = func(m map[string]interface{}) bool {
+		for k, v := range m {
+			if k == "_sd" {
+				return true
+			}
+			if nested, ok := v.(map[string]interface{}); ok {
+				if checkForSD(nested) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	if !hasSD {
+		hasSD = checkForSD(payload)
+	}
+
+	assert.True(t, hasSD, "SD-JWT should contain _sd arrays for selective disclosure")
+}
+
+func TestMakeSDJWT_MultipleCredentialTypes(t *testing.T) {
+	ctx := context.Background()
+	log := logger.NewSimple("test")
+	client := mockNewClient(ctx, t, "ecdsa", log)
+
+	scopes := []string{"ehic", "pid", "diploma"}
+
+	for _, scope := range scopes {
+		t.Run(scope, func(t *testing.T) {
+			var docData []byte
+			switch scope {
+			case "ehic":
+				docData = mockEhic
+			case "pid":
+				docData = mockPidData
+			case "diploma":
+				docData = mockDiplomaData
+			}
+
+			request := &CreateCredentialRequest{
+				Scope:        scope,
+				DocumentData: docData,
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+				},
+			}
+
+			got, err := client.MakeSDJWT(ctx, request)
+			require.NoError(t, err, "should create %s credential", scope)
+			assert.NotNil(t, got)
+			assert.NotEmpty(t, got.Data[0].Credential)
 		})
 	}
 }

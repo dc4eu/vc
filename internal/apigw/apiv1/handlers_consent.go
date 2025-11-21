@@ -58,9 +58,9 @@ type GetConsentRequest struct {
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object} model.Consent	"Success"
-//	@Failure		400	{object}		helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body			GetConsentRequest		true	" "
+//	@Success		200	{object}	model.Consent			"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Param			req	body		GetConsentRequest		true	" "
 //	@Router			/consent/get [post]
 func (c *Client) GetConsent(ctx context.Context, req *GetConsentRequest) (*model.Consent, error) {
 	res, err := c.db.VCConsentColl.Get(ctx, &db.GetConsentQuery{

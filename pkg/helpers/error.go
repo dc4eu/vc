@@ -40,8 +40,8 @@ var (
 	// ErrPrivateKeyMissing error for empty private key
 	ErrPrivateKeyMissing = NewError("ERR_PRIVATE_KEY_MISSING")
 
-	// ErrNoKnownDocumentType error for no known document type
-	ErrNoKnownDocumentType = NewError("ERR_NO_KNOWN_DOCUMENT_TYPE")
+	// ErrNoKnownVCT error for no known vct
+	ErrNoKnownVCT = NewError("ERR_NO_KNOWN_VCT")
 
 	// ErrInternalServerError error for internal server error
 	ErrInternalServerError = NewError("INTERNAL_SERVER_ERROR")

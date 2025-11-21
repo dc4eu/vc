@@ -9,7 +9,6 @@ import (
 	"vc/pkg/openid4vp"
 
 	"github.com/google/uuid"
-	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
@@ -71,7 +70,6 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 		SavedAt:                  0,
 		Consent:                  false,
 		AuthenticSource:          "",
-		DocumentType:             "",
 		Identity:                 &model.Identity{},
 		Token:                    &model.Token{},
 		Nonce:                    nonce,
@@ -80,7 +78,7 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 		RequestObjectID:          requestObjectID,
 	}
 
-	_, ephemeralPublicJWK, err := c.EphemeralEncryptionKey(authorizationContext.EphemeralEncryptionKeyID)
+	_, ephemeralPublicJWK, err := c.openid4vp.EphemeralKeyCache.GenerateAndStore(authorizationContext.EphemeralEncryptionKeyID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +118,7 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 		return nil, err
 	}
 
-	c.requestObjectCache.Set(authorizationContext.RequestObjectID, requestObject, ttlcache.DefaultTTL)
+	c.openid4vp.RequestObjectCache.Set(authorizationContext.RequestObjectID, requestObject)
 
 	reply := &UIInteractionReply{}
 

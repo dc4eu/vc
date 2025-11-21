@@ -13,7 +13,7 @@ service IssuerService {
 }
 
 message MakeSDJWTRequest {
-    string documentType = 1;
+    string scope = 1;
     bytes documentData = 2;
     jwk jwk =3;
 }

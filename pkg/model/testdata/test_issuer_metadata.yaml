@@ -1,0 +1,10 @@
+credential_issuer: "https://test.issuer.example.com"
+credential_endpoint: "https://test.issuer.example.com/credential"
+display:
+  - name: "Test Issuer"
+    locale: "en-US"
+credential_configurations_supported:
+  urn:eudi:pid:1:
+    scope: "pid"
+    vct: "urn:eudi:pid:1"
+    format: "vc+sd-jwt"

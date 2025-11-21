@@ -10,6 +10,7 @@ import (
 	"vc/pkg/messagebroker/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+	"vc/pkg/vcclient"
 
 	"github.com/IBM/sarama"
 )
@@ -31,7 +32,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 }
 
 // Upload publish a UploadRequest message to a Kafka topic
-func (s *kafkaMessageProducer) Upload(uploadRequest *apiv1.UploadRequest) error {
+func (s *kafkaMessageProducer) Upload(uploadRequest *vcclient.UploadRequest) error {
 	if uploadRequest == nil {
 		return errors.New("param uploadRequest is nil")
 	}

@@ -8,11 +8,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"vc/pkg/logger"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/pki"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 
 	"gopkg.in/yaml.v2"
 )
@@ -384,17 +383,20 @@ type AuthenticSource struct {
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common                Common                            `yaml:"common"`
-	AuthenticSources      map[string]AuthenticSource        `yaml:"authentic_sources" validate:"omitempty"`
-	APIGW                 APIGW                             `yaml:"apigw" validate:"omitempty"`
-	Issuer                Issuer                            `yaml:"issuer" validate:"omitempty"`
-	Verifier              Verifier                          `yaml:"verifier" validate:"omitempty"`
-	VerifierProxy         VerifierProxy                     `yaml:"verifier_proxy" validate:"omitempty"`
-	Datastore             Datastore                         `yaml:"datastore" validate:"omitempty"`
-	Registry              Registry                          `yaml:"registry" validate:"omitempty"`
-	Persistent            Persistent                        `yaml:"persistent" validate:"omitempty"`
-	MockAS                MockAS                            `yaml:"mock_as" validate:"omitempty"`
-	UI                    UI                                `yaml:"ui" validate:"omitempty"`
+	Common           Common                     `yaml:"common"`
+	AuthenticSources map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
+	APIGW            APIGW                      `yaml:"apigw" validate:"omitempty"`
+	Issuer           Issuer                     `yaml:"issuer" validate:"omitempty"`
+	Verifier         Verifier                   `yaml:"verifier" validate:"omitempty"`
+	VerifierProxy    VerifierProxy              `yaml:"verifier_proxy" validate:"omitempty"`
+	Datastore        Datastore                  `yaml:"datastore" validate:"omitempty"`
+	Registry         Registry                   `yaml:"registry" validate:"omitempty"`
+	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
+	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
+	UI               UI                         `yaml:"ui" validate:"omitempty"`
+	// CredentialConstructor maps OAuth2 scope values to their constructor configuration
+	// Key: OAuth2 scope (e.g., "pid", "ehic", "diploma") - matches AuthorizationContext.Scope
+	// The constructor contains the VCT URN and other configuration for issuing that credential type
 	CredentialConstructor map[string]*CredentialConstructor `yaml:"credential_constructor" validate:"omitempty"`
 }
 
@@ -406,41 +408,41 @@ func (c *Cfg) GetCredentialConstructorAuthMethod(credentialType string) string {
 	return "basic"
 }
 
-type CredentialConstructor struct {
-	VCT          string                         `yaml:"vct" json:"vct" validate:"required"`
-	VCTMFilePath string                         `yaml:"vctm_file_path" json:"vctm_file_path" validate:"required"`
-	VCTM         *sdjwt3.VCTM                   `yaml:"-" json:"-"`
-	AuthMethod   string                         `yaml:"auth_method" json:"auth_method" validate:"required,oneof=basic pid_auth"`
-	Attributes   map[string]map[string][]string `yaml:"attributes" json:"attributes_v2" validate:"omitempty,dive,required"`
-}
-
-func (c *CredentialConstructor) LoadFile(ctx context.Context) error {
-	if c.VCTMFilePath == "" {
-		return fmt.Errorf("vctm_file_path is empty vct: %s", c.VCT)
+// GetCredentialConstructor returns the credential constructor for a given scope
+func (c *Cfg) GetCredentialConstructor(scope string) *CredentialConstructor {
+	// Direct lookup by scope (map key)
+	if constructor, ok := c.CredentialConstructor[scope]; ok {
+		return constructor
 	}
-
-	fileByte, err := os.ReadFile(c.VCTMFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to read file %s: %w", c.VCTMFilePath, err)
-	}
-
-	if err := json.Unmarshal(fileByte, &c.VCTM); err != nil {
-		fmt.Println("Failed to unmarshal VCTM file:", err)
-		return err
-	}
-
-	c.VCT = c.VCTM.VCT
 
 	return nil
 }
 
-// IsAsyncEnabled checks if the async is enabled
-func (cfg *Cfg) IsAsyncEnabled(log *logger.Log) bool {
-	enabled := cfg.Common.Kafka.Enabled
-	if !enabled {
-		log.Info("EventPublisher disabled in config")
+type CredentialConstructor struct {
+	VCT          string                         `yaml:"vct" json:"vct" validate:"required"`
+	VCTMFilePath string                         `yaml:"vctm_file_path" json:"vctm_file_path" validate:"required"`
+	VCTM         *sdjwtvc.VCTM                  `yaml:"-" json:"-"`
+	AuthMethod   string                         `yaml:"auth_method" json:"auth_method" validate:"required,oneof=basic pid_auth"`
+	Attributes   map[string]map[string][]string `yaml:"attributes" json:"attributes_v2" validate:"omitempty,dive,required"`
+}
+
+// LoadVCTMetadata loads and parses the Verifiable Credential Type Metadata (VCTM) file.
+// The scope parameter is used only for error messages.
+func (c *CredentialConstructor) LoadVCTMetadata(ctx context.Context, scope string) error {
+	if c.VCTMFilePath == "" {
+		return fmt.Errorf("vctm_file_path is empty for scope: %s", scope)
 	}
-	return enabled
+
+	fileByte, err := os.ReadFile(c.VCTMFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to read VCTM file %s for scope %s: %w", c.VCTMFilePath, scope, err)
+	}
+
+	if err := json.Unmarshal(fileByte, &c.VCTM); err != nil {
+		return fmt.Errorf("failed to unmarshal VCTM file %s for scope %s: %w", c.VCTMFilePath, scope, err)
+	}
+
+	return nil
 }
 
 // LoadAndSign loads and signs metadata the issuing metadata from
@@ -458,7 +460,7 @@ func (cfg *IssuerMetadata) LoadAndSign(ctx context.Context) (*openid4vci.Credent
 			return nil, nil, nil, nil, err
 		}
 
-	case "yaml", ".yml":
+	case ".yaml", ".yml":
 		if err := yaml.Unmarshal(fileByte, &metadata); err != nil {
 			return nil, nil, nil, nil, err
 		}

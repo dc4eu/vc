@@ -2,6 +2,7 @@
   "vct": "urn:eudi:diploma:1",
   "name": "Diploma Credential",
   "description": "European Learning Model Diploma Credential.",
+  "extends#integrity": "sha256-h0D1xX0uZ5r3O8b8h3T6lKXJ7Q1Q6f1Y5jv3F4y7gXU=",
   "$comment": "",
   "display": [
     {
@@ -9,6 +10,12 @@
       "name": "Diploma Credential",
       "description": "Portable European Learning Model (ELM) Diploma Credential.",
       "rendering": {
+         "simple": {
+          "logo": {
+            "uri": "https://raw.githubusercontent.com/dc4eu/vc/d5bcc09ad66fb8491d0694f48d60371fc6ac9e04/images/generic-diploma-card-svg-dc4eu-01.svg",
+            "uri#integrity": "sha256-wLet7Ra2LR80J8oXFR9aoB902q8va1eSRhO0JA6apG8"
+          }
+        },
         "svg_templates": [
           {
             "uri": "https://raw.githubusercontent.com/dc4eu/vc/d5bcc09ad66fb8491d0694f48d60371fc6ac9e04/images/generic-diploma-card-svg-dc4eu-01.svg",

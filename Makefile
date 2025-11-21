@@ -128,7 +128,7 @@ docker-build-wallet:
 
 docker-build-verifier-proxy:
 	$(info Docker building verifier-proxy with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/web_worker .
+	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/worker .
 
 docker-push-gobuild:
 	$(info Pushing docker images)
@@ -321,7 +321,9 @@ vscode:
 	sudo apt-get update && sudo apt-get install -y \
 		protobuf-compiler \
 		netcat-openbsd \
-		plantuml
+		plantuml \
+		docker.io \
+		docker-compose
 	$(info Install go packages)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \

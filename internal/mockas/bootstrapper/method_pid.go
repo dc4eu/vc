@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"vc/pkg/model"
-	"vc/pkg/pid"
 	"vc/pkg/vcclient"
 )
 
@@ -44,36 +43,29 @@ func (c *pidClient) readPidUserFile(sourceFilePath string) error {
 }
 
 func (c *pidClient) makeSourceData(sourceFilePath string) error {
-	if err := c.readPidUserFile("../../../bootstrapping/pid_user.json"); err != nil {
+	if err := c.readPidUserFile(sourceFilePath); err != nil {
 		return fmt.Errorf("read pid user file: %w", err)
 	}
 
 	for pidNumber, id := range c.pidUsers {
 		c.documents[pidNumber] = &vcclient.UploadRequest{}
 
-		documentData := pid.Document{
-			Identity: &model.Identity{
-				GivenName:        id.Identity.GivenName,
-				FamilyName:       id.Identity.FamilyName,
-				BirthDate:        id.Identity.BirthDate,
-				BirthPlace:       id.Identity.BirthPlace,
-				Nationality:      id.Identity.Nationality,
-				ExpiryDate:       id.Identity.ExpiryDate,
-				IssuingAuthority: id.Identity.IssuingAuthority,
-				IssuingCountry:   id.Identity.IssuingCountry,
-			},
-		}
-
-		var err error
-		c.documents[pidNumber].DocumentData, err = documentData.Marshal()
-		if err != nil {
-			return err
+		c.documents[pidNumber].DocumentData = map[string]any{
+			"given_name":                 id.Identity.GivenName,
+			"family_name":                id.Identity.FamilyName,
+			"birthdate":                  id.Identity.BirthDate,
+			"issuing_authority":          id.Identity.IssuingAuthority,
+			"issuing_country":            id.Identity.IssuingCountry,
+			"birth_place":                id.Identity.BirthPlace,
+			"expiry_date":                id.Identity.ExpiryDate,
+			"authentic_source_person_id": id.Identity.AuthenticSourcePersonID,
+			"mura":                       "kalle",
 		}
 
 		c.documents[pidNumber].Meta = &model.MetaData{
-			AuthenticSource: id.Meta.AuthenticSource,
+			AuthenticSource: "PID_Provider:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    id.Meta.DocumentType,
+			VCT:             model.CredentialTypeUrnEudiPid1,
 			DocumentID:      fmt.Sprintf("document_id_pid_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
@@ -91,10 +83,10 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
 				"en": map[string]any{
-					"documentType": "PID",
+					"description": "Personal Identification Document",
 				},
 				"sv": map[string]any{
-					"documentType": "PID",
+					"beskrivning": "Personligt identifikationsdokument",
 				},
 			},
 		}

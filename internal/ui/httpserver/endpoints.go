@@ -130,7 +130,7 @@ func (s *Service) endpointDocumentList(ctx context.Context, c *gin.Context) (any
 }
 
 func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1_apigw.UploadRequest{}
+	request := &vcclient.UploadRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}

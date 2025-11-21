@@ -31,7 +31,7 @@ type Config struct {
 }
 
 // New creates a new client
-func New(config *Config) (*Client, error) {
+func New(config *Config, log *logger.Log) (*Client, error) {
 	if err := helpers.CheckSimple(config); err != nil {
 		return nil, err
 	}
@@ -39,13 +39,8 @@ func New(config *Config) (*Client, error) {
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
+		log: log.New("vcclient"),
 		url: config.URL,
-	}
-
-	var err error
-	c.log, err = logger.New("datastoreClient", "", false)
-	if err != nil {
-		return nil, err
 	}
 
 	defaultContentType := "application/json"
@@ -63,6 +58,7 @@ func New(config *Config) (*Client, error) {
 func (c *Client) newRequest(ctx context.Context, method, path, contentType string, body any) (*http.Request, error) {
 	rel, err := url.Parse(path)
 	if err != nil {
+		c.log.Error(err, "parse url", "path", path)
 		return nil, err
 	}
 
@@ -90,7 +86,7 @@ func (c *Client) newRequest(ctx context.Context, method, path, contentType strin
 
 	if body != nil {
 		req.Header.Set("Content-Type", contentType)
-		c.log.Debug("request", "CT", req.Header.Get("Content-Type"))
+		c.log.Debug("request", "Content-Type", req.Header.Get("Content-Type"))
 	}
 	req.Header.Set("Accept", "application/json")
 	return req, nil
@@ -103,7 +99,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 
 	if err := checkResponse(resp); err != nil {
 		buf := &bytes.Buffer{}
@@ -113,6 +109,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 		if err := json.Unmarshal(buf.Bytes(), err); err != nil {
 			return nil, err
 		}
+		c.log.Error(err, "response error", "body", buf.String())
 		return nil, err
 	}
 
@@ -167,11 +164,13 @@ func (c *Client) call(ctx context.Context, method, path, contentType string, bod
 		body,
 	)
 	if err != nil {
+		c.log.Error(err, "call failed", "method", method, "path", path)
 		return nil, err
 	}
 
 	resp, err := c.do(ctx, request, reply, prefixReplyJSONWithData)
 	if err != nil {
+		c.log.Error(err, "do failed", "method", method, "path", path)
 		return resp, err
 	}
 

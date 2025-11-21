@@ -44,9 +44,9 @@ func (c *Client) OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, erro
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	apiv1_issuer.MakeSDJWTReply	"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse		"Bad Request"
-//	@Param			req	body		openid4vci.CredentialRequest			true	" "
+//	@Success		200	{object}	apiv1_issuer.MakeSDJWTReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse			"Bad Request"
+//	@Param			req	body		openid4vci.CredentialRequest	true	" "
 //	@Router			/credential [post]
 func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
 	c.log.Debug("credential", "req", req.Proof.ProofType)
@@ -93,7 +93,8 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			return nil, errors.New("no documents found for session " + authContext.SessionID)
 		}
 		for _, doc := range docs {
-			document = &doc
+			document = doc
+			break
 		}
 
 	case "pid":
@@ -101,7 +102,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		document, err = c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
-				DocumentType:    authContext.DocumentType,
+				VCT:             authContext.VCT,
 			},
 			Identity: authContext.Identity,
 		})
@@ -128,7 +129,6 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	}
 
 	c.log.Debug("Here 1", "jwk", jwk)
-	c.log.Debug("MakeSDJWT request", "documentType", document.Meta.DocumentType)
 
 	//	// Build SDJWT
 	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -140,7 +140,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	client := apiv1_issuer.NewIssuerServiceClient(conn)
 
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		DocumentType: document.Meta.DocumentType,
+		Scope:        authContext.Scope,
 		DocumentData: documentData,
 		Jwk:          jwk,
 	})
@@ -225,7 +225,7 @@ func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuer
 // RevokeRequest is the request for GenericRevoke
 type RevokeRequest struct {
 	AuthenticSource string `json:"authentic_source"`
-	DocumentType    string `json:"document_type"`
+	VCT             string `json:"vct"`
 	DocumentID      string `json:"document_id"`
 	RevocationID    string `json:"revocation_id"`
 }

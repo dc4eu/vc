@@ -49,7 +49,7 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, eventPublish
 	var err error
 	c.vcClient, err = vcclient.New(&vcclient.Config{
 		URL: cfg.MockAS.DatastoreURL,
-	})
+	}, c.log)
 	if err != nil {
 		return nil, err
 	}

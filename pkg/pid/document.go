@@ -6,7 +6,7 @@ import (
 )
 
 type Document struct {
-	Identity *model.Identity `json:"identity,omitempty"  bson:"identity,omitempty"  validate:"required"`
+	*model.Identity
 }
 
 func (d *Document) Marshal() (map[string]any, error) {

@@ -26,10 +26,15 @@ type UploadRequest struct {
 func (s *rootHandler) Upload(ctx context.Context, body *UploadRequest) (*http.Response, error) {
 	s.log.Info("Upload")
 
+	if body.Meta.VCT == model.CredentialTypeUrnEudiPid1 {
+		s.log.Info("Uploading PID document", "body", body)
+	}
+
 	url := fmt.Sprintf("%s/%s", s.serviceBaseURL, "upload")
 
 	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, nil, false)
 	if err != nil {
+		s.log.Error(err, "Upload call failed")
 		return resp, err
 	}
 	return resp, nil

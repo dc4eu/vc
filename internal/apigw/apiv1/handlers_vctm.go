@@ -10,7 +10,7 @@ import (
 	"time"
 	"vc/pkg/openid4vci"
 	"vc/pkg/openid4vp"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 
 	"github.com/skip2/go-qrcode"
 )
@@ -28,14 +28,14 @@ type GetAllCredentialOffersReply struct {
 func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialOffersReply, error) {
 	credentials := make(map[string]GetAllCredentialOffersCredential)
 
-	for key, credential := range c.cfg.CredentialConstructor {
-		if err := credential.LoadFile(ctx); err != nil {
+	for scope, credential := range c.cfg.CredentialConstructor {
+		if err := credential.LoadVCTMetadata(ctx, scope); err != nil {
 			continue
 		}
 
 		vctm := credential.VCTM
 
-		credentials[key] = GetAllCredentialOffersCredential{
+		credentials[scope] = GetAllCredentialOffersCredential{
 			Name:        vctm.Name,
 			Description: vctm.Description,
 		}
@@ -120,14 +120,14 @@ type GetVCTMFromScopeRequest struct {
 	Scope string `validate:"required"`
 }
 
-func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequest) (*sdjwt3.VCTM, error) {
+func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequest) (*sdjwtvc.VCTM, error) {
 	credentialConstructor, ok := c.cfg.CredentialConstructor[req.Scope]
 	if !ok {
 		err := errors.New("scope is not valid credential")
 		return nil, err
 	}
 
-	if err := credentialConstructor.LoadFile(ctx); err != nil {
+	if err := credentialConstructor.LoadVCTMetadata(ctx, req.Scope); err != nil {
 		return nil, err
 	}
 
@@ -137,7 +137,7 @@ func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequ
 }
 
 type SVGTemplateRequest struct {
-	VCTM *sdjwt3.VCTM `json:"-"`
+	VCTM *sdjwtvc.VCTM `json:"-"`
 }
 
 type SVGTemplateReply struct {

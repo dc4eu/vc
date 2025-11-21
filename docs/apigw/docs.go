@@ -580,7 +580,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/apiv1.UploadRequest"
+                            "$ref": "#/definitions/vcclient.UploadRequest"
                         }
                     }
                 ],
@@ -625,8 +625,8 @@ const docTemplate = `{
             "required": [
                 "authentic_source",
                 "document_id",
-                "document_type",
-                "identities"
+                "identities",
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
@@ -637,15 +637,15 @@ const docTemplate = `{
                     "description": "required: true\nexample: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8",
                     "type": "string"
                 },
-                "document_type": {
-                    "description": "required: true\nexample: PDA1",
-                    "type": "string"
-                },
                 "identities": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.Identity"
                     }
+                },
+                "vct": {
+                    "description": "required: true\nexample: urn:eudi:pid:1",
+                    "type": "string"
                 }
             }
         },
@@ -655,7 +655,7 @@ const docTemplate = `{
                 "authentic_source",
                 "authentic_source_person_id",
                 "document_id",
-                "document_type"
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
@@ -670,8 +670,8 @@ const docTemplate = `{
                     "description": "required: true\nexample: 7a00fe1a-3e1a-11ef-9272-fb906803d1b8",
                     "type": "string"
                 },
-                "document_type": {
-                    "description": "required: true\nexample: PDA1",
+                "vct": {
+                    "description": "required: true\nexample: urn:eudi:pid:1",
                     "type": "string"
                 }
             }
@@ -681,7 +681,7 @@ const docTemplate = `{
             "required": [
                 "authentic_source",
                 "document_id",
-                "document_type"
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
@@ -692,8 +692,8 @@ const docTemplate = `{
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
                     "type": "string"
                 },
-                "document_type": {
-                    "description": "required: true\nexample: PDA1",
+                "vct": {
+                    "description": "required: true\nexample: urn:eudi:pid:1",
                     "type": "string"
                 }
             }
@@ -718,9 +718,6 @@ const docTemplate = `{
                 "authentic_source": {
                     "type": "string"
                 },
-                "document_type": {
-                    "type": "string"
-                },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
                 },
@@ -729,6 +726,9 @@ const docTemplate = `{
                 },
                 "valid_to": {
                     "type": "integer"
+                },
+                "vct": {
+                    "type": "string"
                 }
             }
         },
@@ -760,8 +760,8 @@ const docTemplate = `{
             "required": [
                 "authentic_source",
                 "collect_id",
-                "document_type",
-                "identity"
+                "identity",
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
@@ -770,11 +770,11 @@ const docTemplate = `{
                 "collect_id": {
                     "type": "string"
                 },
-                "document_type": {
-                    "type": "string"
-                },
                 "identity": {
                     "$ref": "#/definitions/model.Identity"
+                },
+                "vct": {
+                    "type": "string"
                 }
             }
         },
@@ -791,7 +791,7 @@ const docTemplate = `{
             "required": [
                 "authentic_source",
                 "document_id",
-                "document_type"
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
@@ -800,7 +800,7 @@ const docTemplate = `{
                 "document_id": {
                     "type": "string"
                 },
-                "document_type": {
+                "vct": {
                     "type": "string"
                 }
             }
@@ -842,7 +842,7 @@ const docTemplate = `{
             "required": [
                 "authentic_source",
                 "document_id",
-                "document_type"
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
@@ -851,7 +851,7 @@ const docTemplate = `{
                 "document_id": {
                     "type": "string"
                 },
-                "document_type": {
+                "vct": {
                     "type": "string"
                 }
             }
@@ -860,18 +860,18 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "authentic_source",
-                "document_type",
-                "revocation"
+                "revocation",
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
                     "type": "string"
                 },
-                "document_type": {
-                    "type": "string"
-                },
                 "revocation": {
                     "$ref": "#/definitions/model.Revocation"
+                },
+                "vct": {
+                    "type": "string"
                 }
             }
         },
@@ -897,40 +897,11 @@ const docTemplate = `{
                 "document_id": {
                     "type": "string"
                 },
-                "document_type": {
-                    "type": "string"
-                },
                 "revocation_id": {
                     "type": "string"
-                }
-            }
-        },
-        "apiv1.UploadRequest": {
-            "type": "object",
-            "required": [
-                "document_data",
-                "document_data_version",
-                "meta"
-            ],
-            "properties": {
-                "document_data": {
-                    "type": "object",
-                    "additionalProperties": {}
                 },
-                "document_data_version": {
+                "vct": {
                     "type": "string"
-                },
-                "document_display": {
-                    "$ref": "#/definitions/model.DocumentDisplay"
-                },
-                "identities": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Identity"
-                    }
-                },
-                "meta": {
-                    "$ref": "#/definitions/model.MetaData"
                 }
             }
         },
@@ -950,6 +921,15 @@ const docTemplate = `{
                 },
                 "d": {
                     "type": "string"
+                },
+                "ext": {
+                    "type": "boolean"
+                },
+                "key_ops": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "kid": {
                     "type": "string"
@@ -1175,7 +1155,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expiry_date": {
-                    "description": "required: true\nexample: Date (and if possible time)",
+                    "description": "required: false\nexample: Date (and if possible time)",
                     "type": "string"
                 },
                 "family_name": {
@@ -1194,11 +1174,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "issuing_authority": {
-                    "description": "required: true\nexample:",
+                    "description": "required: false\nexample:",
                     "type": "string"
                 },
                 "issuing_country": {
-                    "description": "required: true\nexample:",
+                    "description": "required: false\nexample:",
                     "type": "string"
                 },
                 "issuing_jurisdiction": {
@@ -1301,8 +1281,8 @@ const docTemplate = `{
             "required": [
                 "authentic_source",
                 "document_id",
-                "document_type",
-                "document_version"
+                "document_version",
+                "vct"
             ],
             "properties": {
                 "authentic_source": {
@@ -1328,18 +1308,6 @@ const docTemplate = `{
                     "description": "required: true\nexample: 5e7a981c-c03f-11ee-b116-9b12c59362b9",
                     "type": "string"
                 },
-                "document_type": {
-                    "description": "required: true\nexample: PDA1",
-                    "type": "string",
-                    "enum": [
-                        "urn:eudi:elm:1",
-                        "urn:eudi:diploma:1",
-                        "urn:eudi:micro_credential:1",
-                        "urn:eudi:pid:1",
-                        "urn:eudi:ehic:1",
-                        "urn:eudi:pda1:1"
-                    ]
-                },
                 "document_version": {
                     "description": "required: true\nexample: \"1.0.0\"",
                     "type": "string"
@@ -1355,6 +1323,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/model.Revocation"
                         }
                     ]
+                },
+                "vct": {
+                    "description": "VCT is the Verifiable Credential Type\nrequired: true\nexample: \"urn:eudi:pid:1\"",
+                    "type": "string"
                 }
             }
         },
@@ -1391,7 +1363,7 @@ const docTemplate = `{
                 "document_id": {
                     "type": "string"
                 },
-                "document_type": {
+                "vct": {
                     "type": "string"
                 }
             }
@@ -1425,9 +1397,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/openid4vci.Proof"
                         }
                     ]
-                },
-                "vct": {
-                    "type": "string"
                 }
             }
         },
@@ -1530,6 +1499,35 @@ const docTemplate = `{
                 },
                 "qr_base64": {
                     "type": "string"
+                }
+            }
+        },
+        "vcclient.UploadRequest": {
+            "type": "object",
+            "required": [
+                "document_data",
+                "document_data_version",
+                "meta"
+            ],
+            "properties": {
+                "document_data": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "document_data_version": {
+                    "type": "string"
+                },
+                "document_display": {
+                    "$ref": "#/definitions/model.DocumentDisplay"
+                },
+                "identities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Identity"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/model.MetaData"
                 }
             }
         }

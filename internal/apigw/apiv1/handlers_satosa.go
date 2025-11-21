@@ -16,8 +16,8 @@ import (
 type CredentialRequest struct {
 	AuthenticSource string            `json:"authentic_source" validate:"required"`
 	Identity        *model.Identity   `json:"identity" validate:"required"`
-	DocumentType    string            `json:"document_type" validate:"required"`
-	CredentialType  string            `json:"credential_type" validate:"required"`
+	Scope           string            `json:"scope" validate:"required"`
+	VCT             string            `json:"vct" validate:"required"`
 	CollectID       string            `json:"collect_id" validate:"required"`
 	JWK             *apiv1_issuer.Jwk `json:"jwk" validate:"required"`
 }
@@ -25,7 +25,7 @@ type CredentialRequest struct {
 func (c *Client) SatosaCredential(ctx context.Context, req *CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error) {
 	document, _, err := c.datastoreClient.Document.CollectID(ctx, &vcclient.DocumentCollectIDQuery{
 		AuthenticSource: req.AuthenticSource,
-		DocumentType:    req.DocumentType,
+		VCT:             req.VCT,
 		CollectID:       req.CollectID,
 		Identity:        req.Identity,
 	})
@@ -55,7 +55,7 @@ func (c *Client) SatosaCredential(ctx context.Context, req *CredentialRequest) (
 	client := apiv1_issuer.NewIssuerServiceClient(conn)
 
 	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		DocumentType: req.DocumentType,
+		Scope:        req.Scope,
 		DocumentData: documentData,
 		Jwk:          req.JWK,
 	})
@@ -68,15 +68,16 @@ func (c *Client) SatosaCredential(ctx context.Context, req *CredentialRequest) (
 }
 
 // JWKS returns the public key in JWK format
-// @Summary		JWKS
-// @ID				issuer-JWKS
-// @Description	JWKS endpoint
-// @Tags			dc4eu
-// @Accept			json
-// @Produce		json
-// @Success		200	{object}	apiv1_issuer.JwksReply	"Success"
-// @Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-// @Router			/credential/.well-known/jwks [get]
+//
+//	@Summary		JWKS
+//	@ID				issuer-JWKS
+//	@Description	JWKS endpoint
+//	@Tags			dc4eu
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	apiv1_issuer.JwksReply	"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
+//	@Router			/credential/.well-known/jwks [get]
 func (c *Client) JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error) {
 	c.log.Debug("jwk")
 	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())

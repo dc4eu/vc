@@ -104,7 +104,7 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: row[3],
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEudiPda11,
+			VCT:             model.CredentialTypeUrnEudiPda11,
 			DocumentID:      fmt.Sprintf("document_id_pda1_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{
@@ -122,10 +122,10 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
 				"en": map[string]any{
-					"documentType": "PDA1",
+					"description": "PDA1 Document",
 				},
 				"sv": map[string]any{
-					"documentType": "PDA1",
+					"beskrivning": "PDA1 Dokument",
 				},
 			},
 		}

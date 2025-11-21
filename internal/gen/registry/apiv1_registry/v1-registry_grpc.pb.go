@@ -8,10 +8,11 @@ package apiv1_registry
 
 import (
 	context "context"
+	apiv1_status "vc/internal/gen/status/apiv1_status"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	apiv1_status "vc/internal/gen/status/apiv1_status"
 )
 
 // This is a compile-time assertion to ensure that this generated file

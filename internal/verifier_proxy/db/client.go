@@ -27,22 +27,22 @@ type Client struct {
 	RequireCodeChallenge    bool     `bson:"require_code_challenge" json:"require_code_challenge"`
 
 	// RFC 7591 Client Metadata (optional fields)
-	ClientName            string   `bson:"client_name,omitempty" json:"client_name,omitempty"`
-	ClientURI             string   `bson:"client_uri,omitempty" json:"client_uri,omitempty"`
-	LogoURI               string   `bson:"logo_uri,omitempty" json:"logo_uri,omitempty"`
-	Contacts              []string `bson:"contacts,omitempty" json:"contacts,omitempty"`
-	TosURI                string   `bson:"tos_uri,omitempty" json:"tos_uri,omitempty"`
-	PolicyURI             string   `bson:"policy_uri,omitempty" json:"policy_uri,omitempty"`
-	SoftwareID            string   `bson:"software_id,omitempty" json:"software_id,omitempty"`
-	SoftwareVersion       string   `bson:"software_version,omitempty" json:"software_version,omitempty"`
-	ApplicationType       string   `bson:"application_type,omitempty" json:"application_type,omitempty"` // "web" or "native"
-	SectorIdentifierURI   string   `bson:"sector_identifier_uri,omitempty" json:"sector_identifier_uri,omitempty"`
-	IDTokenSignedResponseAlg string `bson:"id_token_signed_response_alg,omitempty" json:"id_token_signed_response_alg,omitempty"`
-	DefaultMaxAge         int      `bson:"default_max_age,omitempty" json:"default_max_age,omitempty"`
-	RequireAuthTime       bool     `bson:"require_auth_time,omitempty" json:"require_auth_time,omitempty"`
-	DefaultACRValues      []string `bson:"default_acr_values,omitempty" json:"default_acr_values,omitempty"`
-	InitiateLoginURI      string   `bson:"initiate_login_uri,omitempty" json:"initiate_login_uri,omitempty"`
-	RequestURIs           []string `bson:"request_uris,omitempty" json:"request_uris,omitempty"`
+	ClientName               string   `bson:"client_name,omitempty" json:"client_name,omitempty"`
+	ClientURI                string   `bson:"client_uri,omitempty" json:"client_uri,omitempty"`
+	LogoURI                  string   `bson:"logo_uri,omitempty" json:"logo_uri,omitempty"`
+	Contacts                 []string `bson:"contacts,omitempty" json:"contacts,omitempty"`
+	TosURI                   string   `bson:"tos_uri,omitempty" json:"tos_uri,omitempty"`
+	PolicyURI                string   `bson:"policy_uri,omitempty" json:"policy_uri,omitempty"`
+	SoftwareID               string   `bson:"software_id,omitempty" json:"software_id,omitempty"`
+	SoftwareVersion          string   `bson:"software_version,omitempty" json:"software_version,omitempty"`
+	ApplicationType          string   `bson:"application_type,omitempty" json:"application_type,omitempty"` // "web" or "native"
+	SectorIdentifierURI      string   `bson:"sector_identifier_uri,omitempty" json:"sector_identifier_uri,omitempty"`
+	IDTokenSignedResponseAlg string   `bson:"id_token_signed_response_alg,omitempty" json:"id_token_signed_response_alg,omitempty"`
+	DefaultMaxAge            int      `bson:"default_max_age,omitempty" json:"default_max_age,omitempty"`
+	RequireAuthTime          bool     `bson:"require_auth_time,omitempty" json:"require_auth_time,omitempty"`
+	DefaultACRValues         []string `bson:"default_acr_values,omitempty" json:"default_acr_values,omitempty"`
+	InitiateLoginURI         string   `bson:"initiate_login_uri,omitempty" json:"initiate_login_uri,omitempty"`
+	RequestURIs              []string `bson:"request_uris,omitempty" json:"request_uris,omitempty"`
 
 	// RFC 7636 PKCE metadata
 	CodeChallengeMethod string `bson:"code_challenge_method,omitempty" json:"code_challenge_method,omitempty"`

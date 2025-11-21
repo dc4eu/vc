@@ -28,14 +28,14 @@ type GetAllCredentialOffersReply struct {
 func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialOffersReply, error) {
 	credentials := make(map[string]GetAllCredentialOffersCredential)
 
-	for key, credential := range c.cfg.CredentialConstructor {
-		if err := credential.LoadFile(ctx); err != nil {
+	for scope, credential := range c.cfg.CredentialConstructor {
+		if err := credential.LoadVCTMetadata(ctx, scope); err != nil {
 			continue
 		}
 
 		vctm := credential.VCTM
 
-		credentials[key] = GetAllCredentialOffersCredential{
+		credentials[scope] = GetAllCredentialOffersCredential{
 			Name:        vctm.Name,
 			Description: vctm.Description,
 		}
@@ -127,7 +127,7 @@ func (c *Client) GetVCTMFromScope(ctx context.Context, req *GetVCTMFromScopeRequ
 		return nil, err
 	}
 
-	if err := credentialConstructor.LoadFile(ctx); err != nil {
+	if err := credentialConstructor.LoadVCTMetadata(ctx, req.Scope); err != nil {
 		return nil, err
 	}
 

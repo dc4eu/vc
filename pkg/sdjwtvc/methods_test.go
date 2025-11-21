@@ -167,7 +167,7 @@ func TestMakeCredential(t *testing.T) {
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			client := New()
-			got, disclosures, err := client.MakeCredential(sha256.New(), tt.data, tt.vctm)
+			got, disclosures, err := client.MakeCredential(sha256.New(), tt.data, tt.vctm, 0)
 			require.NoError(t, err)
 
 			// Log the result for debugging
@@ -303,7 +303,7 @@ func TestSaltEntropy(t *testing.T) {
 	salts := make(map[string]bool)
 	for i := 0; i < 10; i++ {
 		dataCopy := map[string]any{"first_name": "John", "last_name": "Doe"}
-		_, disclosures, err := client.MakeCredential(sha256.New(), dataCopy, vctm)
+		_, disclosures, err := client.MakeCredential(sha256.New(), dataCopy, vctm, 0)
 		require.NoError(t, err)
 		require.Len(t, disclosures, 1)
 
@@ -344,7 +344,7 @@ func TestNoDuplicateDigests(t *testing.T) {
 	}
 
 	client := New()
-	_, disclosures, err := client.MakeCredential(sha256.New(), data, vctm)
+	_, disclosures, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 	require.NoError(t, err)
 	assert.Len(t, disclosures, 1)
 }
@@ -362,7 +362,7 @@ func TestRecursiveDisclosure(t *testing.T) {
 	}
 
 	client := New()
-	_, disclosures, err := client.MakeCredential(sha256.New(), data, mockVCTM_v6)
+	_, disclosures, err := client.MakeCredential(sha256.New(), data, mockVCTM_v6, 0)
 	require.NoError(t, err)
 
 	// Should have 2 disclosures: one for postal, one for address
@@ -482,7 +482,7 @@ func TestRecursiveDisclosureDeepNesting(t *testing.T) {
 			}
 
 			client := New()
-			credentialObj, disclosures, err := client.MakeCredential(sha256.New(), dataCopy, tc.vctm)
+			credentialObj, disclosures, err := client.MakeCredential(sha256.New(), dataCopy, tc.vctm, 0)
 			require.NoError(t, err)
 
 			// Should have 3 disclosures (contact, profile, user) regardless of VCTM claim order
@@ -622,7 +622,7 @@ func TestMakeCredential_AlternativeHashAlgorithms(t *testing.T) {
 			data := map[string]any{"first_name": "John"}
 
 			client := New()
-			got, _, err := client.MakeCredential(tt.hasher, data, mockVCTM_v1)
+			got, _, err := client.MakeCredential(tt.hasher, data, mockVCTM_v1, 0)
 			require.NoError(t, err)
 
 			assert.Equal(t, tt.expectedSdAlg, got["_sd_alg"])

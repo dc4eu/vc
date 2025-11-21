@@ -52,6 +52,7 @@ func (c *Client) BuildCredential(
 	if err := json.Unmarshal(documentData, &body); err != nil {
 		return "", fmt.Errorf("failed to unmarshal document data: %w", err)
 	}
+	fmt.Println("buildCredential", "body", body, "holderJWK", holderJWK)
 
 	// Add standard JWT claims
 	body["nbf"] = int64(time.Now().Unix())
@@ -83,18 +84,23 @@ func (c *Client) BuildCredential(
 		return "", fmt.Errorf("failed to encode VCTM: %w", err)
 	}
 	header["vctm"] = vctmEncoded
+	fmt.Println("buildCredential", "header", header)
 
 	// Create selective disclosures using the provided VCTM
-	token, disclosures, err := c.MakeCredentialWithOptions(sha256.New(), body, vctm, opts.DecoyDigests)
+	token, disclosures, err := c.MakeCredential(sha256.New(), body, vctm, opts.DecoyDigests)
 	if err != nil {
 		return "", fmt.Errorf("failed to create selective disclosures: %w", err)
 	}
+
+	fmt.Println("buildCredential", "token", token, "disclosures", disclosures)
 
 	// Sign the JWT
 	signedToken, err := Sign(header, token, signingMethod, privateKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to sign JWT: %w", err)
 	}
+
+	fmt.Println("buildCredential", "signedToken", signedToken)
 
 	// Combine signed JWT with disclosures
 	signedToken = Combine(signedToken, disclosures, "")
@@ -138,15 +144,11 @@ func getSigningMethodFromKey(privateKey any) (jwt.SigningMethod, string) {
 	return jwt.SigningMethodES256, "ES256"
 }
 
-// MakeCredential creates a SD-JWT credential from the provided data and VCTM.
+// MakeCredential creates a SD-JWT credential with optional decoy digests.
 // It implements recursive selective disclosure per oauth-selective-disclosure-jwt-22.
-func (c *Client) MakeCredential(hashMethod hash.Hash, data map[string]any, vctm *VCTM) (map[string]any, []string, error) {
-	return c.MakeCredentialWithOptions(hashMethod, data, vctm, 0)
-}
-
-// MakeCredentialWithOptions creates a SD-JWT credential with optional decoy digests
-// Per section 4.2.5: decoy digests obscure the actual number of claims
-func (c *Client) MakeCredentialWithOptions(hashMethod hash.Hash, data map[string]any, vctm *VCTM, decoyCount int) (map[string]any, []string, error) {
+// Per section 4.2.5: decoy digests obscure the actual number of claims.
+// Use decoyCount = 0 for no decoy digests (standard behavior).
+func (c *Client) MakeCredential(hashMethod hash.Hash, data map[string]any, vctm *VCTM, decoyCount int) (map[string]any, []string, error) {
 	disclosures := []string{}
 
 	// Set hash algorithm claim (section 4.1.1)
@@ -156,10 +158,14 @@ func (c *Client) MakeCredentialWithOptions(hashMethod hash.Hash, data map[string
 		return nil, nil, fmt.Errorf("unsupported hash algorithm: %w", err)
 	}
 	data["_sd_alg"] = algName
+	fmt.Println("MakeCredential", "data", data)
+
+	fmt.Println("MakeCredential", "vctm.Claims", vctm.Claims)
 
 	// Sort claims by depth (deepest first) to ensure child claims are processed
 	// before parent claims in recursive selective disclosure scenarios
 	sortedClaims := sortClaimsByDepth(vctm.Claims)
+	fmt.Println("MakeCredential", "sortedClaims", sortedClaims)
 
 	// Process claims recursively
 	for _, claim := range sortedClaims {
@@ -178,6 +184,8 @@ func (c *Client) MakeCredentialWithOptions(hashMethod hash.Hash, data map[string
 		}
 	}
 
+	fmt.Println("MakeCredential", "after processing claims", "data", data, "disclosures", disclosures)
+
 	// Add decoy digests if requested (section 4.2.5)
 	if decoyCount > 0 {
 		if err := c.addDecoyDigests(data, hashMethod, decoyCount); err != nil {
@@ -188,6 +196,8 @@ func (c *Client) MakeCredentialWithOptions(hashMethod hash.Hash, data map[string
 	// Shuffle all _sd arrays to hide original claim order (section 4.2.4.1)
 	// "The Issuer MUST hide the original order of the claims in the array"
 	shuffleSDArrays(data)
+
+	fmt.Println("MakeCredential", "after shuffle")
 
 	return data, disclosures, nil
 }

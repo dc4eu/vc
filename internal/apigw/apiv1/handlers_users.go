@@ -5,51 +5,13 @@ import (
 	"fmt"
 	"net/url"
 	"vc/pkg/model"
-	"vc/pkg/pid"
 	"vc/pkg/sdjwtvc"
 	"vc/pkg/vcclient"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
-	pid := pid.Document{
-		Identity: req.Identity,
-	}
-
-	documentData, err := pid.Marshal()
-	if err != nil {
-		c.log.Error(err, "failed to marshal document data")
-		return err
-	}
-
-	// build a new document
-	uploadRequest := &UploadRequest{
-		Meta: &model.MetaData{
-			AuthenticSource:           req.Meta.AuthenticSource,
-			DocumentVersion:           "1.0.0",
-			DocumentType:              req.Meta.DocumentType,
-			DocumentID:                fmt.Sprintf("generic.pid.%s", uuid.NewString()),
-			RealData:                  false,
-			Collect:                   &model.Collect{},
-			Revocation:                &model.Revocation{},
-			CredentialValidFrom:       0,
-			CredentialValidTo:         0,
-			DocumentDataValidationRef: "",
-		},
-		Identities: []model.Identity{*req.Identity},
-		DocumentDisplay: &model.DocumentDisplay{
-			Version: "1.0.0",
-			Type:    "",
-			DescriptionStructured: map[string]any{
-				"en": "Generic PID Issuer",
-			},
-		},
-		DocumentData:        documentData,
-		DocumentDataVersion: "1.0.0",
-	}
-
 	// store user and password in the database before document is saved - to check constraints that the user not already exists
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -59,17 +21,11 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		Username:        req.Username,
 		Password:        string(passwordHash),
 		Identity:        req.Identity,
-		DocumentType:    req.Meta.DocumentType,
+		VCT:             req.Meta.VCT,
 		AuthenticSource: req.Meta.AuthenticSource,
 	})
 	if err != nil {
 		c.log.Error(err, "failed to save user")
-		return err
-	}
-
-	// store document
-	if err := c.Upload(ctx, uploadRequest); err != nil {
-		c.log.Error(err, "failed to upload document")
 		return err
 	}
 
@@ -89,8 +45,8 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 
 	update := &model.AuthorizationContext{
 		Identity:        user.Identity,
-		DocumentType:    user.DocumentType,
 		AuthenticSource: user.AuthenticSource,
+		VCT:             user.VCT,
 	}
 	// Update the authorization with the user identity
 	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}, update); err != nil {
@@ -200,24 +156,41 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, err
 		}
 
-		docs := c.documentCache.Get(authorizationContext.SessionID).Value()
-		if docs == nil {
+		item := c.documentCache.Get(authorizationContext.SessionID)
+		if item == nil {
 			c.log.Error(nil, "no documents found in cache for session")
 			return nil, fmt.Errorf("no documents found for session %s", authorizationContext.SessionID)
 		}
 
+		docs := item.Value()
+		if len(docs) == 0 {
+			c.log.Error(nil, "no documents found in cache for session", "docs_len", len(docs))
+			return nil, fmt.Errorf("no documents found for session %s", authorizationContext.SessionID)
+		}
+
+		c.log.Debug("userLookup - retrieved docs from cache", "session_id", authorizationContext.SessionID, "num_docs", len(docs))
+
 		// TODO(masv): fix this monstrosity
 		authenticSource := ""
-		for _, doc := range docs {
+		for key, doc := range docs {
+			c.log.Debug("userLookup - examining doc", "key", key, "authentic_source", doc.Meta.AuthenticSource, "doc_nil", doc == nil)
 			authenticSource = doc.Meta.AuthenticSource
 			break
 		}
+		c.log.Debug("userLookup", "authenticSource", authenticSource, "docs", docs)
 
 		doc, ok := docs[authenticSource]
 		if !ok {
-			c.log.Error(nil, "no document found for authentic source")
-			return nil, fmt.Errorf("no document found for authentic source %s", authorizationContext.AuthenticSource)
+			c.log.Error(nil, "no document found for authentic source", "authenticSource", authenticSource, "available_keys", func() []string {
+				keys := make([]string, 0, len(docs))
+				for k := range docs {
+					keys = append(keys, k)
+				}
+				return keys
+			}())
+			return nil, fmt.Errorf("no document found for authentic source %s", authenticSource)
 		}
+		c.log.Debug("userLookup", "doc", doc)
 
 		jsonPaths, err := req.VCTM.ClaimJSONPath()
 		if err != nil {
@@ -225,11 +198,15 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, err
 		}
 
+		c.log.Debug("userLookup", "doc", doc, "jsonPath", jsonPaths)
+
 		claimValues, err := sdjwtvc.ExtractClaimsByJSONPath(doc.DocumentData, jsonPaths.Displayable)
 		if err != nil {
-			c.log.Error(err, "failed to extract claim values from document data")
-			return nil, fmt.Errorf("failed to extract claim values from document data")
+			c.log.Error(err, "failed to extract claim values from document data", "json_paths", jsonPaths.Displayable, "document_data", doc.DocumentData)
+			return nil, fmt.Errorf("failed to extract claim values from document data: %w", err)
 		}
+
+		c.log.Debug("extracted claim values", "extracted_count", len(claimValues), "requested_count", len(jsonPaths.Displayable), "claims", claimValues)
 
 		for _, claim := range req.VCTM.Claims {
 			value, ok := claimValues[claim.SVGID].(string)
@@ -249,6 +226,8 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 		return nil, fmt.Errorf("unsupported auth method for user lookup: %s", req.AuthMethod)
 	}
 
+	c.log.Debug("lookupUser", "svgTemplateClaims", svgTemplateClaims)
+
 	if err := c.db.VCAuthorizationContextColl.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
 		c.log.Error(err, "failed to consent for user", "username", req.Username)
 		return nil, fmt.Errorf("failed to consent for user %s: %w", req.Username, err)
@@ -258,6 +237,8 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 		SVGTemplateClaims: svgTemplateClaims,
 		RedirectURL:       redirectURL.String(),
 	}
+
+	c.log.Debug("userlookup", "reply", reply)
 
 	return reply, nil
 }

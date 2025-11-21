@@ -32,8 +32,8 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 
 // CreateCredentialRequest is the request for Credential
 type CreateCredentialRequest struct {
-	DocumentType string            `json:"document_type" validate:"required"`
 	DocumentData []byte            `json:"document_data" validate:"required"`
+	Scope        string            `json:"scope" validate:"required"`
 	JWK          *apiv1_issuer.Jwk `json:"jwk" validate:"required"`
 }
 
@@ -48,23 +48,24 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 	ctx, span := c.tracer.Start(ctx, "apiv1:CreateCredential")
 	defer span.End()
 
-	c.log.Debug("create credential", "document_type", req.DocumentType)
-
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		c.log.Debug("Validation", "err", err)
 		return nil, err
 	}
 
 	// Get credential constructor from config based on credential type
-	credentialConstructor := c.cfg.GetCredentialConstructorByType(req.DocumentType)
+	credentialConstructor := c.cfg.GetCredentialConstructor(req.Scope)
 	if credentialConstructor == nil {
-		return nil, fmt.Errorf("unsupported credential type: %s", req.DocumentType)
+		return nil, fmt.Errorf("unsupported scope: %s", req.Scope)
 	}
 
-	// VCTM is already in sdjwtv4 format
+	// VCTM is already in sdjwtvc format
 	vctm := credentialConstructor.VCTM
+	if vctm == nil {
+		return nil, fmt.Errorf("VCTM not configured for scope: %s", req.Scope)
+	}
 
-	// Build SD-JWT using sdjwtv4 package
+	// Build SD-JWT using sdjwtvc package
 	sdClient := sdjwtvc.New()
 	token, err := sdClient.BuildCredential(
 		c.cfg.Issuer.JWTAttribute.Issuer,
@@ -77,7 +78,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		nil, // Use default options
 	)
 	if err != nil {
-		c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
+		c.log.Error(err, "failed to create sdjwt", "scope", req.Scope)
 		return nil, err
 	}
 
@@ -97,7 +98,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 // RevokeRequest is the request for GenericRevoke
 type RevokeRequest struct {
 	AuthenticSource string `json:"authentic_source"`
-	DocumentType    string `json:"document_type"`
+	VCT             string `json:"vct"`
 	DocumentID      string `json:"document_id"`
 	RevocationID    string `json:"revocation_id"`
 }

@@ -10,6 +10,12 @@
       "name": "ARF 1.5 PID SD-JWT VC",
       "description": "Person Identification Data (PID) SD-JWT VC. Adheres to PID Rulebook ARF 1.5 (urn:eu.europa.ec.eudi:pid:1).",
       "rendering": {
+         "simple": {
+          "logo": {
+            "uri": "https://demo-issuer.wwwallet.org/public/creds/pid/person-identification-data-svg-example-01.svg",
+            "uri#integrity": "sha256-037rNwIiS/qeKc16yxy3xJlAYYFGul1wJAcGjXjDVLw="
+          }
+        },
         "svg_templates": [
           {
             "uri": "https://demo-issuer.wwwallet.org/public/creds/pid/person-identification-data-svg-example-01.svg",
@@ -55,7 +61,7 @@
     },
     {
       "path": [
-        "birth_date"
+        "birthdate"
       ],
       "sd": "always",
       "svg_id": "birth_date",
@@ -112,7 +118,14 @@
         "picture"
       ],
       "sd": "always",
-      "svg_id": "picture"
+      "svg_id": "picture",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Picture",
+          "description": "Picture of the individual."
+        }
+      ]
     },
     {
       "path": [
@@ -446,7 +459,14 @@
       "path": [
         "trust_anchor"
       ],
-      "sd": "never"
+      "sd": "never",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Trust anchor",
+          "description": "The trust anchor used to verify the document."
+        }
+      ]
     }
   ],
   "schema_uri": "https://demo-issuer.wwwallet.org/public/creds/pid/person-identification-data-arf-15-schema-example-01.json",

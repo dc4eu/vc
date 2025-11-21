@@ -321,7 +321,9 @@ vscode:
 	sudo apt-get update && sudo apt-get install -y \
 		protobuf-compiler \
 		netcat-openbsd \
-		plantuml
+		plantuml \
+		docker.io \
+		docker-compose
 	$(info Install go packages)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \

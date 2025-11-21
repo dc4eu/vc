@@ -20,13 +20,14 @@ import (
 )
 
 // endpointSAMLMetadata returns the SAML Service Provider metadata XML
-// @Summary Get SAML SP Metadata
-// @Description Returns the SAML Service Provider metadata XML for IdP configuration
-// @Tags SAML
-// @Produce xml
-// @Success 200 {string} string "SAML metadata XML"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /saml/metadata [get]
+//
+//	@Summary		Get SAML SP Metadata
+//	@Description	Returns the SAML Service Provider metadata XML for IdP configuration
+//	@Tags			SAML
+//	@Produce		xml
+//	@Success		200	{string}	string					"SAML metadata XML"
+//	@Failure		500	{object}	map[string]interface{}	"Internal server error"
+//	@Router			/saml/metadata [get]
 func (s *Service) endpointSAMLMetadata(ctx context.Context, c *gin.Context) (interface{}, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointSAMLMetadata")
 	defer span.End()
@@ -61,16 +62,17 @@ type SAMLInitiateResponse struct {
 }
 
 // endpointSAMLInitiate initiates SAML authentication flow
-// @Summary Initiate SAML Authentication
-// @Description Initiates SAML authentication by creating an AuthnRequest and returning the IdP redirect URL
-// @Tags SAML
-// @Accept json
-// @Produce json
-// @Param request body SAMLInitiateRequest true "SAML initiate request"
-// @Success 200 {object} SAMLInitiateResponse
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /saml/initiate [post]
+//
+//	@Summary		Initiate SAML Authentication
+//	@Description	Initiates SAML authentication by creating an AuthnRequest and returning the IdP redirect URL
+//	@Tags			SAML
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		SAMLInitiateRequest	true	"SAML initiate request"
+//	@Success		200		{object}	SAMLInitiateResponse
+//	@Failure		400		{object}	map[string]interface{}	"Bad request"
+//	@Failure		500		{object}	map[string]interface{}	"Internal server error"
+//	@Router			/saml/initiate [post]
 func (s *Service) endpointSAMLInitiate(ctx context.Context, c *gin.Context) (interface{}, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointSAMLInitiate")
 	defer span.End()
@@ -100,17 +102,18 @@ func (s *Service) endpointSAMLInitiate(ctx context.Context, c *gin.Context) (int
 
 // endpointSAMLACS handles the SAML Assertion Consumer Service (ACS) endpoint
 // This is where the IdP POSTs the SAML response after authentication
-// @Summary SAML Assertion Consumer Service
-// @Description Receives and processes SAML assertions from the IdP
-// @Tags SAML
-// @Accept application/x-www-form-urlencoded
-// @Produce json
-// @Param SAMLResponse formData string true "Base64-encoded SAML Response"
-// @Param RelayState formData string false "Relay state from initial request"
-// @Success 200 {object} map[string]interface{} "Success with credential claims or offer"
-// @Failure 400 {object} map[string]interface{} "Bad request"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /saml/acs [post]
+//
+//	@Summary		SAML Assertion Consumer Service
+//	@Description	Receives and processes SAML assertions from the IdP
+//	@Tags			SAML
+//	@Accept			application/x-www-form-urlencoded
+//	@Produce		json
+//	@Param			SAMLResponse	formData	string					true	"Base64-encoded SAML Response"
+//	@Param			RelayState		formData	string					false	"Relay state from initial request"
+//	@Success		200				{object}	map[string]interface{}	"Success with credential claims or offer"
+//	@Failure		400				{object}	map[string]interface{}	"Bad request"
+//	@Failure		500				{object}	map[string]interface{}	"Internal server error"
+//	@Router			/saml/acs [post]
 func (s *Service) endpointSAMLACS(ctx context.Context, c *gin.Context) (interface{}, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointSAMLACS")
 	defer span.End()

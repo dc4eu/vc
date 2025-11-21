@@ -52,7 +52,7 @@ func (c *Client) User(ctx context.Context) (*LoggedinReply, error) {
 type DocumentListRequest struct {
 	AuthenticSource string          `json:"authentic_source"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
-	DocumentType    string          `json:"document_type"`
+	VCT             string          `json:"vct"`
 	ValidFrom       int64           `json:"valid_from"`
 	ValidTo         int64           `json:"valid_to"`
 }
@@ -65,7 +65,7 @@ func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*a
 	return reply, nil
 }
 
-func (c *Client) Upload(ctx context.Context, req *apiv1_apigw.UploadRequest) (any, error) {
+func (c *Client) Upload(ctx context.Context, req *vcclient.UploadRequest) (any, error) {
 	reply, err := c.apigwClient.Upload(req)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (c *Client) Upload(ctx context.Context, req *apiv1_apigw.UploadRequest) (an
 type CredentialRequest struct {
 	AuthenticSource string          `json:"authentic_source" validate:"required"`
 	Identity        *model.Identity `json:"identity" validate:"required"`
-	DocumentType    string          `json:"document_type" validate:"required"`
+	VCT             string          `json:"vct" validate:"required"`
 	CredentialType  string          `json:"credential_type" validate:"required"`
 	CollectID       string          `json:"collect_id" validate:"required"`
 	JWK             map[string]any  `json:"jwk"`
@@ -103,7 +103,7 @@ func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (any, e
 // GetDocumentRequest is the request for the GetDocument endpoint
 type GetDocumentRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`
-	DocumentType    string `json:"document_type" validate:"required"`
+	VCT             string `json:"vct" validate:"required"`
 	DocumentID      string `json:"document_id" validate:"required"`
 }
 
@@ -117,7 +117,7 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (any,
 
 type NotificationRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`
-	DocumentType    string `json:"document_type" validate:"required"`
+	VCT             string `json:"vct" validate:"required"`
 	DocumentID      string `json:"document_id" validate:"required"`
 }
 
@@ -128,13 +128,6 @@ func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (an
 	}
 	return reply, nil
 }
-
-//type MockNextRequest struct {
-//	DocumentType            string `json:"document_type" validate:"required"`
-//	AuthenticSource         string `json:"authentic_source" validate:"required"`
-//	AuthenticSourcePersonId string `json:"authentic_source_person_id" validate:"required"`
-//	IdentitySchemaName      string `json:"identity_schema_name" validate:"required"`
-//}
 
 func (c *Client) MockNext(ctx context.Context, req *apiv1_mockas.MockNextRequest) (any, error) {
 	if c.cfg.Common.Kafka.Enabled {

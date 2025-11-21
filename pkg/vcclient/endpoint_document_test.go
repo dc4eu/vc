@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/socialsecurity"
 
@@ -56,9 +57,15 @@ func mockClient(ctx context.Context, t *testing.T, url string) *Client {
 	_, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
+	log, err := logger.New("test", "", false)
+	if err != nil {
+		t.FailNow()
+		return nil
+	}
+
 	client, err := New(&Config{
 		URL: url,
-	})
+	}, log)
 	if err != nil {
 		t.FailNow()
 		return nil
@@ -78,14 +85,14 @@ func TestGet(t *testing.T) {
 			name: "success",
 			query: &DocumentGetQuery{
 				AuthenticSource: "test_authentic_source",
-				DocumentType:    "test_document_type",
+				VCT:             model.CredentialTypeUrnEudiEhic1,
 				DocumentID:      "test_document_id",
 			},
 			expected: &model.Document{
 				Meta: &model.MetaData{
 					AuthenticSource: "SUNET",
 					DocumentVersion: "1.0.0",
-					DocumentType:    "EHIC",
+					VCT:             model.CredentialTypeUrnEudiEhic1,
 					DocumentID:      "test_document_id",
 					RealData:        false,
 					Collect: &model.Collect{
@@ -97,7 +104,7 @@ func TestGet(t *testing.T) {
 						Revoked: false,
 						Reference: model.RevocationReference{
 							AuthenticSource: "SUNET",
-							DocumentType:    "EHIC",
+							VCT:             model.CredentialTypeUrnEudiEhic1,
 							DocumentID:      "test_document_id",
 						},
 						RevokedAt: 0,

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 	"vc/pkg/model"
+	"vc/pkg/openid4vp"
 	"vc/pkg/sdjwtvc"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -34,9 +35,13 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", err
 	}
 
-	res := c.requestObjectCache.Get(authorizationContext.RequestObjectID)
+	requestObject, found := c.openid4vp.RequestObjectCache.Get(authorizationContext.RequestObjectID)
+	if !found {
+		c.log.Error(nil, "request object not found in cache", "requestObjectID", authorizationContext.RequestObjectID)
+		return "", errors.New("request object not found")
+	}
 
-	signedJWT, err := res.Value().Sign(jwt.SigningMethodRS256, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
+	signedJWT, err := requestObject.Sign(jwt.SigningMethodRS256, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
 	if err != nil {
 		c.log.Error(err, "failed to sign authorization request")
 		return "", err
@@ -84,50 +89,88 @@ type VerificationDirectPostResponse struct {
 func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDirectPostRequest) (*VerificationDirectPostResponse, error) {
 	c.log.Debug("Verification direct-post")
 
+	// Extract KID from JWE header
 	kid, err := req.GetKID()
 	if err != nil {
 		c.log.Error(err, "failed to get KID from request")
 		return nil, err
 	}
 
-	privateEphemeralJWK := c.ephemeralEncryptionKeyCache.Get(kid).Value()
-	if privateEphemeralJWK == nil {
+	// Get ephemeral private key from cache
+	privateEphemeralJWK, found := c.openid4vp.EphemeralKeyCache.Get(kid)
+	if !found {
 		c.log.Debug("No ephemeral key found in cache", "kid", kid)
 		return nil, errors.New("ephemeral key not found in cache")
 	}
 
 	c.log.Debug("Found ephemeral key in cache", "kid", kid)
 
+	// Decrypt JWE response
 	decryptedJWE, err := jwe.Decrypt([]byte(req.Response), jwe.WithKey(jwa.ECDH_ES(), privateEphemeralJWK))
 	if err != nil {
 		c.log.Error(err, "failed to decrypt JWE")
 		return nil, err
 	}
 
-	type decryptedResponse struct {
-		VPToken map[string]string `json:"vp_token"`
-		State   string            `json:"state"`
-	}
-
-	var dr decryptedResponse
-
-	if err := json.Unmarshal(decryptedJWE, &dr); err != nil {
+	// Parse response parameters using openid4vp
+	responseParams := &openid4vp.ResponseParameters{}
+	if err := json.Unmarshal(decryptedJWE, &responseParams); err != nil {
 		c.log.Error(err, "failed to unmarshal decrypted JWE")
 		return nil, err
 	}
 
-	auth, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{State: dr.State})
+	// Validate response parameters
+	if err := responseParams.Validate(); err != nil {
+		c.log.Error(err, "response parameters validation failed")
+		return nil, fmt.Errorf("invalid response: %w", err)
+	}
+
+	// Get authorization context by state
+	auth, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{State: responseParams.State})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err
 	}
 
-	vpToken, ok := dr.VPToken[auth.Scope]
-	if !ok {
-		c.log.Error(err, "vp_token does not contain expected scope", "expected_scope", auth.Scope)
-		return nil, errors.New("vp_token does not contain expected scope: " + auth.Scope)
+	// Extract VP Token for the requested scope
+	// Handle both string VP Token and map[string]string format
+	var vpToken string
+	if responseParams.VPToken != "" {
+		vpToken = responseParams.VPToken
+	} else {
+		// Legacy: Try to parse as map for backward compatibility
+		type legacyResponse struct {
+			VPToken map[string]string `json:"vp_token"`
+		}
+		var legacy legacyResponse
+		if err := json.Unmarshal(decryptedJWE, &legacy); err == nil {
+			if token, ok := legacy.VPToken[auth.Scope]; ok {
+				vpToken = token
+			}
+		}
 	}
 
+	if vpToken == "" {
+		c.log.Error(nil, "vp_token is empty or missing scope", "scope", auth.Scope)
+		return nil, errors.New("vp_token is required")
+	}
+
+	// Validate VP Token using VPTokenValidator
+	validator := &openid4vp.VPTokenValidator{
+		Nonce:           auth.Nonce,
+		ClientID:        auth.ClientID,
+		VerifySignature: true,
+		CheckRevocation: false,
+	}
+
+	if err := validator.Validate(vpToken); err != nil {
+		c.log.Error(err, "VP Token validation failed")
+		return nil, fmt.Errorf("VP Token validation failed: %w", err)
+	}
+
+	c.log.Debug("VP Token validated successfully")
+
+	// Parse SD-JWT credential
 	header, body, signature, selectiveDisclosure, keyBinding, err := sdjwtvc.Token(vpToken).Split()
 	if err != nil {
 		c.log.Error(err, "failed to split sd-jwt")
@@ -140,15 +183,17 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 	c.log.Debug("SD-JWT parts", "selectiveDisclosure", selectiveDisclosure)
 	c.log.Debug("SD-JWT parts", "keyBinding", keyBinding)
 
-	c.log.Debug("verification", "vp_token", vpToken)
-
+	// Parse credential claims
 	parsed, err := sdjwtvc.Token(vpToken).Parse()
 	if err != nil {
 		c.log.Error(err, "failed to parse sd-jwt credential")
 		return nil, err
 	}
+
+	// Generate response code
 	responseCode := uuid.NewString()
 
+	// Cache validated credential
 	c.credentialCache.Set(responseCode, []sdjwtvc.CredentialCache{
 		{
 			Credential: parsed.Claims,
@@ -156,7 +201,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		},
 	}, ttlcache.DefaultTTL)
 
-	// verify the vp_token
+	c.log.Debug("Credential cached", "response_code", responseCode)
 
 	reply := &VerificationDirectPostResponse{
 		RedirectURI: fmt.Sprintf(c.cfg.Verifier.ExternalServerURL+"/verification/callback?response_code=%s", responseCode),

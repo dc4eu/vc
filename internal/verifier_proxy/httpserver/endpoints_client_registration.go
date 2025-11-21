@@ -4,8 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"vc/internal/verifier_proxy/apiv1"
+
+	"github.com/gin-gonic/gin"
 )
 
 // endpointRegisterClient handles OAuth 2.0 Dynamic Client Registration (RFC 7591)

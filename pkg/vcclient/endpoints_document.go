@@ -18,7 +18,7 @@ type documentHandler struct {
 // DocumentGetQuery is the query for GetDocument
 type DocumentGetQuery struct {
 	AuthenticSource string `json:"authentic_source"`
-	DocumentType    string `json:"document_type"`
+	VCT             string `json:"vct"`
 	DocumentID      string `json:"document_id"`
 }
 
@@ -36,7 +36,7 @@ func (s *documentHandler) Get(ctx context.Context, query *DocumentGetQuery) (*mo
 type DocumentListQuery struct {
 	AuthenticSource string          `json:"authentic_source"`
 	Identity        *model.Identity `json:"identity"`
-	DocumentType    string          `json:"document_type"`
+	VCT             string          `json:"vct"`
 	ValidTo         int64           `json:"valid_to"`
 	ValidFrom       int64           `json:"valid_from"`
 }
@@ -56,7 +56,7 @@ func (s *documentHandler) List(ctx context.Context, query *DocumentListQuery) ([
 // DocumentCollectIDQuery is the query for CollectID
 type DocumentCollectIDQuery struct {
 	AuthenticSource string          `json:"authentic_source"`
-	DocumentType    string          `json:"document_type"`
+	VCT             string          `json:"vct"`
 	CollectID       string          `json:"collect_id"`
 	Identity        *model.Identity `json:"identity"`
 }

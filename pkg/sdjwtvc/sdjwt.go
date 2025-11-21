@@ -1,6 +1,6 @@
 package sdjwtvc
 
-type Client struct {}
+type Client struct{}
 
 func New() *Client {
 	return &Client{}

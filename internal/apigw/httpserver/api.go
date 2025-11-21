@@ -15,7 +15,7 @@ import (
 // Apiv1 interface
 type Apiv1 interface {
 	// datastore endpoints
-	Upload(ctx context.Context, req *apiv1.UploadRequest) error
+	Upload(ctx context.Context, req *vcclient.UploadRequest) error
 	Notification(ctx context.Context, req *apiv1.NotificationRequest) (*apiv1.NotificationReply, error)
 	AddDocumentIdentity(ctx context.Context, req *apiv1.AddDocumentIdentityRequest) error
 	DeleteDocumentIdentity(ctx context.Context, req *apiv1.DeleteDocumentIdentityRequest) error

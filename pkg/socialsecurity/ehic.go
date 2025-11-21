@@ -15,8 +15,6 @@ type EHICDocument struct {
 	StartingDate                 string           `json:"starting_date" bson:"startingDate" validate:"required"`
 }
 
-
-
 // Marshal marshals the document to a map
 func (d *EHICDocument) Marshal() (map[string]any, error) {
 	data, err := json.Marshal(d)

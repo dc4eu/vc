@@ -7,6 +7,7 @@ import (
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
+	"vc/pkg/vcclient"
 
 	"go.opentelemetry.io/otel/codes"
 
@@ -17,7 +18,7 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUpload")
 	defer span.End()
 
-	request := &apiv1.UploadRequest{}
+	request := &vcclient.UploadRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

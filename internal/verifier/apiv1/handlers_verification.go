@@ -113,11 +113,23 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 	}
 
 	// Parse response parameters using openid4vp
-	responseParams := &openid4vp.ResponseParameters{}
-	if err := json.Unmarshal(decryptedJWE, &responseParams); err != nil {
+	vpResponse := openid4vp.VPResponse{}
+	if err := json.Unmarshal(decryptedJWE, &vpResponse); err != nil {
 		c.log.Error(err, "failed to unmarshal decrypted JWE")
 		return nil, err
 	}
+
+	responseParams := &openid4vp.ResponseParameters{}
+	responseParams.State = vpResponse.State
+
+	// Get authorization context by state
+	authCtx, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{State: responseParams.State})
+	if err != nil {
+		c.log.Error(err, "failed to get authorization context")
+		return nil, err
+	}
+
+	responseParams.VPToken = vpResponse.VPToken[authCtx.Scope]
 
 	// Validate response parameters
 	if err := responseParams.Validate(); err != nil {
@@ -125,45 +137,15 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, fmt.Errorf("invalid response: %w", err)
 	}
 
-	// Get authorization context by state
-	auth, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{State: responseParams.State})
-	if err != nil {
-		c.log.Error(err, "failed to get authorization context")
-		return nil, err
-	}
-
-	// Extract VP Token for the requested scope
-	// Handle both string VP Token and map[string]string format
-	var vpToken string
-	if responseParams.VPToken != "" {
-		vpToken = responseParams.VPToken
-	} else {
-		// Legacy: Try to parse as map for backward compatibility
-		type legacyResponse struct {
-			VPToken map[string]string `json:"vp_token"`
-		}
-		var legacy legacyResponse
-		if err := json.Unmarshal(decryptedJWE, &legacy); err == nil {
-			if token, ok := legacy.VPToken[auth.Scope]; ok {
-				vpToken = token
-			}
-		}
-	}
-
-	if vpToken == "" {
-		c.log.Error(nil, "vp_token is empty or missing scope", "scope", auth.Scope)
-		return nil, errors.New("vp_token is required")
-	}
-
 	// Validate VP Token using VPTokenValidator
 	validator := &openid4vp.VPTokenValidator{
-		Nonce:           auth.Nonce,
-		ClientID:        auth.ClientID,
+		Nonce:           authCtx.Nonce,
+		ClientID:        authCtx.ClientID,
 		VerifySignature: true,
 		CheckRevocation: false,
 	}
 
-	if err := validator.Validate(vpToken); err != nil {
+	if err := validator.Validate(responseParams.VPToken); err != nil {
 		c.log.Error(err, "VP Token validation failed")
 		return nil, fmt.Errorf("VP Token validation failed: %w", err)
 	}
@@ -171,7 +153,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 	c.log.Debug("VP Token validated successfully")
 
 	// Parse SD-JWT credential
-	header, body, signature, selectiveDisclosure, keyBinding, err := sdjwtvc.Token(vpToken).Split()
+	header, body, signature, selectiveDisclosure, keyBinding, err := sdjwtvc.Token(responseParams.VPToken).Split()
 	if err != nil {
 		c.log.Error(err, "failed to split sd-jwt")
 		return nil, err
@@ -184,7 +166,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 	c.log.Debug("SD-JWT parts", "keyBinding", keyBinding)
 
 	// Parse credential claims
-	parsed, err := sdjwtvc.Token(vpToken).Parse()
+	parsed, err := sdjwtvc.Token(responseParams.VPToken).Parse()
 	if err != nil {
 		c.log.Error(err, "failed to parse sd-jwt credential")
 		return nil, err

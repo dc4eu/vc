@@ -1,0 +1,511 @@
+package sdjwtvc
+
+import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rsa"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"hash"
+	"math/big"
+	"strings"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+// VerificationResult contains the result of SD-JWT verification
+type VerificationResult struct {
+	Valid            bool           // Overall validity
+	Header           map[string]any // JWT header
+	Claims           map[string]any // All claims (including disclosed)
+	DisclosedClaims  map[string]any // Only the selectively disclosed claims
+	Disclosures      []Disclosure   // Parsed disclosures
+	VCTM             *VCTM          // Verifiable Credential Type Metadata
+	KeyBindingValid  bool           // Whether KB-JWT is valid (if present)
+	KeyBindingClaims map[string]any // KB-JWT claims (if present)
+	Errors           []error        // Any validation errors
+}
+
+// Disclosure represents a parsed disclosure
+type Disclosure struct {
+	Salt  string // Random salt for privacy
+	Claim string // Claim name
+	Value any    // Claim value
+	Raw   string // Raw disclosure string
+	Hash  string // Base64url-encoded hash
+}
+
+// VerificationOptions contains options for verification
+type VerificationOptions struct {
+	// RequireKeyBinding: whether KB-JWT must be present
+	RequireKeyBinding bool
+	// ExpectedNonce: nonce to validate in KB-JWT (required if KB-JWT present)
+	ExpectedNonce string
+	// ExpectedAudience: audience to validate in KB-JWT (required if KB-JWT present)
+	ExpectedAudience string
+	// AllowedClockSkew: allowed time skew for exp/iat validation (default: 5 minutes)
+	AllowedClockSkew time.Duration
+	// ValidateTime: whether to validate exp/iat claims (default: true)
+	ValidateTime bool
+}
+
+// ParseAndVerify parses and verifies an SD-JWT credential
+// Per draft-13 Section 5 (Validation) and draft-22 Section 6 (Verification)
+// Parameters:
+//   - sdJWT: the SD-JWT string (format: <Issuer-signed JWT>~<Disclosure 1>~...~<Disclosure N>~[<KB-JWT>])
+//   - publicKey: issuer's public key for signature verification
+//   - opts: verification options (can be nil for defaults)
+func (c *Client) ParseAndVerify(sdJWT string, publicKey any, opts *VerificationOptions) (*VerificationResult, error) {
+	result := &VerificationResult{
+		Valid:  false,
+		Errors: []error{},
+	}
+
+	if opts == nil {
+		opts = &VerificationOptions{
+			ValidateTime:     true,
+			AllowedClockSkew: 5 * time.Minute,
+		}
+	}
+
+	// Step 1: Split the SD-JWT into components (§6.1)
+	parts := strings.Split(sdJWT, "~")
+	if len(parts) < 1 {
+		err := fmt.Errorf("invalid SD-JWT format: must contain at least issuer-signed JWT")
+		result.Errors = append(result.Errors, err)
+		return result, err
+	}
+
+	issuerJWT := parts[0]
+	var kbJWT string
+	var disclosureParts []string
+
+	// Check if last part is a KB-JWT (non-empty after last ~)
+	if len(parts) > 1 {
+		lastPart := parts[len(parts)-1]
+		if lastPart != "" && strings.Count(lastPart, ".") == 2 {
+			// Last part looks like a JWT (has 2 dots) - it's a KB-JWT
+			kbJWT = lastPart
+			disclosureParts = parts[1 : len(parts)-1]
+		} else {
+			// No KB-JWT, all parts after first are disclosures
+			disclosureParts = parts[1:]
+		}
+	}
+
+	// Step 2: Verify issuer-signed JWT signature (§6.2)
+	token, err := c.verifyJWTSignature(issuerJWT, publicKey)
+	if err != nil {
+		result.Errors = append(result.Errors, fmt.Errorf("signature verification failed: %w", err))
+		return result, err
+	}
+
+	// Extract header
+	result.Header = token.Header
+
+	// Extract claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		err := fmt.Errorf("invalid claims type")
+		result.Errors = append(result.Errors, err)
+		return result, err
+	}
+	result.Claims = claims
+
+	// Step 3: Validate SD-JWT VC structure (draft-13 §3.2.2)
+	if err := c.validateSDJWTVCStructure(result.Header, claims, opts); err != nil {
+		result.Errors = append(result.Errors, err)
+		return result, err
+	}
+
+	// Step 4: Extract VCTM from header (draft-13 §6)
+	// VCTM decoding is optional and errors are non-fatal (don't add to Errors)
+	if vctmEncoded, ok := result.Header["vctm"]; ok {
+		vctm, _ := decodeVCTM(vctmEncoded)
+		if vctm != nil {
+			result.VCTM = vctm
+		}
+	}
+
+	// Step 5: Parse and validate disclosures (§6.3)
+	sdAlg, _ := claims["_sd_alg"].(string)
+	if sdAlg == "" {
+		sdAlg = "sha-256" // Default per spec
+	}
+
+	hashMethod, err := getHashFromAlgorithm(sdAlg)
+	if err != nil {
+		result.Errors = append(result.Errors, fmt.Errorf("unsupported hash algorithm %s: %w", sdAlg, err))
+		return result, err
+	}
+
+	result.DisclosedClaims = make(map[string]any)
+	for _, disclosurePart := range disclosureParts {
+		if disclosurePart == "" {
+			continue // Empty disclosure (trailing ~)
+		}
+
+		disclosure, err := c.parseDisclosure(disclosurePart, hashMethod)
+		if err != nil {
+			result.Errors = append(result.Errors, fmt.Errorf("failed to parse disclosure: %w", err))
+			continue
+		}
+
+		result.Disclosures = append(result.Disclosures, *disclosure)
+		result.DisclosedClaims[disclosure.Claim] = disclosure.Value
+
+		// Verify disclosure hash is in _sd array
+		if err := c.verifyDisclosureHash(claims, disclosure.Hash); err != nil {
+			result.Errors = append(result.Errors, err)
+		}
+	}
+
+	// Step 6: Reconstruct full claims with disclosed values
+	if err := c.reconstructClaims(result.Claims, result.Disclosures); err != nil {
+		result.Errors = append(result.Errors, fmt.Errorf("failed to reconstruct claims: %w", err))
+	}
+
+	// Step 7: Verify Key Binding JWT if present (§4.3)
+	if kbJWT != "" {
+		kbResult, err := c.verifyKeyBindingJWT(kbJWT, issuerJWT, disclosureParts, claims, opts, hashMethod)
+		if err != nil {
+			kbErr := fmt.Errorf("KB-JWT verification failed: %w", err)
+			result.Errors = append(result.Errors, kbErr)
+			// KB-JWT verification failure is fatal
+			return result, kbErr
+		}
+		result.KeyBindingValid = true
+		result.KeyBindingClaims = kbResult
+	} else if opts.RequireKeyBinding {
+		err := fmt.Errorf("key binding JWT required but not present")
+		result.Errors = append(result.Errors, err)
+		return result, err
+	}
+
+	// Overall validity: no errors
+	result.Valid = len(result.Errors) == 0
+	return result, nil
+}
+
+// verifyJWTSignature verifies the signature of a JWT
+func (c *Client) verifyJWTSignature(tokenString string, publicKey any) (*jwt.Token, error) {
+	// Parse without validation first to avoid time-based errors
+	parser := jwt.NewParser(jwt.WithoutClaimsValidation())
+	token, err := parser.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		// Verify algorithm matches key type
+		switch publicKey.(type) {
+		case *ecdsa.PublicKey:
+			if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v (expected ECDSA)", token.Header["alg"])
+			}
+		case *rsa.PublicKey:
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v (expected RSA)", token.Header["alg"])
+			}
+		default:
+			return nil, fmt.Errorf("unsupported key type: %T", publicKey)
+		}
+		return publicKey, nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("signature verification failed: %w", err)
+	}
+
+	return token, nil
+}
+
+// validateSDJWTVCStructure validates SD-JWT VC required structure per draft-13 §3.2.2
+func (c *Client) validateSDJWTVCStructure(header map[string]any, claims jwt.MapClaims, opts *VerificationOptions) error {
+	// Validate typ header (§3.2.1)
+	typ, _ := header["typ"].(string)
+	if typ != "dc+sd-jwt" && typ != "vc+sd-jwt" {
+		return fmt.Errorf("invalid typ header: %s (must be dc+sd-jwt or vc+sd-jwt)", typ)
+	}
+
+	// Validate required claims (§3.2.2)
+	vct, ok := claims["vct"].(string)
+	if !ok || vct == "" {
+		return fmt.Errorf("missing required claim: vct")
+	}
+
+	// Validate time claims if enabled
+	if opts.ValidateTime {
+		now := time.Now()
+
+		// Check exp (expiration time)
+		if expFloat, ok := claims["exp"].(float64); ok {
+			exp := time.Unix(int64(expFloat), 0)
+			if now.After(exp.Add(opts.AllowedClockSkew)) {
+				return fmt.Errorf("credential expired at %s", exp)
+			}
+		}
+
+		// Check iat (issued at time) - shouldn't be in the future
+		if iatFloat, ok := claims["iat"].(float64); ok {
+			iat := time.Unix(int64(iatFloat), 0)
+			if now.Before(iat.Add(-opts.AllowedClockSkew)) {
+				return fmt.Errorf("credential issued in the future: %s", iat)
+			}
+		}
+
+		// Check nbf (not before time)
+		if nbfFloat, ok := claims["nbf"].(float64); ok {
+			nbf := time.Unix(int64(nbfFloat), 0)
+			if now.Before(nbf.Add(-opts.AllowedClockSkew)) {
+				return fmt.Errorf("credential not yet valid (nbf: %s)", nbf)
+			}
+		}
+	}
+
+	return nil
+}
+
+// parseDisclosure parses a disclosure string into a Disclosure struct
+// Per draft-22 §4.2: Disclosure format is [<salt>, <claim_name>, <claim_value>]
+func (c *Client) parseDisclosure(disclosureStr string, hashMethod hash.Hash) (*Disclosure, error) {
+	// Base64url decode
+	decoded, err := base64.RawURLEncoding.DecodeString(disclosureStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode disclosure: %w", err)
+	}
+
+	// Parse JSON array
+	var parts []any
+	if err := json.Unmarshal(decoded, &parts); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal disclosure: %w", err)
+	}
+
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid disclosure format: expected 3 elements, got %d", len(parts))
+	}
+
+	salt, ok := parts[0].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid disclosure: salt must be string")
+	}
+
+	claim, ok := parts[1].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid disclosure: claim name must be string")
+	}
+
+	value := parts[2]
+
+	// Calculate hash
+	hashMethod.Reset()
+	hashMethod.Write([]byte(disclosureStr))
+	hash := base64.RawURLEncoding.EncodeToString(hashMethod.Sum(nil))
+
+	return &Disclosure{
+		Salt:  salt,
+		Claim: claim,
+		Value: value,
+		Raw:   disclosureStr,
+		Hash:  hash,
+	}, nil
+}
+
+// verifyDisclosureHash verifies that a disclosure hash exists in the _sd array
+func (c *Client) verifyDisclosureHash(claims jwt.MapClaims, hash string) error {
+	// Check top-level _sd array
+	if sd, ok := claims["_sd"].([]any); ok {
+		for _, h := range sd {
+			if hashStr, ok := h.(string); ok && hashStr == hash {
+				return nil // Found
+			}
+		}
+	}
+
+	// TODO: Also check nested _sd arrays in objects
+	// For now, we accept if found at top level
+	return fmt.Errorf("disclosure hash %s not found in _sd array", hash)
+}
+
+// reconstructClaims adds disclosed claims back into the claims map
+func (c *Client) reconstructClaims(claims map[string]any, disclosures []Disclosure) error {
+	for _, disclosure := range disclosures {
+		claims[disclosure.Claim] = disclosure.Value
+	}
+
+	// Remove _sd and _sd_alg from final claims
+	delete(claims, "_sd")
+	delete(claims, "_sd_alg")
+
+	return nil
+}
+
+// verifyKeyBindingJWT verifies a Key Binding JWT per draft-22 §4.3
+func (c *Client) verifyKeyBindingJWT(
+	kbJWT string,
+	issuerJWT string,
+	disclosures []string,
+	issuerClaims jwt.MapClaims,
+	opts *VerificationOptions,
+	hashMethod hash.Hash,
+) (map[string]any, error) {
+	// Extract holder's public key from cnf claim in issuer JWT
+	cnf, ok := issuerClaims["cnf"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("missing cnf claim in issuer JWT (required for key binding)")
+	}
+
+	jwkMap, ok := cnf["jwk"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("missing jwk in cnf claim")
+	}
+
+	// Convert JWK map to public key
+	holderPublicKey, err := jwkToPublicKey(jwkMap)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse holder's public key: %w", err)
+	}
+
+	// Verify KB-JWT signature
+	kbToken, err := c.verifyJWTSignature(kbJWT, holderPublicKey)
+	if err != nil {
+		return nil, fmt.Errorf("KB-JWT signature verification failed: %w", err)
+	}
+
+	// Verify KB-JWT header
+	kbHeader := kbToken.Header
+
+	if typ, _ := kbHeader["typ"].(string); typ != "kb+jwt" {
+		return nil, fmt.Errorf("invalid KB-JWT typ header: %s (must be kb+jwt)", typ)
+	}
+
+	// Verify KB-JWT claims
+	kbClaims, ok := kbToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid KB-JWT claims")
+	}
+
+	// Verify nonce (only if expected nonce is provided)
+	nonce, _ := kbClaims["nonce"].(string)
+	if opts.ExpectedNonce != "" && nonce != opts.ExpectedNonce {
+		return nil, fmt.Errorf("nonce mismatch: expected %s, got %s", opts.ExpectedNonce, nonce)
+	}
+
+	// Verify audience (only if expected audience is provided)
+	aud, _ := kbClaims["aud"].(string)
+	if opts.ExpectedAudience != "" && aud != opts.ExpectedAudience {
+		return nil, fmt.Errorf("audience mismatch: expected %s, got %s", opts.ExpectedAudience, aud)
+	}
+
+	// Verify sd_hash
+	expectedSDHash, err := c.calculateSDHashForVerification(issuerJWT, disclosures, hashMethod)
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate sd_hash: %w", err)
+	}
+
+	actualSDHash, _ := kbClaims["sd_hash"].(string)
+	if actualSDHash != expectedSDHash {
+		return nil, fmt.Errorf("sd_hash mismatch")
+	}
+
+	return kbClaims, nil
+}
+
+// calculateSDHashForVerification calculates sd_hash for verification
+func (c *Client) calculateSDHashForVerification(issuerJWT string, disclosures []string, hashMethod hash.Hash) (string, error) {
+	// Reconstruct the SD-JWT without KB-JWT: <Issuer-signed JWT>~<Disclosure 1>~...~
+	sdJWT := issuerJWT
+	for _, disclosure := range disclosures {
+		sdJWT += "~" + disclosure
+	}
+	sdJWT += "~" // Trailing ~
+
+	hashMethod.Reset()
+	hashMethod.Write([]byte(sdJWT))
+	return base64.RawURLEncoding.EncodeToString(hashMethod.Sum(nil)), nil
+}
+
+// jwkToPublicKey converts a JWK map to a public key
+func jwkToPublicKey(jwkMap map[string]any) (any, error) {
+	kty, _ := jwkMap["kty"].(string)
+
+	switch kty {
+	case "EC":
+		// ECDSA key
+		crv, _ := jwkMap["crv"].(string)
+		xStr, _ := jwkMap["x"].(string)
+		yStr, _ := jwkMap["y"].(string)
+
+		if xStr == "" || yStr == "" {
+			return nil, fmt.Errorf("missing x or y coordinate in EC key")
+		}
+
+		xBytes, err := base64.RawURLEncoding.DecodeString(xStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode x coordinate: %w", err)
+		}
+
+		yBytes, err := base64.RawURLEncoding.DecodeString(yStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode y coordinate: %w", err)
+		}
+
+		var curve elliptic.Curve
+		switch crv {
+		case "P-256":
+			curve = elliptic.P256()
+		case "P-384":
+			curve = elliptic.P384()
+		case "P-521":
+			curve = elliptic.P521()
+		default:
+			return nil, fmt.Errorf("unsupported curve: %s", crv)
+		}
+
+		pubKey := &ecdsa.PublicKey{
+			Curve: curve,
+			X:     new(big.Int).SetBytes(xBytes),
+			Y:     new(big.Int).SetBytes(yBytes),
+		}
+		return pubKey, nil
+
+	case "RSA":
+		// RSA key - not implemented yet
+		return nil, fmt.Errorf("RSA key type not yet implemented for verification")
+
+	default:
+		return nil, fmt.Errorf("unsupported key type: %s", kty)
+	}
+}
+
+// decodeVCTM decodes VCTM from header
+func decodeVCTM(vctmEncoded any) (*VCTM, error) {
+	// VCTM can be either a string (URL) or an object
+	switch v := vctmEncoded.(type) {
+	case string:
+		// It's a URL reference - we don't fetch it, just store the URL
+		return &VCTM{VCT: v}, nil
+	case map[string]any:
+		// It's an embedded object - marshal and unmarshal to VCTM struct
+		vctmJSON, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		var vctm VCTM
+		if err := json.Unmarshal(vctmJSON, &vctm); err != nil {
+			return nil, err
+		}
+		return &vctm, nil
+	case []any:
+		// VCTM was encoded as an array (from base64 decoding) - try to decode it
+		vctmJSON, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		var vctm VCTM
+		if err := json.Unmarshal(vctmJSON, &vctm); err != nil {
+			return nil, err
+		}
+		return &vctm, nil
+	default:
+		// Just skip VCTM if it's in an unexpected format
+		return nil, nil
+	}
+}

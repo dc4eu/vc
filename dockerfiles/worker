@@ -1,14 +1,26 @@
 # Compile
 FROM docker.sunet.se/dc4eu/gobuild:latest AS builder
 
-COPY . .
 ARG SERVICE_NAME
 ARG BUILDTAG
 
+# Copy only dependency files first for better caching
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+# Copy source code
+COPY . .
+
+# Run make commands
 RUN make swagger
 RUN make proto
 
-RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_$SERVICE_NAME -ldflags \
+# Build with caching for both build cache and module cache
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    GOOS=linux GOARCH=amd64 go build -v -o bin/vc_$SERVICE_NAME -ldflags \
     "-X vc/pkg/model.BuildVariableGitCommit=$(git rev-list -1 HEAD) \
     -X vc/pkg/model.BuildVariableGitBranch=$(git rev-parse --abbrev-ref HEAD) \
     -X vc/pkg/model.BuildVariableTimestamp=$(date +'%F:T%TZ') \
@@ -24,7 +36,7 @@ ARG SERVICE_NAME
 
 WORKDIR /
 
-RUN apt-get update && apt-get install -y curl procps iputils-ping less
+RUN apt-get update && apt-get install -y curl procps iputils-ping less netcat-openbsd
 RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/app/bin/vc_${SERVICE_NAME} /vc_service

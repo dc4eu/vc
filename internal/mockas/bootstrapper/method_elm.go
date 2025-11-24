@@ -48,7 +48,7 @@ func (c *elmClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "ELM:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEudiElm1,
+			VCT:             model.CredentialTypeUrnEudiElm1,
 			DocumentID:      fmt.Sprintf("document_id_elm_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
@@ -66,10 +66,10 @@ func (c *elmClient) makeSourceData(sourceFilePath string) error {
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
 				"en": map[string]any{
-					"documentType": "ELM",
+					"description": "European Learning Model",
 				},
 				"sv": map[string]any{
-					"documentType": "ELM",
+					"beskrivning": "European Learning Model",
 				},
 			},
 		}

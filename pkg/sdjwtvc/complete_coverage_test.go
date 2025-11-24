@@ -107,9 +107,9 @@ func TestComprehensiveCoverage(t *testing.T) {
 					Size() int
 					BlockSize() int
 				}); ok {
-					credential, disclosures, err := client.MakeCredentialWithOptions(hasher, data, vctm, 0)
+					credential, disclosures, err := client.MakeCredential(hasher, data, vctm, 0)
 					if err != nil {
-						t.Fatalf("MakeCredentialWithOptions failed for %s: %v", tc.name, err)
+						t.Fatalf("MakeCredential failed for %s: %v", tc.name, err)
 					}
 
 					if alg := credential["_sd_alg"]; alg != tc.expected {
@@ -310,7 +310,7 @@ func TestComprehensiveCoverage(t *testing.T) {
 		}
 	})
 
-	t.Run("MakeCredentialWithOptions_with_addHashToPath_error", func(t *testing.T) {
+	t.Run("MakeCredential_with_addHashToPath_error", func(t *testing.T) {
 		// This should trigger the error path in addHashToPath
 		parent := "parent"
 		child := "child"
@@ -329,7 +329,7 @@ func TestComprehensiveCoverage(t *testing.T) {
 			"parent": "not-an-object", // This will cause an error
 		}
 
-		_, _, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		_, _, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		// Should handle the error gracefully or fail
 		_ = err
 	})

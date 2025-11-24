@@ -143,8 +143,8 @@ func TestHashAlgorithmDetection(t *testing.T) {
 	})
 }
 
-// TestMakeCredentialWithOptions_EdgeCases tests edge cases
-func TestMakeCredentialWithOptions_EdgeCases(t *testing.T) {
+// TestMakeCredential_EdgeCases tests edge cases
+func TestMakeCredential_EdgeCases(t *testing.T) {
 	client := &Client{}
 
 	t.Run("unsupported_hash_algorithm", func(t *testing.T) {
@@ -167,7 +167,7 @@ func TestMakeCredentialWithOptions_EdgeCases(t *testing.T) {
 
 		// Use SHA-224 which has size 28 but should still work
 		h := sha256.New224()
-		_, _, err := client.MakeCredentialWithOptions(h, data, vctm, 0)
+		_, _, err := client.MakeCredential(h, data, vctm, 0)
 		if err != nil {
 			// This might error or not depending on implementation
 			t.Logf("Got expected error for unusual hash: %v", err)
@@ -189,7 +189,7 @@ func TestMakeCredentialWithOptions_EdgeCases(t *testing.T) {
 			"_sd": "should-not-be-disclosed",
 		}
 
-		_, _, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		_, _, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		if err == nil {
 			t.Error("Expected error for forbidden claim name '_sd'")
 		}
@@ -210,7 +210,7 @@ func TestMakeCredentialWithOptions_EdgeCases(t *testing.T) {
 			"...": "should-not-be-disclosed",
 		}
 
-		_, _, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		_, _, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		if err == nil {
 			t.Error("Expected error for forbidden claim name '...'")
 		}

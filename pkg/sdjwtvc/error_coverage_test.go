@@ -254,8 +254,8 @@ func TestGenerateDecoyDigest_Coverage(t *testing.T) {
 	}
 }
 
-// TestMakeCredentialWithOptions_ProcessClaimPathErrors tests error propagation
-func TestMakeCredentialWithOptions_ProcessClaimPathErrors(t *testing.T) {
+// TestMakeCredential_ProcessClaimPathErrors tests error propagation
+func TestMakeCredential_ProcessClaimPathErrors(t *testing.T) {
 	client := &Client{}
 
 	t.Run("process_claim_with_array_in_path", func(t *testing.T) {
@@ -275,7 +275,7 @@ func TestMakeCredentialWithOptions_ProcessClaimPathErrors(t *testing.T) {
 			"level1": []any{"item1", "item2"}, // Array, not object
 		}
 
-		_, _, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		_, _, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		if err == nil {
 			t.Error("Expected error when trying to process array in path")
 		}

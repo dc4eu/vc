@@ -3,7 +3,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_100",
       "real_data": false,
       "collect": {
@@ -36,26 +36,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1996-01-30",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Mirren",
-        "given_name": "Helen",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_100",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1996-01-30",
+      "expiry_date": "2033-01-01",
+      "family_name": "Mirren",
+      "given_name": "Helen",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -63,7 +60,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_101",
       "real_data": false,
       "collect": {
@@ -96,26 +93,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1983-08-20",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Momoa",
-        "given_name": "Jason",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_101",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1983-08-20",
+      "expiry_date": "2033-01-01",
+      "family_name": "Momoa",
+      "given_name": "Jason",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -123,7 +117,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_102",
       "real_data": false,
       "collect": {
@@ -156,26 +150,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1988-09-09",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Oldman",
-        "given_name": "Gary",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_102",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1988-09-09",
+      "expiry_date": "2033-01-01",
+      "family_name": "Oldman",
+      "given_name": "Gary",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -183,7 +174,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_103",
       "real_data": false,
       "collect": {
@@ -216,26 +207,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1984-06-11",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Pacino",
-        "given_name": "Al",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_103",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1984-06-11",
+      "expiry_date": "2033-01-01",
+      "family_name": "Pacino",
+      "given_name": "Al",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -243,7 +231,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_104",
       "real_data": false,
       "collect": {
@@ -276,26 +264,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1992-12-15",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Pfeiffer",
-        "given_name": "Michelle",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_104",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1992-12-15",
+      "expiry_date": "2033-01-01",
+      "family_name": "Pfeiffer",
+      "given_name": "Michelle",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -303,7 +288,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_105",
       "real_data": false,
       "collect": {
@@ -336,26 +321,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1979-10-16",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Phoenix",
-        "given_name": "Joaquin",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_105",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1979-10-16",
+      "expiry_date": "2033-01-01",
+      "family_name": "Phoenix",
+      "given_name": "Joaquin",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -363,7 +345,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_106",
       "real_data": false,
       "collect": {
@@ -396,26 +378,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1974-12-07",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Pitt",
-        "given_name": "Brad",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_106",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1974-12-07",
+      "expiry_date": "2033-01-01",
+      "family_name": "Pitt",
+      "given_name": "Brad",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -423,7 +402,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_107",
       "real_data": false,
       "collect": {
@@ -456,26 +435,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2005-09-01",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Portman",
-        "given_name": "Natalie",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_107",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2005-09-01",
+      "expiry_date": "2033-01-01",
+      "family_name": "Portman",
+      "given_name": "Natalie",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -483,7 +459,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_108",
       "real_data": false,
       "collect": {
@@ -516,26 +492,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1974-01-07",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Pratt",
-        "given_name": "Chris",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_108",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1974-01-07",
+      "expiry_date": "2033-01-01",
+      "family_name": "Pratt",
+      "given_name": "Chris",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -543,7 +516,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_109",
       "real_data": false,
       "collect": {
@@ -576,26 +549,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1985-11-26",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Reeves",
-        "given_name": "Keanu",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_109",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1985-11-26",
+      "expiry_date": "2033-01-01",
+      "family_name": "Reeves",
+      "given_name": "Keanu",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -603,7 +573,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_110",
       "real_data": false,
       "collect": {
@@ -636,26 +606,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2005-11-19",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Reilly",
-        "given_name": "John C.",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_110",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2005-11-19",
+      "expiry_date": "2033-01-01",
+      "family_name": "Reilly",
+      "given_name": "John C.",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -663,7 +630,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_111",
       "real_data": false,
       "collect": {
@@ -696,26 +663,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1988-12-05",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Reynolds",
-        "given_name": "Ryan",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_111",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1988-12-05",
+      "expiry_date": "2033-01-01",
+      "family_name": "Reynolds",
+      "given_name": "Ryan",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -723,7 +687,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_112",
       "real_data": false,
       "collect": {
@@ -756,26 +720,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1991-02-14",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Robbie",
-        "given_name": "Margot",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_112",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1991-02-14",
+      "expiry_date": "2033-01-01",
+      "family_name": "Robbie",
+      "given_name": "Margot",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -783,7 +744,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_113",
       "real_data": false,
       "collect": {
@@ -816,26 +777,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1982-07-30",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Roberts",
-        "given_name": "Julia",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_113",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1982-07-30",
+      "expiry_date": "2033-01-01",
+      "family_name": "Roberts",
+      "given_name": "Julia",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -843,7 +801,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_114",
       "real_data": false,
       "collect": {
@@ -876,26 +834,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2006-03-28",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Rudd",
-        "given_name": "Paul",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_114",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2006-03-28",
+      "expiry_date": "2033-01-01",
+      "family_name": "Rudd",
+      "given_name": "Paul",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -903,7 +858,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_115",
       "real_data": false,
       "collect": {
@@ -936,26 +891,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1992-03-13",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Smith",
-        "given_name": "Will",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_115",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1992-03-13",
+      "expiry_date": "2033-01-01",
+      "family_name": "Smith",
+      "given_name": "Will",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -963,7 +915,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_116",
       "real_data": false,
       "collect": {
@@ -996,26 +948,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1997-11-18",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Spencer",
-        "given_name": "Octavia",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_116",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1997-11-18",
+      "expiry_date": "2033-01-01",
+      "family_name": "Spencer",
+      "given_name": "Octavia",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1023,7 +972,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_117",
       "real_data": false,
       "collect": {
@@ -1056,26 +1005,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1993-07-17",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Stewart",
-        "given_name": "Kristen",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_117",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1993-07-17",
+      "expiry_date": "2033-01-01",
+      "family_name": "Stewart",
+      "given_name": "Kristen",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1083,7 +1029,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_118",
       "real_data": false,
       "collect": {
@@ -1116,26 +1062,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1985-01-27",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Stone",
-        "given_name": "Emma",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_118",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1985-01-27",
+      "expiry_date": "2033-01-01",
+      "family_name": "Stone",
+      "given_name": "Emma",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1143,7 +1086,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_119",
       "real_data": false,
       "collect": {
@@ -1176,26 +1119,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2005-07-29",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Streep",
-        "given_name": "Meryl",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_119",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2005-07-29",
+      "expiry_date": "2033-01-01",
+      "family_name": "Streep",
+      "given_name": "Meryl",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1203,7 +1143,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_120",
       "real_data": false,
       "collect": {
@@ -1236,26 +1176,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1984-04-14",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Swinton",
-        "given_name": "Tilda",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_120",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1984-04-14",
+      "expiry_date": "2033-01-01",
+      "family_name": "Swinton",
+      "given_name": "Tilda",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1263,7 +1200,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_121",
       "real_data": false,
       "collect": {
@@ -1296,26 +1233,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2006-10-22",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Tatum",
-        "given_name": "Channing",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_121",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2006-10-22",
+      "expiry_date": "2033-01-01",
+      "family_name": "Tatum",
+      "given_name": "Channing",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1323,7 +1257,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_122",
       "real_data": false,
       "collect": {
@@ -1356,26 +1290,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1988-12-11",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Theron",
-        "given_name": "Charlize",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_122",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1988-12-11",
+      "expiry_date": "2033-01-01",
+      "family_name": "Theron",
+      "given_name": "Charlize",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1383,7 +1314,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_123",
       "real_data": false,
       "collect": {
@@ -1416,26 +1347,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1988-02-19",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Vaughn",
-        "given_name": "Vince",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_123",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1988-02-19",
+      "expiry_date": "2033-01-01",
+      "family_name": "Vaughn",
+      "given_name": "Vince",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1443,7 +1371,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_124",
       "real_data": false,
       "collect": {
@@ -1476,26 +1404,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1985-11-09",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Vikander",
-        "given_name": "Alicia",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_124",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1985-11-09",
+      "expiry_date": "2033-01-01",
+      "family_name": "Vikander",
+      "given_name": "Alicia",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1503,7 +1428,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_125",
       "real_data": false,
       "collect": {
@@ -1536,26 +1461,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1986-03-23",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Waltz",
-        "given_name": "Christoph",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_125",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1986-03-23",
+      "expiry_date": "2033-01-01",
+      "family_name": "Waltz",
+      "given_name": "Christoph",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1563,7 +1485,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_126",
       "real_data": false,
       "collect": {
@@ -1596,26 +1518,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1981-10-28",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Washington",
-        "given_name": "Denzel",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_126",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1981-10-28",
+      "expiry_date": "2033-01-01",
+      "family_name": "Washington",
+      "given_name": "Denzel",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1623,7 +1542,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_127",
       "real_data": false,
       "collect": {
@@ -1656,26 +1575,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1990-07-24",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Watts",
-        "given_name": "Naomi",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_127",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1990-07-24",
+      "expiry_date": "2033-01-01",
+      "family_name": "Watts",
+      "given_name": "Naomi",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1683,7 +1599,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_128",
       "real_data": false,
       "collect": {
@@ -1716,26 +1632,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1992-03-29",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Williams",
-        "given_name": "Michelle",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_128",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1992-03-29",
+      "expiry_date": "2033-01-01",
+      "family_name": "Williams",
+      "given_name": "Michelle",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1743,7 +1656,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_129",
       "real_data": false,
       "collect": {
@@ -1776,26 +1689,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2007-09-11",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Wilson",
-        "given_name": "Owen",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_129",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2007-09-11",
+      "expiry_date": "2033-01-01",
+      "family_name": "Wilson",
+      "given_name": "Owen",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1803,7 +1713,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_130",
       "real_data": false,
       "collect": {
@@ -1836,26 +1746,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1986-06-19",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Winslet",
-        "given_name": "Kate",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_130",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1986-06-19",
+      "expiry_date": "2033-01-01",
+      "family_name": "Winslet",
+      "given_name": "Kate",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1863,7 +1770,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_131",
       "real_data": false,
       "collect": {
@@ -1896,26 +1803,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1987-04-02",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Witherspoon",
-        "given_name": "Reese",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_131",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1987-04-02",
+      "expiry_date": "2033-01-01",
+      "family_name": "Witherspoon",
+      "given_name": "Reese",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1923,7 +1827,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_132",
       "real_data": false,
       "collect": {
@@ -1956,26 +1860,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1990-10-05",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Adams",
-        "given_name": "Amy",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_132",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1990-10-05",
+      "expiry_date": "2033-01-01",
+      "family_name": "Adams",
+      "given_name": "Amy",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -1983,7 +1884,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_133",
       "real_data": false,
       "collect": {
@@ -2016,26 +1917,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1973-07-05",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Affleck",
-        "given_name": "Ben",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_133",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1973-07-05",
+      "expiry_date": "2033-01-01",
+      "family_name": "Affleck",
+      "given_name": "Ben",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2043,7 +1941,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_134",
       "real_data": false,
       "collect": {
@@ -2076,26 +1974,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1980-12-30",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Bancroft",
-        "given_name": "Anne",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_134",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1980-12-30",
+      "expiry_date": "2033-01-01",
+      "family_name": "Bancroft",
+      "given_name": "Anne",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2103,7 +1998,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_135",
       "real_data": false,
       "collect": {
@@ -2136,26 +2031,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1989-08-25",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Berry",
-        "given_name": "Halle",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_135",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1989-08-25",
+      "expiry_date": "2033-01-01",
+      "family_name": "Berry",
+      "given_name": "Halle",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2163,7 +2055,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_136",
       "real_data": false,
       "collect": {
@@ -2196,26 +2088,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1988-09-12",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Biel",
-        "given_name": "Jessica",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_136",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1988-09-12",
+      "expiry_date": "2033-01-01",
+      "family_name": "Biel",
+      "given_name": "Jessica",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2223,7 +2112,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_137",
       "real_data": false,
       "collect": {
@@ -2256,26 +2145,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2006-11-08",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Blanchett",
-        "given_name": "Cate",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_137",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2006-11-08",
+      "expiry_date": "2033-01-01",
+      "family_name": "Blanchett",
+      "given_name": "Cate",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2283,7 +2169,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_138",
       "real_data": false,
       "collect": {
@@ -2316,26 +2202,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2000-08-15",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Blunt",
-        "given_name": "Emily",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_138",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2000-08-15",
+      "expiry_date": "2033-01-01",
+      "family_name": "Blunt",
+      "given_name": "Emily",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2343,7 +2226,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_139",
       "real_data": false,
       "collect": {
@@ -2376,26 +2259,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2005-12-05",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Boyega",
-        "given_name": "John",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_139",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2005-12-05",
+      "expiry_date": "2033-01-01",
+      "family_name": "Boyega",
+      "given_name": "John",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2403,7 +2283,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_140",
       "real_data": false,
       "collect": {
@@ -2436,26 +2316,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1984-09-08",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Bullock",
-        "given_name": "Sandra",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_140",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1984-09-08",
+      "expiry_date": "2033-01-01",
+      "family_name": "Bullock",
+      "given_name": "Sandra",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2463,7 +2340,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_141",
       "real_data": false,
       "collect": {
@@ -2496,26 +2373,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2005-05-13",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Cage",
-        "given_name": "Nicolas",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_141",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2005-05-13",
+      "expiry_date": "2033-01-01",
+      "family_name": "Cage",
+      "given_name": "Nicolas",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2523,7 +2397,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_142",
       "real_data": false,
       "collect": {
@@ -2556,26 +2430,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2005-06-04",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Carell",
-        "given_name": "Steve",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_142",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2005-06-04",
+      "expiry_date": "2033-01-01",
+      "family_name": "Carell",
+      "given_name": "Steve",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2583,7 +2454,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_143",
       "real_data": false,
       "collect": {
@@ -2616,26 +2487,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1982-10-19",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Chastain",
-        "given_name": "Jessica",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_143",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1982-10-19",
+      "expiry_date": "2033-01-01",
+      "family_name": "Chastain",
+      "given_name": "Jessica",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2643,7 +2511,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_144",
       "real_data": false,
       "collect": {
@@ -2676,26 +2544,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1981-02-05",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Close",
-        "given_name": "Glenn",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_144",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1981-02-05",
+      "expiry_date": "2033-01-01",
+      "family_name": "Close",
+      "given_name": "Glenn",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2703,7 +2568,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_145",
       "real_data": false,
       "collect": {
@@ -2736,26 +2601,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1988-10-29",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Craig",
-        "given_name": "Daniel",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_145",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1988-10-29",
+      "expiry_date": "2033-01-01",
+      "family_name": "Craig",
+      "given_name": "Daniel",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2763,7 +2625,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_146",
       "real_data": false,
       "collect": {
@@ -2796,26 +2658,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1994-05-22",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Cruz",
-        "given_name": "Penélope",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_146",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1994-05-22",
+      "expiry_date": "2033-01-01",
+      "family_name": "Cruz",
+      "given_name": "Penélope",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2823,7 +2682,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_147",
       "real_data": false,
       "collect": {
@@ -2856,26 +2715,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1987-10-24",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Cumberbatch",
-        "given_name": "Benedict",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_147",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1987-10-24",
+      "expiry_date": "2033-01-01",
+      "family_name": "Cumberbatch",
+      "given_name": "Benedict",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2883,7 +2739,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_148",
       "real_data": false,
       "collect": {
@@ -2916,26 +2772,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1971-07-09",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Damon",
-        "given_name": "Matt",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_148",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1971-07-09",
+      "expiry_date": "2033-01-01",
+      "family_name": "Damon",
+      "given_name": "Matt",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -2943,7 +2796,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_149",
       "real_data": false,
       "collect": {
@@ -2976,26 +2829,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2007-04-20",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Davis",
-        "given_name": "Viola",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_149",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2007-04-20",
+      "expiry_date": "2033-01-01",
+      "family_name": "Davis",
+      "given_name": "Viola",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3003,7 +2853,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_70",
       "real_data": false,
       "collect": {
@@ -3036,26 +2886,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1982-01-15",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "De Niro",
-        "given_name": "Robert",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_70",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1982-01-15",
+      "expiry_date": "2033-01-01",
+      "family_name": "De Niro",
+      "given_name": "Robert",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3063,7 +2910,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_71",
       "real_data": false,
       "collect": {
@@ -3096,26 +2943,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1995-09-04",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Dench",
-        "given_name": "Judi",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_71",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1995-09-04",
+      "expiry_date": "2033-01-01",
+      "family_name": "Dench",
+      "given_name": "Judi",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3123,7 +2967,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_72",
       "real_data": false,
       "collect": {
@@ -3156,26 +3000,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1985-12-03",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Depp",
-        "given_name": "Johnny",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_72",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1985-12-03",
+      "expiry_date": "2033-01-01",
+      "family_name": "Depp",
+      "given_name": "Johnny",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3183,7 +3024,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_73",
       "real_data": false,
       "collect": {
@@ -3216,26 +3057,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1972-08-28",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "DiCaprio",
-        "given_name": "Leonardo",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_73",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1972-08-28",
+      "expiry_date": "2033-01-01",
+      "family_name": "DiCaprio",
+      "given_name": "Leonardo",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3243,7 +3081,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_74",
       "real_data": false,
       "collect": {
@@ -3276,26 +3114,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1983-05-12",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Downey Jr.",
-        "given_name": "Robert",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_74",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1983-05-12",
+      "expiry_date": "2033-01-01",
+      "family_name": "Downey Jr.",
+      "given_name": "Robert",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3303,7 +3138,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_75",
       "real_data": false,
       "collect": {
@@ -3336,26 +3171,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1988-09-27",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Driver",
-        "given_name": "Adam",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_75",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1988-09-27",
+      "expiry_date": "2033-01-01",
+      "family_name": "Driver",
+      "given_name": "Adam",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3363,7 +3195,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_76",
       "real_data": false,
       "collect": {
@@ -3396,26 +3228,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1980-09-02",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Elba",
-        "given_name": "Idris",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_76",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1980-09-02",
+      "expiry_date": "2033-01-01",
+      "family_name": "Elba",
+      "given_name": "Idris",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3423,7 +3252,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_77",
       "real_data": false,
       "collect": {
@@ -3456,26 +3285,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1977-04-25",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Farrell",
-        "given_name": "Colin",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_77",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1977-04-25",
+      "expiry_date": "2033-01-01",
+      "family_name": "Farrell",
+      "given_name": "Colin",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3483,7 +3309,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_78",
       "real_data": false,
       "collect": {
@@ -3516,26 +3342,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1992-04-24",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Fassbender",
-        "given_name": "Michael",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_78",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1992-04-24",
+      "expiry_date": "2033-01-01",
+      "family_name": "Fassbender",
+      "given_name": "Michael",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3543,7 +3366,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_79",
       "real_data": false,
       "collect": {
@@ -3576,26 +3399,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1991-10-30",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Foster",
-        "given_name": "Jodie",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_79",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1991-10-30",
+      "expiry_date": "2033-01-01",
+      "family_name": "Foster",
+      "given_name": "Jodie",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3603,7 +3423,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_80",
       "real_data": false,
       "collect": {
@@ -3636,26 +3456,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1977-07-03",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Foxx",
-        "given_name": "Jamie",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_80",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1977-07-03",
+      "expiry_date": "2033-01-01",
+      "family_name": "Foxx",
+      "given_name": "Jamie",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3663,7 +3480,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_81",
       "real_data": false,
       "collect": {
@@ -3696,26 +3513,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1990-08-24",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Freeman",
-        "given_name": "Morgan",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_81",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1990-08-24",
+      "expiry_date": "2033-01-01",
+      "family_name": "Freeman",
+      "given_name": "Morgan",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3723,7 +3537,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_82",
       "real_data": false,
       "collect": {
@@ -3756,26 +3570,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2007-03-17",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Glover",
-        "given_name": "Donald",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_82",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2007-03-17",
+      "expiry_date": "2033-01-01",
+      "family_name": "Glover",
+      "given_name": "Donald",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3783,7 +3594,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_83",
       "real_data": false,
       "collect": {
@@ -3816,26 +3627,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1989-12-04",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Hanks",
-        "given_name": "Tom",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_83",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1989-12-04",
+      "expiry_date": "2033-01-01",
+      "family_name": "Hanks",
+      "given_name": "Tom",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3843,7 +3651,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_84",
       "real_data": false,
       "collect": {
@@ -3876,26 +3684,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1981-11-23",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Saldana",
-        "given_name": "Zoe",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_84",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1981-11-23",
+      "expiry_date": "2033-01-01",
+      "family_name": "Saldana",
+      "given_name": "Zoe",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3903,7 +3708,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_85",
       "real_data": false,
       "collect": {
@@ -3936,26 +3741,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1987-05-06",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Hathaway",
-        "given_name": "Anne",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_85",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1987-05-06",
+      "expiry_date": "2033-01-01",
+      "family_name": "Hathaway",
+      "given_name": "Anne",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -3963,7 +3765,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_86",
       "real_data": false,
       "collect": {
@@ -3996,26 +3798,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1983-08-27",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Hayek",
-        "given_name": "Salma",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_86",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1983-08-27",
+      "expiry_date": "2033-01-01",
+      "family_name": "Hayek",
+      "given_name": "Salma",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4023,7 +3822,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_87",
       "real_data": false,
       "collect": {
@@ -4056,26 +3855,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1992-01-19",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Hemsworth",
-        "given_name": "Chris",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_87",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1992-01-19",
+      "expiry_date": "2033-01-01",
+      "family_name": "Hemsworth",
+      "given_name": "Chris",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4083,7 +3879,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_88",
       "real_data": false,
       "collect": {
@@ -4116,26 +3912,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2006-08-16",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Hopkins",
-        "given_name": "Anthony",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_88",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2006-08-16",
+      "expiry_date": "2033-01-01",
+      "family_name": "Hopkins",
+      "given_name": "Anthony",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4143,7 +3936,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_89",
       "real_data": false,
       "collect": {
@@ -4176,26 +3969,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1972-06-28",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Jackman",
-        "given_name": "Hugh",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_89",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1972-06-28",
+      "expiry_date": "2033-01-01",
+      "family_name": "Jackman",
+      "given_name": "Hugh",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4203,7 +3993,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_90",
       "real_data": false,
       "collect": {
@@ -4236,26 +4026,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2007-01-27",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Jackson",
-        "given_name": "Samuel L.",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_90",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2007-01-27",
+      "expiry_date": "2033-01-01",
+      "family_name": "Jackson",
+      "given_name": "Samuel L.",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4263,7 +4050,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_91",
       "real_data": false,
       "collect": {
@@ -4296,26 +4083,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1980-05-12",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Johansson",
-        "given_name": "Scarlett",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_91",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1980-05-12",
+      "expiry_date": "2033-01-01",
+      "family_name": "Johansson",
+      "given_name": "Scarlett",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4323,7 +4107,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_92",
       "real_data": false,
       "collect": {
@@ -4356,26 +4140,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1999-04-21",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Johnson",
-        "given_name": "Dakota",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_92",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1999-04-21",
+      "expiry_date": "2033-01-01",
+      "family_name": "Johnson",
+      "given_name": "Dakota",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4383,7 +4164,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_93",
       "real_data": false,
       "collect": {
@@ -4416,26 +4197,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1983-03-15",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Kidman",
-        "given_name": "Nicole",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_93",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1983-03-15",
+      "expiry_date": "2033-01-01",
+      "family_name": "Kidman",
+      "given_name": "Nicole",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4443,7 +4221,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_94",
       "real_data": false,
       "collect": {
@@ -4476,26 +4254,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1993-06-28",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Kirby",
-        "given_name": "Vanessa",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_94",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1993-06-28",
+      "expiry_date": "2033-01-01",
+      "family_name": "Kirby",
+      "given_name": "Vanessa",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4503,7 +4278,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_95",
       "real_data": false,
       "collect": {
@@ -4536,26 +4311,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1989-01-01",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Kunis",
-        "given_name": "Mila",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_95",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1989-01-01",
+      "expiry_date": "2033-01-01",
+      "family_name": "Kunis",
+      "given_name": "Mila",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4563,7 +4335,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_96",
       "real_data": false,
       "collect": {
@@ -4596,26 +4368,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "2006-02-14",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "Lawrence",
-        "given_name": "Jennifer",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_96",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "2006-02-14",
+      "expiry_date": "2033-01-01",
+      "family_name": "Lawrence",
+      "given_name": "Jennifer",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4623,7 +4392,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_97",
       "real_data": false,
       "collect": {
@@ -4656,26 +4425,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1998-06-09",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "McAdams",
-        "given_name": "Rachel",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_97",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1998-06-09",
+      "expiry_date": "2033-01-01",
+      "family_name": "McAdams",
+      "given_name": "Rachel",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4683,7 +4449,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_98",
       "real_data": false,
       "collect": {
@@ -4716,26 +4482,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1977-09-09",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "McConaughey",
-        "given_name": "Matthew",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_98",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1977-09-09",
+      "expiry_date": "2033-01-01",
+      "family_name": "McConaughey",
+      "given_name": "Matthew",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   },
@@ -4743,7 +4506,7 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:pid:1",
+      "vct": "urn:eudi:pid:1",
       "document_id": "document_id_pid_99",
       "real_data": false,
       "collect": {
@@ -4776,26 +4539,23 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "PID"
+          "description": "Personal Identification Document"
         },
         "sv": {
-          "documentType": "PID"
+          "beskrivning": "Personligt identifikationsdokument"
         }
       }
     },
     "document_data": {
-      "identity": {
-        "birth_date": "1991-08-29",
-        "birth_place": "Tulegatan 11",
-        "expiry_date": "2033-01-01",
-        "family_name": "McGregor",
-        "given_name": "Ewan",
-        "issuing_authority": "SUNET",
-        "issuing_country": "SE",
-        "nationality": [
-          "SE"
-        ]
-      }
+      "authentic_source_person_id": "authentic_source_person_id_99",
+      "birth_place": "Tulegatan 11",
+      "birthdate": "1991-08-29",
+      "expiry_date": "2033-01-01",
+      "family_name": "McGregor",
+      "given_name": "Ewan",
+      "issuing_authority": "SUNET",
+      "issuing_country": "SE",
+      "mura": "kalle"
     },
     "document_data_version": "1.0.0"
   }

@@ -4,7 +4,6 @@ go 1.25
 
 require (
 	github.com/IBM/sarama v1.46.2
-	github.com/MichaelFraser99/go-sd-jwt v1.4.0
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/creasty/defaults v1.8.0
@@ -34,6 +33,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.40.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.40.0
 	github.com/wealdtech/go-merkletree v1.0.0
 	github.com/xuri/excelize/v2 v2.10.0
 	go.mongodb.org/mongo-driver v1.17.4
@@ -44,7 +44,6 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
 	go.opentelemetry.io/otel/trace v1.38.0
-	go.step.sm/crypto v0.72.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/time v0.14.0
 	google.golang.org/grpc v1.76.0

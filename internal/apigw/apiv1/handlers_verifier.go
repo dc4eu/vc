@@ -64,7 +64,7 @@ var dcqlQuery = []byte(
         },
         {
           "path": [
-            "given_name_birth"
+            "birth_date"
           ]
         },
         {
@@ -258,12 +258,14 @@ type VerificationDirectPostResponse struct {
 func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDirectPostRequest) (*VerificationDirectPostResponse, error) {
 	c.log.Debug("Verification direct-post")
 
+	// Extract KID from JWE header
 	kid, err := req.GetKID()
 	if err != nil {
 		c.log.Error(err, "failed to get KID from request")
 		return nil, err
 	}
 
+	// Get ephemeral private key from cache
 	privateEphemeralJWK := c.ephemeralEncryptionKeyCache.Get(kid).Value()
 	if privateEphemeralJWK == nil {
 		c.log.Debug("No ephemeral key found in cache", "kid", kid)
@@ -272,45 +274,84 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 
 	c.log.Debug("Found ephemeral key in cache", "kid", kid)
 
+	// Decrypt JWE response
 	decryptedJWE, err := jwe.Decrypt([]byte(req.Response), jwe.WithKey(jwa.ECDH_ES(), privateEphemeralJWK))
 	if err != nil {
 		c.log.Error(err, "failed to decrypt JWE")
 		return nil, err
 	}
 
+	// Get authorization context
 	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err
 	}
 
+	// Parse response parameters
 	responseParameters := &openid4vp.ResponseParameters{}
 	if err := json.Unmarshal(decryptedJWE, &responseParameters); err != nil {
 		c.log.Error(err, "failed to unmarshal decrypted JWE")
 		return nil, err
 	}
 
+	// Validate response parameters
+	if err := responseParameters.Validate(); err != nil {
+		c.log.Error(err, "response parameters validation failed")
+		return nil, fmt.Errorf("invalid response: %w", err)
+	}
+
+	// Validate VP Token using VPTokenValidator
+	validator := &openid4vp.VPTokenValidator{
+		Nonce:           authorizationContext.Nonce,
+		ClientID:        authorizationContext.ClientID,
+		VerifySignature: true,
+		CheckRevocation: false,
+		DCQLQuery:       authorizationContext.DCQLQuery,
+	}
+
+	if err := validator.Validate(responseParameters.VPToken); err != nil {
+		c.log.Error(err, "VP Token validation failed")
+		return nil, fmt.Errorf("VP Token validation failed: %w", err)
+	}
+
+	c.log.Debug("VP Token validated successfully")
+
+	// Build credential from validated VP Token
 	credential, err := responseParameters.BuildCredential()
 	if err != nil {
 		c.log.Error(err, "failed to build credential from response parameters")
 		return nil, err
 	}
 
-	credentialConstructorCfg, ok := c.cfg.CredentialConstructor[authorizationContext.Scope]
-	if !ok {
+	// Get credential constructor configuration using GetCredentialConstructor
+	// This looks up by VCT (primary key) or CommonName (for backward compatibility)
+	credentialConstructorCfg := c.cfg.GetCredentialConstructor(authorizationContext.Scope)
+	if credentialConstructorCfg == nil {
 		c.log.Error(nil, "credential constructor not found for scope", "scope", authorizationContext.Scope)
 		return nil, errors.New("credential constructor not found for scope: " + authorizationContext.Scope)
 	}
 
-	identity := &model.Identity{
-		GivenName:  credential["given_name"].(string),
-		FamilyName: credential["family_name"].(string),
-		BirthDate:  credential["birthdate"].(string),
+	c.log.Debug("Found credential constructor", "scope", authorizationContext.Scope, "vct", credentialConstructorCfg.VCT)
+
+	// Extract identity from validated credential
+	identity := &model.Identity{}
+	if givenName, ok := credential["given_name"].(string); ok {
+		identity.GivenName = givenName
+	}
+	if familyName, ok := credential["family_name"].(string); ok {
+		identity.FamilyName = familyName
+	}
+	if birthdate, ok := credential["birthdate"].(string); ok {
+		identity.BirthDate = birthdate
 	}
 
+	// Retrieve documents matching the identity
+	// Use authorizationContext.VCT which should be set to the VCT value
+	c.log.Debug("Querying documents", "vct", credentialConstructorCfg.VCT, "identity", identity)
 	documents, err := c.db.VCDatastoreColl.GetDocumentsWithIdentity(ctx, &db.GetDocumentQuery{
 		Meta: &model.MetaData{
-			DocumentType: credentialConstructorCfg.VCT,
+			VCT: credentialConstructorCfg.VCT,
 		},
 		Identity: identity,
 	})
@@ -319,10 +360,19 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, err
 	}
 
+	c.log.Debug("Retrieved documents", "count", len(documents))
+
+	if len(documents) == 0 {
+		c.log.Error(nil, "no documents found for identity", "identity", identity)
+		return nil, errors.New("no documents found for the provided identity")
+	}
+
+	// Cache PID documents for session
 	c.documentCache.Set(authorizationContext.SessionID, documents, ttlcache.DefaultTTL)
 
+	c.log.Debug("Documents cached for session", "session_id", authorizationContext.SessionID)
+
 	reply := &VerificationDirectPostResponse{
-		//ResponseCode: responseCode,
 		RedirectURI: c.cfg.APIGW.ExternalServerURL + "/authorization/consent/callback/?response_code=" + authorizationContext.VerifierResponseCode,
 	}
 	return reply, nil

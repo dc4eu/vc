@@ -1,6 +1,5 @@
 package model
 
-// same as document_type
 const (
 	CredentialTypeUrnEudiEhic1            = "urn:eudi:ehic:1"             // #nosec G101
 	CredentialTypeUrnEudiPda11            = "urn:eudi:pda1:1"             // #nosec G101
@@ -9,4 +8,3 @@ const (
 	CredentialTypeUrnEudiElm1             = "urn:eudi:elm:1"              // #nosec G101
 	CredentialTypeUrnEudiMicroCredential1 = "urn:eudi:micro_credential:1" // #nosec G101
 )
-

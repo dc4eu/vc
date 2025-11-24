@@ -27,9 +27,9 @@ func TestDecoyDigests(t *testing.T) {
 	client := &Client{}
 
 	t.Run("no_decoy_digests", func(t *testing.T) {
-		credential, disclosures, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		credential, disclosures, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		// Should have exactly 1 disclosure (name)
@@ -48,9 +48,9 @@ func TestDecoyDigests(t *testing.T) {
 	})
 
 	t.Run("with_decoy_digests", func(t *testing.T) {
-		credential, _, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 3)
+		credential, _, err := client.MakeCredential(sha256.New(), data, vctm, 3)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		// Count _sd array elements (should be 1 real + 3 decoys = 4)
@@ -101,9 +101,9 @@ func TestDecoyDigests(t *testing.T) {
 			},
 		}
 
-		credential, disclosures, err := client.MakeCredentialWithOptions(sha256.New(), nestedData, nestedVCTM, 2)
+		credential, disclosures, err := client.MakeCredential(sha256.New(), nestedData, nestedVCTM, 2)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		// Should have exactly 2 disclosures
@@ -139,9 +139,9 @@ func TestDecoyDigests(t *testing.T) {
 	})
 
 	t.Run("decoy_digests_are_valid_base64url", func(t *testing.T) {
-		credential, _, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 5)
+		credential, _, err := client.MakeCredential(sha256.New(), data, vctm, 5)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		sdArray := credential["_sd"].([]any)

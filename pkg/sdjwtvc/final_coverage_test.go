@@ -164,8 +164,8 @@ func TestGetHashAlgorithmName_AllCases(t *testing.T) {
 	})
 }
 
-// TestMakeCredentialWithOptions_AllBranches tests all code paths
-func TestMakeCredentialWithOptions_AllBranches(t *testing.T) {
+// TestMakeCredential_AllBranches tests all code paths
+func TestMakeCredential_AllBranches(t *testing.T) {
 	client := &Client{}
 
 	t.Run("with_multiple_decoys_and_nested_structures", func(t *testing.T) {
@@ -200,9 +200,9 @@ func TestMakeCredentialWithOptions_AllBranches(t *testing.T) {
 			},
 		}
 
-		credential, disclosures, err := client.MakeCredentialWithOptions(sha512.New(), data, vctm, 3)
+		credential, disclosures, err := client.MakeCredential(sha512.New(), data, vctm, 3)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		if len(disclosures) != 2 {
@@ -227,15 +227,15 @@ func TestMakeCredentialWithOptions_AllBranches(t *testing.T) {
 		}
 
 		data256 := map[string]any{"name": "test"}
-		_, _, err := client.MakeCredentialWithOptions(sha3.New256(), data256, vctm, 1)
+		_, _, err := client.MakeCredential(sha3.New256(), data256, vctm, 1)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions with SHA3-256 failed: %v", err)
+			t.Fatalf("MakeCredential with SHA3-256 failed: %v", err)
 		}
 
 		data512 := map[string]any{"name": "test"}
-		_, _, err = client.MakeCredentialWithOptions(sha3.New512(), data512, vctm, 1)
+		_, _, err = client.MakeCredential(sha3.New512(), data512, vctm, 1)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions with SHA3-512 failed: %v", err)
+			t.Fatalf("MakeCredential with SHA3-512 failed: %v", err)
 		}
 	})
 }

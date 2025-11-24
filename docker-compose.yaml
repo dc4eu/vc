@@ -16,6 +16,12 @@ services:
         ipv4_address: 172.16.50.2
     environment:
       - "VC_CONFIG_YAML=config.yaml"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   ui:
     container_name: "vc_dev_ui"
@@ -136,9 +142,9 @@ services:
     restart: always
     volumes:
       - ./config.yaml:/config.yaml:ro
-      #depends_on:
-      #- kafka0
-      #- kafka1
+    depends_on:
+      vc_dev_apigw:
+        condition: service_healthy
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.13
@@ -172,12 +178,6 @@ services:
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.20
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
   mongo-init-verifier-proxy:
     image: mongo:7.0

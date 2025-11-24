@@ -19,7 +19,7 @@ type AuthorizationContext struct {
 	SavedAt                  int64           `json:"saved_at" bson:"saved_at"`
 	Consent                  bool            `json:"consent" bson:"consent"`
 	AuthenticSource          string          `json:"authentic_source" bson:"authentic_source"`
-	DocumentType             string          `json:"document_type" bson:"document_type"`
+	VCT                      string          `json:"vct" bson:"vct"`
 	Identity                 *Identity       `json:"identity,omitempty" bson:"identity,omitempty"`
 	Token                    *Token          `json:"token,omitempty" bson:"token,omitempty"`
 	Nonce                    string          `json:"nonce,omitempty" bson:"nonce,omitempty" validate:"omitempty"`
@@ -40,7 +40,7 @@ type OAuthUsers struct {
 	Password        string    `json:"password" bson:"password" validate:"required"`
 	Identity        *Identity `json:"identity" bson:"identity" validate:"required"`
 	AuthenticSource string    `json:"authentic_source" bson:"authentic_source" validate:"required"`
-	DocumentType    string    `json:"document_type" bson:"document_type" validate:"required"`
+	VCT             string    `json:"vct" bson:"vct" validate:"required"`
 }
 
 type CodeChallenge struct {

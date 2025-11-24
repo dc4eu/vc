@@ -90,8 +90,8 @@ func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 	})
 }
 
-// TestMakeCredentialWithOptions_ComplexPaths tests complex claim processing
-func TestMakeCredentialWithOptions_ComplexPaths(t *testing.T) {
+// TestMakeCredential_ComplexPaths tests complex claim processing
+func TestMakeCredential_ComplexPaths(t *testing.T) {
 	client := &Client{}
 
 	t.Run("deeply_nested_claim", func(t *testing.T) {
@@ -119,9 +119,9 @@ func TestMakeCredentialWithOptions_ComplexPaths(t *testing.T) {
 			},
 		}
 
-		credential, disclosures, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		credential, disclosures, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		if len(disclosures) != 1 {
@@ -161,9 +161,9 @@ func TestMakeCredentialWithOptions_ComplexPaths(t *testing.T) {
 			},
 		}
 
-		credential, disclosures, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 2)
+		credential, disclosures, err := client.MakeCredential(sha256.New(), data, vctm, 2)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		if len(disclosures) != 2 {
@@ -219,9 +219,9 @@ func TestMakeCredentialWithOptions_ComplexPaths(t *testing.T) {
 			"age":  30,
 		}
 
-		credential, disclosures, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		credential, disclosures, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		// Only name should be disclosed
@@ -250,9 +250,9 @@ func TestMakeCredentialWithOptions_ComplexPaths(t *testing.T) {
 		}
 
 		// Should not process claims with empty paths
-		credential, disclosures, err := client.MakeCredentialWithOptions(sha256.New(), data, vctm, 0)
+		credential, disclosures, err := client.MakeCredential(sha256.New(), data, vctm, 0)
 		if err != nil {
-			t.Fatalf("MakeCredentialWithOptions failed: %v", err)
+			t.Fatalf("MakeCredential failed: %v", err)
 		}
 
 		// No disclosures should be created for empty path

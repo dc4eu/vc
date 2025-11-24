@@ -318,7 +318,7 @@ func (c *VCAuthorizationContextColl) AddIdentity(ctx context.Context, query *mod
 	update := bson.M{
 		"$set": bson.M{
 			"identity":         input.Identity,
-			"document_type":    input.DocumentType,
+			"vct":              input.VCT,
 			"authentic_source": input.AuthenticSource,
 		},
 	}

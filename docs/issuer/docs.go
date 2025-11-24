@@ -80,10 +80,10 @@ const docTemplate = `{
                 "document_id": {
                     "type": "string"
                 },
-                "document_type": {
+                "revocation_id": {
                     "type": "string"
                 },
-                "revocation_id": {
+                "vct": {
                     "type": "string"
                 }
             }

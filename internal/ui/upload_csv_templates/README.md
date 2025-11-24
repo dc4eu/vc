@@ -38,7 +38,7 @@ See [ehic_upload_template.csv](ehic_upload_template.csv) for an example
 - **`authentic_source_person_id`, `family_name`, `given_name` and `birth_date` must be selected and combined exactly as in [file](https://github.com/dc4eu/vc/blob/main/users_paris.csv)**
   - other values may be used BUT the identity then won't be found in an IdP in later stages.
 - all the ehic fields including `social_security_pin` is validated against the rules in [schema](https://github.com/dc4eu/vc/blob/main/standards/schema_ehic.json)
-- `document_id` must be unique together with `authentic_source` and `document_type`
+- `document_id` must be unique together with `authentic_source` and `vct`
 - `document_version` is always given the value "1.0.0"
 - `collect.id` is given the same value as `document_id`
 - `collect.valid_until` is given the same value as `ehic_expiry_date`

@@ -1,6 +1,9 @@
 package openid4vp
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"vc/pkg/sdjwtvc"
 )
 
@@ -24,4 +27,32 @@ func (r *ResponseParameters) BuildCredential() (map[string]any, error) {
 	}
 
 	return parsed.Claims, nil
+}
+
+// Validate validates the response parameters according to OpenID4VP spec Section 8.1
+func (r *ResponseParameters) Validate() error {
+	if r.VPToken == "" {
+		return fmt.Errorf("vp_token is required")
+	}
+
+	// Validate VP Token format
+	if _, err := r.BuildCredential(); err != nil {
+		return fmt.Errorf("invalid vp_token format: %w", err)
+	}
+
+	return nil
+}
+
+// ToJSON serializes the response parameters to JSON
+func (r *ResponseParameters) ToJSON() ([]byte, error) {
+	return json.Marshal(r)
+}
+
+// ResponseParametersFromJSON deserializes the response parameters from JSON
+func ResponseParametersFromJSON(data []byte) (*ResponseParameters, error) {
+	var r ResponseParameters
+	if err := json.Unmarshal(data, &r); err != nil {
+		return nil, err
+	}
+	return &r, nil
 }

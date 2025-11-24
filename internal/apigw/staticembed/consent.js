@@ -3,7 +3,7 @@ import * as v from "valibot";
 
 /**
  * @typedef {Object} Credential
- * @property {string} document_type
+ * @property {string} vct
  * @property {string} name
  * @property {string} svg
  * @property {Record<string, { label: string; value: string; }>} claims
@@ -303,7 +303,7 @@ Alpine.data("app", () => ({
 
 
             this.credentials.push({
-                document_type: "N/A",
+                vct: "N/A",
                 name: "PID",
                 svg,
                 claims: data.svg_template_claims,

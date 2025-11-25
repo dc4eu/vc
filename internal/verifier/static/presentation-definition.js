@@ -84,6 +84,91 @@ Alpine.data("app", () => ({
      /** @type {{ id: string; vct: string; claims: Record<string, string[]>; } | null} */
     credentialAttributes: null,
 
+    /** 
+     * TODO: Fix this.
+     * @type {Record<string,  DCQLQuery & { label: string; }>} 
+     */
+    predefinedPresentationDefinitions: {
+        pid: {
+            label: "PID",
+            credentials: [
+                {
+                    id: "pid",
+                    format: "vc+sd-jwt",
+                    meta: {
+                        vct_values: ["urn:eudi:pid:1"],
+                    },
+                    claims: [
+                        { path: ["age_in_years"] },
+                        { path: ["age_over_14"] },
+                        { path: ["age_over_16"] },
+                        { path: ["age_over_18"] },
+                        { path: ["age_over_21"] },
+                        { path: ["age_over_65"] },
+                        { path: ["birth_given_name"] },
+                        { path: ["birth_family_name"] },
+                        { path: ["age_birth_year"] },
+                        { path: ["resident_city"] },
+                        { path: ["resident_country"] },
+                        { path: ["birthdate"] },
+                        { path: ["document_number"] },
+                        { path: ["email_address"] },
+                        { path: ["expiry_date"] },
+                        { path: ["given_name"] },
+                        { path: ["resident_address"] },
+                        { path: ["issuance_date"] },
+                        { path: ["issuing_authority"] },
+                        { path: ["issuing_country"] },
+                        { path: ["issuing_jurisdiction"] },
+                        { path: ["family_name"] },
+                        { path: ["mobile_phone_number"] },
+                        { path: ["nationality"] },
+                        { path: ["personal_administrative_number"] },
+                        { path: ["picture"] },
+                        { path: ["birth_place"] },
+                        { path: ["resident_postal_code"] },
+                        { path: ["resident_house_number"] },
+                        { path: ["resident_street_address"] },
+                        { path: ["sex"] },
+                        { path: ["resident_state"] },
+                        { path: ["trust_anchor"] },
+                    ],
+                },
+            ],
+        },
+        ehic: {
+            label: "EHIC",
+            credentials: [
+                {
+                id: "ehic",
+                format: "vc+sd-jwt",
+                meta: {
+                    vct_values: ["urn:eudi:ehic:1"],
+                },
+                claims: [
+                    { path: ["authentic_source"] },
+                    { path: ["authentic_source", "id"] },
+                    { path: ["authentic_source", "name"] },
+                    { path: ["document_number"] },
+                    { path: ["ending_date"] },
+                    { path: ["date_of_expiry"] },
+                    { path: ["date_of_issuance"] },
+                    { path: ["issuing_authority"] },
+                    { path: ["issuing_authority", "id"] },
+                    { path: ["issuing_authority", "name"] },
+                    { path: ["issuing_country"] },
+                    { path: ["personal_administrative_number"] },
+                    { path: ["starting_date"] },
+                ],
+                },
+            ],
+        },
+        pid_ehic: {
+            label: "PID + EHIC",
+            credentials: [],
+        },
+    },
+
     /** @type {DCQLQuery | null} */
     dcqlQuery: null,
 
@@ -94,6 +179,12 @@ Alpine.data("app", () => ({
     redirectUris: null,
 
     async init() {
+        // TODO: this is a bit hacky...
+        this.predefinedPresentationDefinitions.pid_ehic.credentials = [
+            ...this.predefinedPresentationDefinitions.pid.credentials,
+            ...this.predefinedPresentationDefinitions.ehic.credentials,
+        ];
+
         await this.lookupCredentialsList();
         this.loading = false;
 
@@ -112,6 +203,28 @@ Alpine.data("app", () => ({
 
         this.credentialsList = data.credentials;
         this.walletInstances = data.supported_wallets;
+    },
+
+    /** @param {string} id */
+    async handleSelectPredefinedPresentationDefinition(id) {
+        this.error = null;
+        this.loading = true;
+        
+        const result = v.safeParse(dcqlQuerySchema, this.predefinedPresentationDefinitions[id]);
+        if (!result.success) {
+            this.error = "Malformed predefined DCQL query";
+            return;
+        }
+
+        // @ts-ignore
+        this.credentialAttributes = {};
+        this.credentialsList = {};
+
+        this.dcqlQuery = result.output;
+
+        await this.sendDcqlQuery();
+
+        this.loading = false;
     },
 
     /** @param {SubmitEvent} event */
@@ -187,11 +300,6 @@ Alpine.data("app", () => ({
             return;
         }
 
-        if (!this.walletInstances) {
-            this.error = "Wallet instances list is null";
-            return;
-        }
-        
         if (!(this.$refs.attributesSelectionForm instanceof HTMLFormElement)) {
             this.error = "Attributes selection form not of type 'HtmlFormElement'";
             return;
@@ -232,6 +340,17 @@ Alpine.data("app", () => ({
 
         this.dcqlQuery = dcql_query;
 
+        await this.sendDcqlQuery();
+
+        this.loading = false;
+    },
+
+    async sendDcqlQuery() {
+        if (!this.walletInstances) {
+            this.error = "Wallet instances list is null";
+            return;
+        }
+
         try {
             const res = await this.fetchData(
                 new URL("/ui/interaction", baseUrl), 
@@ -241,7 +360,7 @@ Alpine.data("app", () => ({
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        dcql_query,
+                        dcql_query: this.dcqlQuery,
                     })
                 },
             );
@@ -264,8 +383,6 @@ Alpine.data("app", () => ({
             this.error = `Error during posting of dcql query: ${error}`;
             return;
         }
-
-        this.loading = false;
     },
 
     /**

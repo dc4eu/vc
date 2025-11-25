@@ -35,11 +35,22 @@ type AuthorizeRequest struct {
 
 // AuthorizeResponse represents the response to an authorization request
 type AuthorizeResponse struct {
-	SessionID      string `json:"session_id"`
-	QRCodeData     string `json:"qr_code_data"`
-	QRCodeImageURL string `json:"qr_code_image_url"`
-	DeepLinkURL    string `json:"deep_link_url"`
-	PollURL        string `json:"poll_url"`
+	SessionID        string   `json:"session_id"`
+	QRCodeData       string   `json:"qr_code_data"`
+	QRCodeImageURL   string   `json:"qr_code_image_url"`
+	DeepLinkURL      string   `json:"deep_link_url"`
+	PollURL          string   `json:"poll_url"`
+	PreferredFormats []string `json:"preferred_formats"`
+	UseJAR           bool     `json:"use_jar"`
+	ResponseMode     string   `json:"response_mode"`
+	Title            string   `json:"title"`
+	Subtitle         string   `json:"subtitle"`
+	PrimaryColor     string   `json:"primary_color"`
+	SecondaryColor   string   `json:"secondary_color"`
+	Theme            string   `json:"theme"`
+	CustomCSS        string   `json:"custom_css"`
+	CSSFile          string   `json:"css_file"`
+	LogoURL          string   `json:"logo_url"`
 }
 
 // Authorize handles the OIDC authorization request
@@ -132,13 +143,54 @@ func (c *Client) Authorize(ctx context.Context, req *AuthorizeRequest) (*Authori
 		sessionID,
 	)
 
-	return &AuthorizeResponse{
+	// Build response with DC API configuration
+	response := &AuthorizeResponse{
 		SessionID:      sessionID,
 		QRCodeData:     authzReqURL,
 		QRCodeImageURL: fmt.Sprintf("/qr/%s", sessionID),
 		DeepLinkURL:    authzReqURL,
 		PollURL:        fmt.Sprintf("/poll/%s", sessionID),
-	}, nil
+	}
+
+	// Add Digital Credentials API configuration
+	if c.cfg.VerifierProxy.DigitalCredentials.Enabled {
+		response.PreferredFormats = c.cfg.VerifierProxy.DigitalCredentials.PreferredFormats
+		response.UseJAR = c.cfg.VerifierProxy.DigitalCredentials.UseJAR
+		response.ResponseMode = c.cfg.VerifierProxy.DigitalCredentials.ResponseMode
+	} else {
+		// Defaults
+		response.PreferredFormats = []string{"vc+sd-jwt"}
+		response.UseJAR = false
+		response.ResponseMode = "direct_post"
+	}
+
+	// Add CSS customization configuration
+	cssConfig := c.cfg.VerifierProxy.AuthorizationPageCSS
+	response.Title = cssConfig.Title
+	if response.Title == "" {
+		response.Title = "Credential Verification"
+	}
+	response.Subtitle = cssConfig.Subtitle
+	if response.Subtitle == "" {
+		response.Subtitle = "Please present your digital credential to continue"
+	}
+	response.PrimaryColor = cssConfig.PrimaryColor
+	if response.PrimaryColor == "" {
+		response.PrimaryColor = "#3182ce"
+	}
+	response.SecondaryColor = cssConfig.SecondaryColor
+	if response.SecondaryColor == "" {
+		response.SecondaryColor = "#2c5282"
+	}
+	response.Theme = cssConfig.Theme
+	if response.Theme == "" {
+		response.Theme = "light"
+	}
+	response.CustomCSS = cssConfig.CustomCSS
+	response.CSSFile = cssConfig.CSSFile
+	response.LogoURL = cssConfig.LogoURL
+
+	return response, nil
 }
 
 // TokenRequest represents an OIDC token request

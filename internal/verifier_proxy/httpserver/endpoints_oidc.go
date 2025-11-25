@@ -83,13 +83,33 @@ func (s *Service) endpointAuthorize(ctx context.Context, c *gin.Context) (any, e
 		return nil, nil
 	}
 
-	// Render authorization page with QR code
-	c.HTML(http.StatusOK, "authorize.html", gin.H{
-		"SessionID":   response.SessionID,
-		"QRCodeData":  response.QRCodeData,
-		"DeepLinkURL": response.DeepLinkURL,
-		"PollURL":     response.PollURL,
-	})
+	// Render authorization page with QR code and DC API support
+	templateData := gin.H{
+		"SessionID":        response.SessionID,
+		"QRCodeData":       response.QRCodeData,
+		"DeepLinkURL":      response.DeepLinkURL,
+		"PollURL":          response.PollURL,
+		"PreferredFormats": response.PreferredFormats,
+		"UseJAR":           response.UseJAR,
+		"ResponseMode":     response.ResponseMode,
+		"Title":            response.Title,
+		"Subtitle":         response.Subtitle,
+		"PrimaryColor":     response.PrimaryColor,
+		"SecondaryColor":   response.SecondaryColor,
+		"Theme":            response.Theme,
+		"CustomCSS":        response.CustomCSS,
+		"CSSFile":          response.CSSFile,
+		"LogoURL":          response.LogoURL,
+		"Config": gin.H{
+			"DigitalCredentials": gin.H{
+				"Enabled":         s.cfg.VerifierProxy.DigitalCredentials.Enabled,
+				"AllowQRFallback": s.cfg.VerifierProxy.DigitalCredentials.AllowQRFallback,
+				"DeepLinkScheme":  s.cfg.VerifierProxy.DigitalCredentials.DeepLinkScheme,
+			},
+		},
+	}
+
+	c.HTML(http.StatusOK, "authorize_enhanced.html", templateData)
 
 	return nil, nil
 }

@@ -54,13 +54,26 @@ func (s *Service) endpointDirectPost(ctx context.Context, c *gin.Context) (any, 
 
 	s.log.Debug("endpointDirectPost called")
 
-	// Parse request
+	// Parse request - support both form-encoded and JSON
 	request := &apiv1.DirectPostRequest{}
-	if err := c.ShouldBind(request); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "Failed to bind direct_post request")
-		c.AbortWithStatus(http.StatusBadRequest)
-		return nil, nil
+	contentType := c.GetHeader("Content-Type")
+
+	if contentType == "application/json" {
+		// DC API may send JSON
+		if err := c.ShouldBindJSON(request); err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "Failed to bind JSON direct_post request")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return nil, nil
+		}
+	} else {
+		// Standard form-encoded
+		if err := c.ShouldBind(request); err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "Failed to bind direct_post request")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return nil, nil
+		}
 	}
 
 	// Process VP token

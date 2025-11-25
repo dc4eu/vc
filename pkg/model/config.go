@@ -196,7 +196,6 @@ type Issuer struct {
 	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 	IssuerURL      string       `yaml:"issuer_url" validate:"required"`
 	WalletURL      string       `yaml:"wallet_url"`
-	SAML           SAMLConfig   `yaml:"saml,omitempty" validate:"omitempty"`
 }
 
 // Registry holds the registry configuration

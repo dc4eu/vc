@@ -65,6 +65,12 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		return nil, fmt.Errorf("VCTM not configured for scope: %s", req.Scope)
 	}
 
+	// Validate document data against VCTM schema
+	if err := sdjwtvc.ValidateDocument(req.DocumentData, vctm); err != nil {
+		c.log.Error(err, "document validation failed", "scope", req.Scope)
+		return nil, fmt.Errorf("document validation failed: %w", err)
+	}
+
 	// Build SD-JWT using sdjwtvc package
 	sdClient := sdjwtvc.New()
 	token, err := sdClient.BuildCredential(

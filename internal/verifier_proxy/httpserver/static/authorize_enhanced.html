@@ -289,6 +289,25 @@
         {{/* Error message display */}}
         <div id="error-message" class="error-message hidden"></div>
 
+        {{/* Credential Display Option */}}
+        {{if .Config.CredentialDisplay.Enabled}}
+        <div class="info-banner" style="margin-top: 24px;">
+            <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="show-credential-details" 
+                       {{if .Config.CredentialDisplay.RequireConfirmation}}checked disabled{{end}}
+                       style="margin-right: 8px; width: 18px; height: 18px; cursor: pointer;">
+                <span style="font-size: 14px;">
+                    <strong>Show credential details</strong> before completing authorization
+                    {{if .Config.CredentialDisplay.RequireConfirmation}}
+                    <span style="color: var(--text-secondary); font-weight: normal;">(required)</span>
+                    {{else}}
+                    <span style="color: var(--text-secondary); font-weight: normal;">(optional - useful for debugging)</span>
+                    {{end}}
+                </span>
+            </label>
+        </div>
+        {{end}}
+
         {{/* Digital Credentials API section (shown if supported) */}}
         <div id="dc-api-section" class="hidden">
             {{if .Config.DigitalCredentials.Enabled}}
@@ -358,7 +377,9 @@
             responseMode: '{{.ResponseMode}}',
             digitalCredentialsEnabled: {{.Config.DigitalCredentials.Enabled}},
             allowQRFallback: {{.Config.DigitalCredentials.AllowQRFallback}},
-            deepLinkScheme: '{{.Config.DigitalCredentials.DeepLinkScheme}}'
+            deepLinkScheme: '{{.Config.DigitalCredentials.DeepLinkScheme}}',
+            credentialDisplayEnabled: {{.Config.CredentialDisplay.Enabled}},
+            credentialDisplayRequired: {{.Config.CredentialDisplay.RequireConfirmation}}
         };
 
         // UI elements
@@ -373,6 +394,7 @@
         const methodToggle = document.getElementById('method-toggle');
         const btnBrowserWallet = document.getElementById('btn-browser-wallet');
         const btnShowQR = document.getElementById('btn-show-qr');
+        const showCredentialDetailsCheckbox = document.getElementById('show-credential-details');
 
         // Check browser capabilities
         const hasDCSupport = isDigitalCredentialsSupported();
@@ -403,8 +425,13 @@
         // Digital Credentials API flow
         async function requestCredentialViaBrowser() {
             try {
-                showLoader('Requesting credential from browser wallet...');
+                showLoader('Preparing credential request...');
                 hideError();
+
+                // Save credential display preference before invoking wallet
+                await saveDisplayPreference();
+
+                showLoader('Requesting credential from browser wallet...');
 
                 const client = new DigitalCredentialsClient({
                     ...config,
@@ -430,6 +457,35 @@
                 if (config.allowQRFallback) {
                     showQRFallback();
                 }
+            }
+        }
+
+        // Save display preference to session
+        async function saveDisplayPreference() {
+            if (!config.credentialDisplayEnabled) {
+                return; // No need to save if feature is disabled
+            }
+
+            const showDetails = showCredentialDetailsCheckbox ? showCredentialDetailsCheckbox.checked : false;
+            
+            try {
+                const response = await fetch('/verification/session-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: config.sessionId,
+                        show_credential_details: showDetails
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to save display preference');
+                }
+            } catch (error) {
+                console.error('Error saving preference:', error);
+                // Don't block the flow if this fails
             }
         }
 

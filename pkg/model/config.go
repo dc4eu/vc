@@ -291,6 +291,7 @@ type VerifierProxy struct {
 	OpenID4VP            OpenID4VPConfig            `yaml:"openid4vp" validate:"required"`
 	DigitalCredentials   DigitalCredentialsConfig   `yaml:"digital_credentials,omitempty"`
 	AuthorizationPageCSS AuthorizationPageCSSConfig `yaml:"authorization_page_css,omitempty"`
+	CredentialDisplay    CredentialDisplayConfig    `yaml:"credential_display,omitempty"`
 }
 
 // OIDCConfig holds OIDC-specific configuration for the verifier-proxy's role as an OpenID Provider.
@@ -373,6 +374,29 @@ type AuthorizationPageCSSConfig struct {
 
 	// Subtitle overrides the page subtitle
 	Subtitle string `yaml:"subtitle,omitempty"`
+}
+
+// CredentialDisplayConfig controls whether and how credentials are displayed before being sent to RP
+type CredentialDisplayConfig struct {
+	// Enabled allows users to optionally view credential details before completing authorization
+	// When enabled, a checkbox appears on the authorization page
+	Enabled bool `yaml:"enabled"`
+
+	// RequireConfirmation forces users to review credentials before proceeding
+	// When true, the credential display step is mandatory (checkbox is pre-checked and disabled)
+	RequireConfirmation bool `yaml:"require_confirmation"`
+
+	// ShowRawCredential displays the raw VP token/credential in the display page
+	// Useful for debugging and technical users
+	ShowRawCredential bool `yaml:"show_raw_credential"`
+
+	// ShowClaims displays the parsed claims that will be sent to the RP
+	// Recommended for transparency and user consent
+	ShowClaims bool `yaml:"show_claims"`
+
+	// AllowEdit allows users to redact certain claims before sending to RP (future feature)
+	// Currently not implemented
+	AllowEdit bool `yaml:"allow_edit,omitempty"`
 }
 
 // SupportedCredentialConfig maps credential types to OIDC scopes

@@ -214,6 +214,72 @@ const { id_token } = await tokenResponse.json();
 5. **Claim Extraction**: Verifier-proxy maps credential claims to OIDC claims
 6. **Code Issuance**: Returns standard OIDC authorization code to RP
 
+## Credential Display & Debugging
+
+The verifier-proxy includes an optional **credential display feature** that shows users the credential details before completing authorization. This serves two purposes:
+
+1. **Debugging Tool** - Developers can see the raw credential and extracted claims
+2. **Transparency/Consent** - Users can review what data is being shared with the RP
+
+### Configuration
+
+```yaml
+verifier_proxy:
+  credential_display:
+    enabled: true                   # Show checkbox on authorization page
+    require_confirmation: false     # Make it optional (true = mandatory)
+    show_raw_credential: true       # Display raw VP token/JWT
+    show_claims: true               # Display parsed claims
+```
+
+### How It Works
+
+1. **Authorization Page**: When enabled, users see a checkbox "Show credential details before completing authorization"
+2. **User Choice**: 
+   - If unchecked (default): Normal flow - credential sent directly to RP
+   - If checked: User is redirected to credential display page after presenting credential
+3. **Display Page**: Shows:
+   - **Parsed Claims** - The exact claims that will be sent to the RP in the ID token
+   - **Raw Credential** (optional) - The full VP token in JWT or mdoc format for debugging
+   - **RP Information** - Which service is requesting the data
+4. **Confirmation**: User must click "Confirm & Continue" to proceed, or "Cancel" to abort
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | boolean | `false` | Show credential display checkbox on authorization page |
+| `require_confirmation` | boolean | `false` | Make credential display mandatory (checkbox pre-checked and disabled) |
+| `show_raw_credential` | boolean | `false` | Display raw VP token/credential in JWT or mdoc format |
+| `show_claims` | boolean | `true` | Display parsed claims that will be sent to RP |
+
+### Use Cases
+
+**For Developers**:
+- Debug credential parsing issues
+- Verify claim mapping is working correctly
+- Inspect raw credential structure
+- Test with different credential formats
+
+**For Production** (Optional):
+- Add transparency layer showing users exactly what's shared
+- Provide additional consent step beyond wallet approval
+- Help users understand credential contents
+- Debugging specific user issues
+
+**Recommendation**: 
+- **Development**: `enabled: true, require_confirmation: false, show_raw_credential: true`
+- **Production**: `enabled: false` (unless regulatory requirements demand additional consent)
+- **Support/Debug**: Enable on demand for specific sessions
+
+### Security Note
+
+When `show_raw_credential: true`, the full credential (including potentially undisclosed fields in SD-JWTs) may be visible. This is intentional for debugging, but be aware:
+
+- Raw credentials may contain more data than what's disclosed to the RP
+- Only enable in trusted environments or for debugging
+- The RP still only receives the disclosed claims in the ID token
+
 ## Testing
 
 ### Local Development

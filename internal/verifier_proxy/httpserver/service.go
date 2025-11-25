@@ -108,6 +108,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodGet, "request-object/:session_id", http.StatusOK, s.endpointRequestObject)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodPost, "direct_post", http.StatusOK, s.endpointDirectPost)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodGet, "callback", http.StatusOK, s.endpointCallback)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodPost, "session-preference", http.StatusOK, s.endpointSessionPreference)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodGet, "display/:session_id", http.StatusOK, s.endpointCredentialDisplay)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodPost, "confirm/:session_id", http.StatusOK, s.endpointConfirmCredentialDisplay)
 
 	// UI Endpoints
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "qr/:session_id", http.StatusOK, s.endpointQRCode)

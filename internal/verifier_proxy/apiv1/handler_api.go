@@ -279,12 +279,32 @@ func (c *Client) ProcessDirectPost(ctx context.Context, req *DirectPostRequest) 
 	session.OpenID4VP.VPToken = vpToken
 	session.OpenID4VP.PresentationSubmission = presentationSubmission
 	session.VerifiedClaims = oidcClaims // Store mapped OIDC claims
-	session.Status = db.SessionStatusCodeIssued
 
 	// Extract wallet ID from claims (sub or other identifier)
 	if sub, ok := oidcClaims["sub"].(string); ok {
 		session.OpenID4VP.WalletID = sub
 	}
+
+	// Check if user requested credential display
+	if session.OIDCRequest.ShowCredentialDetails {
+		// Update session status to indicate we're waiting for user confirmation
+		session.Status = db.SessionStatusAwaitingPresentation
+		
+		if err := c.db.Sessions.Update(ctx, session); err != nil {
+			c.log.Error(err, "Failed to update session")
+			return nil, ErrServerError
+		}
+
+		c.log.Info("Redirecting to credential display page", "session_id", session.ID)
+
+		// Redirect to credential display page instead of completing authorization
+		return &DirectPostResponse{
+			RedirectURI: fmt.Sprintf("%s/verification/display/%s", c.cfg.VerifierProxy.ExternalURL, session.ID),
+		}, nil
+	}
+
+	// Otherwise, issue authorization code immediately
+	session.Status = db.SessionStatusCodeIssued
 
 	// Generate authorization code
 	code := c.generateAuthorizationCode()

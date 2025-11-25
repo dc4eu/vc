@@ -240,7 +240,7 @@ func (s *Service) createCredential(ctx context.Context, credentialType string, d
 
 	// Create credential request
 	req := &apiv1.CreateCredentialRequest{
-		DocumentType: credentialType,
+		Scope:        credentialType,
 		DocumentData: documentData,
 		JWK:          jwk,
 	}

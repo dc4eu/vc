@@ -56,14 +56,7 @@ func main() {
 		panic(err)
 	}
 
-	// Initialize SAML service if enabled
-	samlService, err := initSAMLService(ctx, cfg, mainLog)
-	if err != nil {
-		mainLog.Error(err, "Failed to initialize SAML service")
-		panic(err)
-	}
-
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, samlService, log)
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)

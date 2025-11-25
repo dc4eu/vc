@@ -12,11 +12,12 @@ import (
 	"time"
 
 	apiv1_issuer "vc/internal/gen/issuer/apiv1_issuer"
-	"vc/internal/issuer/apiv1"
 	"vc/pkg/openid4vci"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/codes"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // endpointSAMLMetadata returns the SAML Service Provider metadata XML
@@ -204,8 +205,8 @@ func (s *Service) endpointSAMLACS(ctx context.Context, c *gin.Context) (interfac
 		// TODO: Consider if we should require JWK from wallet instead
 	}
 
-	// Create credential using the issuer API
-	credential, err := s.createCredential(ctx, mapping.CredentialType, documentData, jwk)
+	// Create credential using the issuer gRPC API
+	credential, err := s.createCredentialViaSAML(ctx, mapping.CredentialType, documentData, jwk)
 	if err != nil {
 		span.SetStatus(codes.Error, "credential creation failed")
 		return nil, fmt.Errorf("failed to create credential: %w", err)
@@ -233,30 +234,39 @@ func (s *Service) endpointSAMLACS(ctx context.Context, c *gin.Context) (interfac
 	return response, nil
 }
 
-// createCredential calls the issuer API to create a credential
-func (s *Service) createCredential(ctx context.Context, credentialType string, documentData []byte, jwk *apiv1_issuer.Jwk) (string, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:createCredential")
+// createCredentialViaSAML calls the issuer gRPC service to create a credential
+// This follows the same pattern as other APIGW handlers that call the issuer
+func (s *Service) createCredentialViaSAML(ctx context.Context, credentialType string, documentData []byte, jwk *apiv1_issuer.Jwk) (string, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:createCredentialViaSAML")
 	defer span.End()
 
-	// Create credential request
-	req := &apiv1.CreateCredentialRequest{
+	// Connect to issuer gRPC service
+	conn, err := grpc.NewClient(s.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		s.log.Error(err, "Failed to connect to issuer")
+		return "", fmt.Errorf("failed to connect to issuer: %w", err)
+	}
+	defer conn.Close()
+
+	client := apiv1_issuer.NewIssuerServiceClient(conn)
+
+	// Call the issuer's MakeSDJWT method
+	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
 		Scope:        credentialType,
 		DocumentData: documentData,
-		JWK:          jwk,
-	}
-
-	// Call the credential creation API
-	reply, err := s.apiv1.MakeSDJWT(ctx, req)
+		Jwk:          jwk,
+	})
 	if err != nil {
+		s.log.Error(err, "failed to call MakeSDJWT")
 		return "", fmt.Errorf("failed to create credential: %w", err)
 	}
 
-	if reply == nil || len(reply.Data) == 0 {
+	if reply == nil || len(reply.Credentials) == 0 {
 		return "", fmt.Errorf("no credential data returned")
 	}
 
 	// Return the first credential (assuming single credential response)
-	return reply.Data[0].Credential, nil
+	return reply.Credentials[0].Credential, nil
 }
 
 // generateCredentialOffer creates an OpenID4VCI credential offer

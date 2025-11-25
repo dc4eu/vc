@@ -36,6 +36,11 @@ func New(ctx context.Context, cfg *model.SAMLConfig, log *logger.Log) (*Service,
 		return nil, nil
 	}
 
+	// Validate configuration
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid SAML configuration: %w", err)
+	}
+
 	s := &Service{
 		cfg: cfg,
 		log: log.New("saml"),
@@ -80,8 +85,35 @@ func New(ctx context.Context, cfg *model.SAMLConfig, log *logger.Log) (*Service,
 		SignatureMethod:   "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
 	}
 
-	// Initialize MDQ client
-	s.mdqClient = NewMDQClient(cfg.MDQServer, cfg.MetadataCacheTTL, s.log)
+	// Initialize MDQ client (either MDQ or static mode)
+	if cfg.StaticIDPMetadata != nil {
+		// Static IdP mode
+		isURL := cfg.StaticIDPMetadata.MetadataURL != ""
+		metadataSource := cfg.StaticIDPMetadata.MetadataPath
+		if isURL {
+			metadataSource = cfg.StaticIDPMetadata.MetadataURL
+		}
+
+		s.mdqClient, err = NewStaticMDQClient(
+			metadataSource,
+			cfg.StaticIDPMetadata.EntityID,
+			isURL,
+			s.log,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize static IdP metadata: %w", err)
+		}
+
+		s.log.Info("SAML service initialized with static IdP",
+			"entity_id", cfg.EntityID,
+			"idp_entity_id", cfg.StaticIDPMetadata.EntityID)
+	} else {
+		// MDQ mode
+		s.mdqClient = NewMDQClient(cfg.MDQServer, cfg.MetadataCacheTTL, s.log)
+		s.log.Info("SAML service initialized with MDQ",
+			"entity_id", cfg.EntityID,
+			"mdq_server", cfg.MDQServer)
+	}
 
 	// Initialize session store
 	sessionDuration := cfg.SessionDuration
@@ -89,8 +121,6 @@ func New(ctx context.Context, cfg *model.SAMLConfig, log *logger.Log) (*Service,
 		sessionDuration = 3600 // Default 1 hour
 	}
 	s.sessionStore = NewSessionStore(time.Duration(sessionDuration)*time.Second, s.log)
-
-	s.log.Info("SAML service initialized", "entity_id", cfg.EntityID)
 
 	return s, nil
 }
@@ -114,16 +144,30 @@ type AuthRequest struct {
 
 // InitiateAuth initiates a SAML authentication flow
 func (s *Service) InitiateAuth(ctx context.Context, idpEntityID, credentialType string) (*AuthRequest, error) {
-	// Fetch IdP metadata via MDQ
-	idpMetadata, err := s.mdqClient.GetIDPMetadata(ctx, idpEntityID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get IdP metadata: %w", err)
-	}
-
 	// Validate credential type exists in configuration
 	credMapping, exists := s.cfg.CredentialMappings[credentialType]
 	if !exists {
 		return nil, fmt.Errorf("unsupported credential type: %s", credentialType)
+	}
+
+	// In static IdP mode, use the static entityID if none provided
+	if s.mdqClient.IsStaticMode() {
+		staticEntityID := s.mdqClient.GetStaticEntityID()
+		if idpEntityID == "" {
+			idpEntityID = staticEntityID
+			s.log.Debug("using static IdP entityID", "entity_id", idpEntityID)
+		} else if idpEntityID != staticEntityID {
+			s.log.Info("requested IdP differs from static IdP, using static",
+				"requested", idpEntityID,
+				"static", staticEntityID)
+			idpEntityID = staticEntityID
+		}
+	}
+
+	// Fetch IdP metadata via MDQ or static
+	idpMetadata, err := s.mdqClient.GetIDPMetadata(ctx, idpEntityID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get IdP metadata: %w", err)
 	}
 
 	// Create authentication request
@@ -240,6 +284,22 @@ func (s *Service) Middleware() samlsp.RequestTracker {
 // BuildTransformer creates a ClaimTransformer from the service's SAML configuration
 func (s *Service) BuildTransformer() (*ClaimTransformer, error) {
 	return BuildTransformer(s.cfg)
+}
+
+// GetStaticIDPEntityID returns the static IdP entityID if configured, empty string otherwise
+func (s *Service) GetStaticIDPEntityID() string {
+	if s.mdqClient != nil {
+		return s.mdqClient.GetStaticEntityID()
+	}
+	return ""
+}
+
+// IsStaticIDPMode returns true if service is configured for static IdP mode
+func (s *Service) IsStaticIDPMode() bool {
+	if s.mdqClient != nil {
+		return s.mdqClient.IsStaticMode()
+	}
+	return false
 }
 
 // BuildTransformer creates a ClaimTransformer from SAML configuration (package-level for testing)

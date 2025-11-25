@@ -130,7 +130,12 @@ type SAMLConfig struct {
 
 	// MDQServer is the base URL for MDQ (Metadata Query Protocol) server
 	// Example: "https://md.example.org/entities/" (must end with /)
-	MDQServer string `yaml:"mdq_server" validate:"required_if=Enabled true"`
+	// Mutually exclusive with StaticIDPMetadata
+	MDQServer string `yaml:"mdq_server,omitempty"`
+
+	// StaticIDPMetadata configures a single static IdP as alternative to MDQ
+	// Mutually exclusive with MDQServer
+	StaticIDPMetadata *StaticIDPConfig `yaml:"static_idp_metadata,omitempty"`
 
 	// CertificatePath is the path to X.509 certificate for SAML signing/encryption
 	CertificatePath string `yaml:"certificate_path" validate:"required_if=Enabled true"`
@@ -152,6 +157,57 @@ type SAMLConfig struct {
 
 	// MetadataCacheTTL in seconds (default: 3600) - how long to cache IdP metadata from MDQ
 	MetadataCacheTTL int `yaml:"metadata_cache_ttl"`
+}
+
+// StaticIDPConfig holds configuration for a single static IdP connection
+type StaticIDPConfig struct {
+	// EntityID is the IdP entity identifier
+	EntityID string `yaml:"entity_id" validate:"required"`
+
+	// MetadataPath is the file path to IdP metadata XML (mutually exclusive with MetadataURL)
+	MetadataPath string `yaml:"metadata_path,omitempty"`
+
+	// MetadataURL is the HTTP(S) URL to fetch IdP metadata from (mutually exclusive with MetadataPath)
+	MetadataURL string `yaml:"metadata_url,omitempty"`
+}
+
+// Validate validates SAMLConfig for consistency
+func (c *SAMLConfig) Validate() error {
+	if !c.Enabled {
+		return nil
+	}
+
+	// Check mutual exclusivity of MDQ and static IdP
+	hasMDQ := c.MDQServer != ""
+	hasStatic := c.StaticIDPMetadata != nil
+
+	if !hasMDQ && !hasStatic {
+		return errors.New("SAML enabled but neither mdq_server nor static_idp_metadata configured")
+	}
+
+	if hasMDQ && hasStatic {
+		return errors.New("SAML configuration cannot have both mdq_server and static_idp_metadata")
+	}
+
+	// Validate static IdP config if present
+	if hasStatic {
+		if c.StaticIDPMetadata.EntityID == "" {
+			return errors.New("static_idp_metadata.entity_id is required")
+		}
+
+		hasPath := c.StaticIDPMetadata.MetadataPath != ""
+		hasURL := c.StaticIDPMetadata.MetadataURL != ""
+
+		if !hasPath && !hasURL {
+			return errors.New("static_idp_metadata requires either metadata_path or metadata_url")
+		}
+
+		if hasPath && hasURL {
+			return errors.New("static_idp_metadata cannot have both metadata_path and metadata_url")
+		}
+	}
+
+	return nil
 }
 
 // CredentialMapping defines how to issue a specific credential type via SAML
@@ -196,7 +252,6 @@ type Issuer struct {
 	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 	IssuerURL      string       `yaml:"issuer_url" validate:"required"`
 	WalletURL      string       `yaml:"wallet_url"`
-	SAML           SAMLConfig   `yaml:"saml,omitempty" validate:"omitempty"`
 }
 
 // Registry holds the registry configuration
@@ -303,6 +358,7 @@ type APIGW struct {
 	OauthServer       OAuthServer      `yaml:"oauth_server" validate:"omitempty"`
 	IssuerMetadata    IssuerMetadata   `yaml:"issuer_metadata" validate:"omitempty"`
 	ExternalServerURL string           `yaml:"external_server_url" validate:"required"`
+	SAML              SAMLConfig       `yaml:"saml,omitempty" validate:"omitempty"`
 }
 
 // OTEL holds the opentelemetry configuration

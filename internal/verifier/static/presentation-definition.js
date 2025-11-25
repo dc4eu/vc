@@ -31,7 +31,7 @@ const metadataResponseSchema = v.object({
 const dcqlQueryCredentialSchema = v.object({
     id: v.string(),
     format: v.union([
-        v.literal("vc+sd-jwt"),
+        v.literal("dc+sd-jwt"),
     ]),
     meta: v.intersect([
         v.object({
@@ -94,7 +94,7 @@ Alpine.data("app", () => ({
             credentials: [
                 {
                     id: "pid",
-                    format: "vc+sd-jwt",
+                    format: "dc+sd-jwt",
                     meta: {
                         vct_values: ["urn:eudi:pid:1"],
                     },
@@ -141,7 +141,7 @@ Alpine.data("app", () => ({
             credentials: [
                 {
                 id: "ehic",
-                format: "vc+sd-jwt",
+                format: "dc+sd-jwt",
                 meta: {
                     vct_values: ["urn:eudi:ehic:1"],
                 },
@@ -320,7 +320,7 @@ Alpine.data("app", () => ({
         /** @satisfies {DCQLQueryCredential} */
         const credential = {
             id: this.credentialAttributes.id,
-            format: "vc+sd-jwt",
+            format: "dc+sd-jwt",
             meta: {
                 vct_values: [this.credentialAttributes.vct]
             },

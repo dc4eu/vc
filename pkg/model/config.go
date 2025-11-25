@@ -210,6 +210,65 @@ func (c *SAMLConfig) Validate() error {
 	return nil
 }
 
+// OIDCRPConfig holds OIDC Relying Party configuration for credential issuance
+type OIDCRPConfig struct {
+	// Enabled turns on OIDC RP support (default: false)
+	Enabled bool `yaml:"enabled"`
+
+	// ClientID is the OIDC client identifier
+	ClientID string `yaml:"client_id" validate:"required_if=Enabled true"`
+
+	// ClientSecret is the OIDC client secret
+	ClientSecret string `yaml:"client_secret" validate:"required_if=Enabled true"`
+
+	// RedirectURI is the callback URL where the OIDC Provider sends the authorization response
+	// Example: "https://issuer.example.com/oidcrp/callback"
+	RedirectURI string `yaml:"redirect_uri" validate:"required_if=Enabled true"`
+
+	// IssuerURL is the OIDC Provider's issuer URL for discovery
+	// Example: "https://accounts.google.com"
+	// Used for .well-known/openid-configuration discovery
+	IssuerURL string `yaml:"issuer_url" validate:"required_if=Enabled true"`
+
+	// Scopes are the OAuth2/OIDC scopes to request
+	// Default: ["openid", "profile", "email"]
+	Scopes []string `yaml:"scopes"`
+
+	// SessionDuration in seconds (default: 3600)
+	SessionDuration int `yaml:"session_duration"`
+
+	// CredentialMappings defines how to map OIDC claims to credential claims
+	// Key: credential type identifier (e.g., "pid", "diploma")
+	// Maps to credential_constructor keys and OpenID4VCI credential_configuration_ids
+	CredentialMappings map[string]CredentialMapping `yaml:"credential_mappings" validate:"required_if=Enabled true"`
+}
+
+// Validate validates OIDCRPConfig for consistency
+func (c *OIDCRPConfig) Validate() error {
+	if !c.Enabled {
+		return nil
+	}
+
+	// Ensure scopes includes "openid" at minimum
+	if len(c.Scopes) == 0 {
+		c.Scopes = []string{"openid", "profile", "email"}
+	}
+
+	hasOpenID := false
+	for _, scope := range c.Scopes {
+		if scope == "openid" {
+			hasOpenID = true
+			break
+		}
+	}
+
+	if !hasOpenID {
+		return errors.New("OIDC scopes must include 'openid'")
+	}
+
+	return nil
+}
+
 // CredentialMapping defines how to issue a specific credential type via SAML
 // The credential type identifier (map key) is used in API requests and session state
 type CredentialMapping struct {
@@ -359,6 +418,7 @@ type APIGW struct {
 	IssuerMetadata    IssuerMetadata   `yaml:"issuer_metadata" validate:"omitempty"`
 	ExternalServerURL string           `yaml:"external_server_url" validate:"required"`
 	SAML              SAMLConfig       `yaml:"saml,omitempty" validate:"omitempty"`
+	OIDCRP            OIDCRPConfig     `yaml:"oidcrp,omitempty" validate:"omitempty"`
 }
 
 // OTEL holds the opentelemetry configuration

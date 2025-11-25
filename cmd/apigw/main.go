@@ -76,7 +76,14 @@ func main() {
 		panic(err)
 	}
 
-	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, eventPublisher, samlService, log)
+	// Initialize OIDC RP service if enabled
+	oidcrpService, err := initOIDCRPService(ctx, cfg, mainLog)
+	if err != nil {
+		mainLog.Error(err, "Failed to initialize OIDC RP service")
+		panic(err)
+	}
+
+	httpService, err := httpserver.New(ctx, cfg, apiv1Client, tracer, eventPublisher, samlService, oidcrpService, log)
 	services["httpService"] = httpService
 	if err != nil {
 		panic(err)

@@ -241,6 +241,87 @@ apigw:
     path: "/metadata/issuer_metadata.json"
     signing_key_path: "/pki/apigw.key"
     signing_chain_path: "/pki/apigw.crt"
+  # OIDC Relying Party configuration for issuing credentials via external OIDC Providers
+  # Requires building with -tags oidcrp
+  oidcrp:
+    enabled: false
+    # OAuth2 client credentials registered with the OIDC Provider
+    client_id: "your-client-id"
+    client_secret: "your-client-secret"
+    # Callback URL where the OIDC Provider sends the authorization response
+    redirect_uri: "https://issuer.example.com/oidcrp/callback"
+    # OIDC Provider issuer URL (used for .well-known/openid-configuration discovery)
+    # Examples:
+    #   Google: "https://accounts.google.com"
+    #   Azure AD: "https://login.microsoftonline.com/{tenant-id}/v2.0"
+    #   Keycloak: "https://keycloak.example.com/realms/{realm-name}"
+    issuer_url: "https://accounts.google.com"
+    # OAuth2/OIDC scopes to request (must include "openid")
+    scopes:
+      - "openid"
+      - "profile"
+      - "email"
+    # Session duration in seconds (default: 3600)
+    session_duration: 3600
+    # Credential mappings: how to transform OIDC claims into credentials
+    # Key: credential type identifier (must match credential_constructor keys)
+    credential_mappings:
+      pid:
+        # OpenID4VCI credential configuration ID
+        credential_config_id: "urn:eudi:pid:1"
+        # Attribute mappings: OIDC claim name -> credential claim path
+        # Supports dot-notation for nested structures (e.g., "identity.given_name")
+        attributes:
+          # Standard OpenID Connect claims
+          given_name:
+            claim: "identity.given_name"
+            required: true
+          family_name:
+            claim: "identity.family_name"
+            required: true
+          email:
+            claim: "identity.email"
+            required: true
+          email_verified:
+            claim: "identity.email_verified"
+            required: false
+          # Subject identifier
+          sub:
+            claim: "identity.subject_id"
+            required: true
+            transform: "lowercase"
+          # Optional claims with defaults
+          locale:
+            claim: "identity.locale"
+            required: false
+            default: "en-US"
+      # Example: diploma credential from university OIDC provider
+      diploma:
+        credential_config_id: "urn:eudi:diploma:1"
+        attributes:
+          given_name:
+            claim: "student.given_name"
+            required: true
+          family_name:
+            claim: "student.family_name"
+            required: true
+          email:
+            claim: "student.email"
+            required: true
+          # Custom claims from the OIDC provider
+          student_id:
+            claim: "student.id"
+            required: true
+          degree:
+            claim: "diploma.degree"
+            required: true
+          graduation_date:
+            claim: "diploma.graduation_date"
+            required: true
+          university:
+            claim: "diploma.university"
+            required: false
+            default: "Unknown University"
 
 mock_as:
   api_server:

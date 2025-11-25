@@ -31,7 +31,7 @@ func (e *ValidationErrors) Error() string {
 	if len(e.Errors) == 1 {
 		return e.Errors[0].Error()
 	}
-	
+
 	var msgs []string
 	for _, err := range e.Errors {
 		msgs = append(msgs, err.Error())
@@ -152,7 +152,7 @@ func getClaimValue(claims map[string]any, path []*string) (any, bool) {
 		}
 
 		key := *pathElement
-		
+
 		// Try as object
 		if obj, ok := current.(map[string]any); ok {
 			val, exists := obj[key]
@@ -253,18 +253,18 @@ func ValidateClaimPaths(claims map[string]any, vctm *VCTM, strict bool) error {
 // isStandardClaim checks if a claim is a standard JWT/SD-JWT claim
 func isStandardClaim(claim string) bool {
 	standardClaims := map[string]bool{
-		"iss":      true, // Issuer
-		"sub":      true, // Subject
-		"aud":      true, // Audience
-		"exp":      true, // Expiration
-		"nbf":      true, // Not Before
-		"iat":      true, // Issued At
-		"jti":      true, // JWT ID
-		"vct":      true, // Verifiable Credential Type
-		"cnf":      true, // Confirmation (holder binding)
-		"_sd":      true, // Selective Disclosure array
-		"_sd_alg":  true, // SD hash algorithm
-		"...":      true, // Recursive disclosure (reserved)
+		"iss":     true, // Issuer
+		"sub":     true, // Subject
+		"aud":     true, // Audience
+		"exp":     true, // Expiration
+		"nbf":     true, // Not Before
+		"iat":     true, // Issued At
+		"jti":     true, // JWT ID
+		"vct":     true, // Verifiable Credential Type
+		"cnf":     true, // Confirmation (holder binding)
+		"_sd":     true, // Selective Disclosure array
+		"_sd_alg": true, // SD hash algorithm
+		"...":     true, // Recursive disclosure (reserved)
 	}
 	return standardClaims[claim]
 }

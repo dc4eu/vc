@@ -13,7 +13,7 @@ func TestValidateDocument_Success(t *testing.T) {
 	givenName := "given_name"
 	familyName := "family_name"
 	birthdate := "birthdate"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -53,7 +53,7 @@ func TestValidateDocument_Success(t *testing.T) {
 func TestValidateDocument_MissingMandatoryClaim(t *testing.T) {
 	givenName := "given_name"
 	familyName := "family_name"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -81,7 +81,7 @@ func TestValidateDocument_MissingMandatoryClaim(t *testing.T) {
 	// Validate
 	err = ValidateDocument(docData, vctm)
 	assert.Error(t, err)
-	
+
 	validationErr, ok := err.(*ValidationErrors)
 	require.True(t, ok, "expected ValidationErrors type")
 	assert.Len(t, validationErr.Errors, 1)
@@ -93,7 +93,7 @@ func TestValidateDocument_MultipleMissingClaims(t *testing.T) {
 	givenName := "given_name"
 	familyName := "family_name"
 	birthdate := "birthdate"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -124,7 +124,7 @@ func TestValidateDocument_MultipleMissingClaims(t *testing.T) {
 	// Validate
 	err = ValidateDocument(docData, vctm)
 	assert.Error(t, err)
-	
+
 	validationErr, ok := err.(*ValidationErrors)
 	require.True(t, ok)
 	assert.Len(t, validationErr.Errors, 3)
@@ -134,7 +134,7 @@ func TestValidateDocument_NestedClaims(t *testing.T) {
 	address := "address"
 	street := "street"
 	city := "city"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -171,7 +171,7 @@ func TestValidateDocument_MissingNestedClaim(t *testing.T) {
 	address := "address"
 	street := "street"
 	city := "city"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -201,7 +201,7 @@ func TestValidateDocument_MissingNestedClaim(t *testing.T) {
 	// Validate
 	err = ValidateDocument(docData, vctm)
 	assert.Error(t, err)
-	
+
 	validationErr, ok := err.(*ValidationErrors)
 	require.True(t, ok)
 	assert.Len(t, validationErr.Errors, 1)
@@ -211,7 +211,7 @@ func TestValidateDocument_MissingNestedClaim(t *testing.T) {
 func TestValidateDocument_OptionalClaimsMissing(t *testing.T) {
 	givenName := "given_name"
 	nickname := "nickname"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -272,7 +272,7 @@ func TestValidateDocument_NilVCTM(t *testing.T) {
 
 func TestValidateClaims_ArrayValues(t *testing.T) {
 	nationality := "nationality"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -297,7 +297,7 @@ func TestValidateClaims_ArrayValues(t *testing.T) {
 func TestValidateClaimPaths_StrictMode_Success(t *testing.T) {
 	givenName := "given_name"
 	familyName := "family_name"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -323,7 +323,7 @@ func TestValidateClaimPaths_StrictMode_Success(t *testing.T) {
 
 func TestValidateClaimPaths_StrictMode_ExtraClaims(t *testing.T) {
 	givenName := "given_name"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -342,11 +342,11 @@ func TestValidateClaimPaths_StrictMode_ExtraClaims(t *testing.T) {
 	// Validate in strict mode
 	err := ValidateClaimPaths(doc, vctm, true)
 	assert.Error(t, err)
-	
+
 	validationErr, ok := err.(*ValidationErrors)
 	require.True(t, ok)
 	assert.True(t, len(validationErr.Errors) > 0)
-	
+
 	// Find the error about nickname
 	found := false
 	for _, e := range validationErr.Errors {
@@ -360,7 +360,7 @@ func TestValidateClaimPaths_StrictMode_ExtraClaims(t *testing.T) {
 
 func TestValidateClaimPaths_NonStrictMode_ExtraClaims(t *testing.T) {
 	givenName := "given_name"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -383,7 +383,7 @@ func TestValidateClaimPaths_NonStrictMode_ExtraClaims(t *testing.T) {
 
 func TestValidateClaimPaths_StandardClaimsAllowed(t *testing.T) {
 	givenName := "given_name"
-	
+
 	vctm := &VCTM{
 		VCT: "test:credential:1",
 		Claims: []Claim{
@@ -442,7 +442,7 @@ func TestValidationError_Error(t *testing.T) {
 		Field:   "given_name",
 		Message: "is required",
 	}
-	
+
 	assert.Equal(t, "validation error for field 'given_name': is required", err.Error())
 }
 
@@ -453,7 +453,7 @@ func TestValidationErrors_Error(t *testing.T) {
 			{Field: "family_name", Message: "is required"},
 		},
 	}
-	
+
 	errMsg := errors.Error()
 	assert.Contains(t, errMsg, "multiple validation errors")
 	assert.Contains(t, errMsg, "given_name")
@@ -466,7 +466,7 @@ func TestValidationErrors_SingleError(t *testing.T) {
 			{Field: "given_name", Message: "is required"},
 		},
 	}
-	
+
 	errMsg := errors.Error()
 	assert.Equal(t, "validation error for field 'given_name': is required", errMsg)
 }

@@ -19,7 +19,12 @@
 <body>
     <section class="section" x-data="app">
         <div class="container" style="max-width: 500px;">
-            <h1 class="title has-text-centered has-text-weight-bold is-size-2" x-ref="title">Verifier</h1>
+            <h1 class="title has-text-weight-bold is-size-2 is-flex is-justify-content-center is-align-items-center is-gap-2" x-ref="title">
+                <svg width="40" height="40" aria-label="SUNET">
+                    <image href="/static/logo.svg" width="40" height="40"></image>
+                </svg>
+                <span>Verifier</span>
+            </h1>
             <template x-if="error">
                 <div class="notification is-danger">
                     <p x-text="error"></p>

@@ -38,10 +38,11 @@ type Service struct {
 	sessionsEncKey  string
 	sessionsAuthKey string
 	sessionsName    string
+	samlService     SAMLService
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, samlService SAMLService, log *logger.Log) (*Service, error) {
 	s := &Service{
 		cfg:    cfg,
 		log:    log.New("httpserver"),
@@ -52,6 +53,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 			ReadHeaderTimeout: 3 * time.Second,
 		},
 		eventPublisher:  eventPublisher,
+		samlService:     samlService,
 		sessionsName:    "oauth_user_session",
 		sessionsAuthKey: oauth2.GenerateCryptographicNonceFixedLength(32),
 		sessionsEncKey:  oauth2.GenerateCryptographicNonceFixedLength(32),
@@ -128,6 +130,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent/callback", http.StatusNotModified, s.endpointOAuthAuthorizationConsentCallback)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent/svg-template", http.StatusOK, s.endpointOAuthAuthorizationConsentSvgTemplate)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
+
+	// Register SAML endpoints if enabled (build tag dependent)
+	s.registerSAMLRoutes(ctx, rgRoot)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", 200, s.endpointHealth)
 

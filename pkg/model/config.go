@@ -303,6 +303,7 @@ type APIGW struct {
 	OauthServer       OAuthServer      `yaml:"oauth_server" validate:"omitempty"`
 	IssuerMetadata    IssuerMetadata   `yaml:"issuer_metadata" validate:"omitempty"`
 	ExternalServerURL string           `yaml:"external_server_url" validate:"required"`
+	SAML              SAMLConfig       `yaml:"saml,omitempty" validate:"omitempty"`
 }
 
 // OTEL holds the opentelemetry configuration

@@ -249,6 +249,172 @@ oidcrp:
           default: "Unknown"
 ```
 
+### Dynamic Client Registration (RFC 7591)
+
+Instead of manually pre-registering your OIDC RP with each provider, you can enable **dynamic client registration** to automatically register at runtime. This is especially useful for:
+
+- Development/testing environments
+- Multi-tenant scenarios
+- Providers that support dynamic registration (Google, Keycloak, etc.)
+
+#### How It Works
+
+1. When `dynamic_registration.enabled: true`, the service attempts to register with the OIDC Provider on startup
+2. The provider's `registration_endpoint` is discovered via `.well-known/openid-configuration`
+3. Registration request is sent with client metadata (name, redirect_uri, scopes, etc.)
+4. Provider returns `client_id` and `client_secret`
+5. Credentials are cached to `storage_path` (if configured) to avoid re-registration on restart
+6. Cached credentials are reused until they expire (if `client_secret_expires_at` is set)
+
+#### Configuration Example
+
+```yaml
+oidcrp:
+  enabled: true
+  # Static credentials are optional when using dynamic registration
+  # client_id: "optional-fallback-id"
+  # client_secret: "optional-fallback-secret"
+  
+  redirect_uri: "https://issuer.example.com/oidcrp/callback"
+  issuer_url: "https://accounts.google.com"
+  scopes:
+    - "openid"
+    - "profile"
+    - "email"
+  
+  # Client metadata for registration
+  client_name: "My Credential Issuer"
+  client_uri: "https://issuer.example.com"
+  logo_uri: "https://issuer.example.com/logo.png"
+  contacts:
+    - "admin@example.com"
+  tos_uri: "https://issuer.example.com/terms"
+  policy_uri: "https://issuer.example.com/privacy"
+  
+  # Enable dynamic registration
+  dynamic_registration:
+    enabled: true
+    # Some providers (e.g., Keycloak) require an initial access token
+    initial_access_token: "optional-bearer-token"
+    # Cache credentials to avoid re-registration
+    storage_path: "/var/lib/vc/oidcrp_credentials.json"
+  
+  credential_mappings:
+    pid:
+      credential_config_id: "urn:eudi:pid:1"
+      attributes:
+        given_name:
+          claim: "identity.given_name"
+          required: true
+        family_name:
+          claim: "identity.family_name"
+          required: true
+        email:
+          claim: "identity.email"
+          required: true
+```
+
+#### Provider-Specific Notes
+
+**Google**
+- Supports dynamic registration without initial access token
+- Registration endpoint: `https://accounts.google.com/o/oauth2/register`
+- No special configuration needed
+
+**Azure AD**
+- Does NOT support RFC 7591 dynamic registration
+- Must use Azure Portal to pre-register clients
+- Use static `client_id` and `client_secret`
+
+**Keycloak**
+- Supports dynamic registration with initial access tokens
+- Generate initial access token in Keycloak admin console:
+  - Go to Realm Settings → Client Registration → Initial Access Tokens
+  - Create new token and copy it to `initial_access_token` field
+- Registration endpoint: `https://keycloak.example.com/realms/{realm}/clients-registrations/openid-connect`
+
+**Example: Keycloak with Dynamic Registration**
+
+```yaml
+oidcrp:
+  enabled: true
+  redirect_uri: "https://issuer.example.com/oidcrp/callback"
+  issuer_url: "https://keycloak.example.com/realms/master"
+  scopes:
+    - "openid"
+    - "profile"
+    - "email"
+  
+  client_name: "Issuer Service (Auto-Registered)"
+  client_uri: "https://issuer.example.com"
+  
+  dynamic_registration:
+    enabled: true
+    # Get this from Keycloak admin console
+    initial_access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+    storage_path: "/var/lib/vc/keycloak_credentials.json"
+  
+  credential_mappings:
+    pid:
+      credential_config_id: "urn:eudi:pid:1"
+      attributes:
+        given_name:
+          claim: "identity.given_name"
+          required: true
+        family_name:
+          claim: "identity.family_name"
+          required: true
+```
+
+#### Cached Credentials Format
+
+When `storage_path` is configured, registered credentials are cached in JSON format:
+
+```json
+{
+  "client_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "client_secret": "super-secret-string",
+  "registration_access_token": "optional-token-for-updates",
+  "registration_client_uri": "https://provider.com/clients/a1b2c3d4...",
+  "client_secret_expires_at": 1735689600,
+  "cached_at": "2024-01-15T10:30:00Z"
+}
+```
+
+**Security Notes:**
+- Cached credential files should have `0600` permissions (owner read/write only)
+- The `storage_path` directory should be protected
+- Consider using volume mounts for Docker deployments
+- Rotate credentials periodically if provider supports it
+
+#### Fallback to Static Credentials
+
+You can configure both dynamic registration AND static credentials for failover:
+
+```yaml
+oidcrp:
+  enabled: true
+  # Static credentials as fallback
+  client_id: "fallback-client-id"
+  client_secret: "fallback-client-secret"
+  
+  redirect_uri: "https://issuer.example.com/oidcrp/callback"
+  issuer_url: "https://provider.example.com"
+  scopes:
+    - "openid"
+    - "profile"
+  
+  # Try dynamic registration first
+  dynamic_registration:
+    enabled: true
+    storage_path: "/var/lib/vc/credentials.json"
+  
+  credential_mappings:
+    # ...
+```
+
+If dynamic registration fails, the service will use the static credentials.
+
 ### Credential Mappings
 
 Credential mappings define how OIDC claims are transformed into credential claims.

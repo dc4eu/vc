@@ -50,15 +50,66 @@ func New(ctx context.Context, cfg *model.OIDCRPConfig, log *logger.Log) (*Servic
 	}
 	s.provider = provider
 
+	// Handle dynamic client registration if enabled
+	clientID := cfg.ClientID
+	clientSecret := cfg.ClientSecret
+
+	if cfg.DynamicRegistration.Enabled {
+		log.Info("Dynamic client registration enabled, attempting registration")
+		
+		// Check if we have cached credentials
+		cachedCreds, err := loadCachedCredentials(cfg.DynamicRegistration.StoragePath)
+		if err == nil && cachedCreds != nil {
+			log.Info("Using cached dynamic registration credentials", "client_id", cachedCreds.ClientID)
+			clientID = cachedCreds.ClientID
+			clientSecret = cachedCreds.ClientSecret
+		} else {
+			// Perform dynamic registration
+			regClient := NewDynamicRegistrationClient(log)
+			regReq := BuildRegistrationRequest(cfg)
+			
+			// Get registration endpoint from provider metadata
+			var providerJSON struct {
+				RegistrationEndpoint string `json:"registration_endpoint"`
+			}
+			if err := provider.Claims(&providerJSON); err != nil {
+				return nil, fmt.Errorf("failed to get provider metadata: %w", err)
+			}
+			
+			if providerJSON.RegistrationEndpoint == "" {
+				return nil, fmt.Errorf("OIDC provider does not support dynamic client registration (no registration_endpoint in metadata)")
+			}
+			
+			regResp, err := regClient.Register(ctx, providerJSON.RegistrationEndpoint, regReq, cfg.DynamicRegistration.InitialAccessToken)
+			if err != nil {
+				return nil, fmt.Errorf("dynamic client registration failed: %w", err)
+			}
+			
+			clientID = regResp.ClientID
+			clientSecret = regResp.ClientSecret
+			
+			log.Info("Dynamic client registration successful",
+				"client_id", clientID,
+				"registration_access_token_present", regResp.RegistrationAccessToken != "")
+			
+			// Cache credentials if storage path is provided
+			if cfg.DynamicRegistration.StoragePath != "" {
+				if err := saveCachedCredentials(cfg.DynamicRegistration.StoragePath, regResp); err != nil {
+					log.Info("Failed to cache dynamic registration credentials", "error", err)
+				}
+			}
+		}
+	}
+
 	// Create ID token verifier
 	s.verifier = provider.Verifier(&oidc.Config{
-		ClientID: cfg.ClientID,
+		ClientID: clientID,
 	})
 
 	// Configure OAuth2
 	s.oauth2Config = &oauth2.Config{
-		ClientID:     cfg.ClientID,
-		ClientSecret: cfg.ClientSecret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		RedirectURL:  cfg.RedirectURI,
 		Endpoint:     provider.Endpoint(),
 		Scopes:       cfg.Scopes,
@@ -73,8 +124,9 @@ func New(ctx context.Context, cfg *model.OIDCRPConfig, log *logger.Log) (*Servic
 
 	s.log.Info("OIDC RP service initialized",
 		"issuer", cfg.IssuerURL,
-		"client_id", cfg.ClientID,
-		"redirect_uri", cfg.RedirectURI)
+		"client_id", clientID,
+		"redirect_uri", cfg.RedirectURI,
+		"dynamic_registration", cfg.DynamicRegistration.Enabled)
 
 	return s, nil
 }

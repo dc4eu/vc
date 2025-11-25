@@ -215,11 +215,16 @@ type OIDCRPConfig struct {
 	// Enabled turns on OIDC RP support (default: false)
 	Enabled bool `yaml:"enabled"`
 
-	// ClientID is the OIDC client identifier
-	ClientID string `yaml:"client_id" validate:"required_if=Enabled true"`
+	// Dynamic Registration (RFC 7591) support
+	// If enabled, the OIDC RP will attempt to register itself with the OIDC Provider
+	// instead of using pre-configured client credentials
+	DynamicRegistration DynamicRegistrationConfig `yaml:"dynamic_registration"`
 
-	// ClientSecret is the OIDC client secret
-	ClientSecret string `yaml:"client_secret" validate:"required_if=Enabled true"`
+	// ClientID is the OIDC client identifier (required if not using dynamic registration)
+	ClientID string `yaml:"client_id"`
+
+	// ClientSecret is the OIDC client secret (required if not using dynamic registration)
+	ClientSecret string `yaml:"client_secret"`
 
 	// RedirectURI is the callback URL where the OIDC Provider sends the authorization response
 	// Example: "https://issuer.example.com/oidcrp/callback"
@@ -237,10 +242,34 @@ type OIDCRPConfig struct {
 	// SessionDuration in seconds (default: 3600)
 	SessionDuration int `yaml:"session_duration"`
 
+	// Client metadata for dynamic registration or display purposes
+	ClientName string   `yaml:"client_name,omitempty"`
+	ClientURI  string   `yaml:"client_uri,omitempty"`
+	LogoURI    string   `yaml:"logo_uri,omitempty"`
+	Contacts   []string `yaml:"contacts,omitempty"`
+	TosURI     string   `yaml:"tos_uri,omitempty"`
+	PolicyURI  string   `yaml:"policy_uri,omitempty"`
+
 	// CredentialMappings defines how to map OIDC claims to credential claims
 	// Key: credential type identifier (e.g., "pid", "diploma")
 	// Maps to credential_constructor keys and OpenID4VCI credential_configuration_ids
 	CredentialMappings map[string]CredentialMapping `yaml:"credential_mappings" validate:"required_if=Enabled true"`
+}
+
+// DynamicRegistrationConfig configures RFC 7591 dynamic client registration
+type DynamicRegistrationConfig struct {
+	// Enabled turns on dynamic client registration
+	// If true, ClientID and ClientSecret from OIDCRPConfig are ignored
+	Enabled bool `yaml:"enabled"`
+
+	// InitialAccessToken is an optional bearer token for registration
+	// Required by some OIDC Providers (e.g., Keycloak)
+	InitialAccessToken string `yaml:"initial_access_token,omitempty"`
+
+	// StoragePath is where registered client credentials are cached
+	// Example: "/var/lib/vc/oidcrp-registration.json"
+	// If empty, credentials are not persisted (re-register on restart)
+	StoragePath string `yaml:"storage_path,omitempty"`
 }
 
 // Validate validates OIDCRPConfig for consistency
@@ -264,6 +293,13 @@ func (c *OIDCRPConfig) Validate() error {
 
 	if !hasOpenID {
 		return errors.New("OIDC scopes must include 'openid'")
+	}
+
+	// Validate that either static credentials or dynamic registration is configured
+	if !c.DynamicRegistration.Enabled {
+		if c.ClientID == "" || c.ClientSecret == "" {
+			return errors.New("OIDC RP requires either client_id/client_secret or dynamic_registration.enabled=true")
+		}
 	}
 
 	return nil

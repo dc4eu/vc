@@ -51,7 +51,7 @@ func (s *Service) endpointVerificationCallback(ctx context.Context, c *gin.Conte
 
 	reply, err := s.apiv1.VerificationCallback(ctx, request)
 	if err != nil {
-		return nil, err
+		s.log.Error(err, "Failed to get verification callback reply")
 	}
 
 	c.HTML(http.StatusOK, "callback.html", reply)

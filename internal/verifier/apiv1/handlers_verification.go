@@ -203,6 +203,10 @@ type VerificationCallbackResponse struct {
 func (c *Client) VerificationCallback(ctx context.Context, req *VerificationCallbackRequest) (*VerificationCallbackResponse, error) {
 	c.log.Debug("verificationCallback", "req", req)
 
+	if has := c.credentialCache.Has(req.ResponseCode); !has {
+		return nil, fmt.Errorf("no item in crededential cache matching id %s", req.ResponseCode)
+	}
+
 	credential := c.credentialCache.Get(req.ResponseCode).Value()
 
 	reply := &VerificationCallbackResponse{

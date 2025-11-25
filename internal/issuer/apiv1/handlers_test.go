@@ -15,6 +15,7 @@ import (
 
 var mockEhic = []byte(`
 {
+  "family_name": "TestFamily",
   "authentic_source": {
     "id": "CLEISS",
     "name": "SUNET"
@@ -44,6 +45,7 @@ var mockPidData = []byte(`
 
 var mockDiplomaData = []byte(`
 {
+  "family_name": "Smith",
   "degree": "Master of Science",
   "field_of_study": "Computer Science",
   "graduation_date": "2020-06-15"
@@ -368,6 +370,80 @@ func TestMakeSDJWT_MultipleCredentialTypes(t *testing.T) {
 			require.NoError(t, err, "should create %s credential", scope)
 			assert.NotNil(t, got)
 			assert.NotEmpty(t, got.Data[0].Credential)
+		})
+	}
+}
+
+func TestMakeSDJWT_ValidationErrors(t *testing.T) {
+	tests := []struct {
+		name         string
+		scope        string
+		documentData []byte
+		wantErr      bool
+		errContains  string
+	}{
+		{
+			name:  "missing mandatory claim in PID",
+			scope: "pid",
+			documentData: []byte(`{
+				"given_name": "John",
+				"birth_date": "1990-01-15"
+			}`),
+			wantErr:     true,
+			errContains: "document validation failed",
+		},
+		{
+			name:  "missing mandatory claim in EHIC",
+			scope: "ehic",
+			documentData: []byte(`{
+				"issuing_country": "FR",
+				"starting_date": "2025-06-24"
+			}`),
+			wantErr:     true,
+			errContains: "document validation failed",
+		},
+		{
+			name:         "valid PID passes validation",
+			scope:        "pid",
+			documentData: mockPidData,
+			wantErr:      false,
+		},
+		{
+			name:         "valid EHIC passes validation",
+			scope:        "ehic",
+			documentData: mockEhic,
+			wantErr:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			log := logger.NewSimple("test")
+			client := mockNewClient(ctx, t, "ecdsa", log)
+
+			req := &CreateCredentialRequest{
+				Scope:        tt.scope,
+				DocumentData: tt.documentData,
+				JWK: &apiv1_issuer.Jwk{
+					Kty: "EC",
+					Crv: "P-256",
+					X:   "f83OJ3D2xF4c3hXhN3k1j5x5mX5Z5x5Z5x5Z5x5Z5x5Z",
+					Y:   "x_FEzRu9mX5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5x5Z5",
+				},
+			}
+
+			got, err := client.MakeSDJWT(ctx, req)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errContains)
+				assert.Nil(t, got)
+			} else {
+				require.NoError(t, err)
+				assert.NotNil(t, got)
+				assert.NotEmpty(t, got.Data)
+			}
 		})
 	}
 }

@@ -1,4 +1,3 @@
-package saml
 //go:build saml
 
 package saml

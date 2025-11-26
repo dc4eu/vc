@@ -6,10 +6,11 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"sync"
 	"time"
 
 	"vc/pkg/logger"
+
+	"github.com/jellydator/ttlcache/v3"
 )
 
 // Session represents an OIDC authentication session
@@ -24,26 +25,26 @@ type Session struct {
 	ExpiresAt      time.Time
 }
 
-// SessionStore manages OIDC RP sessions with automatic expiration
+// SessionStore manages OIDC RP sessions with automatic expiration using ttlcache
 type SessionStore struct {
-	sessions map[string]*Session
-	mu       sync.RWMutex
+	cache    *ttlcache.Cache[string, *Session]
 	duration time.Duration
 	log      *logger.Log
 }
 
-// NewSessionStore creates a new session store
+// NewSessionStore creates a new session store using ttlcache
 func NewSessionStore(duration time.Duration, log *logger.Log) *SessionStore {
-	store := &SessionStore{
-		sessions: make(map[string]*Session),
+	cache := ttlcache.New(
+		ttlcache.WithTTL[string, *Session](duration),
+	)
+
+	go cache.Start() // Start automatic cleanup
+
+	return &SessionStore{
+		cache:    cache,
 		duration: duration,
 		log:      log.New("oidcrp_session"),
 	}
-
-	// Start cleanup goroutine
-	go store.cleanup()
-
-	return store
 }
 
 // Create creates a new session with generated state, nonce, and code_verifier
@@ -63,6 +64,7 @@ func (s *SessionStore) Create(credentialType, issuerURL string) (*Session, error
 		return nil, fmt.Errorf("failed to generate code_verifier: %w", err)
 	}
 
+	now := time.Now()
 	session := &Session{
 		ID:             state, // Use state as session ID for simplicity
 		State:          state,
@@ -70,13 +72,11 @@ func (s *SessionStore) Create(credentialType, issuerURL string) (*Session, error
 		CodeVerifier:   codeVerifier,
 		CredentialType: credentialType,
 		IssuerURL:      issuerURL,
-		CreatedAt:      time.Now(),
-		ExpiresAt:      time.Now().Add(s.duration),
+		CreatedAt:      now,
+		ExpiresAt:      now.Add(s.duration),
 	}
 
-	s.mu.Lock()
-	s.sessions[session.ID] = session
-	s.mu.Unlock()
+	s.cache.Set(session.ID, session, ttlcache.DefaultTTL)
 
 	s.log.Debug("Session created",
 		"session_id", session.ID,
@@ -88,16 +88,13 @@ func (s *SessionStore) Create(credentialType, issuerURL string) (*Session, error
 
 // Get retrieves a session by state parameter
 func (s *SessionStore) Get(state string) (*Session, error) {
-	s.mu.RLock()
-	session, exists := s.sessions[state]
-	s.mu.RUnlock()
-
-	if !exists {
+	item := s.cache.Get(state)
+	if item == nil {
 		return nil, fmt.Errorf("session not found for state: %s", state)
 	}
 
-	if time.Now().After(session.ExpiresAt) {
-		s.Delete(state)
+	session := item.Value()
+	if session == nil {
 		return nil, fmt.Errorf("session expired for state: %s", state)
 	}
 
@@ -106,29 +103,13 @@ func (s *SessionStore) Get(state string) (*Session, error) {
 
 // Delete removes a session
 func (s *SessionStore) Delete(state string) {
-	s.mu.Lock()
-	delete(s.sessions, state)
-	s.mu.Unlock()
-
+	s.cache.Delete(state)
 	s.log.Debug("Session deleted", "state", state)
 }
 
-// cleanup periodically removes expired sessions
-func (s *SessionStore) cleanup() {
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		s.mu.Lock()
-		now := time.Now()
-		for id, session := range s.sessions {
-			if now.After(session.ExpiresAt) {
-				delete(s.sessions, id)
-				s.log.Debug("Expired session cleaned up", "session_id", id)
-			}
-		}
-		s.mu.Unlock()
-	}
+// Stop stops the automatic cleanup goroutine
+func (s *SessionStore) Stop() {
+	s.cache.Stop()
 }
 
 // generateRandomString generates a cryptographically secure random string

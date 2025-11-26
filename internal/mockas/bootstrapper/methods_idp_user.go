@@ -40,9 +40,9 @@ func (c *idpUsersClient) makeSourceData(sourceFilePath string) error {
 			Identity: &id.Identities[0],
 			Meta: &model.MetaData{
 				AuthenticSource: "PID_Provider:00001",
-				VCT:             model.CredentialTypeUrnEudiPid1,
+				VCT:             "not_applicable",
 				DocumentVersion: "1.0.0",
-				DocumentID:      fmt.Sprintf("pid_user_%s", pidNumber),
+				DocumentID:      fmt.Sprintf("idp_user_%s", pidNumber),
 			},
 		}
 	}

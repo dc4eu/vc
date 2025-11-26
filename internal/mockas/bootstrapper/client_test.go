@@ -77,7 +77,7 @@ func TestCreateJSONSourceFiles(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("pid", func(t *testing.T) {
+	t.Run("pid-1-5", func(t *testing.T) {
 		client, err := NewPIDClient(ctx, c)
 		assert.NoError(t, err)
 
@@ -88,6 +88,16 @@ func TestCreateJSONSourceFiles(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("pid-1-8", func(t *testing.T) {
+		client, err := NewPID18Client(ctx, c)
+		assert.NoError(t, err)
+
+		err = client.makeSourceData("../../../bootstrapping/idp_user.json")
+		assert.NoError(t, err)
+
+		err = client.save2Disk()
+		assert.NoError(t, err)
+	})
 	t.Run("elm", func(t *testing.T) {
 		client, err := NewELMClient(ctx, c)
 		assert.NoError(t, err)

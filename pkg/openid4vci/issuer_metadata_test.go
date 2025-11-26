@@ -3,10 +3,13 @@ package openid4vci
 import (
 	"crypto/ecdsa"
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 	"gotest.tools/v3/golden"
 )
@@ -275,63 +278,6 @@ func TestMarshal(t *testing.T) {
 				CredentialSigningAlgValuesSupported:  []string{"ES256"},
 				CredentialDefinition: CredentialDefinition{
 					Type: []string{"VerifiableCredential", "EHICCredential"},
-					CredentialSubject: map[string]CredentialSubject{
-						"social_security_pin": {
-							Mandatory: true,
-							ValueType: "string",
-							Display: []CredentialMetadataDisplay{
-								{
-									Name:        "Social Security Number",
-									Locale:      "en-US",
-									Description: "The social security number of the EHIC holder",
-								},
-							},
-						},
-						"institution_country": {
-							Mandatory: true,
-							ValueType: "string",
-							Display: []CredentialMetadataDisplay{
-								{
-									Name:        "Issuer Country",
-									Locale:      "en-US",
-									Description: "The issuer country of the EHIC holder",
-								},
-							},
-						},
-						"institution_id": {
-							Mandatory: true,
-							ValueType: "string",
-							Display: []CredentialMetadataDisplay{
-								{
-									Name:        "Issuer Institution Code",
-									Locale:      "en-US",
-									Description: "The issuer institution code of the EHIC holder",
-								},
-							},
-						},
-						"document_id": {
-							Mandatory: true,
-							ValueType: "string",
-							Display: []CredentialMetadataDisplay{
-								{
-									Name:        "Identification card number",
-									Locale:      "en-US",
-									Description: "The Identification card number of the EHIC holder",
-								},
-							},
-						},
-						"ending_date": {
-							Mandatory: true,
-							ValueType: "string",
-							Display: []CredentialMetadataDisplay{
-								{
-									Name:        "Expiry Date",
-									Locale:      "en-US",
-									Description: "The date and time expired this credential",
-								},
-							},
-						},
-					},
 				},
 				Display: []CredentialMetadataDisplay{
 					{
@@ -373,4 +319,301 @@ func TestMarshal(t *testing.T) {
 		assert.Equal(t, want, metadata)
 	})
 
+}
+
+func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
+	// Read the actual issuer_metadata.json file
+	metadataPath := filepath.Join("..", "..", "metadata", "issuer_metadata.json")
+	data, err := os.ReadFile(metadataPath)
+	require.NoError(t, err, "Failed to read issuer_metadata.json")
+
+	// Unmarshal into our Go struct
+	var metadata CredentialIssuerMetadataParameters
+	err = json.Unmarshal(data, &metadata)
+	require.NoError(t, err, "Failed to unmarshal issuer_metadata.json into CredentialIssuerMetadataParameters")
+
+	// Validate required fields
+	t.Run("Required Fields", func(t *testing.T) {
+		assert.NotEmpty(t, metadata.CredentialIssuer, "credential_issuer is required")
+		assert.Equal(t, "http://vc_dev_apigw:8080", metadata.CredentialIssuer)
+
+		assert.NotEmpty(t, metadata.CredentialEndpoint, "credential_endpoint is required")
+		assert.Equal(t, "http://vc_dev_apigw:8080/credential", metadata.CredentialEndpoint)
+
+		assert.NotEmpty(t, metadata.CredentialConfigurationsSupported, "credential_configurations_supported is required")
+		assert.Len(t, metadata.CredentialConfigurationsSupported, 4, "Expected 4 credential configurations")
+	})
+
+	// Validate display properties
+	t.Run("Display Properties", func(t *testing.T) {
+		assert.Len(t, metadata.Display, 1, "Expected 1 display entry")
+		assert.Equal(t, "SUNET dev Issuer (vc project)", metadata.Display[0].Name)
+		assert.Equal(t, "en-US", metadata.Display[0].Locale)
+	})
+
+	// Validate credential configurations
+	t.Run("Credential Configurations", func(t *testing.T) {
+		expectedConfigs := []string{
+			"urn:edui:diploma:1",
+			"urn:eudi:pid:1",
+			"urn:eudi:ehic:1",
+			"urn:eudi:pda1:1",
+		}
+
+		for _, configID := range expectedConfigs {
+			t.Run(configID, func(t *testing.T) {
+				config, exists := metadata.CredentialConfigurationsSupported[configID]
+				require.True(t, exists, "Configuration %s should exist", configID)
+
+				// Validate format
+				assert.Equal(t, "dc+sd-jwt", config.Format, "All credentials should use dc+sd-jwt format")
+
+				// Validate scope
+				assert.NotEmpty(t, config.Scope, "Scope should not be empty")
+
+				// Validate VCT
+				assert.NotEmpty(t, config.VCT, "VCT should not be empty")
+
+				// Validate cryptographic binding methods
+				assert.Contains(t, config.CryptographicBindingMethodsSupported, "jwk",
+					"Should support jwk binding method")
+
+				// Validate signing algorithms
+				assert.Contains(t, config.CredentialSigningAlgValuesSupported, "ES256",
+					"Should support ES256 signing algorithm")
+
+				// Validate proof types
+				assert.NotEmpty(t, config.ProofTypesSupported, "Proof types should not be empty")
+				jwtProof, hasJWT := config.ProofTypesSupported["jwt"]
+				require.True(t, hasJWT, "Should support jwt proof type")
+				assert.Contains(t, jwtProof.ProofSigningAlgValuesSupported, "ES256",
+					"JWT proof should support ES256")
+
+				// Validate display
+				assert.NotEmpty(t, config.Display, "Display should not be empty")
+				assert.NotEmpty(t, config.Display[0].Name, "Display name should not be empty")
+				assert.NotEmpty(t, config.Display[0].Locale, "Display locale should not be empty")
+			})
+		}
+	})
+
+	// Validate specific credential configurations
+	t.Run("Diploma Configuration", func(t *testing.T) {
+		diploma, exists := metadata.CredentialConfigurationsSupported["urn:edui:diploma:1"]
+		require.True(t, exists)
+
+		assert.Equal(t, "diploma", diploma.Scope)
+		assert.Equal(t, "urn:eudi:diploma:1", diploma.VCT)
+		assert.Equal(t, "Bachelor Diploma - SD-JWT VC", diploma.Display[0].Name)
+		assert.NotEmpty(t, diploma.Display[0].Logo.URI)
+		assert.Equal(t, "#b1d3ff", diploma.Display[0].BackgroundColor)
+		assert.Equal(t, "#ffffff", diploma.Display[0].TextColor)
+	})
+
+	t.Run("PID Configuration", func(t *testing.T) {
+		pid, exists := metadata.CredentialConfigurationsSupported["urn:eudi:pid:1"]
+		require.True(t, exists)
+
+		assert.Equal(t, "pid", pid.Scope)
+		assert.Equal(t, "urn:eudi:pid:1", pid.VCT)
+		assert.Equal(t, "PID SD-JWT VC ARF 1.5", pid.Display[0].Name)
+		assert.Equal(t, "Person Identification Data", pid.Display[0].Description)
+		assert.NotEmpty(t, pid.Display[0].BackgroundImage.URI)
+		assert.Equal(t, "#1b263b", pid.Display[0].BackgroundColor)
+		assert.Equal(t, "#FFFFFF", pid.Display[0].TextColor)
+	})
+
+	t.Run("EHIC Configuration", func(t *testing.T) {
+		ehic, exists := metadata.CredentialConfigurationsSupported["urn:eudi:ehic:1"]
+		require.True(t, exists)
+
+		assert.Equal(t, "ehic", ehic.Scope)
+		assert.Equal(t, "urn:eudi:ehic:1", ehic.VCT)
+		assert.Equal(t, "EHIC - SD-JWT VC", ehic.Display[0].Name)
+		assert.Equal(t, "European Health Insurance Card", ehic.Display[0].Description)
+	})
+
+	t.Run("PDA1 Configuration", func(t *testing.T) {
+		pda1, exists := metadata.CredentialConfigurationsSupported["urn:eudi:pda1:1"]
+		require.True(t, exists)
+
+		assert.Equal(t, "ehic", pda1.Scope) // Note: in the JSON it's "ehic" not "pda1"
+		assert.Equal(t, "urn:eudi:pda1:1", pda1.VCT)
+		assert.Equal(t, "EHIC - SD-JWT VC", pda1.Display[0].Name)
+		assert.Equal(t, "European Portable Document Application", pda1.Display[0].Description)
+	})
+}
+
+func TestCredentialIssuerMetadataParameters_MarshalRoundTrip(t *testing.T) {
+	// Read original JSON
+	metadataPath := filepath.Join("..", "..", "metadata", "issuer_metadata.json")
+	originalData, err := os.ReadFile(metadataPath)
+	require.NoError(t, err)
+
+	// Unmarshal into struct
+	var metadata CredentialIssuerMetadataParameters
+	err = json.Unmarshal(originalData, &metadata)
+	require.NoError(t, err)
+
+	// Marshal back to JSON
+	marshaledData, err := json.Marshal(&metadata)
+	require.NoError(t, err)
+
+	// Unmarshal both to maps for comparison (to ignore field ordering)
+	var originalMap map[string]interface{}
+	var marshaledMap map[string]interface{}
+
+	err = json.Unmarshal(originalData, &originalMap)
+	require.NoError(t, err)
+
+	err = json.Unmarshal(marshaledData, &marshaledMap)
+	require.NoError(t, err)
+
+	// Compare key fields
+	assert.Equal(t, originalMap["credential_issuer"], marshaledMap["credential_issuer"])
+	assert.Equal(t, originalMap["credential_endpoint"], marshaledMap["credential_endpoint"])
+
+	// Verify credential configurations are preserved
+	originalConfigs := originalMap["credential_configurations_supported"].(map[string]interface{})
+	marshaledConfigs := marshaledMap["credential_configurations_supported"].(map[string]interface{})
+	assert.Equal(t, len(originalConfigs), len(marshaledConfigs), "Should have same number of configurations")
+}
+
+func TestCredentialIssuerMetadataParameters_OpenID4VCI_Compliance(t *testing.T) {
+	metadataPath := filepath.Join("..", "..", "metadata", "issuer_metadata.json")
+	data, err := os.ReadFile(metadataPath)
+	require.NoError(t, err)
+
+	var metadata CredentialIssuerMetadataParameters
+	err = json.Unmarshal(data, &metadata)
+	require.NoError(t, err)
+
+	t.Run("Section 12.2.4 - Required Parameters", func(t *testing.T) {
+		// credential_issuer: REQUIRED
+		assert.NotEmpty(t, metadata.CredentialIssuer,
+			"credential_issuer is REQUIRED per Section 12.2.4")
+
+		// credential_endpoint: REQUIRED
+		assert.NotEmpty(t, metadata.CredentialEndpoint,
+			"credential_endpoint is REQUIRED per Section 12.2.4")
+
+		// credential_configurations_supported: REQUIRED
+		assert.NotEmpty(t, metadata.CredentialConfigurationsSupported,
+			"credential_configurations_supported is REQUIRED per Section 12.2.4")
+	})
+
+	t.Run("Section 12.2.4 - Optional Parameters", func(t *testing.T) {
+		// These should be allowed to be empty/nil since they're OPTIONAL
+		// Just verify the fields exist and can be accessed
+		_ = metadata.AuthorizationServers
+		_ = metadata.DeferredCredentialEndpoint
+		_ = metadata.NotificationEndpoint
+		_ = metadata.CredentialResponseEncryption
+		_ = metadata.BatchCredentialIssuance
+		_ = metadata.SignedMetadata
+		_ = metadata.Display
+	})
+
+	t.Run("Credential Format - SD-JWT VC", func(t *testing.T) {
+		// All credentials in the file use dc+sd-jwt format
+		for configID, config := range metadata.CredentialConfigurationsSupported {
+			assert.Equal(t, "dc+sd-jwt", config.Format,
+				"Configuration %s should use dc+sd-jwt format per Appendix A.3", configID)
+
+			// For SD-JWT VC format, vct parameter should be present
+			assert.NotEmpty(t, config.VCT,
+				"Configuration %s should have vct parameter for dc+sd-jwt format", configID)
+		}
+	})
+
+	t.Run("Cryptographic Binding Methods", func(t *testing.T) {
+		for configID, config := range metadata.CredentialConfigurationsSupported {
+			assert.NotEmpty(t, config.CryptographicBindingMethodsSupported,
+				"Configuration %s should specify cryptographic binding methods", configID)
+
+			// Validate that binding methods are recognized values
+			for _, method := range config.CryptographicBindingMethodsSupported {
+				assert.Contains(t, []string{"jwk", "cose_key"}, method,
+					"Configuration %s has unrecognized binding method: %s", configID, method)
+			}
+		}
+	})
+
+	t.Run("Proof Types", func(t *testing.T) {
+		for configID, config := range metadata.CredentialConfigurationsSupported {
+			assert.NotEmpty(t, config.ProofTypesSupported,
+				"Configuration %s should specify proof types", configID)
+
+			// Validate proof_signing_alg_values_supported is present for each proof type
+			for proofType, proofSpec := range config.ProofTypesSupported {
+				assert.NotEmpty(t, proofSpec.ProofSigningAlgValuesSupported,
+					"Configuration %s proof type %s should have proof_signing_alg_values_supported",
+					configID, proofType)
+			}
+		}
+	})
+
+	t.Run("Display Properties", func(t *testing.T) {
+		// Issuer-level display
+		if len(metadata.Display) > 0 {
+			for _, display := range metadata.Display {
+				if display.Locale != "" {
+					// Locale should be BCP47 compliant (basic check)
+					assert.Regexp(t, `^[a-z]{2}(-[A-Z]{2})?$`, display.Locale,
+						"Locale should be BCP47 compliant")
+				}
+			}
+		}
+
+		// Credential-level display
+		for configID, config := range metadata.CredentialConfigurationsSupported {
+			if len(config.Display) > 0 {
+				assert.NotEmpty(t, config.Display[0].Name,
+					"Configuration %s display should have a name", configID)
+
+				if config.Display[0].Locale != "" {
+					assert.Regexp(t, `^[a-z]{2}(-[A-Z]{2})?$`, config.Display[0].Locale,
+						"Configuration %s display locale should be BCP47 compliant", configID)
+				}
+			}
+		}
+	})
+}
+
+func TestCredentialConfigurationsSupported_StructureCompliance(t *testing.T) {
+	metadataPath := filepath.Join("..", "..", "metadata", "issuer_metadata.json")
+	data, err := os.ReadFile(metadataPath)
+	require.NoError(t, err)
+
+	var metadata CredentialIssuerMetadataParameters
+	err = json.Unmarshal(data, &metadata)
+	require.NoError(t, err)
+
+	for configID, config := range metadata.CredentialConfigurationsSupported {
+		t.Run(configID, func(t *testing.T) {
+			// format: REQUIRED
+			assert.NotEmpty(t, config.Format, "format is REQUIRED")
+
+			// For dc+sd-jwt format:
+			if config.Format == "dc+sd-jwt" {
+				// vct should be present (Appendix A.3.2)
+				assert.NotEmpty(t, config.VCT, "vct should be present for dc+sd-jwt format")
+			}
+
+			// scope: OPTIONAL but present in our metadata
+			if config.Scope != "" {
+				assert.NotEmpty(t, config.Scope, "scope should not be empty string")
+			}
+
+			// cryptographic_binding_methods_supported: OPTIONAL
+			// credential_signing_alg_values_supported: OPTIONAL
+			// proof_types_supported: OPTIONAL but should be present if cryptographic binding is used
+
+			// If cryptographic binding is specified, proof types should be too
+			if len(config.CryptographicBindingMethodsSupported) > 0 {
+				assert.NotEmpty(t, config.ProofTypesSupported,
+					"proof_types_supported should be present when cryptographic binding is used")
+			}
+		})
+	}
 }

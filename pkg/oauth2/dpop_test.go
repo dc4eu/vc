@@ -4,6 +4,7 @@ import (
 	"testing"
 	"vc/internal/gen/issuer/apiv1_issuer"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,23 +63,39 @@ func TestValidate(t *testing.T) {
 			name: "mockJWT_1",
 			jwt:  mockJWT_1,
 			want: &DPoP{
-				JTI:        "",
-				HTM:        "",
-				HTU:        "",
+				JTI:        "84bb3266ccd6abf8",
+				HTM:        "POST",
+				HTU:        "https://vc-interop-3.sunet.se/token",
 				ATH:        "",
-				Thumbprint: "",
+				Thumbprint: "ddd7868c9fd1c0a718f13586206dd47e551fdc1b16bd2ad053e5bf09651392fd",
 				JWK: &apiv1_issuer.Jwk{
-					Crv: "P-256",
-					Kty: "EC",
-					X:   "V_CJ7frHf5iHMMkrR4L9OW8QlAX8NHny6dX1IljrZ28",
-					Y:   "tGprUa5HX8hDsBVWwTHpHcsxcd1jhctB_T-6mg4W-Ng",
+					Kty:    "EC",
+					Crv:    "P-256",
+					X:      "ewibSBh-nT80uRnCI__KznEW9szoDa027aMdv2NotQs",
+					Y:      "HRZrbitvff597YpTWAuwgydy7qjlLdZ63n0qpinOllE",
+					KeyOps: []string{"verify"},
+					Ext:    true,
 				},
 			},
 		},
 		{
 			name: "mockJWT_2",
 			jwt:  mockJWT_2,
-			want: nil,
+			want: &DPoP{
+				JTI:        "b7be6cda8d420699",
+				HTM:        "POST",
+				HTU:        "https://vc-interop-3.sunet.se/token",
+				ATH:        "",
+				Thumbprint: "9b85a44324a33a89d650d9aef4b3c85d7ae24bbd07ec062322d956e1b82593ff",
+				JWK: &apiv1_issuer.Jwk{
+					Kty:    "EC",
+					Crv:    "P-256",
+					X:      "V_CJ7frHf5iHMMkrR4L9OW8QlAX8NHny6dX1IljrZ28",
+					Y:      "tGprUa5HX8hDsBVWwTHpHcsxcd1jhctB_T-6mg4W-Ng",
+					KeyOps: []string{"verify"},
+					Ext:    true,
+				},
+			},
 		},
 	}
 	for _, tt := range tts {
@@ -86,8 +103,155 @@ func TestValidate(t *testing.T) {
 			got, err := ValidateAndParseDPoPJWT(tt.jwt)
 			assert.NoError(t, err, "ValidateAndParseDPoPJWT should not return an error")
 
-			assert.Equal(t, tt.want, got, "Parsed DPoP should match expected value")
-			//assert.Equal(t, tt.want, err, "Error should match expected error")
+			// Compare field by field to avoid protobuf atomicMessageInfo comparison issues
+			assert.Equal(t, tt.want.JTI, got.JTI, "JTI should match")
+			assert.Equal(t, tt.want.HTM, got.HTM, "HTM should match")
+			assert.Equal(t, tt.want.HTU, got.HTU, "HTU should match")
+			assert.Equal(t, tt.want.ATH, got.ATH, "ATH should match")
+			assert.Equal(t, tt.want.Thumbprint, got.Thumbprint, "Thumbprint should match")
+
+			// Compare JWK fields individually
+			assert.NotNil(t, got.JWK, "JWK should not be nil")
+			if got.JWK != nil {
+				assert.Equal(t, tt.want.JWK.Kty, got.JWK.Kty, "JWK Kty should match")
+				assert.Equal(t, tt.want.JWK.Crv, got.JWK.Crv, "JWK Crv should match")
+				assert.Equal(t, tt.want.JWK.X, got.JWK.X, "JWK X should match")
+				assert.Equal(t, tt.want.JWK.Y, got.JWK.Y, "JWK Y should match")
+				assert.Equal(t, tt.want.JWK.KeyOps, got.JWK.KeyOps, "JWK KeyOps should match")
+				assert.Equal(t, tt.want.JWK.Ext, got.JWK.Ext, "JWK Ext should match")
+			}
+		})
+	}
+}
+
+func TestIsAccessTokenDPoP(t *testing.T) {
+	tests := []struct {
+		name  string
+		dpop  *DPoP
+		token string
+		want  bool
+	}{
+		{
+			name: "matching token",
+			dpop: &DPoP{
+				ATH: "test_token_hash",
+			},
+			token: "test_token_hash",
+			want:  true,
+		},
+		{
+			name: "non-matching token",
+			dpop: &DPoP{
+				ATH: "test_token_hash",
+			},
+			token: "different_token",
+			want:  false,
+		},
+		{
+			name: "empty ATH",
+			dpop: &DPoP{
+				ATH: "",
+			},
+			token: "some_token",
+			want:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.dpop.IsAccessTokenDPoP(tt.token)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestUnmarshal(t *testing.T) {
+	tests := []struct {
+		name    string
+		claims  jwt.MapClaims
+		wantErr bool
+	}{
+		{
+			name: "valid claims",
+			claims: jwt.MapClaims{
+				"jti": "test-jti",
+				"htm": "POST",
+				"htu": "https://example.com",
+			},
+			wantErr: false,
+		},
+		{
+			name:    "empty claims",
+			claims:  jwt.MapClaims{},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := &DPoP{}
+			err := d.Unmarshal(tt.claims)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestParseDpopJWK_Errors(t *testing.T) {
+	tests := []struct {
+		name    string
+		jwk     string
+		wantErr bool
+	}{
+		{
+			name:    "invalid JSON",
+			jwk:     `{invalid json}`,
+			wantErr: true,
+		},
+		{
+			name:    "empty JWK",
+			jwk:     `{}`,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, _, err := parseDpopJWK([]byte(tt.jwk))
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestValidateAndParseDPoPJWT_Errors(t *testing.T) {
+	tests := []struct {
+		name    string
+		jwt     string
+		wantErr bool
+	}{
+		{
+			name:    "empty JWT",
+			jwt:     "",
+			wantErr: true,
+		},
+		{
+			name:    "invalid JWT format",
+			jwt:     "invalid.jwt.token",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := ValidateAndParseDPoPJWT(tt.jwt)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 		})
 	}
 }

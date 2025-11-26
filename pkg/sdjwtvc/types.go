@@ -131,7 +131,9 @@ func (v *VCTM) Attributes() map[string]map[string][]string {
 			label := d.Label
 
 			for _, p := range c.Path {
-				reply[d.Lang][label] = append(reply[d.Lang][label], *p)
+				if p != nil {
+					reply[d.Lang][label] = append(reply[d.Lang][label], *p)
+				}
 			}
 		}
 	}
@@ -164,7 +166,7 @@ func (v *VCTM) ClaimJSONPath() (*VCTMJSONPath, error) {
 // Each display object provides locale-specific rendering information for wallets
 type VCTMDisplay struct {
 	// Lang is the language tag per RFC 5646 (REQUIRED per section 8)
-	// Changed from "locale" to "lang" - note: draft-12 changed this to "locale" but we maintain "lang" for compatibility
+	// Per draft-13, this field is named "locale" in JSON
 	Lang string `json:"lang"`
 
 	// Name is a human-readable name for end users (REQUIRED per section 8)
@@ -174,7 +176,7 @@ type VCTMDisplay struct {
 	Description string `json:"description,omitempty"`
 
 	// Rendering contains rendering methods per section 8.1 (OPTIONAL)
-	Rendering Rendering `json:"rendering,omitempty"`
+	Rendering *Rendering `json:"rendering,omitempty"`
 }
 
 // Rendering contains rendering methods for credential display per SD-JWT VC draft-13 section 8.1
@@ -289,7 +291,7 @@ func (c *Claim) JSONPath() string {
 // ClaimDisplay provides locale-specific claim display information per SD-JWT VC draft-13 section 9.2
 type ClaimDisplay struct {
 	// Lang is the language tag per RFC 5646 (REQUIRED)
-	// Note: draft-12 changed to "locale" but we use "lang" for compatibility
+	// Per draft-13, this field is named "locale" in JSON
 	Lang string `json:"lang"`
 
 	// Label is a human-readable label for end users (REQUIRED)

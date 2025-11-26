@@ -1,9 +1,13 @@
 package sdjwtvc
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestVCTM_Attributes(t *testing.T) {
@@ -52,6 +56,91 @@ func TestVCTM_Attributes(t *testing.T) {
 
 	assert.Contains(t, attrs["fr"], "Nom")
 	assert.Equal(t, []string{"name"}, attrs["fr"]["Nom"])
+}
+
+func TestVCTM_Attributes_RealMetadata(t *testing.T) {
+	metadataDir := "../../metadata"
+	
+	testCases := []struct {
+		filename        string
+		expectedLangs   []string
+		expectedLabels  map[string][]string // language -> list of labels
+		samplePathCheck map[string]string   // label -> expected path (first one)
+	}{
+		{
+			filename:      "vctm_pid_arf_1_8.json",
+			expectedLangs: []string{"en-US"},
+			expectedLabels: map[string][]string{
+				"en-US": {"Last name", "First name", "Date of birth", "Nationality"},
+			},
+			samplePathCheck: map[string]string{
+				"Last name":     "family_name",
+				"First name":    "given_name",
+				"Date of birth": "birthdate", // Note: uses birthdate not birth_date in metadata
+				// Nationality uses path ["nationalities", null] so we can't check a single string path
+			},
+		},
+		{
+			filename:      "vctm_ehic.json",
+			expectedLangs: []string{"en-US"},
+			expectedLabels: map[string][]string{
+				"en-US": {"Social Security PIN", "Issuing authority", "Issuing authority id", "Issuing authority name"},
+			},
+			samplePathCheck: map[string]string{
+				"Social Security PIN":    "personal_administrative_number",
+				"Issuing authority id":   "id",
+				"Issuing authority name": "name",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.filename, func(t *testing.T) {
+			// Load the VCTM file
+			filePath := filepath.Join(metadataDir, tc.filename)
+			data, err := os.ReadFile(filePath)
+			require.NoError(t, err, "Failed to read %s", tc.filename)
+
+			var vctm VCTM
+			err = json.Unmarshal(data, &vctm)
+			require.NoError(t, err, "Failed to unmarshal %s", tc.filename)
+
+			// Test Attributes()
+			attrs := vctm.Attributes()
+			assert.NotNil(t, attrs)
+
+			// Check expected languages are present
+			for _, lang := range tc.expectedLangs {
+				assert.Contains(t, attrs, lang, "Missing language: %s", lang)
+			}
+
+			// Check expected labels are present for each language
+			for lang, expectedLabels := range tc.expectedLabels {
+				require.Contains(t, attrs, lang)
+				for _, label := range expectedLabels {
+					assert.Contains(t, attrs[lang], label, "Missing label '%s' for language %s", label, lang)
+				}
+			}
+
+			// Check specific path mappings
+			for label, expectedPath := range tc.samplePathCheck {
+				for lang := range tc.expectedLabels {
+					if paths, ok := attrs[lang][label]; ok {
+						assert.NotEmpty(t, paths, "Label '%s' should have paths", label)
+						// Check if the expected path is in the paths slice
+						found := false
+						for _, path := range paths {
+							if path == expectedPath {
+								found = true
+								break
+							}
+						}
+						assert.True(t, found, "Expected path '%s' not found for label '%s'", expectedPath, label)
+					}
+				}
+			}
+		})
+	}
 }
 
 func TestVCTM_Attributes_EmptyClaims(t *testing.T) {

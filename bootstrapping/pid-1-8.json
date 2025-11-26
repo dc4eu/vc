@@ -3,8 +3,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_100",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_100",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_100"
@@ -44,15 +44,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_100",
+      "birth_date": "1996-01-30",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1996-01-30",
       "expiry_date": "2033-01-01",
       "family_name": "Mirren",
       "given_name": "Helen",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -60,8 +63,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_101",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_101",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_101"
@@ -101,15 +104,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_101",
+      "birth_date": "1983-08-20",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1983-08-20",
       "expiry_date": "2033-01-01",
       "family_name": "Momoa",
       "given_name": "Jason",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -117,8 +123,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_102",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_102",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_102"
@@ -158,15 +164,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_102",
+      "birth_date": "1988-09-09",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1988-09-09",
       "expiry_date": "2033-01-01",
       "family_name": "Oldman",
       "given_name": "Gary",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -174,8 +183,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_103",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_103",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_103"
@@ -215,15 +224,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_103",
+      "birth_date": "1984-06-11",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1984-06-11",
       "expiry_date": "2033-01-01",
       "family_name": "Pacino",
       "given_name": "Al",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -231,8 +243,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_104",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_104",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_104"
@@ -272,15 +284,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_104",
+      "birth_date": "1992-12-15",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1992-12-15",
       "expiry_date": "2033-01-01",
       "family_name": "Pfeiffer",
       "given_name": "Michelle",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -288,8 +303,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_105",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_105",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_105"
@@ -329,15 +344,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_105",
+      "birth_date": "1979-10-16",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1979-10-16",
       "expiry_date": "2033-01-01",
       "family_name": "Phoenix",
       "given_name": "Joaquin",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -345,8 +363,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_106",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_106",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_106"
@@ -386,15 +404,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_106",
+      "birth_date": "1974-12-07",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1974-12-07",
       "expiry_date": "2033-01-01",
       "family_name": "Pitt",
       "given_name": "Brad",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -402,8 +423,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_107",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_107",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_107"
@@ -443,15 +464,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_107",
+      "birth_date": "2005-09-01",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2005-09-01",
       "expiry_date": "2033-01-01",
       "family_name": "Portman",
       "given_name": "Natalie",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -459,8 +483,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_108",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_108",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_108"
@@ -500,15 +524,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_108",
+      "birth_date": "1974-01-07",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1974-01-07",
       "expiry_date": "2033-01-01",
       "family_name": "Pratt",
       "given_name": "Chris",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -516,8 +543,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_109",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_109",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_109"
@@ -557,15 +584,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_109",
+      "birth_date": "1985-11-26",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1985-11-26",
       "expiry_date": "2033-01-01",
       "family_name": "Reeves",
       "given_name": "Keanu",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -573,8 +603,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_110",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_110",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_110"
@@ -614,15 +644,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_110",
+      "birth_date": "2005-11-19",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2005-11-19",
       "expiry_date": "2033-01-01",
       "family_name": "Reilly",
       "given_name": "John C.",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -630,8 +663,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_111",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_111",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_111"
@@ -671,15 +704,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_111",
+      "birth_date": "1988-12-05",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1988-12-05",
       "expiry_date": "2033-01-01",
       "family_name": "Reynolds",
       "given_name": "Ryan",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -687,8 +723,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_112",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_112",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_112"
@@ -728,15 +764,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_112",
+      "birth_date": "1991-02-14",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1991-02-14",
       "expiry_date": "2033-01-01",
       "family_name": "Robbie",
       "given_name": "Margot",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -744,8 +783,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_113",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_113",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_113"
@@ -785,15 +824,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_113",
+      "birth_date": "1982-07-30",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1982-07-30",
       "expiry_date": "2033-01-01",
       "family_name": "Roberts",
       "given_name": "Julia",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -801,8 +843,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_114",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_114",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_114"
@@ -842,15 +884,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_114",
+      "birth_date": "2006-03-28",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2006-03-28",
       "expiry_date": "2033-01-01",
       "family_name": "Rudd",
       "given_name": "Paul",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -858,8 +903,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_115",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_115",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_115"
@@ -899,15 +944,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_115",
+      "birth_date": "1992-03-13",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1992-03-13",
       "expiry_date": "2033-01-01",
       "family_name": "Smith",
       "given_name": "Will",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -915,8 +963,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_116",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_116",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_116"
@@ -956,15 +1004,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_116",
+      "birth_date": "1997-11-18",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1997-11-18",
       "expiry_date": "2033-01-01",
       "family_name": "Spencer",
       "given_name": "Octavia",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -972,8 +1023,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_117",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_117",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_117"
@@ -1013,15 +1064,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_117",
+      "birth_date": "1993-07-17",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1993-07-17",
       "expiry_date": "2033-01-01",
       "family_name": "Stewart",
       "given_name": "Kristen",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1029,8 +1083,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_118",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_118",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_118"
@@ -1070,15 +1124,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_118",
+      "birth_date": "1985-01-27",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1985-01-27",
       "expiry_date": "2033-01-01",
       "family_name": "Stone",
       "given_name": "Emma",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1086,8 +1143,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_119",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_119",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_119"
@@ -1127,15 +1184,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_119",
+      "birth_date": "2005-07-29",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2005-07-29",
       "expiry_date": "2033-01-01",
       "family_name": "Streep",
       "given_name": "Meryl",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1143,8 +1203,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_120",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_120",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_120"
@@ -1184,15 +1244,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_120",
+      "birth_date": "1984-04-14",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1984-04-14",
       "expiry_date": "2033-01-01",
       "family_name": "Swinton",
       "given_name": "Tilda",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1200,8 +1263,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_121",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_121",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_121"
@@ -1241,15 +1304,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_121",
+      "birth_date": "2006-10-22",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2006-10-22",
       "expiry_date": "2033-01-01",
       "family_name": "Tatum",
       "given_name": "Channing",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1257,8 +1323,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_122",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_122",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_122"
@@ -1298,15 +1364,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_122",
+      "birth_date": "1988-12-11",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1988-12-11",
       "expiry_date": "2033-01-01",
       "family_name": "Theron",
       "given_name": "Charlize",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1314,8 +1383,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_123",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_123",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_123"
@@ -1355,15 +1424,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_123",
+      "birth_date": "1988-02-19",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1988-02-19",
       "expiry_date": "2033-01-01",
       "family_name": "Vaughn",
       "given_name": "Vince",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1371,8 +1443,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_124",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_124",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_124"
@@ -1412,15 +1484,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_124",
+      "birth_date": "1985-11-09",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1985-11-09",
       "expiry_date": "2033-01-01",
       "family_name": "Vikander",
       "given_name": "Alicia",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1428,8 +1503,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_125",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_125",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_125"
@@ -1469,15 +1544,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_125",
+      "birth_date": "1986-03-23",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1986-03-23",
       "expiry_date": "2033-01-01",
       "family_name": "Waltz",
       "given_name": "Christoph",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1485,8 +1563,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_126",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_126",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_126"
@@ -1526,15 +1604,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_126",
+      "birth_date": "1981-10-28",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1981-10-28",
       "expiry_date": "2033-01-01",
       "family_name": "Washington",
       "given_name": "Denzel",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1542,8 +1623,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_127",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_127",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_127"
@@ -1583,15 +1664,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_127",
+      "birth_date": "1990-07-24",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1990-07-24",
       "expiry_date": "2033-01-01",
       "family_name": "Watts",
       "given_name": "Naomi",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1599,8 +1683,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_128",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_128",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_128"
@@ -1640,15 +1724,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_128",
+      "birth_date": "1992-03-29",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1992-03-29",
       "expiry_date": "2033-01-01",
       "family_name": "Williams",
       "given_name": "Michelle",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1656,8 +1743,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_129",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_129",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_129"
@@ -1697,15 +1784,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_129",
+      "birth_date": "2007-09-11",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2007-09-11",
       "expiry_date": "2033-01-01",
       "family_name": "Wilson",
       "given_name": "Owen",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1713,8 +1803,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_130",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_130",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_130"
@@ -1754,15 +1844,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_130",
+      "birth_date": "1986-06-19",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1986-06-19",
       "expiry_date": "2033-01-01",
       "family_name": "Winslet",
       "given_name": "Kate",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1770,8 +1863,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_131",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_131",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_131"
@@ -1811,15 +1904,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_131",
+      "birth_date": "1987-04-02",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1987-04-02",
       "expiry_date": "2033-01-01",
       "family_name": "Witherspoon",
       "given_name": "Reese",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1827,8 +1923,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_132",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_132",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_132"
@@ -1868,15 +1964,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_132",
+      "birth_date": "1990-10-05",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1990-10-05",
       "expiry_date": "2033-01-01",
       "family_name": "Adams",
       "given_name": "Amy",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1884,8 +1983,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_133",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_133",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_133"
@@ -1925,15 +2024,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_133",
+      "birth_date": "1973-07-05",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1973-07-05",
       "expiry_date": "2033-01-01",
       "family_name": "Affleck",
       "given_name": "Ben",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1941,8 +2043,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_134",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_134",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_134"
@@ -1982,15 +2084,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_134",
+      "birth_date": "1980-12-30",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1980-12-30",
       "expiry_date": "2033-01-01",
       "family_name": "Bancroft",
       "given_name": "Anne",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -1998,8 +2103,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_135",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_135",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_135"
@@ -2039,15 +2144,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_135",
+      "birth_date": "1989-08-25",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1989-08-25",
       "expiry_date": "2033-01-01",
       "family_name": "Berry",
       "given_name": "Halle",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2055,8 +2163,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_136",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_136",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_136"
@@ -2096,15 +2204,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_136",
+      "birth_date": "1988-09-12",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1988-09-12",
       "expiry_date": "2033-01-01",
       "family_name": "Biel",
       "given_name": "Jessica",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2112,8 +2223,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_137",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_137",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_137"
@@ -2153,15 +2264,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_137",
+      "birth_date": "2006-11-08",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2006-11-08",
       "expiry_date": "2033-01-01",
       "family_name": "Blanchett",
       "given_name": "Cate",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2169,8 +2283,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_138",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_138",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_138"
@@ -2210,15 +2324,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_138",
+      "birth_date": "2000-08-15",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2000-08-15",
       "expiry_date": "2033-01-01",
       "family_name": "Blunt",
       "given_name": "Emily",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2226,8 +2343,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_139",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_139",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_139"
@@ -2267,15 +2384,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_139",
+      "birth_date": "2005-12-05",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2005-12-05",
       "expiry_date": "2033-01-01",
       "family_name": "Boyega",
       "given_name": "John",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2283,8 +2403,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_140",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_140",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_140"
@@ -2324,15 +2444,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_140",
+      "birth_date": "1984-09-08",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1984-09-08",
       "expiry_date": "2033-01-01",
       "family_name": "Bullock",
       "given_name": "Sandra",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2340,8 +2463,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_141",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_141",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_141"
@@ -2381,15 +2504,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_141",
+      "birth_date": "2005-05-13",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2005-05-13",
       "expiry_date": "2033-01-01",
       "family_name": "Cage",
       "given_name": "Nicolas",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2397,8 +2523,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_142",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_142",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_142"
@@ -2438,15 +2564,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_142",
+      "birth_date": "2005-06-04",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2005-06-04",
       "expiry_date": "2033-01-01",
       "family_name": "Carell",
       "given_name": "Steve",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2454,8 +2583,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_143",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_143",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_143"
@@ -2495,15 +2624,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_143",
+      "birth_date": "1982-10-19",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1982-10-19",
       "expiry_date": "2033-01-01",
       "family_name": "Chastain",
       "given_name": "Jessica",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2511,8 +2643,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_144",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_144",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_144"
@@ -2552,15 +2684,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_144",
+      "birth_date": "1981-02-05",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1981-02-05",
       "expiry_date": "2033-01-01",
       "family_name": "Close",
       "given_name": "Glenn",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2568,8 +2703,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_145",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_145",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_145"
@@ -2609,15 +2744,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_145",
+      "birth_date": "1988-10-29",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1988-10-29",
       "expiry_date": "2033-01-01",
       "family_name": "Craig",
       "given_name": "Daniel",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2625,8 +2763,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_146",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_146",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_146"
@@ -2666,15 +2804,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_146",
+      "birth_date": "1994-05-22",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1994-05-22",
       "expiry_date": "2033-01-01",
       "family_name": "Cruz",
       "given_name": "Penélope",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2682,8 +2823,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_147",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_147",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_147"
@@ -2723,15 +2864,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_147",
+      "birth_date": "1987-10-24",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1987-10-24",
       "expiry_date": "2033-01-01",
       "family_name": "Cumberbatch",
       "given_name": "Benedict",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2739,8 +2883,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_148",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_148",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_148"
@@ -2780,15 +2924,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_148",
+      "birth_date": "1971-07-09",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1971-07-09",
       "expiry_date": "2033-01-01",
       "family_name": "Damon",
       "given_name": "Matt",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2796,8 +2943,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_149",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_149",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_149"
@@ -2837,15 +2984,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_149",
+      "birth_date": "2007-04-20",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2007-04-20",
       "expiry_date": "2033-01-01",
       "family_name": "Davis",
       "given_name": "Viola",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2853,8 +3003,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_70",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_70",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_70"
@@ -2894,15 +3044,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_70",
+      "birth_date": "1982-01-15",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1982-01-15",
       "expiry_date": "2033-01-01",
       "family_name": "De Niro",
       "given_name": "Robert",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2910,8 +3063,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_71",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_71",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_71"
@@ -2951,15 +3104,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_71",
+      "birth_date": "1995-09-04",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1995-09-04",
       "expiry_date": "2033-01-01",
       "family_name": "Dench",
       "given_name": "Judi",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -2967,8 +3123,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_72",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_72",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_72"
@@ -3008,15 +3164,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_72",
+      "birth_date": "1985-12-03",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1985-12-03",
       "expiry_date": "2033-01-01",
       "family_name": "Depp",
       "given_name": "Johnny",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3024,8 +3183,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_73",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_73",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_73"
@@ -3065,15 +3224,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_73",
+      "birth_date": "1972-08-28",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1972-08-28",
       "expiry_date": "2033-01-01",
       "family_name": "DiCaprio",
       "given_name": "Leonardo",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3081,8 +3243,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_74",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_74",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_74"
@@ -3122,15 +3284,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_74",
+      "birth_date": "1983-05-12",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1983-05-12",
       "expiry_date": "2033-01-01",
       "family_name": "Downey Jr.",
       "given_name": "Robert",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3138,8 +3303,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_75",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_75",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_75"
@@ -3179,15 +3344,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_75",
+      "birth_date": "1988-09-27",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1988-09-27",
       "expiry_date": "2033-01-01",
       "family_name": "Driver",
       "given_name": "Adam",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3195,8 +3363,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_76",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_76",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_76"
@@ -3236,15 +3404,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_76",
+      "birth_date": "1980-09-02",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1980-09-02",
       "expiry_date": "2033-01-01",
       "family_name": "Elba",
       "given_name": "Idris",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3252,8 +3423,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_77",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_77",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_77"
@@ -3293,15 +3464,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_77",
+      "birth_date": "1977-04-25",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1977-04-25",
       "expiry_date": "2033-01-01",
       "family_name": "Farrell",
       "given_name": "Colin",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3309,8 +3483,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_78",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_78",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_78"
@@ -3350,15 +3524,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_78",
+      "birth_date": "1992-04-24",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1992-04-24",
       "expiry_date": "2033-01-01",
       "family_name": "Fassbender",
       "given_name": "Michael",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3366,8 +3543,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_79",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_79",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_79"
@@ -3407,15 +3584,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_79",
+      "birth_date": "1991-10-30",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1991-10-30",
       "expiry_date": "2033-01-01",
       "family_name": "Foster",
       "given_name": "Jodie",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3423,8 +3603,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_80",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_80",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_80"
@@ -3464,15 +3644,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_80",
+      "birth_date": "1977-07-03",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1977-07-03",
       "expiry_date": "2033-01-01",
       "family_name": "Foxx",
       "given_name": "Jamie",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3480,8 +3663,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_81",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_81",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_81"
@@ -3521,15 +3704,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_81",
+      "birth_date": "1990-08-24",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1990-08-24",
       "expiry_date": "2033-01-01",
       "family_name": "Freeman",
       "given_name": "Morgan",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3537,8 +3723,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_82",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_82",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_82"
@@ -3578,15 +3764,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_82",
+      "birth_date": "2007-03-17",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2007-03-17",
       "expiry_date": "2033-01-01",
       "family_name": "Glover",
       "given_name": "Donald",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3594,8 +3783,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_83",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_83",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_83"
@@ -3635,15 +3824,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_83",
+      "birth_date": "1989-12-04",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1989-12-04",
       "expiry_date": "2033-01-01",
       "family_name": "Hanks",
       "given_name": "Tom",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3651,8 +3843,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_84",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_84",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_84"
@@ -3692,15 +3884,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_84",
+      "birth_date": "1981-11-23",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1981-11-23",
       "expiry_date": "2033-01-01",
       "family_name": "Saldana",
       "given_name": "Zoe",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3708,8 +3903,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_85",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_85",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_85"
@@ -3749,15 +3944,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_85",
+      "birth_date": "1987-05-06",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1987-05-06",
       "expiry_date": "2033-01-01",
       "family_name": "Hathaway",
       "given_name": "Anne",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3765,8 +3963,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_86",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_86",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_86"
@@ -3806,15 +4004,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_86",
+      "birth_date": "1983-08-27",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1983-08-27",
       "expiry_date": "2033-01-01",
       "family_name": "Hayek",
       "given_name": "Salma",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3822,8 +4023,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_87",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_87",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_87"
@@ -3863,15 +4064,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_87",
+      "birth_date": "1992-01-19",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1992-01-19",
       "expiry_date": "2033-01-01",
       "family_name": "Hemsworth",
       "given_name": "Chris",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3879,8 +4083,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_88",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_88",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_88"
@@ -3920,15 +4124,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_88",
+      "birth_date": "2006-08-16",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2006-08-16",
       "expiry_date": "2033-01-01",
       "family_name": "Hopkins",
       "given_name": "Anthony",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3936,8 +4143,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_89",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_89",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_89"
@@ -3977,15 +4184,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_89",
+      "birth_date": "1972-06-28",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1972-06-28",
       "expiry_date": "2033-01-01",
       "family_name": "Jackman",
       "given_name": "Hugh",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -3993,8 +4203,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_90",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_90",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_90"
@@ -4034,15 +4244,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_90",
+      "birth_date": "2007-01-27",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2007-01-27",
       "expiry_date": "2033-01-01",
       "family_name": "Jackson",
       "given_name": "Samuel L.",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4050,8 +4263,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_91",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_91",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_91"
@@ -4091,15 +4304,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_91",
+      "birth_date": "1980-05-12",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1980-05-12",
       "expiry_date": "2033-01-01",
       "family_name": "Johansson",
       "given_name": "Scarlett",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4107,8 +4323,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_92",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_92",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_92"
@@ -4148,15 +4364,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_92",
+      "birth_date": "1999-04-21",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1999-04-21",
       "expiry_date": "2033-01-01",
       "family_name": "Johnson",
       "given_name": "Dakota",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4164,8 +4383,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_93",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_93",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_93"
@@ -4205,15 +4424,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_93",
+      "birth_date": "1983-03-15",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1983-03-15",
       "expiry_date": "2033-01-01",
       "family_name": "Kidman",
       "given_name": "Nicole",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4221,8 +4443,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_94",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_94",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_94"
@@ -4262,15 +4484,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_94",
+      "birth_date": "1993-06-28",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1993-06-28",
       "expiry_date": "2033-01-01",
       "family_name": "Kirby",
       "given_name": "Vanessa",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4278,8 +4503,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_95",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_95",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_95"
@@ -4319,15 +4544,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_95",
+      "birth_date": "1989-01-01",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1989-01-01",
       "expiry_date": "2033-01-01",
       "family_name": "Kunis",
       "given_name": "Mila",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4335,8 +4563,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_96",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_96",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_96"
@@ -4376,15 +4604,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_96",
+      "birth_date": "2006-02-14",
       "birth_place": "Tulegatan 11",
-      "birthdate": "2006-02-14",
       "expiry_date": "2033-01-01",
       "family_name": "Lawrence",
       "given_name": "Jennifer",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4392,8 +4623,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_97",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_97",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_97"
@@ -4433,15 +4664,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_97",
+      "birth_date": "1998-06-09",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1998-06-09",
       "expiry_date": "2033-01-01",
       "family_name": "McAdams",
       "given_name": "Rachel",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4449,8 +4683,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_98",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_98",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_98"
@@ -4490,15 +4724,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_98",
+      "birth_date": "1977-09-09",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1977-09-09",
       "expiry_date": "2033-01-01",
       "family_name": "McConaughey",
       "given_name": "Matthew",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   },
@@ -4506,8 +4743,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "document_id_pid_99",
+      "vct": "urn:eudi:pid:arf-1.8:1",
+      "document_id": "document_id_pid_arf_1_8_99",
       "real_data": false,
       "collect": {
         "id": "collect_id_pid_99"
@@ -4547,15 +4784,18 @@
       }
     },
     "document_data": {
+      "arf": "1.8",
       "authentic_source_person_id": "authentic_source_person_id_99",
+      "birth_date": "1991-08-29",
       "birth_place": "Tulegatan 11",
-      "birthdate": "1991-08-29",
       "expiry_date": "2033-01-01",
       "family_name": "McGregor",
       "given_name": "Ewan",
       "issuing_authority": "SUNET",
       "issuing_country": "SE",
-      "mura": "kalle"
+      "nationality": [
+        "SE"
+      ]
     },
     "document_data_version": "1.0.0"
   }

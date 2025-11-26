@@ -11,15 +11,16 @@ import (
 )
 
 var mockAuthorizationServerMetadata = &AuthorizationServerMetadata{
-	Issuer:                              "http://vc_dev_apigw:8080",
-	AuthorizationEndpoint:               "http://vc_dev_apigw:8080/authorize",
-	TokenEndpoint:                       "http://vc_dev_apigw:8080/token",
-	ResponseTypesSupported:              []string{"code"},
-	TokenEndpointAuthMethodsSupported:   []string{"none"},
-	CodeChallengeMethodsSupported:       []string{"S256"},
-	PushedAuthorizationRequestEndpoint:  "http://vc_dev_apigw:8080/par",
-	RequiredPushedAuthorizationRequests: true,
-	DPOPSigningALGValuesSupported:       []string{"ES256"},
+	Issuer:                                     "http://vc_dev_apigw:8080",
+	AuthorizationEndpoint:                      "http://vc_dev_apigw:8080/authorize",
+	TokenEndpoint:                              "http://vc_dev_apigw:8080/token",
+	ResponseTypesSupported:                     []string{"code"},
+	TokenEndpointAuthMethodsSupported:          []string{"none"},
+	CodeChallengeMethodsSupported:              []string{"S256"},
+	PushedAuthorizationRequestEndpoint:         "http://vc_dev_apigw:8080/par",
+	RequiredPushedAuthorizationRequests:        true,
+	DPOPSigningALGValuesSupported:              []string{"ES256"},
+	PreAuthorizedGrantAnonymousAccessSupported: false,
 }
 
 func TestMarshalMetadata(t *testing.T) {

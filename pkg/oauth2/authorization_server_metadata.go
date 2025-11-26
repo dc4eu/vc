@@ -85,7 +85,11 @@ type AuthorizationServerMetadata struct {
 	// DPOPSigningALGValuesSupported from GUNET issuer
 	DPOPSigningALGValuesSupported []string `json:"dpop_signing_alg_values_supported,omitempty"`
 
+	// PreAuthorizedGrantAnonymousAccessSupported OPTIONAL OPTIONAL. A boolean indicating whether the Credential Issuer accepts a Token Request with a Pre-Authorized Code but without a client_id. The default is false.
+	PreAuthorizedGrantAnonymousAccessSupported bool `json:"pre-authorized_grant_anonymous_access_supported,omitempty"`
+
 	// More attributes MAY be present, such as https://openid.net/specs/openid-connect-discovery-1_0.html
+
 }
 
 func (c *AuthorizationServerMetadata) Marshal() (jwt.MapClaims, error) {

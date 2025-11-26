@@ -100,7 +100,8 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		"elm",
 		"diploma",
 		"microcredential",
-		"pid",
+		"pid-1-5",
+		"pid-1-8",
 	} {
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
 		if err := client.documentUploader(ctx, jsonPath); err != nil {

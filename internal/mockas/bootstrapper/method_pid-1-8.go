@@ -10,24 +10,24 @@ import (
 	"vc/pkg/vcclient"
 )
 
-type pidClient struct {
+type pid18Client struct {
 	client         *Client
 	documents      map[string]*vcclient.UploadRequest
 	credentialType string
 	pidUsers       map[string]*vcclient.AddPIDRequest
 }
 
-func NewPIDClient(ctx context.Context, client *Client) (*pidClient, error) {
-	pidClient := &pidClient{
+func NewPID18Client(ctx context.Context, client *Client) (*pid18Client, error) {
+	pidClient := &pid18Client{
 		client:         client,
 		documents:      map[string]*vcclient.UploadRequest{},
-		credentialType: "pid",
+		credentialType: "pid-1-8",
 	}
 
 	return pidClient, nil
 }
 
-func (c *pidClient) readPidUserFile(sourceFilePath string) error {
+func (c *pid18Client) readPidUserFile(sourceFilePath string) error {
 	f, err := os.Open(filepath.Clean(sourceFilePath))
 	if err != nil {
 		return fmt.Errorf("open pid user file: %w", err)
@@ -42,7 +42,7 @@ func (c *pidClient) readPidUserFile(sourceFilePath string) error {
 	return nil
 }
 
-func (c *pidClient) makeSourceData(sourceFilePath string) error {
+func (c *pid18Client) makeSourceData(sourceFilePath string) error {
 	if err := c.readPidUserFile(sourceFilePath); err != nil {
 		return fmt.Errorf("read pid user file: %w", err)
 	}
@@ -53,20 +53,21 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].DocumentData = map[string]any{
 			"given_name":                 id.Identity.GivenName,
 			"family_name":                id.Identity.FamilyName,
-			"birthdate":                  id.Identity.BirthDate,
+			"birth_date":                 id.Identity.BirthDate,
+			"birth_place":                id.Identity.BirthPlace,
+			"nationality":                id.Identity.Nationality,
 			"issuing_authority":          id.Identity.IssuingAuthority,
 			"issuing_country":            id.Identity.IssuingCountry,
-			"birth_place":                id.Identity.BirthPlace,
 			"expiry_date":                id.Identity.ExpiryDate,
 			"authentic_source_person_id": id.Identity.AuthenticSourcePersonID,
-			"mura":                       "kalle",
+			"arf":                        "1.8",
 		}
 
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "PID_Provider:00001",
 			DocumentVersion: "1.0.0",
-			VCT:             model.CredentialTypeUrnEudiPid1,
-			DocumentID:      fmt.Sprintf("document_id_pid_%s", pidNumber),
+			VCT:             model.CredentialTypeUrnEudiPidARG181,
+			DocumentID:      fmt.Sprintf("document_id_pid_arf_1_8_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
 				ID:         fmt.Sprintf("collect_id_pid_%s", pidNumber),
@@ -99,7 +100,7 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 	return nil
 }
 
-func (c *pidClient) save2Disk() error {
+func (c *pid18Client) save2Disk() error {
 	b, err := json.MarshalIndent(c.documents, "", "  ")
 	if err != nil {
 		return err

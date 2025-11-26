@@ -21,7 +21,6 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		Username:        req.Username,
 		Password:        string(passwordHash),
 		Identity:        req.Identity,
-		VCT:             req.Meta.VCT,
 		AuthenticSource: req.Meta.AuthenticSource,
 	})
 	if err != nil {
@@ -46,7 +45,6 @@ func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserReq
 	update := &model.AuthorizationContext{
 		Identity:        user.Identity,
 		AuthenticSource: user.AuthenticSource,
-		VCT:             user.VCT,
 	}
 	// Update the authorization with the user identity
 	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}, update); err != nil {

@@ -40,7 +40,6 @@ type OAuthUsers struct {
 	Password        string    `json:"password" bson:"password" validate:"required"`
 	Identity        *Identity `json:"identity" bson:"identity" validate:"required"`
 	AuthenticSource string    `json:"authentic_source" bson:"authentic_source" validate:"required"`
-	VCT             string    `json:"vct" bson:"vct" validate:"required"`
 }
 
 type CodeChallenge struct {

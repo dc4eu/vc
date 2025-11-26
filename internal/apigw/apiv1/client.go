@@ -7,6 +7,8 @@ import (
 	"crypto/x509"
 	"time"
 	"vc/internal/apigw/db"
+	"vc/internal/gen/issuer/apiv1_issuer"
+	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -16,6 +18,8 @@ import (
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 //	@title		Datastore API
@@ -29,6 +33,8 @@ type Client struct {
 	log                         *logger.Log
 	tracer                      *trace.Tracer
 	datastoreClient             *vcclient.Client
+	issuerClient                apiv1_issuer.IssuerServiceClient
+	registryClient              apiv1_registry.RegistryServiceClient
 	issuerMetadata              *openid4vci.CredentialIssuerMetadataParameters
 	issuerMetadataSigningKey    any
 	issuerMetadataSigningCert   *x509.Certificate
@@ -84,6 +90,22 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	if err != nil {
 		return nil, err
 	}
+
+	// Initialize gRPC client for issuer service
+	issuerConn, err := grpc.NewClient(cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		c.log.Error(err, "Failed to create gRPC connection to issuer")
+		return nil, err
+	}
+	c.issuerClient = apiv1_issuer.NewIssuerServiceClient(issuerConn)
+
+	// Initialize gRPC client for registry service
+	registryConn, err := grpc.NewClient(cfg.Registry.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		c.log.Error(err, "Failed to create gRPC connection to registry")
+		return nil, err
+	}
+	c.registryClient = apiv1_registry.NewRegistryServiceClient(registryConn)
 
 	for scope, credentialInfo := range cfg.CredentialConstructor {
 		if err := credentialInfo.LoadVCTMetadata(ctx, scope); err != nil {

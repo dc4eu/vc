@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-files=("diploma" "elm" "microcredential" "pda1" "ehic" "pid")
+files=("diploma" "elm" "microcredential" "pda1" "ehic" "pid_arf_1_5" "pid_arf_1_8")
 
 for file in "${files[@]}"; do
     printf "\nSyncing vctm_%s.json...\n" "$file"

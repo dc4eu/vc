@@ -1,14 +1,12 @@
 {
-  "vct": "urn:eudi:pid:1",
-  "name": "Example ARF 1.5 PID SD-JWT VCTM",
-  "extends#integrity": "sha256-h0D1xX0uZ5r3O8b8h3T6lKXJ7Q1Q6f1Y5jv3F4y7gXU=",
-  "description": "Example PID SD-JWT Verifiable Credential Type Metadata, based on ietf-oauth-sd-jwt-vc (draft 09), using a single language tag (en-US). Adheres to PID Rulebook ARF 1.5 (urn:eu.europa.ec.eudi:pid:1).",
-  "$comment": "Implementation of this example VCTM may require Member State–specific clarifications to align with national policies governing the display of included claims.",
+  "vct": "urn:eudi:pid:arf-1.8:1",
+  "name": "Example ARF 1.8 PID SD-JWT TYPE METADATA",
+  "description": "Example PID SD-JWT Verifiable Credential Type Metadata, based on ietf-oauth-sd-jwt-vc (draft 09), using a single language tag (en-US). Adheres to PID Rulebook ARF 1.8 (urn:eudi:pid:1) and later, as of the time of publication.",
+  "$comment": "Implementation of this example type metadata may require Member State–specific clarifications to align with national policies governing the display of included claims.",
   "display": [
     {
       "lang": "en-US",
-      "name": "ARF 1.5 PID SD-JWT VC",
-      "description": "Person Identification Data (PID) SD-JWT VC. Adheres to PID Rulebook ARF 1.5 (urn:eu.europa.ec.eudi:pid:1).",
+      "name": "PID",
       "rendering": {
          "simple": {
           "logo": {
@@ -35,6 +33,7 @@
       "path": [
         "family_name"
       ],
+      "mandatory": true,
       "sd": "always",
       "svg_id": "family_name",
       "display": [
@@ -49,6 +48,7 @@
       "path": [
         "given_name"
       ],
+      "mandatory": true,
       "sd": "always",
       "svg_id": "given_name",
       "display": [
@@ -63,6 +63,7 @@
       "path": [
         "birthdate"
       ],
+      "mandatory": true,
       "sd": "always",
       "svg_id": "birth_date",
       "display": [
@@ -75,26 +76,84 @@
     },
     {
       "path": [
-        "birth_place"
+        "place_of_birth"
       ],
+      "mandatory": true,
       "sd": "always",
       "display": [
         {
           "lang": "en-US",
           "label": "Place of birth",
-          "description": "Country (two-letter code) and optional region or city where the person was born."
+          "description": "Place where the person was born."
         }
       ]
     },
     {
       "path": [
-        "nationality"
+        "place_of_birth",
+        "locality"
+      ],
+      "sd": "always",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "City of birth",
+          "description": "Municipality, city, town, or village where the person was born."
+        }
+      ]
+    },
+    {
+      "path": [
+        "place_of_birth",
+        "region"
+      ],
+      "sd": "always",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Region of birth",
+          "description": "State, province, district, or local area where the person was born."
+        }
+      ]
+    },
+    {
+      "path": [
+        "place_of_birth",
+        "country"
+      ],
+      "sd": "always",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Country of birth",
+          "description": "Country where the person was born."
+        }
+      ]
+    },
+    {
+      "path": [
+        "nationalities",
+        null
       ],
       "sd": "always",
       "display": [
         {
           "lang": "en-US",
           "label": "Nationality",
+          "description": "Country of nationality."
+        }
+      ]
+    },
+    {
+      "path": [
+        "nationalities"
+      ],
+      "mandatory": true,
+      "sd": "always",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Nationalities",
           "description": "Country or countries of nationality."
         }
       ]
@@ -104,7 +163,6 @@
         "personal_administrative_number"
       ],
       "sd": "always",
-      "svg_id": "personal_administrative_number",
       "display": [
         {
           "lang": "en-US",
@@ -122,8 +180,7 @@
       "display": [
         {
           "lang": "en-US",
-          "label": "Picture",
-          "description": "Picture of the individual."
+          "label": "Picture"
         }
       ]
     },
@@ -168,7 +225,7 @@
     },
     {
       "path": [
-        "email_address"
+        "email"
       ],
       "sd": "always",
       "display": [
@@ -181,7 +238,7 @@
     },
     {
       "path": [
-        "mobile_phone_number"
+        "phone_number"
       ],
       "sd": "always",
       "display": [
@@ -194,7 +251,21 @@
     },
     {
       "path": [
-        "resident_address"
+        "address"
+      ],
+      "sd": "always",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Address",
+          "description": "Person's residential address."
+        }
+      ]
+    },
+    {
+      "path": [
+        "address",
+        "formatted"
       ],
       "sd": "always",
       "display": [
@@ -207,7 +278,8 @@
     },
     {
       "path": [
-        "resident_street_address"
+        "address",
+        "street_address"
       ],
       "sd": "always",
       "display": [
@@ -220,7 +292,8 @@
     },
     {
       "path": [
-        "resident_house_number"
+        "address",
+        "house_number"
       ],
       "sd": "always",
       "display": [
@@ -233,7 +306,8 @@
     },
     {
       "path": [
-        "resident_postal_code"
+        "address",
+        "postal_code"
       ],
       "sd": "always",
       "display": [
@@ -246,7 +320,8 @@
     },
     {
       "path": [
-        "resident_city"
+        "address",
+        "locality"
       ],
       "sd": "always",
       "display": [
@@ -259,7 +334,8 @@
     },
     {
       "path": [
-        "resident_state"
+        "address",
+        "region"
       ],
       "sd": "always",
       "display": [
@@ -272,7 +348,8 @@
     },
     {
       "path": [
-        "resident_country"
+        "address",
+        "country"
       ],
       "sd": "always",
       "display": [
@@ -285,65 +362,83 @@
     },
     {
       "path": [
-        "age_over_14"
+        "age_equal_or_over"
       ],
       "sd": "always",
       "display": [
         {
           "lang": "en-US",
-          "label": "Age over 14",
+          "label": "Age equal or over",
+          "description": "Age threshold indicators."
+        }
+      ]
+    },
+    {
+      "path": [
+        "age_equal_or_over",
+        "14"
+      ],
+      "sd": "always",
+      "display": [
+        {
+          "lang": "en-US",
+          "label": "Age equal or over 14",
           "description": "Indicates if the person is 14 years old or older."
         }
       ]
     },
     {
       "path": [
-        "age_over_16"
+        "age_equal_or_over",
+        "16"
       ],
       "sd": "always",
       "display": [
         {
           "lang": "en-US",
-          "label": "Age over 16",
+          "label": "Age equal or over 16",
           "description": "Indicates if the person is 16 years old or older."
         }
       ]
     },
     {
       "path": [
-        "age_over_18"
+        "age_equal_or_over",
+        "18"
       ],
       "sd": "always",
       "display": [
         {
           "lang": "en-US",
-          "label": "Age over 18",
+          "label": "Age equal or over 18",
           "description": "Indicates if the person is 18 years old or older."
         }
       ]
     },
     {
       "path": [
-        "age_over_21"
+        "age_equal_or_over",
+        "21"
       ],
       "sd": "always",
       "display": [
         {
           "lang": "en-US",
-          "label": "Age over 21",
+          "label": "Age equal or over 21",
           "description": "Indicates if the person is 21 years old or older."
         }
       ]
     },
     {
       "path": [
-        "age_over_65"
+        "age_equal_or_over",
+        "65"
       ],
       "sd": "always",
       "display": [
         {
           "lang": "en-US",
-          "label": "Age over 65",
+          "label": "Age equal or over 65",
           "description": "Indicates if the person is 65 years old or older."
         }
       ]
@@ -378,7 +473,8 @@
       "path": [
         "issuing_authority"
       ],
-      "sd": "never",
+      "mandatory": true,
+      "sd": "always",
       "display": [
         {
           "lang": "en-US",
@@ -391,8 +487,8 @@
       "path": [
         "issuing_country"
       ],
-      "sd": "never",
-      "svg_id": "issuing_country",
+      "mandatory": true,
+      "sd": "always",
       "display": [
         {
           "lang": "en-US",
@@ -403,8 +499,9 @@
     },
     {
       "path": [
-        "expiry_date"
+        "date_of_expiry"
       ],
+      "mandatory": true,
       "sd": "never",
       "svg_id": "expiry_date",
       "display": [
@@ -417,7 +514,7 @@
     },
     {
       "path": [
-        "issuance_date"
+        "date_of_issuance"
       ],
       "sd": "always",
       "display": [
@@ -433,7 +530,6 @@
         "document_number"
       ],
       "sd": "always",
-      "svg_id": "document_number",
       "display": [
         {
           "lang": "en-US",
@@ -468,7 +564,5 @@
         }
       ]
     }
-  ],
-  "schema_uri": "https://demo-issuer.wwwallet.org/public/creds/pid/person-identification-data-arf-15-schema-example-01.json",
-  "schema_uri#integrity": "sha256-ks7Su5RYXt2xe26p2eIpzA+LeM22Lu6IawDP8+iRfb4="
+  ]
 }

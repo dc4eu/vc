@@ -21,8 +21,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_100",
+      "vct": "not_applicable",
+      "document_id": "idp_user_100",
       "real_data": false
     }
   },
@@ -48,8 +48,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_101",
+      "vct": "not_applicable",
+      "document_id": "idp_user_101",
       "real_data": false
     }
   },
@@ -75,8 +75,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_102",
+      "vct": "not_applicable",
+      "document_id": "idp_user_102",
       "real_data": false
     }
   },
@@ -102,8 +102,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_103",
+      "vct": "not_applicable",
+      "document_id": "idp_user_103",
       "real_data": false
     }
   },
@@ -129,8 +129,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_104",
+      "vct": "not_applicable",
+      "document_id": "idp_user_104",
       "real_data": false
     }
   },
@@ -156,8 +156,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_105",
+      "vct": "not_applicable",
+      "document_id": "idp_user_105",
       "real_data": false
     }
   },
@@ -183,8 +183,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_106",
+      "vct": "not_applicable",
+      "document_id": "idp_user_106",
       "real_data": false
     }
   },
@@ -210,8 +210,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_107",
+      "vct": "not_applicable",
+      "document_id": "idp_user_107",
       "real_data": false
     }
   },
@@ -237,8 +237,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_108",
+      "vct": "not_applicable",
+      "document_id": "idp_user_108",
       "real_data": false
     }
   },
@@ -264,8 +264,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_109",
+      "vct": "not_applicable",
+      "document_id": "idp_user_109",
       "real_data": false
     }
   },
@@ -291,8 +291,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_110",
+      "vct": "not_applicable",
+      "document_id": "idp_user_110",
       "real_data": false
     }
   },
@@ -318,8 +318,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_111",
+      "vct": "not_applicable",
+      "document_id": "idp_user_111",
       "real_data": false
     }
   },
@@ -345,8 +345,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_112",
+      "vct": "not_applicable",
+      "document_id": "idp_user_112",
       "real_data": false
     }
   },
@@ -372,8 +372,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_113",
+      "vct": "not_applicable",
+      "document_id": "idp_user_113",
       "real_data": false
     }
   },
@@ -399,8 +399,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_114",
+      "vct": "not_applicable",
+      "document_id": "idp_user_114",
       "real_data": false
     }
   },
@@ -426,8 +426,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_115",
+      "vct": "not_applicable",
+      "document_id": "idp_user_115",
       "real_data": false
     }
   },
@@ -453,8 +453,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_116",
+      "vct": "not_applicable",
+      "document_id": "idp_user_116",
       "real_data": false
     }
   },
@@ -480,8 +480,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_117",
+      "vct": "not_applicable",
+      "document_id": "idp_user_117",
       "real_data": false
     }
   },
@@ -507,8 +507,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_118",
+      "vct": "not_applicable",
+      "document_id": "idp_user_118",
       "real_data": false
     }
   },
@@ -534,8 +534,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_119",
+      "vct": "not_applicable",
+      "document_id": "idp_user_119",
       "real_data": false
     }
   },
@@ -561,8 +561,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_120",
+      "vct": "not_applicable",
+      "document_id": "idp_user_120",
       "real_data": false
     }
   },
@@ -588,8 +588,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_121",
+      "vct": "not_applicable",
+      "document_id": "idp_user_121",
       "real_data": false
     }
   },
@@ -615,8 +615,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_122",
+      "vct": "not_applicable",
+      "document_id": "idp_user_122",
       "real_data": false
     }
   },
@@ -642,8 +642,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_123",
+      "vct": "not_applicable",
+      "document_id": "idp_user_123",
       "real_data": false
     }
   },
@@ -669,8 +669,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_124",
+      "vct": "not_applicable",
+      "document_id": "idp_user_124",
       "real_data": false
     }
   },
@@ -696,8 +696,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_125",
+      "vct": "not_applicable",
+      "document_id": "idp_user_125",
       "real_data": false
     }
   },
@@ -723,8 +723,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_126",
+      "vct": "not_applicable",
+      "document_id": "idp_user_126",
       "real_data": false
     }
   },
@@ -750,8 +750,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_127",
+      "vct": "not_applicable",
+      "document_id": "idp_user_127",
       "real_data": false
     }
   },
@@ -777,8 +777,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_128",
+      "vct": "not_applicable",
+      "document_id": "idp_user_128",
       "real_data": false
     }
   },
@@ -804,8 +804,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_129",
+      "vct": "not_applicable",
+      "document_id": "idp_user_129",
       "real_data": false
     }
   },
@@ -831,8 +831,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_130",
+      "vct": "not_applicable",
+      "document_id": "idp_user_130",
       "real_data": false
     }
   },
@@ -858,8 +858,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_131",
+      "vct": "not_applicable",
+      "document_id": "idp_user_131",
       "real_data": false
     }
   },
@@ -885,8 +885,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_132",
+      "vct": "not_applicable",
+      "document_id": "idp_user_132",
       "real_data": false
     }
   },
@@ -912,8 +912,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_133",
+      "vct": "not_applicable",
+      "document_id": "idp_user_133",
       "real_data": false
     }
   },
@@ -939,8 +939,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_134",
+      "vct": "not_applicable",
+      "document_id": "idp_user_134",
       "real_data": false
     }
   },
@@ -966,8 +966,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_135",
+      "vct": "not_applicable",
+      "document_id": "idp_user_135",
       "real_data": false
     }
   },
@@ -993,8 +993,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_136",
+      "vct": "not_applicable",
+      "document_id": "idp_user_136",
       "real_data": false
     }
   },
@@ -1020,8 +1020,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_137",
+      "vct": "not_applicable",
+      "document_id": "idp_user_137",
       "real_data": false
     }
   },
@@ -1047,8 +1047,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_138",
+      "vct": "not_applicable",
+      "document_id": "idp_user_138",
       "real_data": false
     }
   },
@@ -1074,8 +1074,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_139",
+      "vct": "not_applicable",
+      "document_id": "idp_user_139",
       "real_data": false
     }
   },
@@ -1101,8 +1101,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_140",
+      "vct": "not_applicable",
+      "document_id": "idp_user_140",
       "real_data": false
     }
   },
@@ -1128,8 +1128,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_141",
+      "vct": "not_applicable",
+      "document_id": "idp_user_141",
       "real_data": false
     }
   },
@@ -1155,8 +1155,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_142",
+      "vct": "not_applicable",
+      "document_id": "idp_user_142",
       "real_data": false
     }
   },
@@ -1182,8 +1182,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_143",
+      "vct": "not_applicable",
+      "document_id": "idp_user_143",
       "real_data": false
     }
   },
@@ -1209,8 +1209,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_144",
+      "vct": "not_applicable",
+      "document_id": "idp_user_144",
       "real_data": false
     }
   },
@@ -1236,8 +1236,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_145",
+      "vct": "not_applicable",
+      "document_id": "idp_user_145",
       "real_data": false
     }
   },
@@ -1263,8 +1263,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_146",
+      "vct": "not_applicable",
+      "document_id": "idp_user_146",
       "real_data": false
     }
   },
@@ -1290,8 +1290,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_147",
+      "vct": "not_applicable",
+      "document_id": "idp_user_147",
       "real_data": false
     }
   },
@@ -1317,8 +1317,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_148",
+      "vct": "not_applicable",
+      "document_id": "idp_user_148",
       "real_data": false
     }
   },
@@ -1344,8 +1344,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_149",
+      "vct": "not_applicable",
+      "document_id": "idp_user_149",
       "real_data": false
     }
   },
@@ -1371,8 +1371,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_70",
+      "vct": "not_applicable",
+      "document_id": "idp_user_70",
       "real_data": false
     }
   },
@@ -1398,8 +1398,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_71",
+      "vct": "not_applicable",
+      "document_id": "idp_user_71",
       "real_data": false
     }
   },
@@ -1425,8 +1425,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_72",
+      "vct": "not_applicable",
+      "document_id": "idp_user_72",
       "real_data": false
     }
   },
@@ -1452,8 +1452,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_73",
+      "vct": "not_applicable",
+      "document_id": "idp_user_73",
       "real_data": false
     }
   },
@@ -1479,8 +1479,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_74",
+      "vct": "not_applicable",
+      "document_id": "idp_user_74",
       "real_data": false
     }
   },
@@ -1506,8 +1506,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_75",
+      "vct": "not_applicable",
+      "document_id": "idp_user_75",
       "real_data": false
     }
   },
@@ -1533,8 +1533,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_76",
+      "vct": "not_applicable",
+      "document_id": "idp_user_76",
       "real_data": false
     }
   },
@@ -1560,8 +1560,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_77",
+      "vct": "not_applicable",
+      "document_id": "idp_user_77",
       "real_data": false
     }
   },
@@ -1587,8 +1587,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_78",
+      "vct": "not_applicable",
+      "document_id": "idp_user_78",
       "real_data": false
     }
   },
@@ -1614,8 +1614,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_79",
+      "vct": "not_applicable",
+      "document_id": "idp_user_79",
       "real_data": false
     }
   },
@@ -1641,8 +1641,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_80",
+      "vct": "not_applicable",
+      "document_id": "idp_user_80",
       "real_data": false
     }
   },
@@ -1668,8 +1668,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_81",
+      "vct": "not_applicable",
+      "document_id": "idp_user_81",
       "real_data": false
     }
   },
@@ -1695,8 +1695,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_82",
+      "vct": "not_applicable",
+      "document_id": "idp_user_82",
       "real_data": false
     }
   },
@@ -1722,8 +1722,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_83",
+      "vct": "not_applicable",
+      "document_id": "idp_user_83",
       "real_data": false
     }
   },
@@ -1749,8 +1749,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_84",
+      "vct": "not_applicable",
+      "document_id": "idp_user_84",
       "real_data": false
     }
   },
@@ -1776,8 +1776,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_85",
+      "vct": "not_applicable",
+      "document_id": "idp_user_85",
       "real_data": false
     }
   },
@@ -1803,8 +1803,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_86",
+      "vct": "not_applicable",
+      "document_id": "idp_user_86",
       "real_data": false
     }
   },
@@ -1830,8 +1830,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_87",
+      "vct": "not_applicable",
+      "document_id": "idp_user_87",
       "real_data": false
     }
   },
@@ -1857,8 +1857,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_88",
+      "vct": "not_applicable",
+      "document_id": "idp_user_88",
       "real_data": false
     }
   },
@@ -1884,8 +1884,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_89",
+      "vct": "not_applicable",
+      "document_id": "idp_user_89",
       "real_data": false
     }
   },
@@ -1911,8 +1911,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_90",
+      "vct": "not_applicable",
+      "document_id": "idp_user_90",
       "real_data": false
     }
   },
@@ -1938,8 +1938,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_91",
+      "vct": "not_applicable",
+      "document_id": "idp_user_91",
       "real_data": false
     }
   },
@@ -1965,8 +1965,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_92",
+      "vct": "not_applicable",
+      "document_id": "idp_user_92",
       "real_data": false
     }
   },
@@ -1992,8 +1992,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_93",
+      "vct": "not_applicable",
+      "document_id": "idp_user_93",
       "real_data": false
     }
   },
@@ -2019,8 +2019,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_94",
+      "vct": "not_applicable",
+      "document_id": "idp_user_94",
       "real_data": false
     }
   },
@@ -2046,8 +2046,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_95",
+      "vct": "not_applicable",
+      "document_id": "idp_user_95",
       "real_data": false
     }
   },
@@ -2073,8 +2073,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_96",
+      "vct": "not_applicable",
+      "document_id": "idp_user_96",
       "real_data": false
     }
   },
@@ -2100,8 +2100,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_97",
+      "vct": "not_applicable",
+      "document_id": "idp_user_97",
       "real_data": false
     }
   },
@@ -2127,8 +2127,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_98",
+      "vct": "not_applicable",
+      "document_id": "idp_user_98",
       "real_data": false
     }
   },
@@ -2154,8 +2154,8 @@
     "meta": {
       "authentic_source": "PID_Provider:00001",
       "document_version": "1.0.0",
-      "vct": "urn:eudi:pid:1",
-      "document_id": "pid_user_99",
+      "vct": "not_applicable",
+      "document_id": "idp_user_99",
       "real_data": false
     }
   }

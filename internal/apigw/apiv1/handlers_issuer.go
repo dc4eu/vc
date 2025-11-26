@@ -14,8 +14,6 @@ import (
 	"vc/pkg/openid4vci"
 
 	"github.com/golang-jwt/jwt/v5"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // OIDCCredentialOffer https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-offer-endpoint
@@ -49,7 +47,7 @@ func (c *Client) OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, erro
 //	@Param			req	body		openid4vci.CredentialRequest	true	" "
 //	@Router			/credential [post]
 func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
-	c.log.Debug("credential", "req", req.Proof.ProofType)
+	c.log.Debug("credential", "req", req.Proof.ProofType, "format", req.Format)
 
 	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.Headers.DPoP)
 	if err != nil {
@@ -84,6 +82,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	document := &model.CompleteDocument{}
 
+	// TODO(masv): make this flexible, use config.yaml credential constructor
 	switch authContext.Scope {
 	case "ehic", "pda1", "diploma":
 		c.log.Debug("ehic/pda1/diploma scope detected")
@@ -97,12 +96,26 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			break
 		}
 
-	case "pid":
+	case "pid_1_5":
 		c.log.Debug("pid scope detected")
 		document, err = c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
-				VCT:             authContext.VCT,
+				VCT:             model.CredentialTypeUrnEudiPidARF151,
+			},
+			Identity: authContext.Identity,
+		})
+		if err != nil {
+			c.log.Debug("failed to get document", "error", err)
+			return nil, err
+		}
+
+	case "pid_1_8":
+		c.log.Debug("pid scope detected")
+		document, err = c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
+			Meta: &model.MetaData{
+				AuthenticSource: authContext.AuthenticSource,
+				VCT:             model.CredentialTypeUrnEudiPidARG181,
 			},
 			Identity: authContext.Identity,
 		})
@@ -130,16 +143,8 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	c.log.Debug("Here 1", "jwk", jwk)
 
-	//	// Build SDJWT
-	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		c.log.Error(err, "Failed to connect to issuer")
-		return nil, err
-	}
-	defer conn.Close()
-	client := apiv1_issuer.NewIssuerServiceClient(conn)
-
-	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
+	// Use the pre-initialized gRPC client
+	reply, err := c.issuerClient.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
 		Scope:        authContext.Scope,
 		DocumentData: documentData,
 		Jwk:          jwk,
@@ -250,16 +255,8 @@ type RevokeReply struct {
 //	@Param			req	body		RevokeRequest			true	" "
 //	@Router			/revoke [post]
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
-	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
-
-	conn, err := grpc.NewClient(c.cfg.Registry.GRPCServer.Addr, optInsecure)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	client := apiv1_registry.NewRegistryServiceClient(conn)
-	resp, err := client.Revoke(ctx, &apiv1_registry.RevokeRequest{
+	// Use the pre-initialized gRPC client
+	resp, err := c.registryClient.Revoke(ctx, &apiv1_registry.RevokeRequest{
 		Entity: "mura",
 	})
 	if err != nil {

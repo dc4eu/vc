@@ -118,152 +118,123 @@ Establish production observability and monitoring.
 
 **Benefits**: Operational excellence, faster incident response, proactive issue detection.
 
-## Priority 10: W3C Digital Credentials API Support in Verifier
+## Priority 10: W3C Digital Credentials API Support in Verifier ✅ COMPLETED
 
-Implement support for the W3C Digital Credentials API in the verifier component.
+**Status**: Implemented in PR #218, merged to main
 
-- Implement Digital Credentials API endpoints
-- Support credential request/response protocol
-- Add browser-based credential presentation flow
-- Integrate with existing presentation exchange logic
-- Support credential selection UI
-- Add comprehensive testing for browser flows
+Implemented support for the W3C Digital Credentials API in the verifier component.
 
-**Benefits**: Enable browser-based credential verification, align with W3C standards, improve user experience for web-based verifiers.
+- ✅ Implemented Digital Credentials API endpoints
+- ✅ Support credential request/response protocol
+- ✅ Added browser-based credential presentation flow
+- ✅ Integrated with existing presentation exchange logic
+- ✅ Support credential selection UI with enhanced authorization page
+- ✅ Added comprehensive testing for browser flows
+- ✅ Created documentation: `docs/DIGITAL_CREDENTIALS_API.md`
+- ✅ Added example configuration: `config.digital-credentials-example.yaml`
+
+**Key Features Delivered**:
+- Digital Credentials JavaScript API implementation (`digital-credentials.js`)
+- Enhanced authorization page with session preferences (`authorize_enhanced.html`)
+- Credential display UI (`credential_display.html`)
+- Session preference management for protocol selection
+- Full integration with OpenID4VP flow
+
+**Benefits**: Enabled browser-based credential verification, aligned with W3C standards, improved user experience for web-based verifiers.
 
 **References**:
 - [W3C Digital Credentials API](https://wicg.github.io/digital-credentials/)
 - Related to OpenID4VP browser flows
+- Documentation: `docs/DIGITAL_CREDENTIALS_API.md`
 
-## Priority 11: OpenID Connect Relying Party for Credential Issuance
+## Priority 11: OpenID Connect Relying Party for Credential Issuance ✅ COMPLETED
 
-Implement OIDC Relying Party (RP) functionality to issue credentials based on OpenID Connect authentication flows, analogous to the existing SAML Service Provider integration.
+**Status**: Implemented in PR #217, merged to main
 
-### Architecture Overview
+Implemented OIDC Relying Party (RP) functionality to issue credentials based on OpenID Connect authentication flows, analogous to the existing SAML Service Provider integration.
 
-The implementation will add OIDC RP capabilities in `pkg/oidcrp/` and `internal/apigw/httpserver/`, following the same patterns established by the SAML integration. This allows issuing credentials based on authentication against external OIDC Providers (Google, Azure AD, Keycloak, etc.).
-
-### Key Components
+### Implementation Summary
 
 **1. Configuration Structure** (`pkg/model/config.go`):
-```yaml
-apigw:
-  oidcrp:
-    enabled: true
-    client_id: "my-client-id"
-    client_secret: "my-client-secret"
-    redirect_uri: "https://issuer.example.com/oidcrp/callback"
-    issuer_url: "https://accounts.google.com"  # For OIDC Discovery
-    scopes: ["openid", "profile", "email"]
-    session_duration: 3600
-    
-    # Reuse existing CredentialMapping structure (protocol-agnostic)
-    credential_mappings:
-      pid:
-        credential_config_id: "urn:eudi:pid:1"
-        attributes:
-          sub: {claim: "identity.unique_id", required: true}
-          given_name: {claim: "identity.given_name", required: true}
-          family_name: {claim: "identity.family_name", required: true}
-          email: {claim: "identity.email", required: false}
-```
+- ✅ Added `OIDCRPConfig` with support for multiple OIDC providers
+- ✅ Implemented credential mappings reusing existing `CredentialMapping` structure
+- ✅ Support for both OIDC Discovery and static configuration
+- ✅ Session duration and security settings
 
-**2. OIDC RP Service** (`pkg/oidcrp/service.go`):
-- OIDC Provider discovery (`.well-known/openid-configuration`)
-- OAuth2 authorization code flow with PKCE
-- ID token verification and claim extraction
-- Session management (state, nonce, code_verifier)
-- UserInfo endpoint support for additional claims
+**2. OIDC RP Service** (`pkg/oidcrp/`):
+- ✅ `service.go` - Core OIDC RP implementation
+- ✅ `session.go` - Session management using ttlcache
+- ✅ `transformer.go` - Claim transformation from OIDC to credentials
+- ✅ `cache.go` - OIDC Provider metadata caching
+- ✅ `dynamic_registration.go` - Dynamic Client Registration support
+- ✅ OIDC Provider discovery (`.well-known/openid-configuration`)
+- ✅ OAuth2 authorization code flow with PKCE
+- ✅ ID token verification and claim extraction
+- ✅ Comprehensive test coverage
 
-**3. API Endpoints** (`internal/apigw/httpserver/`):
-- `POST /oidcrp/initiate` - Start OIDC authentication
-- `GET /oidcrp/callback` - Handle OIDC provider callback
+**3. API Endpoints** (`internal/apigw/`):
+- ✅ `POST /oidcrp/initiate` - Start OIDC authentication
+- ✅ `GET /oidcrp/callback` - Handle OIDC provider callback
+- ✅ Layered architecture: httpserver → apiv1 → pkg
+- ✅ Build tag support for optional compilation (`-tags=oidcrp`)
 
 **4. Authentication Flow**:
-1. Client calls `/oidcrp/initiate` with credential_type
-2. Service generates OAuth2 authorization URL with PKCE
-3. User authenticates at OIDC Provider
-4. Provider redirects to `/oidcrp/callback` with authorization code
-5. Service exchanges code for tokens, verifies ID token
-6. Claims extracted from ID token (+ UserInfo if needed)
-7. Claims transformed using existing `ClaimTransformer` (protocol-agnostic)
-8. Credential issued via issuer gRPC
-9. Credential + offer returned to client
+1. ✅ Client calls `/oidcrp/initiate` with credential_type
+2. ✅ Service generates OAuth2 authorization URL with PKCE
+3. ✅ User authenticates at OIDC Provider
+4. ✅ Provider redirects to `/oidcrp/callback` with authorization code
+5. ✅ Service exchanges code for tokens, verifies ID token
+6. ✅ Claims extracted from ID token
+7. ✅ Claims transformed using `ClaimTransformer`
+8. ✅ Credential issued via issuer gRPC
+9. ✅ Credential + offer returned to client
 
-### Reusable Components
+### Key Features Delivered
 
-**Already Protocol-Agnostic** (shared with SAML):
-- ✅ `AttributeConfig` - Claim mapping configuration
-- ✅ `CredentialMapping` - Credential type configuration
-- ✅ `ClaimTransformer` - Claim transformation logic (supports dot-notation paths, transforms, defaults)
+**Reusable Components**:
+- ✅ Protocol-agnostic `ClaimTransformer` (shared with SAML)
+- ✅ Unified `CredentialMapping` configuration
+- ✅ Build tag architecture for optional features
 
-**OIDC-Specific** (new):
-- OIDC Provider discovery and metadata caching
-- OAuth2 code flow with PKCE implementation
-- JWT/JWK verification using standard libraries
-- Session store for OAuth2 state/nonce
+**OIDC-Specific**:
+- ✅ OIDC Provider discovery and metadata caching
+- ✅ OAuth2 code flow with PKCE implementation
+- ✅ JWT/JWK verification using `github.com/coreos/go-oidc/v3`
+- ✅ Session store with automatic TTL cleanup (ttlcache)
+- ✅ Dynamic Client Registration (RFC 7591) support
 
-### Implementation Phases
+**Architecture Improvements**:
+- ✅ Moved business logic to apiv1 layer (addresses code review)
+- ✅ Thin httpserver endpoints (improved separation of concerns)
+- ✅ Interface-based dependency injection
+- ✅ Stub implementations for non-OIDC builds
 
-**Phase 1 - Core OIDC RP**:
-- `pkg/oidcrp/` package structure
-- Service initialization with OIDC Discovery
-- Session management (state, nonce, PKCE)
-- Authorization code flow implementation
-- APIGW route registration with build tags
+**Documentation**:
+- ✅ Comprehensive documentation: `docs/OIDC_RP.md`
+- ✅ Configuration examples
+- ✅ Integration guide
 
-**Phase 2 - Claim Transformation**:
-- Reuse `pkg/saml/transformer.go` (already supports OIDC claims)
-- Configuration-driven mappings
-- Support UserInfo endpoint for extended claims
-- Handle nested claim paths
+### Dependencies Added
 
-**Phase 3 - Credential Issuance**:
-- Integration with issuer gRPC service
-- Credential offer generation (OpenID4VCI)
-- Error handling and validation
-- Session cleanup
-
-**Phase 4 - Production Features**:
-- Multiple OIDC Provider support
-- Dynamic Client Registration (RFC 7591) support
-- Comprehensive testing with real providers
-- Documentation and examples
-
-### Dependencies
-
-Standard Go libraries for OIDC:
 - `github.com/coreos/go-oidc/v3/oidc` - Provider discovery, token verification
 - `golang.org/x/oauth2` - OAuth2 flows
+- `github.com/jellydator/ttlcache/v3` - Session management
 
-### Key Differences from SAML
+### Benefits Realized
 
-| Aspect | SAML | OIDC RP |
-|--------|------|---------|
-| Metadata | XML (SP/IdP metadata) | JSON (OIDC Discovery) |
-| Cryptography | X.509 certificates | JWK, JWT signatures |
-| Protocol Flow | SAML AuthnRequest → Assertion | OAuth2 code flow → ID Token |
-| Attributes | SAML Attributes (OIDs) | OIDC Claims (JSON) |
-| Session Security | RelayState | OAuth2 state + nonce + PKCE |
-| Provider Discovery | MDQ or static metadata | `.well-known/openid-configuration` |
-
-### Benefits
-
-- **Broader Compatibility**: Support Google, Microsoft, Keycloak, Auth0, etc.
+- **Broader Compatibility**: Support for Google, Microsoft, Keycloak, Auth0, etc.
 - **Modern Protocol**: Industry-standard OAuth2/OIDC flows
 - **Reusable Architecture**: Shares claim transformation with SAML
 - **Flexible Deployment**: Discovery or static configuration
 - **Secure**: PKCE, nonce, standard JWT verification
-- **Optional Build**: Compile-time flag like SAML (`-tags=oidcrp`)
+- **Optional Build**: Compile-time flag (`-tags=oidcrp`)
+- **Production Ready**: Comprehensive tests, documentation, proper layering
 
-### Design Considerations
-
-- Reuse `ClaimTransformer` from SAML (already protocol-agnostic)
-- Follow same configuration patterns as `SAMLConfig`
-- Use build tags for optional compilation
-- Mirror endpoint structure (`endpoints_saml.go` → `endpoints_oidcrp.go`)
-- Support both OIDC Discovery and static provider configuration
-- Implement standard OAuth2 security (PKCE, state, nonce)
+**References**:
+- Documentation: `docs/OIDC_RP.md`
+- RFC 6749 (OAuth 2.0)
+- OpenID Connect Core 1.0
+- RFC 7591 (Dynamic Client Registration)
 
 ---
 

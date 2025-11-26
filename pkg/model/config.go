@@ -210,6 +210,101 @@ func (c *SAMLConfig) Validate() error {
 	return nil
 }
 
+// OIDCRPConfig holds OIDC Relying Party configuration for credential issuance
+type OIDCRPConfig struct {
+	// Enabled turns on OIDC RP support (default: false)
+	Enabled bool `yaml:"enabled"`
+
+	// Dynamic Registration (RFC 7591) support
+	// If enabled, the OIDC RP will attempt to register itself with the OIDC Provider
+	// instead of using pre-configured client credentials
+	DynamicRegistration DynamicRegistrationConfig `yaml:"dynamic_registration"`
+
+	// ClientID is the OIDC client identifier (required if not using dynamic registration)
+	ClientID string `yaml:"client_id"`
+
+	// ClientSecret is the OIDC client secret (required if not using dynamic registration)
+	ClientSecret string `yaml:"client_secret"`
+
+	// RedirectURI is the callback URL where the OIDC Provider sends the authorization response
+	// Example: "https://issuer.example.com/oidcrp/callback"
+	RedirectURI string `yaml:"redirect_uri" validate:"required_if=Enabled true"`
+
+	// IssuerURL is the OIDC Provider's issuer URL for discovery
+	// Example: "https://accounts.google.com"
+	// Used for .well-known/openid-configuration discovery
+	IssuerURL string `yaml:"issuer_url" validate:"required_if=Enabled true"`
+
+	// Scopes are the OAuth2/OIDC scopes to request
+	// Default: ["openid", "profile", "email"]
+	Scopes []string `yaml:"scopes"`
+
+	// SessionDuration in seconds (default: 3600)
+	SessionDuration int `yaml:"session_duration"`
+
+	// Client metadata for dynamic registration or display purposes
+	ClientName string   `yaml:"client_name,omitempty"`
+	ClientURI  string   `yaml:"client_uri,omitempty"`
+	LogoURI    string   `yaml:"logo_uri,omitempty"`
+	Contacts   []string `yaml:"contacts,omitempty"`
+	TosURI     string   `yaml:"tos_uri,omitempty"`
+	PolicyURI  string   `yaml:"policy_uri,omitempty"`
+
+	// CredentialMappings defines how to map OIDC claims to credential claims
+	// Key: credential type identifier (e.g., "pid", "diploma")
+	// Maps to credential_constructor keys and OpenID4VCI credential_configuration_ids
+	CredentialMappings map[string]CredentialMapping `yaml:"credential_mappings" validate:"required_if=Enabled true"`
+}
+
+// DynamicRegistrationConfig configures RFC 7591 dynamic client registration
+type DynamicRegistrationConfig struct {
+	// Enabled turns on dynamic client registration
+	// If true, ClientID and ClientSecret from OIDCRPConfig are ignored
+	Enabled bool `yaml:"enabled"`
+
+	// InitialAccessToken is an optional bearer token for registration
+	// Required by some OIDC Providers (e.g., Keycloak)
+	InitialAccessToken string `yaml:"initial_access_token,omitempty"`
+
+	// StoragePath is where registered client credentials are cached
+	// Example: "/var/lib/vc/oidcrp-registration.json"
+	// If empty, credentials are not persisted (re-register on restart)
+	StoragePath string `yaml:"storage_path,omitempty"`
+}
+
+// Validate validates OIDCRPConfig for consistency
+func (c *OIDCRPConfig) Validate() error {
+	if !c.Enabled {
+		return nil
+	}
+
+	// Ensure scopes includes "openid" at minimum
+	if len(c.Scopes) == 0 {
+		c.Scopes = []string{"openid", "profile", "email"}
+	}
+
+	hasOpenID := false
+	for _, scope := range c.Scopes {
+		if scope == "openid" {
+			hasOpenID = true
+			break
+		}
+	}
+
+	if !hasOpenID {
+		return errors.New("OIDC scopes must include 'openid'")
+	}
+
+	// Validate that either static credentials or dynamic registration is configured
+	if !c.DynamicRegistration.Enabled {
+		if c.ClientID == "" || c.ClientSecret == "" {
+			return errors.New("OIDC RP requires either client_id/client_secret or dynamic_registration.enabled=true")
+		}
+	}
+
+	return nil
+}
+
 // CredentialMapping defines how to issue a specific credential type via SAML
 // The credential type identifier (map key) is used in API requests and session state
 type CredentialMapping struct {
@@ -359,6 +454,7 @@ type APIGW struct {
 	IssuerMetadata    IssuerMetadata   `yaml:"issuer_metadata" validate:"omitempty"`
 	ExternalServerURL string           `yaml:"external_server_url" validate:"required"`
 	SAML              SAMLConfig       `yaml:"saml,omitempty" validate:"omitempty"`
+	OIDCRP            OIDCRPConfig     `yaml:"oidcrp,omitempty" validate:"omitempty"`
 }
 
 // OTEL holds the opentelemetry configuration

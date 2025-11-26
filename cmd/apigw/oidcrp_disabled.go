@@ -1,0 +1,17 @@
+//go:build !oidcrp
+
+package main
+
+import (
+	"context"
+	"vc/internal/apigw/httpserver"
+	"vc/pkg/logger"
+	"vc/pkg/model"
+)
+
+func initOIDCRPService(ctx context.Context, cfg *model.Cfg, log *logger.Log) (httpserver.OIDCRPService, error) {
+	if cfg.APIGW.OIDCRP.Enabled {
+		log.Info("OIDC RP enabled in config but not compiled in. Rebuild with -tags oidcrp")
+	}
+	return nil, nil
+}

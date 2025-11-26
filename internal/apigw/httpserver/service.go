@@ -39,10 +39,11 @@ type Service struct {
 	sessionsAuthKey string
 	sessionsName    string
 	samlService     SAMLService
+	oidcrpService   OIDCRPService
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, samlService SAMLService, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, samlService SAMLService, oidcrpService OIDCRPService, log *logger.Log) (*Service, error) {
 	s := &Service{
 		cfg:    cfg,
 		log:    log.New("httpserver"),
@@ -54,6 +55,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		},
 		eventPublisher:  eventPublisher,
 		samlService:     samlService,
+		oidcrpService:   oidcrpService,
 		sessionsName:    "oauth_user_session",
 		sessionsAuthKey: oauth2.GenerateCryptographicNonceFixedLength(32),
 		sessionsEncKey:  oauth2.GenerateCryptographicNonceFixedLength(32),
@@ -133,6 +135,9 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	// Register SAML endpoints if enabled (build tag dependent)
 	s.registerSAMLRoutes(ctx, rgRoot)
+
+	// Register OIDC RP endpoints if enabled (build tag dependent)
+	s.registerOIDCRPRoutes(ctx, rgRoot)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", 200, s.endpointHealth)
 

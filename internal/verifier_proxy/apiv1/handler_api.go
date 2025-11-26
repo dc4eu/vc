@@ -30,8 +30,9 @@ type GetRequestObjectResponse struct {
 // DirectPostRequest represents a direct_post callback from a wallet
 type DirectPostRequest struct {
 	State                  string `form:"state" binding:"required"`
-	VPToken                string `form:"vp_token" binding:"required"`
-	PresentationSubmission string `form:"presentation_submission"`
+	VPToken                string `form:"vp_token"`                // For standard direct_post
+	PresentationSubmission string `form:"presentation_submission"` // For standard direct_post
+	Response               string `form:"response"`                // For DC API encrypted JWT response
 }
 
 // DirectPostResponse contains the response to a direct_post request
@@ -227,11 +228,42 @@ func (c *Client) ProcessDirectPost(ctx context.Context, req *DirectPostRequest) 
 		return nil, ErrSessionNotFound
 	}
 
+	var vpToken string
+	var presentationSubmission any
+
+	// Check if this is a DC API response (encrypted JWT) or standard form-encoded
+	if req.Response != "" {
+		// DC API response - decrypt and extract vp_token
+		// TODO: Implement JWT decryption using OIDC keys
+		// For now, assume the response JWT contains vp_token in its payload
+		c.log.Debug("Processing DC API encrypted response", "state", req.State)
+
+		// Placeholder: In production, decrypt the JWT and extract vp_token
+		// For now, treat response as the vp_token (this will be replaced with proper decryption)
+		vpToken = req.Response
+
+		c.log.Info("DC API response decryption not yet implemented, treating response as vp_token")
+	} else if req.VPToken != "" {
+		// Standard direct_post with form-encoded parameters
+		vpToken = req.VPToken
+
+		// Parse presentation submission if provided
+		if req.PresentationSubmission != "" {
+			if err := json.Unmarshal([]byte(req.PresentationSubmission), &presentationSubmission); err != nil {
+				c.log.Error(err, "Failed to parse presentation submission")
+				// Continue anyway - presentation submission is optional
+			}
+		}
+	} else {
+		c.log.Error(nil, "Neither vp_token nor response parameter provided")
+		return nil, ErrInvalidRequest
+	}
+
 	// Validate and parse VP token using sdjwt3
-	c.log.Debug("Processing VP token", "state", req.State, "vp_token_length", len(req.VPToken))
+	c.log.Debug("Processing VP token", "state", req.State, "vp_token_length", len(vpToken))
 
 	// Extract and map claims from VP token
-	oidcClaims, err := c.extractAndMapClaims(ctx, req.VPToken, session.OIDCRequest.Scope)
+	oidcClaims, err := c.extractAndMapClaims(ctx, vpToken, session.OIDCRequest.Scope)
 	if err != nil {
 		c.log.Error(err, "Failed to extract and map claims from VP token")
 		return nil, ErrInvalidVP
@@ -243,25 +275,36 @@ func (c *Client) ProcessDirectPost(ctx context.Context, req *DirectPostRequest) 
 	// TODO: Retrieve public key from wallet metadata or cnf claim
 	// For now, we accept the parsed claims (signature validation would go here)
 
-	// Parse presentation submission if provided
-	var presentationSubmission any
-	if req.PresentationSubmission != "" {
-		if err := json.Unmarshal([]byte(req.PresentationSubmission), &presentationSubmission); err != nil {
-			c.log.Error(err, "Failed to parse presentation submission")
-			// Continue anyway - presentation submission is optional
-		}
-	}
-
 	// Update session with VP data
-	session.OpenID4VP.VPToken = req.VPToken
+	session.OpenID4VP.VPToken = vpToken
 	session.OpenID4VP.PresentationSubmission = presentationSubmission
 	session.VerifiedClaims = oidcClaims // Store mapped OIDC claims
-	session.Status = db.SessionStatusCodeIssued
 
 	// Extract wallet ID from claims (sub or other identifier)
 	if sub, ok := oidcClaims["sub"].(string); ok {
 		session.OpenID4VP.WalletID = sub
 	}
+
+	// Check if user requested credential display
+	if session.OIDCRequest.ShowCredentialDetails {
+		// Update session status to indicate we're waiting for user confirmation
+		session.Status = db.SessionStatusAwaitingPresentation
+		
+		if err := c.db.Sessions.Update(ctx, session); err != nil {
+			c.log.Error(err, "Failed to update session")
+			return nil, ErrServerError
+		}
+
+		c.log.Info("Redirecting to credential display page", "session_id", session.ID)
+
+		// Redirect to credential display page instead of completing authorization
+		return &DirectPostResponse{
+			RedirectURI: fmt.Sprintf("%s/verification/display/%s", c.cfg.VerifierProxy.ExternalURL, session.ID),
+		}, nil
+	}
+
+	// Otherwise, issue authorization code immediately
+	session.Status = db.SessionStatusCodeIssued
 
 	// Generate authorization code
 	code := c.generateAuthorizationCode()

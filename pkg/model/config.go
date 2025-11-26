@@ -380,10 +380,13 @@ type Verifier struct {
 
 // VerifierProxy holds the verifier proxy configuration
 type VerifierProxy struct {
-	APIServer   APIServer       `yaml:"api_server" validate:"required"`
-	ExternalURL string          `yaml:"external_url" validate:"required"`
-	OIDC        OIDCConfig      `yaml:"oidc" validate:"required"`
-	OpenID4VP   OpenID4VPConfig `yaml:"openid4vp" validate:"required"`
+	APIServer            APIServer                  `yaml:"api_server" validate:"required"`
+	ExternalURL          string                     `yaml:"external_url" validate:"required"`
+	OIDC                 OIDCConfig                 `yaml:"oidc" validate:"required"`
+	OpenID4VP            OpenID4VPConfig            `yaml:"openid4vp" validate:"required"`
+	DigitalCredentials   DigitalCredentialsConfig   `yaml:"digital_credentials,omitempty"`
+	AuthorizationPageCSS AuthorizationPageCSSConfig `yaml:"authorization_page_css,omitempty"`
+	CredentialDisplay    CredentialDisplayConfig    `yaml:"credential_display,omitempty"`
 }
 
 // OIDCConfig holds OIDC-specific configuration for the verifier-proxy's role as an OpenID Provider.
@@ -410,6 +413,85 @@ type OpenID4VPConfig struct {
 	PresentationTimeout     int                         `yaml:"presentation_timeout" validate:"required"`
 	SupportedCredentials    []SupportedCredentialConfig `yaml:"supported_credentials" validate:"required"`
 	PresentationRequestsDir string                      `yaml:"presentation_requests_dir,omitempty"` // Optional: directory with presentation request templates
+}
+
+// DigitalCredentialsConfig holds W3C Digital Credentials API configuration
+type DigitalCredentialsConfig struct {
+	// Enabled toggles W3C Digital Credentials API support in browser
+	Enabled bool `yaml:"enabled"`
+
+	// UseJAR enables JWT Authorization Request (JAR) for wallet communication
+	// When true, request objects are signed JWTs instead of plain JSON
+	UseJAR bool `yaml:"use_jar"`
+
+	// PreferredFormats specifies the order of preference for credential formats
+	// Supported values: "vc+sd-jwt", "dc+sd-jwt", "mso_mdoc"
+	// Default: ["vc+sd-jwt", "dc+sd-jwt", "mso_mdoc"]
+	PreferredFormats []string `yaml:"preferred_formats,omitempty"`
+
+	// ResponseMode specifies the OpenID4VP response mode for DC API flows
+	// Supported values: "dc_api.jwt" (encrypted), "direct_post.jwt" (signed), "direct_post"
+	// Default: "dc_api.jwt"
+	ResponseMode string `yaml:"response_mode,omitempty" validate:"omitempty,oneof=dc_api.jwt direct_post.jwt direct_post"`
+
+	// AllowQRFallback enables automatic fallback to QR code if DC API is unavailable
+	// Default: true
+	AllowQRFallback bool `yaml:"allow_qr_fallback"`
+
+	// DeepLinkScheme for mobile wallet integration (e.g., "eudi-wallet://")
+	DeepLinkScheme string `yaml:"deep_link_scheme,omitempty"`
+}
+
+// AuthorizationPageCSSConfig allows deployers to customize the authorization page styling
+type AuthorizationPageCSSConfig struct {
+	// CustomCSS is inline CSS that will be injected into the authorization page
+	// Allows deployers to override default styling without modifying templates
+	CustomCSS string `yaml:"custom_css,omitempty"`
+
+	// CSSFile is a path to an external CSS file to include
+	// If both CustomCSS and CSSFile are provided, both are included
+	CSSFile string `yaml:"css_file,omitempty"`
+
+	// Theme sets predefined color scheme: "light" (default), "dark", "blue", "purple"
+	Theme string `yaml:"theme,omitempty" validate:"omitempty,oneof=light dark blue purple"`
+
+	// PrimaryColor overrides the primary brand color (hex format: #667eea)
+	PrimaryColor string `yaml:"primary_color,omitempty"`
+
+	// SecondaryColor overrides the secondary brand color (hex format: #764ba2)
+	SecondaryColor string `yaml:"secondary_color,omitempty"`
+
+	// LogoURL provides a URL to a custom logo image
+	LogoURL string `yaml:"logo_url,omitempty"`
+
+	// Title overrides the page title (default: "Wallet Authorization")
+	Title string `yaml:"title,omitempty"`
+
+	// Subtitle overrides the page subtitle
+	Subtitle string `yaml:"subtitle,omitempty"`
+}
+
+// CredentialDisplayConfig controls whether and how credentials are displayed before being sent to RP
+type CredentialDisplayConfig struct {
+	// Enabled allows users to optionally view credential details before completing authorization
+	// When enabled, a checkbox appears on the authorization page
+	Enabled bool `yaml:"enabled"`
+
+	// RequireConfirmation forces users to review credentials before proceeding
+	// When true, the credential display step is mandatory (checkbox is pre-checked and disabled)
+	RequireConfirmation bool `yaml:"require_confirmation"`
+
+	// ShowRawCredential displays the raw VP token/credential in the display page
+	// Useful for debugging and technical users
+	ShowRawCredential bool `yaml:"show_raw_credential"`
+
+	// ShowClaims displays the parsed claims that will be sent to the RP
+	// Recommended for transparency and user consent
+	ShowClaims bool `yaml:"show_claims"`
+
+	// AllowEdit allows users to redact certain claims before sending to RP (future feature)
+	// Currently not implemented
+	AllowEdit bool `yaml:"allow_edit,omitempty"`
 }
 
 // SupportedCredentialConfig maps credential types to OIDC scopes

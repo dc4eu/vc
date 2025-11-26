@@ -59,6 +59,7 @@ type OIDCRequest struct {
 	IDTokenHint         string   `bson:"id_token_hint,omitempty" json:"id_token_hint,omitempty"`
 	LoginHint           string   `bson:"login_hint,omitempty" json:"login_hint,omitempty"`
 	ACRValues           []string `bson:"acr_values,omitempty" json:"acr_values,omitempty"`
+	ShowCredentialDetails bool   `bson:"show_credential_details,omitempty" json:"show_credential_details,omitempty"` // User requested to view credential before authorization
 }
 
 // OpenID4VPSession represents the OpenID4VP interaction

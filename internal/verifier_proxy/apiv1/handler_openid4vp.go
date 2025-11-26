@@ -13,6 +13,16 @@ import (
 
 // CreateRequestObject creates and signs an OpenID4VP request object
 func (c *Client) CreateRequestObject(ctx context.Context, sessionID string, presentationDefinition any, nonce string) (string, error) {
+	// Determine response mode based on Digital Credentials API configuration
+	responseMode := "direct_post"
+	if c.cfg.VerifierProxy.DigitalCredentials.Enabled {
+		if c.cfg.VerifierProxy.DigitalCredentials.ResponseMode != "" {
+			responseMode = c.cfg.VerifierProxy.DigitalCredentials.ResponseMode
+		} else {
+			responseMode = "dc_api.jwt" // Default for DC API
+		}
+	}
+
 	// Create request object
 	requestObject := &openid4vp.RequestObject{
 		ISS:                    c.cfg.VerifierProxy.OIDC.Issuer,
@@ -21,10 +31,20 @@ func (c *Client) CreateRequestObject(ctx context.Context, sessionID string, pres
 		ResponseType:           "vp_token",
 		ClientID:               c.cfg.VerifierProxy.OIDC.Issuer,
 		Nonce:                  nonce,
-		ResponseMode:           "direct_post",
+		ResponseMode:           responseMode,
 		ResponseURI:            c.cfg.VerifierProxy.ExternalURL + "/verification/direct_post",
 		State:                  sessionID,
 		PresentationDefinition: presentationDefinitionToPresentationDefinitionParameter(presentationDefinition),
+	}
+
+	// Add vp_formats to client_metadata if Digital Credentials API is enabled
+	if c.cfg.VerifierProxy.DigitalCredentials.Enabled {
+		vpFormats := c.buildVPFormats()
+		if len(vpFormats) > 0 {
+			requestObject.ClientMetadata = &openid4vp.ClientMetadata{
+				VPFormats: vpFormats,
+			}
+		}
 	}
 
 	// Sign the request object
@@ -38,6 +58,34 @@ func (c *Client) CreateRequestObject(ctx context.Context, sessionID string, pres
 	c.requestObjectCache.Set(sessionID, requestObject, 5*time.Minute)
 
 	return signedJWT, nil
+}
+
+// buildVPFormats constructs the vp_formats object based on configured preferred formats
+func (c *Client) buildVPFormats() map[string]map[string][]string {
+	vpFormats := make(map[string]map[string][]string)
+
+	preferredFormats := c.cfg.VerifierProxy.DigitalCredentials.PreferredFormats
+	if len(preferredFormats) == 0 {
+		// Default to SD-JWT if no preferences specified
+		preferredFormats = []string{"vc+sd-jwt"}
+	}
+
+	for _, format := range preferredFormats {
+		switch format {
+		case "vc+sd-jwt", "dc+sd-jwt":
+			// SD-JWT format with supported algorithms
+			vpFormats[format] = map[string][]string{
+				"alg": {"ES256", "ES384", "ES512", "RS256"},
+			}
+		case "mso_mdoc":
+			// mdoc format with supported algorithms
+			vpFormats["mso_mdoc"] = map[string][]string{
+				"alg": {"ES256", "ES384", "ES512"},
+			}
+		}
+	}
+
+	return vpFormats
 }
 
 // createPresentationDefinition maps OIDC scopes to OpenID4VP presentation definition

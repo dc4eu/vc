@@ -96,7 +96,7 @@ Alpine.data("app", () => ({
                     id: "pid",
                     format: "dc+sd-jwt",
                     meta: {
-                        vct_values: ["urn:eudi:pid:1"],
+                        vct_values: ["urn:eudi:pid:arf-1.5:1"],
                     },
                     claims: [
                         { path: ["age_in_years"] },

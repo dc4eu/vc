@@ -529,13 +529,6 @@ func TestCompareCredentials(t *testing.T) {
 }
 
 func TestCompareCredentials_Different(t *testing.T) {
-	// TODO: This test is currently skipped due to the same RDF canonicalization issue
-	// identified in TestVerifyBaseProof_ModifiedCredential. The json-gold library appears
-	// to produce similar canonical forms for structurally similar documents, making
-	// byte-level comparison unreliable for detecting content differences.
-	// This will be investigated and resolved during W3C conformance test integration.
-	t.Skip("Skipping - will investigate during W3C conformance test integration")
-	
 	suite := NewSuite()
 
 	cred1 := &credential.VerifiableCredential{

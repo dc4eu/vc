@@ -442,12 +442,31 @@ func (s *Suite) VerifyMandatoryPointers(cred *credential.VerifiableCredential, m
 
 // CompareCredentials compares two credentials byte-by-byte after canonicalization
 func (s *Suite) CompareCredentials(cred1, cred2 *credential.VerifiableCredential) (bool, error) {
-	canonical1, err := s.Canonicalizer.Canonicalize(cred1)
+	// Convert credentials to JSON for proper canonicalization
+	var cred1JSON, cred2JSON map[string]interface{}
+	
+	data1, err := json.Marshal(cred1)
+	if err != nil {
+		return false, fmt.Errorf("failed to marshal first credential: %w", err)
+	}
+	if err := json.Unmarshal(data1, &cred1JSON); err != nil {
+		return false, fmt.Errorf("failed to unmarshal first credential: %w", err)
+	}
+	
+	data2, err := json.Marshal(cred2)
+	if err != nil {
+		return false, fmt.Errorf("failed to marshal second credential: %w", err)
+	}
+	if err := json.Unmarshal(data2, &cred2JSON); err != nil {
+		return false, fmt.Errorf("failed to unmarshal second credential: %w", err)
+	}
+	
+	canonical1, err := s.Canonicalizer.Canonicalize(cred1JSON)
 	if err != nil {
 		return false, fmt.Errorf("failed to canonicalize first credential: %w", err)
 	}
 
-	canonical2, err := s.Canonicalizer.Canonicalize(cred2)
+	canonical2, err := s.Canonicalizer.Canonicalize(cred2JSON)
 	if err != nil {
 		return false, fmt.Errorf("failed to canonicalize second credential: %w", err)
 	}

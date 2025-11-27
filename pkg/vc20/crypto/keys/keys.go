@@ -22,6 +22,10 @@ const (
 	MulticodecP384PubKey = 0x1201
 	// ECDSA secp256k1 public key multicodec prefix
 	MulticodecSecp256k1PubKey = 0xe7
+	// ECDSA P-256 private key multicodec prefix
+	MulticodecP256PrivKey = 0x1306
+	// ECDSA P-384 private key multicodec prefix
+	MulticodecP384PrivKey = 0x1307
 )
 
 // ECDSAPublicKeyToMultikey encodes an ECDSA public key to Multikey format.
@@ -104,13 +108,6 @@ func MultikeyToECDSAPublicKey(multikey string) (*ecdsa.PublicKey, error) {
 		return nil, fmt.Errorf("no key bytes after multicodec")
 	}
 
-	// Check for uncompressed point format (0x04)
-	if keyBytes[0] != 0x04 {
-		return nil, fmt.Errorf("only uncompressed ECDSA keys are supported (expected 0x04 prefix)")
-	}
-
-	keyBytes = keyBytes[1:] // skip 0x04
-
 	var curve elliptic.Curve
 	var expectedSize int
 
@@ -125,13 +122,58 @@ func MultikeyToECDSAPublicKey(multikey string) (*ecdsa.PublicKey, error) {
 		return nil, fmt.Errorf("unsupported multicodec: 0x%x", multicodec)
 	}
 
-	// X and Y coordinates should each be expectedSize bytes
-	if len(keyBytes) != expectedSize*2 {
-		return nil, fmt.Errorf("invalid key length for curve: got %d, expected %d", len(keyBytes), expectedSize*2)
-	}
+	// Check key format (compressed or uncompressed)
+	prefix := keyBytes[0]
+	keyBytes = keyBytes[1:]
 
-	x := new(big.Int).SetBytes(keyBytes[:expectedSize])
-	y := new(big.Int).SetBytes(keyBytes[expectedSize:])
+	var x, y *big.Int
+
+	if prefix == 0x04 {
+		// Uncompressed format: 0x04 + X + Y
+		if len(keyBytes) != expectedSize*2 {
+			return nil, fmt.Errorf("invalid uncompressed key length for curve: got %d, expected %d", len(keyBytes), expectedSize*2)
+		}
+
+		x = new(big.Int).SetBytes(keyBytes[:expectedSize])
+		y = new(big.Int).SetBytes(keyBytes[expectedSize:])
+	} else if prefix == 0x02 || prefix == 0x03 {
+		// Compressed format: 0x02/0x03 + X
+		if len(keyBytes) != expectedSize {
+			return nil, fmt.Errorf("invalid compressed key length for curve: got %d, expected %d", len(keyBytes), expectedSize)
+		}
+
+		x = new(big.Int).SetBytes(keyBytes)
+
+		// Decompress the Y coordinate
+		// y² = x³ - 3x + b (for P-256 and P-384)
+		params := curve.Params()
+		
+		// Calculate x³ - 3x + b
+		x3 := new(big.Int).Mul(x, x)      // x²
+		x3.Mul(x3, x)                       // x³
+		
+		threeX := new(big.Int).Mul(x, big.NewInt(3))
+		x3.Sub(x3, threeX)                  // x³ - 3x
+		x3.Add(x3, params.B)                // x³ - 3x + b
+		x3.Mod(x3, params.P)                // mod p
+
+		// Compute square root
+		y = new(big.Int).ModSqrt(x3, params.P)
+		if y == nil {
+			return nil, fmt.Errorf("invalid compressed public key: point not on curve")
+		}
+
+		// Check if we need to negate y based on prefix
+		// 0x02 means y is even, 0x03 means y is odd
+		yIsOdd := y.Bit(0) == 1
+		prefixIsOdd := prefix == 0x03
+
+		if yIsOdd != prefixIsOdd {
+			y.Sub(params.P, y)
+		}
+	} else {
+		return nil, fmt.Errorf("unsupported key format prefix: 0x%02x (expected 0x02, 0x03, or 0x04)", prefix)
+	}
 
 	pubKey := &ecdsa.PublicKey{
 		Curve: curve,
@@ -145,6 +187,73 @@ func MultikeyToECDSAPublicKey(multikey string) (*ecdsa.PublicKey, error) {
 	}
 
 	return pubKey, nil
+}
+
+// MultikeyToECDSAPrivateKey decodes a Multikey string to an ECDSA private key.
+// Supports P-256 and P-384 curves.
+//
+// Format: multibase(multicodec || private-key-bytes)
+// - P-256: multicodec 0x1306 + 32-byte D value
+// - P-384: multicodec 0x1307 + 48-byte D value
+func MultikeyToECDSAPrivateKey(multikey string) (*ecdsa.PrivateKey, error) {
+	if len(multikey) == 0 {
+		return nil, fmt.Errorf("multikey is empty")
+	}
+
+	// Decode multibase
+	_, decoded, err := multibase.Decode(multikey)
+	if err != nil {
+		return nil, fmt.Errorf("multibase decoding failed: %w", err)
+	}
+
+	if len(decoded) < 2 {
+		return nil, fmt.Errorf("multikey too short")
+	}
+
+	// Decode multicodec (varint)
+	multicodec, bytesRead := binary.Uvarint(decoded)
+	if bytesRead <= 0 {
+		return nil, fmt.Errorf("invalid multicodec varint")
+	}
+
+	keyBytes := decoded[bytesRead:]
+	if len(keyBytes) == 0 {
+		return nil, fmt.Errorf("no key bytes after multicodec")
+	}
+
+	var curve elliptic.Curve
+	var expectedSize int
+
+	switch multicodec {
+	case MulticodecP256PrivKey:
+		curve = elliptic.P256()
+		expectedSize = 32
+	case MulticodecP384PrivKey:
+		curve = elliptic.P384()
+		expectedSize = 48
+	default:
+		return nil, fmt.Errorf("unsupported private key multicodec: 0x%x", multicodec)
+	}
+
+	// Private key D value should be expectedSize bytes
+	if len(keyBytes) != expectedSize {
+		return nil, fmt.Errorf("invalid private key length for curve: got %d, expected %d", len(keyBytes), expectedSize)
+	}
+
+	d := new(big.Int).SetBytes(keyBytes)
+
+	// Create private key and derive public key
+	privKey := &ecdsa.PrivateKey{
+		PublicKey: ecdsa.PublicKey{
+			Curve: curve,
+		},
+		D: d,
+	}
+
+	// Compute public key from private key
+	privKey.PublicKey.X, privKey.PublicKey.Y = curve.ScalarBaseMult(d.Bytes())
+
+	return privKey, nil
 }
 
 // encodeVarint encodes an unsigned integer as a variable-length integer (varint).

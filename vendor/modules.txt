@@ -82,6 +82,8 @@ github.com/cenkalti/backoff/v4
 # github.com/cenkalti/backoff/v5 v5.0.3
 ## explicit; go 1.23
 github.com/cenkalti/backoff/v5
+# github.com/cloudflare/circl v1.3.7
+## explicit; go 1.19
 # github.com/cloudwego/base64x v0.1.6
 ## explicit; go 1.17
 github.com/cloudwego/base64x
@@ -184,6 +186,9 @@ github.com/ebitengine/purego/internal/strings
 # github.com/felixge/httpsnoop v1.0.4
 ## explicit; go 1.13
 github.com/felixge/httpsnoop
+# github.com/fxamacker/cbor/v2 v2.6.0
+## explicit; go 1.17
+github.com/fxamacker/cbor/v2
 # github.com/gabriel-vasile/mimetype v1.4.10
 ## explicit; go 1.21
 github.com/gabriel-vasile/mimetype
@@ -551,6 +556,18 @@ github.com/moogar0880/problems
 # github.com/morikuni/aec v1.0.0
 ## explicit
 github.com/morikuni/aec
+# github.com/mr-tron/base58 v1.1.0
+## explicit
+github.com/mr-tron/base58/base58
+# github.com/multiformats/go-base32 v0.0.3
+## explicit
+github.com/multiformats/go-base32
+# github.com/multiformats/go-base36 v0.1.0
+## explicit; go 1.11
+github.com/multiformats/go-base36
+# github.com/multiformats/go-multibase v0.2.0
+## explicit; go 1.19
+github.com/multiformats/go-multibase
 # github.com/opencontainers/go-digest v1.0.0
 ## explicit; go 1.13
 github.com/opencontainers/go-digest
@@ -575,6 +592,10 @@ github.com/pierrec/lz4/v4/internal/lz4block
 github.com/pierrec/lz4/v4/internal/lz4errors
 github.com/pierrec/lz4/v4/internal/lz4stream
 github.com/pierrec/lz4/v4/internal/xxh32
+# github.com/piprate/json-gold v0.7.0
+## explicit; go 1.18
+github.com/piprate/json-gold/ld
+github.com/piprate/json-gold/ld/internal/jsoncanonicalizer
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
@@ -584,6 +605,10 @@ github.com/pmezard/go-difflib/difflib
 # github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c
 ## explicit; go 1.14
 github.com/power-devops/perfstat
+# github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35
+## explicit
+github.com/pquerna/cachecontrol
+github.com/pquerna/cachecontrol/cacheobject
 # github.com/quic-go/qpack v0.5.1
 ## explicit; go 1.22
 github.com/quic-go/qpack
@@ -708,6 +733,9 @@ github.com/ugorji/go/codec
 ## explicit
 github.com/wealdtech/go-merkletree
 github.com/wealdtech/go-merkletree/blake2b
+# github.com/x448/float16 v0.8.4
+## explicit; go 1.11
+github.com/x448/float16
 # github.com/xdg-go/pbkdf2 v1.0.0
 ## explicit; go 1.9
 github.com/xdg-go/pbkdf2

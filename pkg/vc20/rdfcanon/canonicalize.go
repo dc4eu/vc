@@ -23,7 +23,7 @@ func NewCanonicalizer() *Canonicalizer {
 	opts := ld.NewJsonLdOptions("")
 	opts.Algorithm = "URDNA2015" // RDF Dataset Normalization algorithm
 	opts.Format = "application/n-quads"
-	
+
 	return &Canonicalizer{
 		options: opts,
 	}
@@ -33,19 +33,19 @@ func NewCanonicalizer() *Canonicalizer {
 // This implements the RDFC-1.0 (URDNA2015) algorithm
 func (c *Canonicalizer) Canonicalize(doc interface{}) (string, error) {
 	proc := ld.NewJsonLdProcessor()
-	
+
 	// Convert JSON-LD to RDF dataset (N-Quads)
 	normalized, err := proc.Normalize(doc, c.options)
 	if err != nil {
 		return "", fmt.Errorf("normalization failed: %w", err)
 	}
-	
+
 	// The normalized output is already in canonical form
 	normalizedStr, ok := normalized.(string)
 	if !ok {
 		return "", fmt.Errorf("unexpected normalized format: %T", normalized)
 	}
-	
+
 	return normalizedStr, nil
 }
 
@@ -55,7 +55,7 @@ func (c *Canonicalizer) CanonicalizeToDataset(doc interface{}) (*Dataset, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return ParseNQuads(canonical)
 }
 
@@ -65,7 +65,7 @@ func (c *Canonicalizer) Hash(doc interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	hash := sha256.Sum256([]byte(canonical))
 	return hex.EncodeToString(hash[:]), nil
 }
@@ -76,7 +76,7 @@ func (c *Canonicalizer) HashWithAlgorithm(doc interface{}, algorithm string) (st
 	if err != nil {
 		return "", err
 	}
-	
+
 	switch algorithm {
 	case "sha256", "SHA-256":
 		hash := sha256.Sum256([]byte(canonical))
@@ -103,20 +103,20 @@ type Quad struct {
 func ParseNQuads(nquads string) (*Dataset, error) {
 	lines := strings.Split(strings.TrimSpace(nquads), "\n")
 	quads := make([]Quad, 0, len(lines))
-	
+
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		
+
 		quad, err := parseQuad(line)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse quad: %w", err)
 		}
 		quads = append(quads, quad)
 	}
-	
+
 	return &Dataset{Quads: quads}, nil
 }
 
@@ -125,22 +125,22 @@ func parseQuad(line string) (Quad, error) {
 	// Remove trailing dot
 	line = strings.TrimSuffix(strings.TrimSpace(line), ".")
 	line = strings.TrimSpace(line)
-	
+
 	parts := splitQuad(line)
 	if len(parts) < 3 {
 		return Quad{}, fmt.Errorf("invalid quad format: %s", line)
 	}
-	
+
 	quad := Quad{
 		Subject:   parts[0],
 		Predicate: parts[1],
 		Object:    parts[2],
 	}
-	
+
 	if len(parts) >= 4 {
 		quad.Graph = parts[3]
 	}
-	
+
 	return quad, nil
 }
 
@@ -151,26 +151,26 @@ func splitQuad(line string) []string {
 	var current strings.Builder
 	inQuotes := false
 	escaped := false
-	
+
 	for i, ch := range line {
 		if escaped {
 			current.WriteRune(ch)
 			escaped = false
 			continue
 		}
-		
+
 		if ch == '\\' {
 			escaped = true
 			current.WriteRune(ch)
 			continue
 		}
-		
+
 		if ch == '"' {
 			inQuotes = !inQuotes
 			current.WriteRune(ch)
 			continue
 		}
-		
+
 		if !inQuotes && ch == ' ' {
 			// Check if this is a separator between components
 			part := strings.TrimSpace(current.String())
@@ -180,9 +180,9 @@ func splitQuad(line string) []string {
 			}
 			continue
 		}
-		
+
 		current.WriteRune(ch)
-		
+
 		// Special handling for the end
 		if i == len(line)-1 {
 			part := strings.TrimSpace(current.String())
@@ -191,7 +191,7 @@ func splitQuad(line string) []string {
 			}
 		}
 	}
-	
+
 	// Add final part if not already added
 	if current.Len() > 0 {
 		part := strings.TrimSpace(current.String())
@@ -199,33 +199,33 @@ func splitQuad(line string) []string {
 			parts = append(parts, part)
 		}
 	}
-	
+
 	return parts
 }
 
 // ToNQuads converts the dataset back to N-Quads format
 func (d *Dataset) ToNQuads() string {
 	var builder strings.Builder
-	
+
 	for i, quad := range d.Quads {
 		builder.WriteString(quad.Subject)
 		builder.WriteString(" ")
 		builder.WriteString(quad.Predicate)
 		builder.WriteString(" ")
 		builder.WriteString(quad.Object)
-		
+
 		if quad.Graph != "" {
 			builder.WriteString(" ")
 			builder.WriteString(quad.Graph)
 		}
-		
+
 		builder.WriteString(" .")
-		
+
 		if i < len(d.Quads)-1 {
 			builder.WriteString("\n")
 		}
 	}
-	
+
 	return builder.String()
 }
 
@@ -257,31 +257,31 @@ func (d *Dataset) FilterByGraph(graph string) *Dataset {
 	filtered := &Dataset{
 		Quads: make([]Quad, 0),
 	}
-	
+
 	for _, quad := range d.Quads {
 		if quad.Graph == graph {
 			filtered.Quads = append(filtered.Quads, quad)
 		}
 	}
-	
+
 	return filtered
 }
 
 // GetGraphs returns all unique graph names in the dataset
 func (d *Dataset) GetGraphs() []string {
 	graphSet := make(map[string]bool)
-	
+
 	for _, quad := range d.Quads {
 		if quad.Graph != "" {
 			graphSet[quad.Graph] = true
 		}
 	}
-	
+
 	graphs := make([]string, 0, len(graphSet))
 	for graph := range graphSet {
 		graphs = append(graphs, graph)
 	}
 	sort.Strings(graphs)
-	
+
 	return graphs
 }

@@ -2,7 +2,6 @@
 
 package keys
 
-
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -147,15 +146,15 @@ func MultikeyToECDSAPublicKey(multikey string) (*ecdsa.PublicKey, error) {
 		// Decompress the Y coordinate
 		// y² = x³ - 3x + b (for P-256 and P-384)
 		params := curve.Params()
-		
+
 		// Calculate x³ - 3x + b
-		x3 := new(big.Int).Mul(x, x)      // x²
-		x3.Mul(x3, x)                       // x³
-		
+		x3 := new(big.Int).Mul(x, x) // x²
+		x3.Mul(x3, x)                // x³
+
 		threeX := new(big.Int).Mul(x, big.NewInt(3))
-		x3.Sub(x3, threeX)                  // x³ - 3x
-		x3.Add(x3, params.B)                // x³ - 3x + b
-		x3.Mod(x3, params.P)                // mod p
+		x3.Sub(x3, threeX)   // x³ - 3x
+		x3.Add(x3, params.B) // x³ - 3x + b
+		x3.Mod(x3, params.P) // mod p
 
 		// Compute square root
 		y = new(big.Int).ModSqrt(x3, params.P)

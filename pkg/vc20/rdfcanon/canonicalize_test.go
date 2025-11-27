@@ -46,7 +46,7 @@ func TestCanonicalizer_Canonicalize(t *testing.T) {
 						"ex": "https://example.org/",
 					},
 				},
-				"type":        "VerifiableCredential",
+				"type":           "VerifiableCredential",
 				"ex:customField": "value",
 			},
 			wantErr: false,
@@ -127,17 +127,17 @@ func TestCanonicalizer_Deterministic(t *testing.T) {
 	}
 
 	c := NewCanonicalizer()
-	
+
 	result1, err := c.Canonicalize(doc)
 	if err != nil {
 		t.Fatalf("First canonicalization failed: %v", err)
 	}
-	
+
 	result2, err := c.Canonicalize(doc)
 	if err != nil {
 		t.Fatalf("Second canonicalization failed: %v", err)
 	}
-	
+
 	if result1 != result2 {
 		t.Error("Canonicalization is not deterministic")
 		t.Logf("Result 1:\n%s", result1)
@@ -154,17 +154,17 @@ func TestCanonicalizer_HashDeterministic(t *testing.T) {
 	}
 
 	c := NewCanonicalizer()
-	
+
 	hash1, err := c.Hash(doc)
 	if err != nil {
 		t.Fatalf("First hash failed: %v", err)
 	}
-	
+
 	hash2, err := c.Hash(doc)
 	if err != nil {
 		t.Fatalf("Second hash failed: %v", err)
 	}
-	
+
 	if hash1 != hash2 {
 		t.Errorf("Hash() is not deterministic: %s != %s", hash1, hash2)
 	}
@@ -178,8 +178,8 @@ func TestParseNQuads(t *testing.T) {
 		wantErr   bool
 	}{
 		{
-			name: "single quad",
-			nquads: `<http://example.org/subject> <http://example.org/predicate> "Object" .`,
+			name:      "single quad",
+			nquads:    `<http://example.org/subject> <http://example.org/predicate> "Object" .`,
 			wantQuads: 1,
 			wantErr:   false,
 		},
@@ -191,8 +191,8 @@ func TestParseNQuads(t *testing.T) {
 			wantErr:   false,
 		},
 		{
-			name: "empty input",
-			nquads: "",
+			name:      "empty input",
+			nquads:    "",
 			wantQuads: 0,
 			wantErr:   false,
 		},

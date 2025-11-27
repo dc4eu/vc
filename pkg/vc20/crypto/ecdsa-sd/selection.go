@@ -36,7 +36,7 @@ func ApplyJSONPointer(doc interface{}, pointer JSONPointer) (interface{}, error)
 
 	// Split into tokens
 	tokens := strings.Split(pointerStr, "/")
-	
+
 	current := doc
 	for i, token := range tokens {
 		// Unescape special characters per RFC 6901

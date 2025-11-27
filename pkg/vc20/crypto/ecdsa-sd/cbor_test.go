@@ -2,7 +2,6 @@
 
 package ecdsasd
 
-
 import (
 	"strings"
 	"testing"

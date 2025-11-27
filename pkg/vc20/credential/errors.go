@@ -6,17 +6,17 @@ import "errors"
 
 // Validation errors
 var (
-	ErrMissingContext          = errors.New("@context is required")
-	ErrInvalidBaseContext      = errors.New("first @context must be https://www.w3.org/ns/credentials/v2")
-	ErrMissingType             = errors.New("type is required")
-	ErrMissingVCType           = errors.New("type must include 'VerifiableCredential'")
-	ErrMissingIssuer           = errors.New("issuer is required")
-	ErrMissingValidFrom        = errors.New("validFrom is required")
-	ErrMissingValidUntil       = errors.New("validUntil not specified")
+	ErrMissingContext           = errors.New("@context is required")
+	ErrInvalidBaseContext       = errors.New("first @context must be https://www.w3.org/ns/credentials/v2")
+	ErrMissingType              = errors.New("type is required")
+	ErrMissingVCType            = errors.New("type must include 'VerifiableCredential'")
+	ErrMissingIssuer            = errors.New("issuer is required")
+	ErrMissingValidFrom         = errors.New("validFrom is required")
+	ErrMissingValidUntil        = errors.New("validUntil not specified")
 	ErrMissingCredentialSubject = errors.New("credentialSubject is required")
-	ErrInvalidIssuerFormat     = errors.New("invalid issuer format")
-	ErrInvalidProofFormat      = errors.New("invalid proof format")
-	ErrMissingProof            = errors.New("proof is required")
+	ErrInvalidIssuerFormat      = errors.New("invalid issuer format")
+	ErrInvalidProofFormat       = errors.New("invalid proof format")
+	ErrMissingProof             = errors.New("proof is required")
 )
 
 // Context errors
@@ -45,8 +45,8 @@ var (
 
 // Selective disclosure errors
 var (
-	ErrInvalidJSONPointer     = errors.New("invalid JSON pointer")
-	ErrMandatoryPointer       = errors.New("mandatory pointer cannot be disclosed selectively")
-	ErrInvalidSelection       = errors.New("invalid selection")
-	ErrDerivedProofFailed     = errors.New("derived proof creation failed")
+	ErrInvalidJSONPointer = errors.New("invalid JSON pointer")
+	ErrMandatoryPointer   = errors.New("mandatory pointer cannot be disclosed selectively")
+	ErrInvalidSelection   = errors.New("invalid selection")
+	ErrDerivedProofFailed = errors.New("derived proof creation failed")
 )

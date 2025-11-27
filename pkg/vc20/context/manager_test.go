@@ -25,7 +25,7 @@ func TestManager_Get(t *testing.T) {
 	}))
 	defer server.Close()
 
-	m := NewManager()
+	m := New()
 
 	// First fetch - should hit the server
 	doc1, err := m.Get(server.URL)
@@ -76,7 +76,7 @@ func TestManager_ValidateContexts(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := NewManager()
+			m := New()
 
 			// Skip base context validation for this test
 			// (as it would require actual network access)
@@ -88,7 +88,7 @@ func TestManager_ValidateContexts(t *testing.T) {
 					},
 				}
 				m.Preload(credential.VC20ContextURL, mockContext)
-				
+
 				// Note: This test will fail hash validation
 				// In production, you would mock the hash or use the real context
 				err := m.ValidateContexts(tt.urls)
@@ -107,7 +107,7 @@ func TestManager_ValidateContexts(t *testing.T) {
 }
 
 func TestManager_Preload(t *testing.T) {
-	m := NewManager()
+	m := New()
 
 	contextDoc := map[string]interface{}{
 		"@context": map[string]interface{}{
@@ -132,7 +132,7 @@ func TestManager_Preload(t *testing.T) {
 }
 
 func TestManager_Clear(t *testing.T) {
-	m := NewManager()
+	m := New()
 
 	// Add some contexts
 	m.Preload("https://example.com/context1", map[string]interface{}{})
@@ -152,7 +152,7 @@ func TestManager_Clear(t *testing.T) {
 
 func TestManager_ClearExpired(t *testing.T) {
 	// Create manager with short TTL
-	m := NewManagerWithClient(&http.Client{Timeout: 10 * time.Second}, 1*time.Millisecond)
+	m := NewWithClient(&http.Client{Timeout: 10 * time.Second}, 1*time.Millisecond)
 
 	// Add a context
 	m.Preload("https://example.com/context", map[string]interface{}{})
@@ -179,7 +179,7 @@ func TestManager_fetch_HTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	m := NewManager()
+	m := New()
 	_, err := m.fetch(server.URL)
 	if err == nil {
 		t.Error("fetch() should return error for HTTP 404")
@@ -194,7 +194,7 @@ func TestManager_fetch_InvalidJSON(t *testing.T) {
 	}))
 	defer server.Close()
 
-	m := NewManager()
+	m := New()
 	_, err := m.fetch(server.URL)
 	if err == nil {
 		t.Error("fetch() should return error for invalid JSON")

@@ -29,9 +29,9 @@ func TestCreateDerivedProof(t *testing.T) {
 			"id": "did:example:issuer",
 		},
 		CredentialSubject: map[string]interface{}{
-			"id":   "did:example:subject",
-			"name": "Alice Smith",
-			"age":  30,
+			"id":    "did:example:subject",
+			"name":  "Alice Smith",
+			"age":   30,
 			"email": "alice@example.com",
 		},
 		ValidFrom: "2024-01-01T00:00:00Z",
@@ -590,7 +590,7 @@ func TestDerivedProof_Integration(t *testing.T) {
 			"degree": "Bachelor of Science",
 			"gpa":    3.8,
 		},
-		ValidFrom: "2024-01-01T00:00:00Z",
+		ValidFrom:  "2024-01-01T00:00:00Z",
 		ValidUntil: "2029-01-01T00:00:00Z",
 	}
 

@@ -102,12 +102,12 @@ func (s *Suite) CreateDerivedProof(cred *credential.VerifiableCredential, basePr
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create HMAC key: %w", err)
 	}
-	
+
 	labelMap, err := hmacKey.RandomizeBlankNodeLabels(blankNodes)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to randomize blank nodes: %w", err)
 	}
-	
+
 	// Apply the label substitutions to get randomized N-Quads
 	randomizedNQuads := canonicalCred
 	for canonical, randomized := range labelMap {
@@ -215,7 +215,7 @@ func (s *Suite) selectFields(cred *credential.VerifiableCredential, pointers []s
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal credential: %w", err)
 	}
-	
+
 	var credMap map[string]interface{}
 	if err := json.Unmarshal(credJSON, &credMap); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal credential to map: %w", err)
@@ -226,7 +226,7 @@ func (s *Suite) selectFields(cred *credential.VerifiableCredential, pointers []s
 	for i, ptr := range pointers {
 		jsonPointers[i] = JSONPointer(ptr)
 	}
-	
+
 	result, err := SelectFields(credMap, jsonPointers)
 	if err != nil {
 		return nil, err
@@ -444,7 +444,7 @@ func (s *Suite) VerifyMandatoryPointers(cred *credential.VerifiableCredential, m
 func (s *Suite) CompareCredentials(cred1, cred2 *credential.VerifiableCredential) (bool, error) {
 	// Convert credentials to JSON for proper canonicalization
 	var cred1JSON, cred2JSON map[string]interface{}
-	
+
 	data1, err := json.Marshal(cred1)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal first credential: %w", err)
@@ -452,7 +452,7 @@ func (s *Suite) CompareCredentials(cred1, cred2 *credential.VerifiableCredential
 	if err := json.Unmarshal(data1, &cred1JSON); err != nil {
 		return false, fmt.Errorf("failed to unmarshal first credential: %w", err)
 	}
-	
+
 	data2, err := json.Marshal(cred2)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal second credential: %w", err)
@@ -460,7 +460,7 @@ func (s *Suite) CompareCredentials(cred1, cred2 *credential.VerifiableCredential
 	if err := json.Unmarshal(data2, &cred2JSON); err != nil {
 		return false, fmt.Errorf("failed to unmarshal second credential: %w", err)
 	}
-	
+
 	canonical1, err := s.Canonicalizer.Canonicalize(cred1JSON)
 	if err != nil {
 		return false, fmt.Errorf("failed to canonicalize first credential: %w", err)

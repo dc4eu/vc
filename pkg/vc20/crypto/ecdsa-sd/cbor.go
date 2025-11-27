@@ -15,7 +15,7 @@ const (
 	// This is CBOR tag 64(23808) in hex notation
 	BaseProofHeaderTag = 0x5d00
 
-	// DerivedProofHeader is the CBOR tag for derived proofs: 0xd9, 0x5d, 0x01  
+	// DerivedProofHeader is the CBOR tag for derived proofs: 0xd9, 0x5d, 0x01
 	// This is CBOR tag 64(23809) in hex notation
 	DerivedProofHeaderTag = 0x5d01
 )

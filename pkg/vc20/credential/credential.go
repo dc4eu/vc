@@ -54,10 +54,10 @@ type VerifiableCredential struct {
 
 // CredentialStatus describes the status of a credential
 type CredentialStatus struct {
-	ID              string `json:"id"`
-	Type            string `json:"type"`
-	StatusPurpose   string `json:"statusPurpose,omitempty"`
-	StatusListIndex string `json:"statusListIndex,omitempty"`
+	ID                   string `json:"id"`
+	Type                 string `json:"type"`
+	StatusPurpose        string `json:"statusPurpose,omitempty"`
+	StatusListIndex      string `json:"statusListIndex,omitempty"`
 	StatusListCredential string `json:"statusListCredential,omitempty"`
 }
 
@@ -142,8 +142,8 @@ const (
 	MediaTypeVP = "application/vp"
 
 	// Credential types
-	TypeVerifiableCredential     = "VerifiableCredential"
-	TypeVerifiablePresentation   = "VerifiablePresentation"
+	TypeVerifiableCredential   = "VerifiableCredential"
+	TypeVerifiablePresentation = "VerifiablePresentation"
 
 	// Proof types
 	ProofTypeDataIntegrity = "DataIntegrityProof"
@@ -154,9 +154,9 @@ const (
 	CryptosuiteECDSAJCS2019  = "ecdsa-jcs-2019"
 
 	// Proof purposes
-	ProofPurposeAuthentication  = "authentication"
-	ProofPurposeAssertion       = "assertionMethod"
-	ProofPurposeKeyAgreement    = "keyAgreement"
+	ProofPurposeAuthentication       = "authentication"
+	ProofPurposeAssertion            = "assertionMethod"
+	ProofPurposeKeyAgreement         = "keyAgreement"
 	ProofPurposeCapabilityInvocation = "capabilityInvocation"
 	ProofPurposeCapabilityDelegation = "capabilityDelegation"
 )

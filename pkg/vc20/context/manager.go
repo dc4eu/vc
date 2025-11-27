@@ -17,9 +17,9 @@ import (
 
 // ContextDocument represents a JSON-LD context document
 type ContextDocument struct {
-	URL      string
-	Document map[string]interface{}
-	Hash     string
+	URL       string
+	Document  map[string]any
+	Hash      string
 	FetchedAt time.Time
 }
 
@@ -31,8 +31,8 @@ type Manager struct {
 	cacheTTL   time.Duration
 }
 
-// NewManager creates a new context manager
-func NewManager() *Manager {
+// New creates a new context manager
+func New() *Manager {
 	return &Manager{
 		cache: make(map[string]*ContextDocument),
 		httpClient: &http.Client{
@@ -42,8 +42,8 @@ func NewManager() *Manager {
 	}
 }
 
-// NewManagerWithClient creates a new context manager with a custom HTTP client
-func NewManagerWithClient(client *http.Client, cacheTTL time.Duration) *Manager {
+// NewWithClient creates a new context manager with a custom HTTP client
+func NewWithClient(client *http.Client, cacheTTL time.Duration) *Manager {
 	return &Manager{
 		cache:      make(map[string]*ContextDocument),
 		httpClient: client,
@@ -95,14 +95,15 @@ func (m *Manager) fetch(url string) (*ContextDocument, error) {
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
-	var document map[string]interface{}
+	var document map[string]any
 	if err := json.Unmarshal(body, &document); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON: %w", err)
 	}
 
 	// Compute SHA-256 hash
-	hash := sha256.Sum256(body)
-	hashStr := hex.EncodeToString(hash[:])
+	hasher := sha256.New()
+	hasher.Write(body)
+	hashStr := hex.EncodeToString(hasher.Sum(nil))
 
 	return &ContextDocument{
 		URL:       url,
@@ -156,14 +157,15 @@ func (m *Manager) ValidateContexts(contextURLs []string) error {
 }
 
 // Preload loads a context document into the cache
-func (m *Manager) Preload(url string, document map[string]interface{}) error {
+func (m *Manager) Preload(url string, document map[string]any) error {
 	data, err := json.Marshal(document)
 	if err != nil {
 		return fmt.Errorf("failed to marshal document: %w", err)
 	}
 
-	hash := sha256.Sum256(data)
-	hashStr := hex.EncodeToString(hash[:])
+	hasher := sha256.New()
+	hasher.Write(data)
+	hashStr := hex.EncodeToString(hasher.Sum(nil))
 
 	m.mu.Lock()
 	defer m.mu.Unlock()

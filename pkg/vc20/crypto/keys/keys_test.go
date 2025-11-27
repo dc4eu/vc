@@ -2,7 +2,6 @@
 
 package keys
 
-
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -173,10 +172,10 @@ func TestMultikeyToECDSAPublicKey_InvalidMulticodec(t *testing.T) {
 
 func TestGetCurveName(t *testing.T) {
 	tests := []struct {
-		name       string
-		curve      elliptic.Curve
-		wantName   string
-		wantErr    bool
+		name     string
+		curve    elliptic.Curve
+		wantName string
+		wantErr  bool
 	}{
 		{
 			name:     "P-256",

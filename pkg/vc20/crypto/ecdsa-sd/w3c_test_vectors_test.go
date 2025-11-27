@@ -70,7 +70,7 @@ const testExpectedBaseSignatureHex = "b8dc55afeb6427a990e9d60c0d363b654306d92703
 // Expected proof hash from W3C test vector (hex)
 const testExpectedProofHashHex = "1a5b965b19e73199c34e1ecd8d61127e4d4cd1f5c15c1f63f5a7b0a1b2c9e07c"
 
-// Expected mandatory hash from W3C test vector (hex)  
+// Expected mandatory hash from W3C test vector (hex)
 const testExpectedMandatoryHashHex = "1f2fe18940efbfb38e6d5ca9b3e8c8b6e8dc1b05e34e52a1c8c9e1e5e6b8c7d9"
 
 func TestW3C_KeyMaterialParsing(t *testing.T) {
@@ -82,7 +82,7 @@ func TestW3C_KeyMaterialParsing(t *testing.T) {
 		if pubKey == nil {
 			t.Fatal("Public key is nil")
 		}
-		
+
 		// P-256 public key should be 256 bits
 		if pubKey.Curve.Params().BitSize != 256 {
 			t.Errorf("Expected P-256 curve (256 bits), got %d bits", pubKey.Curve.Params().BitSize)
@@ -97,7 +97,7 @@ func TestW3C_KeyMaterialParsing(t *testing.T) {
 		if privKey == nil {
 			t.Fatal("Private key is nil")
 		}
-		
+
 		if privKey.Curve.Params().BitSize != 256 {
 			t.Errorf("Expected P-256 curve (256 bits), got %d bits", privKey.Curve.Params().BitSize)
 		}
@@ -118,12 +118,12 @@ func TestW3C_KeyMaterialParsing(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to decode HMAC key: %v", err)
 		}
-		
+
 		// HMAC key should be 32 bytes for SHA-256
 		if len(hmacKeyBytes) != 32 {
 			t.Errorf("Expected 32-byte HMAC key, got %d bytes", len(hmacKeyBytes))
 		}
-		
+
 		hmacKey := HMACKey(hmacKeyBytes)
 		if len(hmacKey) != 32 {
 			t.Errorf("HMACKey should be 32 bytes, got %d", len(hmacKey))
@@ -147,13 +147,13 @@ func TestW3C_CredentialParsing(t *testing.T) {
 // This test is currently a placeholder - will be implemented as we fix the verification bug
 func TestW3C_BaseProofCreation(t *testing.T) {
 	t.Skip("TODO: Implement W3C base proof creation test - requires full test vector from spec")
-	
+
 	// TODO: To implement this properly, we need from W3C spec Appendix A.7:
 	// 1. The complete credential with base proof attached (currently missing)
 	// 2. The exact parameters used (created timestamp, proof ID, etc.)
 	// 3. Step-by-step verification of intermediate values:
 	//    - Verify proof hash matches testExpectedProofHashHex
-	//    - Verify mandatory hash matches testExpectedMandatoryHashHex  
+	//    - Verify mandatory hash matches testExpectedMandatoryHashHex
 	//    - Verify base signature matches testExpectedBaseSignatureHex
 	//
 	// Once we have these values, this test will:
@@ -167,7 +167,7 @@ func TestW3C_BaseProofCreation(t *testing.T) {
 // TestW3C_BaseProofVerification tests base proof verification against W3C test vectors
 func TestW3C_BaseProofVerification(t *testing.T) {
 	t.Skip("TODO: Implement W3C base proof verification test")
-	
+
 	// TODO: This test should:
 	// 1. Load the test credential with base proof from W3C spec
 	// 2. Verify the proof using the issuer's public key
@@ -177,7 +177,7 @@ func TestW3C_BaseProofVerification(t *testing.T) {
 // TestW3C_DerivedProofCreation tests derived proof creation against W3C test vectors
 func TestW3C_DerivedProofCreation(t *testing.T) {
 	t.Skip("TODO: Implement W3C derived proof creation test")
-	
+
 	// TODO: This test should:
 	// 1. Load the test credential with base proof
 	// 2. Create a derived proof with selective pointers from W3C spec
@@ -187,7 +187,7 @@ func TestW3C_DerivedProofCreation(t *testing.T) {
 // TestW3C_DerivedProofVerification tests derived proof verification against W3C test vectors
 func TestW3C_DerivedProofVerification(t *testing.T) {
 	t.Skip("TODO: Implement W3C derived proof verification test")
-	
+
 	// TODO: This test should:
 	// 1. Load the test credential with derived proof from W3C spec
 	// 2. Verify the derived proof

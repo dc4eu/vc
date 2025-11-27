@@ -2,7 +2,6 @@
 
 package ecdsasd
 
-
 import (
 	"encoding/json"
 	"testing"
@@ -10,16 +9,16 @@ import (
 
 func TestApplyJSONPointer(t *testing.T) {
 	doc := map[string]interface{}{
-		"foo": []interface{}{"bar", "baz"},
-		"": 0,
-		"a/b": 1,
-		"c%d": 2,
-		"e^f": 3,
-		"g|h": 4,
+		"foo":  []interface{}{"bar", "baz"},
+		"":     0,
+		"a/b":  1,
+		"c%d":  2,
+		"e^f":  3,
+		"g|h":  4,
 		"i\\j": 5,
 		"k\"l": 6,
-		" ": 7,
-		"m~n": 8,
+		" ":    7,
+		"m~n":  8,
 	}
 
 	tests := []struct {
@@ -212,10 +211,10 @@ func TestSelectFields(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		pointers  []JSONPointer
-		wantKeys  []string // Keys that should exist in result
-		wantErr   bool
+		name     string
+		pointers []JSONPointer
+		wantKeys []string // Keys that should exist in result
+		wantErr  bool
 	}{
 		{
 			name: "select issuer",
@@ -390,9 +389,9 @@ func TestMergePointers(t *testing.T) {
 
 func TestEscapeUnescapeJSONPointerToken(t *testing.T) {
 	tests := []struct {
-		name       string
-		original   string
-		escaped    string
+		name     string
+		original string
+		escaped  string
 	}{
 		{
 			name:     "slash",
@@ -435,10 +434,10 @@ func TestEscapeUnescapeJSONPointerToken(t *testing.T) {
 
 func TestSetValueAtPointer(t *testing.T) {
 	tests := []struct {
-		name     string
-		pointer  JSONPointer
-		value    interface{}
-		wantErr  bool
+		name    string
+		pointer JSONPointer
+		value   interface{}
+		wantErr bool
 	}{
 		{
 			name:    "simple key",

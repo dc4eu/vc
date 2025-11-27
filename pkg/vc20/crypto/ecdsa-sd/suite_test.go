@@ -2,7 +2,6 @@
 
 package ecdsasd
 
-
 import (
 	"encoding/json"
 	"testing"
@@ -326,9 +325,9 @@ func TestSuite_HashCredential(t *testing.T) {
 
 func TestExtractController(t *testing.T) {
 	tests := []struct {
-		name       string
-		methodID   string
-		wantCtrl   string
+		name     string
+		methodID string
+		wantCtrl string
 	}{
 		{
 			name:     "with fragment",
@@ -393,7 +392,7 @@ func TestSuite_VerifySignature_InvalidSignatureLength(t *testing.T) {
 	}
 
 	data := []byte("test")
-	
+
 	// Too short signature
 	shortSig := []byte{0x01, 0x02}
 	_, err = suite.VerifySignature(&privKey.PublicKey, data, shortSig)
@@ -411,7 +410,7 @@ func TestSuite_VerifySignature_InvalidSignatureLength(t *testing.T) {
 
 func TestSuite_IntegrationWithJSON(t *testing.T) {
 	suite := NewSuite()
-	
+
 	// Generate key
 	privKey, err := suite.GenerateKeyPair()
 	if err != nil {

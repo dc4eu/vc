@@ -22,11 +22,11 @@ func TestCreateBaseProof(t *testing.T) {
 			"https://www.w3.org/ns/credentials/v2",
 			"https://www.w3.org/ns/credentials/examples/v2",
 		},
-		Type: []string{"VerifiableCredential", "ExampleCredential"},
-		Issuer: "https://example.com/issuers/123",
+		Type:      []string{"VerifiableCredential", "ExampleCredential"},
+		Issuer:    "https://example.com/issuers/123",
 		ValidFrom: "2024-01-01T00:00:00Z",
 		CredentialSubject: map[string]interface{}{
-			"id": "did:example:subject123",
+			"id":   "did:example:subject123",
 			"name": "Alice Example",
 			"degree": map[string]interface{}{
 				"type": "BachelorDegree",
@@ -327,7 +327,7 @@ func TestVerifyBaseProof(t *testing.T) {
 
 func TestVerifyBaseProof_ModifiedCredential(t *testing.T) {
 	// NOTE: This test was originally written with a misunderstanding of the ECDSA-SD-2023 spec.
-	// 
+	//
 	// CORRECT UNDERSTANDING:
 	// - Base proofs sign ALL credential statements, regardless of mandatory pointers
 	// - Mandatory pointers are metadata stored in the proof for use during DERIVED proof creation
@@ -342,7 +342,7 @@ func TestVerifyBaseProof_ModifiedCredential(t *testing.T) {
 	// 2. Mandatory pointers are correctly stored in the proof (already covered)
 	// 3. Derived proofs enforce mandatory field disclosure (separate test needed)
 	t.Skip("Test based on incorrect understanding of spec - see comment for details")
-	
+
 	suite := NewSuite()
 	privateKey, _ := suite.GenerateKeyPair()
 
@@ -386,16 +386,16 @@ func TestVerifyBaseProof_ModifiedCredential(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to verify base proof: %v", err)
 	}
-	
+
 	// Also test that the original still works
 	validOrig, errOrig := suite.VerifyBaseProof(cred, proof)
 	if errOrig != nil {
 		t.Fatalf("Failed to verify original: %v", errOrig)
 	}
-	
+
 	t.Logf("Modified credential verification result: %v", valid)
 	t.Logf("Original credential verification result: %v", validOrig)
-	
+
 	if valid {
 		t.Error("Expected proof to be invalid for modified mandatory field")
 	}
@@ -494,9 +494,9 @@ func TestBaseProof_WithMandatoryPointers(t *testing.T) {
 	privateKey, _ := suite.GenerateKeyPair()
 
 	cred := &credential.VerifiableCredential{
-		Context: []string{"https://www.w3.org/ns/credentials/v2"},
-		Type:    []string{"VerifiableCredential"},
-		Issuer:  "https://example.com/issuers/123",
+		Context:   []string{"https://www.w3.org/ns/credentials/v2"},
+		Type:      []string{"VerifiableCredential"},
+		Issuer:    "https://example.com/issuers/123",
 		ValidFrom: "2024-01-01T00:00:00Z",
 		CredentialSubject: map[string]interface{}{
 			"id":    "did:example:subject123",

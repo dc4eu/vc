@@ -68,7 +68,7 @@
                 <div class="box is-flex is-flex-direction-column is-align-items-center is-gap-2">
                     <h2 class="title has-text-centered has-text-weight-bold is-size-4" x-text="credentialOffer.name"></h2>
                     <p class="has-text-centered">You can either scan the QR code with your mobile device or press the button below to proceed in the browser.</p>
-                    <img :src="`data:image/svg+xml;base64,${credentialOffer.qr.base64_image}`" alt="" />
+                    <img :src="`data:image/png;base64,${credentialOffer.qr.base64_image}`" alt="" />
                     <button class="button is-primary" @click="handleCredentialOfferProceed">Proceed</button>
                     <p class="block has-text-centered is-size-7">You will be redirected to your wallet in order to begin the process.</p>
                     <pre style="width: 100%" x-text="credentialOffer.qr.uri"></pre>

@@ -18,7 +18,6 @@ type UIMetadataReply struct {
 }
 
 func (c *Client) UIMetadata(ctx context.Context) (*UIMetadataReply, error) {
-
 	reply := &UIMetadataReply{}
 	reply.Credentials = c.cfg.CredentialConstructor
 
@@ -54,9 +53,15 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 	requestObjectID := uuid.NewString()
 	sessionID := uuid.NewString()
 
+	// Collect all credential IDs from DCQL query
+	scopes := make([]string, 0, len(req.DCQLQuery.Credentials))
+	for _, credential := range req.DCQLQuery.Credentials {
+		scopes = append(scopes, credential.ID)
+	}
+
 	authorizationContext := &model.AuthorizationContext{
 		SessionID:                sessionID,
-		Scope:                    req.DCQLQuery.Credentials[0].ID,
+		Scope:                    scopes,
 		Code:                     "",
 		RequestURI:               "",
 		WalletURI:                "",

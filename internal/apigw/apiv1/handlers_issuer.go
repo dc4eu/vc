@@ -83,7 +83,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	document := &model.CompleteDocument{}
 
 	// TODO(masv): make this flexible, use config.yaml credential constructor
-	switch authContext.Scope {
+	switch authContext.Scope[0] {
 	case "ehic", "pda1", "diploma":
 		c.log.Debug("ehic/pda1/diploma scope detected")
 		docs := c.documentCache.Get(authContext.SessionID).Value()
@@ -145,7 +145,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	// Use the pre-initialized gRPC client
 	reply, err := c.issuerClient.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		Scope:        authContext.Scope,
+		Scope:        authContext.Scope[0],
 		DocumentData: documentData,
 		Jwk:          jwk,
 	})

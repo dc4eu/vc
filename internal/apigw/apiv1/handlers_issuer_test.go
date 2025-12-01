@@ -278,7 +278,7 @@ func TestOIDCCredential_SuccessfulIssuance(t *testing.T) {
 	mockAuthCtx := &mockAuthContextColl{
 		authContext: &model.AuthorizationContext{
 			SessionID: "session-123",
-			Scope:     "pid",
+			Scope:     []string{"pid"},
 			Identity: &model.Identity{
 				AuthenticSourcePersonID: "test-identity-123",
 				GivenName:               "John",

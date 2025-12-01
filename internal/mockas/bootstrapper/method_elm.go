@@ -49,6 +49,7 @@ func (c *elmClient) makeSourceData(sourceFilePath string) error {
 			AuthenticSource: "ELM:00001",
 			DocumentVersion: "1.0.0",
 			VCT:             model.CredentialTypeUrnEudiElm1,
+			Scope:           "elm",
 			DocumentID:      fmt.Sprintf("document_id_elm_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

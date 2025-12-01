@@ -96,6 +96,7 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 			AuthenticSource: row[2],
 			DocumentVersion: "1.0.0",
 			VCT:             model.CredentialTypeUrnEudiEhic1,
+			Scope:           "ehic",
 			DocumentID:      fmt.Sprintf("document_id_ehic_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{

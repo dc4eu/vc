@@ -53,6 +53,7 @@ func (c *diplomaClient) makeSourceData(sourceFilePath string) error {
 			AuthenticSource: "DIPLOMA:00001",
 			DocumentVersion: "1.0.0",
 			VCT:             model.CredentialTypeUrnEudiDiploma1,
+			Scope:           "diploma",
 			DocumentID:      fmt.Sprintf("document_id_diploma_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

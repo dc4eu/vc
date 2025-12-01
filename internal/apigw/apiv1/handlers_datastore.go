@@ -47,7 +47,7 @@ func (c *Client) Upload(ctx context.Context, req *vcclient.UploadRequest) error 
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{
 		CredentialIssuer: c.cfg.Issuer.IssuerURL,
 		CredentialConfigurationIDs: []string{
-			req.Meta.VCT,
+			req.Meta.Scope,
 		},
 		Grants: map[string]any{
 			"authorization_code": openid4vci.GrantAuthorizationCode{

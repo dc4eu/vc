@@ -41,6 +41,7 @@ func (c *idpUsersClient) makeSourceData(sourceFilePath string) error {
 			Meta: &model.MetaData{
 				AuthenticSource: "PID_Provider:00001",
 				VCT:             "not_applicable",
+				Scope:           "idp_user",
 				DocumentVersion: "1.0.0",
 				DocumentID:      fmt.Sprintf("idp_user_%s", pidNumber),
 			},

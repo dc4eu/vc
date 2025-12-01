@@ -50,6 +50,7 @@ func (c *MicroCredentialClient) makeSourceData(sourceFilePath string) error {
 			AuthenticSource: "MICROCREDENTIAL:00001",
 			DocumentVersion: "1.0.0",
 			VCT:             model.CredentialTypeUrnEudiMicroCredential1,
+			Scope:           "microcredential",
 			DocumentID:      fmt.Sprintf("document_id_microcredential_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{

@@ -73,7 +73,7 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 			return nil, err
 		}
 
-		credentialInfo.Attributes = credentialInfo.VCTM.Attributes()
+		credentialInfo.Attributes = credentialInfo.VCTM.AttributesWithoutObjects()
 	}
 
 	c.trustService = &openid4vp.TrustService{}

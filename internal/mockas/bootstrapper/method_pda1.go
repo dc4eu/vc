@@ -105,6 +105,7 @@ func (c *pda1Client) makeSourceData(sourceFilePath string) error {
 			AuthenticSource: row[3],
 			DocumentVersion: "1.0.0",
 			VCT:             model.CredentialTypeUrnEudiPda11,
+			Scope:           "pda1",
 			DocumentID:      fmt.Sprintf("document_id_pda1_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{

@@ -119,71 +119,90 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, err
 	}
 
-	responseParams := &openid4vp.ResponseParameters{}
-	responseParams.State = vpResponse.State
+	c.log.Debug("directPost", "vpResponse", vpResponse)
 
 	// Get authorization context by state
-	authCtx, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{State: responseParams.State})
+	authCtx, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{State: vpResponse.State})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err
 	}
 
-	responseParams.VPToken = vpResponse.VPToken[authCtx.Scope]
+	// Process all VP tokens for the requested scopes
+	credentialCaches := make([]sdjwtvc.CredentialCache, 0, len(authCtx.Scope))
 
-	// Validate response parameters
-	if err := responseParams.Validate(); err != nil {
-		c.log.Error(err, "response parameters validation failed")
-		return nil, fmt.Errorf("invalid response: %w", err)
-	}
+	for _, scope := range authCtx.Scope {
+		vpToken, ok := vpResponse.VPToken[scope]
+		if !ok {
+			c.log.Error(nil, "VP token not found for scope", "scope", scope)
+			return nil, fmt.Errorf("VP token not found for scope: %s", scope)
+		}
 
-	// Validate VP Token using VPTokenValidator
-	validator := &openid4vp.VPTokenValidator{
-		Nonce:           authCtx.Nonce,
-		ClientID:        authCtx.ClientID,
-		VerifySignature: true,
-		CheckRevocation: false,
-	}
+		responseParams := &openid4vp.ResponseParameters{}
+		responseParams.State = vpResponse.State
+		responseParams.VPToken = vpToken
 
-	if err := validator.Validate(responseParams.VPToken); err != nil {
-		c.log.Error(err, "VP Token validation failed")
-		return nil, fmt.Errorf("VP Token validation failed: %w", err)
-	}
+		// Validate response parameters
+		if err := responseParams.Validate(); err != nil {
+			c.log.Error(err, "response parameters validation failed", "scope", scope)
+			return nil, fmt.Errorf("invalid response for scope %s: %w", scope, err)
+		}
 
-	c.log.Debug("VP Token validated successfully")
+		// Validate VP Token using VPTokenValidator
+		validator := &openid4vp.VPTokenValidator{
+			Nonce:           authCtx.Nonce,
+			ClientID:        authCtx.ClientID,
+			VerifySignature: true,
+			CheckRevocation: false,
+		}
 
-	// Parse SD-JWT credential
-	header, body, signature, selectiveDisclosure, keyBinding, err := sdjwtvc.Token(responseParams.VPToken).Split()
-	if err != nil {
-		c.log.Error(err, "failed to split sd-jwt")
-		return nil, err
-	}
+		if err := validator.Validate(responseParams.VPToken); err != nil {
+			c.log.Error(err, "VP Token validation failed", "scope", scope)
+			return nil, fmt.Errorf("VP Token validation failed for scope %s: %w", scope, err)
+		}
 
-	c.log.Debug("SD-JWT parts", "header", header)
-	c.log.Debug("SD-JWT parts", "body", body)
-	c.log.Debug("SD-JWT parts", "signature", signature)
-	c.log.Debug("SD-JWT parts", "selectiveDisclosure", selectiveDisclosure)
-	c.log.Debug("SD-JWT parts", "keyBinding", keyBinding)
+		c.log.Debug("VP Token validated successfully", "scope", scope)
 
-	// Parse credential claims
-	parsed, err := sdjwtvc.Token(responseParams.VPToken).Parse()
-	if err != nil {
-		c.log.Error(err, "failed to parse sd-jwt credential")
-		return nil, err
+		// Parse SD-JWT credential
+		header, body, signature, selectiveDisclosure, keyBinding, err := sdjwtvc.Token(responseParams.VPToken).Split()
+		if err != nil {
+			c.log.Error(err, "failed to split sd-jwt", "scope", scope)
+			return nil, err
+		}
+
+		c.log.Debug("SD-JWT parts", "scope", scope, "header", header)
+		c.log.Debug("SD-JWT parts", "scope", scope, "body", body)
+		c.log.Debug("SD-JWT parts", "scope", scope, "signature", signature)
+		c.log.Debug("SD-JWT parts", "scope", scope, "selectiveDisclosure", selectiveDisclosure)
+		c.log.Debug("SD-JWT parts", "scope", scope, "keyBinding", keyBinding)
+
+		// Parse credential claims
+		parsed, err := sdjwtvc.Token(responseParams.VPToken).Parse()
+		if err != nil {
+			c.log.Error(err, "failed to parse sd-jwt credential", "scope", scope)
+			return nil, err
+		}
+
+		selectiveDisclosureClaims, err := sdjwtvc.ParseSelectiveDisclosure(selectiveDisclosure)
+		if err != nil {
+			c.log.Error(err, "failed to parse selective disclosures", "scope", scope)
+			return nil, err
+		}
+
+		// Add to credential cache array
+		credentialCaches = append(credentialCaches, sdjwtvc.CredentialCache{
+			Credential: parsed.Claims,
+			Claims:     selectiveDisclosureClaims,
+		})
 	}
 
 	// Generate response code
 	responseCode := uuid.NewString()
 
-	// Cache validated credential
-	c.credentialCache.Set(responseCode, []sdjwtvc.CredentialCache{
-		{
-			Credential: parsed.Claims,
-			Claims:     nil,
-		},
-	}, ttlcache.DefaultTTL)
+	// Cache validated credentials
+	c.credentialCache.Set(responseCode, credentialCaches, ttlcache.DefaultTTL)
 
-	c.log.Debug("Credential cached", "response_code", responseCode)
+	c.log.Debug("Credentials cached", "response_code", responseCode, "count", len(credentialCaches))
 
 	reply := &VerificationDirectPostResponse{
 		RedirectURI: fmt.Sprintf(c.cfg.Verifier.ExternalServerURL+"/verification/callback?response_code=%s", responseCode),
@@ -204,7 +223,7 @@ func (c *Client) VerificationCallback(ctx context.Context, req *VerificationCall
 	c.log.Debug("verificationCallback", "req", req)
 
 	if has := c.credentialCache.Has(req.ResponseCode); !has {
-		return nil, fmt.Errorf("no item in crededential cache matching id %s", req.ResponseCode)
+		return nil, fmt.Errorf("no item in credential cache matching id %s", req.ResponseCode)
 	}
 
 	credential := c.credentialCache.Get(req.ResponseCode).Value()

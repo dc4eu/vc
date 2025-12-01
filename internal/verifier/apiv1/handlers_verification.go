@@ -53,7 +53,8 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 }
 
 type VerificationDirectPostRequest struct {
-	Response string `json:"response"  form:"response"`
+	Response  string `json:"response"  form:"response"`
+	SessionID string `json:"-"` // Set by HTTP layer if same-device flow
 }
 
 func (v *VerificationDirectPostRequest) GetKID() (string, error) {
@@ -83,7 +84,9 @@ func (v *VerificationDirectPostRequest) GetKID() (string, error) {
 }
 
 type VerificationDirectPostResponse struct {
-	RedirectURI string `json:"redirect_uri"`
+	// RedirectURI is optional - only included for same-device flows
+	// For cross-device flows, the browser is notified via SSE instead
+	RedirectURI string `json:"redirect_uri,omitempty"`
 }
 
 func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDirectPostRequest) (*VerificationDirectPostResponse, error) {
@@ -128,6 +131,10 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, err
 	}
 
+	// Generate response code
+	responseCode := uuid.NewString()
+	c.notify.Submit(authCtx.SessionID, map[string]string{"redirect_uri": fmt.Sprintf(c.cfg.Verifier.ExternalServerURL+"/verification/callback?response_code=%s", responseCode)})
+
 	// Process all VP tokens for the requested scopes
 	credentialCaches := make([]sdjwtvc.CredentialCache, 0, len(authCtx.Scope))
 
@@ -164,17 +171,11 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		c.log.Debug("VP Token validated successfully", "scope", scope)
 
 		// Parse SD-JWT credential
-		header, body, signature, selectiveDisclosure, keyBinding, err := sdjwtvc.Token(responseParams.VPToken).Split()
+		_, _, _, selectiveDisclosure, _, err := sdjwtvc.Token(responseParams.VPToken).Split()
 		if err != nil {
 			c.log.Error(err, "failed to split sd-jwt", "scope", scope)
 			return nil, err
 		}
-
-		c.log.Debug("SD-JWT parts", "scope", scope, "header", header)
-		c.log.Debug("SD-JWT parts", "scope", scope, "body", body)
-		c.log.Debug("SD-JWT parts", "scope", scope, "signature", signature)
-		c.log.Debug("SD-JWT parts", "scope", scope, "selectiveDisclosure", selectiveDisclosure)
-		c.log.Debug("SD-JWT parts", "scope", scope, "keyBinding", keyBinding)
 
 		// Parse credential claims
 		parsed, err := sdjwtvc.Token(responseParams.VPToken).Parse()
@@ -196,16 +197,26 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		})
 	}
 
-	// Generate response code
-	responseCode := uuid.NewString()
-
 	// Cache validated credentials
 	c.credentialCache.Set(responseCode, credentialCaches, ttlcache.DefaultTTL)
 
 	c.log.Debug("Credentials cached", "response_code", responseCode, "count", len(credentialCaches))
 
-	reply := &VerificationDirectPostResponse{
-		RedirectURI: fmt.Sprintf(c.cfg.Verifier.ExternalServerURL+"/verification/callback?response_code=%s", responseCode),
+	redirectURI := fmt.Sprintf(c.cfg.Verifier.ExternalServerURL+"/verification/callback?response_code=%s", responseCode)
+
+	reply := &VerificationDirectPostResponse{}
+
+	// Check if there's an active SSE listener for this session
+	// If yes -> cross-device flow: browser is listening, notify via SSE, don't include redirect_uri
+	// If no -> same-device flow: no browser listening, include redirect_uri for wallet to follow
+	if c.notify.HasListener(authCtx.SessionID) {
+		// Cross-device flow: browser is waiting on SSE
+		c.log.Debug("Cross-device flow detected (SSE listener active)", "session_id", authCtx.SessionID)
+		// Don't include redirect_uri - wallet shows success, browser gets SSE notification
+	} else {
+		// Same-device flow: no SSE listener, wallet should redirect
+		c.log.Debug("Same-device flow detected (no SSE listener)", "session_id", authCtx.SessionID)
+		reply.RedirectURI = redirectURI
 	}
 
 	return reply, nil

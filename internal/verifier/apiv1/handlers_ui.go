@@ -36,7 +36,7 @@ type UIInteractionRequest struct {
 	DCQLQuery *openid4vp.DCQL `json:"dcql_query" validate:"required"`
 
 	// SessionID from http server endpoint
-	//SessionID string `json:"-"`
+	SessionID string `json:"-"`
 }
 
 type UIInteractionReply struct {
@@ -51,7 +51,12 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 	nonce := uuid.NewString()
 	state := uuid.NewString()
 	requestObjectID := uuid.NewString()
-	sessionID := uuid.NewString()
+
+	// Use session ID from request if provided, otherwise generate new one
+	sessionID := req.SessionID
+	if sessionID == "" {
+		sessionID = uuid.NewString()
+	}
 
 	// Collect all credential IDs from DCQL query
 	scopes := make([]string, 0, len(req.DCQLQuery.Credentials))

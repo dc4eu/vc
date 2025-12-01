@@ -68,6 +68,50 @@ window.addEventListener("pageshow", (event) => {
 
 const baseUrl = new URL(window.location.origin);
 
+/**
+ * Listen for SSE notifications from the server.
+ * When a response_code is received, redirect to the callback URL.
+ */
+function setupNotifyListener() {
+    console.log("Setting up SSE notify listener");
+    const eventSource = new EventSource(new URL("/ui/notify", baseUrl).toString());
+
+    eventSource.onopen = () => {
+        console.log("SSE connection opened");
+    };
+
+    eventSource.onmessage = (event) => {
+        const data = event.data;
+        console.log("SSE message received:", data);
+        
+        // Check if the message contains a redirect_uri
+        if (data && typeof data === "string" && data.includes("redirect_uri")) {
+            try {
+                const parsed = JSON.parse(data);
+                if (parsed.redirect_uri) {
+                    console.log("Redirecting to:", parsed.redirect_uri);
+                    eventSource.close();
+                    window.location.href = parsed.redirect_uri;
+                }
+            } catch {
+                // Try to extract redirect_uri directly if not valid JSON
+                const match = data.match(/redirect_uri[=:]["']?([^"'\s]+)/);
+                if (match && match[1]) {
+                    console.log("Redirecting to (regex):", match[1]);
+                    eventSource.close();
+                    window.location.href = match[1];
+                }
+            }
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        console.error("SSE connection error:", error);
+    };
+
+    return eventSource;
+}
+
 Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,
@@ -171,6 +215,9 @@ Alpine.data("app", () => ({
 
     /** @type {Record<string, string> | null} */
     redirectUris: null,
+
+    /** @type {EventSource | null} */
+    notifyEventSource: null,
 
     async init() {
         // TODO: this is a bit hacky...
@@ -284,6 +331,18 @@ Alpine.data("app", () => ({
         this.presentationDefinition = null;
     },
 
+    /** 
+     * Handle click on wallet link - close SSE connection for same-device flow
+     * This allows the server to detect same-device flow and include redirect_uri
+     */
+    handleWalletClick() {
+        console.log("Wallet link clicked, closing SSE connection for same-device flow");
+        if (this.notifyEventSource) {
+            this.notifyEventSource.close();
+            this.notifyEventSource = null;
+        }
+    },
+
     /** @param {SubmitEvent} event */
     async handleAttributesSelectionForm(event) {
         this.error = null;
@@ -340,6 +399,7 @@ Alpine.data("app", () => ({
     },
 
     async sendDcqlQuery() {
+        console.log("sendDcqlQuery called");
         if (!this.walletInstances) {
             this.error = "Wallet instances list is null";
             return;
@@ -358,6 +418,13 @@ Alpine.data("app", () => ({
                     })
                 },
             );
+
+            // Start SSE listener AFTER interaction call sets session_id
+            if (!this.notifyEventSource) {
+                console.log("Starting SSE notify listener from sendDcqlQuery");
+                this.notifyEventSource = setupNotifyListener();
+                console.log("SSE notify listener started, eventSource:", this.notifyEventSource);
+            }
 
             this.presentationDefinition = v.parse(presentationDefinitionSchema, res);
 

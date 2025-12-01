@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"vc/internal/verifier/apiv1"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,6 +33,13 @@ func (s *Service) endpointVerificationDirectPost(ctx context.Context, c *gin.Con
 		return nil, err
 	}
 	s.log.Debug("endpointVerificationDirectPost", "here", "after binding")
+
+	// Check if this is a same-device flow by looking for session_id
+	session := sessions.Default(c)
+	if sessionID, ok := session.Get("session_id").(string); ok && sessionID != "" {
+		request.SessionID = sessionID
+		s.log.Debug("endpointVerificationDirectPost", "same_device_flow", true, "session_id", sessionID)
+	}
 
 	reply, err := s.apiv1.VerificationDirectPost(ctx, request)
 	if err != nil {

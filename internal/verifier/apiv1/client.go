@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"time"
 	"vc/internal/verifier/db"
+	"vc/internal/verifier/notify"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -19,6 +20,7 @@ type Client struct {
 	cfg                        *model.Cfg
 	db                         *db.Service
 	log                        *logger.Log
+	notify                     *notify.Service
 	oauth2Metadata             *oauth2.AuthorizationServerMetadata
 	oauth2MetadataSigningKey   any
 	oauth2MetadataSigningChain []string
@@ -32,7 +34,7 @@ type Client struct {
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, db *db.Service, notify *notify.Service, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	// Create OpenID4VP client with custom TTL settings
 	openid4vpClient, err := openid4vp.New(ctx, &openid4vp.Config{
 		EphemeralKeyTTL:  10 * time.Minute,
@@ -46,6 +48,7 @@ func New(ctx context.Context, db *db.Service, cfg *model.Cfg, log *logger.Log) (
 		cfg:             cfg,
 		db:              db,
 		log:             log.New("apiv1"),
+		notify:          notify,
 		openid4vp:       openid4vpClient,
 		credentialCache: ttlcache.New(ttlcache.WithTTL[string, []sdjwtvc.CredentialCache](5 * time.Minute)),
 	}

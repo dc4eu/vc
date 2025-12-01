@@ -2,6 +2,7 @@ package openid4vci
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -52,7 +53,7 @@ func TestCredentialOffer(t *testing.T) {
 					},
 				},
 			},
-			want: "credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegreeCredential%22%2C%22org.iso.18013.5.1.mDL%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre_authorized_code%22%3A%22oaKazRN8I0IbtZ0C7JuMn5%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22numeric%22%2C%22length%22%3A4%2C%22description%22%3A%22Please+provide+the+one-time+code+that+was+sent+via+e-mail%22%7D%7D%7D%7D",
+			want: "credential_offer=%7B%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%2C%22credential_configuration_ids%22%3A%5B%22UniversityDegreeCredential%22%2C%22org.iso.18013.5.1.mDL%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22oaKazRN8I0IbtZ0C7JuMn5%22%2C%22tx_code%22%3A%7B%22input_mode%22%3A%22numeric%22%2C%22length%22%3A4%2C%22description%22%3A%22Please+provide+the+one-time+code+that+was+sent+via+e-mail%22%7D%7D%7D%7D",
 		},
 	}
 
@@ -61,7 +62,335 @@ func TestCredentialOffer(t *testing.T) {
 			got, err := tt.parameters.CredentialOffer()
 			assert.NoError(t, err)
 
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, string(got))
+		})
+	}
+}
+
+func TestCredentialOfferParameters_CredentialOffer(t *testing.T) {
+	tests := []struct {
+		name                       string
+		credentialOfferParameter   *CredentialOfferParameters
+		wantErr                    bool
+		validateCredentialIssuer   bool
+		validateConfigurationIDs   bool
+		validateGrants             bool
+		expectedCredentialIssuer   string
+		expectedConfigurationIDs   []string
+		expectedGrantType          string
+		expectedIssuerStatePattern string
+	}{
+		{
+			name: "authorization_code_with_collect_id_vct_authentic_source",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState: fmt.Sprintf("collect_id=%s&vct=%s&authentic_source=%s", "test-collect-123", "TestCredential", "ExampleSource"),
+					},
+				},
+			},
+			wantErr:                    false,
+			validateCredentialIssuer:   true,
+			validateConfigurationIDs:   true,
+			validateGrants:             true,
+			expectedCredentialIssuer:   "https://issuer.example.com",
+			expectedConfigurationIDs:   []string{"TestCredential"},
+			expectedGrantType:          "authorization_code",
+			expectedIssuerStatePattern: "collect_id=test-collect-123&vct=TestCredential&authentic_source=ExampleSource",
+		},
+		{
+			name: "authorization_code_with_uuid_collect_id",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.sunet.se",
+				CredentialConfigurationIDs: []string{
+					"PDA1Credential",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState: fmt.Sprintf("collect_id=%s&vct=%s&authentic_source=%s", "d779badf-f333-434a-8bdf-fc0d419231ef", "PDA1", "SUNET"),
+					},
+				},
+			},
+			wantErr:                    false,
+			validateCredentialIssuer:   true,
+			validateConfigurationIDs:   true,
+			validateGrants:             true,
+			expectedCredentialIssuer:   "https://issuer.sunet.se",
+			expectedConfigurationIDs:   []string{"PDA1Credential"},
+			expectedGrantType:          "authorization_code",
+			expectedIssuerStatePattern: "collect_id=d779badf-f333-434a-8bdf-fc0d419231ef&vct=PDA1&authentic_source=SUNET",
+		},
+		{
+			name: "authorization_code_with_multiple_credentials",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"CredentialType1",
+					"CredentialType2",
+					"CredentialType3",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState: fmt.Sprintf("collect_id=%s&vct=%s&authentic_source=%s", "multi-cred-123", "CredentialType1", "MultiSource"),
+					},
+				},
+			},
+			wantErr:                  false,
+			validateCredentialIssuer: true,
+			validateConfigurationIDs: true,
+			validateGrants:           true,
+			expectedCredentialIssuer: "https://issuer.example.com",
+			expectedConfigurationIDs: []string{"CredentialType1", "CredentialType2", "CredentialType3"},
+			expectedGrantType:        "authorization_code",
+		},
+		{
+			name: "authorization_code_with_special_characters_in_issuer_state",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState: fmt.Sprintf("collect_id=%s&vct=%s&authentic_source=%s", "test-123@#$", "Test+Credential", "Source/With/Slashes"),
+					},
+				},
+			},
+			wantErr:                  false,
+			validateCredentialIssuer: true,
+			validateConfigurationIDs: true,
+			validateGrants:           true,
+			expectedCredentialIssuer: "https://issuer.example.com",
+			expectedConfigurationIDs: []string{"TestCredential"},
+			expectedGrantType:        "authorization_code",
+		},
+		{
+			name: "pre_authorized_code_grant",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{
+					"urn:ietf:params:oauth:grant-type:pre-authorized_code": GrantPreAuthorizedCode{
+						PreAuthorizedCode: "test-pre-auth-code-123",
+						TXCode: TXCode{
+							InputMode:   "numeric",
+							Length:      6,
+							Description: "Enter the 6-digit code",
+						},
+					},
+				},
+			},
+			wantErr:                  false,
+			validateCredentialIssuer: true,
+			validateConfigurationIDs: true,
+			validateGrants:           true,
+			expectedCredentialIssuer: "https://issuer.example.com",
+			expectedConfigurationIDs: []string{"TestCredential"},
+			expectedGrantType:        "urn:ietf:params:oauth:grant-type:pre-authorized_code",
+		},
+		{
+			name: "no_grants",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: nil,
+			},
+			wantErr:                  false,
+			validateCredentialIssuer: true,
+			validateConfigurationIDs: true,
+			validateGrants:           false,
+			expectedCredentialIssuer: "https://issuer.example.com",
+			expectedConfigurationIDs: []string{"TestCredential"},
+		},
+		{
+			name: "empty_grants",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{},
+			},
+			wantErr:                  false,
+			validateCredentialIssuer: true,
+			validateConfigurationIDs: true,
+			validateGrants:           false,
+			expectedCredentialIssuer: "https://issuer.example.com",
+			expectedConfigurationIDs: []string{"TestCredential"},
+		},
+		{
+			name: "authorization_code_with_empty_issuer_state",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState: "",
+					},
+				},
+			},
+			wantErr:                    false,
+			validateCredentialIssuer:   true,
+			validateConfigurationIDs:   true,
+			validateGrants:             true,
+			expectedCredentialIssuer:   "https://issuer.example.com",
+			expectedConfigurationIDs:   []string{"TestCredential"},
+			expectedGrantType:          "authorization_code",
+			expectedIssuerStatePattern: "",
+		},
+		{
+			name: "authorization_code_with_authorization_server",
+			credentialOfferParameter: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState:         fmt.Sprintf("collect_id=%s&vct=%s&authentic_source=%s", "test-123", "TestCred", "TestSource"),
+						AuthorizationServer: "https://auth.example.com",
+					},
+				},
+			},
+			wantErr:                  false,
+			validateCredentialIssuer: true,
+			validateConfigurationIDs: true,
+			validateGrants:           true,
+			expectedCredentialIssuer: "https://issuer.example.com",
+			expectedConfigurationIDs: []string{"TestCredential"},
+			expectedGrantType:        "authorization_code",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.credentialOfferParameter.CredentialOffer()
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.NotEmpty(t, got)
+
+			// Verify the credential offer can be decoded
+			decodedURL, err := url.ParseQuery(string(got))
+			assert.NoError(t, err)
+			assert.Contains(t, decodedURL, "credential_offer")
+
+			// Parse the JSON from the credential_offer parameter
+			var parsedOffer CredentialOfferParameters
+			err = json.Unmarshal([]byte(decodedURL.Get("credential_offer")), &parsedOffer)
+			assert.NoError(t, err)
+
+			// Validate credential issuer
+			if tt.validateCredentialIssuer {
+				assert.Equal(t, tt.expectedCredentialIssuer, parsedOffer.CredentialIssuer)
+			}
+
+			// Validate credential configuration IDs
+			if tt.validateConfigurationIDs {
+				assert.Equal(t, tt.expectedConfigurationIDs, parsedOffer.CredentialConfigurationIDs)
+			}
+
+			// Validate grants
+			if tt.validateGrants {
+				assert.NotNil(t, parsedOffer.Grants)
+				assert.Contains(t, parsedOffer.Grants, tt.expectedGrantType)
+
+				// Validate authorization_code grant if present
+				if tt.expectedGrantType == "authorization_code" && tt.expectedIssuerStatePattern != "" {
+					grantData, ok := parsedOffer.Grants["authorization_code"]
+					assert.True(t, ok)
+
+					// Re-marshal and unmarshal to get proper type
+					grantBytes, err := json.Marshal(grantData)
+					assert.NoError(t, err)
+
+					var authGrant GrantAuthorizationCode
+					err = json.Unmarshal(grantBytes, &authGrant)
+					assert.NoError(t, err)
+
+					if tt.expectedIssuerStatePattern != "" {
+						assert.Equal(t, tt.expectedIssuerStatePattern, authGrant.IssuerState)
+					}
+				}
+			}
+
+			// Verify the credential offer is URL-encoded
+			assert.True(t, strings.HasPrefix(string(got), "credential_offer="))
+			assert.Contains(t, string(got), "%22credential_issuer%22")
+		})
+	}
+}
+
+func TestCredentialOfferParameters_CredentialOffer_RoundTrip(t *testing.T) {
+	tests := []struct {
+		name       string
+		parameters *CredentialOfferParameters
+	}{
+		{
+			name: "round_trip_authorization_code",
+			parameters: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"TestCredential",
+				},
+				Grants: map[string]any{
+					"authorization_code": GrantAuthorizationCode{
+						IssuerState: fmt.Sprintf("collect_id=%s&vct=%s&authentic_source=%s", "round-trip-123", "TestCred", "TestSource"),
+					},
+				},
+			},
+		},
+		{
+			name: "round_trip_pre_authorized_code",
+			parameters: &CredentialOfferParameters{
+				CredentialIssuer: "https://issuer.example.com",
+				CredentialConfigurationIDs: []string{
+					"UniversityDegree",
+				},
+				Grants: map[string]any{
+					"urn:ietf:params:oauth:grant-type:pre-authorized_code": GrantPreAuthorizedCode{
+						PreAuthorizedCode: "test-code-xyz",
+						TXCode: TXCode{
+							InputMode:   "text",
+							Length:      8,
+							Description: "Enter the code",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create credential offer
+			offer, err := tt.parameters.CredentialOffer()
+			assert.NoError(t, err)
+			assert.NotEmpty(t, offer)
+
+			// Parse it back
+			parsed, err := ParseCredentialOfferURI("openid-credential-offer://?" + string(offer))
+			assert.NoError(t, err)
+			assert.NotNil(t, parsed)
+
+			// Verify round-trip preserved data
+			assert.Equal(t, tt.parameters.CredentialIssuer, parsed.CredentialIssuer)
+			assert.Equal(t, tt.parameters.CredentialConfigurationIDs, parsed.CredentialConfigurationIDs)
+			assert.Equal(t, len(tt.parameters.Grants), len(parsed.Grants))
 		})
 	}
 }

@@ -18,15 +18,12 @@ func TestCreatePresentationDefinition_PID(t *testing.T) {
 
 	scopes := []string{"openid", "pid"}
 
-	pd, err := client.createPresentationDefinition(scopes)
+	dcql, err := client.createDCQLQuery(scopes)
 	assert.NoError(t, err)
-	assert.NotNil(t, pd)
+	assert.NotNil(t, dcql)
 
-	// Should return a PresentationDefinitionParameter struct
-	pdParam, ok := pd.(*openid4vp.PresentationDefinitionParameter)
-	assert.True(t, ok, "Should return PresentationDefinitionParameter")
-	assert.NotEmpty(t, pdParam.ID, "Should have an ID")
-	assert.NotEmpty(t, pdParam.InputDescriptors, "Should have at least one input descriptor for PID")
+	// Should return a DCQL struct with credentials
+	assert.NotEmpty(t, dcql.Credentials, "Should have at least one credential for PID")
 }
 
 // TestCreatePresentationDefinition_MultipleScopes tests presentation definition for multiple scopes
@@ -36,15 +33,12 @@ func TestCreatePresentationDefinition_MultipleScopes(t *testing.T) {
 
 	scopes := []string{"openid", "pid", "email"}
 
-	pd, err := client.createPresentationDefinition(scopes)
+	dcql, err := client.createDCQLQuery(scopes)
 	assert.NoError(t, err)
-	assert.NotNil(t, pd)
+	assert.NotNil(t, dcql)
 
-	pdParam, ok := pd.(*openid4vp.PresentationDefinitionParameter)
-	assert.True(t, ok)
-
-	// Should have multiple input descriptors (one for PID, one for email)
-	assert.GreaterOrEqual(t, len(pdParam.InputDescriptors), 1)
+	// Should have multiple credentials (one for PID, one for email)
+	assert.GreaterOrEqual(t, len(dcql.Credentials), 1)
 }
 
 // TestCreatePresentationDefinition_OnlyOpenID tests with only openid scope
@@ -54,16 +48,12 @@ func TestCreatePresentationDefinition_OnlyOpenID(t *testing.T) {
 
 	scopes := []string{"openid"}
 
-	pd, err := client.createPresentationDefinition(scopes)
+	dcql, err := client.createDCQLQuery(scopes)
 	assert.NoError(t, err)
-	assert.NotNil(t, pd)
+	assert.NotNil(t, dcql)
 
-	pdParam, ok := pd.(*openid4vp.PresentationDefinitionParameter)
-	assert.True(t, ok)
-	assert.NotEmpty(t, pdParam.ID)
-
-	// Should have a generic input descriptor when no specific credentials
-	assert.NotEmpty(t, pdParam.InputDescriptors)
+	// Should have a generic credential when no specific credentials
+	assert.NotEmpty(t, dcql.Credentials)
 }
 
 // TestCreatePresentationDefinition_EmptyScopes tests with empty scopes
@@ -73,15 +63,12 @@ func TestCreatePresentationDefinition_EmptyScopes(t *testing.T) {
 
 	scopes := []string{}
 
-	pd, err := client.createPresentationDefinition(scopes)
+	dcql, err := client.createDCQLQuery(scopes)
 	assert.NoError(t, err)
-	assert.NotNil(t, pd)
+	assert.NotNil(t, dcql)
 
-	pdParam, ok := pd.(*openid4vp.PresentationDefinitionParameter)
-	assert.True(t, ok)
-
-	// Should create a generic presentation definition
-	assert.NotEmpty(t, pdParam.InputDescriptors)
+	// Should create a generic DCQL query
+	assert.NotEmpty(t, dcql.Credentials)
 }
 
 // TestCreatePresentationDefinition_UnsupportedScope tests with unsupported scope
@@ -91,16 +78,12 @@ func TestCreatePresentationDefinition_UnsupportedScope(t *testing.T) {
 
 	scopes := []string{"openid", "unsupported_scope"}
 
-	pd, err := client.createPresentationDefinition(scopes)
+	dcql, err := client.createDCQLQuery(scopes)
 	assert.NoError(t, err)
-	assert.NotNil(t, pd)
+	assert.NotNil(t, dcql)
 
-	pdParam, ok := pd.(*openid4vp.PresentationDefinitionParameter)
-	assert.True(t, ok)
-	assert.NotEmpty(t, pdParam.ID)
-
-	// Should still create a presentation definition with generic descriptor
-	assert.NotEmpty(t, pdParam.InputDescriptors)
+	// Should still create a DCQL query with generic credentials
+	assert.NotEmpty(t, dcql.Credentials)
 }
 
 // TestCreateRequestObject tests request object creation
@@ -110,13 +93,17 @@ func TestCreateRequestObject(t *testing.T) {
 
 	sessionID := "test-session-123"
 	nonce := "test-nonce-456"
-	presentationDefinition := &openid4vp.PresentationDefinitionParameter{
-		ID:               "test-pd",
-		InputDescriptors: []openid4vp.InputDescriptor{},
+	dcqlQuery := &openid4vp.DCQL{
+		Credentials: []openid4vp.CredentialQuery{
+			{
+				ID:     "test-credential",
+				Format: "vc+sd-jwt",
+			},
+		},
 	}
 
 	// This will fail without proper signing key, but we can test the structure
-	requestObject, err := client.CreateRequestObject(nil, sessionID, presentationDefinition, nonce)
+	requestObject, err := client.CreateRequestObject(context.Background(), sessionID, dcqlQuery, nonce)
 
 	// Expect error because no signing key is configured
 	assert.Error(t, err)
@@ -186,7 +173,7 @@ func BenchmarkCreatePresentationDefinition(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = client.createPresentationDefinition(scopes)
+		_, _ = client.createDCQLQuery(scopes)
 	}
 }
 
@@ -221,30 +208,22 @@ func TestCreatePresentationDefinition_WithTemplates(t *testing.T) {
 
 	// Test with PID scope
 	scopes := []string{"openid", "pid"}
-	pd, err := client.createPresentationDefinition(scopes)
+	dcql, err := client.createDCQLQuery(scopes)
 	assert.NoError(t, err)
-	assert.NotNil(t, pd)
+	assert.NotNil(t, dcql)
 
-	pdParam, ok := pd.(*openid4vp.PresentationDefinitionParameter)
-	assert.True(t, ok, "Should return PresentationDefinitionParameter")
-	assert.NotEmpty(t, pdParam.ID, "Should have an ID")
-	assert.NotEmpty(t, pdParam.InputDescriptors, "Should have input descriptors")
+	// Verify DCQL structure
+	assert.NotEmpty(t, dcql.Credentials, "Should have credentials")
 
-	// Verify the descriptor was created from template
-	if len(pdParam.InputDescriptors) > 0 {
-		descriptor := pdParam.InputDescriptors[0]
-		assert.NotEmpty(t, descriptor.ID)
-		assert.NotEmpty(t, descriptor.Constraints.Fields)
+	// Verify the credential query was created from template
+	if len(dcql.Credentials) > 0 {
+		credential := dcql.Credentials[0]
+		assert.NotEmpty(t, credential.ID)
+		assert.NotEmpty(t, credential.Format)
 
-		// Check for VCT constraint
-		hasVCT := false
-		for _, field := range descriptor.Constraints.Fields {
-			if len(field.Path) > 0 && field.Path[0] == "$.vct" {
-				hasVCT = true
-				break
-			}
-		}
-		assert.True(t, hasVCT, "Should have VCT constraint")
+		// Check for VCT values in Meta
+		assert.NotNil(t, credential.Meta, "Should have Meta with VCT values")
+		assert.NotEmpty(t, credential.Meta.VCTValues, "Should have VCT values")
 	}
 }
 
@@ -268,11 +247,10 @@ func TestCreatePresentationDefinition_TemplatesFallback(t *testing.T) {
 
 	// Test with scope not in templates (should fall back to legacy config)
 	scopes := []string{"openid", "ehic"}
-	pd, err := client.createPresentationDefinition(scopes)
+	dcql, err := client.createDCQLQuery(scopes)
 	assert.NoError(t, err)
-	assert.NotNil(t, pd)
+	assert.NotNil(t, dcql)
 
-	pdParam, ok := pd.(*openid4vp.PresentationDefinitionParameter)
-	assert.True(t, ok)
-	assert.NotEmpty(t, pdParam.InputDescriptors, "Should have descriptors from legacy config")
+	// Verify DCQL structure from legacy config
+	assert.NotEmpty(t, dcql.Credentials, "Should have credentials from legacy config")
 }

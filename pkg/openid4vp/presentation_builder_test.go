@@ -85,6 +85,12 @@ func TestPresentationBuilder_BuildFromScopes(t *testing.T) {
 			if template.GetID() != tt.expectedID {
 				t.Errorf("Expected template ID %s, got %s", tt.expectedID, template.GetID())
 			}
+
+			// Also check that DCQL has credentials with VCT values
+			if len(dcql.Credentials) > 0 {
+				t.Logf("BuildFromScopes - Credential: %+v", dcql.Credentials[0])
+				t.Logf("BuildFromScopes - VCT Values: %+v", dcql.Credentials[0].Meta.VCTValues)
+			}
 		})
 	}
 }
@@ -154,7 +160,7 @@ func TestPresentationBuilder_BuildFromTemplate(t *testing.T) {
 	}
 }
 
-func TestPresentationBuilder_BuildPresentationDefinition(t *testing.T) {
+func TestPresentationBuilder_BuildDCQLQuery(t *testing.T) {
 	ctx := context.Background()
 
 	config, err := configuration.LoadPresentationRequestsFromFile(ctx, "../configuration/testdata/multi_template.yaml")
@@ -165,39 +171,58 @@ func TestPresentationBuilder_BuildPresentationDefinition(t *testing.T) {
 	builder := openid4vp.NewPresentationBuilder(config.GetEnabledTemplates())
 
 	tests := []struct {
-		name                string
-		scopes              []string
-		expectError         bool
-		minInputDescriptors int
+		name           string
+		scopes         []string
+		expectError    bool
+		expectGeneric  bool
+		minCredentials int
+		checkVCTValues bool
 	}{
 		{
-			name:                "PID scope creates descriptor",
-			scopes:              []string{"openid", "pid"},
-			expectError:         false,
-			minInputDescriptors: 1,
+			name:           "PID scope creates DCQL with template",
+			scopes:         []string{"openid", "pid"},
+			expectError:    false,
+			expectGeneric:  false,
+			minCredentials: 1,
+			checkVCTValues: true,
 		},
 		{
-			name:                "EHIC scope creates descriptor",
-			scopes:              []string{"openid", "ehic"},
-			expectError:         false,
-			minInputDescriptors: 1,
+			name:           "EHIC scope creates DCQL with template",
+			scopes:         []string{"openid", "ehic"},
+			expectError:    false,
+			expectGeneric:  false,
+			minCredentials: 1,
+			checkVCTValues: true,
 		},
 		{
-			name:                "Only standard scopes creates generic descriptor",
-			scopes:              []string{"openid", "profile"},
-			expectError:         false,
-			minInputDescriptors: 1,
+			name:           "Only standard scopes creates generic DCQL",
+			scopes:         []string{"openid", "profile"},
+			expectError:    false,
+			expectGeneric:  true,
+			minCredentials: 1,
+			checkVCTValues: false,
 		},
 		{
-			name:        "No scopes returns error",
-			scopes:      []string{},
-			expectError: true,
+			name:           "Unknown scope creates generic DCQL",
+			scopes:         []string{"openid", "unknown_scope"},
+			expectError:    false,
+			expectGeneric:  true,
+			minCredentials: 1,
+			checkVCTValues: false,
+		},
+		{
+			name:           "Empty scopes creates generic DCQL",
+			scopes:         []string{},
+			expectError:    false,
+			expectGeneric:  true,
+			minCredentials: 1,
+			checkVCTValues: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pd, err := builder.BuildPresentationDefinition(ctx, tt.scopes)
+			dcql, err := builder.BuildDCQLQuery(ctx, tt.scopes)
 
 			if tt.expectError {
 				if err == nil {
@@ -211,18 +236,34 @@ func TestPresentationBuilder_BuildPresentationDefinition(t *testing.T) {
 				return
 			}
 
-			if pd == nil {
-				t.Error("Expected PresentationDefinition but got nil")
+			if dcql == nil {
+				t.Error("Expected DCQL but got nil")
 				return
 			}
 
-			if len(pd.InputDescriptors) < tt.minInputDescriptors {
-				t.Errorf("Expected at least %d input descriptors, got %d",
-					tt.minInputDescriptors, len(pd.InputDescriptors))
+			if len(dcql.Credentials) < tt.minCredentials {
+				t.Errorf("Expected at least %d credentials, got %d",
+					tt.minCredentials, len(dcql.Credentials))
 			}
 
-			if pd.ID == "" {
-				t.Error("PresentationDefinition should have an ID")
+			if tt.expectGeneric {
+				// Generic DCQL should have generic credential ID
+				if dcql.Credentials[0].ID != "credential_generic" {
+					t.Errorf("Expected generic credential ID, got %s", dcql.Credentials[0].ID)
+				}
+			}
+
+			if tt.checkVCTValues {
+				// Template-based DCQL should have VCT values
+				if len(dcql.Credentials) == 0 {
+					t.Error("Expected at least one credential")
+				} else {
+					t.Logf("DCQL Credentials: %+v", dcql.Credentials)
+					t.Logf("VCT Values: %+v", dcql.Credentials[0].Meta.VCTValues)
+					if len(dcql.Credentials[0].Meta.VCTValues) == 0 {
+						t.Errorf("Expected VCT values from template, got credential: %+v", dcql.Credentials[0])
+					}
+				}
 			}
 		})
 	}
@@ -276,49 +317,5 @@ func TestPresentationBuilder_GetTemplate(t *testing.T) {
 	_, err = builder.GetTemplate("does_not_exist")
 	if err == nil {
 		t.Error("Expected error for non-existent template")
-	}
-}
-
-func TestPresentationBuilder_DCQLConversion(t *testing.T) {
-	ctx := context.Background()
-
-	config, err := configuration.LoadPresentationRequestsFromFile(ctx, "../configuration/testdata/eudi_pid_basic.yaml")
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-
-	builder := openid4vp.NewPresentationBuilder(config.GetEnabledTemplates())
-
-	// Build presentation definition from PID scope
-	pd, err := builder.BuildPresentationDefinition(ctx, []string{"pid"})
-	if err != nil {
-		t.Fatalf("Failed to build presentation definition: %v", err)
-	}
-
-	if len(pd.InputDescriptors) == 0 {
-		t.Fatal("Expected at least one input descriptor")
-	}
-
-	descriptor := pd.InputDescriptors[0]
-
-	// Verify VCT constraint is present
-	hasVCTConstraint := false
-	for _, field := range descriptor.Constraints.Fields {
-		if len(field.Path) > 0 && field.Path[0] == "$.vct" {
-			hasVCTConstraint = true
-			if field.Filter != nil && field.Filter.Const != "" {
-				t.Logf("VCT constraint found: %s", field.Filter.Const)
-			}
-		}
-	}
-
-	if !hasVCTConstraint {
-		t.Error("Expected VCT constraint in input descriptor")
-	}
-
-	// Verify limit_disclosure is set
-	if descriptor.Constraints.LimitDisclosure != "required" {
-		t.Errorf("Expected limit_disclosure to be 'required', got %s",
-			descriptor.Constraints.LimitDisclosure)
 	}
 }

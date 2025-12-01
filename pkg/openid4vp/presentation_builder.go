@@ -2,8 +2,6 @@ package openid4vp
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 )
 
@@ -87,147 +85,111 @@ func (pb *PresentationBuilder) BuildFromTemplate(ctx context.Context, templateID
 	return dcql, template, nil
 }
 
-// BuildPresentationDefinition creates a PresentationDefinitionParameter from scopes
-// This is for backward compatibility with the existing Presentation Exchange format
-func (pb *PresentationBuilder) BuildPresentationDefinition(ctx context.Context, scopes []string) (*PresentationDefinitionParameter, error) {
+// BuildDCQLQuery creates a DCQL query from OIDC scopes
+// This attempts to find matching templates, and falls back to a generic DCQL query if none are found
+func (pb *PresentationBuilder) BuildDCQLQuery(ctx context.Context, scopes []string) (*DCQL, error) {
 	if len(scopes) == 0 {
-		return nil, fmt.Errorf("no scopes provided")
+		// Return a generic DCQL query when no scopes provided
+		return pb.createGenericDCQL(), nil
 	}
 
 	// Filter out standard OIDC scopes
 	credentialScopes := filterStandardScopes(scopes)
 	if len(credentialScopes) == 0 {
-		// No credential-specific scopes, return a generic presentation definition
-		return pb.createGenericPresentationDefinition(), nil
+		// No credential-specific scopes, return generic DCQL
+		return pb.createGenericDCQL(), nil
 	}
 
-	// Try to find templates for the scopes
-	var inputDescriptors []InputDescriptor
-	usedScopes := make(map[string]bool)
-
+	// Try to find a template for the first credential scope
 	for _, scope := range credentialScopes {
-		if usedScopes[scope] {
-			continue
-		}
-
-		templateID, ok := pb.scopeIndex[scope]
-		if !ok {
-			// No template for this scope, skip it
-			continue
-		}
-
-		template := pb.templates[templateID]
-
-		// Convert DCQL to InputDescriptor
-		dcql := template.GetDCQLQuery()
-		if dcql != nil && len(dcql.Credentials) > 0 {
-			for _, credQuery := range dcql.Credentials {
-				descriptor := pb.dcqlCredentialToInputDescriptor(credQuery, scope)
-				inputDescriptors = append(inputDescriptors, descriptor)
-				usedScopes[scope] = true
+		if templateID, ok := pb.scopeIndex[scope]; ok {
+			template := pb.templates[templateID]
+			dcql := template.GetDCQLQuery()
+			if dcql != nil {
+				// Return a copy to avoid modifications to the template
+				return copyDCQL(dcql), nil
 			}
 		}
 	}
 
-	// If no descriptors were created from templates, create a generic one
-	if len(inputDescriptors) == 0 {
-		return pb.createGenericPresentationDefinition(), nil
-	}
-
-	pd := &PresentationDefinitionParameter{
-		ID:               generateRandomID(),
-		Name:             "Verifier Proxy Presentation Request",
-		Purpose:          "To verify your identity",
-		InputDescriptors: inputDescriptors,
-	}
-
-	return pd, nil
+	// No template found, return generic DCQL
+	return pb.createGenericDCQL(), nil
 }
 
-// dcqlCredentialToInputDescriptor converts a DCQL CredentialQuery to a Presentation Exchange InputDescriptor
-func (pb *PresentationBuilder) dcqlCredentialToInputDescriptor(credQuery CredentialQuery, scope string) InputDescriptor {
-	descriptor := InputDescriptor{
-		ID:      fmt.Sprintf("input_%s", credQuery.ID),
-		Name:    fmt.Sprintf("Credential: %s", credQuery.ID),
-		Purpose: fmt.Sprintf("Required for scope: %s", scope),
-		Constraints: Constraints{
-			LimitDisclosure: "required",
-			Fields:          []Field{},
-		},
+// copyDCQL creates a deep copy of a DCQL query
+func copyDCQL(src *DCQL) *DCQL {
+	if src == nil {
+		return nil
 	}
 
-	// Add VCT constraint
-	if len(credQuery.Meta.VCTValues) > 0 {
-		vctField := Field{
-			Path: []string{"$.vct"},
-		}
-
-		// If single VCT, use const filter
-		if len(credQuery.Meta.VCTValues) == 1 {
-			vctField.Filter = &Filter{
-				Type:  "string",
-				Const: credQuery.Meta.VCTValues[0],
-			}
-		} else {
-			// Multiple VCTs, use enum filter
-			vctField.Filter = &Filter{
-				Type: "string",
-				Enum: credQuery.Meta.VCTValues,
-			}
-		}
-
-		descriptor.Constraints.Fields = append(descriptor.Constraints.Fields, vctField)
+	dst := &DCQL{
+		Credentials:    make([]CredentialQuery, len(src.Credentials)),
+		CredentialSets: make([]CredentialSetQuery, len(src.CredentialSets)),
 	}
 
-	// Add claim constraints if specified
-	if len(credQuery.Claims) > 0 {
-		for _, claim := range credQuery.Claims {
-			if len(claim.Path) > 0 {
-				// Convert DCQL claim path to JSONPath
-				jsonPath := dcqlPathToJSONPath(claim.Path)
-				field := Field{
-					Path: []string{jsonPath},
+	// Copy credentials
+	for i, cred := range src.Credentials {
+		dst.Credentials[i] = CredentialQuery{
+			ID:       cred.ID,
+			Format:   cred.Format,
+			Multiple: cred.Multiple,
+			Meta: MetaQuery{
+				VCTValues: append([]string{}, cred.Meta.VCTValues...),
+			},
+			RequireCryptographicHolderBinding: cred.RequireCryptographicHolderBinding,
+		}
+
+		// Copy trusted authorities
+		if len(cred.TrustedAuthorities) > 0 {
+			dst.Credentials[i].TrustedAuthorities = make([]TrustedAuthority, len(cred.TrustedAuthorities))
+			for j, ta := range cred.TrustedAuthorities {
+				dst.Credentials[i].TrustedAuthorities[j] = TrustedAuthority{
+					Type:   ta.Type,
+					Values: append([]string{}, ta.Values...),
 				}
-				descriptor.Constraints.Fields = append(descriptor.Constraints.Fields, field)
 			}
+		}
+
+		// Copy claims
+		if len(cred.Claims) > 0 {
+			dst.Credentials[i].Claims = make([]ClaimQuery, len(cred.Claims))
+			for j, claim := range cred.Claims {
+				dst.Credentials[i].Claims[j] = ClaimQuery{
+					Path: append([]string{}, claim.Path...),
+				}
+			}
+		}
+
+		// Copy claim sets
+		if len(cred.ClaimSet) > 0 {
+			dst.Credentials[i].ClaimSet = append([]string{}, cred.ClaimSet...)
 		}
 	}
 
-	return descriptor
-}
-
-// dcqlPathToJSONPath converts a DCQL claim path to JSONPath format
-func dcqlPathToJSONPath(path []string) string {
-	if len(path) == 0 {
-		return "$"
+	// Copy credential sets
+	for i, cs := range src.CredentialSets {
+		dst.CredentialSets[i] = CredentialSetQuery{
+			Required: cs.Required,
+			Purpose:  cs.Purpose,
+			Options:  make([][]string, len(cs.Options)),
+		}
+		for j, opt := range cs.Options {
+			dst.CredentialSets[i].Options[j] = append([]string{}, opt...)
+		}
 	}
 
-	result := "$"
-	for _, segment := range path {
-		result += "." + segment
-	}
-	return result
+	return dst
 }
 
-// createGenericPresentationDefinition creates a generic presentation definition
-// when no specific templates match
-func (pb *PresentationBuilder) createGenericPresentationDefinition() *PresentationDefinitionParameter {
-	return &PresentationDefinitionParameter{
-		ID:      generateRandomID(),
-		Name:    "Verifier Proxy Presentation Request",
-		Purpose: "To verify your identity",
-		InputDescriptors: []InputDescriptor{
+// createGenericDCQL creates a generic DCQL query when no specific templates match
+func (pb *PresentationBuilder) createGenericDCQL() *DCQL {
+	return &DCQL{
+		Credentials: []CredentialQuery{
 			{
-				ID:      "input_generic",
-				Name:    "Any Verifiable Credential",
-				Purpose: "User identity verification",
-				Constraints: Constraints{
-					LimitDisclosure: "required",
-					Fields: []Field{
-						{
-							Path: []string{"$.vct"},
-						},
-					},
+				ID:     "credential_generic",
+				Format: "vc+sd-jwt",
+				Meta: MetaQuery{
+					VCTValues: []string{}, // Empty - accept any VCT
 				},
 			},
 		},
@@ -252,13 +214,6 @@ func filterStandardScopes(scopes []string) []string {
 		}
 	}
 	return filtered
-}
-
-// generateRandomID generates a random ID for presentation definitions
-func generateRandomID() string {
-	b := make([]byte, 16)
-	rand.Read(b)
-	return base64.RawURLEncoding.EncodeToString(b)
 }
 
 // FindTemplateByScopes finds a template that matches the given OIDC scopes

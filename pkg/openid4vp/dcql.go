@@ -48,7 +48,7 @@ type CredentialSetQuery struct {
 
 type MetaQuery struct {
 	// VCTValues REQUIRED. A non-empty array of strings that specifies allowed values for the type of the requested Verifiable Credential. All elements in the array MUST be valid type identifiers as defined in [I-D.ietf-oauth-sd-jwt-vc]. The Wallet MAY return Credentials that inherit from any of the specified types, following the inheritance logic defined in [I-D.ietf-oauth-sd-jwt-vc].
-	VCTValues []string `json:"vct_values" validate:"required,min=1,dive,required"`
+	VCTValues []string `json:"vct_values" yaml:"vct_values" validate:"required,min=1,dive,required"`
 }
 
 type TrustedAuthority struct {

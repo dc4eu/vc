@@ -203,8 +203,8 @@ func (c *Client) GetRequestObject(ctx context.Context, req *GetRequestObjectRequ
 		return nil, ErrServerError
 	}
 
-	// Create and sign request object
-	signedJWT, err := c.CreateRequestObject(ctx, session.ID, session.OpenID4VP.PresentationDefinition, nonce)
+	// Create and sign request object using DCQL from session
+	signedJWT, err := c.CreateRequestObject(ctx, session.ID, session.OpenID4VP.DCQL, nonce)
 	if err != nil {
 		c.log.Error(err, "Failed to create request object")
 		return nil, ErrServerError
@@ -289,7 +289,7 @@ func (c *Client) ProcessDirectPost(ctx context.Context, req *DirectPostRequest) 
 	if session.OIDCRequest.ShowCredentialDetails {
 		// Update session status to indicate we're waiting for user confirmation
 		session.Status = db.SessionStatusAwaitingPresentation
-		
+
 		if err := c.db.Sessions.Update(ctx, session); err != nil {
 			c.log.Error(err, "Failed to update session")
 			return nil, ErrServerError

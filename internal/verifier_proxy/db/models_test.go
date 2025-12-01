@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"vc/pkg/openid4vp"
 )
 
 // TestSessionStatus tests the SessionStatus type and constants
@@ -147,12 +148,14 @@ func TestOIDCRequest_WithOptionalParameters(t *testing.T) {
 
 // TestOpenID4VPSession tests OpenID4VP session structure
 func TestOpenID4VPSession(t *testing.T) {
-	presentationDef := map[string]any{
-		"id": "pd-123",
-		"input_descriptors": []any{
-			map[string]any{
-				"id":   "pid",
-				"name": "PID Credential",
+	dcqlQuery := &openid4vp.DCQL{
+		Credentials: []openid4vp.CredentialQuery{
+			{
+				ID:     "pid_credential",
+				Format: "vc+sd-jwt",
+				Meta: openid4vp.MetaQuery{
+					VCTValues: []string{"urn:eu.europa.ec.eudi:pid:1"},
+				},
 			},
 		},
 	}
@@ -163,14 +166,14 @@ func TestOpenID4VPSession(t *testing.T) {
 	}
 
 	vp := OpenID4VPSession{
-		PresentationDefinition: presentationDef,
+		DCQL:                   dcqlQuery,
 		RequestObjectNonce:     "nonce-123",
 		VPToken:                "eyJhbGc...",
 		PresentationSubmission: submission,
 		WalletID:               "wallet-456",
 	}
 
-	assert.NotNil(t, vp.PresentationDefinition)
+	assert.NotNil(t, vp.DCQL)
 	assert.Equal(t, "nonce-123", vp.RequestObjectNonce)
 	assert.Equal(t, "wallet-456", vp.WalletID)
 	assert.NotEmpty(t, vp.VPToken)

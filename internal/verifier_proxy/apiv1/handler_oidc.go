@@ -122,13 +122,13 @@ func (c *Client) Authorize(ctx context.Context, req *AuthorizeRequest) (*Authori
 		},
 	}
 
-	// Create presentation definition based on requested scopes
-	presentationDefinition, err := c.createPresentationDefinition(requestedScopes)
+	// Create DCQL query based on requested scopes
+	dcqlQuery, err := c.createDCQLQuery(requestedScopes)
 	if err != nil {
-		c.log.Error(err, "Failed to create presentation definition")
+		c.log.Error(err, "Failed to create DCQL query")
 		return nil, ErrServerError
 	}
-	session.OpenID4VP.PresentationDefinition = presentationDefinition
+	session.OpenID4VP.DCQL = dcqlQuery
 
 	// Save session
 	if err := c.db.Sessions.Create(ctx, session); err != nil {

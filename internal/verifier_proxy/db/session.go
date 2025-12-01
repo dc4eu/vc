@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"time"
+	"vc/pkg/openid4vp"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -43,32 +44,32 @@ type Session struct {
 
 // OIDCRequest represents the initial OIDC request from the RP
 type OIDCRequest struct {
-	ClientID            string   `bson:"client_id" json:"client_id"`
-	RedirectURI         string   `bson:"redirect_uri" json:"redirect_uri"`
-	Scope               string   `bson:"scope" json:"scope"`
-	State               string   `bson:"state" json:"state"`
-	Nonce               string   `bson:"nonce" json:"nonce"`
-	CodeChallenge       string   `bson:"code_challenge,omitempty" json:"code_challenge,omitempty"`
-	CodeChallengeMethod string   `bson:"code_challenge_method,omitempty" json:"code_challenge_method,omitempty"`
-	ResponseType        string   `bson:"response_type" json:"response_type"`
-	ResponseMode        string   `bson:"response_mode,omitempty" json:"response_mode,omitempty"`
-	Display             string   `bson:"display,omitempty" json:"display,omitempty"`
-	Prompt              string   `bson:"prompt,omitempty" json:"prompt,omitempty"`
-	MaxAge              int      `bson:"max_age,omitempty" json:"max_age,omitempty"`
-	UILocales           []string `bson:"ui_locales,omitempty" json:"ui_locales,omitempty"`
-	IDTokenHint         string   `bson:"id_token_hint,omitempty" json:"id_token_hint,omitempty"`
-	LoginHint           string   `bson:"login_hint,omitempty" json:"login_hint,omitempty"`
-	ACRValues           []string `bson:"acr_values,omitempty" json:"acr_values,omitempty"`
-	ShowCredentialDetails bool   `bson:"show_credential_details,omitempty" json:"show_credential_details,omitempty"` // User requested to view credential before authorization
+	ClientID              string   `bson:"client_id" json:"client_id"`
+	RedirectURI           string   `bson:"redirect_uri" json:"redirect_uri"`
+	Scope                 string   `bson:"scope" json:"scope"`
+	State                 string   `bson:"state" json:"state"`
+	Nonce                 string   `bson:"nonce" json:"nonce"`
+	CodeChallenge         string   `bson:"code_challenge,omitempty" json:"code_challenge,omitempty"`
+	CodeChallengeMethod   string   `bson:"code_challenge_method,omitempty" json:"code_challenge_method,omitempty"`
+	ResponseType          string   `bson:"response_type" json:"response_type"`
+	ResponseMode          string   `bson:"response_mode,omitempty" json:"response_mode,omitempty"`
+	Display               string   `bson:"display,omitempty" json:"display,omitempty"`
+	Prompt                string   `bson:"prompt,omitempty" json:"prompt,omitempty"`
+	MaxAge                int      `bson:"max_age,omitempty" json:"max_age,omitempty"`
+	UILocales             []string `bson:"ui_locales,omitempty" json:"ui_locales,omitempty"`
+	IDTokenHint           string   `bson:"id_token_hint,omitempty" json:"id_token_hint,omitempty"`
+	LoginHint             string   `bson:"login_hint,omitempty" json:"login_hint,omitempty"`
+	ACRValues             []string `bson:"acr_values,omitempty" json:"acr_values,omitempty"`
+	ShowCredentialDetails bool     `bson:"show_credential_details,omitempty" json:"show_credential_details,omitempty"` // User requested to view credential before authorization
 }
 
 // OpenID4VPSession represents the OpenID4VP interaction
 type OpenID4VPSession struct {
-	PresentationDefinition any    `bson:"presentation_definition,omitempty" json:"presentation_definition,omitempty"`
-	RequestObjectNonce     string `bson:"request_object_nonce,omitempty" json:"request_object_nonce,omitempty"`
-	VPToken                string `bson:"vp_token,omitempty" json:"vp_token,omitempty"`
-	PresentationSubmission any    `bson:"presentation_submission,omitempty" json:"presentation_submission,omitempty"`
-	WalletID               string `bson:"wallet_id,omitempty" json:"wallet_id,omitempty"`
+	DCQL                   *openid4vp.DCQL `bson:"dcql,omitempty" json:"dcql,omitempty"`
+	RequestObjectNonce     string          `bson:"request_object_nonce,omitempty" json:"request_object_nonce,omitempty"`
+	VPToken                string          `bson:"vp_token,omitempty" json:"vp_token,omitempty"`
+	PresentationSubmission any             `bson:"presentation_submission,omitempty" json:"presentation_submission,omitempty"`
+	WalletID               string          `bson:"wallet_id,omitempty" json:"wallet_id,omitempty"`
 }
 
 // TokenSet represents the OAuth2/OIDC tokens

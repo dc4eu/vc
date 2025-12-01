@@ -114,7 +114,7 @@ func TestAuthorizationRequestSign(t *testing.T) {
 			expectError:   false,
 		},
 		{
-			name: "valid ES512 (P-521)",
+			name: "valid ES512 (P-521) with DCQL",
 			authorization: &RequestObject{
 				ISS:          "https://verifier.example.com",
 				AUD:          "https://wallet.example.com",
@@ -122,17 +122,13 @@ func TestAuthorizationRequestSign(t *testing.T) {
 				ClientID:     "client123",
 				Nonce:        "n-0S6_WzA2Mj",
 				ResponseURI:  "https://verifier.example.com/response",
-				PresentationDefinition: &PresentationDefinitionParameter{
-					ID: "test-pd-1",
-					InputDescriptors: []InputDescriptor{
+				DCQLQuery: &DCQL{
+					Credentials: []CredentialQuery{
 						{
-							ID: "pid",
-							Constraints: Constraints{
-								Fields: []Field{
-									{
-										Path: []string{"$.vct"},
-									},
-								},
+							ID:     "pid_credential",
+							Format: "vc+sd-jwt",
+							Meta: MetaQuery{
+								VCTValues: []string{"urn:eudi:pid:1"},
 							},
 						},
 					},
@@ -284,9 +280,6 @@ func TestAuthorizationRequestSign(t *testing.T) {
 				// Verify optional fields are included when present
 				if tt.authorization.DCQLQuery != nil {
 					assert.Contains(t, claims, "dcql_query")
-				}
-				if tt.authorization.PresentationDefinition != nil {
-					assert.Contains(t, claims, "presentation_definition")
 				}
 			}
 		})

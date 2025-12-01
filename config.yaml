@@ -217,6 +217,9 @@ apigw:
       vanilla: 
         label: Vanilla wwWallet
         redirect_uri: https://demo.wwwallet.org/cb
+      siros_sunet:
+        label: Siros SUNET Wallet
+        redirect_uri: https://sunetwallet-dev.app.siros.org/cb
   trust_model:
     type: "openid_federation"
     trust_anchors:

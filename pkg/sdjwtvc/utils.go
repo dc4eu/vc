@@ -193,3 +193,76 @@ func ExtractClaimsByJSONPath(documentData map[string]any, jsonPathMap map[string
 
 	return reply, nil
 }
+
+// ParseSelectiveDisclosure parses selective disclosure strings and returns a slice of Discloser objects.
+// Each disclosure is a base64url-encoded JSON array containing either:
+// - [salt, claim_name, claim_value] for object properties
+// - [salt, claim_value] for array elements
+// Returns a slice of Discloser objects representing the disclosed claims.
+// Example: ["WyJzYWx0IiwgImdpdmVuX25hbWUiLCAiSm9obiJd"] -> []Discloser{{Salt: "salt", ClaimName: "given_name", Value: "John"}}
+func ParseSelectiveDisclosure(selectiveDisclosure []string) ([]Discloser, error) {
+	if selectiveDisclosure == nil {
+		return nil, errors.New("selective disclosure array is nil")
+	}
+
+	disclosers := make([]Discloser, 0, len(selectiveDisclosure))
+
+	for i, disclosure := range selectiveDisclosure {
+		if disclosure == "" {
+			return nil, fmt.Errorf("disclosure at index %d is empty", i)
+		}
+
+		// Decode the base64url-encoded disclosure
+		disclosureBytes, err := base64.RawURLEncoding.DecodeString(disclosure)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode disclosure at index %d: %w", i, err)
+		}
+
+		// Parse disclosure array
+		var disclosureArray []any
+		if err := json.Unmarshal(disclosureBytes, &disclosureArray); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal disclosure at index %d: %w", i, err)
+		}
+
+		// Validate disclosure array has at least 2 elements (for array elements)
+		if len(disclosureArray) < 2 {
+			return nil, fmt.Errorf("disclosure at index %d has invalid format: expected at least 2 elements, got %d", i, len(disclosureArray))
+		}
+
+		// Extract salt (first element)
+		salt, ok := disclosureArray[0].(string)
+		if !ok {
+			return nil, fmt.Errorf("disclosure at index %d has invalid salt: expected string, got %T", i, disclosureArray[0])
+		}
+
+		var discloser Discloser
+
+		// Check if this is an array element disclosure (2 elements) or object property disclosure (3+ elements)
+		if len(disclosureArray) == 2 {
+			// Array element disclosure: [salt, value]
+			discloser = Discloser{
+				Salt:      salt,
+				ClaimName: "", // Empty for array elements
+				Value:     disclosureArray[1],
+				IsArray:   true,
+			}
+		} else {
+			// Object property disclosure: [salt, claim_name, value]
+			claimName, ok := disclosureArray[1].(string)
+			if !ok {
+				return nil, fmt.Errorf("disclosure at index %d has invalid claim name: expected string, got %T", i, disclosureArray[1])
+			}
+
+			discloser = Discloser{
+				Salt:      salt,
+				ClaimName: claimName,
+				Value:     disclosureArray[2],
+				IsArray:   false,
+			}
+		}
+
+		disclosers = append(disclosers, discloser)
+	}
+
+	return disclosers, nil
+}

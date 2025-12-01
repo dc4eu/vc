@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"hash"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,16 +28,7 @@ type CredentialOptions struct {
 }
 
 // BuildCredential creates a complete SD-JWT credential with additional options
-func (c *Client) BuildCredential(
-	issuer string,
-	kid string,
-	privateKey any,
-	vct string,
-	documentData []byte,
-	holderJWK any,
-	vctm *VCTM,
-	opts *CredentialOptions,
-) (string, error) {
+func (c *Client) BuildCredential(issuer string, kid string, privateKey any, vct string, documentData []byte, holderJWK any, vctm *VCTM, opts *CredentialOptions) (string, error) {
 	// Set defaults
 	if opts == nil {
 		opts = &CredentialOptions{
@@ -158,14 +150,10 @@ func (c *Client) MakeCredential(hashMethod hash.Hash, data map[string]any, vctm 
 		return nil, nil, fmt.Errorf("unsupported hash algorithm: %w", err)
 	}
 	data["_sd_alg"] = algName
-	fmt.Println("MakeCredential", "data", data)
-
-	fmt.Println("MakeCredential", "vctm.Claims", vctm.Claims)
 
 	// Sort claims by depth (deepest first) to ensure child claims are processed
 	// before parent claims in recursive selective disclosure scenarios
 	sortedClaims := sortClaimsByDepth(vctm.Claims)
-	fmt.Println("MakeCredential", "sortedClaims", sortedClaims)
 
 	// Process claims recursively
 	for _, claim := range sortedClaims {
@@ -175,16 +163,30 @@ func (c *Client) MakeCredential(hashMethod hash.Hash, data map[string]any, vctm 
 				return nil, nil, err
 			}
 			if disclosure != "" {
-				disclosures = append(disclosures, disclosure)
-				// Add hash to the appropriate _sd array
-				if err := c.addHashToPath(data, claim.Path[:len(claim.Path)-1], hash); err != nil {
-					return nil, nil, err
+				// Check if this is array element disclosure (path ends with null)
+				isArrayElementDisclosure := len(claim.Path) > 0 && claim.Path[len(claim.Path)-1] == nil
+
+				// Array element processing returns multiple disclosures separated by ~
+				// (or single disclosure if array has one element)
+				if isArrayElementDisclosure {
+					// Split disclosures (handles both single and multiple)
+					disclosureParts := strings.Split(disclosure, "~")
+					disclosures = append(disclosures, disclosureParts...)
+
+					// For array elements, hashes are already placed in the array structure
+					// by processArrayElementPath, so we don't need to add them to _sd array
+				} else {
+					// Single disclosure (object property)
+					disclosures = append(disclosures, disclosure)
+					// Add hash to the appropriate _sd array
+					parentPath := claim.Path[:len(claim.Path)-1]
+					if err := c.addHashToPath(data, parentPath, hash); err != nil {
+						return nil, nil, err
+					}
 				}
 			}
 		}
 	}
-
-	fmt.Println("MakeCredential", "after processing claims", "data", data, "disclosures", disclosures)
 
 	// Add decoy digests if requested (section 4.2.5)
 	if decoyCount > 0 {
@@ -197,24 +199,40 @@ func (c *Client) MakeCredential(hashMethod hash.Hash, data map[string]any, vctm 
 	// "The Issuer MUST hide the original order of the claims in the array"
 	shuffleSDArrays(data)
 
-	fmt.Println("MakeCredential", "after shuffle")
-
 	return data, disclosures, nil
 }
 
+// formatPathForError formats a path slice for error messages
+func formatPathForError(path []*string) string {
+	parts := make([]string, len(path))
+	for i, p := range path {
+		if p == nil {
+			parts[i] = "<nil>"
+		} else {
+			parts[i] = *p
+		}
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
 // processClaimPath handles a single claim path, creating disclosure and removing from data
-// Supports object properties per section 4.2.1. Array element support (section 4.2.2)
-// requires additional path notation and is planned for future implementation.
+// Supports object properties per section 4.2.1 and array elements per section 4.2.2
 func (c *Client) processClaimPath(data map[string]any, path []*string, hashMethod hash.Hash) (string, string, error) {
 	if len(path) == 0 {
 		return "", "", fmt.Errorf("empty path")
+	}
+
+	// Check if this is array element selective disclosure (path ends with null)
+	// Per section 4.2.2: null in path means "all array elements"
+	if path[len(path)-1] == nil {
+		return c.processArrayElementPath(data, path, hashMethod)
 	}
 
 	// Navigate to the parent container
 	current := data
 	for i := 0; i < len(path)-1; i++ {
 		if path[i] == nil {
-			return "", "", fmt.Errorf("nil path element at index %d", i)
+			return "", "", fmt.Errorf("nil path element in middle of path at index %d", i)
 		}
 
 		next, ok := current[*path[i]]
@@ -226,13 +244,8 @@ func (c *Client) processClaimPath(data map[string]any, path []*string, hashMetho
 		switch v := next.(type) {
 		case map[string]any:
 			current = v
-		case []any:
-			// Array element selective disclosure (section 4.2.2) requires index information
-			// This would need extended path notation to specify array indices
-			// For now, return error as this is not yet implemented
-			return "", "", fmt.Errorf("array element selective disclosure requires index information in path")
 		default:
-			return "", "", fmt.Errorf("invalid path: non-object at %s", *path[i])
+			return "", "", fmt.Errorf("invalid path: non-object at %s (type: %T, path: %v)", *path[i], next, formatPathForError(path))
 		}
 	}
 
@@ -257,6 +270,11 @@ func (c *Client) processClaimPath(data map[string]any, path []*string, hashMetho
 	// For nested objects that should be selectively disclosed recursively,
 	// the value might already be processed (contain _sd arrays)
 	// This handles recursive disclosures as per section 4.2.6
+	//
+	// When an array has been processed with array element disclosure (path with null),
+	// it becomes an SD array like [{"...": hash1}, {"...": hash2}, ...]
+	// A subsequent claim for just the array name (e.g., ["nationalities"]) means
+	// we should now disclose the entire SD array recursively
 
 	// Create disclosure with cryptographically secure random salt
 	// Per section 4.2.1: salt MUST be a string with recommended 128-bit entropy
@@ -270,6 +288,7 @@ func (c *Client) processClaimPath(data map[string]any, path []*string, hashMetho
 		Salt:      salt,
 		ClaimName: *claimName,
 		Value:     value,
+		IsArray:   false,
 	}
 
 	// Hash the disclosure per section 4.2.3
@@ -284,6 +303,97 @@ func (c *Client) processClaimPath(data map[string]any, path []*string, hashMetho
 	delete(current, *claimName)
 
 	return sdB64, sdHash, nil
+}
+
+// processArrayElementPath handles array element selective disclosure per section 4.2.2
+// Path ending with null means "make each array element selectively disclosable"
+// Returns multiple disclosures concatenated with "~" separator
+func (c *Client) processArrayElementPath(data map[string]any, path []*string, hashMethod hash.Hash) (string, string, error) {
+	if len(path) < 2 {
+		return "", "", fmt.Errorf("array element path must have at least 2 elements")
+	}
+
+	// Navigate to the parent container
+	current := data
+	for i := 0; i < len(path)-2; i++ {
+		if path[i] == nil {
+			return "", "", fmt.Errorf("nil path element in middle of path at index %d", i)
+		}
+
+		next, ok := current[*path[i]]
+		if !ok {
+			// Path doesn't exist in data
+			return "", "", nil
+		}
+
+		switch v := next.(type) {
+		case map[string]any:
+			current = v
+		default:
+			return "", "", fmt.Errorf("invalid path: non-object at %s", *path[i])
+		}
+	}
+
+	// Get the array name (second to last element before null)
+	arrayName := path[len(path)-2]
+	if arrayName == nil {
+		return "", "", fmt.Errorf("array name cannot be nil")
+	}
+
+	// Get the array value
+	arrayValue, exists := current[*arrayName]
+	if !exists {
+		// Array doesn't exist in data
+		return "", "", nil
+	}
+
+	// Must be an array
+	arraySlice, ok := arrayValue.([]any)
+	if !ok {
+		return "", "", fmt.Errorf("path with null must point to an array, got %T", arrayValue)
+	}
+
+	// Per section 4.2.2: Each array element is individually disclosed
+	// Replace array with array containing only _sd digests
+	var disclosures []string
+	var hashes []string
+	sdArray := make([]any, 0, len(arraySlice))
+
+	for _, element := range arraySlice {
+		// Create disclosure with cryptographically secure random salt
+		salt, err := generateSalt()
+		if err != nil {
+			return "", "", fmt.Errorf("failed to generate salt: %w", err)
+		}
+
+		// Create Disclosure for array element: [salt, value]
+		discloser := Discloser{
+			Salt:    salt,
+			Value:   element,
+			IsArray: true,
+		}
+
+		// Hash the disclosure
+		sdHash, sdB64, _, err := discloser.Hash(hashMethod)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to hash disclosure: %w", err)
+		}
+
+		disclosures = append(disclosures, sdB64)
+		hashes = append(hashes, sdHash)
+
+		// Per section 4.2.2.2: array is replaced with objects containing _sd
+		sdArray = append(sdArray, map[string]any{"...": sdHash})
+	}
+
+	// Replace the array with the SD array
+	current[*arrayName] = sdArray
+
+	// Join all disclosures with ~ separator
+	allDisclosures := strings.Join(disclosures, "~")
+	allHashes := strings.Join(hashes, "~")
+
+	return allDisclosures, allHashes, nil
 }
 
 // addHashToPath adds a hash to the _sd array at the specified path
@@ -305,7 +415,7 @@ func (c *Client) addHashToPath(data map[string]any, path []*string, hash string)
 
 		nextMap, ok := next.(map[string]any)
 		if !ok {
-			return fmt.Errorf("non-object at path: %s", *p)
+			return fmt.Errorf("non-object at path: %s (type: %T, value: %v, full path: %v)", *p, next, next, formatPathForError(path))
 		}
 		current = nextMap
 	}

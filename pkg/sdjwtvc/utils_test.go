@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"strings"
 	"testing"
 )
 
@@ -178,6 +179,342 @@ func TestToken_Parse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParseSelectiveDisclosure(t *testing.T) {
+	tests := []struct {
+		name        string
+		disclosures []string
+		want        []Discloser
+		wantErr     bool
+		errContains string
+	}{
+		{
+			name: "valid single disclosure - string value",
+			// ["salt123", "given_name", "John"]
+			disclosures: []string{"WyJzYWx0MTIzIiwiZ2l2ZW5fbmFtZSIsIkpvaG4iXQ"},
+			want: []Discloser{
+				{
+					Salt:      "salt123",
+					ClaimName: "given_name",
+					Value:     "John",
+					IsArray:   false,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid multiple disclosures",
+			// ["salt1", "given_name", "John"], ["salt2", "family_name", "Doe"], ["salt3", "birthdate", "1990-01-01"]
+			disclosures: []string{
+				"WyJzYWx0MSIsImdpdmVuX25hbWUiLCJKb2huIl0",
+				"WyJzYWx0MiIsImZhbWlseV9uYW1lIiwiRG9lIl0",
+				"WyJzYWx0MyIsImJpcnRoZGF0ZSIsIjE5OTAtMDEtMDEiXQ",
+			},
+			want: []Discloser{
+				{Salt: "salt1", ClaimName: "given_name", Value: "John", IsArray: false},
+				{Salt: "salt2", ClaimName: "family_name", Value: "Doe", IsArray: false},
+				{Salt: "salt3", ClaimName: "birthdate", Value: "1990-01-01", IsArray: false},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with number value",
+			// ["salt456", "age", 30]
+			disclosures: []string{"WyJzYWx0NDU2IiwiYWdlIiwzMF0"},
+			want: []Discloser{
+				{Salt: "salt456", ClaimName: "age", Value: float64(30), IsArray: false},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with boolean value",
+			// ["salt789", "is_verified", true]
+			disclosures: []string{"WyJzYWx0Nzg5IiwiaXNfdmVyaWZpZWQiLHRydWVd"},
+			want: []Discloser{
+				{Salt: "salt789", ClaimName: "is_verified", Value: true, IsArray: false},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with null value",
+			// ["saltabc", "middle_name", null]
+			disclosures: []string{"WyJzYWx0YWJjIiwibWlkZGxlX25hbWUiLG51bGxd"},
+			want: []Discloser{
+				{Salt: "saltabc", ClaimName: "middle_name", Value: nil, IsArray: false},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with object value",
+			// ["saltxyz", "address", {"street": "123 Main St", "city": "Anytown"}]
+			disclosures: []string{"WyJzYWx0eHl6IiwiYWRkcmVzcyIseyJzdHJlZXQiOiIxMjMgTWFpbiBTdCIsImNpdHkiOiJBbnl0b3duIn1d"},
+			want: []Discloser{
+				{
+					Salt:      "saltxyz",
+					ClaimName: "address",
+					Value: map[string]any{
+						"street": "123 Main St",
+						"city":   "Anytown",
+					},
+					IsArray: false,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with array value",
+			// ["saltarr", "hobbies", ["reading", "coding", "hiking"]]
+			disclosures: []string{"WyJzYWx0YXJyIiwiaG9iYmllcyIsWyJyZWFkaW5nIiwiY29kaW5nIiwiaGlraW5nIl1d"},
+			want: []Discloser{
+				{
+					Salt:      "saltarr",
+					ClaimName: "hobbies",
+					Value:     []any{"reading", "coding", "hiking"},
+					IsArray:   false,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with empty array value",
+			// ["saltempty", "items", []]
+			disclosures: []string{"WyJzYWx0ZW1wdHkiLCJpdGVtcyIsW11d"},
+			want: []Discloser{
+				{Salt: "saltempty", ClaimName: "items", Value: []any{}, IsArray: false},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with mixed type array",
+			// ["saltmixed", "data", [1, "text", true, null]]
+			disclosures: []string{"WyJzYWx0bWl4ZWQiLCJkYXRhIixbMSwidGV4dCIsdHJ1ZSxudWxsXV0"},
+			want: []Discloser{
+				{
+					Salt:      "saltmixed",
+					ClaimName: "data",
+					Value:     []any{float64(1), "text", true, nil},
+					IsArray:   false,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid disclosure with nested array value",
+			// ["saltnested", "matrix", [[1, 2], [3, 4]]]
+			disclosures: []string{"WyJzYWx0bmVzdGVkIiwibWF0cml4IixbWzEsMl0sWzMsNF1dXQ"},
+			want: []Discloser{
+				{
+					Salt:      "saltnested",
+					ClaimName: "matrix",
+					Value: []any{
+						[]any{float64(1), float64(2)},
+						[]any{float64(3), float64(4)},
+					},
+					IsArray: false,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid array element disclosure (2 elements)",
+			// ["saltelem", "value123"]
+			disclosures: []string{"WyJzYWx0ZWxlbSIsInZhbHVlMTIzIl0"},
+			want: []Discloser{
+				{Salt: "saltelem", ClaimName: "", Value: "value123", IsArray: true},
+			},
+			wantErr: false,
+		},
+		{
+			name:        "empty disclosure array",
+			disclosures: []string{},
+			want:        []Discloser{},
+			wantErr:     false,
+		},
+		{
+			name:        "nil disclosure array",
+			disclosures: nil,
+			want:        nil,
+			wantErr:     true,
+			errContains: "selective disclosure array is nil",
+		},
+		{
+			name:        "disclosure with empty string",
+			disclosures: []string{""},
+			want:        nil,
+			wantErr:     true,
+			errContains: "disclosure at index 0 is empty",
+		},
+		{
+			name:        "invalid base64 encoding",
+			disclosures: []string{"not-valid-base64!!!"},
+			want:        nil,
+			wantErr:     true,
+			errContains: "failed to decode disclosure at index 0",
+		},
+		{
+			name:        "valid base64 but not JSON",
+			disclosures: []string{"bm90IGpzb24"}, // "not json" in base64
+			want:        nil,
+			wantErr:     true,
+			errContains: "failed to unmarshal disclosure at index 0",
+		},
+		{
+			name: "disclosure array too short (only 1 element)",
+			// ["salt"] - missing claim_name and value
+			disclosures: []string{"WyJzYWx0Il0"},
+			want:        nil,
+			wantErr:     true,
+			errContains: "has invalid format: expected at least 2 elements, got 1",
+		},
+		{
+			name: "disclosure with non-string claim name in object property",
+			// [123, 456, "value"] - salt is number instead of string
+			disclosures: []string{"WzEyMyw0NTYsInZhbHVlIl0"},
+			want:        nil,
+			wantErr:     true,
+			errContains: "has invalid salt: expected string",
+		},
+		{
+			name: "disclosure with non-string claim name (3 elements)",
+			// ["salt", 456, "value"] - claim name is number, not string
+			disclosures: []string{"WyJzYWx0Iiw0NTYsInZhbHVlIl0"},
+			want:        nil,
+			wantErr:     true,
+			errContains: "has invalid claim name: expected string",
+		},
+		{
+			name: "mixed valid and invalid disclosures",
+			disclosures: []string{
+				"WyJzYWx0MSIsImdpdmVuX25hbWUiLCJKb2huIl0", // valid
+				"invalid-base64!!!",                       // invalid
+			},
+			want:        nil,
+			wantErr:     true,
+			errContains: "failed to decode disclosure at index 1",
+		},
+		{
+			name: "disclosure with extra elements (should still work as object property)",
+			// ["salt", "name", "John", "extra", "data"] - more than 3 elements
+			disclosures: []string{"WyJzYWx0IiwibmFtZSIsIkpvaG4iLCJleHRyYSIsImRhdGEiXQ"},
+			want: []Discloser{
+				{Salt: "salt", ClaimName: "name", Value: "John", IsArray: false},
+			},
+			wantErr: false,
+		},
+		{
+			name: "disclosure with empty string claim name",
+			// ["salt", "", "value"]
+			disclosures: []string{"WyJzYWx0IiwiIiwidmFsdWUiXQ"},
+			want: []Discloser{
+				{Salt: "salt", ClaimName: "", Value: "value", IsArray: false},
+			},
+			wantErr: false,
+		},
+		{
+			name: "disclosure with special characters in claim name",
+			// ["salt", "user.email@domain", "test@example.com"]
+			disclosures: []string{"WyJzYWx0IiwidXNlci5lbWFpbEBkb21haW4iLCJ0ZXN0QGV4YW1wbGUuY29tIl0"},
+			want: []Discloser{
+				{Salt: "salt", ClaimName: "user.email@domain", Value: "test@example.com", IsArray: false},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseSelectiveDisclosure(tt.disclosures)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("ParseSelectiveDisclosure() error = nil, wantErr %v", tt.wantErr)
+					return
+				}
+				if tt.errContains != "" {
+					if !strings.Contains(err.Error(), tt.errContains) {
+						t.Errorf("ParseSelectiveDisclosure() error = %v, want error containing %v", err, tt.errContains)
+					}
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("ParseSelectiveDisclosure() unexpected error = %v", err)
+				return
+			}
+
+			if len(got) != len(tt.want) {
+				t.Errorf("ParseSelectiveDisclosure() got %d disclosers, want %d", len(got), len(tt.want))
+				return
+			}
+
+			for i, wantDiscloser := range tt.want {
+				gotDiscloser := got[i]
+
+				if gotDiscloser.Salt != wantDiscloser.Salt {
+					t.Errorf("ParseSelectiveDisclosure() discloser[%d].Salt = %v, want %v", i, gotDiscloser.Salt, wantDiscloser.Salt)
+				}
+
+				if gotDiscloser.ClaimName != wantDiscloser.ClaimName {
+					t.Errorf("ParseSelectiveDisclosure() discloser[%d].ClaimName = %v, want %v", i, gotDiscloser.ClaimName, wantDiscloser.ClaimName)
+				}
+
+				if gotDiscloser.IsArray != wantDiscloser.IsArray {
+					t.Errorf("ParseSelectiveDisclosure() discloser[%d].IsArray = %v, want %v", i, gotDiscloser.IsArray, wantDiscloser.IsArray)
+				}
+
+				// Deep comparison for Value field
+				if !deepEqual(gotDiscloser.Value, wantDiscloser.Value) {
+					t.Errorf("ParseSelectiveDisclosure() discloser[%d].Value = %v (%T), want %v (%T)",
+						i, gotDiscloser.Value, gotDiscloser.Value, wantDiscloser.Value, wantDiscloser.Value)
+				}
+			}
+		})
+	}
+}
+
+// Helper function for deep equality comparison
+func deepEqual(a, b any) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+
+	// Handle maps
+	aMap, aIsMap := a.(map[string]any)
+	bMap, bIsMap := b.(map[string]any)
+	if aIsMap && bIsMap {
+		if len(aMap) != len(bMap) {
+			return false
+		}
+		for k, v := range aMap {
+			if !deepEqual(v, bMap[k]) {
+				return false
+			}
+		}
+		return true
+	}
+
+	// Handle slices
+	aSlice, aIsSlice := a.([]any)
+	bSlice, bIsSlice := b.([]any)
+	if aIsSlice && bIsSlice {
+		if len(aSlice) != len(bSlice) {
+			return false
+		}
+		for i := range aSlice {
+			if !deepEqual(aSlice[i], bSlice[i]) {
+				return false
+			}
+		}
+		return true
+	}
+
+	// For primitive types, use direct comparison
+	return a == b
 }
 
 func TestToken_Split(t *testing.T) {

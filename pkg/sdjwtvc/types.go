@@ -141,6 +141,40 @@ func (v *VCTM) Attributes() map[string]map[string][]string {
 	return reply
 }
 
+// AttributesWithoutObjects parse vctm claims and return a map of labels and their paths for each language,
+// excluding claims that represent objects (claims with nested paths)
+func (v *VCTM) AttributesWithoutObjects() map[string]map[string][]string {
+	reply := map[string]map[string][]string{}
+
+	for _, c := range v.Claims {
+		// Skip claims that are objects (have more than one path element)
+		if len(c.Path) > 1 {
+			continue
+		}
+
+		// Skip claims without display information (not relevant for display)
+		if len(c.Display) == 0 {
+			continue
+		}
+
+		for _, d := range c.Display {
+			if _, ok := reply[d.Lang]; !ok {
+				reply[d.Lang] = map[string][]string{}
+			}
+
+			label := d.Label
+
+			for _, p := range c.Path {
+				if p != nil {
+					reply[d.Lang][label] = append(reply[d.Lang][label], *p)
+				}
+			}
+		}
+	}
+
+	return reply
+}
+
 // ClaimJSONPath returns the JSON paths for the VCTM claims
 func (v *VCTM) ClaimJSONPath() (*VCTMJSONPath, error) {
 	if v.Claims == nil {

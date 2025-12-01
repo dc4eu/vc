@@ -2,8 +2,6 @@ package sdjwtvc
 
 import (
 	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
 	"testing"
 )
 
@@ -325,62 +323,4 @@ func contains(s, substr string) bool {
 		}
 	}
 	return false
-}
-
-// Helper to decode base64url
-func base64URLDecode(s string) ([]byte, error) {
-	return base64.RawURLEncoding.DecodeString(s)
-}
-
-// Helper to parse SD-JWT parts
-func parseParts(sdJWT string) []string {
-	parts := []string{}
-	current := ""
-	for _, char := range sdJWT {
-		if char == '~' {
-			parts = append(parts, current)
-			current = ""
-		} else {
-			current += string(char)
-		}
-	}
-	if current != "" {
-		parts = append(parts, current)
-	}
-	return parts
-}
-
-// Helper to decode JWT payload
-func decodeJWT(t *testing.T, jwt string) map[string]any {
-	// JWT format: header.payload.signature
-	parts := []string{}
-	current := ""
-	for _, char := range jwt {
-		if char == '.' {
-			parts = append(parts, current)
-			current = ""
-		} else {
-			current += string(char)
-		}
-	}
-	if current != "" {
-		parts = append(parts, current)
-	}
-
-	if len(parts) != 3 {
-		t.Fatalf("Invalid JWT format, expected 3 parts, got %d", len(parts))
-	}
-
-	// Decode payload (second part)
-	payloadJSON, err := base64URLDecode(parts[1])
-	if err != nil {
-		t.Fatalf("Failed to decode JWT payload: %v", err)
-	}
-
-	var payload map[string]any
-	if err := json.Unmarshal(payloadJSON, &payload); err != nil {
-		t.Fatalf("Failed to unmarshal JWT payload: %v", err)
-	}
-
-	return payload
 }

@@ -60,7 +60,7 @@ func TestVCTM_Attributes(t *testing.T) {
 
 func TestVCTM_Attributes_RealMetadata(t *testing.T) {
 	metadataDir := "../../metadata"
-	
+
 	testCases := []struct {
 		filename        string
 		expectedLangs   []string
@@ -151,6 +151,253 @@ func TestVCTM_Attributes_EmptyClaims(t *testing.T) {
 	attrs := vctm.Attributes()
 	assert.NotNil(t, attrs)
 	assert.Empty(t, attrs)
+}
+
+func TestVCTM_AttributesWithoutObjects(t *testing.T) {
+	// Set up test data with both simple and object attributes
+	simpleName := "name"
+	simpleEmail := "email"
+	simpleAge := "age"
+	addressPath1 := "address"
+	addressPath2 := "street"
+	contactPath1 := "contact"
+	contactPath2 := "phone"
+
+	vctm := &VCTM{
+		Claims: []Claim{
+			{
+				// Simple attribute - should be included
+				Path: []*string{&simpleName},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Name",
+					},
+					{
+						Lang:  "fr",
+						Label: "Nom",
+					},
+				},
+			},
+			{
+				// Object attribute (nested) - should be excluded
+				Path: []*string{&addressPath1, &addressPath2},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Street Address",
+					},
+				},
+			},
+			{
+				// Simple attribute - should be included
+				Path: []*string{&simpleEmail},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Email",
+					},
+				},
+			},
+			{
+				// Object attribute (nested) - should be excluded
+				Path: []*string{&contactPath1, &contactPath2},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Phone Number",
+					},
+					{
+						Lang:  "fr",
+						Label: "Numéro de téléphone",
+					},
+				},
+			},
+			{
+				// Simple attribute - should be included
+				Path: []*string{&simpleAge},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Age",
+					},
+				},
+			},
+		},
+	}
+
+	attrs := vctm.AttributesWithoutObjects()
+
+	// Verify results
+	assert.NotNil(t, attrs)
+	assert.Contains(t, attrs, "en")
+	assert.Contains(t, attrs, "fr")
+
+	// Check that simple attributes are included
+	assert.Contains(t, attrs["en"], "Name")
+	assert.Contains(t, attrs["en"], "Email")
+	assert.Contains(t, attrs["en"], "Age")
+	assert.Equal(t, []string{"name"}, attrs["en"]["Name"])
+	assert.Equal(t, []string{"email"}, attrs["en"]["Email"])
+	assert.Equal(t, []string{"age"}, attrs["en"]["Age"])
+
+	// Check that object attributes are excluded
+	assert.NotContains(t, attrs["en"], "Street Address")
+	assert.NotContains(t, attrs["en"], "Phone Number")
+
+	// Check French language
+	assert.Contains(t, attrs["fr"], "Nom")
+	assert.Equal(t, []string{"name"}, attrs["fr"]["Nom"])
+	assert.NotContains(t, attrs["fr"], "Numéro de téléphone")
+}
+
+func TestVCTM_AttributesWithoutObjects_EmptyClaims(t *testing.T) {
+	vctm := &VCTM{
+		Claims: []Claim{},
+	}
+
+	attrs := vctm.AttributesWithoutObjects()
+	assert.NotNil(t, attrs)
+	assert.Empty(t, attrs)
+}
+
+func TestVCTM_AttributesWithoutObjects_OnlyObjects(t *testing.T) {
+	// Test case where all claims are objects
+	path1 := "address"
+	path2 := "street"
+	path3 := "contact"
+	path4 := "email"
+
+	vctm := &VCTM{
+		Claims: []Claim{
+			{
+				Path: []*string{&path1, &path2},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Street Address",
+					},
+				},
+			},
+			{
+				Path: []*string{&path3, &path4},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Contact Email",
+					},
+				},
+			},
+		},
+	}
+
+	attrs := vctm.AttributesWithoutObjects()
+	assert.NotNil(t, attrs)
+	assert.Empty(t, attrs)
+}
+
+func TestVCTM_AttributesWithoutObjects_OnlySimple(t *testing.T) {
+	// Test case where all claims are simple (non-object)
+	name := "name"
+	email := "email"
+	age := "age"
+
+	vctm := &VCTM{
+		Claims: []Claim{
+			{
+				Path: []*string{&name},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Name",
+					},
+				},
+			},
+			{
+				Path: []*string{&email},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Email",
+					},
+				},
+			},
+			{
+				Path: []*string{&age},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Age",
+					},
+				},
+			},
+		},
+	}
+
+	attrs := vctm.AttributesWithoutObjects()
+	assert.NotNil(t, attrs)
+	assert.Contains(t, attrs, "en")
+	assert.Len(t, attrs["en"], 3)
+	assert.Contains(t, attrs["en"], "Name")
+	assert.Contains(t, attrs["en"], "Email")
+	assert.Contains(t, attrs["en"], "Age")
+}
+
+func TestVCTM_AttributesWithoutObjects_CompareWithAttributes(t *testing.T) {
+	// Verify that AttributesWithoutObjects is a subset of Attributes
+	simpleName := "name"
+	simpleEmail := "email"
+	addressPath1 := "address"
+	addressPath2 := "street"
+
+	vctm := &VCTM{
+		Claims: []Claim{
+			{
+				Path: []*string{&simpleName},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Name",
+					},
+				},
+			},
+			{
+				Path: []*string{&addressPath1, &addressPath2},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Street Address",
+					},
+				},
+			},
+			{
+				Path: []*string{&simpleEmail},
+				Display: []ClaimDisplay{
+					{
+						Lang:  "en",
+						Label: "Email",
+					},
+				},
+			},
+		},
+	}
+
+	allAttrs := vctm.Attributes()
+	simpleAttrs := vctm.AttributesWithoutObjects()
+
+	// All attributes should have 3 items (Name, Street Address, Email)
+	assert.Len(t, allAttrs["en"], 3)
+
+	// Simple attributes should have only 2 items (Name, Email)
+	assert.Len(t, simpleAttrs["en"], 2)
+
+	// Simple attrs should be a subset
+	for lang, labels := range simpleAttrs {
+		for label, paths := range labels {
+			assert.Contains(t, allAttrs[lang], label)
+			assert.Equal(t, allAttrs[lang][label], paths)
+		}
+	}
 }
 
 func TestVCTM_ClaimJSONPath(t *testing.T) {

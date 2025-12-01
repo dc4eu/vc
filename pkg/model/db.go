@@ -5,7 +5,7 @@ import "vc/pkg/openid4vp"
 // AuthorizationContext is the model for the authorization token in the database
 type AuthorizationContext struct {
 	SessionID                string          `json:"session_id" bson:"session_id" validate:"required"`
-	Scope                    string          `json:"scope" bson:"scope" validate:"required"`
+	Scope                    []string        `json:"scope" bson:"scope" validate:"required"`
 	Code                     string          `json:"code" bson:"code"`
 	RequestURI               string          `json:"request_uri" bson:"request_uri" validate:"required"`
 	WalletURI                string          `json:"redirect_url" bson:"redirect_url" validate:"required"`

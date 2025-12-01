@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"time"
 	"vc/pkg/openid4vci"
 )
 
@@ -93,6 +94,11 @@ type MetaData struct {
 	// required: true
 	// example: "urn:eudi:pid:1"
 	VCT string `json:"vct,omitempty" bson:"vct" validate:"required"`
+
+	// Scope is the credential configuration ID scope
+	// required: false
+	// example: "ehic", "pda1"
+	Scope string `json:"scope,omitempty" bson:"scope" validate:"required"`
 
 	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
@@ -283,6 +289,64 @@ type Identity struct {
 	IssuingJurisdiction string `json:"issuing_jurisdiction,omitempty" bson:"issuing_jurisdiction,omitempty"`
 
 	TrustAnchor string `json:"trust_anchor,omitempty" bson:"trust_anchor,omitempty"`
+}
+
+func (i *Identity) GetOver14() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(14, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver16() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(16, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver18() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(18, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver21() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(21, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver65() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(65, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetAgeInYears() (int, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return 0, err
+	}
+	now := time.Now()
+	age := now.Year() - birthDay.Year()
+	if now.YearDay() < birthDay.YearDay() {
+		age--
+	}
+	return age, nil
 }
 
 // Marshal marshals the document to a map

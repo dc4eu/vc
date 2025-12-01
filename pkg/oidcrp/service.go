@@ -56,7 +56,7 @@ func New(ctx context.Context, cfg *model.OIDCRPConfig, log *logger.Log) (*Servic
 
 	if cfg.DynamicRegistration.Enabled {
 		log.Info("Dynamic client registration enabled, attempting registration")
-		
+
 		// Check if we have cached credentials
 		cachedCreds, err := loadCachedCredentials(cfg.DynamicRegistration.StoragePath)
 		if err == nil && cachedCreds != nil {
@@ -67,7 +67,7 @@ func New(ctx context.Context, cfg *model.OIDCRPConfig, log *logger.Log) (*Servic
 			// Perform dynamic registration
 			regClient := NewDynamicRegistrationClient(log)
 			regReq := BuildRegistrationRequest(cfg)
-			
+
 			// Get registration endpoint from provider metadata
 			var providerJSON struct {
 				RegistrationEndpoint string `json:"registration_endpoint"`
@@ -75,23 +75,23 @@ func New(ctx context.Context, cfg *model.OIDCRPConfig, log *logger.Log) (*Servic
 			if err := provider.Claims(&providerJSON); err != nil {
 				return nil, fmt.Errorf("failed to get provider metadata: %w", err)
 			}
-			
+
 			if providerJSON.RegistrationEndpoint == "" {
 				return nil, fmt.Errorf("OIDC provider does not support dynamic client registration (no registration_endpoint in metadata)")
 			}
-			
+
 			regResp, err := regClient.Register(ctx, providerJSON.RegistrationEndpoint, regReq, cfg.DynamicRegistration.InitialAccessToken)
 			if err != nil {
 				return nil, fmt.Errorf("dynamic client registration failed: %w", err)
 			}
-			
+
 			clientID = regResp.ClientID
 			clientSecret = regResp.ClientSecret
-			
+
 			log.Info("Dynamic client registration successful",
 				"client_id", clientID,
 				"registration_access_token_present", regResp.RegistrationAccessToken != "")
-			
+
 			// Cache credentials if storage path is provided
 			if cfg.DynamicRegistration.StoragePath != "" {
 				if err := saveCachedCredentials(cfg.DynamicRegistration.StoragePath, regResp); err != nil {
@@ -275,7 +275,7 @@ func generateCodeChallenge(verifier string) string {
 }
 
 // GetUserInfo fetches additional claims from the UserInfo endpoint
-func (s *Service) GetUserInfo(ctx context.Context, accessToken string) (map[string]interface{}, error) {
+func (s *Service) GetUserInfo(ctx context.Context, accessToken string) (map[string]any, error) {
 	userInfo, err := s.provider.UserInfo(ctx, oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: accessToken},
 	))

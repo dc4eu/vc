@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 	"vc/pkg/model"
 	"vc/pkg/sdjwtvc"
 	"vc/pkg/vcclient"
@@ -32,14 +33,16 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 }
 
 func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) error {
-	c.log.Debug("LoginPIDUser called", "username", req.Username)
-	user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
+	username := strings.ToLower(req.Username)
+
+	c.log.Debug("LoginPIDUser called", "username", username)
+	user, err := c.db.VCUsersColl.GetUser(ctx, username)
 	if err != nil {
-		return fmt.Errorf("username %s not found", req.Username)
+		return fmt.Errorf("username %s not found", username)
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return fmt.Errorf("password mismatch for username %s", req.Username)
+		return fmt.Errorf("password mismatch for username %s", username)
 	}
 
 	update := &model.AuthorizationContext{
@@ -122,10 +125,10 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 
 	switch req.AuthMethod {
 	case model.AuthMethodBasic:
-		user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
+		user, err := c.db.VCUsersColl.GetUser(ctx, strings.ToLower(req.Username))
 		if err != nil {
-			c.log.Error(err, "failed to get user", "username", req.Username)
-			return nil, fmt.Errorf("user %s not found: %w", req.Username, err)
+			c.log.Error(err, "failed to get user", "username", strings.ToLower(req.Username))
+			return nil, fmt.Errorf("user %s not found: %w", strings.ToLower(req.Username), err)
 		}
 
 		svgTemplateClaims = map[string]vcclient.SVGClaim{

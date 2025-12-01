@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -15,47 +16,12 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
-type GetAllCredentialOffersCredential struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+// UICredentialOffers provides data for UI /offer endpoint
+func (c *Client) UICredentialOffers(ctx context.Context) (*CredentialOfferLookupMetadata, error) {
+	return c.CredentialOfferLookupMetadata, nil
 }
 
-type GetAllCredentialOffersReply struct {
-	Credentials map[string]GetAllCredentialOffersCredential `json:"credentials"`
-	Wallets     map[string]string                           `json:"wallets"`
-}
-
-func (c *Client) GetAllCredentialOffers(ctx context.Context) (*GetAllCredentialOffersReply, error) {
-	credentials := make(map[string]GetAllCredentialOffersCredential)
-
-	for scope, credential := range c.cfg.CredentialConstructor {
-		if err := credential.LoadVCTMetadata(ctx, scope); err != nil {
-			continue
-		}
-
-		vctm := credential.VCTM
-
-		credentials[scope] = GetAllCredentialOffersCredential{
-			Name:        vctm.Name,
-			Description: vctm.Description,
-		}
-	}
-
-	wallets := make(map[string]string)
-
-	for key, wallet := range c.cfg.APIGW.CredentialOffers.Wallets {
-		wallets[key] = wallet.Label
-	}
-
-	reply := &GetAllCredentialOffersReply{
-		Credentials: credentials,
-		Wallets:     wallets,
-	}
-
-	return reply, nil
-}
-
-type CredentialOfferRequest struct {
+type UICredentialOfferRequest struct {
 	Scope    string `json:"scope" uri:"scope" binding:"required"`
 	WalletID string `json:"wallet_id" uri:"wallet_id" binding:"required"`
 }
@@ -66,7 +32,7 @@ type CredentialOfferReply struct {
 	QR   openid4vp.QRReply `json:"qr" validate:"required"`
 }
 
-func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferRequest) (*CredentialOfferReply, error) {
+func (c *Client) UICreateCredentialOffer(ctx context.Context, req *UICredentialOfferRequest) (*CredentialOfferReply, error) {
 	vctmReq := &GetVCTMFromScopeRequest{
 		Scope: req.Scope,
 	}
@@ -78,7 +44,7 @@ func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferReques
 
 	offerParams := openid4vci.CredentialOfferParameters{
 		CredentialIssuer:           c.cfg.APIGW.CredentialOffers.IssuerURL,
-		CredentialConfigurationIDs: []string{vctm.VCT},
+		CredentialConfigurationIDs: []string{req.Scope},
 		Grants: map[string]any{
 			"authorization_code": map[string]any{},
 		},
@@ -95,14 +61,15 @@ func (c *Client) CredentialOffer(ctx context.Context, req *CredentialOfferReques
 		return nil, err
 	}
 
-	baseURL, err := url.Parse(wallet.RedirectURI)
+	credentialOfferURL := fmt.Sprintf("%s?%s", wallet.RedirectURI, credentialOffer)
+
+	u, err := url.Parse(credentialOfferURL)
 	if err != nil {
+		c.log.Error(err, "failed to parse credential offer URL")
 		return nil, err
 	}
 
-	credentialOfferURL := baseURL.JoinPath("?", credentialOffer.String())
-
-	qr, err := openid4vp.GenerateQR(credentialOfferURL, qrcode.Medium, 256)
+	qr, err := openid4vp.GenerateQR(u, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
 	}

@@ -364,67 +364,42 @@ func (s *Service) endpointOIDCMetadata(ctx context.Context, c *gin.Context) (any
 	return reply, nil
 }
 
-//func (s *Service) endpointJWKS(ctx context.Context, c *gin.Context) (any, error) {
-//	ctx, span := s.tracer.Start(ctx, "httpserver:endpointJWKS")
-//	defer span.End()
-//
-//	reply, err := s.apiv1.JWKS(ctx)
-//	if err != nil {
-//		span.SetStatus(codes.Error, err.Error())
-//		return nil, err
-//	}
-//	return reply, nil
-//}
-
 func (s *Service) endpointIndex(ctx context.Context, c *gin.Context) (any, error) {
 	c.Redirect(http.StatusTemporaryRedirect, "/offers")
 
 	return nil, nil
 }
 
-func (s *Service) endpointOffers(ctx context.Context, c *gin.Context) (any, error) {
+func (s *Service) endpointUICredentialOffers(ctx context.Context, c *gin.Context) (any, error) {
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOffers")
 	defer span.End()
 
-	reply, err := s.apiv1.GetAllCredentialOffers(ctx)
+	reply, err := s.apiv1.UICredentialOffers(ctx)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
-	c.HTML(http.StatusOK, "offers.html", map[string]*apiv1.GetAllCredentialOffersReply{
+	s.log.Debug("endpopintUICredentialOffers", "metadata", reply)
+
+	c.HTML(http.StatusOK, "offers.html", map[string]*apiv1.CredentialOfferLookupMetadata{
 		"offers": reply,
 	})
 
 	return nil, nil
 }
 
-func (s *Service) endpointGetOffersLookup(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetOffersLookup")
+func (s *Service) endpointUICreateCredentialOffer(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointUICreateCredentialOffer")
 	defer span.End()
 
-	reply, err := s.apiv1.GetAllCredentialOffers(ctx)
-	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	c.SetAccepted("application/json")
-
-	return reply, nil
-}
-
-func (s *Service) endpointGetOffer(ctx context.Context, c *gin.Context) (any, error) {
-	ctx, span := s.tracer.Start(ctx, "httpserver:endpointGetOffer")
-	defer span.End()
-
-	request := &apiv1.CredentialOfferRequest{}
+	request := &apiv1.UICredentialOfferRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
-	reply, err := s.apiv1.CredentialOffer(ctx, request)
+	reply, err := s.apiv1.UICreateCredentialOffer(ctx, request)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err

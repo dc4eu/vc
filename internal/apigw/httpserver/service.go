@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"time"
@@ -87,7 +88,20 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	s.gin.StaticFS("/static", http.FS(staticembed.FS))
 
-	f := template.Must(template.ParseFS(staticembed.FS, "*.html"))
+	// Create a new template with custom functions before parsing
+	t := template.New("").Funcs(template.FuncMap{
+		"json": func(v interface{}) (any, error) {
+			jsonBytes, err := json.Marshal(v)
+			if err != nil {
+				return "", err
+			}
+			// Return as template.JS to prevent escaping in JavaScript context
+			return template.JS(string(jsonBytes)), nil
+		},
+	})
+
+	f := template.Must(t.ParseFS(staticembed.FS, "*.html"))
+
 	s.gin.SetHTMLTemplate(f)
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
@@ -112,9 +126,8 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/", http.StatusOK, s.endpointIndex)
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers", http.StatusOK, s.endpointOffers)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/lookup", http.StatusOK, s.endpointGetOffersLookup)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/:scope/:wallet_id", http.StatusOK, s.endpointGetOffer)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers", http.StatusOK, s.endpointUICredentialOffers)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/:scope/:wallet_id", http.StatusOK, s.endpointUICreateCredentialOffer)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "nonce", http.StatusOK, s.endpointOIDCNonce)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "credential", http.StatusOK, s.endpointOIDCCredential)

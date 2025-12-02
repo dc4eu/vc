@@ -1,4 +1,4 @@
-.PHONY : docker-build docker-push release
+.PHONY : docker-build docker-push release pki
 
 NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
@@ -7,6 +7,11 @@ CURRENT_BRANCH 			:= $(shell git rev-parse --abbrev-ref HEAD)
 SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet verifier-proxy
 PORT                    := 8888
 W3C_TEST_SUITE_DIR      := /tmp/w3c-test-suite
+
+pki:
+	$(info Setting up PKI)
+	cd pki/; ./create_pki.sh
+	cd developer_tools/; ./gen_ec_sign_key.sh; ./gen_rsa_sign_key.sh
 
 test: test-verifier
 

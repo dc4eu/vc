@@ -40,8 +40,3 @@ func (v *Verifier) VerifyCredential(cred *credential.RDFCredential) error {
     // 5. Verify: suite.Verify(cred, key)
 }
 ```
-
-### 3. Trust Model
-- Key resolution only retrieves the cryptographic key associated with the DID.
-- Trust evaluation (e.g., "Is this DID authorized to issue this type of credential?") is a separate layer.
-- This can be handled by `pkg/authzen` or the `TrustEvaluator` interface in `pkg/keyresolver`.

@@ -69,12 +69,13 @@ func (l *CachingDocumentLoader) LoadDocument(url string) (*ld.RemoteDocument, er
 func (l *CachingDocumentLoader) preloadContexts() {
 	// Load all embedded contexts
 	for url, content := range context.GetAllContexts() {
-		l.addContext(url, string(content))
+		l.AddContext(url, string(content))
 	}
 }
 
-func (l *CachingDocumentLoader) addContext(url string, content string) {
-	var doc interface{}
+// AddContext adds a context to the cache manually
+func (l *CachingDocumentLoader) AddContext(url string, content string) {
+	var doc any
 	if err := json.Unmarshal([]byte(content), &doc); err != nil {
 		l.log.Info("Failed to parse preloaded context", "url", url, "error", err)
 		return

@@ -152,7 +152,7 @@ func main() {
         Type:      []string{credential.TypeVerifiableCredential, "UniversityDegree"},
         Issuer:    "did:example:university",
         ValidFrom: time.Now().Format(time.RFC3339),
-        CredentialSubject: map[string]interface{}{
+        CredentialSubject: map[string]any{
             "id":     "did:example:student",
             "degree": "Bachelor of Science",
             "major":  "Computer Science",

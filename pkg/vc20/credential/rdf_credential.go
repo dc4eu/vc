@@ -37,8 +37,8 @@ func NewRDFCredentialFromJSON(jsonData []byte, options *ld.JsonLdOptions) (*RDFC
 		}
 	}
 
-	// Parse JSON to interface{}
-	var jsonLdDoc interface{}
+	// Parse JSON to any
+	var jsonLdDoc any
 	if err := json.Unmarshal(jsonData, &jsonLdDoc); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
@@ -108,7 +108,7 @@ func (rc *RDFCredential) GetCanonicalForm() (string, error) {
 	}
 
 	// Parse the original JSON for normalization
-	var jsonLdDoc interface{}
+	var jsonLdDoc any
 	if err := json.Unmarshal([]byte(rc.originalJSON), &jsonLdDoc); err != nil {
 		return "", fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
@@ -417,11 +417,11 @@ func (rc *RDFCredential) GetDataset() *ld.RDFDataset {
 }
 
 // GetContext returns the @context from the original JSON
-func (rc *RDFCredential) GetContext() (interface{}, error) {
+func (rc *RDFCredential) GetContext() (any, error) {
 	if rc.originalJSON == "" {
 		return nil, fmt.Errorf("original JSON not available")
 	}
-	var doc map[string]interface{}
+	var doc map[string]any
 	if err := json.Unmarshal([]byte(rc.originalJSON), &doc); err != nil {
 		return nil, err
 	}

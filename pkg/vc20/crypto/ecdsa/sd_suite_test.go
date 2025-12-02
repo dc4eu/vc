@@ -19,26 +19,39 @@ import (
 
 func TestSdSuite_SignVerifyDerive(t *testing.T) {
 	// 1. Setup
+	// Preload example context to avoid network requests
+	loader := credential.GetGlobalLoader()
+	exampleContext := `{
+		"@context": {
+			"@vocab": "https://www.w3.org/ns/credentials/examples/v2#",
+			"UniversityDegreeCredential": "https://example.org/examples#UniversityDegreeCredential",
+			"BachelorDegree": "https://example.org/examples#BachelorDegree",
+			"degree": "https://example.org/examples#degree",
+			"name": "https://schema.org/name"
+		}
+	}`
+	loader.AddContext("https://www.w3.org/ns/credentials/examples/v2", exampleContext)
+
 	suite := NewSdSuite()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	require.NoError(t, err)
 
 	// Create a simple credential
-	credJSON := map[string]interface{}{
-		"@context": []interface{}{
+	credJSON := map[string]any{
+		"@context": []any{
 			"https://www.w3.org/ns/credentials/v2",
 			"https://www.w3.org/ns/credentials/examples/v2",
 		},
 		"id": "http://example.gov/credentials/3732",
-		"type": []interface{}{
+		"type": []any{
 			"VerifiableCredential",
 			"UniversityDegreeCredential",
 		},
 		"issuer":    "did:example:123",
 		"validFrom": "2023-01-01T00:00:00Z",
-		"credentialSubject": map[string]interface{}{
+		"credentialSubject": map[string]any{
 			"id": "did:example:456",
-			"degree": map[string]interface{}{
+			"degree": map[string]any{
 				"type": "BachelorDegree",
 				"name": "Bachelor of Science and Arts",
 			},
@@ -109,7 +122,7 @@ func TestSdSuite_SignVerifyDerive(t *testing.T) {
 		// Check that it is indeed partial
 		// Convert to JSON and check fields
 		jsonBytes, _ := derivedPartial.ToJSON()
-		var partialMap map[string]interface{}
+		var partialMap map[string]any
 		json.Unmarshal(jsonBytes, &partialMap)
 		// We can't easily check what's missing without knowing the quad mapping,
 		// but verification success is the main test.

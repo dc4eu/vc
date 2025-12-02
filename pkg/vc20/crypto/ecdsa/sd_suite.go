@@ -66,7 +66,7 @@ type DerivedProofValue struct {
 }
 
 // Helper to encode as CBOR array
-func toCborArray(v interface{}) ([]byte, error) {
+func toCborArray(v any) ([]byte, error) {
 	// We can use the "toarray" tag if we define a struct, or just marshal a slice
 	// But the struct fields have different types.
 	// Let's use a struct with `cbor:",toarray"` tag.
@@ -231,7 +231,7 @@ func (s *SdSuite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, op
 		created = time.Now().UTC()
 	}
 
-	proofConfig := map[string]interface{}{
+	proofConfig := map[string]any{
 		"@context":           "https://www.w3.org/ns/credentials/v2",
 		"type":               ProofType,
 		"cryptosuite":        CryptosuiteSd2023,
@@ -318,7 +318,7 @@ func (s *SdSuite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, op
 
 	// Add to credential
 	// ... (Same as before)
-	var credMap map[string]interface{}
+	var credMap map[string]any
 	originalJSON := cred.GetOriginalJSON()
 	if originalJSON != "" {
 		if err := json.Unmarshal([]byte(originalJSON), &credMap); err != nil {
@@ -337,10 +337,10 @@ func (s *SdSuite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, op
 	proofConfig["proofValue"] = proofValue
 
 	if existingProof, ok := credMap["proof"]; ok {
-		if proofs, ok := existingProof.([]interface{}); ok {
+		if proofs, ok := existingProof.([]any); ok {
 			credMap["proof"] = append(proofs, proofConfig)
 		} else {
-			credMap["proof"] = []interface{}{existingProof, proofConfig}
+			credMap["proof"] = []any{existingProof, proofConfig}
 		}
 	} else {
 		credMap["proof"] = proofConfig
@@ -374,7 +374,7 @@ func (s *SdSuite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) e
 		return fmt.Errorf("failed to convert proof to JSON: %w", err)
 	}
 
-	var proofJSON interface{}
+	var proofJSON any
 	if err := json.Unmarshal(proofJSONBytes, &proofJSON); err != nil {
 		return fmt.Errorf("failed to unmarshal proof JSON: %w", err)
 	}
@@ -382,11 +382,12 @@ func (s *SdSuite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) e
 	// Compact proof
 	proc := ld.NewJsonLdProcessor()
 	compactOpts := ld.NewJsonLdOptions("")
+	compactOpts.DocumentLoader = credential.GetGlobalLoader()
 
-	var context interface{}
+	var context any
 	if ctx, err := cred.GetContext(); err == nil {
-		var ctxList []interface{}
-		if list, ok := ctx.([]interface{}); ok {
+		var ctxList []any
+		if list, ok := ctx.([]any); ok {
 			ctxList = append(ctxList, list...)
 		} else {
 			ctxList = append(ctxList, ctx)
@@ -404,11 +405,11 @@ func (s *SdSuite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) e
 			ctxList = append(ctxList, "https://www.w3.org/ns/credentials/v2")
 		}
 
-		context = map[string]interface{}{
+		context = map[string]any{
 			"@context": ctxList,
 		}
 	} else {
-		context = map[string]interface{}{
+		context = map[string]any{
 			"@context": "https://www.w3.org/ns/credentials/v2",
 		}
 	}
@@ -466,7 +467,7 @@ func (s *SdSuite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) e
 	return s.verifyDerivedProof(cred, key, &derivedProof, proofMap)
 }
 
-func (s *SdSuite) verifyBaseProof(cred *credential.RDFCredential, key *ecdsa.PublicKey, proof *BaseProofValueArray, proofMap map[string]interface{}) error {
+func (s *SdSuite) verifyBaseProof(cred *credential.RDFCredential, key *ecdsa.PublicKey, proof *BaseProofValueArray, proofMap map[string]any) error {
 	// 1. Verify Base Signature
 	// Reconstruct the signed data: hash(proofHash + ephemeralPub + mandatoryHash)
 
@@ -580,7 +581,7 @@ func (s *SdSuite) verifyBaseProof(cred *credential.RDFCredential, key *ecdsa.Pub
 	return nil
 }
 
-func (s *SdSuite) verifyDerivedProof(cred *credential.RDFCredential, key *ecdsa.PublicKey, proof *DerivedProofValueArray, proofMap map[string]interface{}) error {
+func (s *SdSuite) verifyDerivedProof(cred *credential.RDFCredential, key *ecdsa.PublicKey, proof *DerivedProofValueArray, proofMap map[string]any) error {
 	// 1. Verify Base Signature
 	// Reconstruct signed data.
 	// We need proofHash, ephemeralPub, mandatoryHash.
@@ -672,7 +673,7 @@ func (s *SdSuite) verifyDerivedProof(cred *credential.RDFCredential, key *ecdsa.
 
 	// Instead of GetCredentialWithoutProof, we use the original JSON and remove proof manually
 	// to preserve blank node IDs.
-	var credJSON interface{}
+	var credJSON any
 	originalJSON := cred.GetOriginalJSON()
 	if originalJSON != "" {
 		if err := json.Unmarshal([]byte(originalJSON), &credJSON); err != nil {
@@ -787,14 +788,15 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert proof to JSON: %w", err)
 	}
-	var proofJSON interface{}
+	var proofJSON any
 	if err := json.Unmarshal(proofJSONBytes, &proofJSON); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal proof JSON: %w", err)
 	}
 
 	proc := ld.NewJsonLdProcessor()
 	compactOpts := ld.NewJsonLdOptions("")
-	context := map[string]interface{}{
+	compactOpts.DocumentLoader = credential.GetGlobalLoader()
+	context := map[string]any{
 		"@context": "https://www.w3.org/ns/credentials/v2",
 	}
 	compactedProof, err := proc.Compact(proofJSON, context, compactOpts)
@@ -993,6 +995,7 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 
 	// FromRDF
 	fromRdfOpts := ld.NewJsonLdOptions("")
+	fromRdfOpts.DocumentLoader = credential.GetGlobalLoader()
 	fromRdfOpts.Format = "application/n-quads"
 	derivedDoc, err := proc.FromRDF(derivedNQuadsStr, fromRdfOpts)
 	if err != nil {
@@ -1020,7 +1023,7 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 
 	// Construct Proof Config
 	// Copy from original proof but replace proofValue
-	newProofConfig := make(map[string]interface{})
+	newProofConfig := make(map[string]any)
 	for k, v := range proofMap {
 		newProofConfig[k] = v
 	}
@@ -1034,8 +1037,8 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 	}
 
 	// Construct new context ensuring V2 is present
-	var ctxList []interface{}
-	if list, ok := originalContext.([]interface{}); ok {
+	var ctxList []any
+	if list, ok := originalContext.([]any); ok {
 		ctxList = append(ctxList, list...)
 	} else {
 		ctxList = append(ctxList, originalContext)
@@ -1056,7 +1059,7 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 	newContext := ctxList
 
 	// Compact the derived document
-	compactedDerived, err := proc.Compact(derivedDoc, map[string]interface{}{"@context": newContext}, compactOpts)
+	compactedDerived, err := proc.Compact(derivedDoc, map[string]any{"@context": newContext}, compactOpts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compact derived credential: %w", err)
 	}
@@ -1072,10 +1075,10 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 
 	// Add proof to compacted credential
 	if existingProof, ok := m["proof"]; ok {
-		if proofs, ok := existingProof.([]interface{}); ok {
+		if proofs, ok := existingProof.([]any); ok {
 			m["proof"] = append(proofs, newProofConfig)
 		} else {
-			m["proof"] = []interface{}{existingProof, newProofConfig}
+			m["proof"] = []any{existingProof, newProofConfig}
 		}
 	} else {
 		m["proof"] = newProofConfig
@@ -1226,7 +1229,7 @@ func applyLabelMap(quad string, labelMap map[string]string) string {
 	})
 }
 
-func sdHasType(m map[string]interface{}, expectedType string) bool {
+func sdHasType(m map[string]any, expectedType string) bool {
 	t, ok := m["type"]
 	if !ok {
 		t, ok = m["@type"]
@@ -1238,7 +1241,7 @@ func sdHasType(m map[string]interface{}, expectedType string) bool {
 	if s, ok := t.(string); ok {
 		return s == expectedType
 	}
-	if list, ok := t.([]interface{}); ok {
+	if list, ok := t.([]any); ok {
 		for _, item := range list {
 			if s, ok := item.(string); ok && s == expectedType {
 				return true
@@ -1248,8 +1251,8 @@ func sdHasType(m map[string]interface{}, expectedType string) bool {
 	return false
 }
 
-func sdFindProofNode(data interface{}) map[string]interface{} {
-	if m, ok := data.(map[string]interface{}); ok {
+func sdFindProofNode(data any) map[string]any {
+	if m, ok := data.(map[string]any); ok {
 		if sdHasType(m, ProofType) || sdHasType(m, "Proof") {
 			return m
 		}
@@ -1259,7 +1262,7 @@ func sdFindProofNode(data interface{}) map[string]interface{} {
 				return found
 			}
 		}
-	} else if list, ok := data.([]interface{}); ok {
+	} else if list, ok := data.([]any); ok {
 		for _, item := range list {
 			if found := sdFindProofNode(item); found != nil {
 				return found
@@ -1269,8 +1272,8 @@ func sdFindProofNode(data interface{}) map[string]interface{} {
 	return nil
 }
 
-func replaceURNs(data interface{}) {
-	if m, ok := data.(map[string]interface{}); ok {
+func replaceURNs(data any) {
+	if m, ok := data.(map[string]any); ok {
 		for k, v := range m {
 			if s, ok := v.(string); ok {
 				if strings.HasPrefix(s, "urn:bn:") {
@@ -1280,7 +1283,7 @@ func replaceURNs(data interface{}) {
 				replaceURNs(v)
 			}
 		}
-	} else if list, ok := data.([]interface{}); ok {
+	} else if list, ok := data.([]any); ok {
 		for i, item := range list {
 			if s, ok := item.(string); ok {
 				if strings.HasPrefix(s, "urn:bn:") {
@@ -1293,8 +1296,8 @@ func replaceURNs(data interface{}) {
 	}
 }
 
-func replaceLabelsWithURNs(data interface{}, labelMap map[string]string) {
-	if m, ok := data.(map[string]interface{}); ok {
+func replaceLabelsWithURNs(data any, labelMap map[string]string) {
+	if m, ok := data.(map[string]any); ok {
 		for k, v := range m {
 			if s, ok := v.(string); ok {
 				if strings.HasPrefix(s, "_:") {
@@ -1307,7 +1310,7 @@ func replaceLabelsWithURNs(data interface{}, labelMap map[string]string) {
 				replaceLabelsWithURNs(v, labelMap)
 			}
 		}
-	} else if list, ok := data.([]interface{}); ok {
+	} else if list, ok := data.([]any); ok {
 		for i, item := range list {
 			if s, ok := item.(string); ok {
 				if strings.HasPrefix(s, "_:") {
@@ -1329,8 +1332,8 @@ func replaceURNsInNQuads(nquads string) string {
 	return re.ReplaceAllString(nquads, "_:$1")
 }
 
-func removeProof(data interface{}) {
-	if m, ok := data.(map[string]interface{}); ok {
+func removeProof(data any) {
+	if m, ok := data.(map[string]any); ok {
 		delete(m, "proof")
 		delete(m, "https://w3id.org/security#proof")
 		delete(m, "https://www.w3.org/ns/credentials#proof")
@@ -1338,7 +1341,7 @@ func removeProof(data interface{}) {
 		for _, v := range m {
 			removeProof(v)
 		}
-	} else if list, ok := data.([]interface{}); ok {
+	} else if list, ok := data.([]any); ok {
 		for _, item := range list {
 			removeProof(item)
 		}

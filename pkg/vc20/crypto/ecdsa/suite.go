@@ -63,7 +63,7 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 		created = time.Now().UTC()
 	}
 
-	proofConfig := map[string]interface{}{
+	proofConfig := map[string]any{
 		"@context":           "https://www.w3.org/ns/credentials/v2",
 		"type":               ProofType,
 		"cryptosuite":        Cryptosuite2019,
@@ -153,7 +153,7 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 	// Since RDFCredential is immutable-ish, we create a new one.
 
 	// Get JSON from original credential (or convert if needed)
-	var credMap map[string]interface{}
+	var credMap map[string]any
 	originalJSON := cred.GetOriginalJSON()
 	if originalJSON != "" {
 		if err := json.Unmarshal([]byte(originalJSON), &credMap); err != nil {
@@ -178,10 +178,10 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 	// Usually we append if it's an array, or turn it into an array.
 	// For simplicity, let's assume single proof or overwrite for now, or append.
 	if existingProof, ok := credMap["proof"]; ok {
-		if proofs, ok := existingProof.([]interface{}); ok {
+		if proofs, ok := existingProof.([]any); ok {
 			credMap["proof"] = append(proofs, proofConfig)
 		} else {
-			credMap["proof"] = []interface{}{existingProof, proofConfig}
+			credMap["proof"] = []any{existingProof, proofConfig}
 		}
 	} else {
 		credMap["proof"] = proofConfig
@@ -217,7 +217,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 		return fmt.Errorf("failed to convert proof to JSON: %w", err)
 	}
 
-	var proofJSON interface{}
+	var proofJSON any
 	if err := json.Unmarshal(proofJSONBytes, &proofJSON); err != nil {
 		return fmt.Errorf("failed to unmarshal proof JSON: %w", err)
 	}
@@ -227,7 +227,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 	compactOpts := ld.NewJsonLdOptions("")
 	compactOpts.DocumentLoader = credential.GetGlobalLoader()
 	// Use the V2 context for compaction
-	context := map[string]interface{}{
+	context := map[string]any{
 		"@context": "https://www.w3.org/ns/credentials/v2",
 	}
 
@@ -317,7 +317,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 	return nil
 }
 
-func hasType(m map[string]interface{}, expectedType string) bool {
+func hasType(m map[string]any, expectedType string) bool {
 	t, ok := m["type"]
 	if !ok {
 		t, ok = m["@type"]
@@ -329,7 +329,7 @@ func hasType(m map[string]interface{}, expectedType string) bool {
 	if s, ok := t.(string); ok {
 		return s == expectedType
 	}
-	if list, ok := t.([]interface{}); ok {
+	if list, ok := t.([]any); ok {
 		for _, item := range list {
 			if s, ok := item.(string); ok && s == expectedType {
 				return true
@@ -339,8 +339,8 @@ func hasType(m map[string]interface{}, expectedType string) bool {
 	return false
 }
 
-func findProofNode(data interface{}) map[string]interface{} {
-	if m, ok := data.(map[string]interface{}); ok {
+func findProofNode(data any) map[string]any {
+	if m, ok := data.(map[string]any); ok {
 		if hasType(m, ProofType) || hasType(m, "Proof") {
 			return m
 		}
@@ -350,7 +350,7 @@ func findProofNode(data interface{}) map[string]interface{} {
 				return found
 			}
 		}
-	} else if list, ok := data.([]interface{}); ok {
+	} else if list, ok := data.([]any); ok {
 		for _, item := range list {
 			if found := findProofNode(item); found != nil {
 				return found

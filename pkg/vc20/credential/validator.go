@@ -30,7 +30,7 @@ func NewValidator(log *logger.Log) *Validator {
 
 // ValidateCredential performs structural validation on a Verifiable Credential
 // to ensure compliance with W3C VC Data Model 2.0
-func (v *Validator) ValidateCredential(cred map[string]interface{}) error {
+func (v *Validator) ValidateCredential(cred map[string]any) error {
 	// 1. Context Validation
 	if err := v.validateContext(cred); err != nil {
 		return err
@@ -100,7 +100,7 @@ func (v *Validator) ValidateCredential(cred map[string]interface{}) error {
 }
 
 // ValidatePresentation performs structural validation on a Verifiable Presentation
-func (v *Validator) ValidatePresentation(vp map[string]interface{}) error {
+func (v *Validator) ValidatePresentation(vp map[string]any) error {
 	// 1. Context Validation
 	if err := v.validateContext(vp); err != nil {
 		return err
@@ -121,13 +121,13 @@ func (v *Validator) ValidatePresentation(vp map[string]interface{}) error {
 
 // ValidateCredential performs structural validation on a Verifiable Credential
 // Deprecated: Use NewValidator(log).ValidateCredential(cred) instead
-func ValidateCredential(cred map[string]interface{}) error {
+func ValidateCredential(cred map[string]any) error {
 	return NewValidator(logger.NewSimple("validator")).ValidateCredential(cred)
 }
 
 // ValidatePresentation performs structural validation on a Verifiable Presentation
 // Deprecated: Use NewValidator(log).ValidatePresentation(vp) instead
-func ValidatePresentation(vp map[string]interface{}) error {
+func ValidatePresentation(vp map[string]any) error {
 	return NewValidator(logger.NewSimple("validator")).ValidatePresentation(vp)
 }
 
@@ -152,7 +152,7 @@ func isURL(str string) bool {
 	return true
 }
 
-func (v *Validator) validateID(obj map[string]interface{}) error {
+func (v *Validator) validateID(obj map[string]any) error {
 	if id, ok := obj["id"]; ok {
 		if idStr, ok := id.(string); ok {
 			if !isURL(idStr) {
@@ -165,17 +165,17 @@ func (v *Validator) validateID(obj map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateContext(cred map[string]interface{}) error {
+func (v *Validator) validateContext(cred map[string]any) error {
 	ctx, ok := cred["@context"]
 	if !ok {
 		return fmt.Errorf("missing @context")
 	}
 
-	var contexts []interface{}
+	var contexts []any
 	switch v := ctx.(type) {
 	case string:
-		contexts = []interface{}{v}
-	case []interface{}:
+		contexts = []any{v}
+	case []any:
 		contexts = v
 	default:
 		return fmt.Errorf("invalid @context format")
@@ -200,7 +200,7 @@ func (v *Validator) validateContext(cred map[string]interface{}) error {
 			if !isURL(str) {
 				return fmt.Errorf("invalid URL in @context: %s", str)
 			}
-		} else if _, ok := c.(map[string]interface{}); !ok {
+		} else if _, ok := c.(map[string]any); !ok {
 			return fmt.Errorf("invalid item in @context: must be string or object")
 		}
 	}
@@ -208,7 +208,7 @@ func (v *Validator) validateContext(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateType(obj map[string]interface{}, requiredType string) error {
+func (v *Validator) validateType(obj map[string]any, requiredType string) error {
 	t, ok := obj["type"]
 	if !ok {
 		return fmt.Errorf("missing type")
@@ -218,7 +218,7 @@ func (v *Validator) validateType(obj map[string]interface{}, requiredType string
 	switch val := t.(type) {
 	case string:
 		types = []string{val}
-	case []interface{}:
+	case []any:
 		for _, item := range val {
 			if s, ok := item.(string); ok {
 				types = append(types, s)
@@ -248,7 +248,7 @@ func (v *Validator) validateType(obj map[string]interface{}, requiredType string
 	return nil
 }
 
-func (v *Validator) validateIssuer(cred map[string]interface{}) error {
+func (v *Validator) validateIssuer(cred map[string]any) error {
 	issuer, ok := cred["issuer"]
 	if !ok {
 		return fmt.Errorf("missing issuer")
@@ -259,7 +259,7 @@ func (v *Validator) validateIssuer(cred map[string]interface{}) error {
 		if !isURL(val) {
 			return fmt.Errorf("invalid issuer URL: %s", val)
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		id, ok := val["id"]
 		if !ok {
 			return fmt.Errorf("issuer object missing id")
@@ -283,7 +283,7 @@ func (v *Validator) validateIssuer(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateCredentialSubject(cred map[string]interface{}) error {
+func (v *Validator) validateCredentialSubject(cred map[string]any) error {
 	sub, ok := cred["credentialSubject"]
 	if !ok {
 		return fmt.Errorf("missing credentialSubject")
@@ -293,17 +293,17 @@ func (v *Validator) validateCredentialSubject(cred map[string]interface{}) error
 	}
 
 	switch val := sub.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		if len(val) == 0 {
 			return fmt.Errorf("empty credentialSubject")
 		}
-	case []interface{}:
+	case []any:
 		if len(val) == 0 {
 			return fmt.Errorf("empty credentialSubject array")
 		}
 		// Check if any item is empty
 		for _, item := range val {
-			if m, ok := item.(map[string]interface{}); ok {
+			if m, ok := item.(map[string]any); ok {
 				if len(m) == 0 {
 					return fmt.Errorf("empty credentialSubject item")
 				}
@@ -316,7 +316,7 @@ func (v *Validator) validateCredentialSubject(cred map[string]interface{}) error
 	return nil
 }
 
-func (v *Validator) validateValidityPeriod(cred map[string]interface{}) error {
+func (v *Validator) validateValidityPeriod(cred map[string]any) error {
 	// XML Schema dateTime format (RFC3339 is close enough for Go's time.Parse)
 	// W3C spec requires XMLSCHEMA11-2 dateTimeStamp
 
@@ -354,14 +354,14 @@ func (v *Validator) validateValidityPeriod(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateStatus(cred map[string]interface{}) error {
+func (v *Validator) validateStatus(cred map[string]any) error {
 	status, ok := cred["credentialStatus"]
 	if !ok {
 		return nil // Optional
 	}
 
 	switch val := status.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		if err := v.validateType(val, ""); err != nil {
 			return fmt.Errorf("credentialStatus missing type")
 		}
@@ -374,9 +374,9 @@ func (v *Validator) validateStatus(cred map[string]interface{}) error {
 				return fmt.Errorf("credentialStatus id must be a URL: %s", id.(string))
 			}
 		}
-	case []interface{}:
+	case []any:
 		for _, item := range val {
-			if m, ok := item.(map[string]interface{}); ok {
+			if m, ok := item.(map[string]any); ok {
 				if err := v.validateType(m, ""); err != nil {
 					return fmt.Errorf("credentialStatus item missing type")
 				}
@@ -386,14 +386,14 @@ func (v *Validator) validateStatus(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateSchema(cred map[string]interface{}) error {
+func (v *Validator) validateSchema(cred map[string]any) error {
 	schema, ok := cred["credentialSchema"]
 	if !ok {
 		return nil
 	}
 
-	validateItem := func(item interface{}) error {
-		m, ok := item.(map[string]interface{})
+	validateItem := func(item any) error {
+		m, ok := item.(map[string]any)
 		if !ok {
 			return fmt.Errorf("credentialSchema must be an object")
 		}
@@ -413,9 +413,9 @@ func (v *Validator) validateSchema(cred map[string]interface{}) error {
 	}
 
 	switch val := schema.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return validateItem(val)
-	case []interface{}:
+	case []any:
 		for _, item := range val {
 			if err := validateItem(item); err != nil {
 				return err
@@ -425,14 +425,14 @@ func (v *Validator) validateSchema(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateTermsOfUse(cred map[string]interface{}) error {
+func (v *Validator) validateTermsOfUse(cred map[string]any) error {
 	tou, ok := cred["termsOfUse"]
 	if !ok {
 		return nil
 	}
 
-	validateItem := func(item interface{}) error {
-		m, ok := item.(map[string]interface{})
+	validateItem := func(item any) error {
+		m, ok := item.(map[string]any)
 		if !ok {
 			return fmt.Errorf("termsOfUse item must be an object")
 		}
@@ -443,9 +443,9 @@ func (v *Validator) validateTermsOfUse(cred map[string]interface{}) error {
 	}
 
 	switch val := tou.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return validateItem(val)
-	case []interface{}:
+	case []any:
 		for _, item := range val {
 			if err := validateItem(item); err != nil {
 				return err
@@ -455,14 +455,14 @@ func (v *Validator) validateTermsOfUse(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateEvidence(cred map[string]interface{}) error {
+func (v *Validator) validateEvidence(cred map[string]any) error {
 	ev, ok := cred["evidence"]
 	if !ok {
 		return nil
 	}
 
-	validateItem := func(item interface{}) error {
-		m, ok := item.(map[string]interface{})
+	validateItem := func(item any) error {
+		m, ok := item.(map[string]any)
 		if !ok {
 			return fmt.Errorf("evidence item must be an object")
 		}
@@ -473,9 +473,9 @@ func (v *Validator) validateEvidence(cred map[string]interface{}) error {
 	}
 
 	switch val := ev.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return validateItem(val)
-	case []interface{}:
+	case []any:
 		for _, item := range val {
 			if err := validateItem(item); err != nil {
 				return err
@@ -485,14 +485,14 @@ func (v *Validator) validateEvidence(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateRefreshService(cred map[string]interface{}) error {
+func (v *Validator) validateRefreshService(cred map[string]any) error {
 	rs, ok := cred["refreshService"]
 	if !ok {
 		return nil
 	}
 
-	validateItem := func(item interface{}) error {
-		m, ok := item.(map[string]interface{})
+	validateItem := func(item any) error {
+		m, ok := item.(map[string]any)
 		if !ok {
 			return fmt.Errorf("refreshService item must be an object")
 		}
@@ -503,9 +503,9 @@ func (v *Validator) validateRefreshService(cred map[string]interface{}) error {
 	}
 
 	switch val := rs.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return validateItem(val)
-	case []interface{}:
+	case []any:
 		for _, item := range val {
 			if err := validateItem(item); err != nil {
 				return err
@@ -515,14 +515,14 @@ func (v *Validator) validateRefreshService(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateRelatedResource(cred map[string]interface{}) error {
+func (v *Validator) validateRelatedResource(cred map[string]any) error {
 	rr, ok := cred["relatedResource"]
 	if !ok {
 		return nil
 	}
 
-	validateItem := func(item interface{}) error {
-		m, ok := item.(map[string]interface{})
+	validateItem := func(item any) error {
+		m, ok := item.(map[string]any)
 		if !ok {
 			return fmt.Errorf("relatedResource item must be an object")
 		}
@@ -726,17 +726,17 @@ func (v *Validator) validateRelatedResource(cred map[string]interface{}) error {
 	ids := make(map[string]bool)
 
 	switch val := rr.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		if err := validateItem(val); err != nil {
 			return err
 		}
 		ids[val["id"].(string)] = true
-	case []interface{}:
+	case []any:
 		for _, item := range val {
 			if err := validateItem(item); err != nil {
 				return err
 			}
-			id := item.(map[string]interface{})["id"].(string)
+			id := item.(map[string]any)["id"].(string)
 			if ids[id] {
 				return fmt.Errorf("duplicate relatedResource id: %s", id)
 			}
@@ -746,13 +746,13 @@ func (v *Validator) validateRelatedResource(cred map[string]interface{}) error {
 	return nil
 }
 
-func (v *Validator) validateNameAndDescription(obj map[string]interface{}) error {
-	var check func(key string, val interface{}) error
-	check = func(key string, val interface{}) error {
+func (v *Validator) validateNameAndDescription(obj map[string]any) error {
+	var check func(key string, val any) error
+	check = func(key string, val any) error {
 		switch v := val.(type) {
 		case string:
 			return nil
-		case map[string]interface{}:
+		case map[string]any:
 			// Check if it is a language map or value object
 			hasValue := false
 			if _, ok := v["@value"]; ok {
@@ -770,7 +770,7 @@ func (v *Validator) validateNameAndDescription(obj map[string]interface{}) error
 					}
 				}
 			}
-		case []interface{}:
+		case []any:
 			for _, item := range v {
 				if err := check(key, item); err != nil {
 					return err

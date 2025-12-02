@@ -175,6 +175,9 @@ services:
       - 27017
     volumes:
       - mongo_data:/data
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      start_period: 3s
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.20

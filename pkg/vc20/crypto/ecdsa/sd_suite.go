@@ -886,9 +886,12 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 				hmacID := k[2:] // remove _:
 				if _, exists := hmacToNew[hmacID]; !exists {
 					// Generate new ID
-					// Use simple counter or random?
-					// Random is better.
-					newID := fmt.Sprintf("b%d", len(hmacToNew)) // Simple for now
+					// Use random identifier as recommended
+					rnd := make([]byte, 16)
+					if _, err := rand.Read(rnd); err != nil {
+						return nil, fmt.Errorf("failed to generate random ID: %w", err)
+					}
+					newID := fmt.Sprintf("b%x", rnd)
 					hmacToNew[hmacID] = newID
 					labelMap[newID] = hmacID
 				}

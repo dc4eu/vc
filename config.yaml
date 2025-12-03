@@ -16,10 +16,14 @@ common:
       size: 256
 
 credential_constructor:
-  pid:
-    vct: "urn:eudi:pid:1"
-    vctm_file_path: "/metadata/vctm_pid.json"
+  pid_1_5:
+    vctm_file_path: "/metadata/vctm_pid_arf_1_5.json"
     auth_method: basic
+    vct: "urn:eudi:pid:arf-1.5:1"
+  pid_1_8:
+    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+    auth_method: basic
+    vct: "urn:eudi:pid:arf-1.8:1"
   ehic:
     vct: "urn:eudi:ehic:1"
     vctm_file_path: "/metadata/vctm_ehic.json"
@@ -202,6 +206,7 @@ apigw:
     enabled: false
     users:
       admin: "secret123"
+  external_server_url: "http://vc_dev_apigw:8080"
   credential_offers:
     issuer_url: http://vc_dev_apigw:8080
     wallets:

@@ -95,7 +95,6 @@ services:
       - ./config.yaml:/config.yaml:ro
       - ./developer_tools/pki/:/pki:ro
       - ./developer_tools/private_rsa.pem:/private_rsa.pem:ro
-      - ./internal/verifier_proxy/httpserver/static:/static:ro
       - ./presentation_requests:/presentation_requests:ro
     depends_on:
       mongo:
@@ -143,7 +142,7 @@ services:
     volumes:
       - ./config.yaml:/config.yaml:ro
     depends_on:
-      vc_dev_apigw:
+      apigw:
         condition: service_healthy
     networks:
       vc-dev-net:
@@ -175,6 +174,9 @@ services:
       - 27017
     volumes:
       - mongo_data:/data
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      start_period: 3s
     networks:
       vc-dev-net:
         ipv4_address: 172.16.50.20

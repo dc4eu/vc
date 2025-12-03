@@ -2,10 +2,12 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
+	"html/template"
 	"net/http"
-	"text/template"
 	"time"
 	"vc/internal/verifier_proxy/apiv1"
+	"vc/internal/verifier_proxy/httpserver/static"
 	"vc/internal/verifier_proxy/middleware"
 	"vc/pkg/httphelpers"
 	"vc/pkg/logger"
@@ -61,6 +63,29 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
+	// Used in development to avoid bundling static files in the executable.
+	// When used, comment the four lines below these ones.
+	// s.gin.Static("/static", "./static")
+	//s.gin.LoadHTMLGlob("./static/*.html")
+
+	s.gin.StaticFS("/static", http.FS(static.FS))
+
+	// Create a new template with custom functions before parsing
+	t := template.New("").Funcs(template.FuncMap{
+		"json": func(v any) (any, error) {
+			jsonBytes, err := json.Marshal(v)
+			if err != nil {
+				return "", err
+			}
+			// Return as template.JS to prevent escaping in JavaScript context
+			return template.JS(string(jsonBytes)), nil
+		},
+	})
+
+	f := template.Must(t.ParseFS(static.FS, "*.html"))
+
+	s.gin.SetHTMLTemplate(f)
+
 	// Set up session store
 	store := cookie.NewStore([]byte("secret-key-change-in-production"))
 	store.Options(sessions.Options{
@@ -71,16 +96,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		SameSite: http.SameSiteLaxMode,
 	})
 	s.gin.Use(sessions.Sessions("verifier_proxy_session", store))
-
-	// Templating functions
-	s.gin.SetFuncMap(template.FuncMap{
-		"json": func(v any) string {
-			return ""
-		},
-	})
-
-	// Load templates
-	s.gin.LoadHTMLGlob("./internal/verifier_proxy/httpserver/static/*.html")
 
 	// Health check
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)

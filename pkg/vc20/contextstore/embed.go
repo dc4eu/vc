@@ -1,4 +1,7 @@
-package context
+//go:build vc20
+// +build vc20
+
+package contextstore
 
 import (
 	"embed"

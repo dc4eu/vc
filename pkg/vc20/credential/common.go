@@ -1,3 +1,6 @@
+//go:build vc20
+// +build vc20
+
 package credential
 
 import "github.com/piprate/json-gold/ld"

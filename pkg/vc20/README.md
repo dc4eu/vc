@@ -6,7 +6,7 @@ This package implements support for W3C Verifiable Credentials Data Model v2.0 w
 
 **Phase 1 Foundation: ✅ COMPLETED**
 - ✅ W3C VC 2.0 data structures (`pkg/vc20/credential`)
-- ✅ Context management and validation (`pkg/vc20/context`)
+- ✅ Context management and validation (`pkg/vc20/contextstore`)
 - ✅ Core dependencies integrated
 
 **Phase 2 RDF Canonicalization: ✅ COMPLETED**
@@ -45,7 +45,7 @@ pkg/vc20/
 │   ├── credential.go   # JSON-LD credential structures
 │   ├── errors.go       # Error definitions
 │   └── *_test.go       # Tests
-├── context/            # Context management
+├── contextstore/       # Context management
 │   ├── manager.go      # Context caching and validation
 │   └── *_test.go       # Tests
 ├── rdfcanon/           # RDF Canonicalization (RDFC-1.0)
@@ -79,7 +79,7 @@ pkg/vc20/
   - Expiration checking
   - Current validity checking
 
-### Context Management (`pkg/vc20/context`)
+### Context Management (`pkg/vc20/contextstore`)
 
 - **Context Manager** - HTTP-based context document fetching and caching
   - Thread-safe caching with TTL
@@ -142,7 +142,7 @@ import (
     "time"
     
     "vc/pkg/vc20/credential"
-    "vc/pkg/vc20/context"
+    "vc/pkg/vc20/contextstore"
 )
 
 func main() {
@@ -165,7 +165,7 @@ func main() {
     }
     
     // Create context manager
-    ctxMgr := context.NewManager()
+    ctxMgr := contextstore.NewManager()
     
     // Validate contexts (requires network access)
     if err := ctxMgr.ValidateContexts(vc.Context); err != nil {
@@ -236,7 +236,7 @@ go test -tags=vc20 -v ./pkg/vc20/...
 
 # Run specific package tests
 go test -tags=vc20 -v ./pkg/vc20/credential/
-go test -tags=vc20 -v ./pkg/vc20/context/
+go test -tags=vc20 -v ./pkg/vc20/contextstore/
 
 # Run with coverage
 go test -tags=vc20 -cover ./pkg/vc20/...

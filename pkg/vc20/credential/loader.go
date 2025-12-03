@@ -1,3 +1,6 @@
+//go:build vc20
+// +build vc20
+
 package credential
 
 import (
@@ -6,7 +9,7 @@ import (
 	"time"
 
 	"vc/pkg/logger"
-	"vc/pkg/vc20/context"
+	"vc/pkg/vc20/contextstore"
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/piprate/json-gold/ld"
@@ -68,7 +71,7 @@ func (l *CachingDocumentLoader) LoadDocument(url string) (*ld.RemoteDocument, er
 
 func (l *CachingDocumentLoader) preloadContexts() {
 	// Load all embedded contexts
-	for url, content := range context.GetAllContexts() {
+	for url, content := range contextstore.GetAllContexts() {
 		l.AddContext(url, string(content))
 	}
 }

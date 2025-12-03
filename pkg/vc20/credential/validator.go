@@ -1,3 +1,6 @@
+//go:build vc20
+// +build vc20
+
 package credential
 
 import (
@@ -6,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
+	"hash"
 	"io"
 	"net/http"
 	"net/url"
@@ -15,7 +19,7 @@ import (
 	"github.com/multiformats/go-multibase"
 
 	"vc/pkg/logger"
-	"vc/pkg/vc20/context"
+	"vc/pkg/vc20/contextstore"
 )
 
 // Validator performs structural validation on Verifiable Credentials and Presentations
@@ -553,7 +557,7 @@ func (v *Validator) validateRelatedResource(cred map[string]any) error {
 		var data []byte
 
 		// Check if we have it embedded
-		if embedded, err := context.GetContext(idStr); err == nil {
+		if embedded, err := contextstore.GetContext(idStr); err == nil {
 			data = embedded
 		} else {
 			req, err := http.NewRequest("GET", idStr, nil)
@@ -605,19 +609,19 @@ func (v *Validator) validateRelatedResource(cred map[string]any) error {
 					0xd1, 0xdc, 0xaa, 0xda, 0x40, 0xed, 0xa7, 0xef, 0x92, 0x1c, 0x6b, 0x8c, 0x0a, 0xe1, 0x07, 0xa0,
 				}
 			} else {
+				var hasher hash.Hash
 				switch alg {
 				case "sha256":
-					h := sha256.Sum256(data)
-					actualHash = h[:]
+					hasher = sha256.New()
 				case "sha384":
-					h := sha512.Sum384(data)
-					actualHash = h[:]
+					hasher = sha512.New384()
 				case "sha512":
-					h := sha512.Sum512(data)
-					actualHash = h[:]
+					hasher = sha512.New()
 				default:
 					return fmt.Errorf("unsupported SRI algorithm: %s", alg)
 				}
+				hasher.Write(data)
+				actualHash = hasher.Sum(nil)
 			}
 
 			if string(actualHash) != string(expectedHash) {
@@ -698,13 +702,12 @@ func (v *Validator) validateRelatedResource(cred map[string]any) error {
 					0xf4, 0x40, 0x60, 0xb8, 0xce, 0x56, 0x66, 0x56, 0xc0, 0x81, 0xf5, 0xc1, 0x0e, 0xe4, 0x40, 0xe9,
 				}
 			} else {
+				var hasher hash.Hash
 				switch code {
 				case 0x12: // sha2-256
-					h := sha256.Sum256(data)
-					actualDigest = h[:]
+					hasher = sha256.New()
 				case 0x13: // sha2-512 (0x13 is 19)
-					h := sha512.Sum512(data)
-					actualDigest = h[:]
+					hasher = sha512.New()
 				default:
 					// HACK: The W3C test suite uses code 0x33 (51) for a negative test case
 					if code == 0x33 {
@@ -712,6 +715,8 @@ func (v *Validator) validateRelatedResource(cred map[string]any) error {
 					}
 					return fmt.Errorf("unsupported multihash code: 0x%x", code)
 				}
+				hasher.Write(data)
+				actualDigest = hasher.Sum(nil)
 			}
 
 			if string(actualDigest) != string(expectedDigest) {

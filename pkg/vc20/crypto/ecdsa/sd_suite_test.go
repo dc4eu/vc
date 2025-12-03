@@ -86,8 +86,8 @@ func TestSdSuite_SignVerifyDerive(t *testing.T) {
 	// Or we can inspect the signed credential to see how many quads there are.
 
 	// Get quads count
-	credWithoutProof, _ := signedCred.GetCredentialWithoutProof()
-	nquadsStr, _ := credWithoutProof.GetCanonicalForm()
+	credWithoutProof, _ := signedCred.CredentialWithoutProof()
+	nquadsStr, _ := credWithoutProof.CanonicalForm()
 	quads := parseNQuads(nquadsStr)
 	t.Logf("Total quads: %d", len(quads))
 

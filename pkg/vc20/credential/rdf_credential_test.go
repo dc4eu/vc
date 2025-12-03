@@ -49,8 +49,8 @@ func TestNewRDFCredentialFromJSON(t *testing.T) {
 	}
 }
 
-// TestGetCanonicalForm tests RDF canonicalization produces consistent N-Quads
-func TestGetCanonicalForm(t *testing.T) {
+// TestCanonicalForm tests RDF canonicalization produces consistent N-Quads
+func TestCanonicalForm(t *testing.T) {
 	credentialJSON := []byte(`{
 		"@context": [
 			"https://www.w3.org/ns/credentials/v2",
@@ -69,7 +69,7 @@ func TestGetCanonicalForm(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	canonical, err := rdfCred.GetCanonicalForm()
+	canonical, err := rdfCred.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form: %v", err)
 	}
@@ -79,7 +79,7 @@ func TestGetCanonicalForm(t *testing.T) {
 	}
 
 	// Test idempotency: canonical form should be deterministic
-	canonical2, err := rdfCred.GetCanonicalForm()
+	canonical2, err := rdfCred.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form on second call: %v", err)
 	}
@@ -99,8 +99,8 @@ func TestGetCanonicalForm(t *testing.T) {
 	}
 }
 
-// TestGetCanonicalHash tests SHA-256 hashing of canonical form
-func TestGetCanonicalHash(t *testing.T) {
+// TestCanonicalHash tests SHA-256 hashing of canonical form
+func TestCanonicalHash(t *testing.T) {
 	credentialJSON := []byte(`{
 		"@context": "https://www.w3.org/ns/credentials/v2",
 		"type": "VerifiableCredential",
@@ -113,7 +113,7 @@ func TestGetCanonicalHash(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	hash, err := rdfCred.GetCanonicalHash()
+	hash, err := rdfCred.CanonicalHash()
 	if err != nil {
 		t.Fatalf("Failed to get canonical hash: %v", err)
 	}
@@ -128,7 +128,7 @@ func TestGetCanonicalHash(t *testing.T) {
 	}
 
 	// Test idempotency
-	hash2, err := rdfCred.GetCanonicalHash()
+	hash2, err := rdfCred.CanonicalHash()
 	if err != nil {
 		t.Fatalf("Failed to get canonical hash on second call: %v", err)
 	}
@@ -138,8 +138,8 @@ func TestGetCanonicalHash(t *testing.T) {
 	}
 }
 
-// TestGetCredentialWithoutProof tests filtering out proof quads
-func TestGetCredentialWithoutProof(t *testing.T) {
+// TestCredentialWithoutProof tests filtering out proof quads
+func TestCredentialWithoutProof(t *testing.T) {
 	// Credential with embedded proof
 	credentialJSON := []byte(`{
 		"@context": [
@@ -167,7 +167,7 @@ func TestGetCredentialWithoutProof(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	credWithoutProof, err := rdfCred.GetCredentialWithoutProof()
+	credWithoutProof, err := rdfCred.CredentialWithoutProof()
 	if err != nil {
 		t.Fatalf("Failed to get credential without proof: %v", err)
 	}
@@ -177,8 +177,8 @@ func TestGetCredentialWithoutProof(t *testing.T) {
 	}
 
 	// The credential without proof should have fewer quads than original
-	originalCanon, _ := rdfCred.GetCanonicalForm()
-	withoutProofCanon, _ := credWithoutProof.GetCanonicalForm()
+	originalCanon, _ := rdfCred.CanonicalForm()
+	withoutProofCanon, _ := credWithoutProof.CanonicalForm()
 
 	if len(withoutProofCanon) >= len(originalCanon) {
 		t.Errorf("Credential without proof should have fewer quads.\nOriginal (%d): %s\nWithout Proof (%d): %s",
@@ -186,8 +186,8 @@ func TestGetCredentialWithoutProof(t *testing.T) {
 	}
 }
 
-// TestGetProofObject tests extracting proof quads
-func TestGetProofObject(t *testing.T) {
+// TestProofObject tests extracting proof quads
+func TestProofObject(t *testing.T) {
 	credentialJSON := []byte(`{
 		"@context": [
 			"https://www.w3.org/ns/credentials/v2",
@@ -208,7 +208,7 @@ func TestGetProofObject(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	proofObj, err := rdfCred.GetProofObject()
+	proofObj, err := rdfCred.ProofObject()
 	if err != nil {
 		t.Fatalf("Failed to get proof object: %v", err)
 	}
@@ -218,7 +218,7 @@ func TestGetProofObject(t *testing.T) {
 	}
 
 	// Proof object should have quads
-	proofCanon, err := proofObj.GetCanonicalForm()
+	proofCanon, err := proofObj.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form of proof object: %v", err)
 	}
@@ -258,7 +258,7 @@ func TestMultipleSubjects(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	canonical, err := rdfCred.GetCanonicalForm()
+	canonical, err := rdfCred.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form: %v", err)
 	}
@@ -300,7 +300,7 @@ func TestComplexCredentialWithStatus(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	canonical, err := rdfCred.GetCanonicalForm()
+	canonical, err := rdfCred.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form: %v", err)
 	}
@@ -310,20 +310,20 @@ func TestComplexCredentialWithStatus(t *testing.T) {
 	}
 
 	// Extract credential without proof (should include status)
-	credWithoutProof, err := rdfCred.GetCredentialWithoutProof()
+	credWithoutProof, err := rdfCred.CredentialWithoutProof()
 	if err != nil {
 		t.Fatalf("Failed to get credential without proof: %v", err)
 	}
 
-	withoutProofCanon, _ := credWithoutProof.GetCanonicalForm()
+	withoutProofCanon, _ := credWithoutProof.CanonicalForm()
 	// Canonical should contain status-related quads
 	if len(withoutProofCanon) == 0 {
 		t.Error("Expected credential without proof to contain status information")
 	}
 }
 
-// TestGetDataset tests access to underlying RDF dataset
-func TestGetDataset(t *testing.T) {
+// TestDataset tests access to underlying RDF dataset
+func TestDataset(t *testing.T) {
 	credentialJSON := []byte(`{
 		"@context": "https://www.w3.org/ns/credentials/v2",
 		"type": "VerifiableCredential",
@@ -336,7 +336,7 @@ func TestGetDataset(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	dataset := rdfCred.GetDataset()
+	dataset := rdfCred.Dataset()
 	if dataset == nil {
 		t.Error("Expected dataset to be non-nil")
 	}
@@ -347,8 +347,8 @@ func TestGetDataset(t *testing.T) {
 	}
 }
 
-// TestGetOriginalJSON tests retrieval of original input
-func TestGetOriginalJSON(t *testing.T) {
+// TestOriginalJSON tests retrieval of original input
+func TestOriginalJSON(t *testing.T) {
 	originalJSON := `{"@context":"https://www.w3.org/ns/credentials/v2","type":"VerifiableCredential","issuer":"https://example.com/issuer","credentialSubject":{"id":"did:example:123"}}`
 	credentialJSON := []byte(originalJSON)
 
@@ -357,7 +357,7 @@ func TestGetOriginalJSON(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	retrieved := rdfCred.GetOriginalJSON()
+	retrieved := rdfCred.OriginalJSON()
 	if retrieved == "" {
 		t.Error("Expected GetOriginalJSON to return non-empty string")
 	}
@@ -411,7 +411,7 @@ func TestNestedCredentialSubject(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	canonical, err := rdfCred.GetCanonicalForm()
+	canonical, err := rdfCred.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form: %v", err)
 	}
@@ -457,7 +457,7 @@ func TestCredentialWithSchema(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	canonical, err := rdfCred.GetCanonicalForm()
+	canonical, err := rdfCred.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form: %v", err)
 	}
@@ -492,7 +492,7 @@ func TestCredentialWithExpiration(t *testing.T) {
 		t.Fatalf("Failed to create RDFCredential: %v", err)
 	}
 
-	canonical, err := rdfCred.GetCanonicalForm()
+	canonical, err := rdfCred.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form: %v", err)
 	}
@@ -524,7 +524,7 @@ func BenchmarkGetCanonicalForm(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		rdfCred.GetCanonicalForm()
+		rdfCred.CanonicalForm()
 	}
 }
 
@@ -577,18 +577,18 @@ func TestSignatureVerificationRoundtrip(t *testing.T) {
 	}
 
 	// Get credential without proof for signature verification
-	credWithoutProof, err := rdfCred.GetCredentialWithoutProof()
+	credWithoutProof, err := rdfCred.CredentialWithoutProof()
 	if err != nil {
 		t.Fatalf("Failed to get credential without proof: %v", err)
 	}
 
 	// Get canonical form multiple times - should be deterministic
-	canonical1, err := credWithoutProof.GetCanonicalForm()
+	canonical1, err := credWithoutProof.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form: %v", err)
 	}
 
-	canonical2, err := credWithoutProof.GetCanonicalForm()
+	canonical2, err := credWithoutProof.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get canonical form on second call: %v", err)
 	}
@@ -599,17 +599,17 @@ func TestSignatureVerificationRoundtrip(t *testing.T) {
 	}
 
 	// Get proof object canonical form
-	proofObj, err := rdfCred.GetProofObject()
+	proofObj, err := rdfCred.ProofObject()
 	if err != nil {
 		t.Fatalf("Failed to get proof object: %v", err)
 	}
 
-	proofCanonical1, err := proofObj.GetCanonicalForm()
+	proofCanonical1, err := proofObj.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get proof canonical form: %v", err)
 	}
 
-	proofCanonical2, err := proofObj.GetCanonicalForm()
+	proofCanonical2, err := proofObj.CanonicalForm()
 	if err != nil {
 		t.Fatalf("Failed to get proof canonical form on second call: %v", err)
 	}

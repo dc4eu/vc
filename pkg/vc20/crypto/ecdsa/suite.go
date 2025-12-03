@@ -52,8 +52,8 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 	}
 
 	// 1. Get canonical document hash (without proof)
-	// We use GetCredentialWithoutProof to ensure we don't include any existing proof
-	credWithoutProof, err := cred.GetCredentialWithoutProof()
+	// We use CredentialWithoutProof to ensure we don't include any existing proof
+	credWithoutProof, err := cred.CredentialWithoutProof()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get credential without proof: %w", err)
 	}
@@ -100,17 +100,17 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 
 	// 4. Combine hashes
 	// The spec says: hash(proofOptionsHash + documentHash)
-	// But wait, GetCanonicalHash returns hex string. We need raw bytes?
-	// RDFCredential.GetCanonicalHash returns hex string.
+	// But wait, CanonicalHash returns hex string. We need raw bytes?
+	// RDFCredential.CanonicalHash returns hex string.
 	// We should probably get the canonical form string and hash it ourselves to be sure about concatenation.
 
 	// Let's get canonical forms instead
-	docCanonical, err := credWithoutProof.GetCanonicalForm()
+	docCanonical, err := credWithoutProof.CanonicalForm()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get canonical form of document: %w", err)
 	}
 
-	proofCanonical, err := proofCred.GetCanonicalForm()
+	proofCanonical, err := proofCred.CanonicalForm()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get canonical form of proof config: %w", err)
 	}
@@ -154,7 +154,7 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 
 	// Get JSON from original credential (or convert if needed)
 	var credMap map[string]any
-	originalJSON := cred.GetOriginalJSON()
+	originalJSON := cred.OriginalJSON()
 	if originalJSON != "" {
 		if err := json.Unmarshal([]byte(originalJSON), &credMap); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal original credential: %w", err)
@@ -206,7 +206,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 	}
 
 	// 1. Extract proof object
-	proofCred, err := cred.GetProofObject()
+	proofCred, err := cred.ProofObject()
 	if err != nil {
 		return fmt.Errorf("failed to get proof object: %w", err)
 	}
@@ -272,18 +272,18 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 		return fmt.Errorf("failed to create RDF credential for proof config: %w", err)
 	}
 
-	proofCanonical, err := proofConfigCred.GetCanonicalForm()
+	proofCanonical, err := proofConfigCred.CanonicalForm()
 	if err != nil {
 		return fmt.Errorf("failed to get canonical form of proof config: %w", err)
 	}
 
 	// 4. Canonicalize document (without proof)
-	credWithoutProof, err := cred.GetCredentialWithoutProof()
+	credWithoutProof, err := cred.CredentialWithoutProof()
 	if err != nil {
 		return fmt.Errorf("failed to get credential without proof: %w", err)
 	}
 
-	docCanonical, err := credWithoutProof.GetCanonicalForm()
+	docCanonical, err := credWithoutProof.CanonicalForm()
 	if err != nil {
 		return fmt.Errorf("failed to get canonical form of document: %w", err)
 	}

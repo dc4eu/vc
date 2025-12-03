@@ -182,7 +182,7 @@ func handleIssue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return the original JSON which preserves context and structure
-	signedJSON := []byte(signedCred.GetOriginalJSON())
+	signedJSON := []byte(signedCred.OriginalJSON())
 	if len(signedJSON) == 0 {
 		// Fallback if original JSON is missing (should not happen with current Sign implementation)
 		signedJSON, err = signedCred.ToJSON()

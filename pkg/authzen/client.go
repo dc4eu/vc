@@ -46,9 +46,9 @@ type Subject struct {
 
 // Resource represents the public key to be validated
 type Resource struct {
-	Type string      `json:"type"` // "jwk" or "x5c"
-	ID   string      `json:"id"`   // MUST match subject.id
-	Key  interface{} `json:"key"`  // JWK object or array of base64 X.509 certs
+	Type string `json:"type"` // "jwk" or "x5c"
+	ID   string `json:"id"`   // MUST match subject.id
+	Key  any    `json:"key"`  // JWK object or array of base64 X.509 certs
 }
 
 // Action represents the role associated with the name-to-key binding
@@ -66,8 +66,8 @@ type EvaluationRequest struct {
 
 // EvaluationResponse represents an AuthZEN evaluation response
 type EvaluationResponse struct {
-	Decision bool                   `json:"decision"`
-	Context  map[string]interface{} `json:"context,omitempty"`
+	Decision bool           `json:"decision"`
+	Context  map[string]any `json:"context,omitempty"`
 }
 
 // EvaluationEnvelope wraps the request according to AuthZEN format
@@ -78,7 +78,7 @@ type EvaluationEnvelope struct {
 
 // EvaluateJWK evaluates whether a JWK is bound to a given name (subject ID)
 // Returns true if the trust registry authorizes this binding
-func (c *Client) EvaluateJWK(subjectID string, jwk map[string]interface{}, role string) (bool, error) {
+func (c *Client) EvaluateJWK(subjectID string, jwk map[string]any, role string) (bool, error) {
 	req := EvaluationEnvelope{
 		Type: "authzen",
 		Request: EvaluationRequest{
@@ -162,8 +162,8 @@ func (c *Client) evaluate(req EvaluationEnvelope) (bool, error) {
 }
 
 // JWKFromEd25519 creates a JWK from an Ed25519 public key
-func JWKFromEd25519(publicKey []byte) map[string]interface{} {
-	return map[string]interface{}{
+func JWKFromEd25519(publicKey []byte) map[string]any {
+	return map[string]any{
 		"kty": "OKP",
 		"crv": "Ed25519",
 		"x":   base64.RawURLEncoding.EncodeToString(publicKey),
@@ -171,7 +171,7 @@ func JWKFromEd25519(publicKey []byte) map[string]interface{} {
 }
 
 // Ed25519FromJWK extracts an Ed25519 public key from a JWK
-func Ed25519FromJWK(jwk map[string]interface{}) ([]byte, error) {
+func Ed25519FromJWK(jwk map[string]any) ([]byte, error) {
 	kty, ok := jwk["kty"].(string)
 	if !ok || kty != "OKP" {
 		return nil, fmt.Errorf("invalid key type, expected OKP")

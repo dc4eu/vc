@@ -66,9 +66,9 @@ func NewRDFCredentialFromJSON(jsonData []byte, options *ld.JsonLdOptions) (*RDFC
 	}, nil
 }
 
-// GetCanonicalForm returns the canonical N-Quads representation
+// CanonicalForm returns the canonical N-Quads representation
 // This implements URDNA2015 normalization per W3C spec
-func (rc *RDFCredential) GetCanonicalForm() (string, error) {
+func (rc *RDFCredential) CanonicalForm() (string, error) {
 	if rc.originalJSON == "" {
 		// If we don't have original JSON (e.g. created from dataset), we must use the dataset
 		// But JsonLdProcessor.Normalize expects JSON-LD input unless InputFormat is set.
@@ -138,9 +138,9 @@ func (rc *RDFCredential) GetCanonicalForm() (string, error) {
 	return normalizedStr, nil
 }
 
-// GetCanonicalHash returns the SHA-256 hash of the canonical form
-func (rc *RDFCredential) GetCanonicalHash() (string, error) {
-	canonical, err := rc.GetCanonicalForm()
+// CanonicalHash returns the SHA-256 hash of the canonical form
+func (rc *RDFCredential) CanonicalHash() (string, error) {
+	canonical, err := rc.CanonicalForm()
 	if err != nil {
 		return "", err
 	}
@@ -149,15 +149,15 @@ func (rc *RDFCredential) GetCanonicalHash() (string, error) {
 	return hex.EncodeToString(hash[:]), nil
 }
 
-// GetCredentialWithoutProof returns the credential as RDF without the proof object
+// CredentialWithoutProof returns the credential as RDF without the proof object
 // This is needed for signature verification
-func (rc *RDFCredential) GetCredentialWithoutProof() (*RDFCredential, error) {
-	return rc.GetCredentialWithoutProofForTypes()
+func (rc *RDFCredential) CredentialWithoutProof() (*RDFCredential, error) {
+	return rc.CredentialWithoutProofForTypes()
 }
 
-// GetCredentialWithoutProofForTypes returns the credential as RDF without the proof object
+// CredentialWithoutProofForTypes returns the credential as RDF without the proof object
 // attached to nodes of the specified types. If no types are provided, all proofs are removed.
-func (rc *RDFCredential) GetCredentialWithoutProofForTypes(targetTypes ...string) (*RDFCredential, error) {
+func (rc *RDFCredential) CredentialWithoutProofForTypes(targetTypes ...string) (*RDFCredential, error) {
 	if rc.dataset == nil {
 		return nil, fmt.Errorf("RDF dataset is nil")
 	}
@@ -265,7 +265,7 @@ func (rc *RDFCredential) GetCredentialWithoutProofForTypes(targetTypes ...string
 			Graphs: filteredGraphs,
 		},
 		// We don't have original JSON for the filtered credential
-		// But we can set it to empty string, and GetCanonicalForm will handle it
+		// But we can set it to empty string, and CanonicalForm will handle it
 		// by converting dataset to JSON-LD first
 		originalJSON: "",
 		processor:    rc.processor,
@@ -275,8 +275,8 @@ func (rc *RDFCredential) GetCredentialWithoutProofForTypes(targetTypes ...string
 	return credWithoutProof, nil
 }
 
-// GetProofObject extracts the proof object as separate RDF
-func (rc *RDFCredential) GetProofObject() (*RDFCredential, error) {
+// ProofObject extracts the proof object as separate RDF
+func (rc *RDFCredential) ProofObject() (*RDFCredential, error) {
 	if rc.dataset == nil {
 		return nil, fmt.Errorf("RDF dataset is nil")
 	}
@@ -414,18 +414,18 @@ func (rc *RDFCredential) ToJSON() ([]byte, error) {
 	return rc.MarshalJSON()
 }
 
-// GetOriginalJSON returns the original JSON input
-func (rc *RDFCredential) GetOriginalJSON() string {
+// OriginalJSON returns the original JSON input
+func (rc *RDFCredential) OriginalJSON() string {
 	return rc.originalJSON
 }
 
-// GetDataset returns the underlying RDF dataset
-func (rc *RDFCredential) GetDataset() *ld.RDFDataset {
+// Dataset returns the underlying RDF dataset
+func (rc *RDFCredential) Dataset() *ld.RDFDataset {
 	return rc.dataset
 }
 
-// GetContext returns the @context from the original JSON
-func (rc *RDFCredential) GetContext() (any, error) {
+// Context returns the @context from the original JSON
+func (rc *RDFCredential) Context() (any, error) {
 	if rc.originalJSON == "" {
 		return nil, fmt.Errorf("original JSON not available")
 	}
@@ -436,9 +436,9 @@ func (rc *RDFCredential) GetContext() (any, error) {
 	return doc["@context"], nil
 }
 
-// GetNQuads returns the N-Quads representation without normalization
+// NQuads returns the N-Quads representation without normalization
 // This preserves the blank node identifiers from the input
-func (rc *RDFCredential) GetNQuads() (string, error) {
+func (rc *RDFCredential) NQuads() (string, error) {
 	if rc.dataset == nil {
 		return "", fmt.Errorf("RDF dataset is nil")
 	}

@@ -37,7 +37,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 	}
 
 	// 1. Extract proof object
-	proofCred, err := cred.GetProofObject()
+	proofCred, err := cred.ProofObject()
 	if err != nil {
 		return fmt.Errorf("failed to get proof object: %w", err)
 	}
@@ -95,7 +95,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 	targetType := "VerifiableCredential"
 
 	// Check original JSON for type
-	originalJSON := cred.GetOriginalJSON()
+	originalJSON := cred.OriginalJSON()
 	if originalJSON != "" {
 		var credMap map[string]any
 		if err := json.Unmarshal([]byte(originalJSON), &credMap); err == nil {
@@ -105,12 +105,12 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 		}
 	}
 
-	credWithoutProof, err := cred.GetCredentialWithoutProofForTypes(targetType)
+	credWithoutProof, err := cred.CredentialWithoutProofForTypes(targetType)
 	if err != nil {
 		return fmt.Errorf("failed to get credential without proof: %w", err)
 	}
 
-	docCanonical, err := credWithoutProof.GetCanonicalForm()
+	docCanonical, err := credWithoutProof.CanonicalForm()
 	if err != nil {
 		return fmt.Errorf("failed to get canonical form of document: %w", err)
 	}
@@ -121,7 +121,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 	// Ensure context
 	if _, ok := proofNode["@context"]; !ok {
 		// Try to use context from credential if available
-		if ctx, err := cred.GetContext(); err == nil && ctx != nil {
+		if ctx, err := cred.Context(); err == nil && ctx != nil {
 			proofNode["@context"] = ctx
 		} else {
 			proofNode["@context"] = credential.ContextV2
@@ -141,7 +141,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 		return fmt.Errorf("failed to create RDF credential for proof config: %w", err)
 	}
 
-	proofCanonical, err := proofConfigCred.GetCanonicalForm()
+	proofCanonical, err := proofConfigCred.CanonicalForm()
 	if err != nil {
 		return fmt.Errorf("failed to get canonical form of proof config: %w", err)
 	}

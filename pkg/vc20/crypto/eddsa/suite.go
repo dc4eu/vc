@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"vc/pkg/vc20/credential"
+	"vc/pkg/vc20/crypto/common"
 
 	"github.com/multiformats/go-multibase"
 	"github.com/piprate/json-gold/ld"
@@ -14,7 +15,7 @@ import (
 
 const (
 	Cryptosuite2022 = "eddsa-rdfc-2022"
-	ProofType       = "DataIntegrityProof"
+	ProofType       = credential.ProofTypeDataIntegrity
 )
 
 // Suite implements the EdDSA Cryptosuite v1.0 (eddsa-rdfc-2022)
@@ -54,10 +55,9 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 
 	// Compact the proof JSON to ensure we have short keys
 	proc := ld.NewJsonLdProcessor()
-	compactOpts := ld.NewJsonLdOptions("")
-	compactOpts.DocumentLoader = credential.GetGlobalLoader()
+	compactOpts := credential.NewJSONLDOptions("")
 	context := map[string]any{
-		"@context": "https://www.w3.org/ns/credentials/v2",
+		"@context": credential.ContextV2,
 	}
 
 	compactedProof, err := proc.Compact(proofJSON, context, compactOpts)
@@ -68,7 +68,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 	proofMap := compactedProof
 
 	// Find proof node
-	proofNode := findProofNode(proofMap)
+	proofNode := common.FindProofNode(proofMap, ProofType)
 	if proofNode == nil {
 		return fmt.Errorf("proof node not found in proof object")
 	}
@@ -99,7 +99,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 	if originalJSON != "" {
 		var credMap map[string]any
 		if err := json.Unmarshal([]byte(originalJSON), &credMap); err == nil {
-			if hasType(credMap, "VerifiablePresentation") {
+			if common.HasType(credMap, "VerifiablePresentation") {
 				targetType = "VerifiablePresentation"
 			}
 		}
@@ -124,7 +124,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 		if ctx, err := cred.GetContext(); err == nil && ctx != nil {
 			proofNode["@context"] = ctx
 		} else {
-			proofNode["@context"] = "https://www.w3.org/ns/credentials/v2"
+			proofNode["@context"] = credential.ContextV2
 		}
 	}
 
@@ -133,8 +133,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 		return fmt.Errorf("failed to marshal proof config: %w", err)
 	}
 
-	ldOpts := ld.NewJsonLdOptions("")
-	ldOpts.DocumentLoader = credential.GetGlobalLoader()
+	ldOpts := credential.NewJSONLDOptions("")
 	ldOpts.Algorithm = ld.AlgorithmURDNA2015
 
 	proofConfigCred, err := credential.NewRDFCredentialFromJSON(proofConfigBytes, ldOpts)
@@ -158,48 +157,5 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 		return fmt.Errorf("signature verification failed")
 	}
 
-	return nil
-}
-
-func hasType(m map[string]any, expectedType string) bool {
-	t, ok := m["type"]
-	if !ok {
-		t, ok = m["@type"]
-	}
-	if !ok {
-		return false
-	}
-
-	if s, ok := t.(string); ok {
-		return s == expectedType
-	}
-	if list, ok := t.([]any); ok {
-		for _, item := range list {
-			if s, ok := item.(string); ok && s == expectedType {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func findProofNode(data any) map[string]any {
-	if m, ok := data.(map[string]any); ok {
-		if hasType(m, ProofType) || hasType(m, "Proof") {
-			return m
-		}
-		// Check all values
-		for _, v := range m {
-			if found := findProofNode(v); found != nil {
-				return found
-			}
-		}
-	} else if list, ok := data.([]any); ok {
-		for _, item := range list {
-			if found := findProofNode(item); found != nil {
-				return found
-			}
-		}
-	}
 	return nil
 }

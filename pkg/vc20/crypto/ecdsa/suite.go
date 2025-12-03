@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"vc/pkg/vc20/credential"
+	"vc/pkg/vc20/crypto/common"
 
 	"github.com/multiformats/go-multibase"
 	"github.com/piprate/json-gold/ld"
@@ -17,7 +18,7 @@ import (
 
 const (
 	Cryptosuite2019 = "ecdsa-rdfc-2019"
-	ProofType       = "DataIntegrityProof"
+	ProofType       = credential.ProofTypeDataIntegrity
 )
 
 // Suite implements the ECDSA Cryptosuite v1.0
@@ -64,7 +65,7 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 	}
 
 	proofConfig := map[string]any{
-		"@context":           "https://www.w3.org/ns/credentials/v2",
+		"@context":           credential.ContextV2,
 		"type":               ProofType,
 		"cryptosuite":        Cryptosuite2019,
 		"verificationMethod": opts.VerificationMethod,
@@ -88,8 +89,7 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 	}
 
 	// Use standard JSON-LD options
-	ldOpts := ld.NewJsonLdOptions("")
-	ldOpts.DocumentLoader = credential.GetGlobalLoader()
+	ldOpts := credential.NewJSONLDOptions("")
 	// ldOpts.Format = "application/n-quads" // Do not set format, we want RDFDataset
 	ldOpts.Algorithm = ld.AlgorithmURDNA2015
 
@@ -224,11 +224,10 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 
 	// Compact the proof JSON to ensure we have short keys (e.g. "proofValue" instead of full URI)
 	proc := ld.NewJsonLdProcessor()
-	compactOpts := ld.NewJsonLdOptions("")
-	compactOpts.DocumentLoader = credential.GetGlobalLoader()
+	compactOpts := credential.NewJSONLDOptions("")
 	// Use the V2 context for compaction
 	context := map[string]any{
-		"@context": "https://www.w3.org/ns/credentials/v2",
+		"@context": credential.ContextV2,
 	}
 
 	compactedProof, err := proc.Compact(proofJSON, context, compactOpts)
@@ -239,7 +238,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 	proofMap := compactedProof
 
 	// Find proof node
-	proofNode := findProofNode(proofMap)
+	proofNode := common.FindProofNode(proofMap, ProofType)
 
 	if proofNode == nil {
 		return fmt.Errorf("proof node not found in proof object")
@@ -255,7 +254,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 
 	// Ensure context is present for correct RDF conversion
 	if _, ok := proofNode["@context"]; !ok {
-		proofNode["@context"] = "https://www.w3.org/ns/credentials/v2"
+		proofNode["@context"] = credential.ContextV2
 	}
 
 	// 3. Canonicalize proof configuration
@@ -264,8 +263,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 		return fmt.Errorf("failed to marshal proof config: %w", err)
 	}
 
-	ldOpts := ld.NewJsonLdOptions("")
-	ldOpts.DocumentLoader = credential.GetGlobalLoader()
+	ldOpts := credential.NewJSONLDOptions("")
 	// ldOpts.Format = "application/n-quads" // Do not set format, we want RDFDataset
 	ldOpts.Algorithm = ld.AlgorithmURDNA2015
 
@@ -314,48 +312,5 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 		return fmt.Errorf("signature verification failed")
 	}
 
-	return nil
-}
-
-func hasType(m map[string]any, expectedType string) bool {
-	t, ok := m["type"]
-	if !ok {
-		t, ok = m["@type"]
-	}
-	if !ok {
-		return false
-	}
-
-	if s, ok := t.(string); ok {
-		return s == expectedType
-	}
-	if list, ok := t.([]any); ok {
-		for _, item := range list {
-			if s, ok := item.(string); ok && s == expectedType {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func findProofNode(data any) map[string]any {
-	if m, ok := data.(map[string]any); ok {
-		if hasType(m, ProofType) || hasType(m, "Proof") {
-			return m
-		}
-		// Check all values
-		for _, v := range m {
-			if found := findProofNode(v); found != nil {
-				return found
-			}
-		}
-	} else if list, ok := data.([]any); ok {
-		for _, item := range list {
-			if found := findProofNode(item); found != nil {
-				return found
-			}
-		}
-	}
 	return nil
 }

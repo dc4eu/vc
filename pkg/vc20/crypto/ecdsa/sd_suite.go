@@ -274,7 +274,7 @@ func (s *SdSuite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, op
 			return nil, fmt.Errorf("failed to unmarshal original credential: %w", err)
 		}
 	} else {
-		jsonBytes, err := cred.ToJSON()
+		jsonBytes, err := json.Marshal(cred)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert credential to JSON: %w", err)
 		}
@@ -318,7 +318,7 @@ func (s *SdSuite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) e
 		return fmt.Errorf("failed to get proof object: %w", err)
 	}
 
-	proofJSONBytes, err := proofCred.ToJSON()
+	proofJSONBytes, err := json.Marshal(proofCred)
 	if err != nil {
 		return fmt.Errorf("failed to convert proof to JSON: %w", err)
 	}
@@ -630,7 +630,7 @@ func (s *SdSuite) verifyDerivedProof(cred *credential.RDFCredential, key *ecdsa.
 		}
 	} else {
 		// Fallback
-		jsonBytes, err := cred.ToJSON()
+		jsonBytes, err := json.Marshal(cred)
 		if err != nil {
 			return fmt.Errorf("failed to get JSON: %w", err)
 		}
@@ -733,7 +733,7 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 	if err != nil {
 		return nil, fmt.Errorf("failed to get proof object: %w", err)
 	}
-	proofJSONBytes, err := proofCred.ToJSON()
+	proofJSONBytes, err := json.Marshal(proofCred)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert proof to JSON: %w", err)
 	}

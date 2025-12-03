@@ -138,6 +138,7 @@ pkg/vc20/
 package main
 
 import (
+    "encoding/json"
     "fmt"
     "time"
     
@@ -178,7 +179,7 @@ func main() {
     }
     
     // Marshal to JSON
-    data, _ := vc.ToJSON()
+    data, _ := json.Marshal(vc)
     fmt.Println(string(data))
 }
 ```

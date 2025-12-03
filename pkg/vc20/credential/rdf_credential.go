@@ -365,9 +365,8 @@ func isProofQuad(quad *ld.Quad) bool {
 	return false
 }
 
-// ToJSON converts the RDF credential back to JSON-LD
-// This is useful for debugging and response generation
-func (rc *RDFCredential) ToJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler to convert the RDF credential back to JSON-LD
+func (rc *RDFCredential) MarshalJSON() ([]byte, error) {
 	if rc.dataset == nil {
 		return nil, fmt.Errorf("RDF dataset is nil")
 	}
@@ -407,6 +406,12 @@ func (rc *RDFCredential) ToJSON() ([]byte, error) {
 	}
 
 	return jsonBytes, nil
+}
+
+// ToJSON is a helper that calls MarshalJSON
+// Deprecated: Use json.Marshal instead
+func (rc *RDFCredential) ToJSON() ([]byte, error) {
+	return rc.MarshalJSON()
 }
 
 // GetOriginalJSON returns the original JSON input

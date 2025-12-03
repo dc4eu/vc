@@ -161,7 +161,7 @@ func (s *Suite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, opts
 		}
 	} else {
 		// Convert from RDF
-		jsonBytes, err := cred.ToJSON()
+		jsonBytes, err := json.Marshal(cred)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert credential to JSON: %w", err)
 		}
@@ -212,7 +212,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) err
 	}
 
 	// We need to get the proofValue from the proof object
-	proofJSONBytes, err := proofCred.ToJSON()
+	proofJSONBytes, err := json.Marshal(proofCred)
 	if err != nil {
 		return fmt.Errorf("failed to convert proof to JSON: %w", err)
 	}

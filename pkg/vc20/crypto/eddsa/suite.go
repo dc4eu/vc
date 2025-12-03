@@ -43,7 +43,7 @@ func (s *Suite) Verify(cred *credential.RDFCredential, key ed25519.PublicKey) er
 	}
 
 	// Convert proof to JSON to extract values
-	proofJSONBytes, err := proofCred.ToJSON()
+	proofJSONBytes, err := json.Marshal(proofCred)
 	if err != nil {
 		return fmt.Errorf("failed to convert proof to JSON: %w", err)
 	}

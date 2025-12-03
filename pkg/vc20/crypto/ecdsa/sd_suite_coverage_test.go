@@ -126,7 +126,7 @@ func TestSdSuite_Verify_TamperedProof(t *testing.T) {
 	require.NoError(t, err)
 
 	// Debug: print signed credential
-	signedJSON, _ := signedCred.ToJSON()
+	signedJSON, _ := json.Marshal(signedCred)
 	// t.Logf("Signed Credential: %s", string(signedJSON))
 
 	// Tamper with the proof

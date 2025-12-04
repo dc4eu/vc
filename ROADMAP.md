@@ -238,15 +238,167 @@ Implemented OIDC Relying Party (RP) functionality to issue credentials based on 
 
 ---
 
+## Priority 12: W3C Verifiable Credentials 2.0 with JSON-LD and ECDSA-SD-2023 🚧 IN PROGRESS
+
+**Status**: Implementation started - November 2025
+
+Add support for W3C Verifiable Credentials Data Model 2.0 with JSON-LD credentials and ECDSA-SD-2023 selective disclosure cryptosuite.
+
+### Implementation Plan
+
+**Phase 1: Foundation Libraries and Data Structures** (Weeks 1-2):
+- ✅ Add Go dependencies (json-gold, CBOR, multibase)
+- ✅ Implement W3C VC 2.0 data model in `pkg/vc20/credential`
+  - JSON-LD credential structures with `@context`, `type`, `issuer`, `validFrom`, `credentialSubject`
+  - Media type support (`application/vc`, `application/vp`)
+  - Context validation with SHA-256 hash verification
+- ✅ Implement context manager in `pkg/vc20/context`
+  - Context document caching
+  - Cryptographic hash validation for base context
+  - Support for `https://www.w3.org/ns/credentials/v2`
+
+**Phase 2: RDF Canonicalization** (Weeks 3-4): ✅ COMPLETED
+- ✅ Implement RDFC-1.0 (RDF Dataset Canonicalization) in `pkg/vc20/rdfcanon`
+  - RDF dataset generation using json-gold
+  - URDNA2015 canonicalization algorithm
+  - Hash algorithms (SHA-256)
+  - Dataset and Quad structures for RDF manipulation
+  - N-Quads parsing and serialization
+  - All tests passing (11 test functions)
+
+**Phase 3: ECDSA-SD-2023 Cryptosuite** (Weeks 5-7):
+- 🚧 Implement base proof creation (issuer) in `pkg/vc20/crypto/ecdsa-sd`
+  - HMAC-based blank node randomization (256-bit keys)
+  - RDF transformation and hashing
+  - P-256 ECDSA signing (P-384 optional)
+  - CBOR serialization for proof values
+  - Multibase encoding with specific headers
+- 🚧 Implement derived proof creation (holder)
+  - JSON Pointer-based selective disclosure
+  - Mandatory vs non-mandatory statement handling
+  - Derived proof CBOR structure
+- 🚧 Implement derived proof verification (verifier)
+  - Signature verification
+  - Selective disclosure validation
+  - Security checks per W3C spec
+
+**Phase 4: Integration and Testing** (Weeks 8-10):
+- 🚧 W3C Official Test Suite Integration
+  - Implement VC-API compatible endpoints (`/credentials/issue`, `/credentials/verify`, `/presentations/verify`)
+  - Run against official W3C VC Data Model 2.0 Test Suite (https://github.com/w3c/vc-data-model-2.0-test-suite)
+  - Support `eddsa-rdfc-2022` cryptosuite for initial interoperability
+  - Support `ecdsa-sd-2023` cryptosuite for selective disclosure
+  - Register implementation in w3c/vc-test-suite-implementations
+- 🚧 Specification Test Vectors
+  - ECDSA-SD-2023 Appendix A.7 and A.8 test cases
+  - RDF Canonicalization test vectors
+  - Cross-implementation interoperability validation
+- 🚧 Service Integration
+  - Issuer service support for JSON-LD credentials
+  - Verifier service support for ECDSA-SD-2023
+  - Build tag support (`-tags=vc20`)
+- 🚧 Documentation
+  - `docs/VC20_JSON_LD.md` - Usage guide
+  - VC-API endpoint implementation guide
+  - W3C test suite integration guide
+  - API examples and integration patterns
+  - Security considerations
+
+### Technical Architecture
+
+```
+pkg/vc20/
+├── credential/          # VC 2.0 data model
+│   ├── credential.go   # JSON-LD credential structures
+│   ├── builder.go      # Credential builder
+│   ├── parser.go       # Parse JSON-LD credentials
+│   └── validator.go    # Basic validation
+├── context/            # Context management
+│   ├── manager.go      # Context document handling
+│   ├── cache.go        # Context caching
+│   └── validator.go    # Hash verification
+├── crypto/
+│   ├── ecdsa-sd/       # ECDSA-SD-2023 cryptosuite
+│   │   ├── suite.go    # Cryptosuite interface
+│   │   ├── base_proof.go     # Base proof creation
+│   │   ├── derived_proof.go  # Derived proof creation/verify
+│   │   ├── hmac.go           # HMAC randomization
+│   │   ├── selection.go      # JSON Pointer selection
+│   │   └── cbor.go           # CBOR serialization
+│   └── keys/
+│       ├── multikey.go # Multikey encoding/decoding
+│       └── ecdsa.go    # ECDSA key helpers
+└── rdfcanon/           # RDF Canonicalization
+    ├── canonicalize.go # RDFC-1.0 implementation
+    ├── dataset.go      # RDF dataset handling
+    └── hash.go         # Hash algorithms
+```
+
+### Key Dependencies
+
+**External Libraries**:
+- `github.com/piprate/json-gold` v0.7.0 - JSON-LD 1.1 processing, RDF dataset generation
+- `github.com/fxamacker/cbor/v2` - CBOR encoding for proof values
+- `github.com/multiformats/go-multibase` - Multibase encoding
+- `github.com/cloudflare/circl` - P-256/P-384 ECDSA cryptography
+- Standard library: `crypto/ecdsa`, `crypto/hmac`, `crypto/sha256`
+
+**Specifications Implemented**:
+- [W3C Verifiable Credentials Data Model v2.0](https://www.w3.org/TR/vc-data-model-2.0/)
+- [Data Integrity ECDSA Cryptosuites v1.0](https://www.w3.org/TR/vc-di-ecdsa/)
+- [RDF Dataset Canonicalization (RDFC-1.0)](https://www.w3.org/TR/rdf-canon/)
+- [JSON-LD 1.1](https://www.w3.org/TR/json-ld11/)
+
+### Implementation Challenges
+
+1. **RDF Canonicalization (RDFC-1.0)** - Most complex component
+   - No existing Go implementation available
+   - Must implement algorithm from specification
+   - Critical for cryptographic security
+   - Heavy dependency on json-gold
+
+2. **ECDSA-SD-2023 Selective Disclosure** - Novel cryptographic scheme
+   - HMAC-based blank node randomization
+   - JSON Pointer selection mechanisms
+   - Mandatory pointer handling
+   - CBOR proof serialization
+
+3. **Interoperability** - Must pass W3C test vectors
+   - Test vectors in specification appendices
+   - Cross-platform compatibility verification
+
+### Benefits
+
+- **W3C Standards Compliance**: Support for latest VC 2.0 specification
+- **Selective Disclosure**: Privacy-preserving credential presentation with ECDSA-SD-2023
+- **JSON-LD Support**: Semantic interoperability and extensibility
+- **Cryptographic Agility**: Multiple curve support (P-256, P-384)
+- **Future-Proof**: Aligned with W3C's direction for verifiable credentials
+
+### Build Tag Support
+
+Following existing pattern for optional features:
+
+```go
+//go:build vc20
+
+package vc20
+```
+
+Compile with: `go build -tags=vc20`
+
+---
+
 ## Timeline and Sequencing
 
 **Phase 1 - Foundation** (Priorities 1-3):
 - Core quality improvements
 - Better error handling and configuration management
 
-**Phase 2 - Feature Expansion** (Priorities 4-5, 10-11):
+**Phase 2 - Feature Expansion** (Priorities 4-5, 10-11, 12):
 - Batch operations and lifecycle management
 - New authentication and presentation protocols
+- W3C VC 2.0 JSON-LD with ECDSA-SD-2023
 
 **Phase 3 - Production Readiness** (Priorities 6-9):
 - Performance validation

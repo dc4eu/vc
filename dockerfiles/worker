@@ -3,6 +3,7 @@ FROM docker.sunet.se/dc4eu/gobuild:latest AS builder
 
 ARG SERVICE_NAME
 ARG BUILDTAG
+ARG GO_BUILD_TAGS
 
 # Copy only dependency files first for better caching
 COPY go.mod go.sum ./
@@ -18,9 +19,10 @@ RUN make swagger
 RUN make proto
 
 # Build with caching for both build cache and module cache
+# GO_BUILD_TAGS is optional - if set, adds -tags flag
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    GOOS=linux GOARCH=amd64 go build -v -o bin/vc_$SERVICE_NAME -ldflags \
+    GOOS=linux GOARCH=amd64 go build -v ${GO_BUILD_TAGS:+-tags "$GO_BUILD_TAGS"} -o bin/vc_$SERVICE_NAME -ldflags \
     "-X vc/pkg/model.BuildVariableGitCommit=$(git rev-list -1 HEAD) \
     -X vc/pkg/model.BuildVariableGitBranch=$(git rev-parse --abbrev-ref HEAD) \
     -X vc/pkg/model.BuildVariableTimestamp=$(date +'%F:T%TZ') \

@@ -1,6 +1,7 @@
 package sdjwtvc
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/rsa"
@@ -93,6 +94,70 @@ func (c *Client) BuildCredential(issuer string, kid string, privateKey any, vct 
 	}
 
 	fmt.Println("buildCredential", "signedToken", signedToken)
+
+	// Combine signed JWT with disclosures
+	signedToken = Combine(signedToken, disclosures, "")
+
+	return signedToken, nil
+}
+
+// BuildCredentialWithSigner creates a complete SD-JWT credential using a Signer interface.
+// This allows signing with HSMs via PKCS#11 or other external signing services.
+func (c *Client) BuildCredentialWithSigner(ctx context.Context, issuer string, signer Signer, vct string, documentData []byte, holderJWK any, vctm *VCTM, opts *CredentialOptions) (string, error) {
+	// Set defaults
+	if opts == nil {
+		opts = &CredentialOptions{
+			DecoyDigests:   0,
+			ExpirationDays: 365,
+		}
+	}
+	if opts.ExpirationDays == 0 {
+		opts.ExpirationDays = 365
+	}
+
+	// Parse document data as generic map
+	body := map[string]any{}
+	if err := json.Unmarshal(documentData, &body); err != nil {
+		return "", fmt.Errorf("failed to unmarshal document data: %w", err)
+	}
+
+	// Add standard JWT claims
+	body["nbf"] = int64(time.Now().Unix())
+	body["exp"] = time.Now().Add(time.Duration(opts.ExpirationDays) * 24 * time.Hour).Unix()
+	body["iss"] = issuer
+	body["jti"] = uuid.NewString()
+	body["vct"] = vct
+
+	// Add confirmation claim with holder's public key
+	body["cnf"] = map[string]any{
+		"jwk": holderJWK,
+	}
+
+	// Create JWT header using signer's algorithm and key ID
+	header := map[string]any{
+		"typ": "dc+sd-jwt",
+		"kid": signer.KeyID(),
+		"alg": signer.Algorithm(),
+	}
+
+	// Encode VCTM in header
+	vctmEncoded, err := vctm.Encode()
+	if err != nil {
+		return "", fmt.Errorf("failed to encode VCTM: %w", err)
+	}
+	header["vctm"] = vctmEncoded
+
+	// Create selective disclosures using the provided VCTM
+	token, disclosures, err := c.MakeCredential(sha256.New(), body, vctm, opts.DecoyDigests)
+	if err != nil {
+		return "", fmt.Errorf("failed to create selective disclosures: %w", err)
+	}
+
+	// Sign the JWT using the signer interface
+	signedToken, err := SignWithSigner(ctx, header, token, signer)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign JWT: %w", err)
+	}
 
 	// Combine signed JWT with disclosures
 	signedToken = Combine(signedToken, disclosures, "")

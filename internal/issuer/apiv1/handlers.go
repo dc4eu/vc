@@ -71,12 +71,12 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		return nil, fmt.Errorf("document validation failed: %w", err)
 	}
 
-	// Build SD-JWT using sdjwtvc package
+	// Build SD-JWT using sdjwtvc package with the signer interface
 	sdClient := sdjwtvc.New()
-	token, err := sdClient.BuildCredential(
+	token, err := sdClient.BuildCredentialWithSigner(
+		ctx,
 		c.cfg.Issuer.JWTAttribute.Issuer,
-		c.kid,
-		c.privateKey,
+		c.signer,
 		credentialConstructor.VCT,
 		req.DocumentData,
 		req.JWK,

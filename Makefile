@@ -5,12 +5,40 @@ LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 CURRENT_BRANCH 			:= $(shell git rev-parse --abbrev-ref HEAD)
 SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet verifier-proxy
+PORT                    := 8888
+W3C_TEST_SUITE_DIR      := /tmp/w3c-test-suite
 
 test: test-verifier
 
 test-verifier:
 	$(info Testing verifier)
 	go test -v ./cmd/verifier
+
+# W3C VC 2.0 Test Suite targets
+create-w3c-test-suite:
+	$(info Creating W3C test suite in $(W3C_TEST_SUITE_DIR))
+	rm -rf $(W3C_TEST_SUITE_DIR)
+	mkdir -p $(W3C_TEST_SUITE_DIR)
+	cd $(W3C_TEST_SUITE_DIR) && \
+	git clone https://github.com/w3c/vc-data-model-2.0-test-suite.git . && \
+	npm install
+	./scripts/gen-w3c-config.sh $(PORT)
+
+run-w3c-test: build-vc20-test-server
+	$(info Starting test server on port $(PORT))
+	./bin/vc_vc20-test-server -port $(PORT)&
+	$(info Running W3C test suite against server on port $(PORT))
+	$(info Logs will be saved to /tmp/w3c-test.log)
+	cd $(W3C_TEST_SUITE_DIR) && \
+	SERVER_URL=http://localhost:$(PORT) npm test 2>&1 | tee /tmp/w3c-test.log ; \
+	curl -s http://localhost:$(PORT)/stop 2>/dev/null || true ; \
+	sleep 1
+	$(info Test results saved to /tmp/w3c-test.log)
+	@echo ""; \
+	echo "Test Summary:"; \
+	echo "============"; \
+	grep -c "✓" /tmp/w3c-test.log 2>/dev/null && echo " passing tests" || echo "Tests completed"; \
+	grep -c "❌" /tmp/w3c-test.log 2>/dev/null && echo " failing tests" || true
 
 gosec:
 	$(info Run gosec)
@@ -54,11 +82,15 @@ DOCKER_TAG_WALLET 		:= docker.sunet.se/dc4eu/wallet:$(VERSION)
 DOCKER_TAG_VERIFIER_PROXY := docker.sunet.se/dc4eu/verifier-proxy:$(VERSION)
 
 
-build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui build-verifier-proxy
+build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui build-verifier-proxy build-vc20-test-server
 
 build-verifier:
 	$(info Building verifier)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier ${LDFLAGS} ./cmd/verifier/main.go
+
+build-vc20-test-server:
+	$(info Building vc20-test-server)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags vc20 -v -o ./bin/$(NAME)_vc20-test-server ${LDFLAGS} ./cmd/vc20-test-server/main.go
 
 build-registry:
 	$(info Building registry)
@@ -332,3 +364,21 @@ vscode:
 	go install github.com/securego/gosec/v2/cmd/gosec@latest && \
 	go install golang.org/x/vuln/cmd/govulncheck@latest && \
 	go install honnef.co/go/tools/cmd/staticcheck@latest
+
+w3c-test: build-vc20-test-server
+	$(info Running W3C test suite)
+	@echo "Stopping any existing server..."
+	@killall $(NAME)_vc20-test-server 2>/dev/null || true
+	@echo "Starting server..."
+	@./bin/$(NAME)_vc20-test-server > server.log 2>&1 & echo $$! > server.pid
+	@sleep 2
+	@echo "Running tests..."
+	@cd $(W3C_TEST_SUITE_DIR) && \
+	SERVER_URL=http://localhost:$(PORT) npm test > /tmp/w3c-test.log 2>&1 || true
+	@echo "Stopping server..."
+	@kill `cat server.pid` || true
+	@rm server.pid
+	@echo "Test results saved to /tmp/w3c-test.log"
+	@echo "Summary:"
+	@grep "✓" /tmp/w3c-test.log | wc -l | tr -d '\n' && echo " passing tests"
+	@grep "❌" /tmp/w3c-test.log | wc -l | tr -d '\n' && echo " failing tests"

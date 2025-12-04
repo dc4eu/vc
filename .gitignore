@@ -1,3 +1,4 @@
+cover.out
 bin/
 pki/*
 !pki/create_pki.sh

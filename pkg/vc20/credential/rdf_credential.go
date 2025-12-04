@@ -337,6 +337,8 @@ func isProofQuad(quad *ld.Quad) bool {
 		"https://www.w3.org/ns/credentials#created",
 		"https://w3id.org/security#created",
 		"http://purl.org/dc/terms/created",
+		"https://w3id.org/security#challenge",
+		"https://w3id.org/security#domain",
 	}
 
 	predicateValue := ""

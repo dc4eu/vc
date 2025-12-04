@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"vc/pkg/vc20/credential"
 	"vc/pkg/vc20/crypto/common"
@@ -25,6 +26,136 @@ type Suite struct {
 // NewSuite creates a new EdDSA cryptosuite
 func NewSuite() *Suite {
 	return &Suite{}
+}
+
+// SignOptions contains options for signing
+type SignOptions struct {
+	VerificationMethod string
+	ProofPurpose       string
+	Created            time.Time
+	Domain             string
+	Challenge          string
+}
+
+// Sign signs a credential using eddsa-rdfc-2022
+func (s *Suite) Sign(cred *credential.RDFCredential, key ed25519.PrivateKey, opts *SignOptions) (*credential.RDFCredential, error) {
+	if cred == nil {
+		return nil, fmt.Errorf("credential is nil")
+	}
+	if key == nil {
+		return nil, fmt.Errorf("private key is nil")
+	}
+	if opts == nil {
+		return nil, fmt.Errorf("sign options are nil")
+	}
+
+	// 1. Get canonical document hash (without proof)
+	credWithoutProof, err := cred.CredentialWithoutProof()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get credential without proof: %w", err)
+	}
+
+	// 2. Create proof configuration
+	created := opts.Created
+	if created.IsZero() {
+		created = time.Now().UTC()
+	}
+
+	proofConfig := map[string]any{
+		"@context":           credential.ContextV2,
+		"type":               ProofType,
+		"cryptosuite":        Cryptosuite2022,
+		"verificationMethod": opts.VerificationMethod,
+		"proofPurpose":       opts.ProofPurpose,
+		"created":            created.Format(time.RFC3339),
+	}
+
+	if opts.Domain != "" {
+		proofConfig["domain"] = opts.Domain
+	}
+	if opts.Challenge != "" {
+		proofConfig["challenge"] = opts.Challenge
+	}
+
+	// 3. Canonicalize and hash proof configuration
+	proofConfigBytes, err := json.Marshal(proofConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal proof config: %w", err)
+	}
+
+	ldOpts := credential.NewJSONLDOptions("")
+	ldOpts.Algorithm = ld.AlgorithmURDNA2015
+
+	proofCred, err := credential.NewRDFCredentialFromJSON(proofConfigBytes, ldOpts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create RDF credential for proof config: %w", err)
+	}
+
+	// 4. Get canonical forms and hash
+	docCanonical, err := credWithoutProof.CanonicalForm()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get canonical form of document: %w", err)
+	}
+
+	proofCanonical, err := proofCred.CanonicalForm()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get canonical form of proof config: %w", err)
+	}
+
+	// Hash the canonical forms
+	docHash := sha256.Sum256([]byte(docCanonical))
+	proofHash := sha256.Sum256([]byte(proofCanonical))
+
+	// Concatenate: proofHash + docHash (per spec)
+	combined := append(proofHash[:], docHash[:]...)
+
+	// 5. Sign with Ed25519
+	signature := ed25519.Sign(key, combined)
+
+	// 6. Encode signature (multibase base58-btc)
+	proofValue, err := multibase.Encode(multibase.Base58BTC, signature)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode signature: %w", err)
+	}
+
+	// 7. Add proof to credential
+	var credMap map[string]any
+	originalJSON := cred.OriginalJSON()
+	if originalJSON != "" {
+		if err := json.Unmarshal([]byte(originalJSON), &credMap); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal original credential: %w", err)
+		}
+	} else {
+		jsonBytes, err := json.Marshal(cred)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert credential to JSON: %w", err)
+		}
+		if err := json.Unmarshal(jsonBytes, &credMap); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal converted credential: %w", err)
+		}
+	}
+
+	// Add proofValue to proofConfig
+	proofConfig["proofValue"] = proofValue
+
+	// Add proof to credential (handle existing proofs)
+	if existingProof, ok := credMap["proof"]; ok {
+		if proofs, ok := existingProof.([]any); ok {
+			credMap["proof"] = append(proofs, proofConfig)
+		} else {
+			credMap["proof"] = []any{existingProof, proofConfig}
+		}
+	} else {
+		credMap["proof"] = proofConfig
+	}
+
+	// Create new RDFCredential
+	newCredBytes, err := json.Marshal(credMap)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal new credential: %w", err)
+	}
+
+	return credential.NewRDFCredentialFromJSON(newCredBytes, ldOpts)
 }
 
 // Verify verifies a credential using eddsa-rdfc-2022

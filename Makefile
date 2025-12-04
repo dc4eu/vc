@@ -1,4 +1,4 @@
-.PHONY : docker-build docker-push release
+.PHONY : docker-build docker-push release build-issuer-hsm build-apigw-saml build-apigw-oidcrp build-apigw-all test-saml test-oidcrp test-vc20 test-pkcs11 test-all-tags docker-build-apigw-saml docker-build-apigw-oidcrp docker-build-apigw-all docker-build-issuer-hsm
 
 NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
@@ -120,6 +120,48 @@ build-verifier-proxy:
 	$(info Building verifier-proxy)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier-proxy ${LDFLAGS} ./cmd/verifier-proxy/main.go
 
+# Build targets with optional features (build tags)
+# Usage: make build-issuer-hsm  (builds issuer with PKCS#11 HSM support)
+#        make build-apigw-saml  (builds apigw with SAML support)
+#        make build-apigw-all   (builds apigw with all optional features)
+
+build-issuer-hsm:
+	$(info Building issuer with PKCS#11 HSM support)
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags pkcs11 -v -o ./bin/$(NAME)_issuer-hsm ${LDFLAGS_DYNAMIC} ./cmd/issuer/main.go
+
+build-apigw-saml:
+	$(info Building apigw with SAML support)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags saml -v -o ./bin/$(NAME)_apigw-saml ${LDFLAGS} ./cmd/apigw/main.go
+
+build-apigw-oidcrp:
+	$(info Building apigw with OIDC RP support)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags oidcrp -v -o ./bin/$(NAME)_apigw-oidcrp ${LDFLAGS} ./cmd/apigw/main.go
+
+build-apigw-all:
+	$(info Building apigw with all optional features - SAML and OIDC RP)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags "saml,oidcrp" -v -o ./bin/$(NAME)_apigw-all ${LDFLAGS} ./cmd/apigw/main.go
+
+# Test targets with build tags
+test-saml:
+	$(info Testing with SAML build tag)
+	go test -tags saml -v ./pkg/saml/... ./internal/apigw/...
+
+test-oidcrp:
+	$(info Testing with OIDC RP build tag)
+	go test -tags oidcrp -v ./pkg/oidcrp/... ./internal/apigw/...
+
+test-vc20:
+	$(info Testing with VC 2.0 build tag)
+	go test -tags vc20 -v ./pkg/vc20/... ./pkg/authzen/... ./pkg/keyresolver/...
+
+test-pkcs11:
+	$(info Testing with PKCS#11 build tag)
+	go test -tags pkcs11 -v ./pkg/signing/...
+
+test-all-tags:
+	$(info Testing with all build tags)
+	go test -tags "saml,oidcrp,vc20,pkcs11" -v ./...
+
 docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui docker-build-verifier-proxy
 
 docker-build-gobuild:
@@ -161,6 +203,31 @@ docker-build-wallet:
 docker-build-verifier-proxy:
 	$(info Docker building verifier-proxy with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/worker .
+
+# Docker build targets with build tags
+# Usage: make docker-build-apigw-saml VERSION=1.0.0
+#        make docker-build-issuer-hsm VERSION=1.0.0
+
+DOCKER_TAG_APIGW_SAML 		:= docker.sunet.se/dc4eu/apigw-saml:$(VERSION)
+DOCKER_TAG_APIGW_OIDCRP 	:= docker.sunet.se/dc4eu/apigw-oidcrp:$(VERSION)
+DOCKER_TAG_APIGW_ALL 		:= docker.sunet.se/dc4eu/apigw-full:$(VERSION)
+DOCKER_TAG_ISSUER_HSM 		:= docker.sunet.se/dc4eu/issuer-hsm:$(VERSION)
+
+docker-build-apigw-saml:
+	$(info Docker building apigw with SAML support, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS=saml --tag $(DOCKER_TAG_APIGW_SAML) --file dockerfiles/worker .
+
+docker-build-apigw-oidcrp:
+	$(info Docker building apigw with OIDC RP support, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS=oidcrp --tag $(DOCKER_TAG_APIGW_OIDCRP) --file dockerfiles/worker .
+
+docker-build-apigw-all:
+	$(info Docker building apigw with all features - SAML and OIDC RP, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS="saml,oidcrp" --tag $(DOCKER_TAG_APIGW_ALL) --file dockerfiles/worker .
+
+docker-build-issuer-hsm:
+	$(info Docker building issuer with PKCS#11 HSM support, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=issuer --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS=pkcs11 --tag $(DOCKER_TAG_ISSUER_HSM) --file dockerfiles/worker .
 
 docker-push-gobuild:
 	$(info Pushing docker images)

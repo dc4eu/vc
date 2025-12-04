@@ -24,7 +24,9 @@ create-w3c-test-suite:
 	npm install
 	./scripts/gen-w3c-config.sh $(PORT)
 
-run-w3c-test:
+run-w3c-test: build-vc20-test-server
+	$(info Starting test server on port $(PORT))
+	./bin/vc_vc20-test-server -port $(PORT)&
 	$(info Running W3C test suite against server on port $(PORT))
 	$(info Logs will be saved to /tmp/w3c-test.log)
 	cd $(W3C_TEST_SUITE_DIR) && \

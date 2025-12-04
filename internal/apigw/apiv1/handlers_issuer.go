@@ -72,7 +72,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "accessToken", accessToken)
 
-	authContext, err := c.db.VCAuthorizationContextColl.GetWithAccessToken(ctx, accessToken)
+	authContext, err := c.authContextStore.GetWithAccessToken(ctx, accessToken)
 	if err != nil {
 		c.log.Error(err, "failed to get authorization")
 		return nil, err
@@ -98,7 +98,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	case "pid_1_5":
 		c.log.Debug("pid scope detected")
-		document, err = c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
+		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
 				VCT:             model.CredentialTypeUrnEudiPidARF151,
@@ -112,7 +112,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	case "pid_1_8":
 		c.log.Debug("pid scope detected")
-		document, err = c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
+		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
 				VCT:             model.CredentialTypeUrnEudiPidARG181,
@@ -196,7 +196,7 @@ func (c *Client) OIDCDeferredCredential(ctx context.Context, req *openid4vci.Def
 // OIDCredentialOfferURI https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-14.html#name-sending-credential-offer-by-
 func (c *Client) OIDCredentialOfferURI(ctx context.Context, req *openid4vci.CredentialOfferURIRequest) (*openid4vci.CredentialOfferParameters, error) {
 	c.log.Debug("credential offer uri", "req", req.CredentialOfferUUID)
-	doc, err := c.db.VCCredentialOfferColl.Get(ctx, req.CredentialOfferUUID)
+	doc, err := c.credentialOfferStore.Get(ctx, req.CredentialOfferUUID)
 	if err != nil {
 		c.log.Debug("failed to marshal document data", "error", err)
 		return nil, err

@@ -341,7 +341,7 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 		assert.Equal(t, "http://vc_dev_apigw:8080/credential", metadata.CredentialEndpoint)
 
 		assert.NotEmpty(t, metadata.CredentialConfigurationsSupported, "credential_configurations_supported is required")
-		assert.Len(t, metadata.CredentialConfigurationsSupported, 4, "Expected 4 credential configurations")
+		assert.Len(t, metadata.CredentialConfigurationsSupported, 5, "Expected 5 credential configurations")
 	})
 
 	// Validate display properties
@@ -354,10 +354,11 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 	// Validate credential configurations
 	t.Run("Credential Configurations", func(t *testing.T) {
 		expectedConfigs := []string{
-			"urn:edui:diploma:1",
-			"urn:eudi:pid:1",
-			"urn:eudi:ehic:1",
-			"urn:eudi:pda1:1",
+			"diploma",
+			"pid_1_5",
+			"pid_1_8",
+			"ehic",
+			"pda1",
 		}
 
 		for _, configID := range expectedConfigs {
@@ -399,7 +400,7 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 
 	// Validate specific credential configurations
 	t.Run("Diploma Configuration", func(t *testing.T) {
-		diploma, exists := metadata.CredentialConfigurationsSupported["urn:edui:diploma:1"]
+		diploma, exists := metadata.CredentialConfigurationsSupported["diploma"]
 		require.True(t, exists)
 
 		assert.Equal(t, "diploma", diploma.Scope)
@@ -411,11 +412,11 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 	})
 
 	t.Run("PID Configuration", func(t *testing.T) {
-		pid, exists := metadata.CredentialConfigurationsSupported["urn:eudi:pid:1"]
+		pid, exists := metadata.CredentialConfigurationsSupported["pid_1_5"]
 		require.True(t, exists)
 
-		assert.Equal(t, "pid", pid.Scope)
-		assert.Equal(t, "urn:eudi:pid:1", pid.VCT)
+		assert.Equal(t, "pid_1_5", pid.Scope)
+		assert.Equal(t, "urn:eudi:pid:arf-1.5:1", pid.VCT)
 		assert.Equal(t, "PID SD-JWT VC ARF 1.5", pid.Display[0].Name)
 		assert.Equal(t, "Person Identification Data", pid.Display[0].Description)
 		assert.NotEmpty(t, pid.Display[0].BackgroundImage.URI)
@@ -424,7 +425,7 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 	})
 
 	t.Run("EHIC Configuration", func(t *testing.T) {
-		ehic, exists := metadata.CredentialConfigurationsSupported["urn:eudi:ehic:1"]
+		ehic, exists := metadata.CredentialConfigurationsSupported["ehic"]
 		require.True(t, exists)
 
 		assert.Equal(t, "ehic", ehic.Scope)
@@ -434,12 +435,12 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 	})
 
 	t.Run("PDA1 Configuration", func(t *testing.T) {
-		pda1, exists := metadata.CredentialConfigurationsSupported["urn:eudi:pda1:1"]
+		pda1, exists := metadata.CredentialConfigurationsSupported["pda1"]
 		require.True(t, exists)
 
-		assert.Equal(t, "ehic", pda1.Scope) // Note: in the JSON it's "ehic" not "pda1"
+		assert.Equal(t, "pda1", pda1.Scope)
 		assert.Equal(t, "urn:eudi:pda1:1", pda1.VCT)
-		assert.Equal(t, "EHIC - SD-JWT VC", pda1.Display[0].Name)
+		assert.Equal(t, "PDA1 - SD-JWT VC", pda1.Display[0].Name)
 		assert.Equal(t, "European Portable Document Application", pda1.Display[0].Description)
 	})
 }

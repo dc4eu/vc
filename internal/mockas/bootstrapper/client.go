@@ -41,7 +41,7 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		cfg:        cfg,
 		identities: map[string]*vcclient.UploadRequest{},
 		vcClientConfig: &vcclient.Config{
-			URL: cfg.MockAS.DatastoreURL,
+			ApigwFQDN: cfg.MockAS.DatastoreURL,
 		},
 		log: log.New("bootstrapper"),
 	}

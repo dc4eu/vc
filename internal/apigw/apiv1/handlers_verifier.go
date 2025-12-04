@@ -52,7 +52,7 @@ type VerificationRequestObjectRequest struct {
 func (c *Client) VerificationRequestObject(ctx context.Context, req *VerificationRequestObjectRequest) (string, error) {
 	c.log.Debug("Verification request object", "req", req)
 
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+	authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{
 		VerifierResponseCode: req.ID,
 	})
 	if err != nil {
@@ -208,7 +208,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 	}
 
 	// Get authorization context
-	authCtx, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid})
+	authCtx, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err
@@ -285,7 +285,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 	// Retrieve documents matching the identity
 	// Use authorizationContext.VCT which should be set to the VCT value
 	c.log.Debug("Querying documents", "vct", credentialConstructorCfg.VCT, "identity", identity)
-	documents, err := c.db.VCDatastoreColl.GetDocumentsWithIdentity(ctx, &db.GetDocumentQuery{
+	documents, err := c.datastoreStore.GetDocumentsWithIdentity(ctx, &db.GetDocumentQuery{
 		Meta: &model.MetaData{
 			VCT: credentialConstructorCfg.VCT,
 		},

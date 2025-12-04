@@ -38,7 +38,7 @@ func TestAuthorize(t *testing.T) {
 			},
 			wantHTTP: &http.Response{
 				Status:           "",
-				StatusCode:       200,
+				StatusCode:       302,
 				Proto:            "",
 				ProtoMajor:       0,
 				ProtoMinor:       0,

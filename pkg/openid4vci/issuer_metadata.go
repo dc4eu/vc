@@ -135,7 +135,7 @@ type CredentialConfigurationsSupported struct {
 	Scope string `json:"scope,omitempty" yaml:"scope,omitempty"`
 
 	// CryptographicBindingMethodsSupported: OPTIONAL. Array of case sensitive strings that identify the representation of the cryptographic key material that the issued Credential is bound to, as defined in Section 7.1. Support for keys in JWK format [RFC7517] is indicated by the value jwk. Support for keys expressed as a COSE Key object [RFC8152] (for example, used in [ISO.18013-5]) is indicated by the value cose_key. When the Cryptographic Binding Method is a DID, valid values are a did: prefix followed by a method-name using a syntax as defined in Section 3.1 of [DID-Core], but without a :and method-specific-id. For example, support for the DID method with a method-name "example" would be represented by did:example.
-	CryptographicBindingMethodsSupported []string `json:"cryptographic_binding_methods_supported,omitempty" yaml:"cryptographic_binding_methods_supported,omitempty,oneof=jwk cose_key did:example"`
+	CryptographicBindingMethodsSupported []string `json:"cryptographic_binding_methods_supported,omitempty" yaml:"cryptographic_binding_methods_supported,omitempty" validate:"omitempty,dive,oneof=jwk cose_key did:example"`
 
 	// CredentialSigningAlgValuesSupported: OPTIONAL. Array of case sensitive strings that identify the algorithms that the Issuer uses to sign the issued Credential. Algorithm names used are determined by the Credential format and are defined in Appendix A.
 	CredentialSigningAlgValuesSupported []string `json:"credential_signing_alg_values_supported,omitempty" yaml:"credential_signing_alg_values_supported,omitempty"`

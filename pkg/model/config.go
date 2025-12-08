@@ -343,10 +343,20 @@ type Issuer struct {
 	APIServer      APIServer    `yaml:"api_server" validate:"required"`
 	Identifier     string       `yaml:"identifier" validate:"required"`
 	GRPCServer     GRPCServer   `yaml:"grpc_server" validate:"required"`
-	SigningKeyPath string       `yaml:"signing_key_path" validate:"required"`
+	SigningKeyPath string       `yaml:"signing_key_path" validate:"required_without=PKCS11"`
+	PKCS11         *PKCS11      `yaml:"pkcs11" validate:"omitempty"`
 	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
 	IssuerURL      string       `yaml:"issuer_url" validate:"required"`
 	WalletURL      string       `yaml:"wallet_url"`
+}
+
+// PKCS11 holds PKCS#11 HSM configuration
+type PKCS11 struct {
+	ModulePath string `yaml:"module_path" validate:"required"`
+	SlotID     uint   `yaml:"slot_id"`
+	PIN        string `yaml:"pin" validate:"required"`
+	KeyLabel   string `yaml:"key_label" validate:"required"`
+	KeyID      string `yaml:"key_id" validate:"required"`
 }
 
 // Registry holds the registry configuration

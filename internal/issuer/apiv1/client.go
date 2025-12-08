@@ -13,6 +13,7 @@ import (
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/signing"
 	"vc/pkg/trace"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -28,7 +29,8 @@ type Client struct {
 	log        *logger.Log
 	tracer     *trace.Tracer
 	auditLog   *auditlog.Service
-	privateKey any // Can be *ecdsa.PrivateKey or *rsa.PrivateKey
+	signer     signing.Signer
+	privateKey any // Can be *ecdsa.PrivateKey or *rsa.PrivateKey (legacy, kept for JWK creation)
 	publicKey  any // Can be *ecdsa.PublicKey or *rsa.PublicKey
 	jwkClaim   jwt.MapClaims
 	jwkBytes   []byte
@@ -47,7 +49,7 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 		jwkClaim: jwt.MapClaims{},
 	}
 
-	if err := c.initKeys(ctx); err != nil {
+	if err := c.initSigner(ctx); err != nil {
 		return nil, err
 	}
 
@@ -65,7 +67,48 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	return c, nil
 }
 
-func (c *Client) initKeys(ctx context.Context) error {
+// initSigner initializes the signing service (software or PKCS#11)
+func (c *Client) initSigner(ctx context.Context) error {
+	// Check if PKCS#11 is configured
+	if c.cfg.Issuer.PKCS11 != nil {
+		return c.initPKCS11Signer(ctx)
+	}
+
+	// Fall back to software signer
+	return c.initSoftwareSigner(ctx)
+}
+
+// initPKCS11Signer initializes a PKCS#11 HSM signer
+func (c *Client) initPKCS11Signer(ctx context.Context) error {
+	pkcs11Cfg := c.cfg.Issuer.PKCS11
+
+	signer, err := signing.NewPKCS11Signer(&signing.PKCS11Config{
+		ModulePath: pkcs11Cfg.ModulePath,
+		SlotID:     pkcs11Cfg.SlotID,
+		PIN:        pkcs11Cfg.PIN,
+		KeyLabel:   pkcs11Cfg.KeyLabel,
+		KeyID:      pkcs11Cfg.KeyID,
+	})
+	if err != nil {
+		c.log.Error(err, "Failed to initialize PKCS#11 signer")
+		return fmt.Errorf("failed to initialize PKCS#11 signer: %w", err)
+	}
+
+	c.signer = signer
+	c.publicKey = signer.PublicKey()
+	c.kid = signer.KeyID()
+
+	c.log.Info("Initialized PKCS#11 signer", "keyID", c.kid)
+
+	if err := c.createJWK(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// initSoftwareSigner initializes a software key signer
+func (c *Client) initSoftwareSigner(ctx context.Context) error {
 	keyByte, err := os.ReadFile(c.cfg.Issuer.SigningKeyPath)
 	if err != nil {
 		c.log.Error(err, "Failed to read signing key")
@@ -76,7 +119,7 @@ func (c *Client) initKeys(ctx context.Context) error {
 		return helpers.ErrPrivateKeyMissing
 	}
 
-	// Try to parse as PKCS8 first (supports both RSA and ECDSA)
+	// Parse the private key
 	c.privateKey, err = c.parsePrivateKey(keyByte)
 	if err != nil {
 		return fmt.Errorf("failed to parse private key: %w", err)
@@ -92,9 +135,18 @@ func (c *Client) initKeys(ctx context.Context) error {
 		return fmt.Errorf("unsupported key type: %T", c.privateKey)
 	}
 
+	// Create JWK first to get the kid
 	if err := c.createJWK(ctx); err != nil {
 		return err
 	}
+
+	// Create software signer
+	c.signer, err = signing.NewSoftwareSigner(c.privateKey, c.kid)
+	if err != nil {
+		return fmt.Errorf("failed to create software signer: %w", err)
+	}
+
+	c.log.Info("Initialized software signer", "keyID", c.kid)
 
 	return nil
 }

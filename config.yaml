@@ -104,6 +104,12 @@ issuer:
   grpc_server:
     addr: vc_dev_issuer:8090
   signing_key_path: "/private_ec256.pem"
+  #pkcs11:
+  #  module_path: /usr/lib/softhsm/libsofthsm2.so
+  #  slot_id: 0
+  #  pin: "1234"
+  #  key_label: "issuer-key"
+  #  key_id: "issuer-key-1"
   issuer_url: "http://172.16.50.2:8080"
   wallet_url: ""
   jwt_attribute:

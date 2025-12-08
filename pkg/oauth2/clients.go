@@ -1,7 +1,9 @@
 package oauth2
 
 import (
-	"fmt"
+	"errors"
+	"net/url"
+	"reflect"
 	"slices"
 )
 
@@ -13,21 +15,28 @@ type Client struct {
 
 type Clients map[string]*Client
 
-func (c *Clients) Allow(clientID, redirectURI, scope string) bool {
+func (c *Clients) Allow(clientID, redirectURI, scope string) (bool, error) {
 	client, ok := (*c)[clientID]
 	if !ok {
-		fmt.Println("client not found")
-		return false
+		return false, errors.New("client not found in config")
 	}
 
-	if client.RedirectURI != redirectURI {
-		fmt.Println("redirect uri not match")
-		return false
+	urlFromWallet, err := url.Parse(redirectURI)
+	if err != nil {
+		return false, err
+	}
+	urlFromConfig, err := url.Parse(client.RedirectURI)
+	if err != nil {
+		return false, err
+	}
+
+	if !reflect.DeepEqual(urlFromWallet, urlFromConfig) {
+		return false, errors.New("redirect_url do not match")
 	}
 
 	if !slices.Contains(client.Scopes, scope) {
-		return false
+		return false, errors.New("requested scope is not allowed for this client")
 	}
 
-	return true
+	return true, nil
 }

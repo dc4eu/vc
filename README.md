@@ -34,6 +34,9 @@ linux/amd64 is consider supported, other build options may work.
 
 `make restart`
 
+### Setup PKI
+`make pki`
+
 ## Swagger
 
 ### Endpoint

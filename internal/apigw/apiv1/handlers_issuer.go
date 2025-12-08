@@ -14,8 +14,6 @@ import (
 	"vc/pkg/openid4vci"
 
 	"github.com/golang-jwt/jwt/v5"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // OIDCCredentialOffer https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-offer-endpoint
@@ -44,12 +42,12 @@ func (c *Client) OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, erro
 //	@Tags			dc4eu
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	apiv1_issuer.MakeSDJWTReply	"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse		"Bad Request"
-//	@Param			req	body		openid4vci.CredentialRequest			true	" "
+//	@Success		200	{object}	apiv1_issuer.MakeSDJWTReply		"Success"
+//	@Failure		400	{object}	helpers.ErrorResponse			"Bad Request"
+//	@Param			req	body		openid4vci.CredentialRequest	true	" "
 //	@Router			/credential [post]
 func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
-	c.log.Debug("credential", "req", req.Proof.ProofType)
+	c.log.Debug("credential", "req", req.Proof.ProofType, "format", req.Format)
 
 	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.Headers.DPoP)
 	if err != nil {
@@ -74,7 +72,7 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "accessToken", accessToken)
 
-	authContext, err := c.db.VCAuthorizationContextColl.GetWithAccessToken(ctx, accessToken)
+	authContext, err := c.authContextStore.GetWithAccessToken(ctx, accessToken)
 	if err != nil {
 		c.log.Error(err, "failed to get authorization")
 		return nil, err
@@ -84,7 +82,8 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	document := &model.CompleteDocument{}
 
-	switch authContext.Scope {
+	// TODO(masv): make this flexible, use config.yaml credential constructor
+	switch authContext.Scope[0] {
 	case "ehic", "pda1", "diploma":
 		c.log.Debug("ehic/pda1/diploma scope detected")
 		docs := c.documentCache.Get(authContext.SessionID).Value()
@@ -93,15 +92,30 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			return nil, errors.New("no documents found for session " + authContext.SessionID)
 		}
 		for _, doc := range docs {
-			document = &doc
+			document = doc
+			break
 		}
 
-	case "pid":
+	case "pid_1_5":
 		c.log.Debug("pid scope detected")
-		document, err = c.db.VCDatastoreColl.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
+		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
-				DocumentType:    authContext.DocumentType,
+				VCT:             model.CredentialTypeUrnEudiPidARF151,
+			},
+			Identity: authContext.Identity,
+		})
+		if err != nil {
+			c.log.Debug("failed to get document", "error", err)
+			return nil, err
+		}
+
+	case "pid_1_8":
+		c.log.Debug("pid scope detected")
+		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
+			Meta: &model.MetaData{
+				AuthenticSource: authContext.AuthenticSource,
+				VCT:             model.CredentialTypeUrnEudiPidARG181,
 			},
 			Identity: authContext.Identity,
 		})
@@ -128,19 +142,10 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	}
 
 	c.log.Debug("Here 1", "jwk", jwk)
-	c.log.Debug("MakeSDJWT request", "documentType", document.Meta.DocumentType)
 
-	//	// Build SDJWT
-	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		c.log.Error(err, "Failed to connect to issuer")
-		return nil, err
-	}
-	defer conn.Close()
-	client := apiv1_issuer.NewIssuerServiceClient(conn)
-
-	reply, err := client.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		DocumentType: document.Meta.DocumentType,
+	// Use the pre-initialized gRPC client
+	reply, err := c.issuerClient.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
+		Scope:        authContext.Scope[0],
 		DocumentData: documentData,
 		Jwk:          jwk,
 	})
@@ -164,8 +169,13 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		c.log.Debug("No credentials returned from issuer")
 		return nil, helpers.ErrNoDocumentFound
 	case 1:
+		credential := reply.Credentials[0].Credential
+		response.Credentials = []openid4vci.Credential{
+			{
+				Credential: credential,
+			},
+		}
 		c.log.Debug("Single credential returned from issuer")
-		response.Credential = reply.Credentials[0].Credential
 		return response, nil
 	default:
 		c.log.Debug("Multiple credentials returned from issuer")
@@ -186,7 +196,7 @@ func (c *Client) OIDCDeferredCredential(ctx context.Context, req *openid4vci.Def
 // OIDCredentialOfferURI https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-14.html#name-sending-credential-offer-by-
 func (c *Client) OIDCredentialOfferURI(ctx context.Context, req *openid4vci.CredentialOfferURIRequest) (*openid4vci.CredentialOfferParameters, error) {
 	c.log.Debug("credential offer uri", "req", req.CredentialOfferUUID)
-	doc, err := c.db.VCCredentialOfferColl.Get(ctx, req.CredentialOfferUUID)
+	doc, err := c.credentialOfferStore.Get(ctx, req.CredentialOfferUUID)
 	if err != nil {
 		c.log.Debug("failed to marshal document data", "error", err)
 		return nil, err
@@ -220,7 +230,7 @@ func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuer
 // RevokeRequest is the request for GenericRevoke
 type RevokeRequest struct {
 	AuthenticSource string `json:"authentic_source"`
-	DocumentType    string `json:"document_type"`
+	VCT             string `json:"vct"`
 	DocumentID      string `json:"document_id"`
 	RevocationID    string `json:"revocation_id"`
 }
@@ -245,16 +255,8 @@ type RevokeReply struct {
 //	@Param			req	body		RevokeRequest			true	" "
 //	@Router			/revoke [post]
 func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
-	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
-
-	conn, err := grpc.NewClient(c.cfg.Registry.GRPCServer.Addr, optInsecure)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	client := apiv1_registry.NewRegistryServiceClient(conn)
-	resp, err := client.Revoke(ctx, &apiv1_registry.RevokeRequest{
+	// Use the pre-initialized gRPC client
+	resp, err := c.registryClient.Revoke(ctx, &apiv1_registry.RevokeRequest{
 		Entity: "mura",
 	})
 	if err != nil {

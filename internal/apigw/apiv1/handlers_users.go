@@ -4,62 +4,24 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 	"vc/pkg/model"
-	"vc/pkg/pid"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 	"vc/pkg/vcclient"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) error {
-	pid := pid.Document{
-		Identity: req.Identity,
-	}
-
-	documentData, err := pid.Marshal()
-	if err != nil {
-		c.log.Error(err, "failed to marshal document data")
-		return err
-	}
-
-	// build a new document
-	uploadRequest := &UploadRequest{
-		Meta: &model.MetaData{
-			AuthenticSource:           req.Meta.AuthenticSource,
-			DocumentVersion:           "1.0.0",
-			DocumentType:              req.Meta.DocumentType,
-			DocumentID:                fmt.Sprintf("generic.pid.%s", uuid.NewString()),
-			RealData:                  false,
-			Collect:                   &model.Collect{},
-			Revocation:                &model.Revocation{},
-			CredentialValidFrom:       0,
-			CredentialValidTo:         0,
-			DocumentDataValidationRef: "",
-		},
-		Identities: []model.Identity{*req.Identity},
-		DocumentDisplay: &model.DocumentDisplay{
-			Version: "1.0.0",
-			Type:    "",
-			DescriptionStructured: map[string]any{
-				"en": "Generic PID Issuer",
-			},
-		},
-		DocumentData:        documentData,
-		DocumentDataVersion: "1.0.0",
-	}
-
 	// store user and password in the database before document is saved - to check constraints that the user not already exists
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	err = c.db.VCUsersColl.Save(ctx, &model.OAuthUsers{
+	err = c.usersStore.Save(ctx, &model.OAuthUsers{
 		Username:        req.Username,
 		Password:        string(passwordHash),
 		Identity:        req.Identity,
-		DocumentType:    req.Meta.DocumentType,
 		AuthenticSource: req.Meta.AuthenticSource,
 	})
 	if err != nil {
@@ -67,33 +29,28 @@ func (c *Client) AddPIDUser(ctx context.Context, req *vcclient.AddPIDRequest) er
 		return err
 	}
 
-	// store document
-	if err := c.Upload(ctx, uploadRequest); err != nil {
-		c.log.Error(err, "failed to upload document")
-		return err
-	}
-
 	return nil
 }
 
 func (c *Client) LoginPIDUser(ctx context.Context, req *vcclient.LoginPIDUserRequest) error {
-	c.log.Debug("LoginPIDUser called", "username", req.Username)
-	user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
+	username := strings.ToLower(req.Username)
+
+	c.log.Debug("LoginPIDUser called", "username", username)
+	user, err := c.usersStore.GetUser(ctx, username)
 	if err != nil {
-		return fmt.Errorf("username %s not found", req.Username)
+		return fmt.Errorf("username %s not found", username)
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return fmt.Errorf("password mismatch for username %s", req.Username)
+		return fmt.Errorf("password mismatch for username %s", username)
 	}
 
 	update := &model.AuthorizationContext{
 		Identity:        user.Identity,
-		DocumentType:    user.DocumentType,
 		AuthenticSource: user.AuthenticSource,
 	}
 	// Update the authorization with the user identity
-	if err := c.db.VCAuthorizationContextColl.AddIdentity(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}, update); err != nil {
+	if err := c.authContextStore.AddIdentity(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}, update); err != nil {
 		c.log.Error(err, "failed to add identity to authorization context")
 		return err
 	}
@@ -107,7 +64,7 @@ func (c *Client) UserAuthenticSourceLookup(ctx context.Context, req *vcclient.Us
 
 	if req.AuthenticSource == "" && req.SessionID != "" {
 		c.log.Debug("userAuthenticSourceLookup called without authentic source, looking up by session ID", "session_id", req.SessionID)
-		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+		authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{
 			SessionID: req.SessionID,
 		})
 		if err != nil {
@@ -135,7 +92,7 @@ func (c *Client) UserAuthenticSourceLookup(ctx context.Context, req *vcclient.Us
 
 	} else if req.AuthenticSource != "" {
 		c.log.Debug("userAuthenticSourceLookup called with authentic source", "authentic_source", req.AuthenticSource)
-		if err := c.db.VCAuthorizationContextColl.SetAuthenticSource(ctx, &model.AuthorizationContext{SessionID: req.SessionID}, req.AuthenticSource); err != nil {
+		if err := c.authContextStore.SetAuthenticSource(ctx, &model.AuthorizationContext{SessionID: req.SessionID}, req.AuthenticSource); err != nil {
 			c.log.Error(err, "failed to set authentic source")
 			return nil, fmt.Errorf("failed to set authentic source %s: %w", req.AuthenticSource, err)
 		}
@@ -147,7 +104,7 @@ func (c *Client) UserAuthenticSourceLookup(ctx context.Context, req *vcclient.Us
 func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest) (*vcclient.UserLookupReply, error) {
 	c.log.Debug("UserLookup called")
 
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+	authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{
 		RequestURI: req.RequestURI,
 	})
 	if err != nil {
@@ -168,10 +125,10 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 
 	switch req.AuthMethod {
 	case model.AuthMethodBasic:
-		user, err := c.db.VCUsersColl.GetUser(ctx, req.Username)
+		user, err := c.usersStore.GetUser(ctx, strings.ToLower(req.Username))
 		if err != nil {
-			c.log.Error(err, "failed to get user", "username", req.Username)
-			return nil, fmt.Errorf("user %s not found: %w", req.Username, err)
+			c.log.Error(err, "failed to get user", "username", strings.ToLower(req.Username))
+			return nil, fmt.Errorf("user %s not found: %w", strings.ToLower(req.Username), err)
 		}
 
 		svgTemplateClaims = map[string]vcclient.SVGClaim{
@@ -194,30 +151,47 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 		}
 
 	case model.AuthMethodPID:
-		authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{VerifierResponseCode: req.ResponseCode})
+		authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{VerifierResponseCode: req.ResponseCode})
 		if err != nil {
 			c.log.Error(err, "failed to get authorization context")
 			return nil, err
 		}
 
-		docs := c.documentCache.Get(authorizationContext.SessionID).Value()
-		if docs == nil {
+		item := c.documentCache.Get(authorizationContext.SessionID)
+		if item == nil {
 			c.log.Error(nil, "no documents found in cache for session")
 			return nil, fmt.Errorf("no documents found for session %s", authorizationContext.SessionID)
 		}
 
+		docs := item.Value()
+		if len(docs) == 0 {
+			c.log.Error(nil, "no documents found in cache for session", "docs_len", len(docs))
+			return nil, fmt.Errorf("no documents found for session %s", authorizationContext.SessionID)
+		}
+
+		c.log.Debug("userLookup - retrieved docs from cache", "session_id", authorizationContext.SessionID, "num_docs", len(docs))
+
 		// TODO(masv): fix this monstrosity
 		authenticSource := ""
-		for _, doc := range docs {
+		for key, doc := range docs {
+			c.log.Debug("userLookup - examining doc", "key", key, "authentic_source", doc.Meta.AuthenticSource, "doc_nil", doc == nil)
 			authenticSource = doc.Meta.AuthenticSource
 			break
 		}
+		c.log.Debug("userLookup", "authenticSource", authenticSource, "docs", docs)
 
 		doc, ok := docs[authenticSource]
 		if !ok {
-			c.log.Error(nil, "no document found for authentic source")
-			return nil, fmt.Errorf("no document found for authentic source %s", authorizationContext.AuthenticSource)
+			c.log.Error(nil, "no document found for authentic source", "authenticSource", authenticSource, "available_keys", func() []string {
+				keys := make([]string, 0, len(docs))
+				for k := range docs {
+					keys = append(keys, k)
+				}
+				return keys
+			}())
+			return nil, fmt.Errorf("no document found for authentic source %s", authenticSource)
 		}
+		c.log.Debug("userLookup", "doc", doc)
 
 		jsonPaths, err := req.VCTM.ClaimJSONPath()
 		if err != nil {
@@ -225,11 +199,15 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 			return nil, err
 		}
 
-		claimValues, err := sdjwt3.Filter(doc.DocumentData, jsonPaths.Displayable)
+		c.log.Debug("userLookup", "doc", doc, "jsonPath", jsonPaths)
+
+		claimValues, err := sdjwtvc.ExtractClaimsByJSONPath(doc.DocumentData, jsonPaths.Displayable)
 		if err != nil {
-			c.log.Error(err, "failed to filter document data for SVG template claims")
-			return nil, fmt.Errorf("failed to filter document data for SVG template claims")
+			c.log.Error(err, "failed to extract claim values from document data", "json_paths", jsonPaths.Displayable, "document_data", doc.DocumentData)
+			return nil, fmt.Errorf("failed to extract claim values from document data: %w", err)
 		}
+
+		c.log.Debug("extracted claim values", "extracted_count", len(claimValues), "requested_count", len(jsonPaths.Displayable), "claims", claimValues)
 
 		for _, claim := range req.VCTM.Claims {
 			value, ok := claimValues[claim.SVGID].(string)
@@ -249,7 +227,9 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 		return nil, fmt.Errorf("unsupported auth method for user lookup: %s", req.AuthMethod)
 	}
 
-	if err := c.db.VCAuthorizationContextColl.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
+	c.log.Debug("lookupUser", "svgTemplateClaims", svgTemplateClaims)
+
+	if err := c.authContextStore.Consent(ctx, &model.AuthorizationContext{RequestURI: req.RequestURI}); err != nil {
 		c.log.Error(err, "failed to consent for user", "username", req.Username)
 		return nil, fmt.Errorf("failed to consent for user %s: %w", req.Username, err)
 	}
@@ -258,6 +238,8 @@ func (c *Client) UserLookup(ctx context.Context, req *vcclient.UserLookupRequest
 		SVGTemplateClaims: svgTemplateClaims,
 		RedirectURL:       redirectURL.String(),
 	}
+
+	c.log.Debug("userlookup", "reply", reply)
 
 	return reply, nil
 }

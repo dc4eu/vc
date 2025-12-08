@@ -1,16 +1,77 @@
-.PHONY : docker-build docker-push release
+.PHONY : docker-build docker-push release build-issuer-hsm build-apigw-saml build-apigw-oidcrp build-apigw-all test-saml test-oidcrp test-vc20 test-pkcs11 test-all-tags docker-build-apigw-saml docker-build-apigw-oidcrp docker-build-apigw-all docker-build-issuer-hsm pki
 
 NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 CURRENT_BRANCH 			:= $(shell git rev-parse --abbrev-ref HEAD)
-SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet
+SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet verifier-proxy
+PORT                    := 8888
+W3C_TEST_SUITE_DIR      := /tmp/w3c-test-suite
 
-test: test-verifier
+pki:
+	$(info Setting up PKI)
+	cd pki/; ./create_pki.sh
+	cd developer_tools/; ./gen_ec_sign_key.sh; ./gen_rsa_sign_key.sh
+
+test: test-apigw test-issuer test-mockas test-persistent test-registry test-ui test-verifier test-verifier-proxy
+
+test-apigw:
+	$(info Testing apigw)
+	go test -v ./cmd/apigw/... ./internal/apigw/...
+
+test-issuer:
+	$(info Testing issuer)
+	go test -v ./cmd/issuer/... ./internal/issuer/...
+
+test-mockas:
+	$(info Testing mockas)
+	go test -v ./cmd/mockas/... ./internal/mockas/...
+
+test-persistent:
+	$(info Testing persistent)
+	go test -v ./cmd/persistent/... ./internal/persistent/...
+
+test-registry:
+	$(info Testing registry)
+	go test -v ./cmd/registry/... ./internal/registry/...
+
+test-ui:
+	$(info Testing ui)
+	go test -v ./cmd/ui/... ./internal/ui/...
 
 test-verifier:
 	$(info Testing verifier)
-	go test -v ./cmd/verifier
+	go test -v ./cmd/verifier/... ./internal/verifier/...
+
+test-verifier-proxy:
+	$(info Testing verifier-proxy)
+	go test -v ./cmd/verifier-proxy/... ./internal/verifier_proxy/...
+
+# W3C VC 2.0 Test Suite targets
+create-w3c-test-suite:
+	$(info Creating W3C test suite in $(W3C_TEST_SUITE_DIR))
+	rm -rf $(W3C_TEST_SUITE_DIR)
+	mkdir -p $(W3C_TEST_SUITE_DIR)
+	cd $(W3C_TEST_SUITE_DIR) && \
+	git clone https://github.com/w3c/vc-data-model-2.0-test-suite.git . && \
+	npm install
+	./scripts/gen-w3c-config.sh $(PORT)
+
+run-w3c-test: build-vc20-test-server
+	$(info Starting test server on port $(PORT))
+	./bin/vc_vc20-test-server -port $(PORT)&
+	$(info Running W3C test suite against server on port $(PORT))
+	$(info Logs will be saved to /tmp/w3c-test.log)
+	cd $(W3C_TEST_SUITE_DIR) && \
+	SERVER_URL=http://localhost:$(PORT) npm test 2>&1 | tee /tmp/w3c-test.log ; \
+	curl -s http://localhost:$(PORT)/stop 2>/dev/null || true ; \
+	sleep 1
+	$(info Test results saved to /tmp/w3c-test.log)
+	@echo ""; \
+	echo "Test Summary:"; \
+	echo "============"; \
+	grep -c "✓" /tmp/w3c-test.log 2>/dev/null && echo " passing tests" || echo "Tests completed"; \
+	grep -c "❌" /tmp/w3c-test.log 2>/dev/null && echo " failing tests" || true
 
 gosec:
 	$(info Run gosec)
@@ -51,13 +112,18 @@ DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
 DOCKER_TAG_WALLET 		:= docker.sunet.se/dc4eu/wallet:$(VERSION)
+DOCKER_TAG_VERIFIER_PROXY := docker.sunet.se/dc4eu/verifier-proxy:$(VERSION)
 
 
-build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui
+build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui build-verifier-proxy build-vc20-test-server
 
 build-verifier:
 	$(info Building verifier)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier ${LDFLAGS} ./cmd/verifier/main.go
+
+build-vc20-test-server:
+	$(info Building vc20-test-server)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags vc20 -v -o ./bin/$(NAME)_vc20-test-server ${LDFLAGS} ./cmd/vc20-test-server/main.go
 
 build-registry:
 	$(info Building registry)
@@ -83,7 +149,53 @@ build-wallet:
 	$(info Building wallet)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_wallet ${LDFLAGS} ./cmd/wallet/main.go
 
-docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
+build-verifier-proxy:
+	$(info Building verifier-proxy)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier-proxy ${LDFLAGS} ./cmd/verifier-proxy/main.go
+
+# Build targets with optional features (build tags)
+# Usage: make build-issuer-hsm  (builds issuer with PKCS#11 HSM support)
+#        make build-apigw-saml  (builds apigw with SAML support)
+#        make build-apigw-all   (builds apigw with all optional features)
+
+build-issuer-hsm:
+	$(info Building issuer with PKCS#11 HSM support)
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags pkcs11 -v -o ./bin/$(NAME)_issuer-hsm ${LDFLAGS_DYNAMIC} ./cmd/issuer/main.go
+
+build-apigw-saml:
+	$(info Building apigw with SAML support)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags saml -v -o ./bin/$(NAME)_apigw-saml ${LDFLAGS} ./cmd/apigw/main.go
+
+build-apigw-oidcrp:
+	$(info Building apigw with OIDC RP support)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags oidcrp -v -o ./bin/$(NAME)_apigw-oidcrp ${LDFLAGS} ./cmd/apigw/main.go
+
+build-apigw-all:
+	$(info Building apigw with all optional features - SAML and OIDC RP)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags "saml,oidcrp" -v -o ./bin/$(NAME)_apigw-all ${LDFLAGS} ./cmd/apigw/main.go
+
+# Test targets with build tags
+test-saml:
+	$(info Testing with SAML build tag)
+	go test -tags saml -v ./pkg/saml/... ./internal/apigw/...
+
+test-oidcrp:
+	$(info Testing with OIDC RP build tag)
+	go test -tags oidcrp -v ./pkg/oidcrp/... ./internal/apigw/...
+
+test-vc20:
+	$(info Testing with VC 2.0 build tag)
+	go test -tags vc20 -v ./pkg/vc20/... ./pkg/authzen/... ./pkg/keyresolver/...
+
+test-pkcs11:
+	$(info Testing with PKCS#11 build tag)
+	go test -tags pkcs11 -v ./pkg/signing/...
+
+test-all-tags:
+	$(info Testing with all build tags)
+	go test -tags "saml,oidcrp,vc20,pkcs11" -v ./...
+
+docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui docker-build-verifier-proxy
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
@@ -120,6 +232,35 @@ docker-build-ui:
 docker-build-wallet:
 	$(info Docker building wallet with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=wallet --tag $(DOCKER_TAG_WALLET) --file dockerfiles/worker .
+
+docker-build-verifier-proxy:
+	$(info Docker building verifier-proxy with tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/worker .
+
+# Docker build targets with build tags
+# Usage: make docker-build-apigw-saml VERSION=1.0.0
+#        make docker-build-issuer-hsm VERSION=1.0.0
+
+DOCKER_TAG_APIGW_SAML 		:= docker.sunet.se/dc4eu/apigw-saml:$(VERSION)
+DOCKER_TAG_APIGW_OIDCRP 	:= docker.sunet.se/dc4eu/apigw-oidcrp:$(VERSION)
+DOCKER_TAG_APIGW_ALL 		:= docker.sunet.se/dc4eu/apigw-full:$(VERSION)
+DOCKER_TAG_ISSUER_HSM 		:= docker.sunet.se/dc4eu/issuer-hsm:$(VERSION)
+
+docker-build-apigw-saml:
+	$(info Docker building apigw with SAML support, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS=saml --tag $(DOCKER_TAG_APIGW_SAML) --file dockerfiles/worker .
+
+docker-build-apigw-oidcrp:
+	$(info Docker building apigw with OIDC RP support, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS=oidcrp --tag $(DOCKER_TAG_APIGW_OIDCRP) --file dockerfiles/worker .
+
+docker-build-apigw-all:
+	$(info Docker building apigw with all features - SAML and OIDC RP, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=apigw --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS="saml,oidcrp" --tag $(DOCKER_TAG_APIGW_ALL) --file dockerfiles/worker .
+
+docker-build-issuer-hsm:
+	$(info Docker building issuer with PKCS#11 HSM support, tag: $(VERSION))
+	docker build --build-arg SERVICE_NAME=issuer --build-arg BUILDTAG=$(VERSION) --build-arg GO_BUILD_TAGS=pkcs11 --tag $(DOCKER_TAG_ISSUER_HSM) --file dockerfiles/worker .
 
 docker-push-gobuild:
 	$(info Pushing docker images)
@@ -238,15 +379,38 @@ clean_docker_images:
 ci_build: docker-build docker-push
 	$(info CI Build)
 
-proto: proto-status proto-registry proto-issuer
+# Check if protoc is installed
+check-protoc:
+	@which protoc > /dev/null || (echo ""; \
+		echo "ERROR: protoc (Protocol Buffer Compiler) is not installed"; \
+		echo ""; \
+		echo "Please install protoc using one of these methods:"; \
+		echo ""; \
+		echo "Ubuntu/Debian:"; \
+		echo "  sudo apt-get update"; \
+		echo "  sudo apt-get install -y protobuf-compiler"; \
+		echo ""; \
+		echo "macOS (Homebrew):"; \
+		echo "  brew install protobuf"; \
+		echo ""; \
+		echo "Or download from: https://github.com/protocolbuffers/protobuf/releases"; \
+		echo ""; \
+		echo "After installation, also install Go plugins:"; \
+		echo "  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest"; \
+		echo "  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest"; \
+		echo ""; \
+		exit 1)
+	@protoc --version
 
-proto-registry:
+proto: check-protoc proto-status proto-registry proto-issuer
+
+proto-registry: check-protoc
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go-grpc_out=. --go_opt=module=vc --go_out=. ./proto/v1-registry.proto
 
-proto-status:
+proto-status: check-protoc
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-status-model.proto 
 
-proto-issuer:
+proto-issuer: check-protoc
 	protoc --proto_path=./proto/ --go-grpc_opt=module=vc --go_opt=module=vc --go_out=. --go-grpc_out=. ./proto/v1-issuer.proto 
 
 swagger: swagger-registry swagger-verifier swagger-apigw swagger-issuer swagger-fmt
@@ -289,7 +453,11 @@ vscode:
 	sudo apt-get update && sudo apt-get install -y \
 		protobuf-compiler \
 		netcat-openbsd \
-		plantuml
+		plantuml \
+		docker.io \
+		docker-compose
+	$(info Install act for local GitHub Actions testing)
+	curl -sfL https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b /usr/local/bin
 	$(info Install go packages)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
@@ -298,3 +466,35 @@ vscode:
 	go install github.com/securego/gosec/v2/cmd/gosec@latest && \
 	go install golang.org/x/vuln/cmd/govulncheck@latest && \
 	go install honnef.co/go/tools/cmd/staticcheck@latest
+
+w3c-test: build-vc20-test-server
+	$(info Running W3C test suite)
+	@echo "Stopping any existing server..."
+	@killall $(NAME)_vc20-test-server 2>/dev/null || true
+	@echo "Starting server..."
+	@./bin/$(NAME)_vc20-test-server > server.log 2>&1 & echo $$! > server.pid
+	@sleep 2
+	@echo "Running tests..."
+	@cd $(W3C_TEST_SUITE_DIR) && \
+	SERVER_URL=http://localhost:$(PORT) npm test > /tmp/w3c-test.log 2>&1 || true
+	@echo "Stopping server..."
+	@kill `cat server.pid` || true
+	@rm server.pid
+	@echo "Test results saved to /tmp/w3c-test.log"
+	@echo "Summary:"
+	@grep "✓" /tmp/w3c-test.log | wc -l | tr -d '\n' && echo " passing tests"
+	@grep "❌" /tmp/w3c-test.log | wc -l | tr -d '\n' && echo " failing tests"
+
+test-workflows:
+	$(info Testing all GitHub Actions workflows locally with act)
+	@echo '{"action": "closed", "pull_request": {"merged": true}}' > /tmp/act-pr-event.json
+	act -l
+	@echo "--- Running pull_request workflow (dry run) ---"
+	act pull_request -e /tmp/act-pr-event.json -n
+	@rm -f /tmp/act-pr-event.json
+
+test-workflows-run:
+	$(info Running all GitHub Actions workflows locally with act)
+	@echo '{"action": "closed", "pull_request": {"merged": true}}' > /tmp/act-pr-event.json
+	act pull_request -e /tmp/act-pr-event.json
+	@rm -f /tmp/act-pr-event.json

@@ -45,109 +45,6 @@ var vpFormats = []byte(
     }
 `)
 
-var dcqlQuery = []byte(
-	`{
-  "credentials": [
-    {
-      "id": "CustomVerifiableId1_5",
-      "format": "vc+sd-jwt",
-      "meta": {
-        "vct_values": [
-          "urn:eu.europa.ec.eudi:pid:1"
-        ]
-      },
-      "claims": [
-        {
-          "path": [
-            "given_name"
-          ]
-        },
-        {
-          "path": [
-            "given_name_birth"
-          ]
-        },
-        {
-          "path": [
-            "family_name"
-          ]
-        }
-      ]
-    }
-  ],
-  "credential_sets": [
-    {
-      "options": [
-        [
-          "CustomVerifiableId1_5"
-        ]
-      ],
-      "purpose": "Purpose not specified"
-    }
-  ]
-}
-`)
-
-var presentationDefinition = []byte(
-	`{
-    "id": "CustomVerifiableId",
-    "title": "PID ARF v1.8",
-    "description": "Select the format and the fields you want to request",
-    "input_descriptors": [
-      {
-        "id": "SdJwtPID",
-        "name": "Custom PID",
-        "constraints": {
-          "limit_disclosure": "required",
-          "fields": [
-            {
-              "name": "VC type",
-              "path": [
-                "$.vct"
-              ],
-              "filter": {
-                "type": "string",
-                "const": "urn:eudi:pid:1"
-              }
-            },
-            {
-              "name": "First name",
-              "path": [
-                "$.given_name"
-              ],
-              "filter": {}
-            },
-             {
-              "name": "Family name",
-              "path": [
-                "$.family_name"
-              ],
-              "filter": {}
-            },
-            {
-              "name": "Birth date",
-              "path": [
-                "$.birthdate"
-              ],
-              "filter": {}
-            }
-          ]
-        },
-        "format": {
-          "vc+sd-jwt": {
-            "sd-jwt_alg_values": [
-              "ES256"
-            ],
-            "kb-jwt_alg_values": [
-              "ES256"
-            ]
-          }
-        }
-      }
-    ]
-}
-`)
-
 type VerificationRequestObjectRequest struct {
 	ID string `form:"id" uri:"id"`
 }
@@ -155,7 +52,7 @@ type VerificationRequestObjectRequest struct {
 func (c *Client) VerificationRequestObject(ctx context.Context, req *VerificationRequestObjectRequest) (string, error) {
 	c.log.Debug("Verification request object", "req", req)
 
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+	authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{
 		VerifierResponseCode: req.ID,
 	})
 	if err != nil {
@@ -163,17 +60,41 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", err
 	}
 
-	dcql := &openid4vp.DCQL{}
-	if err := json.Unmarshal(dcqlQuery, &dcql); err != nil {
-		return "", err
+	dcql := &openid4vp.DCQL{
+		Credentials: []openid4vp.CredentialQuery{
+			{
+				ID:       authorizationContext.Scope[0],
+				Format:   "dc+sd-jwt",
+				Multiple: false,
+				Meta: openid4vp.MetaQuery{
+					VCTValues: []string{model.CredentialTypeUrnEudiPidARF151, model.CredentialTypeUrnEudiPidARG181},
+				},
+				TrustedAuthorities:                []openid4vp.TrustedAuthority{},
+				RequireCryptographicHolderBinding: false,
+				Claims: []openid4vp.ClaimQuery{
+					{
+						Path: []string{"given_name"},
+					},
+					{
+						Path: []string{"birthdate"},
+					},
+					{
+						Path: []string{"family_name"},
+					},
+				},
+				ClaimSet: []string{},
+			},
+		},
+		CredentialSets: []openid4vp.CredentialSetQuery{
+			{
+				Options: [][]string{
+					{authorizationContext.Scope[0]},
+				},
+				Required: false,
+				Purpose:  "fetch credential for " + authorizationContext.Scope[0],
+			},
+		},
 	}
-
-	pd := &openid4vp.PresentationDefinitionParameter{}
-	if err := json.Unmarshal(presentationDefinition, &pd); err != nil {
-		return "", err
-	}
-
-	pd.InputDescriptors[0].Purpose = fmt.Sprintf("Present your credential(s) to get your %s", authorizationContext.Scope)
 
 	vf := map[string]map[string][]string{}
 	if err := json.Unmarshal(vpFormats, &vf); err != nil {
@@ -186,17 +107,15 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 	}
 
 	authorizationRequest := openid4vp.RequestObject{
-		ResponseURI:            "https://vc-interop-3.sunet.se/verification/direct_post",
-		AUD:                    "https://self-issued.me/v2",
-		ISS:                    authorizationContext.ClientID,
-		ClientID:               authorizationContext.ClientID,
-		ResponseType:           "vp_token",
-		ResponseMode:           "direct_post.jwt",
-		State:                  authorizationContext.State,
-		Nonce:                  authorizationContext.Nonce,
-		DCQLQuery:              dcql,
-		PresentationDefinition: pd,
-
+		ResponseURI:  c.cfg.APIGW.ExternalServerURL + "/verification/direct_post",
+		AUD:          "https://self-issued.me/v2",
+		ISS:          authorizationContext.ClientID,
+		ClientID:     authorizationContext.ClientID,
+		ResponseType: "vp_token",
+		ResponseMode: "direct_post.jwt",
+		State:        authorizationContext.State,
+		Nonce:        authorizationContext.Nonce,
+		DCQLQuery:    dcql,
 		ClientMetadata: &openid4vp.ClientMetadata{
 			VPFormats: vf,
 			JWKS: &openid4vp.Keys{
@@ -258,12 +177,14 @@ type VerificationDirectPostResponse struct {
 func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDirectPostRequest) (*VerificationDirectPostResponse, error) {
 	c.log.Debug("Verification direct-post")
 
+	// Extract KID from JWE header
 	kid, err := req.GetKID()
 	if err != nil {
 		c.log.Error(err, "failed to get KID from request")
 		return nil, err
 	}
 
+	// Get ephemeral private key from cache
 	privateEphemeralJWK := c.ephemeralEncryptionKeyCache.Get(kid).Value()
 	if privateEphemeralJWK == nil {
 		c.log.Debug("No ephemeral key found in cache", "kid", kid)
@@ -272,45 +193,101 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 
 	c.log.Debug("Found ephemeral key in cache", "kid", kid)
 
+	// Decrypt JWE response
 	decryptedJWE, err := jwe.Decrypt([]byte(req.Response), jwe.WithKey(jwa.ECDH_ES(), privateEphemeralJWK))
 	if err != nil {
 		c.log.Error(err, "failed to decrypt JWE")
 		return nil, err
 	}
 
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid})
+	// Parse response parameters using openid4vp
+	vpResponse := openid4vp.VPResponse{}
+	if err := json.Unmarshal(decryptedJWE, &vpResponse); err != nil {
+		c.log.Error(err, "failed to unmarshal decrypted JWE")
+		return nil, err
+	}
+
+	// Get authorization context
+	authCtx, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{EphemeralEncryptionKeyID: kid})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err
 	}
 
-	responseParameters := &openid4vp.ResponseParameters{}
-	if err := json.Unmarshal(decryptedJWE, &responseParameters); err != nil {
-		c.log.Error(err, "failed to unmarshal decrypted JWE")
-		return nil, err
+	c.log.Debug("VP Response received", "vp_token_keys", vpResponse.VPToken, "scope", authCtx.Scope)
+
+	// Extract VP Token from the map using the scope as key
+	vpToken, ok := vpResponse.VPToken[authCtx.Scope[0]]
+	if !ok {
+		c.log.Error(nil, "VP Token not found for scope", "scope", authCtx.Scope[0], "available_keys", vpResponse.VPToken)
+		return nil, fmt.Errorf("VP Token not found for scope: %s", authCtx.Scope[0])
 	}
 
-	credential, err := responseParameters.BuildCredential()
+	// Prepare response parameters
+	responseParams := &openid4vp.ResponseParameters{
+		State:   vpResponse.State,
+		VPToken: vpToken,
+	}
+
+	c.log.Debug("Response parameters prepared", "has_vp_token", responseParams.VPToken != "", "state", responseParams.State)
+
+	// Validate response parameters
+	if err := responseParams.Validate(); err != nil {
+		c.log.Error(err, "response parameters validation failed")
+		return nil, fmt.Errorf("invalid response: %w", err)
+	}
+
+	// Validate VP Token using VPTokenValidator
+	validator := &openid4vp.VPTokenValidator{
+		Nonce:           authCtx.Nonce,
+		ClientID:        authCtx.ClientID,
+		VerifySignature: true,
+		CheckRevocation: false,
+		DCQLQuery:       authCtx.DCQLQuery,
+	}
+
+	if err := validator.Validate(responseParams.VPToken); err != nil {
+		c.log.Error(err, "VP Token validation failed")
+		return nil, fmt.Errorf("VP Token validation failed: %w", err)
+	}
+
+	c.log.Debug("VP Token validated successfully")
+
+	// Build credential from validated VP Token
+	credential, err := responseParams.BuildCredential()
 	if err != nil {
 		c.log.Error(err, "failed to build credential from response parameters")
 		return nil, err
 	}
 
-	credentialConstructorCfg, ok := c.cfg.CredentialConstructor[authorizationContext.Scope]
-	if !ok {
-		c.log.Error(nil, "credential constructor not found for scope", "scope", authorizationContext.Scope)
-		return nil, errors.New("credential constructor not found for scope: " + authorizationContext.Scope)
+	// Get credential constructor configuration using GetCredentialConstructor
+	// This looks up by VCT (primary key) or CommonName (for backward compatibility)
+	credentialConstructorCfg := c.cfg.GetCredentialConstructor(authCtx.Scope[0])
+	if credentialConstructorCfg == nil {
+		c.log.Error(nil, "credential constructor not found for scope", "scope", authCtx.Scope[0])
+		return nil, errors.New("credential constructor not found for scope: " + authCtx.Scope[0])
 	}
 
-	identity := &model.Identity{
-		GivenName:  credential["given_name"].(string),
-		FamilyName: credential["family_name"].(string),
-		BirthDate:  credential["birthdate"].(string),
+	c.log.Debug("Found credential constructor", "scope", authCtx.Scope, "vct", credentialConstructorCfg.VCT)
+
+	// Extract identity from validated credential
+	identity := &model.Identity{}
+	if givenName, ok := credential["given_name"].(string); ok {
+		identity.GivenName = givenName
+	}
+	if familyName, ok := credential["family_name"].(string); ok {
+		identity.FamilyName = familyName
+	}
+	if birthdate, ok := credential["birthdate"].(string); ok {
+		identity.BirthDate = birthdate
 	}
 
-	documents, err := c.db.VCDatastoreColl.GetDocumentsWithIdentity(ctx, &db.GetDocumentQuery{
+	// Retrieve documents matching the identity
+	// Use authorizationContext.VCT which should be set to the VCT value
+	c.log.Debug("Querying documents", "vct", credentialConstructorCfg.VCT, "identity", identity)
+	documents, err := c.datastoreStore.GetDocumentsWithIdentity(ctx, &db.GetDocumentQuery{
 		Meta: &model.MetaData{
-			DocumentType: credentialConstructorCfg.VCT,
+			VCT: credentialConstructorCfg.VCT,
 		},
 		Identity: identity,
 	})
@@ -319,11 +296,20 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 		return nil, err
 	}
 
-	c.documentCache.Set(authorizationContext.SessionID, documents, ttlcache.DefaultTTL)
+	c.log.Debug("Retrieved documents", "count", len(documents))
+
+	if len(documents) == 0 {
+		c.log.Error(nil, "no documents found for identity", "identity", identity)
+		return nil, errors.New("no documents found for the provided identity")
+	}
+
+	// Cache PID documents for session
+	c.documentCache.Set(authCtx.SessionID, documents, ttlcache.DefaultTTL)
+
+	c.log.Debug("Documents cached for session", "session_id", authCtx.SessionID)
 
 	reply := &VerificationDirectPostResponse{
-		//ResponseCode: responseCode,
-		RedirectURI: "https://vc-interop-3.sunet.se/authorization/consent/callback/?response_code=" + authorizationContext.VerifierResponseCode,
+		RedirectURI: c.cfg.APIGW.ExternalServerURL + "/authorization/consent/callback/?response_code=" + authCtx.VerifierResponseCode,
 	}
 	return reply, nil
 }

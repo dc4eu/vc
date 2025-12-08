@@ -44,7 +44,7 @@
     }
 }
 
-.vc-dcql-query-details {
+.vc-data-block-details {
     padding: var(--bulma-box-padding);
     border-radius: var(--bulma-box-radius);
     background-color: var(--bulma-pre-background);

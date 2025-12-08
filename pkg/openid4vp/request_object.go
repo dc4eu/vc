@@ -38,8 +38,9 @@ type RequestObject struct {
 	ResponseMode string `json:"response_mode,omitempty" uri:"response_mode" validate:"omitempty,oneof=form_post direct_post direct_post.jwt dc_api.jwt"`
 
 	//dcql_query
-	DCQLQuery              *DCQL                            `json:"dcql_query,omitempty" bson:"dcql_query,omitempty" validate:"omitempty,dive"`
-	PresentationDefinition *PresentationDefinitionParameter `json:"presentation_definition,omitempty" bson:"presentation_definition,omitempty" validate:"omitempty,dive"`
+	DCQLQuery *DCQL `json:"dcql_query,omitempty" bson:"dcql_query,omitempty" validate:"omitempty,dive"`
+
+	//PresentationDefinition *PresentationDefinitionParameter `json:"presentation_definition,omitempty" bson:"presentation_definition,omitempty" validate:"omitempty,dive"`
 
 	// ClientMetadata OPTIONAL. A JSON object containing the Verifier metadata values. It MUST be UTF-8 encoded.
 	ClientMetadata *ClientMetadata `json:"client_metadata,omitempty" validate:"omitempty"`

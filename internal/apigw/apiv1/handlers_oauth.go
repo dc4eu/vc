@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/model"
@@ -18,8 +19,9 @@ import (
 // OIDCAuth  https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-authorization-endpoint
 func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*openid4vci.ParResponse, error) {
 	c.log.Debug("OAuthPar", "req", req)
-	if !c.cfg.APIGW.OauthServer.Clients.Allow(req.ClientID, req.RedirectURI, req.Scope) {
-		return nil, oauth2.ErrInvalidClient
+	allow, err := c.cfg.APIGW.OauthServer.Clients.Allow(req.ClientID, req.RedirectURI, req.Scope)
+	if !allow {
+		return nil, errors.Join(oauth2.ErrInvalidClient, err)
 	}
 
 	c.log.Debug("par")
@@ -32,12 +34,12 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		SessionID:                uuid.NewString(),
 		Code:                     uuid.NewString(),
 		RequestURI:               requestURI,
-		Scope:                    req.Scope,
+		Scope:                    []string{req.Scope},
 		IsUsed:                   false,
 		CodeChallenge:            req.CodeChallenge,
 		CodeChallengeMethod:      req.CodeChallengeMethod,
 		State:                    req.State,
-		ClientID:                 req.ClientID,
+		ClientID:                 fmt.Sprintf("x509_san_dns:%s", strings.TrimLeft(c.cfg.APIGW.ExternalServerURL, "https://")),
 		WalletURI:                req.RedirectURI,
 		ExpiresAt:                time.Now().Add(60 * time.Second).Unix(),
 		Nonce:                    oauth2.GenerateCryptographicNonceFixedLength(32),
@@ -45,7 +47,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		VerifierResponseCode:     oauth2.GenerateCryptographicNonceFixedLength(32),
 	}
 
-	if err := c.db.VCAuthorizationContextColl.Save(ctx, &azt); err != nil {
+	if err := c.authContextStore.Save(ctx, &azt); err != nil {
 		c.log.Error(err, "authorizationContext not saved")
 		return nil, err
 	}
@@ -64,9 +66,9 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 	c.log.Debug("Authorize", "req", req)
 	query := &model.AuthorizationContext{
 		RequestURI: req.RequestURI,
-		ClientID:   req.ClientID,
+		ClientID:   fmt.Sprintf("x509_san_dns:%s", strings.TrimLeft(c.cfg.APIGW.ExternalServerURL, "https://")),
 	}
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, query)
+	authorizationContext, err := c.authContextStore.Get(ctx, query)
 	c.log.Debug("Get authorization", "query", query, "authorization", authorizationContext)
 	if err != nil {
 		c.log.Error(err, "get error")
@@ -86,7 +88,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 
 	response := &openid4vci.AuthorizationResponse{
 		RedirectURL: redirectURL,
-		Scope:       authorizationContext.Scope,
+		Scope:       authorizationContext.Scope[0],
 		SessionID:   authorizationContext.SessionID,
 		ClientID:    authorizationContext.ClientID,
 	}
@@ -100,7 +102,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error) {
 	c.log.Debug("OIDCToken", "req", req)
 
-	authorizationContext, err := c.db.VCAuthorizationContextColl.ForfeitAuthorizationCode(ctx, &model.AuthorizationContext{
+	authorizationContext, err := c.authContextStore.ForfeitAuthorizationCode(ctx, &model.AuthorizationContext{
 		Code: req.Code,
 	})
 	if err != nil {
@@ -119,7 +121,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		AccessToken:          accessToken,
 		TokenType:            "DPoP",
 		ExpiresIn:            3600, // 1 hour
-		Scope:                authorizationContext.Scope,
+		Scope:                authorizationContext.Scope[0],
 		State:                authorizationContext.State,
 		CNonce:               authorizationContext.Nonce,
 		CNonceExpiresIn:      0,
@@ -131,7 +133,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		ExpiresAt:   time.Now().Add(time.Duration(reply.ExpiresIn) * time.Second).Unix(),
 	}
 
-	if err := c.db.VCAuthorizationContextColl.AddToken(ctx, authorizationContext.Code, tokenDoc); err != nil {
+	if err := c.authContextStore.AddToken(ctx, authorizationContext.Code, tokenDoc); err != nil {
 		c.log.Error(err, "failed to add token")
 		return nil, err
 	}
@@ -188,7 +190,7 @@ type OAuthAuthorizationConsentResponse struct {
 }
 
 func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthorizationConsentRequest) (*OAuthAuthorizationConsentResponse, error) {
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{SessionID: req.SessionID})
+	authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{SessionID: req.SessionID})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err
@@ -197,7 +199,7 @@ func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthor
 
 	c.log.Debug("OAuthAuthorizationConsent request")
 
-	verifierRequestURI, err := url.Parse("https://vc-interop-3.sunet.se/verification/request-object")
+	verifierRequestURI, err := url.Parse(c.cfg.APIGW.ExternalServerURL + "/verification/request-object")
 	if err != nil {
 		c.log.Error(err, "failed to parse request URI URL")
 		return nil, err

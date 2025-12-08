@@ -3,7 +3,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_100",
       "real_data": false,
       "collect": {
@@ -36,10 +37,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -51,14 +52,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-12-26",
       "document_number": "80246802460003420696",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "40046784",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -66,7 +67,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_101",
       "real_data": false,
       "collect": {
@@ -99,10 +101,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -114,14 +116,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-02-18",
       "document_number": "80246802460003975414",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "80387895",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -129,7 +131,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_102",
       "real_data": false,
       "collect": {
@@ -162,10 +165,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -177,14 +180,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-11-18",
       "document_number": "80246802460003483005",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "57381544",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -192,7 +195,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_103",
       "real_data": false,
       "collect": {
@@ -225,10 +229,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -240,14 +244,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2024-03-08",
       "document_number": "80246802460003431583",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "79785792",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -255,7 +259,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_104",
       "real_data": false,
       "collect": {
@@ -288,10 +293,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -303,14 +308,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-08-15",
       "document_number": "80246802460003465348",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "87299198",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -318,7 +323,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_105",
       "real_data": false,
       "collect": {
@@ -351,10 +357,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -366,14 +372,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-05-27",
       "document_number": "80246802460003882863",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "44715442",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -381,7 +387,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_106",
       "real_data": false,
       "collect": {
@@ -414,10 +421,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -429,14 +436,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-04-21",
       "document_number": "80246802460003582443",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "70501734",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -444,7 +451,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_107",
       "real_data": false,
       "collect": {
@@ -477,10 +485,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -492,14 +500,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-10-04",
       "document_number": "80246802460003850509",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "27713953",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -507,7 +515,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_108",
       "real_data": false,
       "collect": {
@@ -540,10 +549,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -555,14 +564,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-01-23",
       "document_number": "80246802460003517908",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "74070435",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -570,7 +579,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_109",
       "real_data": false,
       "collect": {
@@ -603,10 +613,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -618,14 +628,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-02",
       "document_number": "80246802460003715709",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "87416368",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -633,7 +643,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_110",
       "real_data": false,
       "collect": {
@@ -666,10 +677,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -681,14 +692,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-01",
       "document_number": "80246802460003767929",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "33133266",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -696,7 +707,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_111",
       "real_data": false,
       "collect": {
@@ -729,10 +741,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -744,14 +756,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-08",
       "document_number": "80246802460003668716",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "86154445",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -759,7 +771,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_112",
       "real_data": false,
       "collect": {
@@ -792,10 +805,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -807,14 +820,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-01-15",
       "document_number": "80246802460003841233",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "55625776",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -822,7 +835,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_113",
       "real_data": false,
       "collect": {
@@ -855,10 +869,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -870,14 +884,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-09-17",
       "document_number": "80246802460003671438",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "43568744",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -885,7 +899,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_114",
       "real_data": false,
       "collect": {
@@ -918,10 +933,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -933,14 +948,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "80246802460003630878",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "65664926",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -948,7 +963,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_115",
       "real_data": false,
       "collect": {
@@ -981,10 +997,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -996,14 +1012,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "80246802460003630878",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "85734926",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1011,7 +1027,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_116",
       "real_data": false,
       "collect": {
@@ -1044,10 +1061,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1059,14 +1076,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "45678901234567890123",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "87451234",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1074,7 +1091,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_117",
       "real_data": false,
       "collect": {
@@ -1107,10 +1125,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1122,14 +1140,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "12345678901234567890",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "23987456",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1137,7 +1155,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_118",
       "real_data": false,
       "collect": {
@@ -1170,10 +1189,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1185,14 +1204,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "98765432109876543210",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "98765432",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1200,7 +1219,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_119",
       "real_data": false,
       "collect": {
@@ -1233,10 +1253,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1248,14 +1268,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "23456789012345678901",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "12345678",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1263,7 +1283,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_120",
       "real_data": false,
       "collect": {
@@ -1296,10 +1317,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1311,14 +1332,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "34567890123456789012",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "45678901",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1326,7 +1347,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_121",
       "real_data": false,
       "collect": {
@@ -1359,10 +1381,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1374,14 +1396,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "56789012345678901234",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "23456789",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1389,7 +1411,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_122",
       "real_data": false,
       "collect": {
@@ -1422,10 +1445,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1437,14 +1460,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "67890123456789012345",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "34567890",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1452,7 +1475,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_123",
       "real_data": false,
       "collect": {
@@ -1485,10 +1509,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1500,14 +1524,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "78901234567890123456",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "56789012",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1515,7 +1539,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_124",
       "real_data": false,
       "collect": {
@@ -1548,10 +1573,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1563,14 +1588,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "89012345678901234567",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "67890123",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1578,7 +1603,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_125",
       "real_data": false,
       "collect": {
@@ -1611,10 +1637,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1626,14 +1652,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "90123456789012345678",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "78901234",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1641,7 +1667,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_126",
       "real_data": false,
       "collect": {
@@ -1674,10 +1701,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1689,14 +1716,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "34567890123456789012",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "89012345",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1704,7 +1731,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_127",
       "real_data": false,
       "collect": {
@@ -1737,10 +1765,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1752,14 +1780,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "45678901234567890123",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "90123456",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1767,7 +1795,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_128",
       "real_data": false,
       "collect": {
@@ -1800,10 +1829,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1815,14 +1844,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "56789012345678901234",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "34561278",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1830,7 +1859,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_129",
       "real_data": false,
       "collect": {
@@ -1863,10 +1893,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1878,14 +1908,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "67890123456789012345",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "45672389",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1893,7 +1923,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_130",
       "real_data": false,
       "collect": {
@@ -1926,10 +1957,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -1941,14 +1972,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "78901234567890123456",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "56783490",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -1956,7 +1987,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_131",
       "real_data": false,
       "collect": {
@@ -1989,10 +2021,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2004,14 +2036,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "89012345678901234567",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "67894501",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2019,7 +2051,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_132",
       "real_data": false,
       "collect": {
@@ -2052,10 +2085,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2067,14 +2100,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "90123456789012345678",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "78905612",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2082,7 +2115,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_133",
       "real_data": false,
       "collect": {
@@ -2115,10 +2149,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2130,14 +2164,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "12345678901234567890",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "89016723",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2145,7 +2179,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_134",
       "real_data": false,
       "collect": {
@@ -2178,10 +2213,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2193,14 +2228,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "23456789012345678901",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "90127834",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2208,7 +2243,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_135",
       "real_data": false,
       "collect": {
@@ -2241,10 +2277,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2256,14 +2292,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "34567890123456789012",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "12348945",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2271,7 +2307,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_136",
       "real_data": false,
       "collect": {
@@ -2304,10 +2341,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2319,14 +2356,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "45678901234567890123",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "23459056",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2334,7 +2371,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_137",
       "real_data": false,
       "collect": {
@@ -2367,10 +2405,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2382,14 +2420,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "56789012345678901234",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "34560167",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2397,7 +2435,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_138",
       "real_data": false,
       "collect": {
@@ -2430,10 +2469,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2445,14 +2484,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "67890123456789012345",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "45671278",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2460,7 +2499,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_139",
       "real_data": false,
       "collect": {
@@ -2493,10 +2533,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2508,14 +2548,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "78901234567890123456",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "56782389",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2523,7 +2563,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_140",
       "real_data": false,
       "collect": {
@@ -2556,10 +2597,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2571,14 +2612,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "89012345678901234567",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "67893490",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2586,7 +2627,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_141",
       "real_data": false,
       "collect": {
@@ -2619,10 +2661,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2634,14 +2676,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "90123456789012345678",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "78904501",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2649,7 +2691,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_142",
       "real_data": false,
       "collect": {
@@ -2682,10 +2725,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2697,14 +2740,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "12345678901234567890",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "89015612",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2712,7 +2755,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_143",
       "real_data": false,
       "collect": {
@@ -2745,10 +2789,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2760,14 +2804,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "23456789012345678901",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "90126723",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2775,7 +2819,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_144",
       "real_data": false,
       "collect": {
@@ -2808,10 +2853,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2823,14 +2868,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "34567890123456789012",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "12337834",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2838,7 +2883,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_145",
       "real_data": false,
       "collect": {
@@ -2871,10 +2917,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2886,14 +2932,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "45678901234567890123",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "23448945",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2901,7 +2947,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_146",
       "real_data": false,
       "collect": {
@@ -2934,10 +2981,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -2949,14 +2996,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "56789012345678901234",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "34559056",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -2964,7 +3011,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_147",
       "real_data": false,
       "collect": {
@@ -2997,10 +3045,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3012,14 +3060,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "67890123456789012345",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "45660167",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3027,7 +3075,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_148",
       "real_data": false,
       "collect": {
@@ -3060,10 +3109,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3075,14 +3124,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "78901234567890123456",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "92330167",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3090,7 +3139,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_149",
       "real_data": false,
       "collect": {
@@ -3123,10 +3173,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3138,14 +3188,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "87101234567890123433",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "80440167",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3153,7 +3203,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_70",
       "real_data": false,
       "collect": {
@@ -3186,10 +3237,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3201,14 +3252,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-09-08",
       "document_number": "80246802460003464995",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "23451235",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3216,7 +3267,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_71",
       "real_data": false,
       "collect": {
@@ -3249,10 +3301,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3264,14 +3316,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-04-21",
       "document_number": "80246802460003707285",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "34873567",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3279,7 +3331,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_72",
       "real_data": false,
       "collect": {
@@ -3312,10 +3365,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3327,14 +3380,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2024-03-14",
       "document_number": "80246802460003665621",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "76841223",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3342,7 +3395,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_73",
       "real_data": false,
       "collect": {
@@ -3375,10 +3429,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3390,14 +3444,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2024-04-01",
       "document_number": "80246802460003861950",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "83865760",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3405,7 +3459,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_74",
       "real_data": false,
       "collect": {
@@ -3438,10 +3493,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3453,14 +3508,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-04-29",
       "document_number": "80246802460003502921",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "39738563",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3468,7 +3523,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_75",
       "real_data": false,
       "collect": {
@@ -3501,10 +3557,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3516,14 +3572,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-09-12",
       "document_number": "80246802460003929691",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "29899548",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3531,7 +3587,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_76",
       "real_data": false,
       "collect": {
@@ -3564,10 +3621,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3579,14 +3636,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-09-06",
       "document_number": "80246802460003667017",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "52712842",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3594,7 +3651,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_77",
       "real_data": false,
       "collect": {
@@ -3627,10 +3685,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3642,14 +3700,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2024-03-28",
       "document_number": "80246802460003508607",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "42388599",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3657,7 +3715,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_78",
       "real_data": false,
       "collect": {
@@ -3690,10 +3749,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3705,14 +3764,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2024-01-13",
       "document_number": "80246802460003670006",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "44460320",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3720,7 +3779,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_79",
       "real_data": false,
       "collect": {
@@ -3753,10 +3813,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3768,14 +3828,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-10-30",
       "document_number": "80246802460003874563",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "71509226",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3783,7 +3843,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_80",
       "real_data": false,
       "collect": {
@@ -3816,10 +3877,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3831,14 +3892,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-01-22",
       "document_number": "80246802460003980686",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "42393788",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3846,7 +3907,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_81",
       "real_data": false,
       "collect": {
@@ -3879,10 +3941,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3894,14 +3956,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-08-08",
       "document_number": "80246802460003808930",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "86368354",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3909,7 +3971,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_82",
       "real_data": false,
       "collect": {
@@ -3942,10 +4005,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -3957,14 +4020,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-10",
       "document_number": "80246802460003930680",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "61350638",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -3972,7 +4035,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_83",
       "real_data": false,
       "collect": {
@@ -4005,10 +4069,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4020,14 +4084,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-12-26",
       "document_number": "80246802460003420696",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "40046784",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4035,7 +4099,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_84",
       "real_data": false,
       "collect": {
@@ -4068,10 +4133,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4083,14 +4148,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-02-18",
       "document_number": "80246802460003975414",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "80387895",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4098,7 +4163,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_85",
       "real_data": false,
       "collect": {
@@ -4131,10 +4197,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4146,14 +4212,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-11-18",
       "document_number": "80246802460003483005",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "57381544",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4161,7 +4227,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_86",
       "real_data": false,
       "collect": {
@@ -4194,10 +4261,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4209,14 +4276,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2024-03-08",
       "document_number": "80246802460003431583",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "79785792",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4224,7 +4291,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_87",
       "real_data": false,
       "collect": {
@@ -4257,10 +4325,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4272,14 +4340,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-08-15",
       "document_number": "80246802460003465348",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "87299198",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4287,7 +4355,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_88",
       "real_data": false,
       "collect": {
@@ -4320,10 +4389,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4335,14 +4404,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-05-27",
       "document_number": "80246802460003882863",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "44715442",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4350,7 +4419,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_89",
       "real_data": false,
       "collect": {
@@ -4383,10 +4453,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4398,14 +4468,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-04-21",
       "document_number": "80246802460003582443",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "70501734",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4413,7 +4483,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_90",
       "real_data": false,
       "collect": {
@@ -4446,10 +4517,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4461,14 +4532,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-10-04",
       "document_number": "80246802460003850509",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "27713953",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4476,7 +4547,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_91",
       "real_data": false,
       "collect": {
@@ -4509,10 +4581,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4524,14 +4596,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-01-23",
       "document_number": "80246802460003517908",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "74070435",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4539,7 +4611,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_92",
       "real_data": false,
       "collect": {
@@ -4572,10 +4645,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4587,14 +4660,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-02",
       "document_number": "80246802460003715709",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "87416368",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4602,7 +4675,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_93",
       "real_data": false,
       "collect": {
@@ -4635,10 +4709,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4650,14 +4724,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-01",
       "document_number": "80246802460003767929",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "33133266",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4665,7 +4739,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_94",
       "real_data": false,
       "collect": {
@@ -4698,10 +4773,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4713,14 +4788,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-08",
       "document_number": "80246802460003668716",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "86154445",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4728,7 +4803,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_95",
       "real_data": false,
       "collect": {
@@ -4761,10 +4837,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4776,14 +4852,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-01-15",
       "document_number": "80246802460003841233",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "55625776",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4791,7 +4867,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_96",
       "real_data": false,
       "collect": {
@@ -4824,10 +4901,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4839,14 +4916,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-09-17",
       "document_number": "80246802460003671438",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "43568744",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4854,7 +4931,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_97",
       "real_data": false,
       "collect": {
@@ -4887,10 +4965,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4902,14 +4980,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-03-13",
       "document_number": "80246802460003630878",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "65664926",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4917,7 +4995,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_98",
       "real_data": false,
       "collect": {
@@ -4950,10 +5029,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -4965,14 +5044,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2024-02-10",
       "document_number": "80246802460003757763",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "37400178",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   },
@@ -4980,7 +5059,8 @@
     "meta": {
       "authentic_source": "EHIC:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:ehic:1",
+      "vct": "urn:eudi:ehic:1",
+      "scope": "ehic",
       "document_id": "document_id_ehic_99",
       "real_data": false,
       "collect": {
@@ -5013,10 +5093,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "EHIC"
+          "description": "European Health Insurance Card"
         },
         "sv": {
-          "documentType": "EHIC"
+          "beskrivning": "Europeiskt sjukförsäkringskort"
         }
       }
     },
@@ -5028,14 +5108,14 @@
       "date_of_expiry": "2026-04-12",
       "date_of_issuance": "2023-12-31",
       "document_number": "80246802460003991122",
-      "ending_date": "2026-06-24",
+      "ending_date": "2026-12-08",
       "issuing_authority": {
         "id": "CLEISS",
         "name": "SUNET"
       },
       "issuing_country": "FR",
       "personal_administrative_number": "41191495",
-      "starting_date": "2025-06-24"
+      "starting_date": "2025-12-08"
     },
     "document_data_version": "1.0.0"
   }

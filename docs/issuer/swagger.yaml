@@ -14,9 +14,9 @@ definitions:
         type: string
       document_id:
         type: string
-      document_type:
-        type: string
       revocation_id:
+        type: string
+      vct:
         type: string
     type: object
   helpers.Error:

@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"time"
 	"vc/pkg/openid4vci"
 )
 
@@ -89,9 +90,15 @@ type MetaData struct {
 	// example: "1.0.0"
 	DocumentVersion string `json:"document_version,omitempty" bson:"document_version" validate:"required,semver"`
 
+	// VCT is the Verifiable Credential Type
 	// required: true
-	// example: PDA1
-	DocumentType string `json:"document_type,omitempty" bson:"document_type" validate:"required,oneof=urn:eudi:elm:1 urn:eudi:diploma:1 urn:eudi:micro_credential:1 urn:eudi:pid:1 urn:eudi:ehic:1 urn:eudi:pda1:1"`
+	// example: "urn:eudi:pid:1"
+	VCT string `json:"vct,omitempty" bson:"vct" validate:"required"`
+
+	// Scope is the credential configuration ID scope
+	// required: false
+	// example: "ehic", "pda1"
+	Scope string `json:"scope,omitempty" bson:"scope" validate:"required"`
 
 	// required: true
 	// example: 5e7a981c-c03f-11ee-b116-9b12c59362b9
@@ -126,7 +133,7 @@ type MetaData struct {
 // RevocationReference refer to a document
 type RevocationReference struct {
 	AuthenticSource string `json:"authentic_source,omitempty" bson:"authentic_source"`
-	DocumentType    string `json:"document_type,omitempty" bson:"document_type"`
+	VCT             string `json:"vct,omitempty" bson:"vct"`
 	DocumentID      string `json:"document_id,omitempty" bson:"document_id"`
 }
 
@@ -284,6 +291,64 @@ type Identity struct {
 	TrustAnchor string `json:"trust_anchor,omitempty" bson:"trust_anchor,omitempty"`
 }
 
+func (i *Identity) GetOver14() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(14, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver16() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(16, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver18() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(18, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver21() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(21, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetOver65() (bool, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return false, err
+	}
+	birthDay = birthDay.AddDate(65, 0, 0)
+	return time.Now().After(birthDay), nil
+}
+
+func (i *Identity) GetAgeInYears() (int, error) {
+	birthDay, err := time.Parse("2006-01-02", i.BirthDate)
+	if err != nil {
+		return 0, err
+	}
+	now := time.Now()
+	age := now.Year() - birthDay.Year()
+	if now.YearDay() < birthDay.YearDay() {
+		age--
+	}
+	return age, nil
+}
+
 // Marshal marshals the document to a map
 func (i *Identity) Marshal() (map[string]any, error) {
 	data, err := json.Marshal(i)
@@ -325,7 +390,7 @@ type SearchDocumentsReply struct {
 // SearchDocumentsRequest the request to search for documents
 type SearchDocumentsRequest struct {
 	AuthenticSource string `json:"authentic_source,omitempty"`
-	DocumentType    string `json:"document_type,omitempty"`
+	VCT             string `json:"vct,omitempty"`
 	DocumentID      string `json:"document_id,omitempty"`
 	CollectID       string `json:"collect_id,omitempty"`
 

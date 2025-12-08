@@ -16,39 +16,43 @@ common:
       size: 256
 
 credential_constructor:
-  "pid":
-    vct: "urn:eudi:pid:1"
-    vctm_file_path: "/metadata/vctm_pid.json"
+  pid_1_5:
+    vctm_file_path: "/metadata/vctm_pid_arf_1_5.json"
     auth_method: basic
-  "ehic":
+    vct: "urn:eudi:pid:arf-1.5:1"
+  pid_1_8:
+    vctm_file_path: "/metadata/vctm_pid_arf_1_8.json"
+    auth_method: basic
+    vct: "urn:eudi:pid:arf-1.8:1"
+  ehic:
     vct: "urn:eudi:ehic:1"
     vctm_file_path: "/metadata/vctm_ehic.json"
     auth_method: pid_auth
-  "pda1":
+  pda1:
     vct: "urn:eudi:pda1:1"
     vctm_file_path: "/metadata/vctm_pda1.json"
     auth_method: pid_auth
-  "elm":
+  elm:
     vct: "urn:eudi:elm:1"
     vctm_file_path: "/metadata/vctm_elm.json"
     auth_method: pid_auth
-  "diploma":
+  diploma:
     vct: "urn:eudi:diploma:1"
     vctm_file_path: "/metadata/vctm_diploma.json"
     auth_method: pid_auth
-  "micro_credential":
+  micro_credential:
     vct: "urn:eudi:micro_credential:1"
     vctm_file_path: "/metadata/vctm_microcredential.json"
     auth_method: pid_auth
-  "openbadge_complete":
+  openbadge_complete:
     vct: "urn:eudi:openbadge_complete:1"
     vctm_file_path: "/metadata/vctm_elm.json"
     auth_method: pid_auth
-  "openbadge_basic":
+  openbadge_basic:
     vct: "urn:eudi:openbadge_basic:1"
     vctm_file_path: "/metadata/vctm_elm.json"
     auth_method: pid_auth
-  "openbadge_endorsements":
+  openbadge_endorsements:
     vct: "urn:eudi:openbadge_endorsements:1"
     vctm_file_path: "/metadata/vctm_elm.json"
     auth_method: pid_auth
@@ -100,6 +104,12 @@ issuer:
   grpc_server:
     addr: vc_dev_issuer:8090
   signing_key_path: "/private_ec256.pem"
+  #pkcs11:
+  #  module_path: /usr/lib/softhsm/libsofthsm2.so
+  #  slot_id: 0
+  #  pin: "1234"
+  #  key_label: "issuer-key"
+  #  key_id: "issuer-key-1"
   issuer_url: "http://172.16.50.2:8080"
   wallet_url: ""
   jwt_attribute:
@@ -119,6 +129,67 @@ verifier:
   external_server_url: "http://vc_dev_verifier:8080"
   supported_wallets:
     "SUNET dev": "https://dev.wallet.sunet.se/cb"
+  oauth_server:
+    token_endpoint: "http://vc_dev_verifier:8080/token"
+    metadata:
+      path: /metadata/oauth2_metadata.json
+      signing_key_path: "/pki/apigw.key"
+      signing_chain_path: "/pki/apigw.crt"
+    clients:
+      "1003":
+        type: "confidential"
+        redirect_uri: "https://dev.wallet.sunet.se"
+        scopes:
+          - "pid"
+          - "diploma"
+          - "ehic"
+          - "pda1"
+          - "elm"
+
+verifier_proxy:
+  api_server:
+    addr: :8080
+    tls:
+      enabled: false
+  external_url: "http://vc_dev_verifier_proxy:8080"
+  oidc:
+    # OIDC Provider identifier (issuer of ID tokens and access tokens)
+    # This identifies the verifier-proxy as an OpenID Provider
+    # NOT related to verifiable credential issuance (see cmd/issuer/)
+    # Must match the 'iss' claim in ID tokens sent to relying parties
+    issuer: "http://vc_dev_verifier_proxy:8080"
+    signing_key_path: "/private_rsa.pem"
+    signing_alg: "RS256"                 # Signing algorithm for ID tokens (RS256, RS384, RS512, ES256, ES384, ES512)
+    session_duration: 900                # Session duration in seconds (15 minutes)
+    code_duration: 600                   # Authorization code duration in seconds (10 minutes)
+    access_token_duration: 3600          # Access token duration in seconds (1 hour)
+    id_token_duration: 3600              # ID token duration in seconds (1 hour)
+    refresh_token_duration: 86400        # Refresh token duration in seconds (24 hours)
+    subject_type: "pairwise"
+    subject_salt: "change-this-in-production"
+  openid4vp:
+    presentation_timeout: 300
+    # Template-based presentation requests (optional)
+    # When configured, DCQL queries are loaded from YAML templates
+    # Falls back to supported_credentials if templates not found or disabled
+    presentation_requests_dir: "/presentation_requests"
+    supported_credentials:
+      - vct: "urn:eudi:pid:1"
+        scopes:
+          - "profile"
+          - "pid"
+      - vct: "urn:eudi:ehic:1"
+        scopes:
+          - "ehic"
+      - vct: "urn:eudi:pda1:1"
+        scopes:
+          - "pda1"
+      - vct: "urn:eudi:elm:1"
+        scopes:
+          - "elm"
+      - vct: "urn:eudi:diploma:1"
+        scopes:
+          - "diploma"
 
 registry:
   api_server:
@@ -141,6 +212,7 @@ apigw:
     enabled: false
     users:
       admin: "secret123"
+  external_server_url: "http://vc_dev_apigw:8080"
   credential_offers:
     issuer_url: http://vc_dev_apigw:8080
     wallets:
@@ -156,6 +228,9 @@ apigw:
       vanilla: 
         label: Vanilla wwWallet
         redirect_uri: https://demo.wwwallet.org/cb
+      siros_sunet:
+        label: Siros SUNET Wallet
+        redirect_uri: https://sunetwallet-dev.app.siros.org/cb
   trust_model:
     type: "openid_federation"
     trust_anchors:
@@ -180,6 +255,131 @@ apigw:
     path: "/metadata/issuer_metadata.json"
     signing_key_path: "/pki/apigw.key"
     signing_chain_path: "/pki/apigw.crt"
+  # OIDC Relying Party configuration for issuing credentials via external OIDC Providers
+  # Requires building with -tags oidcrp
+  oidcrp:
+    enabled: false
+    # OAuth2 client credentials registered with the OIDC Provider
+    client_id: "your-client-id"
+    client_secret: "your-client-secret"
+    # Callback URL where the OIDC Provider sends the authorization response
+    redirect_uri: "https://issuer.example.com/oidcrp/callback"
+    # OIDC Provider issuer URL (used for .well-known/openid-configuration discovery)
+    # Examples:
+    #   Google: "https://accounts.google.com"
+    #   Azure AD: "https://login.microsoftonline.com/{tenant-id}/v2.0"
+    #   Keycloak: "https://keycloak.example.com/realms/{realm-name}"
+    issuer_url: "https://accounts.google.com"
+    # OAuth2/OIDC scopes to request (must include "openid")
+    scopes:
+      - "openid"
+      - "profile"
+      - "email"
+    # Session duration in seconds (default: 3600)
+    session_duration: 3600
+    # Credential mappings: how to transform OIDC claims into credentials
+    # Key: credential type identifier (must match credential_constructor keys)
+    credential_mappings:
+      pid:
+        # OpenID4VCI credential configuration ID
+        credential_config_id: "urn:eudi:pid:1"
+        # Attribute mappings: OIDC claim name -> credential claim path
+        # Supports dot-notation for nested structures (e.g., "identity.given_name")
+        attributes:
+          # Standard OpenID Connect claims
+          given_name:
+            claim: "identity.given_name"
+            required: true
+          family_name:
+            claim: "identity.family_name"
+            required: true
+          email:
+            claim: "identity.email"
+            required: true
+          email_verified:
+            claim: "identity.email_verified"
+            required: false
+          # Subject identifier
+          sub:
+            claim: "identity.subject_id"
+            required: true
+            transform: "lowercase"
+          # Optional claims with defaults
+          locale:
+            claim: "identity.locale"
+            required: false
+            default: "en-US"
+      # Example: diploma credential from university OIDC provider
+      diploma:
+        credential_config_id: "urn:eudi:diploma:1"
+        attributes:
+          given_name:
+            claim: "student.given_name"
+            required: true
+          family_name:
+            claim: "student.family_name"
+            required: true
+          email:
+            claim: "student.email"
+            required: true
+          # Custom claims from the OIDC provider
+          student_id:
+            claim: "student.id"
+            required: true
+          degree:
+            claim: "diploma.degree"
+            required: true
+          graduation_date:
+            claim: "diploma.graduation_date"
+            required: true
+          university:
+            claim: "diploma.university"
+            required: false
+            default: "Unknown University"
+  
+  # Alternative: Dynamic Client Registration (RFC 7591)
+  # Uncomment to enable automatic client registration with OIDC Providers
+  # oidcrp:
+  #   enabled: true
+  #   # Static credentials are optional when using dynamic registration
+  #   # client_id: "optional-fallback-id"
+  #   # client_secret: "optional-fallback-secret"
+  #   redirect_uri: "https://issuer.example.com/oidcrp/callback"
+  #   issuer_url: "https://accounts.google.com"
+  #   scopes:
+  #     - "openid"
+  #     - "profile"
+  #     - "email"
+  #   session_duration: 3600
+  #   # Client metadata for dynamic registration
+  #   client_name: "My Credential Issuer"
+  #   client_uri: "https://issuer.example.com"
+  #   logo_uri: "https://issuer.example.com/logo.png"
+  #   contacts:
+  #     - "admin@example.com"
+  #   tos_uri: "https://issuer.example.com/terms"
+  #   policy_uri: "https://issuer.example.com/privacy"
+  #   # Dynamic registration settings
+  #   dynamic_registration:
+  #     enabled: true
+  #     # Some providers (e.g., Keycloak) require an initial access token
+  #     # Generate in Keycloak: Realm Settings → Client Registration → Initial Access Tokens
+  #     initial_access_token: ""  # Optional, leave empty for Google
+  #     # Cache registered credentials to avoid re-registration on restart
+  #     storage_path: "/var/lib/vc/oidcrp_credentials.json"
+  #   credential_mappings:
+  #     pid:
+  #       credential_config_id: "urn:eudi:pid:1"
+  #       attributes:
+  #         given_name:
+  #           claim: "identity.given_name"
+  #           required: true
+  #         family_name:
+  #           claim: "identity.family_name"
+  #           required: true
+  #         email:
+  #           claim: "identity.email"
+  #           required: true
 
 mock_as:
   api_server:

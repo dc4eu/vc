@@ -15,7 +15,7 @@ import (
 // Client is the client
 type Client struct {
 	httpClient *http.Client
-	url        string
+	apigwFQDN  string
 	log        *logger.Log
 
 	Document *documentHandler
@@ -27,11 +27,11 @@ type Client struct {
 
 // Config is the configuration for the client
 type Config struct {
-	URL string `validate:"required"`
+	ApigwFQDN string `validate:"required"`
 }
 
 // New creates a new client
-func New(config *Config) (*Client, error) {
+func New(config *Config, log *logger.Log) (*Client, error) {
 	if err := helpers.CheckSimple(config); err != nil {
 		return nil, err
 	}
@@ -39,13 +39,8 @@ func New(config *Config) (*Client, error) {
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		url: config.URL,
-	}
-
-	var err error
-	c.log, err = logger.New("datastoreClient", "", false)
-	if err != nil {
-		return nil, err
+		log:       log.New("vcclient"),
+		apigwFQDN: config.ApigwFQDN,
 	}
 
 	defaultContentType := "application/json"
@@ -63,10 +58,11 @@ func New(config *Config) (*Client, error) {
 func (c *Client) newRequest(ctx context.Context, method, path, contentType string, body any) (*http.Request, error) {
 	rel, err := url.Parse(path)
 	if err != nil {
+		c.log.Error(err, "parse url", "path", path)
 		return nil, err
 	}
 
-	u, err := url.Parse(c.url)
+	u, err := url.Parse(c.apigwFQDN)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +86,7 @@ func (c *Client) newRequest(ctx context.Context, method, path, contentType strin
 
 	if body != nil {
 		req.Header.Set("Content-Type", contentType)
-		c.log.Debug("request", "CT", req.Header.Get("Content-Type"))
+		c.log.Debug("request", "Content-Type", req.Header.Get("Content-Type"))
 	}
 	req.Header.Set("Accept", "application/json")
 	return req, nil
@@ -103,7 +99,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 
 	if err := checkResponse(resp); err != nil {
 		buf := &bytes.Buffer{}
@@ -113,6 +109,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 		if err := json.Unmarshal(buf.Bytes(), err); err != nil {
 			return nil, err
 		}
+		c.log.Error(err, "response error", "body", buf.String())
 		return nil, err
 	}
 
@@ -147,7 +144,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 
 func checkResponse(r *http.Response) error {
 	switch r.StatusCode {
-	case 200, 201, 202, 204, 304:
+	case 200, 201, 202, 204, 302, 304:
 		return nil
 	case 500:
 		return ErrInvalidRequest
@@ -167,11 +164,13 @@ func (c *Client) call(ctx context.Context, method, path, contentType string, bod
 		body,
 	)
 	if err != nil {
+		c.log.Error(err, "call failed", "method", method, "path", path)
 		return nil, err
 	}
 
 	resp, err := c.do(ctx, request, reply, prefixReplyJSONWithData)
 	if err != nil {
+		c.log.Error(err, "do failed", "method", method, "path", path)
 		return resp, err
 	}
 

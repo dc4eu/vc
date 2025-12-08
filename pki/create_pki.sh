@@ -75,7 +75,7 @@ EOF
     # remove any generated config files
     if [ $conf_generated -eq 1 ]; then
 	    rm ${service_name}.conf
-        rm ca.conf
+        rm -f ca.conf
     fi
     if [ $ext_generated -eq 1 ]; then
 	    rm ${service_name}.ext

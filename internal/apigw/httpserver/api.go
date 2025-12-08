@@ -8,14 +8,14 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 	"vc/pkg/vcclient"
 )
 
 // Apiv1 interface
 type Apiv1 interface {
 	// datastore endpoints
-	Upload(ctx context.Context, req *apiv1.UploadRequest) error
+	Upload(ctx context.Context, req *vcclient.UploadRequest) error
 	Notification(ctx context.Context, req *apiv1.NotificationRequest) (*apiv1.NotificationReply, error)
 	AddDocumentIdentity(ctx context.Context, req *apiv1.AddDocumentIdentityRequest) error
 	DeleteDocumentIdentity(ctx context.Context, req *apiv1.DeleteDocumentIdentityRequest) error
@@ -59,13 +59,20 @@ type Apiv1 interface {
 	VerificationRequestObject(ctx context.Context, req *apiv1.VerificationRequestObjectRequest) (string, error)
 	VerificationDirectPost(ctx context.Context, req *apiv1.VerificationDirectPostRequest) (*apiv1.VerificationDirectPostResponse, error)
 
-	GetAllCredentialOffers(ctx context.Context) (*apiv1.GetAllCredentialOffersReply, error)
-	CredentialOffer(ctx context.Context, req *apiv1.CredentialOfferRequest) (*apiv1.CredentialOfferReply, error)
-	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*sdjwt3.VCTM, error)
+	// UI Credential Offer endpoints
+	UICredentialOffers(ctx context.Context) (*apiv1.CredentialOfferLookupMetadata, error)
+	UICreateCredentialOffer(ctx context.Context, req *apiv1.UICredentialOfferRequest) (*apiv1.CredentialOfferReply, error)
+
+	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*sdjwtvc.VCTM, error)
 	SVGTemplateReply(ctx context.Context, req *apiv1.SVGTemplateRequest) (*apiv1.SVGTemplateReply, error)
 
 	// Status lists endpoints
 	StatusLists(ctx context.Context, req *apiv1.StatusListsRequest) (string, error)
+
+
+	// OIDC RP endpoints
+	OIDCRPInitiate(ctx context.Context, req *apiv1.OIDCRPInitiateRequest, oidcrpService interface{}) (*apiv1.OIDCRPInitiateResponse, error)
+	OIDCRPCallback(ctx context.Context, req *apiv1.OIDCRPCallbackRequest, oidcrpService interface{}) (*apiv1.OIDCRPCallbackResponse, error)
 
 	// misc endpoints
 	Health(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)

@@ -51,7 +51,7 @@ type CredentialRequest struct {
 	// CredentialIdentifier REQUIRED when credential_identifiers parameter was returned from the Token Response. It MUST NOT be used otherwise. It is a String that identifies a Credential that is being requested to be issued. When this parameter is used, the format parameter and any other Credential format specific parameters such as those defined in Appendix A MUST NOT be present.
 	CredentialResponseEncryption *CredentialResponseEncryption `json:"credential_response_encryption"`
 
-	VCT string `json:"vct"`
+	//VCT string `json:"vct" validate:"required"`
 }
 
 // IsAccessTokenDPoP checks if the Authorize header belong to DPoP proof
@@ -71,11 +71,8 @@ func (c *CredentialRequest) Validate(ctx context.Context, tokenResponse *TokenRe
 
 // CredentialResponse https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-response
 type CredentialResponse struct {
-	//Credential: OPTIONAL. Contains issued Credential. It MUST be present when transaction_id is not returned. It MAY be a string or an object, depending on the Credential format. See Appendix A for the Credential format specific encoding requirements.
-	Credential any `json:"credential,omitempty" validate:"required_without=TransactionID,required_without=NotificationID Credentials"`
-
 	// Credentials OPTIONAL. Contains an array of issued Credentials. It MUST NOT be used if credential or transaction_id parameter is present. The values in the array MAY be a string or an object, depending on the Credential Format. See Appendix A for the Credential Format-specific encoding requirements.
-	Credentials []any `json:"credentials,omitempty" validate:"required_without=TransactionID Credential"`
+	Credentials []Credential `json:"credentials,omitempty" validate:"required_without=TransactionID Credential"`
 
 	// TransactionID: OPTIONAL. String identifying a Deferred Issuance transaction. This claim is contained in the response if the Credential Issuer was unable to immediately issue the Credential. The value is subsequently used to obtain the respective Credential with the Deferred Credential Endpoint (see Section 9). It MUST be present when the credential parameter is not returned. It MUST be invalidated after the Credential for which it was meant has been obtained by the Wallet.
 	TransactionID string `json:"transaction_id,omitempty" validate:"required_without=Credentials Credential"`
@@ -88,6 +85,10 @@ type CredentialResponse struct {
 
 	//NotificationID: OPTIONAL. String identifying an issued Credential that the Wallet includes in the Notification Request as defined in Section 10.1. This parameter MUST NOT be present if credential parameter is not present.
 	NotificationID string `json:"notification_id,omitempty" validate:"required_with=Credentials"`
+}
+
+type Credential struct {
+	Credential string `json:"credential" validate:"required"`
 }
 
 // ProofJWT holds the JWT for proof
@@ -106,13 +107,18 @@ type JWK struct {
 }
 
 // Proof https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
+// Proof types defined in Appendix F of the OpenID4VCI 1.0 specification.
 type Proof struct {
-	// ProofType REQUIRED. String denoting the key proof type. The value of this parameter determines other parameters in the key proof object and its respective processing rules. Key proof types defined in this specification can be found in Section 7.2.1.
-	ProofType string `json:"proof_type" validate:"required,oneof=jwt ldp_vp cwt"`
+	// ProofType REQUIRED. String denoting the key proof type. The value of this parameter determines other parameters in the key proof object and its respective processing rules.
+	// Valid values: jwt, di_vp, attestation
+	ProofType string `json:"proof_type" validate:"required,oneof=jwt di_vp attestation"`
 
-	JWT         string `json:"jwt,omitempty"`
-	LDPVP       string `json:"ldp_vp,omitempty"`
-	Attestation string `json:"attestation"`
+	// JWT contains the JWT when proof_type is "jwt"
+	JWT string `json:"jwt,omitempty"`
+	// DIVP contains the Data Integrity Verifiable Presentation when proof_type is "di_vp"
+	DIVP any `json:"di_vp,omitempty"`
+	// Attestation contains the key attestation JWT when proof_type is "attestation"
+	Attestation string `json:"attestation,omitempty"`
 }
 
 func (p *Proof) ExtractJWK() (*apiv1_issuer.Jwk, error) {

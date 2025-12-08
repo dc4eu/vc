@@ -95,7 +95,8 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: row[2],
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEudiEhic1,
+			VCT:             model.CredentialTypeUrnEudiEhic1,
+			Scope:           "ehic",
 			DocumentID:      fmt.Sprintf("document_id_ehic_%s", row[0]),
 			RealData:        false,
 			Collect: &model.Collect{
@@ -113,10 +114,10 @@ func (c *ehicClient) makeSourceData(sourceFilePath string) error {
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
 				"en": map[string]any{
-					"documentType": "EHIC",
+					"description": "European Health Insurance Card",
 				},
 				"sv": map[string]any{
-					"documentType": "EHIC",
+					"beskrivning": "Europeiskt sjukförsäkringskort",
 				},
 			},
 		}

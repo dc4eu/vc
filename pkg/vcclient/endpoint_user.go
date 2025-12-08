@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/sdjwt3"
+	"vc/pkg/sdjwtvc"
 )
 
 type userHandler struct {
@@ -26,6 +26,7 @@ func (s *userHandler) AddPID(ctx context.Context, body *AddPIDRequest) (*http.Re
 	url := s.serviceBaseURL + "/pid"
 	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, nil, false)
 	if err != nil {
+		s.log.Error(err, "AddPID call failed")
 		return resp, err
 	}
 
@@ -44,6 +45,7 @@ func (s *userHandler) LoginPIDUser(ctx context.Context, body *LoginPIDUserReques
 	url := s.serviceBaseURL + "/pid/login"
 	resp, err := s.client.call(ctx, http.MethodPost, url, s.defaultContentType, body, nil, false)
 	if err != nil {
+		s.log.Error(err, "LoginPIDUser call failed")
 		return resp, err
 	}
 
@@ -59,11 +61,11 @@ type GetPIDReply struct {
 }
 
 type UserLookupRequest struct {
-	Username     string       `json:"-"`
-	AuthMethod   string       `json:"-"`
-	ResponseCode string       `json:"-"`
-	RequestURI   string       `json:"-"`
-	VCTM         *sdjwt3.VCTM `json:"-"`
+	Username     string        `json:"-"`
+	AuthMethod   string        `json:"-"`
+	ResponseCode string        `json:"-"`
+	RequestURI   string        `json:"-"`
+	VCTM         *sdjwtvc.VCTM `json:"-"`
 }
 
 type SVGClaim struct {

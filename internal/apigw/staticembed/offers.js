@@ -11,7 +11,7 @@ const CredentialSchema = v.object({
  * @typedef {v.InferOutput<typeof OffersLookupSchema>} OffersLookup
  */
 const OffersLookupSchema = v.required(v.object({
-    credentials: v.record(v.string(), CredentialSchema),
+    credential_types: v.record(v.string(), CredentialSchema),
     wallets: v.record(v.string(), v.string())
 }))
 
@@ -28,124 +28,140 @@ const CredentialOfferSchema = v.required(v.object({
 }));
 
 Alpine.data("app", () => ({
+    /** @type {Object<string, Object>} Credential types from offers data */
     credentials: null,
+
+    /** @type {Object<string, string>} Wallets from offers data */
     wallets: null,
 
     /** @type {CredentialOffer} */
     credentialOffer: null,
 
     /** @type {boolean} */
-    loading: true,
+    loading: false,
 
     /** @type {string | null} */
     error: null,
 
-    async init() {
-        await this.lookupOffers()
+    init() {
+        try {
+            // Load offers data from the JSON data element
+            const offersDataElement = document.getElementById("offersData");
+            if (offersDataElement) {
+                const offersData = JSON.parse(offersDataElement.textContent);
+                this.credentials = offersData.credential_types;
+                this.wallets = offersData.wallets;
+            }
+        } catch (err) {
+            this.error = "Failed to load credential types: " + err.message;
+        }
 
-        this.loading = false;
-
+        // Setup error watcher
         this.$watch("error", (newVal) => {
             if (typeof newVal === "string") {
                 console.error(`Error: ${newVal}`);
             }
         });
 
-        await this.hashState();
-
+        // Handle initial hash and listen for changes
+        this.handleHashState();
     },
 
-    async hashState() {
-        /** @param {string} hash */
-        const refreshState = async (hash) => {
-            const state = new URLSearchParams(hash.slice(1));
+    handleHashState() {
+        const processHash = (hash) => {
+            const params = new URLSearchParams(hash.slice(1));
 
-            if (state.has("scope") && state.has("wallet_id")) {
-                await this.getOfferData(state.get("scope"), state.get("wallet_id"))
+            if (params.has("scope") && params.has("wallet_id")) {
+                const scope = params.get("scope");
+                const walletId = params.get("wallet_id");
+                this.loadCredentialOffer(scope, walletId);
             } else {
-                await this.lookupOffers();
+                this.credentialOffer = null;
+                this.error = null;
             }
         };
 
-        await refreshState(location.hash)
+        // Process initial hash
+        processHash(location.hash);
 
-        addEventListener("hashchange", async () => {
-            this.loading = true;
-            
-            await refreshState(location.hash)
-            
-            this.loading = false;
+        // Listen for hash changes
+        addEventListener("hashchange", () => {
+            processHash(location.hash);
         });
     },
 
     /**
+     * Handle form submission to select credential and wallet
      * @param {SubmitEvent} event 
      */
     async handleOffersForm(event) {
+        event.preventDefault();
         this.error = null;
-        this.loading = true;
-        this.credentials = null;
-        this.wallets = null;
 
         if (!(this.$refs.offersForm instanceof HTMLFormElement)) {
-            this.error = "Offers form not of type 'HtmlFormElement'";
+            this.error = "Offers form not found";
             return;
         }
 
         const formData = new FormData(this.$refs.offersForm);
 
         const credential = formData.get("credential");
-        if (!credential) {
+        if (!credential || typeof credential !== "string") {
             this.error = "Credential is required";
             return;
         }
 
         const wallet = formData.get("wallet");
-        if (!wallet) {
+        if (!wallet || typeof wallet !== "string") {
             this.error = "Wallet is required";
             return;
         }
 
-        window.location.hash = `scope=${credential}&wallet_id=${wallet}`;
+        // Update hash to trigger credential offer loading
+        window.location.hash = `scope=${encodeURIComponent(credential)}&wallet_id=${encodeURIComponent(wallet)}`;
     },
 
-    async lookupOffers() {
+    /**
+     * Load credential offer data from GET /offers/:scope/:wallet_id endpoint
+     * @param {string} scope - Credential type scope/ID
+     * @param {string} walletId - Wallet ID
+     */
+    async loadCredentialOffer(scope, walletId) {
         try {
+            this.error = null;
+            this.loading = true;
             this.credentialOffer = null;
 
-            const res = await fetch("/offers/lookup");
+            const url = `/offers/${encodeURIComponent(scope)}/${encodeURIComponent(walletId)}`;
+
+            const res = await fetch(url);
             if (!res.ok) {
-                this.error = "Failed to fetch credential offers";
+                if (res.status === 404) {
+                    this.error = "Credential offer not found";
+                } else {
+                    this.error = `Failed to fetch credential offer: ${res.statusText}`;
+                }
                 return;
             }
 
-            const data = v.parse(OffersLookupSchema, (await res.json()));
+            const jsonData = await res.json();
 
-            this.credentials = data.credentials;
-            this.wallets = data.wallets;
-        } catch (err) {
-            this.error = err;
-        }
-    },
-
-    async getOfferData(credential, wallet) {
-        try {
-            const res = await fetch(`/offers/${credential}/${wallet}`)
-            if (!res.ok) {
-                this.error = "Failed to fetch credential offer";
-                return;
-            }
-
-            const data = v.parse(CredentialOfferSchema, (await res.json()));
-
+            const data = v.parse(CredentialOfferSchema, jsonData);
             this.credentialOffer = data;
         } catch (err) {
-            this.error = err;
+            console.error("Error loading credential offer:", err);
+            this.error = err instanceof Error ? err.message : String(err);
+            this.credentialOffer = null;
+        } finally {
+            this.loading = false;
         }
     },
 
+    /**
+     * Proceed with credential offer by opening wallet redirect URI
+     */
     handleCredentialOfferProceed() {
-        if (this.credentialOffer) {
+        if (this.credentialOffer?.qr?.uri) {
             window.location.href = this.credentialOffer.qr.uri;
         }
     }

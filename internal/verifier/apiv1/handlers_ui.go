@@ -3,12 +3,12 @@ package apiv1
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 	"vc/pkg/model"
 	"vc/pkg/openid4vp"
 
 	"github.com/google/uuid"
-	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
@@ -18,7 +18,6 @@ type UIMetadataReply struct {
 }
 
 func (c *Client) UIMetadata(ctx context.Context) (*UIMetadataReply, error) {
-
 	reply := &UIMetadataReply{}
 	reply.Credentials = c.cfg.CredentialConstructor
 
@@ -37,7 +36,7 @@ type UIInteractionRequest struct {
 	DCQLQuery *openid4vp.DCQL `json:"dcql_query" validate:"required"`
 
 	// SessionID from http server endpoint
-	//SessionID string `json:"-"`
+	SessionID string `json:"-"`
 }
 
 type UIInteractionReply struct {
@@ -52,17 +51,28 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 	nonce := uuid.NewString()
 	state := uuid.NewString()
 	requestObjectID := uuid.NewString()
-	sessionID := uuid.NewString()
+
+	// Use session ID from request if provided, otherwise generate new one
+	sessionID := req.SessionID
+	if sessionID == "" {
+		sessionID = uuid.NewString()
+	}
+
+	// Collect all credential IDs from DCQL query
+	scopes := make([]string, 0, len(req.DCQLQuery.Credentials))
+	for _, credential := range req.DCQLQuery.Credentials {
+		scopes = append(scopes, credential.ID)
+	}
 
 	authorizationContext := &model.AuthorizationContext{
 		SessionID:                sessionID,
-		Scope:                    "",
+		Scope:                    scopes,
 		Code:                     "",
 		RequestURI:               "",
 		WalletURI:                "",
 		IsUsed:                   false,
 		State:                    state,
-		ClientID:                 "x509_san_dns:vc-interop-3.sunet.se",
+		ClientID:                 fmt.Sprintf("x509_san_dns:%s", strings.TrimLeft(c.cfg.Verifier.ExternalServerURL, "https://")),
 		ExpiresAt:                0,
 		CodeChallenge:            "",
 		CodeChallengeMethod:      "",
@@ -70,7 +80,6 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 		SavedAt:                  0,
 		Consent:                  false,
 		AuthenticSource:          "",
-		DocumentType:             "",
 		Identity:                 &model.Identity{},
 		Token:                    &model.Token{},
 		Nonce:                    nonce,
@@ -79,7 +88,7 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 		RequestObjectID:          requestObjectID,
 	}
 
-	_, ephemeralPublicJWK, err := c.EphemeralEncryptionKey(authorizationContext.EphemeralEncryptionKeyID)
+	_, ephemeralPublicJWK, err := c.openid4vp.EphemeralKeyCache.GenerateAndStore(authorizationContext.EphemeralEncryptionKeyID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +96,7 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 	requestObject := &openid4vp.RequestObject{
 		ResponseURI:  fmt.Sprintf("%s/verification/direct_post", c.cfg.Verifier.ExternalServerURL),
 		AUD:          "https://self-issued.me/v2",
-		ISS:          "vc-interop-3.sunet.se",
+		ISS:          strings.TrimLeft(c.cfg.Verifier.ExternalServerURL, "https://"),
 		ClientID:     authorizationContext.ClientID,
 		ResponseType: "vp_token",
 		ResponseMode: "direct_post.jwt",
@@ -115,11 +124,11 @@ func (c *Client) UIInteraction(ctx context.Context, req *UIInteractionRequest) (
 		VerifierInfo:     []openid4vp.VerifierInfo{},
 	}
 
-	if err := c.db.AuthorizationContextColl.Save(ctx, authorizationContext); err != nil {
+	if err := c.authContextStore.Save(ctx, authorizationContext); err != nil {
 		return nil, err
 	}
 
-	c.requestObjectCache.Set(authorizationContext.RequestObjectID, requestObject, ttlcache.DefaultTTL)
+	c.openid4vp.RequestObjectCache.Set(authorizationContext.RequestObjectID, requestObject)
 
 	reply := &UIInteractionReply{}
 

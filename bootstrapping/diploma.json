@@ -3,7 +3,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_100",
       "real_data": false,
       "collect": {
@@ -36,10 +37,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -430,7 +431,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_101",
       "real_data": false,
       "collect": {
@@ -463,10 +465,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -857,7 +859,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_102",
       "real_data": false,
       "collect": {
@@ -890,10 +893,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -1284,7 +1287,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_103",
       "real_data": false,
       "collect": {
@@ -1317,10 +1321,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -1711,7 +1715,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_104",
       "real_data": false,
       "collect": {
@@ -1744,10 +1749,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -2138,7 +2143,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_105",
       "real_data": false,
       "collect": {
@@ -2171,10 +2177,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -2565,7 +2571,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_106",
       "real_data": false,
       "collect": {
@@ -2598,10 +2605,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -2992,7 +2999,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_107",
       "real_data": false,
       "collect": {
@@ -3025,10 +3033,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -3419,7 +3427,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_108",
       "real_data": false,
       "collect": {
@@ -3452,10 +3461,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -3846,7 +3855,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_109",
       "real_data": false,
       "collect": {
@@ -3879,10 +3889,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -4273,7 +4283,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_110",
       "real_data": false,
       "collect": {
@@ -4306,10 +4317,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -4700,7 +4711,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_111",
       "real_data": false,
       "collect": {
@@ -4733,10 +4745,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -5127,7 +5139,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_112",
       "real_data": false,
       "collect": {
@@ -5160,10 +5173,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -5554,7 +5567,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_113",
       "real_data": false,
       "collect": {
@@ -5587,10 +5601,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -5981,7 +5995,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_114",
       "real_data": false,
       "collect": {
@@ -6014,10 +6029,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -6408,7 +6423,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_115",
       "real_data": false,
       "collect": {
@@ -6441,10 +6457,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -6835,7 +6851,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_116",
       "real_data": false,
       "collect": {
@@ -6868,10 +6885,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -7262,7 +7279,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_117",
       "real_data": false,
       "collect": {
@@ -7295,10 +7313,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -7689,7 +7707,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_118",
       "real_data": false,
       "collect": {
@@ -7722,10 +7741,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -8116,7 +8135,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_119",
       "real_data": false,
       "collect": {
@@ -8149,10 +8169,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -8543,7 +8563,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_120",
       "real_data": false,
       "collect": {
@@ -8576,10 +8597,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -8970,7 +8991,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_121",
       "real_data": false,
       "collect": {
@@ -9003,10 +9025,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -9397,7 +9419,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_122",
       "real_data": false,
       "collect": {
@@ -9430,10 +9453,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -9824,7 +9847,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_123",
       "real_data": false,
       "collect": {
@@ -9857,10 +9881,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -10251,7 +10275,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_124",
       "real_data": false,
       "collect": {
@@ -10284,10 +10309,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -10678,7 +10703,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_125",
       "real_data": false,
       "collect": {
@@ -10711,10 +10737,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -11105,7 +11131,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_126",
       "real_data": false,
       "collect": {
@@ -11138,10 +11165,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -11532,7 +11559,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_127",
       "real_data": false,
       "collect": {
@@ -11565,10 +11593,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -11959,7 +11987,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_128",
       "real_data": false,
       "collect": {
@@ -11992,10 +12021,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -12386,7 +12415,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_129",
       "real_data": false,
       "collect": {
@@ -12419,10 +12449,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -12813,7 +12843,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_130",
       "real_data": false,
       "collect": {
@@ -12846,10 +12877,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -13240,7 +13271,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_131",
       "real_data": false,
       "collect": {
@@ -13273,10 +13305,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -13667,7 +13699,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_132",
       "real_data": false,
       "collect": {
@@ -13700,10 +13733,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -14094,7 +14127,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_133",
       "real_data": false,
       "collect": {
@@ -14127,10 +14161,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -14521,7 +14555,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_134",
       "real_data": false,
       "collect": {
@@ -14554,10 +14589,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -14948,7 +14983,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_135",
       "real_data": false,
       "collect": {
@@ -14981,10 +15017,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -15375,7 +15411,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_136",
       "real_data": false,
       "collect": {
@@ -15408,10 +15445,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -15802,7 +15839,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_137",
       "real_data": false,
       "collect": {
@@ -15835,10 +15873,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -16229,7 +16267,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_138",
       "real_data": false,
       "collect": {
@@ -16262,10 +16301,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -16656,7 +16695,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_139",
       "real_data": false,
       "collect": {
@@ -16689,10 +16729,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -17083,7 +17123,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_140",
       "real_data": false,
       "collect": {
@@ -17116,10 +17157,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -17510,7 +17551,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_141",
       "real_data": false,
       "collect": {
@@ -17543,10 +17585,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -17937,7 +17979,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_142",
       "real_data": false,
       "collect": {
@@ -17970,10 +18013,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -18364,7 +18407,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_143",
       "real_data": false,
       "collect": {
@@ -18397,10 +18441,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -18791,7 +18835,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_144",
       "real_data": false,
       "collect": {
@@ -18824,10 +18869,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -19218,7 +19263,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_145",
       "real_data": false,
       "collect": {
@@ -19251,10 +19297,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -19645,7 +19691,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_146",
       "real_data": false,
       "collect": {
@@ -19678,10 +19725,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -20072,7 +20119,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_147",
       "real_data": false,
       "collect": {
@@ -20105,10 +20153,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -20499,7 +20547,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_148",
       "real_data": false,
       "collect": {
@@ -20532,10 +20581,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -20926,7 +20975,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_149",
       "real_data": false,
       "collect": {
@@ -20959,10 +21009,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -21353,7 +21403,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_70",
       "real_data": false,
       "collect": {
@@ -21386,10 +21437,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -21780,7 +21831,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_71",
       "real_data": false,
       "collect": {
@@ -21813,10 +21865,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -22207,7 +22259,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_72",
       "real_data": false,
       "collect": {
@@ -22240,10 +22293,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -22634,7 +22687,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_73",
       "real_data": false,
       "collect": {
@@ -22667,10 +22721,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -23061,7 +23115,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_74",
       "real_data": false,
       "collect": {
@@ -23094,10 +23149,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -23488,7 +23543,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_75",
       "real_data": false,
       "collect": {
@@ -23521,10 +23577,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -23915,7 +23971,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_76",
       "real_data": false,
       "collect": {
@@ -23948,10 +24005,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -24342,7 +24399,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_77",
       "real_data": false,
       "collect": {
@@ -24375,10 +24433,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -24769,7 +24827,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_78",
       "real_data": false,
       "collect": {
@@ -24802,10 +24861,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -25196,7 +25255,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_79",
       "real_data": false,
       "collect": {
@@ -25229,10 +25289,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -25623,7 +25683,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_80",
       "real_data": false,
       "collect": {
@@ -25656,10 +25717,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -26050,7 +26111,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_81",
       "real_data": false,
       "collect": {
@@ -26083,10 +26145,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -26477,7 +26539,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_82",
       "real_data": false,
       "collect": {
@@ -26510,10 +26573,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -26904,7 +26967,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_83",
       "real_data": false,
       "collect": {
@@ -26937,10 +27001,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -27331,7 +27395,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_84",
       "real_data": false,
       "collect": {
@@ -27364,10 +27429,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -27758,7 +27823,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_85",
       "real_data": false,
       "collect": {
@@ -27791,10 +27857,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -28185,7 +28251,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_86",
       "real_data": false,
       "collect": {
@@ -28218,10 +28285,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -28612,7 +28679,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_87",
       "real_data": false,
       "collect": {
@@ -28645,10 +28713,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -29039,7 +29107,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_88",
       "real_data": false,
       "collect": {
@@ -29072,10 +29141,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -29466,7 +29535,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_89",
       "real_data": false,
       "collect": {
@@ -29499,10 +29569,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -29893,7 +29963,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_90",
       "real_data": false,
       "collect": {
@@ -29926,10 +29997,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -30320,7 +30391,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_91",
       "real_data": false,
       "collect": {
@@ -30353,10 +30425,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -30747,7 +30819,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_92",
       "real_data": false,
       "collect": {
@@ -30780,10 +30853,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -31174,7 +31247,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_93",
       "real_data": false,
       "collect": {
@@ -31207,10 +31281,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -31601,7 +31675,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_94",
       "real_data": false,
       "collect": {
@@ -31634,10 +31709,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -32028,7 +32103,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_95",
       "real_data": false,
       "collect": {
@@ -32061,10 +32137,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -32455,7 +32531,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_96",
       "real_data": false,
       "collect": {
@@ -32488,10 +32565,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -32882,7 +32959,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_97",
       "real_data": false,
       "collect": {
@@ -32915,10 +32993,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -33309,7 +33387,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_98",
       "real_data": false,
       "collect": {
@@ -33342,10 +33421,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },
@@ -33736,7 +33815,8 @@
     "meta": {
       "authentic_source": "DIPLOMA:00001",
       "document_version": "1.0.0",
-      "document_type": "urn:eudi:diploma:1",
+      "vct": "urn:eudi:diploma:1",
+      "scope": "diploma",
       "document_id": "document_id_diploma_99",
       "real_data": false,
       "collect": {
@@ -33769,10 +33849,10 @@
       "type": "secure",
       "description_structured": {
         "en": {
-          "documentType": "Diploma"
+          "description": "Diploma"
         },
         "sv": {
-          "documentType": "Diploma"
+          "beskrivning": "Diploma"
         }
       }
     },

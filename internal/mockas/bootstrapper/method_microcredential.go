@@ -49,7 +49,8 @@ func (c *MicroCredentialClient) makeSourceData(sourceFilePath string) error {
 		c.documents[pidNumber].Meta = &model.MetaData{
 			AuthenticSource: "MICROCREDENTIAL:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEudiMicroCredential1,
+			VCT:             model.CredentialTypeUrnEudiMicroCredential1,
+			Scope:           "microcredential",
 			DocumentID:      fmt.Sprintf("document_id_microcredential_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
@@ -67,10 +68,10 @@ func (c *MicroCredentialClient) makeSourceData(sourceFilePath string) error {
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
 				"en": map[string]any{
-					"documentType": "MicroCredential",
+					"description": "MicroCredential",
 				},
 				"sv": map[string]any{
-					"documentType": "MicroCredential",
+					"beskrivning": "MicroCredential",
 				},
 			},
 		}

@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"time"
@@ -18,6 +19,7 @@ import (
 	// Swagger
 	_ "vc/docs/apigw"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -37,10 +39,12 @@ type Service struct {
 	sessionsEncKey  string
 	sessionsAuthKey string
 	sessionsName    string
+	samlService     SAMLService
+	oidcrpService   OIDCRPService
 }
 
 // New creates a new httpserver service
-func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace.Tracer, eventPublisher apiv1.EventPublisher, samlService SAMLService, oidcrpService OIDCRPService, log *logger.Log) (*Service, error) {
 	s := &Service{
 		cfg:    cfg,
 		log:    log.New("httpserver"),
@@ -51,6 +55,8 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 			ReadHeaderTimeout: 3 * time.Second,
 		},
 		eventPublisher:  eventPublisher,
+		samlService:     samlService,
+		oidcrpService:   oidcrpService,
 		sessionsName:    "oauth_user_session",
 		sessionsAuthKey: oauth2.GenerateCryptographicNonceFixedLength(32),
 		sessionsEncKey:  oauth2.GenerateCryptographicNonceFixedLength(32),
@@ -66,7 +72,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	if s.cfg.APIGW.APIServer.TLS.Enabled {
 		s.sessionsOptions.Secure = true
-		s.sessionsOptions.SameSite = http.SameSiteStrictMode
+		//s.sessionsOptions.SameSite = http.SameSiteStrictMode
 	}
 
 	var err error
@@ -82,7 +88,20 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	s.gin.StaticFS("/static", http.FS(staticembed.FS))
 
-	f := template.Must(template.ParseFS(staticembed.FS, "*.html"))
+	// Create a new template with custom functions before parsing
+	t := template.New("").Funcs(template.FuncMap{
+		"json": func(v any) (any, error) {
+			jsonBytes, err := json.Marshal(v)
+			if err != nil {
+				return "", err
+			}
+			// Return as template.JS to prevent escaping in JavaScript context
+			return template.JS(string(jsonBytes)), nil
+		},
+	})
+
+	f := template.Must(t.ParseFS(staticembed.FS, "*.html"))
+
 	s.gin.SetHTMLTemplate(f)
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
@@ -90,13 +109,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 		return nil, err
 	}
 
-	//rgRoot.Use(cors.New(cors.Config{
-	//	AllowOrigins:     []string{"https://dc4eu.wwwallet.org", "https://demo.wwwallet.org", "https://dev.wallet.sunet.se"},
-	//	AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-	//	AllowHeaders:     []string{"Content-Type", "Authorization"},
-	//	AllowCredentials: true,
-	//	MaxAge:           12 * time.Hour,
-	//}))
+	rgRoot.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://dc4eu.wwwallet.org", "https://demo.wwwallet.org", "https://dev.wallet.sunet.se", "https://sunetwallet-dev.app.siros.org/"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	rgRestricted, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.APIGW.APIServer.Addr)
 	if err != nil {
@@ -107,9 +126,8 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/", http.StatusOK, s.endpointIndex)
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers", http.StatusOK, s.endpointOffers)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/lookup", http.StatusOK, s.endpointGetOffersLookup)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/:scope/:wallet_id", http.StatusOK, s.endpointGetOffer)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers", http.StatusOK, s.endpointUICredentialOffers)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "offers/:scope/:wallet_id", http.StatusOK, s.endpointUICreateCredentialOffer)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "nonce", http.StatusOK, s.endpointOIDCNonce)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodPost, "credential", http.StatusOK, s.endpointOIDCCredential)
@@ -129,6 +147,12 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "statuslists/:id", http.StatusOK, s.endpointStatusLists)
+
+	// Register SAML endpoints if enabled (build tag dependent)
+	s.registerSAMLRoutes(ctx, rgRoot)
+
+	// Register OIDC RP endpoints if enabled (build tag dependent)
+	s.registerOIDCRPRoutes(ctx, rgRoot)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", 200, s.endpointHealth)
 

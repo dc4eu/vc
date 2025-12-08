@@ -11,7 +11,7 @@ import (
 
 // MockInputData is the input data for the mock function
 type MockInputData struct {
-	DocumentType            string `json:"document_type"`
+	VCT                     string `json:"vct"`
 	DocumentID              string `json:"document_id"`
 	AuthenticSource         string `json:"authentic_source"`
 	AuthenticSourcePersonID string `json:"authentic_source_person_id"`
@@ -79,7 +79,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 
 	meta := &model.MetaData{
 		AuthenticSource: data.AuthenticSource,
-		DocumentType:    data.DocumentType,
+		VCT:             data.VCT,
 		DocumentID:      data.DocumentID,
 		DocumentVersion: "1.0.0",
 		RealData:        false,
@@ -94,7 +94,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 			Revoked: false,
 			Reference: model.RevocationReference{
 				AuthenticSource: data.AuthenticSource,
-				DocumentType:    data.DocumentType,
+				VCT:             data.VCT,
 				DocumentID:      data.DocumentID,
 			},
 		},
@@ -115,7 +115,7 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 
 	documentDisplay := &model.DocumentDisplay{
 		Version: "1.0.0",
-		Type:    data.DocumentType,
+		Type:    data.VCT,
 		DescriptionStructured: map[string]any{
 			"en": "issuer",
 			"sv": "utfärdare",
@@ -129,32 +129,32 @@ func (c *Client) mockOne(ctx context.Context, data MockInputData) (*uploadMock, 
 	}
 
 	var err error
-	switch data.DocumentType {
-	case "PDA1":
+	switch data.VCT {
+	case model.CredentialTypeUrnEudiPda11:
 		mockUpload.DocumentData, err = c.PDA1.random(ctx, person)
 		if err != nil {
 			return nil, err
 		}
 		mockUpload.Meta.DocumentDataValidationRef = "file://../../standards/schema_pda1.json"
-	case "EHIC":
+	case model.CredentialTypeUrnEudiEhic1:
 		mockUpload.DocumentData, err = c.EHIC.random(ctx, person)
 		if err != nil {
 			return nil, err
 		}
 		mockUpload.Meta.DocumentDataValidationRef = "file://../../standards/schema_ehic.json"
-	case "PID":
+	case model.CredentialTypeUrnEudiPid1:
 		mockUpload.DocumentData, err = c.PID.random(ctx, person)
 		if err != nil {
 			return nil, err
 		}
 
-	case "ELM":
+	case model.CredentialTypeUrnEudiElm1:
 		mockUpload.DocumentData, err = c.ELM.random(ctx, person)
 		if err != nil {
 			return nil, err
 		}
 	default:
-		return nil, helpers.ErrNoKnownDocumentType
+		return nil, helpers.ErrNoKnownVCT
 	}
 
 	mockUpload.DocumentDataVersion = "1.0.0"

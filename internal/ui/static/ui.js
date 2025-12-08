@@ -219,13 +219,13 @@ async function postAndDisplayInArticleContainerFor(path, requestBody, articleHea
 const createMock = () => {
     //console.debug("createMock");
 
-    const documentTypeElement = getElementById("document-type-select");
+    const vctElement = getElementById("vct-select");
     const authenticSourceElement = getElementById("authentic-source-input");
     const authenticSourcePersonIdElement = getElementById("authentic_source_person_id-input");
     const identitySchemaNameElement = getElementById("identity-schema-name");
 
     const postBody = {
-        document_type: documentTypeElement.value,
+        vct: vctElement.value,
         authentic_source: authenticSourceElement.value,
         authentic_source_person_id: authenticSourcePersonIdElement.value,
         identity_schema_name: identitySchemaNameElement.value,
@@ -239,7 +239,7 @@ const postDocumentList = () => {
     const path = "/secure/apigw/document/list";
     const articleHeaderText = "List documents result";
 
-    const documentTypeElement = getElementById("document-type-select");
+    const vctElement = getElementById("vct-select");
     const authenticSourceElement = getElementById("authentic-source-input");
     const authenticSourcePersonIdElement = getElementById("authentic_source_person_id-input");
     const identitySchemaName = getElementById("identity-schema-name");
@@ -249,7 +249,7 @@ const postDocumentList = () => {
             authentic_source_person_id: authenticSourcePersonIdElement.value, schema: {
                 name: identitySchemaName.value
             }
-        }, document_type: documentTypeElement.value
+        }, vct: vctElement.value
     };
 
     postAndDisplayInArticleContainerFor(path, documentListRequest, articleHeaderText);
@@ -408,7 +408,7 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
         const familyNameElement = createInputElement('family name', '', 'text');
         const givenNameElement = createInputElement('given name', '', 'text');
         const birthdateElement = createInputElement('birth date (YYYY-MM-DD)', '', 'text');
-        const documentTypeSelectWithinDivElement = createSelectElement([
+        const vctSelectWithinDivElement = createSelectElement([
             {value: 'urn:eudi:ehic:1', label: 'urn:eudi:ehic:1'},
             {value: '"urn:eudi:pda1:', label: '"urn:eudi:pda1:'},
             {value: 'urn:eu.europa.ec.eudi:pid:1"', label: 'urn:eudi:pid:1"'},
@@ -417,8 +417,8 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
             {value: 'urn:eudi:micro_credential:1', label: 'urn:eudi:diploma:1'},
         ]);
 
-        const documentTypeDiv = documentTypeSelectWithinDivElement[0];
-        const documentTypeSelect = documentTypeSelectWithinDivElement[1];
+        const vctDiv = vctSelectWithinDivElement[0];
+        const vctSelect = vctSelectWithinDivElement[1];
 
         const createButton = document.createElement('button');
         createButton.id = generateUUID();
@@ -431,15 +431,15 @@ const addUploadNewMockUsingBasicEIDASattributesFormArticleToContainer = () => {
                 family_name: familyNameElement.value,
                 given_name: givenNameElement.value,
                 birth_date: birthdateElement.value,
-                document_type: documentTypeSelect.value,
+                vct: vctSelect.value,
             };
 
-            disableElements([familyNameElement, givenNameElement, birthdateElement, documentTypeSelect,]);
+            disableElements([familyNameElement, givenNameElement, birthdateElement, vctSelect,]);
 
             postAndDisplayInArticleContainerFor("/secure/mockas/mock/next", requestBody, "Uploaded business decision");
         };
 
-        return [familyNameElement, givenNameElement, birthdateElement, documentTypeDiv, document.createElement('br'), createButton];
+        return [familyNameElement, givenNameElement, birthdateElement, vctDiv, document.createElement('br'), createButton];
     };
 
     const articleIdBasis = generateArticleIDBasis();
@@ -584,7 +584,7 @@ const addViewDocumentFormArticleToContainer = () => {
     const buildFormElements = () => {
 
         const documentIDElement = createInputElement('document id');
-        const documentTypeElement = createInputElement('document type');
+        const vctElement = createInputElement('document type');
         const authenticSourceElement = createInputElement('authentic source');
 
         const viewButton = document.createElement('button');
@@ -597,15 +597,15 @@ const addViewDocumentFormArticleToContainer = () => {
             const requestBody = {
                 document_id: documentIDElement.value,
                 authentic_source: authenticSourceElement.value,
-                document_type: documentTypeElement.value,
+                vct: vctElement.value,
             };
 
-            disableElements([documentIDElement, documentTypeElement, authenticSourceElement]);
+            disableElements([documentIDElement, vctElement, authenticSourceElement]);
 
             postAndDisplayInArticleContainerFor("/secure/apigw/document", requestBody, "Document");
         };
 
-        return [documentIDElement, documentTypeElement, authenticSourceElement, viewButton];
+        return [documentIDElement, vctElement, authenticSourceElement, viewButton];
     };
 
     const articleIdBasis = generateArticleIDBasis();
@@ -791,7 +791,7 @@ function displayCompleteDocumentInModal(rowData) {
         body: JSON.stringify({
             document_id: rowData.documentId,
             authentic_source: rowData.authenticSource,
-            document_type: rowData.documentType,
+            vct: rowData.vct,
             limit: parseInt(1, 10),
             fields: [],
         }),
@@ -848,7 +848,7 @@ function displayQRInModal(rowData) {
         body: JSON.stringify({
             document_id: rowData.documentId,
             authentic_source: rowData.authenticSource,
-            document_type: rowData.documentType,
+            vct: rowData.vct,
             limit: parseInt(1, 10),
             fields: ["qr"],
         }),
@@ -943,7 +943,7 @@ function displayCreateCredentialInModal(rowData) {
                 given_name: rowData.given_name,
                 birth_date: rowData.birth_date,
             },
-            document_type: rowData.documentType,
+            vct: rowData.vct,
             credential_type: "vc+sd-jwt",
             collect_id: rowData.collectId,
         }),
@@ -988,7 +988,7 @@ function displayDeleteDocumentInModal(rowData) {
         },
         body: JSON.stringify({
             authentic_source: rowData.authenticSource,
-            document_type: rowData.documentType,
+            vct: rowData.vct,
             document_id: rowData.documentId,
         }),
     }).then(data => {
@@ -1053,10 +1053,10 @@ function buildDocumentTableRow(doc) {
     tdCollectId.textContent = collectId;
     row.appendChild(tdCollectId);
 
-    const tdDocumentType = document.createElement('td');
-    const documentType = doc.meta?.document_type || "";
-    tdDocumentType.textContent = documentType;
-    row.appendChild(tdDocumentType);
+    const tdVCT = document.createElement('td');
+    const vct = doc.meta?.vct || "";
+    tdVCT.textContent = vct;
+    row.appendChild(tdVCT);
 
     const tdAuthenticSource = document.createElement('td');
     const authenticSource = doc.meta?.authentic_source || "";
@@ -1123,7 +1123,7 @@ function buildDocumentTableRow(doc) {
     const rowData = {
         documentId: documentId,
         authenticSource: authenticSource,
-        documentType: documentType,
+        vct: vct,
         collectId: collectId,
         firstIdentityAuthenticSourcePersonId: doc.identities[0].authentic_source_person_id,
         firstIdentitySchemaName: doc.identities[0].schema.name,
@@ -1227,7 +1227,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
     const buildFormElements = () => {
         const documentIDInput = createInputElement('Document id (optional)');
         const authenticSourceInput = createInputElement('Authentic source (optional)');
-        const documentTypeSelectWithinDivElement = createSelectElement([{
+        const vctSelectWithinDivElement = createSelectElement([{
             value: '',
             label: 'Document type (optional)'
         }, {value: 'urn:eudi:diploma:1', label: 'Diploma (urn:eudi:diploma:1)'},
@@ -1236,8 +1236,8 @@ const addSearchDocumentsFormArticleToContainer = () => {
             {value: 'urn:eudi:micro_credential:1', label: 'Micro credential (urn:eudi:micro_credential:1)'},
             {value: 'urn:eudi:pda1:1', label: 'PDA1 (urn:eudi:pda1:1)'},
             {value: 'urn:eudi:pid:1', label: 'PID (urn:eudi:pid:1)'}]);
-        const documentTypeDiv = documentTypeSelectWithinDivElement[0];
-        const documentTypeSelect = documentTypeSelectWithinDivElement[1];
+        const vctDiv = vctSelectWithinDivElement[0];
+        const vctSelect = vctSelectWithinDivElement[1];
         const collectIdInput = createInputElement('Collect ID (optional)');
         const authenticSourcePersonIdInput = createInputElement('Authentic source person id (optional)');
         const familyNameInput = createInputElement('Family name (optional)');
@@ -1266,7 +1266,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
             const requestBody = {
                 document_id: documentIDInput.value,
                 authentic_source: authenticSourceInput.value,
-                document_type: documentTypeSelect.value,
+                vct: vctSelect.value,
                 collect_id: collectIdInput.value,
 
                 authentic_source_person_id: authenticSourcePersonIdInput.value,
@@ -1276,7 +1276,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
 
                 limit: parseInt(limitInput.value, 10),
 
-                fields: ["meta.document_id", "meta.authentic_source", "meta.document_type", "meta.collect.id", "identities", "qr.credential_offer_url"],
+                fields: ["meta.document_id", "meta.authentic_source", "meta.vct", "meta.collect.id", "identities", "qr.credential_offer_url"],
             };
 
             if (checkboxShowCompleteDocsAsRawJson.checked) {
@@ -1284,7 +1284,7 @@ const addSearchDocumentsFormArticleToContainer = () => {
                 disableElements([
                     documentIDInput,
                     authenticSourceInput,
-                    documentTypeSelect,
+                    vctSelect,
                     collectIdInput,
                     authenticSourcePersonIdInput,
                     familyNameInput,
@@ -1314,12 +1314,12 @@ const addSearchDocumentsFormArticleToContainer = () => {
 
         let brElement = document.createElement('br');
 
-        triggerButtonOnEnter([documentIDInput, authenticSourceInput, documentTypeSelect, collectIdInput, authenticSourcePersonIdInput, familyNameInput, givenNameInput, birthdateInput, checkboxShowCompleteDocsAsRawJson, limitInput], searchButton);
+        triggerButtonOnEnter([documentIDInput, authenticSourceInput, vctSelect, collectIdInput, authenticSourcePersonIdInput, familyNameInput, givenNameInput, birthdateInput, checkboxShowCompleteDocsAsRawJson, limitInput], searchButton);
 
         return [
             documentIDInput,
             authenticSourceInput,
-            documentTypeDiv,
+            vctDiv,
             collectIdInput,
             authenticSourcePersonIdInput,
             familyNameInput,
@@ -1510,7 +1510,7 @@ const addPIDUser = () => {
 
 const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
     const buildFormElements = () => {
-        const documentTypeSelectWithinDivElement = createSelectElement([{
+        const vctSelectWithinDivElement = createSelectElement([{
             value: 'urn:eudi:ehic:1',
             label: 'urn:eudi:ehic:1'
         }], false);
@@ -1606,7 +1606,7 @@ const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
 
                 jsonData.forEach((row) => {
                     try {
-                        const uploadRequest = buildUploadRequestFrom(row, documentTypeSelectWithinDivElement[1].value);
+                        const uploadRequest = buildUploadRequestFrom(row, vctSelectWithinDivElement[1].value);
 
                         console.debug("row", row);
                         console.debug("bodyData", uploadRequest);
@@ -1655,7 +1655,7 @@ const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
         let brElement = document.createElement('br');
 
         return {
-            formElements: [documentTypeSelectWithinDivElement[0], fileDiv, uploadButton, brElement, tableContainer],
+            formElements: [vctSelectWithinDivElement[0], fileDiv, uploadButton, brElement, tableContainer],
             csvFileElement: input,
             csvFileName: fileName,
         };
@@ -1667,7 +1667,7 @@ const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
     const articleContainer = document.getElementById('article-container');
     articleContainer.prepend(articleDiv);
 
-    function buildUploadRequestFrom(row, documentType) {
+    function buildUploadRequestFrom(row, vct) {
         const generatedDocumentId = generateUUID();
 
         function asString(value) {
@@ -1693,7 +1693,7 @@ const addUploadDocumentsUsingCsvFormArticleToContainer = () => {
             meta: {
                 authentic_source: asString(row.authentic_source),
                 document_version: asString(row.document_version) || "1.0.0",
-                document_type: asString(documentType),
+                vct: asString(vct),
                 document_id: asString(row.document_id || generatedDocumentId),
                 real_data: asBoolean(row.real_data) || false,
                 credential_valid_from: convertToUnixTimestampOrNull(asDate(row.ehic_start_date)),
@@ -1831,7 +1831,7 @@ const addViewNotificationFormArticleToContainer = () => {
     const buildFormElements = () => {
 
         const documentIDElement = createInputElement('document id');
-        const documentTypeElement = createInputElement('document type', 'urn:eudi:ehic:1');
+        const vctElement = createInputElement('document type', 'urn:eudi:ehic:1');
         const authenticSourceElement = createInputElement('authentic source', 'SUNET');
 
         const viewButton = document.createElement('button');
@@ -1844,15 +1844,15 @@ const addViewNotificationFormArticleToContainer = () => {
             const requestBody = {
                 document_id: documentIDElement.value,
                 authentic_source: authenticSourceElement.value,
-                document_type: documentTypeElement.value,
+                vct: vctElement.value,
             };
 
-            disableElements([documentIDElement, documentTypeElement, authenticSourceElement]);
+            disableElements([documentIDElement, vctElement, authenticSourceElement]);
 
             postAndDisplayInArticleContainerFor("/secure/apigw/notification", requestBody, "Notification");
         };
 
-        return [documentIDElement, documentTypeElement, authenticSourceElement, viewButton];
+        return [documentIDElement, vctElement, authenticSourceElement, viewButton];
     };
 
     const articleIdBasis = generateArticleIDBasis();
@@ -1871,7 +1871,7 @@ const addCredentialFormArticleToContainer = () => {
         const givenNameElement = createInputElement('given name', '', 'text');
         const birthdateElement = createInputElement('birth date', '', 'text');
         const schemaNameElement = createInputElement('identity schema name', 'FR');
-        const documentTypeElement = createInputElement('document type', 'urn:eudi:ehic:1');
+        const vctElement = createInputElement('document type', 'urn:eudi:ehic:1');
         const credentialTypeElement = createInputElement('credential type', 'vc+sd-jwt');
         const authenticSourceElement = createInputElement('authentic source', 'SUNET');
         const collectIdElement = createInputElement('collect id');
@@ -1894,12 +1894,12 @@ const addCredentialFormArticleToContainer = () => {
                     given_name: givenNameElement.value,
                     birth_date: birthdateElement.value,
                 },
-                document_type: documentTypeElement.value,
+                vct: vctElement.value,
                 credential_type: credentialTypeElement.value,
                 collect_id: collectIdElement.value,
             };
 
-            disableElements([authenticSourcePersonIdElement, familyNameElement, givenNameElement, birthdateElement, schemaNameElement, documentTypeElement, credentialTypeElement, authenticSourceElement, collectIdElement]);
+            disableElements([authenticSourcePersonIdElement, familyNameElement, givenNameElement, birthdateElement, schemaNameElement, vctElement, credentialTypeElement, authenticSourceElement, collectIdElement]);
 
             postAndDisplayInArticleContainerFor("/secure/apigw/credential", requestBody, "Credential");
         };
@@ -1908,7 +1908,7 @@ const addCredentialFormArticleToContainer = () => {
         const orTextElement = document.createElement('p');
         orTextElement.textContent = 'or';
 
-        return [authenticSourcePersonIdElement, orTextElement, familyNameElement, givenNameElement, birthdateElement, lineElement, collectIdElement, schemaNameElement, documentTypeElement, credentialTypeElement, authenticSourceElement, createButton];
+        return [authenticSourcePersonIdElement, orTextElement, familyNameElement, givenNameElement, birthdateElement, lineElement, collectIdElement, schemaNameElement, vctElement, credentialTypeElement, authenticSourceElement, createButton];
     };
 
     const articleIdBasis = generateArticleIDBasis();

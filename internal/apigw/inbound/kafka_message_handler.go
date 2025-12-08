@@ -9,6 +9,7 @@ import (
 	"vc/pkg/messagebroker/kafka"
 	"vc/pkg/model"
 	"vc/pkg/trace"
+	"vc/pkg/vcclient"
 
 	"github.com/IBM/sarama"
 )
@@ -61,7 +62,7 @@ type UploadMessageHandler struct {
 
 // HandleMessage handles Kafka message of type UploadRequest
 func (h *UploadMessageHandler) HandleMessage(ctx context.Context, message *sarama.ConsumerMessage) error {
-	var uploadRequest apiv1.UploadRequest
+	var uploadRequest vcclient.UploadRequest
 	if err := json.Unmarshal(message.Value, &uploadRequest); err != nil {
 		h.log.Error(err, "Failed to unmarshal message.Value from Kafka")
 		return err

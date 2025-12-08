@@ -2,14 +2,11 @@ package apiv1
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
-	"vc/pkg/education"
 	"vc/pkg/helpers"
-	"vc/pkg/model"
-	"vc/pkg/pid"
-	"vc/pkg/socialsecurity"
+	"vc/pkg/sdjwtvc"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -35,8 +32,8 @@ func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error)
 
 // CreateCredentialRequest is the request for Credential
 type CreateCredentialRequest struct {
-	DocumentType string            `json:"document_type" validate:"required"`
 	DocumentData []byte            `json:"document_data" validate:"required"`
+	Scope        string            `json:"scope" validate:"required"`
 	JWK          *apiv1_issuer.Jwk `json:"jwk" validate:"required"`
 }
 
@@ -46,98 +43,49 @@ type CreateCredentialReply struct {
 	Data []*apiv1_issuer.Credential `json:"data"`
 }
 
-// MakeSDJWT creates a credential
+// MakeSDJWT creates a credential generically for any credential type
 func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
 	ctx, span := c.tracer.Start(ctx, "apiv1:CreateCredential")
 	defer span.End()
-
-	c.log.Debug("create credential", "document_type", req.DocumentType)
 
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		c.log.Debug("Validation", "err", err)
 		return nil, err
 	}
 
-	// Build SDJWT
-	var token string
-	var err error
-	switch req.DocumentType {
-	case model.CredentialTypeUrnEudiPda11:
-		doc := &socialsecurity.PDA1Document{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.pda1Client.sdjwt(ctx, doc, req.JWK, nil)
-		if err != nil {
-			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
-			return nil, err
-		}
+	// Get credential constructor from config based on credential type
+	credentialConstructor := c.cfg.GetCredentialConstructor(req.Scope)
+	if credentialConstructor == nil {
+		return nil, fmt.Errorf("unsupported scope: %s", req.Scope)
+	}
 
-	case model.CredentialTypeUrnEudiEhic1:
-		doc := &socialsecurity.EHICDocument{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.ehicClient.sdjwt(ctx, doc, req.JWK, nil)
-		if err != nil {
-			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
-			return nil, err
-		}
+	// VCTM is already in sdjwtvc format
+	vctm := credentialConstructor.VCTM
+	if vctm == nil {
+		return nil, fmt.Errorf("VCTM not configured for scope: %s", req.Scope)
+	}
 
-	case model.CredentialTypeUrnEudiElm1:
-		doc := &education.ELMDocument{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.elmClient.sdjwt(ctx, doc, req.JWK, nil)
-		if err != nil {
-			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
-			return nil, err
-		}
+	// Validate document data against VCTM schema
+	if err := sdjwtvc.ValidateDocument(req.DocumentData, vctm); err != nil {
+		c.log.Error(err, "document validation failed", "scope", req.Scope)
+		return nil, fmt.Errorf("document validation failed: %w", err)
+	}
 
-	case model.CredentialTypeUrnEudiDiploma1:
-		doc := map[string]any{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.diplomaClient.sdjwt(ctx, doc, req.JWK, nil)
-		if err != nil {
-			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
-			return nil, err
-		}
-
-	case model.CredentialTypeUrnEudiMicroCredential1:
-		doc := map[string]any{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.microCredentialClient.sdjwt(ctx, doc, req.JWK, nil)
-		if err != nil {
-			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
-			return nil, err
-		}
-
-	case "open_badge":
-		doc := &education.OpenbadgeCompleteDocument{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.openBadgeCompleteClient.sdjwt(ctx, doc, req.JWK, nil)
-		if err != nil {
-			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
-			return nil, err
-		}
-
-	case model.CredentialTypeUrnEudiPid1:
-		doc := &pid.Document{}
-		if err := json.Unmarshal(req.DocumentData, &doc); err != nil {
-			return nil, err
-		}
-		token, err = c.pidClient.sdjwt(ctx, doc, req.JWK, nil)
-		if err != nil {
-			c.log.Error(err, "failed to create sdjwt", "document_type", req.DocumentType)
-			return nil, err
-		}
+	// Build SD-JWT using sdjwtvc package with the signer interface
+	sdClient := sdjwtvc.New()
+	token, err := sdClient.BuildCredentialWithSigner(
+		ctx,
+		c.cfg.Issuer.JWTAttribute.Issuer,
+		c.signer,
+		credentialConstructor.VCT,
+		req.DocumentData,
+		req.JWK,
+		vctm,
+		nil, // Use default options
+	)
+	if err != nil {
+		c.log.Error(err, "failed to create sdjwt", "scope", req.Scope)
+		return nil, err
 	}
 
 	//c.auditLog.AddAuditLog(ctx, "create_credential", signedCredential.PresentationFlat())
@@ -156,7 +104,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 // RevokeRequest is the request for GenericRevoke
 type RevokeRequest struct {
 	AuthenticSource string `json:"authentic_source"`
-	DocumentType    string `json:"document_type"`
+	VCT             string `json:"vct"`
 	DocumentID      string `json:"document_id"`
 	RevocationID    string `json:"revocation_id"`
 }

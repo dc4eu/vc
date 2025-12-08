@@ -41,13 +41,13 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		cfg:        cfg,
 		identities: map[string]*vcclient.UploadRequest{},
 		vcClientConfig: &vcclient.Config{
-			URL: cfg.MockAS.DatastoreURL,
+			ApigwFQDN: cfg.MockAS.DatastoreURL,
 		},
 		log: log.New("bootstrapper"),
 	}
 
 	var err error
-	client.vcClient, err = vcclient.New(client.vcClientConfig)
+	client.vcClient, err = vcclient.New(client.vcClientConfig, client.log)
 	if err != nil {
 		return nil, fmt.Errorf("new datastore client: %w", err)
 	}
@@ -82,22 +82,30 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 		return nil, fmt.Errorf("new micro credential client: %w", err)
 	}
 
-	client.pidUserClient, err = NewPIDUserClient(ctx, client)
+	client.pidUserClient, err = NewIDPUserClient(ctx, client)
 	if err != nil {
 		return nil, fmt.Errorf("new user client: %w", err)
 	}
 
-	for _, credentialType := range []string{"pid_user"} {
+	for _, credentialType := range []string{"idp_user"} {
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
 		if err := client.userUpload(ctx, jsonPath); err != nil {
-			return nil, fmt.Errorf("user upload: %w", err)
+			client.log.Error(err, "user upload failed", "credentialType", credentialType)
 		}
 	}
 
-	for _, credentialType := range []string{"ehic", "pda1", "elm", "diploma", "microcredential"} { // pid is not working
+	for _, credentialType := range []string{
+		"ehic",
+		"pda1",
+		"elm",
+		"diploma",
+		"microcredential",
+		"pid-1-5",
+		"pid-1-8",
+	} {
 		jsonPath := filepath.Join("../../../bootstrapping", fmt.Sprintf("%s.json", credentialType))
-		if err := client.uploader(ctx, jsonPath); err != nil {
-			return nil, fmt.Errorf("uploader: %w", err)
+		if err := client.documentUploader(ctx, jsonPath); err != nil {
+			client.log.Error(err, "document upload failed", "credentialType", credentialType)
 		}
 	}
 
@@ -107,13 +115,13 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Client, error) 
 func (c *Client) makeIdentities(sourceFilePath string) error {
 	fs, err := excelize.OpenFile(sourceFilePath)
 	if err != nil {
-		fmt.Println(err)
-		return nil
+		c.log.Error(err, "cant open file")
+		return err
 	}
 	defer func() {
 		// Close the spreadsheet.
 		if err := fs.Close(); err != nil {
-			fmt.Println(err)
+			c.log.Error(err, "cant close file")
 		}
 	}()
 
@@ -167,23 +175,26 @@ func (c *Client) shouldUpload(id string) bool {
 	return false
 }
 
-func (c *Client) uploader(ctx context.Context, jsonPath string) error {
+func (c *Client) documentUploader(ctx context.Context, jsonPath string) error {
 	b, err := os.ReadFile(filepath.Clean(jsonPath))
 	if err != nil {
 		return err
 	}
 
-	bodys := map[string]*vcclient.UploadRequest{}
-	if err := json.Unmarshal(b, &bodys); err != nil {
+	requests := map[string]*vcclient.UploadRequest{}
+	if err := json.Unmarshal(b, &requests); err != nil {
 		return err
 	}
 
-	for id, body := range bodys {
+	for id, request := range requests {
 		if c.shouldUpload(id) {
-			resp, err := c.vcClient.Root.Upload(ctx, body)
+			resp, err := c.vcClient.Root.Upload(ctx, request)
 			if err != nil {
 				c.log.Error(err, "Upload", "resp", resp)
 				return err
+			}
+			if resp != nil && resp.Body != nil {
+				resp.Body.Close()
 			}
 
 			c.log.Debug("Upload", "resp", resp.StatusCode)
@@ -199,17 +210,21 @@ func (c *Client) userUpload(ctx context.Context, jsonPath string) error {
 		return err
 	}
 
-	bodys := map[string]*vcclient.AddPIDRequest{}
-	if err := json.Unmarshal(b, &bodys); err != nil {
+	requests := map[string]*vcclient.AddPIDRequest{}
+	if err := json.Unmarshal(b, &requests); err != nil {
 		return err
 	}
+	c.log.Debug("userUpload", "document count", len(requests))
 
-	for id, body := range bodys {
+	for id, request := range requests {
 		if c.shouldUpload(id) {
-			resp, err := c.vcClient.User.AddPID(ctx, body)
+			resp, err := c.vcClient.User.AddPID(ctx, request)
 			if err != nil {
 				c.log.Error(err, "User Upload", "resp", resp)
 				return err
+			}
+			if resp != nil && resp.Body != nil {
+				resp.Body.Close()
 			}
 			c.log.Debug("User Upload", "resp", resp.StatusCode)
 		}

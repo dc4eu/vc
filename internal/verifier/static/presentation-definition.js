@@ -31,7 +31,7 @@ const metadataResponseSchema = v.object({
 const dcqlQueryCredentialSchema = v.object({
     id: v.string(),
     format: v.union([
-        v.literal("vc+sd-jwt"),
+        v.literal("dc+sd-jwt"),
     ]),
     meta: v.intersect([
         v.object({
@@ -68,6 +68,50 @@ window.addEventListener("pageshow", (event) => {
 
 const baseUrl = new URL(window.location.origin);
 
+/**
+ * Listen for SSE notifications from the server.
+ * When a response_code is received, redirect to the callback URL.
+ */
+function setupNotifyListener() {
+    console.log("Setting up SSE notify listener");
+    const eventSource = new EventSource(new URL("/ui/notify", baseUrl).toString());
+
+    eventSource.onopen = () => {
+        console.log("SSE connection opened");
+    };
+
+    eventSource.onmessage = (event) => {
+        const data = event.data;
+        console.log("SSE message received:", data);
+        
+        // Check if the message contains a redirect_uri
+        if (data && typeof data === "string" && data.includes("redirect_uri")) {
+            try {
+                const parsed = JSON.parse(data);
+                if (parsed.redirect_uri) {
+                    console.log("Redirecting to:", parsed.redirect_uri);
+                    eventSource.close();
+                    window.location.href = parsed.redirect_uri;
+                }
+            } catch {
+                // Try to extract redirect_uri directly if not valid JSON
+                const match = data.match(/redirect_uri[=:]["']?([^"'\s]+)/);
+                if (match && match[1]) {
+                    console.log("Redirecting to (regex):", match[1]);
+                    eventSource.close();
+                    window.location.href = match[1];
+                }
+            }
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        console.error("SSE connection error:", error);
+    };
+
+    return eventSource;
+}
+
 Alpine.data("app", () => ({
     /** @type {boolean} */
     loading: true,
@@ -84,6 +128,85 @@ Alpine.data("app", () => ({
      /** @type {{ id: string; vct: string; claims: Record<string, string[]>; } | null} */
     credentialAttributes: null,
 
+    /** 
+     * TODO: Fix this.
+     * @type {Record<string,  DCQLQuery & { label: string; }>} 
+     */
+    predefinedPresentationDefinitions: {
+        pid: {
+            label: "PID",
+            credentials: [
+                {
+                    id: "pid",
+                    format: "dc+sd-jwt",
+                    meta: {
+                        vct_values: ["urn:eudi:pid:arf-1.5:1"],
+                    },
+                    claims: [
+                        { path: ["age_in_years"] },
+                        { path: ["age_over_14"] },
+                        { path: ["age_over_16"] },
+                        { path: ["age_over_18"] },
+                        { path: ["age_over_21"] },
+                        { path: ["age_over_65"] },
+                        { path: ["birth_given_name"] },
+                        { path: ["birth_family_name"] },
+                        { path: ["age_birth_year"] },
+                        { path: ["resident_city"] },
+                        { path: ["resident_country"] },
+                        { path: ["birthdate"] },
+                        { path: ["document_number"] },
+                        { path: ["email_address"] },
+                        { path: ["expiry_date"] },
+                        { path: ["given_name"] },
+                        { path: ["resident_address"] },
+                        { path: ["issuance_date"] },
+                        { path: ["issuing_authority"] },
+                        { path: ["issuing_country"] },
+                        { path: ["issuing_jurisdiction"] },
+                        { path: ["family_name"] },
+                        { path: ["mobile_phone_number"] },
+                        { path: ["nationality"] },
+                        { path: ["personal_administrative_number"] },
+                        { path: ["picture"] },
+                        { path: ["birth_place"] },
+                        { path: ["resident_postal_code"] },
+                        { path: ["resident_house_number"] },
+                        { path: ["resident_street_address"] },
+                        { path: ["sex"] },
+                        { path: ["resident_state"] },
+                        { path: ["trust_anchor"] },
+                    ],
+                },
+            ],
+        },
+        ehic: {
+            label: "EHIC",
+            credentials: [
+                {
+                id: "ehic",
+                format: "dc+sd-jwt",
+                meta: {
+                    vct_values: ["urn:eudi:ehic:1"],
+                },
+                claims: [
+                    { path: ["document_number"] },
+                    { path: ["ending_date"] },
+                    { path: ["date_of_expiry"] },
+                    { path: ["date_of_issuance"] },
+                    { path: ["issuing_country"] },
+                    { path: ["personal_administrative_number"] },
+                    { path: ["starting_date"] },
+                ],
+                },
+            ],
+        },
+        pid_ehic: {
+            label: "PID + EHIC",
+            credentials: [],
+        },
+    },
+
     /** @type {DCQLQuery | null} */
     dcqlQuery: null,
 
@@ -93,7 +216,16 @@ Alpine.data("app", () => ({
     /** @type {Record<string, string> | null} */
     redirectUris: null,
 
+    /** @type {EventSource | null} */
+    notifyEventSource: null,
+
     async init() {
+        // TODO: this is a bit hacky...
+        this.predefinedPresentationDefinitions.pid_ehic.credentials = [
+            ...this.predefinedPresentationDefinitions.pid.credentials,
+            ...this.predefinedPresentationDefinitions.ehic.credentials,
+        ];
+
         await this.lookupCredentialsList();
         this.loading = false;
 
@@ -112,6 +244,28 @@ Alpine.data("app", () => ({
 
         this.credentialsList = data.credentials;
         this.walletInstances = data.supported_wallets;
+    },
+
+    /** @param {string} id */
+    async handleSelectPredefinedPresentationDefinition(id) {
+        this.error = null;
+        this.loading = true;
+        
+        const result = v.safeParse(dcqlQuerySchema, this.predefinedPresentationDefinitions[id]);
+        if (!result.success) {
+            this.error = "Malformed predefined DCQL query";
+            return;
+        }
+
+        // @ts-ignore
+        this.credentialAttributes = {};
+        this.credentialsList = {};
+
+        this.dcqlQuery = result.output;
+
+        await this.sendDcqlQuery();
+
+        this.loading = false;
     },
 
     /** @param {SubmitEvent} event */
@@ -177,6 +331,18 @@ Alpine.data("app", () => ({
         this.presentationDefinition = null;
     },
 
+    /** 
+     * Handle click on wallet link - close SSE connection for same-device flow
+     * This allows the server to detect same-device flow and include redirect_uri
+     */
+    handleWalletClick() {
+        console.log("Wallet link clicked, closing SSE connection for same-device flow");
+        if (this.notifyEventSource) {
+            this.notifyEventSource.close();
+            this.notifyEventSource = null;
+        }
+    },
+
     /** @param {SubmitEvent} event */
     async handleAttributesSelectionForm(event) {
         this.error = null;
@@ -187,11 +353,6 @@ Alpine.data("app", () => ({
             return;
         }
 
-        if (!this.walletInstances) {
-            this.error = "Wallet instances list is null";
-            return;
-        }
-        
         if (!(this.$refs.attributesSelectionForm instanceof HTMLFormElement)) {
             this.error = "Attributes selection form not of type 'HtmlFormElement'";
             return;
@@ -212,7 +373,7 @@ Alpine.data("app", () => ({
         /** @satisfies {DCQLQueryCredential} */
         const credential = {
             id: this.credentialAttributes.id,
-            format: "vc+sd-jwt",
+            format: "dc+sd-jwt",
             meta: {
                 vct_values: [this.credentialAttributes.vct]
             },
@@ -232,6 +393,18 @@ Alpine.data("app", () => ({
 
         this.dcqlQuery = dcql_query;
 
+        await this.sendDcqlQuery();
+
+        this.loading = false;
+    },
+
+    async sendDcqlQuery() {
+        console.log("sendDcqlQuery called");
+        if (!this.walletInstances) {
+            this.error = "Wallet instances list is null";
+            return;
+        }
+
         try {
             const res = await this.fetchData(
                 new URL("/ui/interaction", baseUrl), 
@@ -241,10 +414,17 @@ Alpine.data("app", () => ({
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        dcql_query,
+                        dcql_query: this.dcqlQuery,
                     })
                 },
             );
+
+            // Start SSE listener AFTER interaction call sets session_id
+            if (!this.notifyEventSource) {
+                console.log("Starting SSE notify listener from sendDcqlQuery");
+                this.notifyEventSource = setupNotifyListener();
+                console.log("SSE notify listener started, eventSource:", this.notifyEventSource);
+            }
 
             this.presentationDefinition = v.parse(presentationDefinitionSchema, res);
 
@@ -264,8 +444,6 @@ Alpine.data("app", () => ({
             this.error = `Error during posting of dcql query: ${error}`;
             return;
         }
-
-        this.loading = false;
     },
 
     /**

@@ -69,7 +69,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	}
 
 	// extra middlewares (must be declared before Server.Default)
-	s.gin.Use(s.httpHelpers.Middleware.Gzip(ctx))
 	s.gin.Use(s.middlewareUserSession(ctx, s.cfg))
 
 	rgRoot, err := s.httpHelpers.Server.Default(ctx, s.server, s.gin, s.cfg.UI.APIServer.Addr)
@@ -105,7 +104,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	rgAPIGWSecure := rgSecure.Group("apigw")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/list", http.StatusOK, s.endpointDocumentList)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "upload", http.StatusOK, s.endpointUpload)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "credential", http.StatusOK, s.endpointCredential)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document", http.StatusOK, s.endpointGetDocument)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "notification", http.StatusOK, s.endpointNotification)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIGWSecure, http.MethodPost, "document/search", http.StatusOK, s.endpointSearchDocuments)

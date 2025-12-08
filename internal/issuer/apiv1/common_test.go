@@ -2,6 +2,8 @@ package apiv1
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
 	"testing"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/auditlog"
@@ -9,6 +11,7 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/pid"
+	"vc/pkg/signing"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
@@ -77,41 +80,51 @@ var (
 func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logger.Log) *Client {
 	cfg := &model.Cfg{
 		CredentialConstructor: map[string]*model.CredentialConstructor{
+			// OAuth2 scope based keys
 			"diploma": {
 				VCT:          model.CredentialTypeUrnEudiDiploma1,
 				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
 			},
 			"pid": {
 				VCT:          model.CredentialTypeUrnEudiPid1,
 				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
 			},
 			"ehic": {
 				VCT:          model.CredentialTypeUrnEudiEhic1,
 				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
 			},
 			"pda1": {
 				VCT:          model.CredentialTypeUrnEudiPda11,
 				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
 			},
 			"micro_credential": {
 				VCT:          model.CredentialTypeUrnEudiMicroCredential1,
 				VCTMFilePath: "testdata/vctm_test.json",
-			},
-			"openbadge_complete": {
-				VCT:          "openbadge_complete",
-				VCTMFilePath: "testdata/vctm_test.json",
-			},
-			"openbadge_basic": {
-				VCT:          "openbadge_basic",
-				VCTMFilePath: "testdata/vctm_test.json",
-			},
-			"openbadge_endorsements": {
-				VCT:          "openbadge_endorsements",
-				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
 			},
 			"elm": {
 				VCT:          model.CredentialTypeUrnEudiElm1,
 				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
+			},
+			"openbadge_complete": {
+				VCT:          "urn:eudi:openbadge_complete:1",
+				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
+			},
+			"openbadge_basic": {
+				VCT:          "urn:eudi:openbadge_basic:1",
+				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
+			},
+			"openbadge_endorsements": {
+				VCT:          "urn:eudi:openbadge_endorsements:1",
+				VCTMFilePath: "testdata/vctm_test.json",
+				AuthMethod:   "basic",
 			},
 		},
 		Issuer: model.Issuer{
@@ -136,8 +149,26 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 	audit, err := auditlog.New(ctx, cfg, log.New("audit"))
 	assert.NoError(t, err)
 
+	// Load VCTM files for all credential constructors
+	for scope, constructor := range cfg.CredentialConstructor {
+		err := constructor.LoadVCTMetadata(ctx, scope)
+		assert.NoError(t, err)
+	}
+
 	client, err := New(ctx, audit, cfg, tracer, log.New("apiv1"))
 	assert.NoError(t, err)
+
+	// Override key if RSA is requested for testing
+	if keyType == "rsa" {
+		rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
+		assert.NoError(t, err)
+		client.privateKey = rsaKey
+		client.publicKey = &rsaKey.PublicKey
+		// Also update the signer to use RSA
+		signer, err := signing.NewSoftwareSigner(rsaKey, "test-rsa-kid")
+		assert.NoError(t, err)
+		client.signer = signer
+	}
 
 	return client
 }

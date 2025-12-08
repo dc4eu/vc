@@ -27,9 +27,9 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 
 	indexDocumentIDInAuthenticSourceUniq := mongo.IndexModel{
 		Keys: bson.D{
-			bson.E{Key: "meta.document_id", Value: 1},
-			bson.E{Key: "meta.authentic_source", Value: 1},
-			bson.E{Key: "meta.document_type", Value: 1},
+			primitive.E{Key: "meta.document_id", Value: 1},
+			primitive.E{Key: "meta.authentic_source", Value: 1},
+			primitive.E{Key: "meta.document_type", Value: 1},
 		},
 		Options: options.Index().SetName("document_unique_within_namespace").SetUnique(true),
 	}
@@ -88,7 +88,7 @@ func (c *VCDatastoreColl) IDMapping(ctx context.Context, query *IDMappingQuery) 
 // AddDocumentIdentityQuery is the query to add document identity
 type AddDocumentIdentityQuery struct {
 	AuthenticSource string            `json:"authentic_source" bson:"authentic_source"`
-	DocumentType    string            `json:"document_type" bson:"document_type"`
+	VCT             string            `json:"vct" bson:"vct"`
 	DocumentID      string            `json:"document_id" bson:"document_id"`
 	Identities      []*model.Identity `json:"identities" bson:"identities"`
 }
@@ -98,7 +98,7 @@ func (c *VCDatastoreColl) AddDocumentIdentity(ctx context.Context, query *AddDoc
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
 		"meta.document_id":      bson.M{"$eq": query.DocumentID},
-		"meta.document_type":    bson.M{"$eq": query.DocumentType},
+		"meta.vct":              bson.M{"$eq": query.VCT},
 	}
 
 	// This needs to make sure no duplicate authentic_source_person_id is added in the future
@@ -118,7 +118,7 @@ func (c *VCDatastoreColl) AddDocumentIdentity(ctx context.Context, query *AddDoc
 // DeleteDocumentIdentityQuery is the query to delete identity in document
 type DeleteDocumentIdentityQuery struct {
 	AuthenticSource         string `json:"authentic_source" bson:"authentic_source"`
-	DocumentType            string `json:"document_type" bson:"document_type"`
+	VCT                     string `json:"vct" bson:"vct"`
 	DocumentID              string `json:"document_id" bson:"document_id"`
 	AuthenticSourcePersonID string `json:"authentic_source_person_id" bson:"authentic_source_person_id"`
 }
@@ -128,7 +128,7 @@ func (c *VCDatastoreColl) DeleteDocumentIdentity(ctx context.Context, query *Del
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": query.AuthenticSource},
 		"meta.document_id":      bson.M{"$eq": query.DocumentID},
-		"meta.document_type":    bson.M{"$eq": query.DocumentType},
+		"meta.vct":              bson.M{"$eq": query.VCT},
 	}
 
 	update := bson.M{"$pull": bson.M{"identities": bson.M{"authentic_source_person_id": query.AuthenticSourcePersonID}}}
@@ -147,7 +147,7 @@ func (c *VCDatastoreColl) Delete(ctx context.Context, doc *model.MetaData) error
 	filter := bson.M{
 		"meta.document_id":      bson.M{"$eq": doc.DocumentID},
 		"meta.authentic_source": bson.M{"$eq": doc.AuthenticSource},
-		"meta.document_type":    bson.M{"$eq": doc.DocumentType},
+		"meta.vct":              bson.M{"$eq": doc.VCT},
 	}
 	_, err := c.Coll.DeleteOne(ctx, filter)
 	if err != nil {
@@ -169,7 +169,7 @@ type GetDocumentForCredential struct {
 func (c *VCDatastoreColl) GetDocumentForCredential(ctx context.Context, query *GetDocumentForCredential) (*model.Document, error) {
 	filter := bson.M{
 		"meta.authentic_source":                 bson.M{"$eq": query.Meta.AuthenticSource},
-		"meta.document_type":                    bson.M{"$eq": query.Meta.DocumentType},
+		"meta.vct":                              bson.M{"$eq": query.Meta.VCT},
 		"identities.authentic_source_person_id": bson.M{"$eq": query.Identity.AuthenticSourcePersonID},
 	}
 	opt := options.FindOne().SetProjection(bson.M{
@@ -223,11 +223,13 @@ func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQue
 func (c *VCDatastoreColl) GetDocumentWithIdentity(ctx context.Context, query *GetDocumentQuery) (*model.CompleteDocument, error) {
 	filter := bson.M{
 		"meta.authentic_source":  bson.M{"$eq": query.Meta.AuthenticSource},
-		"meta.document_type":     bson.M{"$eq": query.Meta.DocumentType},
+		"meta.vct":               bson.M{"$eq": query.Meta.VCT},
 		"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
 		"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
 		"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
 	}
+
+	c.log.Debug("GetDocumentWithIdentity", "filter", filter)
 
 	opt := options.FindOne().SetProjection(bson.M{
 		"document_data": 1,
@@ -243,10 +245,10 @@ func (c *VCDatastoreColl) GetDocumentWithIdentity(ctx context.Context, query *Ge
 	return doc, nil
 }
 
-// GetDocumentsWithIdentity returns matching document with identity if any, or error
-func (c *VCDatastoreColl) GetDocumentsWithIdentity(ctx context.Context, query *GetDocumentQuery) (map[string]model.CompleteDocument, error) {
+// GetDocumentsWithIdentity returns matching document with identity and VCT if any, or error
+func (c *VCDatastoreColl) GetDocumentsWithIdentity(ctx context.Context, query *GetDocumentQuery) (map[string]*model.CompleteDocument, error) {
 	filter := bson.M{
-		"meta.document_type":     bson.M{"$eq": query.Meta.DocumentType},
+		"meta.vct":               bson.M{"$eq": query.Meta.VCT},
 		"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
 		"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
 		"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
@@ -262,10 +264,10 @@ func (c *VCDatastoreColl) GetDocumentsWithIdentity(ctx context.Context, query *G
 		return nil, err
 	}
 
-	docs := make(map[string]model.CompleteDocument, len(res))
+	docs := make(map[string]*model.CompleteDocument, len(res))
 
 	for _, doc := range res {
-		docs[doc.Meta.AuthenticSource] = *doc
+		docs[doc.Meta.AuthenticSource] = doc
 	}
 
 	return docs, nil
@@ -275,7 +277,7 @@ func (c *VCDatastoreColl) GetDocumentsWithIdentity(ctx context.Context, query *G
 type DocumentListQuery struct {
 	AuthenticSource string          `json:"authentic_source" bson:"authentic_source"`
 	Identity        *model.Identity `json:"identity" bson:"identity" validate:"required"`
-	DocumentType    string          `json:"document_type" bson:"document_type"`
+	VCT             string          `json:"vct" bson:"vct"`
 	ValidFrom       int64           `json:"valid_from" bson:"valid_from"`
 	ValidTo         int64           `json:"valid_to" bson:"valid_to"`
 }
@@ -294,8 +296,8 @@ func (c *VCDatastoreColl) DocumentList(ctx context.Context, query *DocumentListQ
 		filter["meta.authentic_source"] = bson.M{"$eq": query.AuthenticSource}
 	}
 
-	if query.DocumentType != "" {
-		filter["meta.document_type"] = bson.M{"$eq": query.DocumentType}
+	if query.VCT != "" {
+		filter["meta.vct"] = bson.M{"$eq": query.VCT}
 	}
 
 	if query.Identity.AuthenticSourcePersonID != "" {
@@ -323,7 +325,7 @@ func (c *VCDatastoreColl) DocumentList(ctx context.Context, query *DocumentListQ
 func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*openid4vci.QR, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": attr.AuthenticSource},
-		"meta.document_type":    bson.M{"$eq": attr.DocumentType},
+		"meta.vct":              bson.M{"$eq": attr.VCT},
 		"meta.document_id":      bson.M{"$eq": attr.DocumentID},
 	}
 	opt := options.FindOne().SetProjection(bson.M{
@@ -339,7 +341,7 @@ func (c *VCDatastoreColl) GetQR(ctx context.Context, attr *model.MetaData) (*ope
 
 type GetQRForUserFilter struct {
 	AuthenticSource string          `json:"authentic_source" bson:"authentic_source"`
-	DocumentType    string          `json:"document_type" bson:"document_type"`
+	VCT             string          `json:"vct" bson:"vct"`
 	Identity        *model.Identity `json:"identity" bson:"identity" validate:"required"`
 }
 
@@ -347,7 +349,7 @@ type GetQRForUserFilter struct {
 func (c *VCDatastoreColl) GetQRForUser(ctx context.Context, query *GetQRForUserFilter) (*openid4vci.QR, error) {
 	filter := bson.M{
 		"meta.authentic_source":  bson.M{"$eq": query.AuthenticSource},
-		"meta.document_type":     bson.M{"$eq": query.DocumentType},
+		"meta.vct":               bson.M{"$eq": query.VCT},
 		"identities.family_name": bson.M{"$eq": query.Identity.FamilyName},
 		"identities.given_name":  bson.M{"$eq": query.Identity.GivenName},
 		"identities.birth_date":  bson.M{"$eq": query.Identity.BirthDate},
@@ -374,7 +376,7 @@ func (c *VCDatastoreColl) GetDocumentCollectID(ctx context.Context, query *GetDo
 	filter := bson.M{
 		"meta.authentic_source":  bson.M{"$eq": query.Meta.AuthenticSource},
 		"meta.collect.id":        bson.M{"$eq": query.Meta.Collect.ID},
-		"meta.document_type":     bson.M{"$eq": query.Meta.DocumentType},
+		"meta.vct":               bson.M{"$eq": query.Meta.VCT},
 		"identities.schema.name": bson.M{"$eq": query.Identity.Schema.Name},
 	}
 
@@ -407,7 +409,7 @@ func (c *VCDatastoreColl) GetDocumentCollectID(ctx context.Context, query *GetDo
 func (c *VCDatastoreColl) GetByRevocationID(ctx context.Context, q *model.MetaData) (*model.CompleteDocument, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": q.AuthenticSource},
-		"meta.document_type":    bson.M{"$eq": q.DocumentType},
+		"meta.vct":              bson.M{"$eq": q.VCT},
 		"meta.revocation.id":    bson.M{"$eq": q.Revocation.ID},
 	}
 	res := &model.CompleteDocument{}
@@ -439,7 +441,7 @@ func (c *VCDatastoreColl) Replace(ctx context.Context, doc *model.CompleteDocume
 // SearchDocumentsQuery the query to search for documents
 type SearchDocumentsQuery struct {
 	AuthenticSource string `json:"authentic_source,omitempty" validate:"omitempty,max=1000"`
-	DocumentType    string `json:"document_type,omitempty" validate:"omitempty,max=1000"`
+	VCT             string `json:"vct,omitempty" validate:"omitempty,max=1000"`
 	DocumentID      string `json:"document_id,omitempty" validate:"omitempty,max=1000"`
 	CollectID       string `json:"collect_id,omitempty" validate:"omitempty,max=1000"`
 
@@ -527,8 +529,8 @@ func buildSearchDocumentsFilter(query *SearchDocumentsQuery) bson.M {
 	if query.AuthenticSource != "" {
 		filter["meta.authentic_source"] = bson.M{"$eq": query.AuthenticSource}
 	}
-	if query.DocumentType != "" {
-		filter["meta.document_type"] = bson.M{"$eq": query.DocumentType}
+	if query.VCT != "" {
+		filter["meta.vct"] = bson.M{"$eq": query.VCT}
 	}
 	if query.DocumentID != "" {
 		filter["meta.document_id"] = bson.M{"$eq": query.DocumentID}

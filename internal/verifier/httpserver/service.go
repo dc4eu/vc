@@ -2,7 +2,9 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"text/template"
 	"time"
 	"vc/internal/verifier/apiv1"
 	"vc/internal/verifier/notify"
@@ -47,7 +49,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 		server: &http.Server{
 			ReadHeaderTimeout: 3 * time.Second,
 		},
-		sessionsName:    "oauth_user_session",
+		sessionsName:    "verifier_user_session",
 		sessionsAuthKey: oauth2.GenerateCryptographicNonceFixedLength(32),
 		sessionsEncKey:  oauth2.GenerateCryptographicNonceFixedLength(32),
 		sessionsOptions: sessions.Options{
@@ -62,7 +64,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 
 	if s.cfg.Verifier.APIServer.TLS.Enabled {
 		s.sessionsOptions.Secure = true
-		s.sessionsOptions.SameSite = http.SameSiteStrictMode
+		//s.sessionsOptions.SameSite = http.SameSiteStrictMode
 	}
 
 	var err error
@@ -76,24 +78,34 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, notify *notif
 		return nil, err
 	}
 
+	// templating functions
+	s.gin.SetFuncMap(template.FuncMap{
+		"toJSON": func(v any) string {
+			b, _ := json.MarshalIndent(v, "", "  ")
+			return string(b)
+		},
+	})
+
 	s.gin.Static("/static", "./static")
 	s.gin.LoadHTMLGlob("./static/*.html")
 
-	s.gin.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "presentation-definition.html", nil)
-	})
+	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "/", http.StatusOK, s.endpointIndex)
 
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "health", http.StatusOK, s.endpointHealth)
 
 	// oauth2
 	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, ".well-known/oauth-authorization-server", http.StatusOK, s.endpointOAuthMetadata)
 
-	sgVerification := rgRoot.Group("/verification")
-	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodGet, "/request-object", http.StatusOK, s.endpointVerificationRequestObject)
-	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodPost, "/direct_post", http.StatusOK, s.endpointVerificationDirectPost)
+	rgOAuthSession := rgRoot.Group("")
+	rgOAuthSession.Use(s.httpHelpers.Middleware.UserSession(s.sessionsName, s.sessionsAuthKey, s.sessionsEncKey, s.sessionsOptions))
+	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "op/par", http.StatusCreated, s.endpointOAuthPar)
 
-	rgUI := rgRoot.Group("/ui")
-	rgUI.Use(s.httpHelpers.Middleware.UserSession(s.sessionsName, s.sessionsAuthKey, s.sessionsEncKey, s.sessionsOptions))
+	sgVerification := rgOAuthSession.Group("/verification")
+	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodGet, "request-object", http.StatusOK, s.endpointVerificationRequestObject)
+	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodPost, "direct_post", http.StatusOK, s.endpointVerificationDirectPost)
+	s.httpHelpers.Server.RegEndpoint(ctx, sgVerification, http.MethodGet, "callback", http.StatusOK, s.endpointVerificationCallback)
+
+	rgUI := rgOAuthSession.Group("/ui")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodPost, "/interaction", http.StatusOK, s.endpointUIInteraction)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/notify", http.StatusOK, s.endpointUINotify)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgUI, http.MethodGet, "/metadata", http.StatusOK, s.endpointUIMetadata)

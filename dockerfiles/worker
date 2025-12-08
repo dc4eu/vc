@@ -1,21 +1,35 @@
 # Compile
 FROM docker.sunet.se/dc4eu/gobuild:latest AS builder
 
-COPY . .
 ARG SERVICE_NAME
 ARG BUILDTAG
+ARG GO_BUILD_TAGS
 
+# Copy only dependency files first for better caching
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+# Copy source code
+COPY . .
+
+# Run make commands
 RUN make swagger
 RUN make proto
 
-RUN --mount=type=cache,target=/root/.cache/go-build GOOS=linux GOARCH=amd64 go build -v -o bin/vc_$SERVICE_NAME -ldflags \
+# Build with caching for both build cache and module cache
+# GO_BUILD_TAGS is optional - if set, adds -tags flag
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    GOOS=linux GOARCH=amd64 go build -v ${GO_BUILD_TAGS:+-tags "$GO_BUILD_TAGS"} -o bin/vc_$SERVICE_NAME -ldflags \
     "-X vc/pkg/model.BuildVariableGitCommit=$(git rev-list -1 HEAD) \
     -X vc/pkg/model.BuildVariableGitBranch=$(git rev-parse --abbrev-ref HEAD) \
     -X vc/pkg/model.BuildVariableTimestamp=$(date +'%F:T%TZ') \
     -X vc/pkg/model.BuildVariableGoVersion=$(go version|awk '{print $3}') \
     -X vc/pkg/model.BuildVariableGoArch=$(go version|awk '{print $4}') \
     -X vc/pkg/model.BuildVersion=$(echo $BUILDTAG) \
-    -w -s --extldflags '-static'" ./cmd/$SERVICE_NAME/main.go
+    -w -s --extldflags '-static'" ./cmd/$SERVICE_NAME
 
 # Deploy
 FROM debian:13-slim
@@ -24,7 +38,7 @@ ARG SERVICE_NAME
 
 WORKDIR /
 
-RUN apt-get update && apt-get install -y curl procps iputils-ping less
+RUN apt-get update && apt-get install -y curl procps iputils-ping less netcat-openbsd
 RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/app/bin/vc_${SERVICE_NAME} /vc_service

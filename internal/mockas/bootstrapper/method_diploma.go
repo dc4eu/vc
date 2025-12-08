@@ -52,7 +52,8 @@ func (c *diplomaClient) makeSourceData(sourceFilePath string) error {
 		doc.Meta = &model.MetaData{
 			AuthenticSource: "DIPLOMA:00001",
 			DocumentVersion: "1.0.0",
-			DocumentType:    model.CredentialTypeUrnEudiDiploma1,
+			VCT:             model.CredentialTypeUrnEudiDiploma1,
+			Scope:           "diploma",
 			DocumentID:      fmt.Sprintf("document_id_diploma_%s", pidNumber),
 			RealData:        false,
 			Collect: &model.Collect{
@@ -70,10 +71,10 @@ func (c *diplomaClient) makeSourceData(sourceFilePath string) error {
 			Type:    "secure",
 			DescriptionStructured: map[string]any{
 				"en": map[string]any{
-					"documentType": "Diploma",
+					"description": "Diploma",
 				},
 				"sv": map[string]any{
-					"documentType": "Diploma",
+					"beskrivning": "Diploma",
 				},
 			},
 		}

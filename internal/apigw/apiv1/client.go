@@ -30,7 +30,6 @@ type Client struct {
 	log                         *logger.Log
 	tracer                      *trace.Tracer
 	datastoreClient             *vcclient.Client
-	statusIssuer                *statusissuer.Service
 	issuerMetadata              *openid4vci.CredentialIssuerMetadataParameters
 	issuerMetadataSigningKey    any
 	issuerMetadataSigningCert   *x509.Certificate
@@ -44,11 +43,10 @@ type Client struct {
 }
 
 // New creates a new instance of the public api
-func New(ctx context.Context, db *db.Service, statusIssuer *statusissuer.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	c := &Client{
 		cfg:                         cfg,
 		db:                          db,
-		statusIssuer:                statusIssuer,
 		log:                         log.New("apiv1"),
 		tracer:                      tracer,
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
@@ -83,8 +81,37 @@ func New(ctx context.Context, db *db.Service, statusIssuer *statusissuer.Service
 	issuerIdentifier := cfg.Issuer.Identifier
 	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
 
-	c.datastoreClient, err = vcclient.New(&vcclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL})
+	c.datastoreClient, err = vcclient.New(&vcclient.Config{ApigwFQDN: issuerCFG.AuthenticSourceEndpoint.URL}, c.log)
 	if err != nil {
+		return nil, err
+	}
+
+	// Initialize gRPC client for issuer service
+	issuerConn, err := grpc.NewClient(cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		c.log.Error(err, "Failed to create gRPC connection to issuer")
+		return nil, err
+	}
+	c.issuerClient = apiv1_issuer.NewIssuerServiceClient(issuerConn)
+
+	// Initialize gRPC client for registry service
+	registryConn, err := grpc.NewClient(cfg.Registry.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		c.log.Error(err, "Failed to create gRPC connection to registry")
+		return nil, err
+	}
+	c.registryClient = apiv1_registry.NewRegistryServiceClient(registryConn)
+
+	for scope, credentialInfo := range cfg.CredentialConstructor {
+		if err := credentialInfo.LoadVCTMetadata(ctx, scope); err != nil {
+			c.log.Error(err, "Failed to load credential constructor", "scope", scope)
+			return nil, err
+		}
+
+		credentialInfo.Attributes = credentialInfo.VCTM.Attributes()
+	}
+
+	if err := c.CreateCredentialOfferLookupMetadata(ctx); err != nil {
 		return nil, err
 	}
 
@@ -126,4 +153,51 @@ func (c *Client) EphemeralEncryptionKey(kid string) (jwk.Key, jwk.Key, error) {
 	}
 
 	return privateJWK, publicJWK, nil
+}
+
+type CredentialOfferLookupMetadata struct {
+	// CredentialTypes use scope as key
+	CredentialTypes map[string]CredentialOfferTypeData `json:"credential_types"`
+
+	// Wallet use name in config as key and description as value
+	Wallets map[string]string `json:"wallets"`
+}
+type CredentialOfferTypeData struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// CreateCredentialOfferLookupMetadata provides data for UI /offer, credential_offer selection
+func (c *Client) CreateCredentialOfferLookupMetadata(ctx context.Context) error {
+	_, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	c.log.Info("Running CreateCredentialOfferLookupMetadata")
+
+	credentialTypes := map[string]CredentialOfferTypeData{}
+
+	for scope, credential := range c.cfg.CredentialConstructor {
+		if err := credential.LoadVCTMetadata(ctx, scope); err != nil {
+			continue
+		}
+
+		vctm := credential.VCTM
+
+		credentialTypes[scope] = CredentialOfferTypeData{
+			Name:        vctm.Name,
+			Description: vctm.Description,
+		}
+	}
+
+	wallets := map[string]string{}
+	for key, wallet := range c.cfg.APIGW.CredentialOffers.Wallets {
+		wallets[key] = wallet.Label
+	}
+
+	c.CredentialOfferLookupMetadata = &CredentialOfferLookupMetadata{
+		CredentialTypes: credentialTypes,
+		Wallets:         wallets,
+	}
+
+	return nil
 }

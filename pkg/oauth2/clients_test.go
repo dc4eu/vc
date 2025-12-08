@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,13 +21,17 @@ var mockClients = Clients{
 }
 
 func TestAllow(t *testing.T) {
+	type want struct {
+		allowed bool
+		err     error
+	}
 	tts := []struct {
 		name        string
 		clientID    string
 		redirectURI string
 		scope       string
 		clients     Clients
-		want        bool
+		want        want
 	}{
 		{
 			name:        "valid client",
@@ -34,7 +39,7 @@ func TestAllow(t *testing.T) {
 			redirectURI: "https://example.com/callback",
 			scope:       "ehic",
 			clients:     mockClients,
-			want:        true,
+			want:        want{allowed: true, err: nil},
 		},
 		{
 			name:        "invalid client",
@@ -42,22 +47,31 @@ func TestAllow(t *testing.T) {
 			redirectURI: "https://example.com/callback",
 			scope:       "el",
 			clients:     mockClients,
-			want:        false,
+			want:        want{allowed: false, err: errors.New("requested scope is not allowed for this client")},
 		},
 		{
-			name:        "invalid client",
+			name:        "client not in config",
 			clientID:    "client_not_in_dataset",
 			redirectURI: "https://example.com/callback",
 			scope:       "openid",
 			clients:     mockClients,
-			want:        false,
+			want:        want{allowed: false, err: errors.New("client not found in config")},
+		},
+		{
+			name:        "redirect url trailing slash",
+			clientID:    "client_1",
+			redirectURI: "https://example.com/callback/",
+			scope:       "ehic",
+			clients:     mockClients,
+			want:        want{allowed: false, err: errors.New("redirect_url do not match")},
 		},
 	}
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.clients.Allow(tt.clientID, tt.redirectURI, tt.scope)
-			assert.Equal(t, tt.want, got)
+			got, err := tt.clients.Allow(tt.clientID, tt.redirectURI, tt.scope)
+			assert.Equal(t, tt.want.allowed, got)
+			assert.Equal(t, tt.want.err, err)
 		})
 	}
 }

@@ -8,9 +8,20 @@ jobs:
   if_merged:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.set_tag.outputs.release_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set release tag with timestamp
+        id: set_tag
+        run: |
+          # Generate ISO8601-style timestamp with milliseconds
+          # Format: YYYY_MM_DD_HHMMSSmmm (e.g., 2025_12_08_123052345)
+          TIMESTAMP=$(date -u +'%Y_%m_%d_%H%M%S%3N')
+          echo "release_tag=${TIMESTAMP}" >> $GITHUB_OUTPUT
+          echo "Release tag: ${TIMESTAMP}"
 
       - name: Install Go
         uses: actions/setup-go@v4
@@ -33,3 +44,26 @@ jobs:
 
       - name: Build
         run: make build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: release_${{ steps.set_tag.outputs.release_tag }}
+          name: Release ${{ steps.set_tag.outputs.release_tag }}
+          body: |
+            ## Docker Images
+            All services tagged with: `${{ steps.set_tag.outputs.release_tag }}`
+
+            ### Services
+            - apigw_${{ steps.set_tag.outputs.release_tag }}
+            - verifier_${{ steps.set_tag.outputs.release_tag }}
+            - registry_${{ steps.set_tag.outputs.release_tag }}
+            - persistent_${{ steps.set_tag.outputs.release_tag }}
+            - mockas_${{ steps.set_tag.outputs.release_tag }}
+            - issuer_${{ steps.set_tag.outputs.release_tag }}
+            - ui_${{ steps.set_tag.outputs.release_tag }}
+            - verifier-proxy_${{ steps.set_tag.outputs.release_tag }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

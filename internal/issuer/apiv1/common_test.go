@@ -11,6 +11,7 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/pid"
+	"vc/pkg/signing"
 	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
@@ -163,6 +164,10 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 		assert.NoError(t, err)
 		client.privateKey = rsaKey
 		client.publicKey = &rsaKey.PublicKey
+		// Also update the signer to use RSA
+		signer, err := signing.NewSoftwareSigner(rsaKey, "test-rsa-kid")
+		assert.NoError(t, err)
+		client.signer = signer
 	}
 
 	return client

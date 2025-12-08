@@ -13,11 +13,39 @@ pki:
 	cd pki/; ./create_pki.sh
 	cd developer_tools/; ./gen_ec_sign_key.sh; ./gen_rsa_sign_key.sh
 
-test: test-verifier
+test: test-apigw test-issuer test-mockas test-persistent test-registry test-ui test-verifier test-verifier-proxy
+
+test-apigw:
+	$(info Testing apigw)
+	go test -v ./cmd/apigw/... ./internal/apigw/...
+
+test-issuer:
+	$(info Testing issuer)
+	go test -v ./cmd/issuer/... ./internal/issuer/...
+
+test-mockas:
+	$(info Testing mockas)
+	go test -v ./cmd/mockas/... ./internal/mockas/...
+
+test-persistent:
+	$(info Testing persistent)
+	go test -v ./cmd/persistent/... ./internal/persistent/...
+
+test-registry:
+	$(info Testing registry)
+	go test -v ./cmd/registry/... ./internal/registry/...
+
+test-ui:
+	$(info Testing ui)
+	go test -v ./cmd/ui/... ./internal/ui/...
 
 test-verifier:
 	$(info Testing verifier)
-	go test -v ./cmd/verifier
+	go test -v ./cmd/verifier/... ./internal/verifier/...
+
+test-verifier-proxy:
+	$(info Testing verifier-proxy)
+	go test -v ./cmd/verifier-proxy/... ./internal/verifier_proxy/...
 
 # W3C VC 2.0 Test Suite targets
 create-w3c-test-suite:
@@ -428,6 +456,8 @@ vscode:
 		plantuml \
 		docker.io \
 		docker-compose
+	$(info Install act for local GitHub Actions testing)
+	curl -sfL https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- -b /usr/local/bin
 	$(info Install go packages)
 	go install github.com/swaggo/swag/cmd/swag@latest && \
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
@@ -454,3 +484,17 @@ w3c-test: build-vc20-test-server
 	@echo "Summary:"
 	@grep "✓" /tmp/w3c-test.log | wc -l | tr -d '\n' && echo " passing tests"
 	@grep "❌" /tmp/w3c-test.log | wc -l | tr -d '\n' && echo " failing tests"
+
+test-workflows:
+	$(info Testing all GitHub Actions workflows locally with act)
+	@echo '{"action": "closed", "pull_request": {"merged": true}}' > /tmp/act-pr-event.json
+	act -l
+	@echo "--- Running pull_request workflow (dry run) ---"
+	act pull_request -e /tmp/act-pr-event.json -n
+	@rm -f /tmp/act-pr-event.json
+
+test-workflows-run:
+	$(info Running all GitHub Actions workflows locally with act)
+	@echo '{"action": "closed", "pull_request": {"merged": true}}' > /tmp/act-pr-event.json
+	act pull_request -e /tmp/act-pr-event.json
+	@rm -f /tmp/act-pr-event.json

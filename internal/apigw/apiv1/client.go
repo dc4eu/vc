@@ -30,6 +30,10 @@ import (
 type Client struct {
 	cfg                           *model.Cfg
 	db                            *db.Service
+	authContextStore              db.AuthorizationContextStore
+	usersStore                    db.UsersStore
+	credentialOfferStore          db.CredentialOfferStore
+	datastoreStore                db.DatastoreStore
 	log                           *logger.Log
 	tracer                        *trace.Tracer
 	datastoreClient               *vcclient.Client
@@ -53,6 +57,10 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	c := &Client{
 		cfg:                           cfg,
 		db:                            db,
+		authContextStore:              db.VCAuthorizationContextColl,
+		usersStore:                    db.VCUsersColl,
+		credentialOfferStore:          db.VCCredentialOfferColl,
+		datastoreStore:                db.VCDatastoreColl,
 		log:                           log.New("apiv1"),
 		tracer:                        tracer,
 		CredentialOfferLookupMetadata: &CredentialOfferLookupMetadata{},
@@ -88,7 +96,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	issuerIdentifier := cfg.Issuer.Identifier
 	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
 
-	c.datastoreClient, err = vcclient.New(&vcclient.Config{URL: issuerCFG.AuthenticSourceEndpoint.URL}, c.log)
+	c.datastoreClient, err = vcclient.New(&vcclient.Config{ApigwFQDN: issuerCFG.AuthenticSourceEndpoint.URL}, c.log)
 	if err != nil {
 		return nil, err
 	}

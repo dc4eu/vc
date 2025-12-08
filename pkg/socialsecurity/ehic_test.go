@@ -2,9 +2,8 @@ package socialsecurity
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"testing"
+	"time"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -12,39 +11,43 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func generateDocument(t *testing.T) map[string]any {
-	document := EHICDocument{
-		PersonalAdministrativeNumber: "123123123",
-		IssuingAuthority: IssuingAuthority{
-			ID:   "1231231",
-			Name: "SUNET",
+func generateEHICDocument(t *testing.T) map[string]any {
+	document := map[string]any{
+		// JWT required fields
+		"vct": "urn:eudi:ehic:1",
+		"jti": "urn:uuid:12345678-1234-1234-1234-123456789012",
+		"sub": "did:example:subject123",
+		"iss": "https://issuer.example.com",
+		"iat": time.Now().Unix(),
+		"cnf": map[string]any{
+			"jwk": map[string]any{
+				"kty": "EC",
+				"crv": "P-256",
+				"x":   "example-x-coordinate",
+				"y":   "example-y-coordinate",
+			},
 		},
-		IssuingCountry: "SE",
-		DateOfExpiry:   "2038-01-19",
-		DateOfIssuance: "2021-01-19",
-		DocumentNumber: "123123123",
+		// EHIC specific fields
+		"personal_administrative_number": "123123123",
+		"issuing_authority": map[string]any{
+			"id":   "1231231",
+			"name": "SUNET",
+		},
+		"issuing_country": "SE",
+		"date_of_expiry":  "2038-01-19",
+		"date_of_issuance": "2021-01-19",
+		"document_number": "123123123",
+		"authentic_source": map[string]any{
+			"id":   "SE-EHIC-001",
+			"name": "Swedish Social Insurance Agency",
+		},
 	}
 
-	b, err := json.Marshal(document)
-	assert.NoError(t, err)
-
-	fmt.Println("Document", string(b))
-
-	docMap := map[string]any{}
-
-	err = json.Unmarshal(b, &docMap)
-	assert.NoError(t, err)
-
-	return docMap
+	return document
 }
 
 func mockEHICMap(t *testing.T) map[string]any {
-	docMap := map[string]any{}
-
-	err := json.Unmarshal([]byte(mockPDA1JSON), &docMap)
-	assert.NoError(t, err)
-
-	return docMap
+	return generateEHICDocument(t)
 }
 
 func TestEHICSchemaValidation(t *testing.T) {
@@ -59,7 +62,7 @@ func TestEHICSchemaValidation(t *testing.T) {
 				Meta: &model.MetaData{
 					DocumentDataValidationRef: "https://demo-issuer.wwwallet.org/public/creds/ehic/european-health-insurance-card-schema-dc4eu-01.json",
 				},
-				DocumentData: generateDocument(t),
+				DocumentData: generateEHICDocument(t),
 			},
 			want: nil,
 		},

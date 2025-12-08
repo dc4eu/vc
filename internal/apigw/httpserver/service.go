@@ -90,7 +90,7 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 
 	// Create a new template with custom functions before parsing
 	t := template.New("").Funcs(template.FuncMap{
-		"json": func(v interface{}) (any, error) {
+		"json": func(v any) (any, error) {
 			jsonBytes, err := json.Marshal(v)
 			if err != nil {
 				return "", err

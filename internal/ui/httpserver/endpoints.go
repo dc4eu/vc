@@ -142,19 +142,6 @@ func (s *Service) endpointUpload(ctx context.Context, c *gin.Context) (any, erro
 	return reply, nil
 }
 
-func (s *Service) endpointCredential(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.CredentialRequest{}
-	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
-		return nil, err
-	}
-
-	reply, err := s.apiv1.Credential(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
 func (s *Service) endpointGetDocument(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1.GetDocumentRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {

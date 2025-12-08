@@ -90,7 +90,7 @@ func (c *Client) Upload(ctx context.Context, req *vcclient.UploadRequest) error 
 			CredentialOfferParameters: credentialOfferParameter,
 		}
 
-		if err := c.db.VCCredentialOfferColl.Save(ctx, doc); err != nil {
+		if err := c.credentialOfferStore.Save(ctx, doc); err != nil {
 			return err
 		}
 	}
@@ -131,7 +131,7 @@ func (c *Client) Upload(ctx context.Context, req *vcclient.UploadRequest) error 
 		upload.Identities = []model.Identity{}
 	}
 
-	if err := c.db.VCDatastoreColl.Save(ctx, upload); err != nil {
+	if err := c.datastoreStore.Save(ctx, upload); err != nil {
 		c.log.Error(err, "failed to save document")
 		return err
 	}
@@ -164,7 +164,7 @@ type NotificationReply struct {
 //	@Param			req	body		NotificationRequest		true	" "
 //	@Router			/notification [post]
 func (c *Client) Notification(ctx context.Context, req *NotificationRequest) (*NotificationReply, error) {
-	qrCode, err := c.db.VCDatastoreColl.GetQR(ctx, &model.MetaData{
+	qrCode, err := c.datastoreStore.GetQR(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
 		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,
@@ -205,7 +205,7 @@ type IdentityMappingReply struct {
 //	@Param			req	body		IdentityMappingRequest	true	" "
 //	@Router			/identity/mapping [post]
 func (c *Client) IdentityMapping(ctx context.Context, reg *IdentityMappingRequest) (*IdentityMappingReply, error) {
-	authenticSourcePersonID, err := c.db.VCDatastoreColl.IDMapping(ctx, &db.IDMappingQuery{
+	authenticSourcePersonID, err := c.datastoreStore.IDMapping(ctx, &db.IDMappingQuery{
 		AuthenticSource: reg.AuthenticSource,
 		Identity:        reg.Identity,
 	})
@@ -252,7 +252,7 @@ type AddDocumentIdentityRequest struct {
 //	@Param			req	body		AddDocumentIdentityRequest	true	" "
 //	@Router			/document/identity [put]
 func (c *Client) AddDocumentIdentity(ctx context.Context, req *AddDocumentIdentityRequest) error {
-	err := c.db.VCDatastoreColl.AddDocumentIdentity(ctx, &db.AddDocumentIdentityQuery{
+	err := c.datastoreStore.AddDocumentIdentity(ctx, &db.AddDocumentIdentityQuery{
 		AuthenticSource: req.AuthenticSource,
 		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,
@@ -297,7 +297,7 @@ type DeleteDocumentIdentityRequest struct {
 //	@Param			req	body		DeleteDocumentIdentityRequest	true	" "
 //	@Router			/document/identity [delete]
 func (c *Client) DeleteDocumentIdentity(ctx context.Context, req *DeleteDocumentIdentityRequest) error {
-	err := c.db.VCDatastoreColl.DeleteDocumentIdentity(ctx, &db.DeleteDocumentIdentityQuery{
+	err := c.datastoreStore.DeleteDocumentIdentity(ctx, &db.DeleteDocumentIdentityQuery{
 		AuthenticSource:         req.AuthenticSource,
 		VCT:                     req.VCT,
 		DocumentID:              req.DocumentID,
@@ -338,7 +338,7 @@ type DeleteDocumentRequest struct {
 //	@Param			req	body		DeleteDocumentRequest	true	" "
 //	@Router			/document [delete]
 func (c *Client) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) error {
-	err := c.db.VCDatastoreColl.Delete(ctx, &model.MetaData{
+	err := c.datastoreStore.Delete(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
 		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,
@@ -382,7 +382,7 @@ func (c *Client) GetDocument(ctx context.Context, req *GetDocumentRequest) (*Get
 			DocumentID:      req.DocumentID,
 		},
 	}
-	doc, err := c.db.VCDatastoreColl.GetDocument(ctx, query)
+	doc, err := c.datastoreStore.GetDocument(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -420,7 +420,7 @@ type DocumentListReply struct {
 //	@Param			req	body		DocumentListRequest		true	" "
 //	@Router			/document/list [post]
 func (c *Client) DocumentList(ctx context.Context, req *DocumentListRequest) (*DocumentListReply, error) {
-	docs, err := c.db.VCDatastoreColl.DocumentList(ctx, &db.DocumentListQuery{
+	docs, err := c.datastoreStore.DocumentList(ctx, &db.DocumentListQuery{
 		AuthenticSource: req.AuthenticSource,
 		Identity:        req.Identity,
 		VCT:             req.VCT,
@@ -473,7 +473,7 @@ func (c *Client) GetDocumentCollectID(ctx context.Context, req *GetDocumentColle
 		},
 	}
 
-	doc, err := c.db.VCDatastoreColl.GetDocumentCollectID(ctx, query)
+	doc, err := c.datastoreStore.GetDocumentCollectID(ctx, query)
 	if err != nil {
 		c.log.Error(err, "failed to get document")
 		return nil, err
@@ -512,7 +512,7 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 		return helpers.ErrNoRevocationID
 	}
 
-	doc, err := c.db.VCDatastoreColl.GetByRevocationID(ctx, &model.MetaData{
+	doc, err := c.datastoreStore.GetByRevocationID(ctx, &model.MetaData{
 		AuthenticSource: req.AuthenticSource,
 		VCT:             req.VCT,
 		Revocation:      &model.Revocation{ID: req.Revocation.ID},
@@ -529,7 +529,7 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 		doc.Meta.Revocation.Revoked = true
 	}
 
-	if err := c.db.VCDatastoreColl.Replace(ctx, doc); err != nil {
+	if err := c.datastoreStore.Replace(ctx, doc); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		c.log.Error(err, "replace failed")
 		return err
@@ -541,7 +541,7 @@ func (c *Client) RevokeDocument(ctx context.Context, req *RevokeDocumentRequest)
 
 // SearchDocuments search for documents
 func (c *Client) SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error) {
-	docs, hasMore, err := c.db.VCDatastoreColl.SearchDocuments(ctx, &db.SearchDocumentsQuery{
+	docs, hasMore, err := c.datastoreStore.SearchDocuments(ctx, &db.SearchDocumentsQuery{
 		AuthenticSource: req.AuthenticSource,
 		VCT:             req.VCT,
 		DocumentID:      req.DocumentID,

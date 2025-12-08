@@ -19,6 +19,7 @@ import (
 type Client struct {
 	cfg                        *model.Cfg
 	db                         *db.Service
+	authContextStore           db.AuthorizationContextStore
 	log                        *logger.Log
 	notify                     *notify.Service
 	oauth2Metadata             *oauth2.AuthorizationServerMetadata
@@ -45,12 +46,13 @@ func New(ctx context.Context, db *db.Service, notify *notify.Service, cfg *model
 	}
 
 	c := &Client{
-		cfg:             cfg,
-		db:              db,
-		log:             log.New("apiv1"),
-		notify:          notify,
-		openid4vp:       openid4vpClient,
-		credentialCache: ttlcache.New(ttlcache.WithTTL[string, []sdjwtvc.CredentialCache](5 * time.Minute)),
+		cfg:              cfg,
+		db:               db,
+		authContextStore: db.AuthorizationContextColl,
+		log:              log.New("apiv1"),
+		notify:           notify,
+		openid4vp:        openid4vpClient,
+		credentialCache:  ttlcache.New(ttlcache.WithTTL[string, []sdjwtvc.CredentialCache](5 * time.Minute)),
 	}
 
 	go c.credentialCache.Start()

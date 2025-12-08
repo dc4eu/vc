@@ -4,6 +4,7 @@
         "apiv",
         "auditlog",
         "bson",
+        "cose",
         "datastoreclient",
         "DCQL",
         "dockerfiles",

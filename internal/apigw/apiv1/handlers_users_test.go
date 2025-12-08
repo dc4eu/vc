@@ -3,55 +3,122 @@ package apiv1
 import (
 	"context"
 	"testing"
-	"time"
 	"vc/internal/apigw/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/sdjwtvc"
-	"vc/pkg/trace"
 	"vc/pkg/vcclient"
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 )
 
-// setupTestMongoDB creates a MongoDB testcontainer and returns the database service
-func setupTestMongoDB(ctx context.Context, t *testing.T) (*db.Service, func()) {
-	mongoContainer, err := mongodb.Run(ctx, "mongo:6")
-	require.NoError(t, err)
+// mockAuthContextStore mocks the authorization context store
+type mockAuthContextStore struct {
+	authContexts map[string]*model.AuthorizationContext
+	err          error
+}
 
-	connStr, err := mongoContainer.ConnectionString(ctx)
-	require.NoError(t, err)
-
-	// Create configuration
-	cfg := &model.Cfg{
-		Common: model.Common{
-			Mongo: model.Mongo{
-				URI: connStr,
-			},
-		},
+func newMockAuthContextStore() *mockAuthContextStore {
+	return &mockAuthContextStore{
+		authContexts: make(map[string]*model.AuthorizationContext),
 	}
+}
 
-	// Create tracer
-	log, _ := logger.New("test", "", false)
-	tracer, err := trace.NewForTesting(ctx, "test", log)
-	require.NoError(t, err)
+func (m *mockAuthContextStore) Save(ctx context.Context, doc *model.AuthorizationContext) error {
+	if m.err != nil {
+		return m.err
+	}
+	// Index by request_uri and verifier_response_code for lookups
+	if doc.RequestURI != "" {
+		m.authContexts["request_uri:"+doc.RequestURI] = doc
+	}
+	if doc.VerifierResponseCode != "" {
+		m.authContexts["response_code:"+doc.VerifierResponseCode] = doc
+	}
+	return nil
+}
 
-	// Create database service
-	dbService, err := db.New(ctx, cfg, tracer, log)
-	require.NoError(t, err)
-
-	cleanup := func() {
-		dbService.Close(ctx)
-		tracer.Shutdown(ctx)
-		if err := mongoContainer.Terminate(ctx); err != nil {
-			t.Logf("failed to terminate container: %s", err)
+func (m *mockAuthContextStore) Get(ctx context.Context, query *model.AuthorizationContext) (*model.AuthorizationContext, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	if query.RequestURI != "" {
+		if doc, ok := m.authContexts["request_uri:"+query.RequestURI]; ok {
+			return doc, nil
 		}
 	}
+	if query.VerifierResponseCode != "" {
+		if doc, ok := m.authContexts["response_code:"+query.VerifierResponseCode]; ok {
+			return doc, nil
+		}
+	}
+	return nil, db.ErrNoDocuments
+}
 
-	return dbService, cleanup
+func (m *mockAuthContextStore) GetWithAccessToken(ctx context.Context, token string) (*model.AuthorizationContext, error) {
+	return nil, nil
+}
+
+func (m *mockAuthContextStore) ForfeitAuthorizationCode(ctx context.Context, query *model.AuthorizationContext) (*model.AuthorizationContext, error) {
+	return nil, nil
+}
+
+func (m *mockAuthContextStore) Consent(ctx context.Context, query *model.AuthorizationContext) error {
+	return nil
+}
+
+func (m *mockAuthContextStore) AddToken(ctx context.Context, code string, token *model.Token) error {
+	return nil
+}
+
+func (m *mockAuthContextStore) SetAuthenticSource(ctx context.Context, query *model.AuthorizationContext, authenticSource string) error {
+	return nil
+}
+
+func (m *mockAuthContextStore) AddIdentity(ctx context.Context, query *model.AuthorizationContext, input *model.AuthorizationContext) error {
+	return nil
+}
+
+// mockUsersStore mocks the users store
+type mockUsersStore struct {
+	users map[string]*model.OAuthUsers
+	err   error
+}
+
+func newMockUsersStore() *mockUsersStore {
+	return &mockUsersStore{
+		users: make(map[string]*model.OAuthUsers),
+	}
+}
+
+func (m *mockUsersStore) Save(ctx context.Context, doc *model.OAuthUsers) error {
+	if m.err != nil {
+		return m.err
+	}
+	m.users[doc.Username] = doc
+	return nil
+}
+
+func (m *mockUsersStore) GetUser(ctx context.Context, username string) (*model.OAuthUsers, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	if user, ok := m.users[username]; ok {
+		return user, nil
+	}
+	return nil, db.ErrNoDocuments
+}
+
+func (m *mockUsersStore) GetHashedPassword(ctx context.Context, username string) (string, error) {
+	if m.err != nil {
+		return "", m.err
+	}
+	if user, ok := m.users[username]; ok {
+		return user.Password, nil
+	}
+	return "", nil
 }
 
 // TestUserLookup_BasicAuth tests the UserLookup function with basic username/password authentication.
@@ -60,9 +127,9 @@ func TestUserLookup_BasicAuth(t *testing.T) {
 	ctx := context.Background()
 	log, _ := logger.New("test", "", false)
 
-	// Setup MongoDB testcontainer
-	dbService, cleanup := setupTestMongoDB(ctx, t)
-	defer cleanup()
+	// Create mock stores
+	authContextStore := newMockAuthContextStore()
+	usersStore := newMockUsersStore()
 
 	// Insert test user
 	testUser := &model.OAuthUsers{
@@ -77,7 +144,7 @@ func TestUserLookup_BasicAuth(t *testing.T) {
 			AuthenticSourcePersonID: "test-person-123",
 		},
 	}
-	err := dbService.VCUsersColl.Save(ctx, testUser)
+	err := usersStore.Save(ctx, testUser)
 	require.NoError(t, err)
 
 	// Insert authorization context
@@ -90,15 +157,16 @@ func TestUserLookup_BasicAuth(t *testing.T) {
 		ClientID:            "test-client",
 		CodeChallenge:       "challenge",
 		CodeChallengeMethod: "S256",
-		ExpiresAt:           time.Now().Add(1 * time.Hour).Unix(),
+		ExpiresAt:           1735000000,
 		VCT:                 "urn:eudi:pid:1",
 	}
-	err = dbService.VCAuthorizationContextColl.Save(ctx, testAuthContext)
+	err = authContextStore.Save(ctx, testAuthContext)
 	require.NoError(t, err)
 
 	client := &Client{
-		log: log,
-		db:  dbService,
+		log:              log,
+		authContextStore: authContextStore,
+		usersStore:       usersStore,
 	}
 
 	req := &vcclient.UserLookupRequest{
@@ -129,9 +197,8 @@ func TestUserLookup_PIDAuth(t *testing.T) {
 	ctx := context.Background()
 	log, _ := logger.New("test", "", false)
 
-	// Setup MongoDB testcontainer
-	dbService, cleanup := setupTestMongoDB(ctx, t)
-	defer cleanup()
+	// Create mock stores
+	authContextStore := newMockAuthContextStore()
 
 	// Insert authorization context for PID auth
 	testAuthContext := &model.AuthorizationContext{
@@ -143,12 +210,12 @@ func TestUserLookup_PIDAuth(t *testing.T) {
 		ClientID:             "test-client",
 		CodeChallenge:        "challenge",
 		CodeChallengeMethod:  "S256",
-		ExpiresAt:            time.Now().Add(1 * time.Hour).Unix(),
+		ExpiresAt:            1735000000,
 		RequestURI:           "https://issuer.example.com/request/456",
 		VCT:                  "urn:eudi:pid:1",
 		AuthenticSource:      "test-source",
 	}
-	err := dbService.VCAuthorizationContextColl.Save(ctx, testAuthContext)
+	err := authContextStore.Save(ctx, testAuthContext)
 	require.NoError(t, err)
 
 	// Create document cache with test data
@@ -189,9 +256,9 @@ func TestUserLookup_PIDAuth(t *testing.T) {
 	cache.Set("session-456", docs, ttlcache.DefaultTTL)
 
 	client := &Client{
-		log:           log,
-		documentCache: cache,
-		db:            dbService,
+		log:              log,
+		documentCache:    cache,
+		authContextStore: authContextStore,
 	}
 
 	// Create VCTM with claims
@@ -251,9 +318,8 @@ func TestUserLookup_PIDAuth_NoDocuments(t *testing.T) {
 	ctx := context.Background()
 	log, _ := logger.New("test", "", false)
 
-	// Setup MongoDB testcontainer
-	dbService, cleanup := setupTestMongoDB(ctx, t)
-	defer cleanup()
+	// Create mock stores
+	authContextStore := newMockAuthContextStore()
 
 	// Insert authorization context
 	testAuthContext := &model.AuthorizationContext{
@@ -265,20 +331,20 @@ func TestUserLookup_PIDAuth_NoDocuments(t *testing.T) {
 		ClientID:             "test-client",
 		CodeChallenge:        "challenge",
 		CodeChallengeMethod:  "S256",
-		ExpiresAt:            time.Now().Add(1 * time.Hour).Unix(),
+		ExpiresAt:            1735000000,
 		RequestURI:           "https://issuer.example.com/request/789",
 		VCT:                  "urn:eudi:pid:1",
 	}
-	err := dbService.VCAuthorizationContextColl.Save(ctx, testAuthContext)
+	err := authContextStore.Save(ctx, testAuthContext)
 	require.NoError(t, err)
 
 	// Create empty document cache
 	cache := ttlcache.New[string, map[string]*model.CompleteDocument]()
 
 	client := &Client{
-		log:           log,
-		documentCache: cache,
-		db:            dbService,
+		log:              log,
+		documentCache:    cache,
+		authContextStore: authContextStore,
 	}
 
 	req := &vcclient.UserLookupRequest{
@@ -299,9 +365,8 @@ func TestUserLookup_UnsupportedAuthMethod(t *testing.T) {
 	ctx := context.Background()
 	log, _ := logger.New("test", "", false)
 
-	// Setup MongoDB testcontainer
-	dbService, cleanup := setupTestMongoDB(ctx, t)
-	defer cleanup()
+	// Create mock stores
+	authContextStore := newMockAuthContextStore()
 
 	// Insert authorization context
 	testAuthContext := &model.AuthorizationContext{
@@ -313,15 +378,15 @@ func TestUserLookup_UnsupportedAuthMethod(t *testing.T) {
 		ClientID:            "test-client",
 		CodeChallenge:       "challenge",
 		CodeChallengeMethod: "S256",
-		ExpiresAt:           time.Now().Add(1 * time.Hour).Unix(),
+		ExpiresAt:           1735000000,
 		VCT:                 "urn:eudi:pid:1",
 	}
-	err := dbService.VCAuthorizationContextColl.Save(ctx, testAuthContext)
+	err := authContextStore.Save(ctx, testAuthContext)
 	require.NoError(t, err)
 
 	client := &Client{
-		log: log,
-		db:  dbService,
+		log:              log,
+		authContextStore: authContextStore,
 	}
 
 	req := &vcclient.UserLookupRequest{

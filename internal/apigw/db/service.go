@@ -39,7 +39,6 @@ type Service struct {
 	VCConsentColl              *VCConsentColl
 	VCAuthorizationContextColl *VCAuthorizationContextColl
 	VCUsersColl                *VCUsersColl
-	VCCodeChallengeColl        *VCCodeChallengeColl
 	VCCredentialOfferColl      *VCCredentialOfferColl
 }
 
@@ -87,12 +86,6 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	service.VCUsersColl, err = NewUserColl(ctx, "users", service, log.New("VCUsersColl"))
 	if err != nil {
 		service.log.Error(err, "failed to create user collection")
-		return nil, err
-	}
-
-	service.VCCodeChallengeColl, err = NewPkceColl(ctx, "code_challenge", service, log.New("VCCodeChallengeColl"))
-	if err != nil {
-		service.log.Error(err, "failed to create pkce collection")
 		return nil, err
 	}
 

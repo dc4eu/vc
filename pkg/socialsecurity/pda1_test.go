@@ -1,9 +1,7 @@
 package socialsecurity
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"testing"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
@@ -12,45 +10,68 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//{"location":"/places_of_work", "message":map[string]interface {}{"item_mismatch":"Item at index 0 does not match the schema"}}}})
-
-func GenerateDocument(t *testing.T) map[string]any {
-	document := PDA1Document{
-		PersonalAdministrativeNumber: "134",
-		Employer: Employer{
-			ID:   "123123",
-			Name: "SUNET",
+func GeneratePDA1Document(t *testing.T) map[string]any {
+	// Create a document with all required fields per schema_pda1.json
+	document := map[string]any{
+		"social_security_pin": "12345",
+		"nationality":         []string{"SE"},
+		"details_of_employment": []map[string]any{
+			{
+				"type_of_employment": "01",
+				"name":               "SUNET",
+				"address": map[string]any{
+					"street":    "Tulegatan 11",
+					"post_code": "12354",
+					"town":      "Stockholm",
+					"country":   "SE",
+				},
+				"ids_of_employer": []map[string]any{
+					{
+						"employer_id": "SE:1234",
+						"type_of_id":  "01",
+					},
+				},
+			},
 		},
-		WorkAddress: WorkAddress{
-			Formatted:      "Tulegatan 11",
-			Street_address: "Tulgatan 11",
-			House_number:   "11",
-			Postal_code:    "11353",
-			Locality:       "Stockholm",
-			Region:         "Stockholm",
-			Country:        "SE",
+		"places_of_work": []map[string]any{
+			{
+				"a_fixed_place_of_work_exist": false,
+				"country_work":                "SE",
+				"place_of_work": []map[string]any{
+					{
+						"company_vessel_name":  "M/S Transpaper",
+						"flag_state_home_base": "Göteborg",
+						"ids_of_company": []map[string]any{
+							{
+								"company_id": "SE:1234",
+								"type_of_id": "01",
+							},
+						},
+						"address": map[string]any{
+							"street":    "vägen 1",
+							"post_code": "1235",
+							"town":      "Göteborg",
+						},
+					},
+				},
+			},
 		},
-		IssuingAuthority: IssuingAuthority{
-			ID:   "345345",
-			Name: "SUNET",
+		"decision_legislation_applicable": map[string]any{
+			"member_state_which_legislation_applies": "SE",
+			"transitional_rule_apply":                false,
+			"starting_date":                          "1970-01-01",
+			"ending_date":                            "2038-01-19",
 		},
-		LegislationCountry: "SE",
-		DateOfExpiry:       "2023-01-01",
-		DateOfIssuance:     "2021-01-01",
-		DocumentNumber:     "09809820394SE",
+		"status_confirmation":              "02",
+		"unique_number_of_issued_document": "SE1234",
+		"competent_institution": map[string]any{
+			"institution_id":   "SE:12345",
+			"institution_name": "test",
+			"country_code":     "SE",
+		},
 	}
 
-	b, err := json.Marshal(document)
-	assert.NoError(t, err)
-
-	fmt.Println("Document", string(b))
-
-	docMap := map[string]any{}
-
-	err = json.Unmarshal(b, &docMap)
-	assert.NoError(t, err)
-
-	return docMap
+	return document
 }
 
 var mockPDA1JSON = `{
@@ -143,8 +164,6 @@ func mockPDA1Map(t *testing.T, jsonString string) map[string]any {
 	err := json.Unmarshal([]byte(jsonString), &docMap)
 	assert.NoError(t, err)
 
-	//fmt.Println("Document", docMap)
-
 	return docMap
 }
 
@@ -160,7 +179,7 @@ func TestSchemaValidation(t *testing.T) {
 				Meta: &model.MetaData{
 					DocumentDataValidationRef: "file://../../standards/schema_pda1.json",
 				},
-				DocumentData: GenerateDocument(t),
+				DocumentData: GeneratePDA1Document(t),
 			},
 			want: nil,
 		},
@@ -184,15 +203,15 @@ func TestSchemaValidation(t *testing.T) {
 			},
 			want: &helpers.Error{
 				Title: "document_data_schema_error",
-				Err: []map[string]interface{}{
-					{"location": "/competent_institution", "message": map[string]interface{}{"type_mismatch": "Value is null but should be object"}},
-					{"location": "/decision_legislation_applicable", "message": map[string]interface{}{"type_mismatch": "Value is null but should be object"}},
-					{"location": "/details_of_employment", "message": map[string]interface{}{"type_mismatch": "Value is null but should be array"}},
-					{"location": "/nationality", "message": map[string]interface{}{"type_mismatch": "Value is null but should be array"}},
-					{"location": "/places_of_work", "message": map[string]interface{}{"type_mismatch": "Value is null but should be array"}},
-					{"location": "/social_security_pin", "message": map[string]interface{}{"type_mismatch": "Value is null but should be string"}},
-					{"location": "/status_confirmation", "message": map[string]interface{}{"ref_mismatch": "Value does not match the reference schema"}},
-					{"location": "/unique_number_of_issued_document", "message": map[string]interface{}{"ref_mismatch": "Value does not match the reference schema"}},
+				Err: []map[string]any{
+					{"location": "/competent_institution", "message": map[string]any{"type_mismatch": "Value is null but should be object"}},
+					{"location": "/decision_legislation_applicable", "message": map[string]any{"type_mismatch": "Value is null but should be object"}},
+					{"location": "/details_of_employment", "message": map[string]any{"type_mismatch": "Value is null but should be array"}},
+					{"location": "/nationality", "message": map[string]any{"type_mismatch": "Value is null but should be array"}},
+					{"location": "/places_of_work", "message": map[string]any{"type_mismatch": "Value is null but should be array"}},
+					{"location": "/social_security_pin", "message": map[string]any{"type_mismatch": "Value is null but should be string"}},
+					{"location": "/status_confirmation", "message": map[string]any{"ref_mismatch": "Value does not match the reference schema"}},
+					{"location": "/unique_number_of_issued_document", "message": map[string]any{"ref_mismatch": "Value does not match the reference schema"}},
 				},
 			},
 		},
@@ -206,14 +225,14 @@ func TestSchemaValidation(t *testing.T) {
 			},
 			want: &helpers.Error{
 				Title: "document_data_schema_error",
-				Err: []map[string]interface{}{
-					{"location": "/competent_institution", "message": map[string]interface{}{"type_mismatch": "Value is string but should be object"}},
-					{"location": "/decision_legislation_applicable", "message": map[string]interface{}{"type_mismatch": "Value is string but should be object"}},
-					{"location": "/details_of_employment", "message": map[string]interface{}{"type_mismatch": "Value is string but should be array"}},
-					{"location": "/nationality", "message": map[string]interface{}{"type_mismatch": "Value is string but should be array"}},
-					{"location": "/places_of_work", "message": map[string]interface{}{"type_mismatch": "Value is string but should be array"}},
-					{"location": "/status_confirmation", "message": map[string]interface{}{"ref_mismatch": "Value does not match the reference schema"}},
-					{"location": "/unique_number_of_issued_document", "message": map[string]interface{}{"ref_mismatch": "Value does not match the reference schema"}},
+				Err: []map[string]any{
+					{"location": "/competent_institution", "message": map[string]any{"type_mismatch": "Value is string but should be object"}},
+					{"location": "/decision_legislation_applicable", "message": map[string]any{"type_mismatch": "Value is string but should be object"}},
+					{"location": "/details_of_employment", "message": map[string]any{"type_mismatch": "Value is string but should be array"}},
+					{"location": "/nationality", "message": map[string]any{"type_mismatch": "Value is string but should be array"}},
+					{"location": "/places_of_work", "message": map[string]any{"type_mismatch": "Value is string but should be array"}},
+					{"location": "/status_confirmation", "message": map[string]any{"ref_mismatch": "Value does not match the reference schema"}},
+					{"location": "/unique_number_of_issued_document", "message": map[string]any{"ref_mismatch": "Value does not match the reference schema"}},
 				},
 			},
 		},
@@ -221,24 +240,11 @@ func TestSchemaValidation(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 
 			got := helpers.ValidateDocumentData(ctx, tt.payload, logger.NewSimple("test"))
 
 			assert.Equal(t, tt.want, got)
-			//opt := func(a, b string) bool { return a < b }
-			//if eq := cmp.Equal(tt.want, got); !eq {
-			//	//t.Errorf("ValidateDocumentData() mismatch (-want +got):\n%s", cmp.Diff(tt.want, got))
-			//	t.Fail()
-			//}
-			//slices.Equal(tt.want, got)
-
-			//	if diff := cmp.Diff(tt.want, got); diff != "" {
-			//		t.Errorf("ValidateDocumentData() mismatch (-want +got):\n%s", diff)
-			//		assert.Equal(t, tt.want, got)
-			//	}
-
-			//assert.ObjectsAreEqual(tt.want, got)
 		})
 	}
 }

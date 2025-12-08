@@ -2,7 +2,7 @@
 
 ## Decision
 
-We use the newer 'any' instead of 'interface{}' to represent a value that can have any type.
+We use the newer 'any' instead of 'interface{}' to represent a value that can have any type, even in complex types example: map[string]interface{} becomes map[string]any
 
 ## Rationale
 

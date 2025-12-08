@@ -22,7 +22,7 @@ type Service struct {
 	tracer     *trace.Tracer
 	probeStore *apiv1_status.StatusProbeStore
 
-	AuthorizationContextColl *AuthorizationContextColl
+	AuthorizationContextColl AuthorizationContextStore
 }
 
 // New creates a new database service

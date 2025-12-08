@@ -62,41 +62,194 @@ func (c *pidClient) makeSourceData(sourceFilePath string) error {
 			age--
 		}
 
+		// Use identity values if provided, otherwise generate fake data or calculate
+		birthPlace := id.Identity.BirthPlace
+		if birthPlace == "" {
+			birthPlace = gofakeit.City()
+		}
+
+		issuingAuthority := id.Identity.IssuingAuthority
+		if issuingAuthority == "" {
+			issuingAuthority = gofakeit.Company()
+		}
+
+		expiryDate := id.Identity.ExpiryDate
+		if expiryDate == "" {
+			expiryDate = gofakeit.FutureDate().Format("2006-01-02")
+		}
+
+		authenticSourcePersonID := id.Identity.AuthenticSourcePersonID
+		if authenticSourcePersonID == "" {
+			authenticSourcePersonID = gofakeit.UUID()
+		}
+
+		// Age fields - use identity values if provided, otherwise calculate
+		ageBirthYear := id.Identity.AgeBirthYear
+		if ageBirthYear == 0 {
+			ageBirthYear = birthDate.Year()
+		}
+
+		ageInYears := id.Identity.AgeInYears
+		if ageInYears == 0 {
+			ageInYears = age
+		}
+
+		// Age over flags - use identity values if provided, otherwise calculate
+		var ageOver14 any = id.Identity.AgeOver14
+		if id.Identity.AgeOver14 == "" {
+			ageOver14 = age >= 14
+		}
+
+		ageOver16 := id.Identity.AgeOver16
+		if !ageOver16 && age >= 16 {
+			ageOver16 = true
+		}
+
+		ageOver18 := id.Identity.AgeOver18
+		if !ageOver18 && age >= 18 {
+			ageOver18 = true
+		}
+
+		ageOver21 := id.Identity.AgeOver21
+		if !ageOver21 && age >= 21 {
+			ageOver21 = true
+		}
+
+		ageOver65 := id.Identity.AgeOver65
+		if !ageOver65 && age >= 65 {
+			ageOver65 = true
+		}
+
+		birthFamilyName := id.Identity.BirthFamilyName
+		if birthFamilyName == "" {
+			birthFamilyName = gofakeit.LastName()
+		}
+
+		birthGivenName := id.Identity.BirthGivenName
+		if birthGivenName == "" {
+			birthGivenName = gofakeit.FirstName()
+		}
+
+		sex := id.Identity.Sex
+		if sex == "" {
+			sex = strconv.Itoa(gofakeit.RandomInt([]int{0, 1, 2, 9}))
+		}
+
+		var nationality any = id.Identity.Nationality
+		if len(id.Identity.Nationality) == 0 {
+			nationality = gofakeit.CountryAbr()
+		}
+
+		issuingJurisdiction := id.Identity.IssuingJurisdiction
+		if issuingJurisdiction == "" {
+			issuingJurisdiction = gofakeit.State()
+		}
+
+		documentNumber := id.Identity.DocumentNumber
+		if documentNumber == "" {
+			documentNumber = gofakeit.UUID()
+		}
+
+		personalAdministrativeNumber := id.Identity.PersonalAdministrativeNumber
+		if personalAdministrativeNumber == "" {
+			personalAdministrativeNumber = gofakeit.SSN()
+		}
+
+		issuanceDate := id.Identity.IssuanceDate
+		if issuanceDate == "" {
+			issuanceDate = gofakeit.Date().Format("2006-01-02")
+		}
+
+		picture := id.Identity.Picture
+		if picture == "" {
+			picture = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFElEQVQYV2P8z8DwHwYGBgZGMAEADigBCCGZkB0AAAAASUVORK5CYII="
+		}
+
+		emailAddress := id.Identity.EmailAddress
+		if emailAddress == "" {
+			emailAddress = gofakeit.Email()
+		}
+
+		mobilePhoneNumber := id.Identity.MobilePhoneNumber
+		if mobilePhoneNumber == "" {
+			mobilePhoneNumber = gofakeit.Phone()
+		}
+
+		residentAddress := id.Identity.ResidentAddress
+		if residentAddress == "" {
+			residentAddress = fmt.Sprintf("%s, %s %s", gofakeit.Street(), gofakeit.City(), gofakeit.Zip())
+		}
+
+		residentStreetAddress := id.Identity.ResidentStreetAddress
+		if residentStreetAddress == "" {
+			residentStreetAddress = gofakeit.Street()
+		}
+
+		residentHouseNumber := id.Identity.ResidentHouseNumber
+		if residentHouseNumber == "" {
+			residentHouseNumber = gofakeit.StreetNumber()
+		}
+
+		residentPostalCode := id.Identity.ResidentPostalCode
+		if residentPostalCode == "" {
+			residentPostalCode = gofakeit.Zip()
+		}
+
+		residentCity := id.Identity.ResidentCity
+		if residentCity == "" {
+			residentCity = gofakeit.City()
+		}
+
+		residentState := id.Identity.ResidentState
+		if residentState == "" {
+			residentState = gofakeit.State()
+		}
+
+		residentCountry := id.Identity.ResidentCountry
+		if residentCountry == "" {
+			residentCountry = gofakeit.CountryAbr()
+		}
+
+		trustAnchor := id.Identity.TrustAnchor
+		if trustAnchor == "" {
+			trustAnchor = "https://" + gofakeit.DomainName()
+		}
+
 		c.documents[pidNumber].DocumentData = map[string]any{
 			"given_name":                     id.Identity.GivenName,
 			"family_name":                    id.Identity.FamilyName,
 			"birthdate":                      id.Identity.BirthDate,
-			"birth_place":                    gofakeit.City(),
-			"age_birth_year":                 birthDate.Year(),
-			"age_in_years":                   age,
-			"age_over_14":                    age >= 14,
-			"age_over_16":                    age >= 16,
-			"age_over_18":                    age >= 18,
-			"age_over_21":                    age >= 21,
-			"age_over_65":                    age >= 65,
-			"birth_family_name":              gofakeit.LastName(),
-			"birth_given_name":               gofakeit.FirstName(),
-			"sex":                            strconv.Itoa(gofakeit.RandomInt([]int{0, 1, 2, 9})),
-			"nationality":                    gofakeit.CountryAbr(),
+			"birth_place":                    birthPlace,
+			"age_birth_year":                 ageBirthYear,
+			"age_in_years":                   ageInYears,
+			"age_over_14":                    ageOver14,
+			"age_over_16":                    ageOver16,
+			"age_over_18":                    ageOver18,
+			"age_over_21":                    ageOver21,
+			"age_over_65":                    ageOver65,
+			"birth_family_name":              birthFamilyName,
+			"birth_given_name":               birthGivenName,
+			"sex":                            sex,
+			"nationality":                    nationality,
 			"issuing_country":                id.Identity.IssuingCountry,
-			"issuing_authority":              gofakeit.Company(),
-			"issuing_jurisdiction":           gofakeit.State(),
-			"document_number":                gofakeit.UUID(),
-			"personal_administrative_number": gofakeit.SSN(),
-			"issuance_date":                  gofakeit.Date().Format("2006-01-02"),
-			"expiry_date":                    gofakeit.FutureDate().Format("2006-01-02"),
-			"picture":                        "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFElEQVQYV2P8z8DwHwYGBgZGMAEADigBCCGZkB0AAAAASUVORK5CYII=",
-			"email_address":                  gofakeit.Email(),
-			"mobile_phone_number":            gofakeit.Phone(),
-			"resident_address":               fmt.Sprintf("%s, %s %s", gofakeit.Street(), gofakeit.City(), gofakeit.Zip()),
-			"resident_street_address":        gofakeit.Street(),
-			"resident_house_number":          gofakeit.StreetNumber(),
-			"resident_postal_code":           gofakeit.Zip(),
-			"resident_city":                  gofakeit.City(),
-			"resident_state":                 gofakeit.State(),
-			"resident_country":               gofakeit.CountryAbr(),
-			"authentic_source_person_id":     gofakeit.UUID(),
-			"trust_anchor":                   "https://" + gofakeit.DomainName(),
+			"issuing_authority":              issuingAuthority,
+			"issuing_jurisdiction":           issuingJurisdiction,
+			"document_number":                documentNumber,
+			"personal_administrative_number": personalAdministrativeNumber,
+			"issuance_date":                  issuanceDate,
+			"expiry_date":                    expiryDate,
+			"picture":                        picture,
+			"email_address":                  emailAddress,
+			"mobile_phone_number":            mobilePhoneNumber,
+			"resident_address":               residentAddress,
+			"resident_street_address":        residentStreetAddress,
+			"resident_house_number":          residentHouseNumber,
+			"resident_postal_code":           residentPostalCode,
+			"resident_city":                  residentCity,
+			"resident_state":                 residentState,
+			"resident_country":               residentCountry,
+			"authentic_source_person_id":     authenticSourcePersonID,
+			"trust_anchor":                   trustAnchor,
 			"arf":                            "1.5",
 		}
 

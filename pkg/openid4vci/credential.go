@@ -107,13 +107,18 @@ type JWK struct {
 }
 
 // Proof https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
+// Proof types defined in Appendix F of the OpenID4VCI 1.0 specification.
 type Proof struct {
-	// ProofType REQUIRED. String denoting the key proof type. The value of this parameter determines other parameters in the key proof object and its respective processing rules. Key proof types defined in this specification can be found in Section 7.2.1.
-	ProofType string `json:"proof_type" validate:"required,oneof=jwt ldp_vp cwt"`
+	// ProofType REQUIRED. String denoting the key proof type. The value of this parameter determines other parameters in the key proof object and its respective processing rules.
+	// Valid values: jwt, di_vp, attestation
+	ProofType string `json:"proof_type" validate:"required,oneof=jwt di_vp attestation"`
 
-	JWT         string `json:"jwt,omitempty"`
-	LDPVP       string `json:"ldp_vp,omitempty"`
-	Attestation string `json:"attestation"`
+	// JWT contains the JWT when proof_type is "jwt"
+	JWT string `json:"jwt,omitempty"`
+	// DIVP contains the Data Integrity Verifiable Presentation when proof_type is "di_vp"
+	DIVP any `json:"di_vp,omitempty"`
+	// Attestation contains the key attestation JWT when proof_type is "attestation"
+	Attestation string `json:"attestation,omitempty"`
 }
 
 func (p *Proof) ExtractJWK() (*apiv1_issuer.Jwk, error) {

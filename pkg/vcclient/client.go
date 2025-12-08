@@ -15,7 +15,7 @@ import (
 // Client is the client
 type Client struct {
 	httpClient *http.Client
-	url        string
+	apigwFQDN  string
 	log        *logger.Log
 
 	Document *documentHandler
@@ -27,7 +27,7 @@ type Client struct {
 
 // Config is the configuration for the client
 type Config struct {
-	URL string `validate:"required"`
+	ApigwFQDN string `validate:"required"`
 }
 
 // New creates a new client
@@ -39,8 +39,8 @@ func New(config *Config, log *logger.Log) (*Client, error) {
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		log: log.New("vcclient"),
-		url: config.URL,
+		log:       log.New("vcclient"),
+		apigwFQDN: config.ApigwFQDN,
 	}
 
 	defaultContentType := "application/json"
@@ -62,7 +62,7 @@ func (c *Client) newRequest(ctx context.Context, method, path, contentType strin
 		return nil, err
 	}
 
-	u, err := url.Parse(c.url)
+	u, err := url.Parse(c.apigwFQDN)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 
 func checkResponse(r *http.Response) error {
 	switch r.StatusCode {
-	case 200, 201, 202, 204, 304:
+	case 200, 201, 202, 204, 302, 304:
 		return nil
 	case 500:
 		return ErrInvalidRequest

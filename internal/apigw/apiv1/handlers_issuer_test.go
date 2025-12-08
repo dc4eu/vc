@@ -304,7 +304,7 @@ func TestOIDCCredential_SuccessfulIssuance(t *testing.T) {
 	// Verify mock authorization context retrieval
 	authCtx, err := mockAuthCtx.GetWithAccessToken(ctx, accessToken)
 	require.NoError(t, err)
-	assert.Equal(t, "pid", authCtx.Scope)
+	assert.Equal(t, []string{"pid"}, authCtx.Scope)
 	assert.Equal(t, nonce, authCtx.Nonce)
 	assert.NotNil(t, authCtx.Token)
 	assert.Equal(t, accessToken, authCtx.Token.AccessToken)

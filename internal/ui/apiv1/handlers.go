@@ -83,23 +83,6 @@ type CredentialRequest struct {
 	JWK             map[string]any  `json:"jwk"`
 }
 
-// Credential sends POST to apigw /api/v1/credential
-func (c *Client) Credential(ctx context.Context, req *CredentialRequest) (any, error) {
-	req.JWK = map[string]any{
-		"kty": c.jwk.Kty,
-		"kid": c.jwk.Kid,
-		"crv": c.jwk.Crv,
-		"x":   c.jwk.X,
-		"y":   c.jwk.Y,
-	}
-
-	reply, err := c.apigwClient.Credential(req)
-	if err != nil {
-		return nil, err
-	}
-	return reply, nil
-}
-
 // GetDocumentRequest is the request for the GetDocument endpoint
 type GetDocumentRequest struct {
 	AuthenticSource string `json:"authentic_source" validate:"required"`

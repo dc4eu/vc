@@ -47,7 +47,7 @@ func (c *Client) OAuthPar(ctx context.Context, req *openid4vci.PARRequest) (*ope
 		VerifierResponseCode:     oauth2.GenerateCryptographicNonceFixedLength(32),
 	}
 
-	if err := c.db.VCAuthorizationContextColl.Save(ctx, &azt); err != nil {
+	if err := c.authContextStore.Save(ctx, &azt); err != nil {
 		c.log.Error(err, "authorizationContext not saved")
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 		RequestURI: req.RequestURI,
 		ClientID:   fmt.Sprintf("x509_san_dns:%s", strings.TrimLeft(c.cfg.APIGW.ExternalServerURL, "https://")),
 	}
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, query)
+	authorizationContext, err := c.authContextStore.Get(ctx, query)
 	c.log.Debug("Get authorization", "query", query, "authorization", authorizationContext)
 	if err != nil {
 		c.log.Error(err, "get error")
@@ -102,7 +102,7 @@ func (c *Client) OAuthAuthorize(ctx context.Context, req *openid4vci.AuthorizeRe
 func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (*openid4vci.TokenResponse, error) {
 	c.log.Debug("OIDCToken", "req", req)
 
-	authorizationContext, err := c.db.VCAuthorizationContextColl.ForfeitAuthorizationCode(ctx, &model.AuthorizationContext{
+	authorizationContext, err := c.authContextStore.ForfeitAuthorizationCode(ctx, &model.AuthorizationContext{
 		Code: req.Code,
 	})
 	if err != nil {
@@ -133,7 +133,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		ExpiresAt:   time.Now().Add(time.Duration(reply.ExpiresIn) * time.Second).Unix(),
 	}
 
-	if err := c.db.VCAuthorizationContextColl.AddToken(ctx, authorizationContext.Code, tokenDoc); err != nil {
+	if err := c.authContextStore.AddToken(ctx, authorizationContext.Code, tokenDoc); err != nil {
 		c.log.Error(err, "failed to add token")
 		return nil, err
 	}
@@ -190,7 +190,7 @@ type OAuthAuthorizationConsentResponse struct {
 }
 
 func (c *Client) OAuthAuthorizationConsent(ctx context.Context, req *OauthAuthorizationConsentRequest) (*OAuthAuthorizationConsentResponse, error) {
-	authorizationContext, err := c.db.VCAuthorizationContextColl.Get(ctx, &model.AuthorizationContext{SessionID: req.SessionID})
+	authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{SessionID: req.SessionID})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err

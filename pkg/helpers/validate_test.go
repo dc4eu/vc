@@ -18,7 +18,7 @@ func TestValidationIdentity(t *testing.T) {
 			have: &model.Identity{},
 			want: &Error{
 				Title: "validation_error",
-				Err: []map[string]interface{}{
+				Err: []map[string]any{
 					{
 						"field":           "schema",
 						"namespace":       "schema",
@@ -26,6 +26,30 @@ func TestValidationIdentity(t *testing.T) {
 						"validation":      "required",
 						"validationParam": "",
 						"value":           (*model.IdentitySchema)(nil),
+					},
+					{
+						"field":           "family_name",
+						"namespace":       "family_name",
+						"type":            "string",
+						"validation":      "required",
+						"validationParam": "",
+						"value":           "",
+					},
+					{
+						"field":           "given_name",
+						"namespace":       "given_name",
+						"type":            "string",
+						"validation":      "required",
+						"validationParam": "",
+						"value":           "",
+					},
+					{
+						"field":           "birth_date",
+						"namespace":       "birth_date",
+						"type":            "string",
+						"validation":      "required",
+						"validationParam": "",
+						"value":           "",
 					},
 				},
 			},
@@ -37,7 +61,9 @@ func TestValidationIdentity(t *testing.T) {
 					Name:    "SE",
 					Version: "1.0.0",
 				},
-				BirthDate: "1970-01-01",
+				FamilyName: "Doe",
+				GivenName:  "John",
+				BirthDate:  "1970-01-01",
 			},
 			want: nil,
 		},
@@ -47,7 +73,9 @@ func TestValidationIdentity(t *testing.T) {
 				Schema: &model.IdentitySchema{
 					Name: "SE",
 				},
-				BirthDate: "1972-10-27 10:15:31.432635902 +0000 UTC",
+				FamilyName: "Doe",
+				GivenName:  "John",
+				BirthDate:  "1972-10-27 10:15:31.432635902 +0000 UTC",
 			},
 			want: &Error{
 				Title: "validation_error",
@@ -136,7 +164,9 @@ func TestValidationArrayOfIdentity(t *testing.T) {
 						Schema: &model.IdentitySchema{
 							Name: "SE",
 						},
-						BirthDate: "1972-10-27",
+						FamilyName: "Doe",
+						GivenName:  "John",
+						BirthDate:  "1972-10-27",
 					},
 				},
 			},
@@ -150,7 +180,9 @@ func TestValidationArrayOfIdentity(t *testing.T) {
 						Schema: &model.IdentitySchema{
 							Name: "SE",
 						},
-						BirthDate: "1972-10-27 10:15:31.432635902 +0000 UTC",
+						FamilyName: "Doe",
+						GivenName:  "John",
+						BirthDate:  "1972-10-27 10:15:31.432635902 +0000 UTC",
 					},
 				},
 			},

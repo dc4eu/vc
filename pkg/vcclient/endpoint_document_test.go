@@ -8,7 +8,6 @@ import (
 	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/socialsecurity"
 
 	"github.com/stretchr/testify/assert"
 	"gotest.tools/v3/golden"
@@ -64,7 +63,7 @@ func mockClient(ctx context.Context, t *testing.T, url string) *Client {
 	}
 
 	client, err := New(&Config{
-		URL: url,
+		ApigwFQDN: url,
 	}, log)
 	if err != nil {
 		t.FailNow()
@@ -79,7 +78,7 @@ func TestGet(t *testing.T) {
 		name                 string
 		query                *DocumentGetQuery
 		expected             *model.Document
-		expectedDocumentData *socialsecurity.EHICDocument
+		expectedDocumentData any
 	}{
 		{
 			name: "success",
@@ -115,16 +114,16 @@ func TestGet(t *testing.T) {
 					DocumentDataValidationRef: "",
 				},
 			},
-			expectedDocumentData: &socialsecurity.EHICDocument{
-				PersonalAdministrativeNumber: "123123123",
-				IssuingAuthority: socialsecurity.IssuingAuthority{
-					ID:   "1231231",
-					Name: "SUNET",
+			expectedDocumentData: map[string]any{
+				"personal_administrative_number": "123123123",
+				"issuing_authority": map[string]any{
+					"id":   "1231231",
+					"name": "SUNET",
 				},
-				IssuingCountry: "SE",
-				DateOfExpiry:   "2038-01-19",
-				DateOfIssuance: "2021-01-19",
-				DocumentNumber: "123123123",
+				"issuing_country":  "SE",
+				"date_of_expiry":   "2038-01-19",
+				"date_of_issuance": "2021-01-19",
+				"document_number":  "123123123",
 			},
 		},
 	}
@@ -140,9 +139,7 @@ func TestGet(t *testing.T) {
 			got, _, err := client.Document.Get(ctx, tt.query)
 			assert.NoError(t, err)
 
-			documentData, err := tt.expectedDocumentData.Marshal()
-			assert.NoError(t, err)
-			tt.expected.DocumentData = documentData
+			tt.expected.DocumentData = tt.expectedDocumentData
 
 			assert.Equal(t, tt.expected, got)
 		})

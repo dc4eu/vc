@@ -27,7 +27,7 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 	c.log.Debug("Verification request object", "req", req)
 
 	// TODO(masv): should request-object-id be associated with a particular session?
-	authorizationContext, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{
+	authorizationContext, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{
 		RequestObjectID: req.ID,
 	})
 	if err != nil {
@@ -125,7 +125,7 @@ func (c *Client) VerificationDirectPost(ctx context.Context, req *VerificationDi
 	c.log.Debug("directPost", "vpResponse", vpResponse)
 
 	// Get authorization context by state
-	authCtx, err := c.db.AuthorizationContextColl.Get(ctx, &model.AuthorizationContext{State: vpResponse.State})
+	authCtx, err := c.authContextStore.Get(ctx, &model.AuthorizationContext{State: vpResponse.State})
 	if err != nil {
 		c.log.Error(err, "failed to get authorization context")
 		return nil, err

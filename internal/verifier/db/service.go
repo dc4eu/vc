@@ -26,8 +26,9 @@ type Service struct {
 	AuthorizationContextColl AuthorizationContextStore
 
 	// OIDC session and client collections (from verifier-proxy)
-	Sessions *SessionCollection
-	Clients  *ClientCollection
+	// Using interfaces to allow mocking in tests
+	Sessions SessionStore
+	Clients  ClientStore
 }
 
 // New creates a new database service
@@ -68,6 +69,15 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	service.log.Info("Started")
 
 	return service, nil
+}
+
+// NewServiceWithMocks creates a db.Service with mock implementations for testing
+// This allows unit tests to inject mock SessionStore and ClientStore implementations
+func NewServiceWithMocks(sessions SessionStore, clients ClientStore) *Service {
+	return &Service{
+		Sessions: sessions,
+		Clients:  clients,
+	}
 }
 
 // connect connects to the database

@@ -1,8 +1,10 @@
 package apiv1
 
 import (
+	"context"
 	"testing"
 	"vc/internal/verifier/apiv1/utils"
+	"vc/internal/verifier/db"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -338,4 +340,197 @@ func TestStandardClaims(t *testing.T) {
 			assert.NotEmpty(t, claim)
 		})
 	}
+}
+
+// ============================================================================
+// Handler Integration Tests with Mock Database
+// ============================================================================
+
+// TestAuthorize_ClientValidation tests client validation in the Authorize handler
+// Note: Full Authorize flow requires CredentialConstructor config which is complex to mock
+func TestAuthorize_ClientValidation(t *testing.T) {
+	ctx := context.Background()
+	client, mockDB := CreateTestClientWithMock(nil)
+
+	// Add a test client to the mock
+	mockDB.Clients.AddClient(&db.Client{
+		ClientID:      "test-client-id",
+		RedirectURIs:  []string{"https://example.com/callback"},
+		ResponseTypes: []string{"code"},
+		AllowedScopes: []string{"openid", "profile", "email"},
+		RequirePKCE:   false,
+	})
+
+	// Test unknown client
+	t.Run("unknown client returns ErrInvalidClient", func(t *testing.T) {
+		req := &AuthorizeRequest{
+			ResponseType: "code",
+			ClientID:     "unknown-client",
+			RedirectURI:  "https://example.com/callback",
+			Scope:        "openid",
+		}
+		_, err := client.Authorize(ctx, req)
+		assert.ErrorIs(t, err, ErrInvalidClient)
+	})
+
+	// Test invalid redirect URI
+	t.Run("invalid redirect URI returns ErrInvalidRequest", func(t *testing.T) {
+		req := &AuthorizeRequest{
+			ResponseType: "code",
+			ClientID:     "test-client-id",
+			RedirectURI:  "https://malicious.com/callback",
+			Scope:        "openid",
+		}
+		_, err := client.Authorize(ctx, req)
+		assert.ErrorIs(t, err, ErrInvalidRequest)
+	})
+
+	// Test unsupported response type
+	t.Run("unsupported response type returns ErrInvalidRequest", func(t *testing.T) {
+		req := &AuthorizeRequest{
+			ResponseType: "token",
+			ClientID:     "test-client-id",
+			RedirectURI:  "https://example.com/callback",
+			Scope:        "openid",
+		}
+		_, err := client.Authorize(ctx, req)
+		assert.ErrorIs(t, err, ErrInvalidRequest)
+	})
+
+	// Test invalid scope
+	t.Run("invalid scope returns ErrInvalidScope", func(t *testing.T) {
+		req := &AuthorizeRequest{
+			ResponseType: "code",
+			ClientID:     "test-client-id",
+			RedirectURI:  "https://example.com/callback",
+			Scope:        "openid admin",
+		}
+		_, err := client.Authorize(ctx, req)
+		assert.ErrorIs(t, err, ErrInvalidScope)
+	})
+}
+
+// TestAuthorize_PKCEValidation tests PKCE enforcement in the Authorize handler
+func TestAuthorize_PKCEValidation(t *testing.T) {
+	ctx := context.Background()
+	client, mockDB := CreateTestClientWithMock(nil)
+
+	// Add a client that requires PKCE
+	mockDB.Clients.AddClient(&db.Client{
+		ClientID:      "pkce-required-client",
+		RedirectURIs:  []string{"https://example.com/callback"},
+		ResponseTypes: []string{"code"},
+		AllowedScopes: []string{"openid"},
+		RequirePKCE:   true,
+	})
+
+	t.Run("PKCE required but not provided", func(t *testing.T) {
+		req := &AuthorizeRequest{
+			ResponseType: "code",
+			ClientID:     "pkce-required-client",
+			RedirectURI:  "https://example.com/callback",
+			Scope:        "openid",
+		}
+		_, err := client.Authorize(ctx, req)
+		assert.ErrorIs(t, err, ErrInvalidRequest)
+	})
+}
+
+// TestMockClientCollection tests the mock client collection
+func TestMockClientCollection(t *testing.T) {
+	ctx := context.Background()
+	mock := NewMockClientCollection()
+
+	// Test Create
+	client := &db.Client{
+		ClientID:      "test-client",
+		RedirectURIs:  []string{"https://example.com/callback"},
+		ResponseTypes: []string{"code"},
+	}
+	err := mock.Create(ctx, client)
+	assert.NoError(t, err)
+
+	// Test GetByClientID
+	retrieved, err := mock.GetByClientID(ctx, "test-client")
+	assert.NoError(t, err)
+	assert.NotNil(t, retrieved)
+	assert.Equal(t, "test-client", retrieved.ClientID)
+
+	// Test GetByClientID with unknown client
+	unknown, err := mock.GetByClientID(ctx, "unknown")
+	assert.NoError(t, err)
+	assert.Nil(t, unknown)
+
+	// Test Update
+	client.AllowedScopes = []string{"openid", "profile"}
+	err = mock.Update(ctx, client)
+	assert.NoError(t, err)
+
+	updated, _ := mock.GetByClientID(ctx, "test-client")
+	assert.Equal(t, []string{"openid", "profile"}, updated.AllowedScopes)
+
+	// Test Delete
+	err = mock.Delete(ctx, "test-client")
+	assert.NoError(t, err)
+
+	deleted, _ := mock.GetByClientID(ctx, "test-client")
+	assert.Nil(t, deleted)
+}
+
+// TestMockSessionCollection tests the mock session collection
+func TestMockSessionCollection(t *testing.T) {
+	ctx := context.Background()
+	mock := NewMockSessionCollection()
+
+	// Test Create
+	session := &db.Session{
+		ID:     "session-1",
+		Status: db.SessionStatusPending,
+		Tokens: db.TokenSet{
+			AuthorizationCode: "auth-code-123",
+			AccessToken:       "access-token-456",
+		},
+	}
+	err := mock.Create(ctx, session)
+	assert.NoError(t, err)
+
+	// Test GetByID
+	retrieved, err := mock.GetByID(ctx, "session-1")
+	assert.NoError(t, err)
+	assert.NotNil(t, retrieved)
+	assert.Equal(t, "session-1", retrieved.ID)
+
+	// Test GetByAuthorizationCode
+	byCode, err := mock.GetByAuthorizationCode(ctx, "auth-code-123")
+	assert.NoError(t, err)
+	assert.NotNil(t, byCode)
+	assert.Equal(t, "session-1", byCode.ID)
+
+	// Test GetByAccessToken
+	byToken, err := mock.GetByAccessToken(ctx, "access-token-456")
+	assert.NoError(t, err)
+	assert.NotNil(t, byToken)
+	assert.Equal(t, "session-1", byToken.ID)
+
+	// Test MarkCodeAsUsed
+	err = mock.MarkCodeAsUsed(ctx, "session-1")
+	assert.NoError(t, err)
+
+	markedSession, _ := mock.GetByID(ctx, "session-1")
+	assert.True(t, markedSession.Tokens.AuthorizationCodeUsed)
+
+	// Test Update
+	session.Status = db.SessionStatusCompleted
+	err = mock.Update(ctx, session)
+	assert.NoError(t, err)
+
+	updated, _ := mock.GetByID(ctx, "session-1")
+	assert.Equal(t, db.SessionStatusCompleted, updated.Status)
+
+	// Test Delete
+	err = mock.Delete(ctx, "session-1")
+	assert.NoError(t, err)
+
+	deleted, _ := mock.GetByID(ctx, "session-1")
+	assert.Nil(t, deleted)
 }

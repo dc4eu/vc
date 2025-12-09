@@ -189,6 +189,10 @@ func (m *MockClientCollection) AddClient(client *db.Client) {
 	m.clients[client.ClientID] = client
 }
 
+// Compile-time interface satisfaction checks for mocks
+var _ db.SessionStore = (*MockSessionCollection)(nil)
+var _ db.ClientStore = (*MockClientCollection)(nil)
+
 // MockDBService creates a mock database service for testing
 type MockDBService struct {
 	Sessions *MockSessionCollection
@@ -201,6 +205,12 @@ func NewMockDBService() *MockDBService {
 		Sessions: NewMockSessionCollection(),
 		Clients:  NewMockClientCollection(),
 	}
+}
+
+// ToDBService creates a db.Service that uses the mock collections
+// This allows the mocks to be used with the real Client struct
+func (m *MockDBService) ToDBService() *db.Service {
+	return db.NewServiceWithMocks(m.Sessions, m.Clients)
 }
 
 // CreateTestClientWithMock creates a test Client with a mock database for testing handlers
@@ -229,11 +239,13 @@ func CreateTestClientWithMock(cfg *model.Cfg) (*Client, *MockDBService) {
 	tracer, _ := trace.NewForTesting(ctx, "test", log)
 
 	mockDB := NewMockDBService()
+	dbService := mockDB.ToDBService()
 
 	// Create client directly with mock dependencies
 	// Note: We bypass New() to avoid loading real config files
 	client := &Client{
 		cfg:                         cfg,
+		db:                          dbService,
 		log:                         log.New("apiv1"),
 		tracer:                      tracer,
 		oidcSigningAlg:              "RS256",

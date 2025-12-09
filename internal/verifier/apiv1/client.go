@@ -11,6 +11,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 	"vc/internal/verifier/db"
 	"vc/internal/verifier/notify"
@@ -360,4 +361,68 @@ func (c *Client) buildLegacyDCQLQuery(scopes []string) (*openid4vp.DCQL, error) 
 	return &openid4vp.DCQL{
 		Credentials: credentials,
 	}, nil
+}
+
+// extractAndMapClaims extracts claims from a VP token and maps them to OIDC claims
+// using the template that matches the requested scopes
+func (c *Client) extractAndMapClaims(ctx context.Context, vpToken string, scopeStr string) (map[string]any, error) {
+	// If no claims extractor, fall back to basic extraction
+	if c.claimsExtractor == nil {
+		c.log.Debug("No claims extractor configured, using basic claim extraction")
+		return c.claimsExtractor.ExtractClaimsFromVPToken(ctx, vpToken)
+	}
+
+	// If no presentation builder, use basic extraction without mapping
+	if c.presentationBuilder == nil {
+		c.log.Debug("No presentation builder configured, using basic extraction without mapping")
+		return c.claimsExtractor.ExtractClaimsFromVPToken(ctx, vpToken)
+	}
+
+	// Parse scopes
+	scopes := parseScopes(scopeStr)
+
+	// Find the template that was used for this request
+	template := c.presentationBuilder.FindTemplateByScopes(scopes)
+	if template == nil {
+		c.log.Debug("No template found for scopes, using basic claim extraction", "scopes", scopes)
+		return c.claimsExtractor.ExtractClaimsFromVPToken(ctx, vpToken)
+	}
+
+	c.log.Debug("Using template for claim extraction", "template_id", template.GetID(), "scopes", scopes)
+
+	// Get claim mappings from template
+	claimMappings := openid4vp.GetClaimMappings(template)
+	if claimMappings == nil {
+		c.log.Debug("Template has no claim mappings, using basic extraction")
+		return c.claimsExtractor.ExtractClaimsFromVPToken(ctx, vpToken)
+	}
+
+	// Convert ClaimTransform to ClaimTransformDef for the extractor
+	transformDefs := make(map[string]openid4vp.ClaimTransformDef)
+	if templateWithTransforms, ok := template.(interface {
+		GetClaimTransforms() map[string]configuration.ClaimTransform
+	}); ok {
+		for claimName, transform := range templateWithTransforms.GetClaimTransforms() {
+			transformDefs[claimName] = openid4vp.ClaimTransformDef{
+				Type:   transform.Type,
+				Params: transform.Params,
+			}
+		}
+	}
+
+	// Extract, map, and transform claims
+	oidcClaims, err := c.claimsExtractor.ExtractAndMapClaims(ctx, vpToken, claimMappings, transformDefs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract and map claims: %w", err)
+	}
+
+	return oidcClaims, nil
+}
+
+// parseScopes splits a scope string into individual scopes
+func parseScopes(scopeStr string) []string {
+	if scopeStr == "" {
+		return []string{}
+	}
+	return strings.Split(scopeStr, " ")
 }

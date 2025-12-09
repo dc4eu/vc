@@ -314,6 +314,126 @@ func (c *Client) DeleteClient(ctx context.Context, clientID string, registration
 	return c.db.Clients.Delete(ctx, clientID)
 }
 
+// UpdateClient updates client configuration (RFC 7592)
+func (c *Client) UpdateClient(ctx context.Context, clientID string, registrationAccessToken string, req *ClientRegistrationRequest) (*ClientRegistrationResponse, error) {
+	ctx, span := c.tracer.Start(ctx, "apiv1:update_client")
+	defer span.End()
+
+	// Get existing client
+	client, err := c.db.Clients.GetByClientID(ctx, clientID)
+	if err != nil {
+		return nil, err
+	}
+	if client == nil {
+		return nil, ErrInvalidClient
+	}
+
+	// Verify registration access token
+	if err := verifyRegistrationAccessToken(registrationAccessToken, client.RegistrationAccessTokenHash); err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	// Validate update request
+	if err := c.validateRegistrationRequest(req); err != nil {
+		return nil, err
+	}
+
+	// Apply defaults
+	c.applyRegistrationDefaults(req)
+
+	// Update client fields
+	if req.RedirectURIs != nil {
+		client.RedirectURIs = req.RedirectURIs
+	}
+	if req.GrantTypes != nil {
+		client.GrantTypes = req.GrantTypes
+	}
+	if req.ResponseTypes != nil {
+		client.ResponseTypes = req.ResponseTypes
+	}
+	if req.TokenEndpointAuthMethod != "" {
+		client.TokenEndpointAuthMethod = req.TokenEndpointAuthMethod
+	}
+	if req.Scope != "" {
+		client.AllowedScopes = strings.Split(req.Scope, " ")
+	}
+	if req.SubjectType != "" {
+		client.SubjectType = req.SubjectType
+	}
+	if req.JWKSUri != "" {
+		client.JWKSUri = req.JWKSUri
+	}
+	if req.JWKS != nil {
+		client.JWKS = req.JWKS
+	}
+	if req.ClientName != "" {
+		client.ClientName = req.ClientName
+	}
+	if req.ClientURI != "" {
+		client.ClientURI = req.ClientURI
+	}
+	if req.LogoURI != "" {
+		client.LogoURI = req.LogoURI
+	}
+	if req.Contacts != nil {
+		client.Contacts = req.Contacts
+	}
+	if req.TosURI != "" {
+		client.TosURI = req.TosURI
+	}
+	if req.PolicyURI != "" {
+		client.PolicyURI = req.PolicyURI
+	}
+	if req.CodeChallengeMethod != "" {
+		client.CodeChallengeMethod = req.CodeChallengeMethod
+		client.RequirePKCE = true
+		client.RequireCodeChallenge = true
+	}
+
+	// Update in database
+	err = c.db.Clients.Update(ctx, client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update client: %w", err)
+	}
+
+	// Build response (same as GET)
+	scope := strings.Join(client.AllowedScopes, " ")
+
+	response := &ClientRegistrationResponse{
+		ClientID:                clientID,
+		ClientIDIssuedAt:        client.ClientIDIssuedAt,
+		ClientSecretExpiresAt:   client.ClientSecretExpiresAt,
+		RedirectURIs:            client.RedirectURIs,
+		TokenEndpointAuthMethod: client.TokenEndpointAuthMethod,
+		GrantTypes:              client.GrantTypes,
+		ResponseTypes:           client.ResponseTypes,
+		ClientName:              client.ClientName,
+		ClientURI:               client.ClientURI,
+		LogoURI:                 client.LogoURI,
+		Scope:                   scope,
+		Contacts:                client.Contacts,
+		TosURI:                  client.TosURI,
+		PolicyURI:               client.PolicyURI,
+		JWKSUri:                 client.JWKSUri,
+		JWKS:                    client.JWKS,
+		SoftwareID:              client.SoftwareID,
+		SoftwareVersion:         client.SoftwareVersion,
+		RegistrationClientURI:   fmt.Sprintf("%s/register/%s", c.cfg.VerifierProxy.ExternalURL, clientID),
+		ApplicationType:         client.ApplicationType,
+		SectorIdentifierURI:     client.SectorIdentifierURI,
+		SubjectType:             client.SubjectType,
+		IDTokenSignedRespAlg:    client.IDTokenSignedResponseAlg,
+		DefaultMaxAge:           client.DefaultMaxAge,
+		RequireAuthTime:         client.RequireAuthTime,
+		DefaultACRValues:        client.DefaultACRValues,
+		InitiateLoginURI:        client.InitiateLoginURI,
+		RequestURIs:             client.RequestURIs,
+		CodeChallengeMethod:     client.CodeChallengeMethod,
+	}
+
+	return response, nil
+}
+
 // validateRegistrationRequest validates RFC 7591 client registration request
 func (c *Client) validateRegistrationRequest(req *ClientRegistrationRequest) error {
 	// Validate redirect URIs

@@ -1,0 +1,205 @@
+package httpserver
+
+import (
+	"context"
+	"net/http"
+	"vc/internal/verifier/apiv1"
+
+	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/codes"
+)
+
+// endpointOIDCRequestObject handles OpenID4VP request object retrieval (for OIDC flow)
+func (s *Service) endpointOIDCRequestObject(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOIDCRequestObject")
+	defer span.End()
+
+	s.log.Debug("endpointOIDCRequestObject called")
+
+	sessionID := c.Param("session_id")
+	if sessionID == "" {
+		span.SetStatus(codes.Error, "Missing session_id")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, nil
+	}
+
+	// Get request object
+	request := &apiv1.GetRequestObjectRequest{
+		SessionID: sessionID,
+	}
+
+	response, err := s.apiv1.GetOIDCRequestObject(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "Failed to get request object")
+
+		if err == apiv1.ErrSessionNotFound {
+			c.AbortWithStatus(http.StatusNotFound)
+			return nil, nil
+		}
+
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return nil, nil
+	}
+
+	c.Header("Content-Type", "application/oauth-authz-req+jwt")
+	c.String(http.StatusOK, response.RequestObject)
+	return nil, nil
+}
+
+// endpointOIDCDirectPost handles OpenID4VP direct_post responses from wallet (for OIDC flow)
+func (s *Service) endpointOIDCDirectPost(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOIDCDirectPost")
+	defer span.End()
+
+	s.log.Debug("endpointOIDCDirectPost called")
+
+	// Parse request - support both form-encoded and JSON
+	request := &apiv1.DirectPostRequest{}
+	contentType := c.GetHeader("Content-Type")
+
+	if contentType == "application/json" {
+		// DC API may send JSON
+		if err := c.ShouldBindJSON(request); err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "Failed to bind JSON direct_post request")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return nil, nil
+		}
+	} else {
+		// Standard form-encoded
+		if err := c.ShouldBind(request); err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			s.log.Error(err, "Failed to bind direct_post request")
+			c.AbortWithStatus(http.StatusBadRequest)
+			return nil, nil
+		}
+	}
+
+	// Process VP token
+	response, err := s.apiv1.ProcessDirectPost(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "Failed to process direct_post")
+
+		// Return error response per OpenID4VP spec
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"error":             "invalid_request",
+			"error_description": err.Error(),
+		})
+		return nil, nil
+	}
+
+	// Return redirect_uri if present (for cross-device flow completion)
+	if response.RedirectURI != "" {
+		c.Redirect(http.StatusFound, response.RedirectURI)
+		return nil, nil
+	}
+
+	// Success response for same-device flow
+	c.JSON(http.StatusOK, map[string]string{
+		"status": "ok",
+	})
+	return nil, nil
+}
+
+// endpointOIDCCallback handles callback requests (for OIDC flow)
+func (s *Service) endpointOIDCCallback(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOIDCCallback")
+	defer span.End()
+
+	s.log.Debug("endpointOIDCCallback called")
+
+	request := &apiv1.CallbackRequest{}
+	if err := c.ShouldBindQuery(request); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "Failed to bind callback request")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, nil
+	}
+
+	response, err := s.apiv1.ProcessCallback(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "Failed to process callback")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return nil, nil
+	}
+
+	// Redirect to RP
+	if response.RedirectURI != "" {
+		c.Redirect(http.StatusFound, response.RedirectURI)
+		return nil, nil
+	}
+
+	c.AbortWithStatus(http.StatusOK)
+	return nil, nil
+}
+
+// endpointQRCode generates a QR code for a session
+func (s *Service) endpointQRCode(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointQRCode")
+	defer span.End()
+
+	sessionID := c.Param("session_id")
+	if sessionID == "" {
+		span.SetStatus(codes.Error, "Missing session_id")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, nil
+	}
+
+	request := &apiv1.GetQRCodeRequest{
+		SessionID: sessionID,
+	}
+
+	response, err := s.apiv1.GetQRCode(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "Failed to generate QR code")
+
+		if err == apiv1.ErrSessionNotFound {
+			c.AbortWithStatus(http.StatusNotFound)
+			return nil, nil
+		}
+
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return nil, nil
+	}
+
+	c.Header("Content-Type", "image/png")
+	c.Data(http.StatusOK, "image/png", response.ImageData)
+	return nil, nil
+}
+
+// endpointPollSession polls the session status
+func (s *Service) endpointPollSession(ctx context.Context, c *gin.Context) (any, error) {
+	ctx, span := s.tracer.Start(ctx, "httpserver:endpointPollSession")
+	defer span.End()
+
+	sessionID := c.Param("session_id")
+	if sessionID == "" {
+		span.SetStatus(codes.Error, "Missing session_id")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return nil, nil
+	}
+
+	request := &apiv1.PollSessionRequest{
+		SessionID: sessionID,
+	}
+
+	response, err := s.apiv1.PollSession(ctx, request)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		s.log.Error(err, "Failed to poll session")
+
+		if err == apiv1.ErrSessionNotFound {
+			c.AbortWithStatus(http.StatusNotFound)
+			return nil, nil
+		}
+
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return nil, nil
+	}
+
+	return response, nil
+}

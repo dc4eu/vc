@@ -157,6 +157,9 @@ var (
 		ErrorDescription: "Invalid verifiable presentation",
 		HTTPStatus:       http.StatusBadRequest,
 	}
+
+	// ErrNotFound is a generic not found error
+	ErrNotFound = errors.New("not found")
 )
 
 // NewOAuthError creates a new OAuth error with a custom description

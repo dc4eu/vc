@@ -4,7 +4,7 @@ NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
 LDFLAGS_DYNAMIC			:= -ldflags "-w -s"
 CURRENT_BRANCH 			:= $(shell git rev-parse --abbrev-ref HEAD)
-SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet verifier-proxy
+SERVICES 				:= verifier registry persistent mockas apigw issuer ui wallet
 PORT                    := 8888
 W3C_TEST_SUITE_DIR      := /tmp/w3c-test-suite
 
@@ -13,7 +13,7 @@ pki:
 	cd pki/; ./create_pki.sh
 	cd developer_tools/; ./gen_ec_sign_key.sh; ./gen_rsa_sign_key.sh
 
-test: test-apigw test-issuer test-mockas test-persistent test-registry test-ui test-verifier test-verifier-proxy
+test: test-apigw test-issuer test-mockas test-persistent test-registry test-ui test-verifier
 
 test-apigw:
 	$(info Testing apigw)
@@ -42,10 +42,6 @@ test-ui:
 test-verifier:
 	$(info Testing verifier)
 	go test -v ./cmd/verifier/... ./internal/verifier/...
-
-test-verifier-proxy:
-	$(info Testing verifier-proxy)
-	go test -v ./cmd/verifier-proxy/... ./internal/verifier_proxy/...
 
 # W3C VC 2.0 Test Suite targets
 create-w3c-test-suite:
@@ -112,10 +108,9 @@ DOCKER_TAG_MOCKAS 		:= docker.sunet.se/dc4eu/mockas:$(VERSION)
 DOCKER_TAG_ISSUER 		:= docker.sunet.se/dc4eu/issuer:$(VERSION)
 DOCKER_TAG_UI 			:= docker.sunet.se/dc4eu/ui:$(VERSION)
 DOCKER_TAG_WALLET 		:= docker.sunet.se/dc4eu/wallet:$(VERSION)
-DOCKER_TAG_VERIFIER_PROXY := docker.sunet.se/dc4eu/verifier-proxy:$(VERSION)
 
 
-build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui build-verifier-proxy build-vc20-test-server
+build: proto build-verifier build-registry build-persistent build-mockas build-apigw build-ui build-vc20-test-server
 
 build-verifier:
 	$(info Building verifier)
@@ -148,10 +143,6 @@ build-ui:
 build-wallet:
 	$(info Building wallet)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_wallet ${LDFLAGS} ./cmd/wallet/main.go
-
-build-verifier-proxy:
-	$(info Building verifier-proxy)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./bin/$(NAME)_verifier-proxy ${LDFLAGS} ./cmd/verifier-proxy/main.go
 
 # Build targets with optional features (build tags)
 # Usage: make build-issuer-hsm  (builds issuer with PKCS#11 HSM support)
@@ -195,7 +186,7 @@ test-all-tags:
 	$(info Testing with all build tags)
 	go test -tags "saml,oidcrp,vc20,pkcs11" -v ./...
 
-docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui docker-build-verifier-proxy
+docker-build: docker-build-verifier docker-build-registry docker-build-persistent docker-build-mockas docker-build-apigw docker-build-issuer docker-build-ui
 
 docker-build-gobuild:
 	$(info Docker Building gobuild with tag: $(VERSION))
@@ -232,10 +223,6 @@ docker-build-ui:
 docker-build-wallet:
 	$(info Docker building wallet with tag: $(VERSION))
 	docker build --build-arg SERVICE_NAME=wallet --tag $(DOCKER_TAG_WALLET) --file dockerfiles/worker .
-
-docker-build-verifier-proxy:
-	$(info Docker building verifier-proxy with tag: $(VERSION))
-	docker build --build-arg SERVICE_NAME=verifier-proxy --tag $(DOCKER_TAG_VERIFIER_PROXY) --file dockerfiles/worker .
 
 # Docker build targets with build tags
 # Usage: make docker-build-apigw-saml VERSION=1.0.0

@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"net"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestValidateRedirectURI tests the redirect URI validation
@@ -401,4 +403,171 @@ func parseIP(s string) []byte {
 		return ip[:]
 	}
 	return nil
+}
+
+// TestValidateURI tests the ValidateURI function
+func TestValidateURI(t *testing.T) {
+	tests := []struct {
+		name         string
+		uri          string
+		requireHTTPS bool
+		wantErr      bool
+	}{
+		{
+			name:         "valid HTTPS URI",
+			uri:          "https://example.com/path",
+			requireHTTPS: true,
+			wantErr:      false,
+		},
+		{
+			name:         "HTTP when HTTPS required",
+			uri:          "http://example.com/path",
+			requireHTTPS: true,
+			wantErr:      true,
+		},
+		{
+			name:         "HTTP when HTTPS not required",
+			uri:          "http://example.com/path",
+			requireHTTPS: false,
+			wantErr:      false,
+		},
+		{
+			name:         "localhost blocked by SSRF check",
+			uri:          "https://localhost/path",
+			requireHTTPS: true,
+			wantErr:      true,
+		},
+		{
+			name:         "missing scheme",
+			uri:          "example.com/path",
+			requireHTTPS: false,
+			wantErr:      true,
+		},
+		{
+			name:         "URI with fragment blocked",
+			uri:          "https://example.com/path#fragment",
+			requireHTTPS: true,
+			wantErr:      true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateURI(tt.uri, tt.requireHTTPS)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+// TestValidateIPAddress tests the validateIPAddress function
+func TestValidateIPAddress(t *testing.T) {
+	tests := []struct {
+		name    string
+		ip      string
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name:    "public IP allowed",
+			ip:      "8.8.8.8",
+			wantErr: false,
+		},
+		{
+			name:    "loopback blocked",
+			ip:      "127.0.0.1",
+			wantErr: true,
+			errMsg:  "loopback",
+		},
+		{
+			name:    "private Class A blocked",
+			ip:      "10.0.0.1",
+			wantErr: true,
+			errMsg:  "private",
+		},
+		{
+			name:    "private Class B blocked",
+			ip:      "172.16.0.1",
+			wantErr: true,
+			errMsg:  "private",
+		},
+		{
+			name:    "private Class C blocked",
+			ip:      "192.168.1.1",
+			wantErr: true,
+			errMsg:  "private",
+		},
+		{
+			name:    "link-local blocked",
+			ip:      "169.254.1.1",
+			wantErr: true,
+			errMsg:  "link-local",
+		},
+		{
+			name:    "public IP 1.1.1.1 allowed",
+			ip:      "1.1.1.1",
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ip := net.ParseIP(tt.ip)
+			require.NotNil(t, ip, "failed to parse test IP")
+
+			err := validateIPAddress(ip)
+			if tt.wantErr {
+				assert.Error(t, err)
+				if tt.errMsg != "" {
+					assert.Contains(t, err.Error(), tt.errMsg)
+				}
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+// TestCheckSSRF tests the checkSSRF function
+func TestCheckSSRF(t *testing.T) {
+	tests := []struct {
+		name     string
+		hostname string
+		wantErr  bool
+	}{
+		{
+			name:     "localhost blocked",
+			hostname: "localhost",
+			wantErr:  true,
+		},
+		{
+			name:     "LOCALHOST blocked (case insensitive)",
+			hostname: "LOCALHOST",
+			wantErr:  true,
+		},
+		{
+			name:     "valid public hostname",
+			hostname: "example.com",
+			wantErr:  false,
+		},
+		{
+			name:     "google.com allowed",
+			hostname: "google.com",
+			wantErr:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := checkSSRF(tt.hostname)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

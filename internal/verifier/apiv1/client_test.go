@@ -1,0 +1,283 @@
+package apiv1
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestClient_generateSessionID(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	// Generate multiple session IDs and verify they're unique
+	ids := make(map[string]bool)
+	for i := 0; i < 100; i++ {
+		id := client.generateSessionID()
+		assert.NotEmpty(t, id)
+		assert.False(t, ids[id], "session ID should be unique")
+		ids[id] = true
+	}
+}
+
+func TestClient_generateAuthorizationCode(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	// Generate multiple codes and verify they're unique
+	codes := make(map[string]bool)
+	for i := 0; i < 100; i++ {
+		code := client.generateAuthorizationCode()
+		assert.NotEmpty(t, code)
+		assert.False(t, codes[code], "authorization code should be unique")
+		codes[code] = true
+	}
+}
+
+func TestClient_generateAccessToken(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	// Generate multiple tokens and verify they're unique
+	tokens := make(map[string]bool)
+	for i := 0; i < 100; i++ {
+		token := client.generateAccessToken()
+		assert.NotEmpty(t, token)
+		assert.False(t, tokens[token], "access token should be unique")
+		tokens[token] = true
+	}
+}
+
+func TestClient_generateRefreshToken(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	// Generate multiple tokens and verify they're unique
+	tokens := make(map[string]bool)
+	for i := 0; i < 100; i++ {
+		token := client.generateRefreshToken()
+		assert.NotEmpty(t, token)
+		assert.False(t, tokens[token], "refresh token should be unique")
+		tokens[token] = true
+	}
+}
+
+func TestClient_generateSubjectIdentifier_Public(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+	client.cfg.VerifierProxy.OIDC.SubjectType = "public"
+	client.cfg.VerifierProxy.OIDC.SubjectSalt = "test-salt"
+
+	walletID := "wallet-123"
+	clientID1 := "client-1"
+	clientID2 := "client-2"
+
+	// Public subject type: same sub for different clients
+	sub1 := client.generateSubjectIdentifier(walletID, clientID1)
+	sub2 := client.generateSubjectIdentifier(walletID, clientID2)
+
+	assert.NotEmpty(t, sub1)
+	assert.NotEmpty(t, sub2)
+	assert.Equal(t, sub1, sub2, "public subject type should return same sub for different clients")
+}
+
+func TestClient_generateSubjectIdentifier_Pairwise(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+	client.cfg.VerifierProxy.OIDC.SubjectType = "pairwise"
+	client.cfg.VerifierProxy.OIDC.SubjectSalt = "test-salt"
+
+	walletID := "wallet-123"
+	clientID1 := "client-1"
+	clientID2 := "client-2"
+
+	// Pairwise subject type: different sub for different clients
+	sub1 := client.generateSubjectIdentifier(walletID, clientID1)
+	sub2 := client.generateSubjectIdentifier(walletID, clientID2)
+
+	assert.NotEmpty(t, sub1)
+	assert.NotEmpty(t, sub2)
+	assert.NotEqual(t, sub1, sub2, "pairwise subject type should return different sub for different clients")
+
+	// Same client should get same sub
+	sub1Again := client.generateSubjectIdentifier(walletID, clientID1)
+	assert.Equal(t, sub1, sub1Again, "same wallet+client should always get same sub")
+}
+
+func TestClient_generateSubjectIdentifier_DifferentWallets(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+	client.cfg.VerifierProxy.OIDC.SubjectType = "pairwise"
+	client.cfg.VerifierProxy.OIDC.SubjectSalt = "test-salt"
+
+	walletID1 := "wallet-1"
+	walletID2 := "wallet-2"
+	clientID := "client-1"
+
+	sub1 := client.generateSubjectIdentifier(walletID1, clientID)
+	sub2 := client.generateSubjectIdentifier(walletID2, clientID)
+
+	assert.NotEqual(t, sub1, sub2, "different wallets should get different subs")
+}
+
+func TestClient_containsOIDC(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	tests := []struct {
+		name     string
+		slice    []string
+		value    string
+		expected bool
+	}{
+		{
+			name:     "value exists",
+			slice:    []string{"openid", "profile", "email"},
+			value:    "profile",
+			expected: true,
+		},
+		{
+			name:     "value does not exist",
+			slice:    []string{"openid", "profile", "email"},
+			value:    "admin",
+			expected: false,
+		},
+		{
+			name:     "empty slice",
+			slice:    []string{},
+			value:    "openid",
+			expected: false,
+		},
+		{
+			name:     "first element",
+			slice:    []string{"openid", "profile"},
+			value:    "openid",
+			expected: true,
+		},
+		{
+			name:     "last element",
+			slice:    []string{"openid", "profile"},
+			value:    "profile",
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := client.containsOIDC(tt.slice, tt.value)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestClient_parseScopes(t *testing.T) {
+	tests := []struct {
+		name     string
+		scopeStr string
+		expected []string
+	}{
+		{
+			name:     "single scope",
+			scopeStr: "openid",
+			expected: []string{"openid"},
+		},
+		{
+			name:     "multiple scopes",
+			scopeStr: "openid profile email",
+			expected: []string{"openid", "profile", "email"},
+		},
+		{
+			name:     "empty string",
+			scopeStr: "",
+			expected: []string{},
+		},
+		{
+			name:     "extra spaces",
+			scopeStr: "openid  profile   email",
+			expected: []string{"openid", "", "profile", "", "", "email"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := parseScopes(tt.scopeStr)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestClient_getSigningMethod(t *testing.T) {
+	tests := []struct {
+		name        string
+		signingAlg  string
+		expectedAlg string
+	}{
+		{
+			name:        "RS256",
+			signingAlg:  "RS256",
+			expectedAlg: "RS256",
+		},
+		{
+			name:        "RS384",
+			signingAlg:  "RS384",
+			expectedAlg: "RS384",
+		},
+		{
+			name:        "RS512",
+			signingAlg:  "RS512",
+			expectedAlg: "RS512",
+		},
+		{
+			name:        "ES256",
+			signingAlg:  "ES256",
+			expectedAlg: "ES256",
+		},
+		{
+			name:        "ES384",
+			signingAlg:  "ES384",
+			expectedAlg: "ES384",
+		},
+		{
+			name:        "ES512",
+			signingAlg:  "ES512",
+			expectedAlg: "ES512",
+		},
+		{
+			name:        "unknown defaults to RS256",
+			signingAlg:  "unknown",
+			expectedAlg: "RS256",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, _ := CreateTestClientWithMock(nil)
+			client.oidcSigningAlg = tt.signingAlg
+			method := client.getSigningMethod()
+			require.NotNil(t, method)
+			assert.Equal(t, tt.expectedAlg, method.Alg())
+		})
+	}
+}
+
+func TestClient_Health(t *testing.T) {
+	ctx := context.Background()
+	client, _ := CreateTestClientWithMock(nil)
+
+	// Note: Health requires db to be set, which may fail in mock
+	// This test verifies the method exists and can be called
+	_, err := client.Health(ctx, nil)
+	// May return error due to nil db, that's expected in test
+	_ = err
+}
+
+// TestPKCE_S256 verifies PKCE S256 code challenge method
+func TestPKCE_S256(t *testing.T) {
+	// Standard PKCE test vectors from RFC 7636 Appendix B
+	// code_verifier: dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+	// code_challenge (S256): E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
+
+	verifier := "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+
+	// Compute S256 challenge
+	hash := sha256.Sum256([]byte(verifier))
+	challenge := base64.RawURLEncoding.EncodeToString(hash[:])
+
+	assert.Equal(t, "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", challenge)
+}

@@ -367,12 +367,12 @@ func TestExtractClaimsFromVPToken(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name            string
-		hasExtractor    bool
-		vpToken         string
-		scope           string
-		expectedClaims  int
-		expectError     bool
+		name           string
+		hasExtractor   bool
+		vpToken        string
+		scope          string
+		expectedClaims int
+		expectError    bool
 	}{
 		{
 			name:           "nil claims extractor returns empty claims",

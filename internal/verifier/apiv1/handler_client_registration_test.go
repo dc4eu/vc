@@ -839,17 +839,17 @@ func TestUpdateClient(t *testing.T) {
 				return "full-update-client", token
 			},
 			request: &ClientRegistrationRequest{
-				RedirectURIs:       []string{"https://example.com/new-callback"},
-				GrantTypes:         []string{"authorization_code", "refresh_token"},
-				ResponseTypes:      []string{"code"},
-				JWKSUri:            "https://example.com/.well-known/jwks.json",
-				JWKS:               nil, // Can't set both jwks_uri and jwks
-				ClientName:         "Full Update Client",
-				ClientURI:          "https://example.com",
-				LogoURI:            "https://example.com/logo.png",
-				Contacts:           []string{"admin@example.com"},
-				TosURI:             "https://example.com/tos",
-				PolicyURI:          "https://example.com/policy",
+				RedirectURIs:        []string{"https://example.com/new-callback"},
+				GrantTypes:          []string{"authorization_code", "refresh_token"},
+				ResponseTypes:       []string{"code"},
+				JWKSUri:             "https://example.com/.well-known/jwks.json",
+				JWKS:                nil, // Can't set both jwks_uri and jwks
+				ClientName:          "Full Update Client",
+				ClientURI:           "https://example.com",
+				LogoURI:             "https://example.com/logo.png",
+				Contacts:            []string{"admin@example.com"},
+				TosURI:              "https://example.com/tos",
+				PolicyURI:           "https://example.com/policy",
 				CodeChallengeMethod: "S256",
 			},
 			expectError: false,

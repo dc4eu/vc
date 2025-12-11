@@ -1380,4 +1380,3 @@ func TestAuthorize_DigitalCredentialsDisabled(t *testing.T) {
 	assert.Equal(t, "Credential Verification", resp.Title)
 	assert.Equal(t, "Please present your digital credential to continue", resp.Subtitle)
 }
-

@@ -183,27 +183,77 @@ func TestGetJWKS(t *testing.T) {
 		},
 	}
 
-	client, _ := CreateTestClientWithMock(cfg)
+	t.Run("RSA key", func(t *testing.T) {
+		client, _ := CreateTestClientWithMock(cfg)
 
-	// Set signing key for testing
-	privateKey := generateTestRSAKey(t)
-	client.SetSigningKeyForTesting(privateKey, "RS256")
+		// Set signing key for testing
+		privateKey := generateTestRSAKey(t)
+		client.SetSigningKeyForTesting(privateKey, "RS256")
 
-	// Test getting JWKS
-	jwks, err := client.GetJWKS(ctx)
-	assert.NoError(t, err)
-	assert.NotNil(t, jwks)
+		// Test getting JWKS
+		jwks, err := client.GetJWKS(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, jwks)
 
-	// Verify JWKS structure
-	assert.NotNil(t, jwks.Keys)
-	assert.Greater(t, len(jwks.Keys), 0, "JWKS should contain at least one key")
+		// Verify JWKS structure
+		assert.NotNil(t, jwks.Keys)
+		assert.Greater(t, len(jwks.Keys), 0, "JWKS should contain at least one key")
 
-	// Verify first key properties
-	key := jwks.Keys[0]
-	assert.Equal(t, "RSA", key.Kty, "Key type should be RSA")
-	assert.Equal(t, "sig", key.Use, "Key use should be sig")
-	assert.Equal(t, "default", key.Kid, "Kid should be default")
-	assert.Equal(t, "RS256", key.Alg, "Algorithm should be RS256")
+		// Verify first key properties
+		key := jwks.Keys[0]
+		assert.Equal(t, "RSA", key.Kty, "Key type should be RSA")
+		assert.Equal(t, "sig", key.Use, "Key use should be sig")
+		assert.Equal(t, "default", key.Kid, "Kid should be default")
+		assert.Equal(t, "RS256", key.Alg, "Algorithm should be RS256")
+	})
+
+	t.Run("ECDSA key", func(t *testing.T) {
+		client, _ := CreateTestClientWithMock(cfg)
+
+		// Set ECDSA signing key for testing
+		privateKey := generateTestECDSAKey(t)
+		client.SetSigningKeyForTesting(privateKey, "ES256")
+
+		// Test getting JWKS
+		jwks, err := client.GetJWKS(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, jwks)
+
+		// Verify JWKS structure
+		assert.NotNil(t, jwks.Keys)
+		assert.Greater(t, len(jwks.Keys), 0, "JWKS should contain at least one key")
+
+		// Verify first key properties
+		key := jwks.Keys[0]
+		assert.Equal(t, "EC", key.Kty, "Key type should be EC")
+		assert.Equal(t, "sig", key.Use, "Key use should be sig")
+		assert.Equal(t, "default", key.Kid, "Kid should be default")
+		assert.Equal(t, "ES256", key.Alg, "Algorithm should be ES256")
+	})
+
+	t.Run("unsupported key type", func(t *testing.T) {
+		client, _ := CreateTestClientWithMock(cfg)
+
+		// Set an unsupported key type (string instead of crypto key)
+		client.SetSigningKeyForTesting("not-a-crypto-key", "HS256")
+
+		// Test getting JWKS should error
+		jwks, err := client.GetJWKS(ctx)
+		assert.Error(t, err)
+		assert.Nil(t, jwks)
+		assert.Contains(t, err.Error(), "unsupported key type")
+	})
+
+	t.Run("no signing key set", func(t *testing.T) {
+		client, _ := CreateTestClientWithMock(cfg)
+
+		// Don't set any signing key - signingKey will be nil
+
+		// Test getting JWKS should error
+		jwks, err := client.GetJWKS(ctx)
+		assert.Error(t, err)
+		assert.Nil(t, jwks)
+	})
 }
 
 // BenchmarkGetDiscoveryMetadata benchmarks discovery metadata generation

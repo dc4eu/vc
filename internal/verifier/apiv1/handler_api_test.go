@@ -188,6 +188,62 @@ func TestGetUserInfo(t *testing.T) {
 	err := mockDB.Sessions.Create(ctx, session)
 	require.NoError(t, err)
 
+	// Create a session with expired token
+	expiredSession := &db.Session{
+		ID:        "expired-session",
+		CreatedAt: time.Now().Add(-2 * time.Hour),
+		ExpiresAt: time.Now().Add(-1 * time.Hour),
+		Status:    db.SessionStatusTokenIssued,
+		Tokens: db.TokenSet{
+			AccessToken:          "expired-token",
+			AccessTokenExpiresAt: time.Now().Add(-1 * time.Hour), // Expired 1 hour ago
+		},
+	}
+	err = mockDB.Sessions.Create(ctx, expiredSession)
+	require.NoError(t, err)
+
+	// Create a session without 'sub' claim
+	sessionNoSub := &db.Session{
+		ID:        "session-no-sub",
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(1 * time.Hour),
+		Status:    db.SessionStatusTokenIssued,
+		OIDCRequest: db.OIDCRequest{
+			ClientID: "test-client",
+		},
+		Tokens: db.TokenSet{
+			AccessToken:          "token-no-sub",
+			AccessTokenExpiresAt: time.Now().Add(1 * time.Hour),
+		},
+		VerifiedClaims: map[string]any{
+			"name":  "Jane Doe",
+			"email": "jane@example.com",
+		},
+	}
+	err = mockDB.Sessions.Create(ctx, sessionNoSub)
+	require.NoError(t, err)
+
+	// Create a session with non-string 'sub' claim
+	sessionNonStringSub := &db.Session{
+		ID:        "session-non-string-sub",
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(1 * time.Hour),
+		Status:    db.SessionStatusTokenIssued,
+		OIDCRequest: db.OIDCRequest{
+			ClientID: "test-client",
+		},
+		Tokens: db.TokenSet{
+			AccessToken:          "token-non-string-sub",
+			AccessTokenExpiresAt: time.Now().Add(1 * time.Hour),
+		},
+		VerifiedClaims: map[string]any{
+			"sub":   12345, // Non-string sub
+			"name":  "Bob Smith",
+		},
+	}
+	err = mockDB.Sessions.Create(ctx, sessionNonStringSub)
+	require.NoError(t, err)
+
 	tests := []struct {
 		name      string
 		req       *UserInfoRequest
@@ -212,6 +268,38 @@ func TestGetUserInfo(t *testing.T) {
 				AccessToken: "invalid-token",
 			},
 			wantErr: ErrInvalidGrant,
+		},
+		{
+			name: "expired access token",
+			req: &UserInfoRequest{
+				AccessToken: "expired-token",
+			},
+			wantErr: ErrInvalidGrant,
+		},
+		{
+			name: "valid token without sub claim",
+			req: &UserInfoRequest{
+				AccessToken: "token-no-sub",
+			},
+			wantErr: nil,
+			checkResp: func(t *testing.T, resp UserInfoResponse) {
+				// Should still return a response, just with generated subject
+				assert.NotEmpty(t, resp["sub"])
+				assert.Equal(t, "Jane Doe", resp["name"])
+				assert.Equal(t, "jane@example.com", resp["email"])
+			},
+		},
+		{
+			name: "valid token with non-string sub claim",
+			req: &UserInfoRequest{
+				AccessToken: "token-non-string-sub",
+			},
+			wantErr: nil,
+			checkResp: func(t *testing.T, resp UserInfoResponse) {
+				// Should still return a response with generated subject (non-string sub is ignored)
+				assert.NotEmpty(t, resp["sub"])
+				assert.Equal(t, "Bob Smith", resp["name"])
+			},
 		},
 	}
 

@@ -3,9 +3,11 @@ package apiv1
 import (
 	"context"
 	"testing"
+	"time"
 	"vc/internal/verifier/apiv1/utils"
 	"vc/internal/verifier/db"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -533,4 +535,553 @@ func TestMockSessionCollection(t *testing.T) {
 
 	deleted, _ := mock.GetByID(ctx, "session-1")
 	assert.Nil(t, deleted)
+}
+
+// TestToken_AuthorizationCodeGrant tests the Token endpoint with authorization_code grant
+func TestToken_AuthorizationCodeGrant(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name          string
+		setupMock     func(*testing.T, *MockSessionCollection, *MockClientCollection)
+		request       *TokenRequest
+		expectError   bool
+		expectedError error
+	}{
+		{
+			name: "successful token exchange",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-1",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:            "test-client",
+						RedirectURI:         "https://example.com/callback",
+						Scope:               "openid profile",
+						Nonce:               "test-nonce",
+						CodeChallenge:       "",
+						CodeChallengeMethod: "",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "valid-code",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+					OpenID4VP: db.OpenID4VPSession{
+						WalletID: "wallet-123",
+					},
+					VerifiedClaims: map[string]any{
+						"name":  "John Doe",
+						"email": "john@example.com",
+					},
+				}
+				sessions.Create(ctx, session)
+
+				client := &db.Client{
+					ClientID:                "test-client",
+					ClientSecretHash:        hashPassword(t, "secret"),
+					TokenEndpointAuthMethod: "client_secret_basic",
+					RedirectURIs:            []string{"https://example.com/callback"},
+				}
+				clients.Create(ctx, client)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "valid-code",
+				ClientID:     "test-client",
+				ClientSecret: "secret",
+				RedirectURI:  "https://example.com/callback",
+			},
+			expectError: false,
+		},
+		{
+			name: "invalid grant type",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				// No setup needed
+			},
+			request: &TokenRequest{
+				GrantType: "implicit",
+				Code:      "some-code",
+				ClientID:  "test-client",
+			},
+			expectError:   true,
+			expectedError: ErrUnsupportedGrantType,
+		},
+		{
+			name: "invalid authorization code",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				// No session with this code
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "invalid-code",
+				ClientID:     "test-client",
+				ClientSecret: "secret",
+				RedirectURI:  "https://example.com/callback",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidGrant,
+		},
+		{
+			name: "code already used",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-used",
+					Status: db.SessionStatusTokenIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "test-client",
+						RedirectURI: "https://example.com/callback",
+						Scope:       "openid",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "used-code",
+						AuthorizationCodeUsed: true, // Already used
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+				}
+				sessions.Create(ctx, session)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "used-code",
+				ClientID:     "test-client",
+				ClientSecret: "secret",
+				RedirectURI:  "https://example.com/callback",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidGrant,
+		},
+		{
+			name: "expired authorization code",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-expired",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "test-client",
+						RedirectURI: "https://example.com/callback",
+						Scope:       "openid",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "expired-code",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(-1 * time.Minute), // Expired
+					},
+				}
+				sessions.Create(ctx, session)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "expired-code",
+				ClientID:     "test-client",
+				ClientSecret: "secret",
+				RedirectURI:  "https://example.com/callback",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidGrant,
+		},
+		{
+			name: "invalid client credentials",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-2",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "test-client",
+						RedirectURI: "https://example.com/callback",
+						Scope:       "openid",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "valid-code-2",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+				}
+				sessions.Create(ctx, session)
+
+				client := &db.Client{
+					ClientID:                "test-client",
+					ClientSecretHash:        hashPassword(t, "secret"), // hash of "secret"
+					TokenEndpointAuthMethod: "client_secret_basic",
+				}
+				clients.Create(ctx, client)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "valid-code-2",
+				ClientID:     "test-client",
+				ClientSecret: "wrong-secret",
+				RedirectURI:  "https://example.com/callback",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidClient,
+		},
+		{
+			name: "client ID mismatch",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-3",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "original-client",
+						RedirectURI: "https://example.com/callback",
+						Scope:       "openid",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "valid-code-3",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+				}
+				sessions.Create(ctx, session)
+
+				client := &db.Client{
+					ClientID:                "different-client",
+					ClientSecretHash:        hashPassword(t, "secret"),
+					TokenEndpointAuthMethod: "client_secret_basic",
+				}
+				clients.Create(ctx, client)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "valid-code-3",
+				ClientID:     "different-client",
+				ClientSecret: "secret",
+				RedirectURI:  "https://example.com/callback",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidGrant,
+		},
+		{
+			name: "redirect URI mismatch",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-4",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "test-client",
+						RedirectURI: "https://example.com/callback",
+						Scope:       "openid",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "valid-code-4",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+				}
+				sessions.Create(ctx, session)
+
+				client := &db.Client{
+					ClientID:                "test-client",
+					ClientSecretHash:        hashPassword(t, "secret"),
+					TokenEndpointAuthMethod: "client_secret_basic",
+				}
+				clients.Create(ctx, client)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "valid-code-4",
+				ClientID:     "test-client",
+				ClientSecret: "secret",
+				RedirectURI:  "https://different.com/callback",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidGrant,
+		},
+		{
+			name: "PKCE validation success",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-pkce",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:            "test-client",
+						RedirectURI:         "https://example.com/callback",
+						Scope:               "openid",
+						CodeChallenge:       "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+						CodeChallengeMethod: "S256",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "pkce-code",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+					OpenID4VP: db.OpenID4VPSession{
+						WalletID: "wallet-123",
+					},
+					VerifiedClaims: map[string]any{},
+				}
+				sessions.Create(ctx, session)
+
+				client := &db.Client{
+					ClientID:                "test-client",
+					TokenEndpointAuthMethod: "none", // Public client
+					RedirectURIs:            []string{"https://example.com/callback"},
+				}
+				clients.Create(ctx, client)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "pkce-code",
+				ClientID:     "test-client",
+				RedirectURI:  "https://example.com/callback",
+				CodeVerifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk", // Standard test vector
+			},
+			expectError: false,
+		},
+		{
+			name: "PKCE validation failure",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-pkce-fail",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:            "test-client",
+						RedirectURI:         "https://example.com/callback",
+						Scope:               "openid",
+						CodeChallenge:       "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+						CodeChallengeMethod: "S256",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "pkce-code-fail",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+				}
+				sessions.Create(ctx, session)
+
+				client := &db.Client{
+					ClientID:                "test-client",
+					TokenEndpointAuthMethod: "none",
+				}
+				clients.Create(ctx, client)
+			},
+			request: &TokenRequest{
+				GrantType:    "authorization_code",
+				Code:         "pkce-code-fail",
+				ClientID:     "test-client",
+				RedirectURI:  "https://example.com/callback",
+				CodeVerifier: "wrong-verifier",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidGrant,
+		},
+		{
+			name: "public client (no secret required)",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				session := &db.Session{
+					ID:     "session-public",
+					Status: db.SessionStatusCodeIssued,
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "public-client",
+						RedirectURI: "https://example.com/callback",
+						Scope:       "openid",
+					},
+					Tokens: db.TokenSet{
+						AuthorizationCode:     "public-code",
+						AuthorizationCodeUsed: false,
+						CodeExpiresAt:         time.Now().Add(10 * time.Minute),
+					},
+					OpenID4VP: db.OpenID4VPSession{
+						WalletID: "wallet-456",
+					},
+					VerifiedClaims: map[string]any{},
+				}
+				sessions.Create(ctx, session)
+
+				client := &db.Client{
+					ClientID:                "public-client",
+					TokenEndpointAuthMethod: "none", // Public client
+					RedirectURIs:            []string{"https://example.com/callback"},
+				}
+				clients.Create(ctx, client)
+			},
+			request: &TokenRequest{
+				GrantType:   "authorization_code",
+				Code:        "public-code",
+				ClientID:    "public-client",
+				RedirectURI: "https://example.com/callback",
+			},
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+			tt.setupMock(t, mockDB.Sessions, mockDB.Clients)
+
+			// Set up test signing key
+			key := generateTestRSAKey(t)
+			client.SetSigningKeyForTesting(key, "RS256")
+
+			// Execute
+			resp, err := client.Token(ctx, tt.request)
+
+			// Verify
+			if tt.expectError {
+				assert.Error(t, err)
+				if tt.expectedError != nil {
+					assert.Equal(t, tt.expectedError, err)
+				}
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp.AccessToken)
+				assert.Equal(t, "Bearer", resp.TokenType)
+				assert.NotEmpty(t, resp.IDToken)
+				assert.NotEmpty(t, resp.RefreshToken)
+				assert.Greater(t, resp.ExpiresIn, 0)
+
+				// Verify session was updated
+				session, _ := mockDB.Sessions.GetByAuthorizationCode(ctx, tt.request.Code)
+				if session != nil {
+					assert.True(t, session.Tokens.AuthorizationCodeUsed)
+					assert.Equal(t, db.SessionStatusTokenIssued, session.Status)
+					assert.Equal(t, resp.AccessToken, session.Tokens.AccessToken)
+					assert.Equal(t, resp.IDToken, session.Tokens.IDToken)
+					assert.Equal(t, resp.RefreshToken, session.Tokens.RefreshToken)
+				}
+			}
+		})
+	}
+}
+
+// TestToken_RefreshTokenGrant tests the refresh token grant (currently unimplemented)
+func TestToken_RefreshTokenGrant(t *testing.T) {
+	ctx := context.Background()
+	client, _ := CreateTestClientWithMock(nil)
+
+	req := &TokenRequest{
+		GrantType:    "refresh_token",
+		RefreshToken: "some-refresh-token",
+		ClientID:     "test-client",
+		ClientSecret: "secret",
+	}
+
+	resp, err := client.Token(ctx, req)
+
+	// Should return unsupported grant type until implemented
+	assert.Error(t, err)
+	assert.Equal(t, ErrUnsupportedGrantType, err)
+	assert.Nil(t, resp)
+}
+
+// TestGenerateIDToken tests ID token generation
+func TestGenerateIDToken(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+	client.cfg.VerifierProxy.OIDC.Issuer = "https://issuer.example.com"
+	client.cfg.VerifierProxy.OIDC.IDTokenDuration = 3600
+	client.cfg.VerifierProxy.OIDC.SubjectType = "public"
+	client.cfg.VerifierProxy.OIDC.SubjectSalt = "test-salt"
+
+	// Set up signing key
+	key := generateTestRSAKey(t)
+	client.SetSigningKeyForTesting(key, "RS256")
+
+	session := &db.Session{
+		ID: "session-1",
+		OIDCRequest: db.OIDCRequest{
+			ClientID: "test-client",
+			Nonce:    "test-nonce-123",
+		},
+		OpenID4VP: db.OpenID4VPSession{
+			WalletID: "wallet-123",
+		},
+		VerifiedClaims: map[string]any{
+			"name":  "John Doe",
+			"email": "john@example.com",
+		},
+	}
+
+	dbClient := &db.Client{
+		ClientID: "test-client",
+	}
+
+	idToken, err := client.generateIDToken(session, dbClient)
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, idToken)
+
+	// Parse and verify token
+	token, err := jwt.Parse(idToken, func(token *jwt.Token) (interface{}, error) {
+		return &key.PublicKey, nil
+	})
+	assert.NoError(t, err)
+	assert.True(t, token.Valid)
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	assert.True(t, ok)
+
+	// Verify standard claims
+	assert.Equal(t, "https://issuer.example.com", claims["iss"])
+	assert.Equal(t, "test-client", claims["aud"])
+	assert.Equal(t, "test-nonce-123", claims["nonce"])
+	assert.NotEmpty(t, claims["sub"])
+	assert.NotEmpty(t, claims["exp"])
+	assert.NotEmpty(t, claims["iat"])
+
+	// Verify verified claims are included
+	assert.Equal(t, "John Doe", claims["name"])
+	assert.Equal(t, "john@example.com", claims["email"])
+}
+
+// TestAuthenticateOIDCClient tests client authentication
+func TestAuthenticateOIDCClient(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	tests := []struct {
+		name         string
+		dbClient     *db.Client
+		clientSecret string
+		expectError  bool
+	}{
+		{
+			name: "public client (no auth)",
+			dbClient: &db.Client{
+				TokenEndpointAuthMethod: "none",
+			},
+			clientSecret: "",
+			expectError:  false,
+		},
+		{
+			name: "valid client secret",
+			dbClient: &db.Client{
+				TokenEndpointAuthMethod: "client_secret_basic",
+				ClientSecretHash:        hashPassword(t, "secret"), // hash of "secret"
+			},
+			clientSecret: "secret",
+			expectError:  false,
+		},
+		{
+			name: "invalid client secret",
+			dbClient: &db.Client{
+				TokenEndpointAuthMethod: "client_secret_basic",
+				ClientSecretHash:        hashPassword(t, "secret"),
+			},
+			clientSecret: "wrong-secret",
+			expectError:  true,
+		},
+		{
+			name: "missing client secret hash",
+			dbClient: &db.Client{
+				TokenEndpointAuthMethod: "client_secret_basic",
+				ClientSecretHash:        "",
+			},
+			clientSecret: "secret",
+			expectError:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := client.authenticateOIDCClient(tt.dbClient, tt.clientSecret)
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

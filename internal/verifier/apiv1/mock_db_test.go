@@ -4,10 +4,15 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 	"vc/internal/verifier/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/openid4vp"
 	"vc/pkg/trace"
+
+	"github.com/jellydator/ttlcache/v3"
+	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
 // MockSessionCollection is an in-memory implementation of SessionCollection for testing
@@ -249,8 +254,8 @@ func CreateTestClientWithMock(cfg *model.Cfg) (*Client, *MockDBService) {
 		log:                         log.New("apiv1"),
 		tracer:                      tracer,
 		oidcSigningAlg:              "RS256",
-		ephemeralEncryptionKeyCache: nil,
-		requestObjectCache:          nil,
+		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
+		requestObjectCache:          ttlcache.New(ttlcache.WithTTL[string, *openid4vp.RequestObject](5 * time.Minute)),
 	}
 
 	return client, mockDB

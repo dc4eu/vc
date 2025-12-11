@@ -558,6 +558,11 @@ func TestCheckSSRF(t *testing.T) {
 			hostname: "google.com",
 			wantErr:  false,
 		},
+		{
+			name:     "non-existent hostname fails DNS lookup",
+			hostname: "thishostnamedoesnotexist12345.invalid",
+			wantErr:  true,
+		},
 	}
 
 	for _, tt := range tests {

@@ -432,3 +432,50 @@ func TestClient_buildLegacyDCQLQuery(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_createDCQLQuery(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name                  string
+		scopes                []string
+		credentialConstructor map[string]*model.CredentialConstructor
+		expectError           bool
+	}{
+		{
+			name:   "creates DCQL from credential config (no presentation builder)",
+			scopes: []string{"diploma"},
+			credentialConstructor: map[string]*model.CredentialConstructor{
+				"diploma": {
+					VCT: "urn:credential:diploma",
+				},
+			},
+			expectError: false,
+		},
+		{
+			name:                  "falls back to legacy with empty config",
+			scopes:                []string{"unknown_scope"},
+			credentialConstructor: map[string]*model.CredentialConstructor{},
+			expectError:           true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &model.Cfg{
+				CredentialConstructor: tt.credentialConstructor,
+			}
+			client, _ := CreateTestClientWithMock(cfg)
+
+			dcql, err := client.createDCQLQuery(ctx, tt.scopes)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, dcql)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, dcql)
+			}
+		})
+	}
+}

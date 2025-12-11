@@ -427,3 +427,402 @@ func TestAuthenticateClient(t *testing.T) {
 		})
 	}
 }
+
+// TestRegisterClient tests the dynamic client registration endpoint
+func TestRegisterClient(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name        string
+		request     *ClientRegistrationRequest
+		expectError bool
+	}{
+		{
+			name: "successful minimal registration",
+			request: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback"},
+			},
+			expectError: false,
+		},
+		{
+			name: "successful full registration",
+			request: &ClientRegistrationRequest{
+				RedirectURIs:            []string{"https://example.com/callback", "https://example.com/callback2"},
+				TokenEndpointAuthMethod: "client_secret_basic",
+				GrantTypes:              []string{"authorization_code", "refresh_token"},
+				ResponseTypes:           []string{"code"},
+				ClientName:              "Test Application",
+				ClientURI:               "https://example.com",
+				LogoURI:                 "https://example.com/logo.png",
+				Scope:                   "openid profile email",
+				Contacts:                []string{"admin@example.com"},
+				TosURI:                  "https://example.com/tos",
+				PolicyURI:               "https://example.com/privacy",
+				SoftwareID:              "test-software-1",
+				SoftwareVersion:         "1.0.0",
+				ApplicationType:         "web",
+				SubjectType:             "pairwise",
+				CodeChallengeMethod:     "S256",
+			},
+			expectError: false,
+		},
+		{
+			name: "registration with PKCE required",
+			request: &ClientRegistrationRequest{
+				RedirectURIs:        []string{"https://example.com/callback"},
+				CodeChallengeMethod: "S256",
+			},
+			expectError: false,
+		},
+		{
+			name: "missing redirect URIs",
+			request: &ClientRegistrationRequest{
+				ClientName: "Test Client",
+			},
+			expectError: true,
+		},
+		{
+			name: "invalid redirect URI (with fragment)",
+			request: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback#section"},
+			},
+			expectError: true,
+		},
+		{
+			name: "invalid token endpoint auth method",
+			request: &ClientRegistrationRequest{
+				RedirectURIs:            []string{"https://example.com/callback"},
+				TokenEndpointAuthMethod: "invalid_method",
+			},
+			expectError: true,
+		},
+		{
+			name: "invalid grant type",
+			request: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback"},
+				GrantTypes:   []string{"implicit"},
+			},
+			expectError: true,
+		},
+		{
+			name: "invalid response type",
+			request: &ClientRegistrationRequest{
+				RedirectURIs:  []string{"https://example.com/callback"},
+				ResponseTypes: []string{"token"},
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+			client.cfg.VerifierProxy.ExternalURL = "https://verifier.example.com"
+
+			resp, err := client.RegisterClient(ctx, tt.request)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, resp)
+
+				// Verify response fields
+				assert.NotEmpty(t, resp.ClientID)
+				assert.NotEmpty(t, resp.ClientSecret)
+				assert.NotEmpty(t, resp.RegistrationAccessToken)
+				assert.NotEmpty(t, resp.RegistrationClientURI)
+				assert.Contains(t, resp.RegistrationClientURI, resp.ClientID)
+				assert.Greater(t, resp.ClientIDIssuedAt, int64(0))
+				assert.Equal(t, tt.request.RedirectURIs, resp.RedirectURIs)
+
+				// Verify client was stored in database
+				storedClient, _ := mockDB.Clients.GetByClientID(ctx, resp.ClientID)
+				assert.NotNil(t, storedClient)
+				assert.Equal(t, resp.ClientID, storedClient.ClientID)
+				assert.NotEmpty(t, storedClient.ClientSecretHash)
+				assert.NotEmpty(t, storedClient.RegistrationAccessTokenHash)
+
+				// Verify PKCE flag
+				if tt.request.CodeChallengeMethod != "" {
+					assert.True(t, storedClient.RequirePKCE)
+				}
+			}
+		})
+	}
+}
+
+// TestGetClientInformation tests retrieving client configuration
+func TestGetClientInformation(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name          string
+		setupMock     func(*testing.T, *MockClientCollection) (string, string)
+		expectError   bool
+		expectedError error
+	}{
+		{
+			name: "successful retrieval",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				token := "valid-token-123"
+				hash, _ := hashRegistrationAccessToken(token)
+				client := &db.Client{
+					ClientID:                    "test-client-id",
+					ClientSecretHash:            hashPassword(t, "secret"),
+					RedirectURIs:                []string{"https://example.com/callback"},
+					GrantTypes:                  []string{"authorization_code"},
+					ResponseTypes:               []string{"code"},
+					TokenEndpointAuthMethod:     "client_secret_basic",
+					AllowedScopes:               []string{"openid", "profile"},
+					ClientName:                  "Test Client",
+					ClientIDIssuedAt:            1699999999,
+					RegistrationAccessTokenHash: hash,
+				}
+				clients.Create(ctx, client)
+				return "test-client-id", token
+			},
+			expectError: false,
+		},
+		{
+			name: "client not found",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				return "nonexistent-client", "some-token"
+			},
+			expectError:   true,
+			expectedError: ErrInvalidClient,
+		},
+		{
+			name: "invalid registration access token",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				token := "valid-token-123"
+				hash, _ := hashRegistrationAccessToken(token)
+				client := &db.Client{
+					ClientID:                    "test-client-id",
+					RegistrationAccessTokenHash: hash,
+				}
+				clients.Create(ctx, client)
+				return "test-client-id", "wrong-token"
+			},
+			expectError:   true,
+			expectedError: ErrInvalidToken,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+			client.cfg.VerifierProxy.ExternalURL = "https://verifier.example.com"
+
+			clientID, token := tt.setupMock(t, mockDB.Clients)
+
+			resp, err := client.GetClientInformation(ctx, clientID, token)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				if tt.expectedError != nil {
+					assert.Equal(t, tt.expectedError, err)
+				}
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, resp)
+				assert.Equal(t, clientID, resp.ClientID)
+				assert.NotEmpty(t, resp.RegistrationClientURI)
+			}
+		})
+	}
+}
+
+// TestDeleteClient tests client deletion
+func TestDeleteClient(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name          string
+		setupMock     func(*testing.T, *MockClientCollection) (string, string)
+		expectError   bool
+		expectedError error
+	}{
+		{
+			name: "successful deletion",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				token := "valid-token-123"
+				hash, _ := hashRegistrationAccessToken(token)
+				client := &db.Client{
+					ClientID:                    "test-client-id",
+					RegistrationAccessTokenHash: hash,
+				}
+				clients.Create(ctx, client)
+				return "test-client-id", token
+			},
+			expectError: false,
+		},
+		{
+			name: "client not found",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				return "nonexistent-client", "some-token"
+			},
+			expectError:   true,
+			expectedError: ErrInvalidClient,
+		},
+		{
+			name: "invalid registration access token",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				token := "valid-token-123"
+				hash, _ := hashRegistrationAccessToken(token)
+				client := &db.Client{
+					ClientID:                    "test-client-id",
+					RegistrationAccessTokenHash: hash,
+				}
+				clients.Create(ctx, client)
+				return "test-client-id", "wrong-token"
+			},
+			expectError:   true,
+			expectedError: ErrInvalidToken,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+
+			clientID, token := tt.setupMock(t, mockDB.Clients)
+
+			err := client.DeleteClient(ctx, clientID, token)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				if tt.expectedError != nil {
+					assert.Equal(t, tt.expectedError, err)
+				}
+			} else {
+				assert.NoError(t, err)
+
+				// Verify client was deleted
+				deletedClient, _ := mockDB.Clients.GetByClientID(ctx, clientID)
+				assert.Nil(t, deletedClient)
+			}
+		})
+	}
+}
+
+// TestUpdateClient tests client configuration update
+func TestUpdateClient(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name          string
+		setupMock     func(*testing.T, *MockClientCollection) (string, string)
+		request       *ClientRegistrationRequest
+		expectError   bool
+		expectedError error
+	}{
+		{
+			name: "successful update",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				token := "valid-token-123"
+				hash, _ := hashRegistrationAccessToken(token)
+				client := &db.Client{
+					ClientID:                    "test-client-id",
+					ClientSecretHash:            hashPassword(t, "secret"),
+					RedirectURIs:                []string{"https://example.com/callback"},
+					GrantTypes:                  []string{"authorization_code"},
+					ResponseTypes:               []string{"code"},
+					TokenEndpointAuthMethod:     "client_secret_basic",
+					RegistrationAccessTokenHash: hash,
+					ClientIDIssuedAt:            1699999999,
+				}
+				clients.Create(ctx, client)
+				return "test-client-id", token
+			},
+			request: &ClientRegistrationRequest{
+				RedirectURIs:            []string{"https://example.com/new-callback"},
+				TokenEndpointAuthMethod: "client_secret_post",
+				GrantTypes:              []string{"authorization_code", "refresh_token"},
+				ResponseTypes:           []string{"code"},
+				ClientName:              "Updated Client Name",
+			},
+			expectError: false,
+		},
+		{
+			name: "client not found",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				return "nonexistent-client", "some-token"
+			},
+			request: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback"},
+			},
+			expectError:   true,
+			expectedError: ErrInvalidClient,
+		},
+		{
+			name: "invalid registration access token",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				token := "valid-token-123"
+				hash, _ := hashRegistrationAccessToken(token)
+				client := &db.Client{
+					ClientID:                    "test-client-id",
+					RegistrationAccessTokenHash: hash,
+				}
+				clients.Create(ctx, client)
+				return "test-client-id", "wrong-token"
+			},
+			request: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback"},
+			},
+			expectError:   true,
+			expectedError: ErrInvalidToken,
+		},
+		{
+			name: "invalid update request",
+			setupMock: func(t *testing.T, clients *MockClientCollection) (string, string) {
+				token := "valid-token-123"
+				hash, _ := hashRegistrationAccessToken(token)
+				client := &db.Client{
+					ClientID:                    "test-client-id",
+					RegistrationAccessTokenHash: hash,
+				}
+				clients.Create(ctx, client)
+				return "test-client-id", token
+			},
+			request: &ClientRegistrationRequest{
+				// Missing required redirect_uris
+				ClientName: "Test",
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+			client.cfg.VerifierProxy.ExternalURL = "https://verifier.example.com"
+
+			clientID, token := tt.setupMock(t, mockDB.Clients)
+
+			resp, err := client.UpdateClient(ctx, clientID, token, tt.request)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				if tt.expectedError != nil {
+					assert.Equal(t, tt.expectedError, err)
+				}
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, resp)
+				assert.Equal(t, clientID, resp.ClientID)
+				assert.Equal(t, tt.request.RedirectURIs, resp.RedirectURIs)
+				assert.Equal(t, tt.request.ClientName, resp.ClientName)
+
+				// Verify database was updated
+				updatedClient, _ := mockDB.Clients.GetByClientID(ctx, clientID)
+				assert.NotNil(t, updatedClient)
+				assert.Equal(t, tt.request.RedirectURIs, updatedClient.RedirectURIs)
+				assert.Equal(t, tt.request.ClientName, updatedClient.ClientName)
+			}
+		})
+	}
+}

@@ -332,6 +332,33 @@ func TestClientRegistration_validateRegistrationRequest(t *testing.T) {
 			wantErr: true,
 			errMsg:  "logo_uri",
 		},
+		{
+			name: "invalid client_uri - http not allowed",
+			req: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback"},
+				ClientURI:    "http://example.com",
+			},
+			wantErr: true,
+			errMsg:  "client_uri",
+		},
+		{
+			name: "invalid policy_uri - http not allowed",
+			req: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback"},
+				PolicyURI:    "http://example.com/policy",
+			},
+			wantErr: true,
+			errMsg:  "policy_uri",
+		},
+		{
+			name: "invalid tos_uri - http not allowed",
+			req: &ClientRegistrationRequest{
+				RedirectURIs: []string{"https://example.com/callback"},
+				TosURI:       "http://example.com/tos",
+			},
+			wantErr: true,
+			errMsg:  "tos_uri",
+		},
 	}
 
 	for _, tt := range tests {

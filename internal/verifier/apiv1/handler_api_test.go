@@ -237,8 +237,8 @@ func TestGetUserInfo(t *testing.T) {
 			AccessTokenExpiresAt: time.Now().Add(1 * time.Hour),
 		},
 		VerifiedClaims: map[string]any{
-			"sub":   12345, // Non-string sub
-			"name":  "Bob Smith",
+			"sub":  12345, // Non-string sub
+			"name": "Bob Smith",
 		},
 	}
 	err = mockDB.Sessions.Create(ctx, sessionNonStringSub)

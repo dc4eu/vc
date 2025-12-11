@@ -362,6 +362,48 @@ func createTestDCQLForVP(t *testing.T) *openid4vp.DCQL {
 	}
 }
 
+// TestExtractClaimsFromVPToken tests the extractClaimsFromVPToken helper
+func TestExtractClaimsFromVPToken(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name            string
+		hasExtractor    bool
+		vpToken         string
+		scope           string
+		expectedClaims  int
+		expectError     bool
+	}{
+		{
+			name:           "nil claims extractor returns empty claims",
+			hasExtractor:   false,
+			vpToken:        "test.vp.token",
+			scope:          "openid",
+			expectedClaims: 0,
+			expectError:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, _ := CreateTestClientWithMock(nil)
+
+			// If hasExtractor is true, we would need to set up a mock
+			// For now, we only test the nil case
+
+			claims, err := client.extractClaimsFromVPToken(ctx, tt.vpToken, tt.scope)
+
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, claims)
+				assert.Len(t, claims, tt.expectedClaims)
+			}
+		})
+	}
+}
+
 // createTestDBSession creates a test session for testing
 func createTestDBSession(sessionID string) *db.Session {
 	return &db.Session{

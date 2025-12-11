@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestAuthorizeRequest validates the AuthorizeRequest struct fields
@@ -1328,5 +1329,55 @@ func TestAuthorize_FullFlow(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestAuthorize_DigitalCredentialsDisabled tests the authorization flow when Digital Credentials API is disabled
+func TestAuthorize_DigitalCredentialsDisabled(t *testing.T) {
+	ctx := context.Background()
+
+	client, mockDB := CreateTestClientWithMock(nil)
+	client.cfg.VerifierProxy.ExternalURL = "https://verifier.example.com"
+	client.cfg.VerifierProxy.OIDC.SessionDuration = 900
+	// Explicitly disable Digital Credentials API
+	client.cfg.VerifierProxy.DigitalCredentials.Enabled = false
+	// Clear CSS title to test default fallback
+	client.cfg.VerifierProxy.AuthorizationPageCSS.Title = ""
+	client.cfg.VerifierProxy.AuthorizationPageCSS.Subtitle = ""
+
+	// Add presentation template
+	template := createSimplePresentationTemplate(t, []string{"openid", "profile"})
+	client.AddPresentationTemplateForTesting(template)
+
+	// Setup client
+	dbClient := &db.Client{
+		ClientID:      "dc-disabled-client",
+		RedirectURIs:  []string{"https://example.com/callback"},
+		ResponseTypes: []string{"code"},
+		AllowedScopes: []string{"openid", "profile"},
+	}
+	mockDB.Clients.Create(ctx, dbClient)
+
+	req := &AuthorizeRequest{
+		ResponseType: "code",
+		ClientID:     "dc-disabled-client",
+		RedirectURI:  "https://example.com/callback",
+		Scope:        "openid profile",
+		State:        "test-state",
+		Nonce:        "test-nonce",
+	}
+
+	resp, err := client.Authorize(ctx, req)
+
+	assert.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// Verify default DC API configuration is applied
+	assert.Equal(t, []string{"vc+sd-jwt"}, resp.PreferredFormats)
+	assert.False(t, resp.UseJAR)
+	assert.Equal(t, "direct_post", resp.ResponseMode)
+
+	// Verify default title/subtitle are applied
+	assert.Equal(t, "Credential Verification", resp.Title)
+	assert.Equal(t, "Please present your digital credential to continue", resp.Subtitle)
 }
 

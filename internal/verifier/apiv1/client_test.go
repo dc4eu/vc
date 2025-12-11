@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"testing"
 	"vc/pkg/model"
+	"vc/pkg/sdjwtvc"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -405,6 +406,35 @@ func TestClient_buildLegacyDCQLQuery(t *testing.T) {
 			expectError:       true,
 			expectedCredCount: 0,
 		},
+		{
+			name:   "scope with VCTM containing claims",
+			scopes: []string{"diploma"},
+			credentialConstructor: map[string]*model.CredentialConstructor{
+				"diploma": {
+					VCT: "urn:credential:diploma",
+					VCTM: &sdjwtvc.VCTM{
+						VCT:  "urn:credential:diploma",
+						Name: "Diploma Credential",
+						Claims: []sdjwtvc.Claim{
+							{
+								Path: []*string{ptrString("given_name")},
+								Display: []sdjwtvc.ClaimDisplay{
+									{Lang: "en", Label: "Given Name"},
+								},
+							},
+							{
+								Path: []*string{ptrString("family_name")},
+								Display: []sdjwtvc.ClaimDisplay{
+									{Lang: "en", Label: "Family Name"},
+								},
+							},
+						},
+					},
+				},
+			},
+			expectError:       false,
+			expectedCredCount: 1,
+		},
 	}
 
 	for _, tt := range tests {
@@ -431,6 +461,11 @@ func TestClient_buildLegacyDCQLQuery(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Helper function to create a pointer to a string
+func ptrString(s string) *string {
+	return &s
 }
 
 func TestClient_createDCQLQuery(t *testing.T) {

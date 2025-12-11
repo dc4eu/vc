@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"testing"
+	"vc/pkg/model"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -338,6 +339,96 @@ func TestHmacEqual(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := hmacEqual(tt.a, tt.b)
 			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestClient_buildLegacyDCQLQuery(t *testing.T) {
+	tests := []struct {
+		name                  string
+		scopes                []string
+		credentialConstructor map[string]*model.CredentialConstructor
+		expectError           bool
+		expectedCredCount     int
+	}{
+		{
+			name:   "single valid scope",
+			scopes: []string{"diploma"},
+			credentialConstructor: map[string]*model.CredentialConstructor{
+				"diploma": {
+					VCT: "urn:credential:diploma",
+				},
+			},
+			expectError:       false,
+			expectedCredCount: 1,
+		},
+		{
+			name:   "multiple valid scopes",
+			scopes: []string{"diploma", "ehic"},
+			credentialConstructor: map[string]*model.CredentialConstructor{
+				"diploma": {
+					VCT: "urn:credential:diploma",
+				},
+				"ehic": {
+					VCT: "urn:credential:ehic",
+				},
+			},
+			expectError:       false,
+			expectedCredCount: 2,
+		},
+		{
+			name:   "scopes with openid (should be skipped)",
+			scopes: []string{"openid", "diploma"},
+			credentialConstructor: map[string]*model.CredentialConstructor{
+				"diploma": {
+					VCT: "urn:credential:diploma",
+				},
+			},
+			expectError:       false,
+			expectedCredCount: 1,
+		},
+		{
+			name:                  "no matching scopes",
+			scopes:                []string{"unknown_scope"},
+			credentialConstructor: map[string]*model.CredentialConstructor{},
+			expectError:           true,
+			expectedCredCount:     0,
+		},
+		{
+			name:   "all scopes are openid or unmatched",
+			scopes: []string{"openid"},
+			credentialConstructor: map[string]*model.CredentialConstructor{
+				"diploma": {
+					VCT: "urn:credential:diploma",
+				},
+			},
+			expectError:       true,
+			expectedCredCount: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &model.Cfg{
+				CredentialConstructor: tt.credentialConstructor,
+			}
+			client, _ := CreateTestClientWithMock(cfg)
+
+			dcql, err := client.buildLegacyDCQLQuery(tt.scopes)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, dcql)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, dcql)
+				assert.Equal(t, tt.expectedCredCount, len(dcql.Credentials))
+
+				// Verify credential format is vc+sd-jwt
+				for _, cred := range dcql.Credentials {
+					assert.Equal(t, "vc+sd-jwt", cred.Format)
+				}
+			}
 		})
 	}
 }

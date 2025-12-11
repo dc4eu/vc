@@ -2,9 +2,14 @@ package apiv1
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/rsa"
 	"testing"
 	"time"
 	"vc/internal/verifier/db"
+	"vc/pkg/openid4vp"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -239,5 +244,285 @@ func TestGenerateNonce(t *testing.T) {
 
 		// Base64 URL encoded 32 bytes should be 43 characters
 		assert.Len(t, nonce, 43, "nonce should be 43 base64url characters")
+	}
+}
+
+// TestGetOIDCRequestObject tests the GetOIDCRequestObject handler
+func TestGetOIDCRequestObject(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name         string
+		sessionID    string
+		sessionSetup func(*db.Session)
+		expectError  bool
+	}{
+		{
+			name:      "successful request object generation",
+			sessionID: "session-ro-1",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.ExpiresAt = time.Now().Add(10 * time.Minute)
+				s.OpenID4VP.DCQL = &openid4vp.DCQL{
+					Credentials: []openid4vp.CredentialQuery{
+						{
+							ID:     "test_credential",
+							Format: "vc+sd-jwt",
+							Meta: openid4vp.MetaQuery{
+								VCTValues: []string{"https://example.com/credential/test"},
+							},
+						},
+					},
+				}
+			},
+			expectError: false,
+		},
+		{
+			name:      "expired session",
+			sessionID: "session-expired",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.ExpiresAt = time.Now().Add(-10 * time.Minute) // Already expired
+			},
+			expectError: true,
+		},
+		{
+			name:         "session not found",
+			sessionID:    "non-existent-session",
+			sessionSetup: nil,
+			expectError:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+
+			// Generate RSA key for signing
+			key, err := rsa.GenerateKey(rand.Reader, 2048)
+			require.NoError(t, err)
+			client.SetSigningKeyForTesting(key, "RS256")
+
+			// Setup session if needed
+			if tt.sessionSetup != nil {
+				session := &db.Session{
+					ID:        tt.sessionID,
+					Status:    db.SessionStatusPending,
+					CreatedAt: time.Now(),
+					ExpiresAt: time.Now().Add(10 * time.Minute),
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "test-client",
+						RedirectURI: "https://client.example.com/callback",
+						Scope:       "openid",
+					},
+					OpenID4VP: db.OpenID4VPSession{},
+					Tokens:    db.TokenSet{},
+				}
+				tt.sessionSetup(session)
+				err := mockDB.Sessions.Create(ctx, session)
+				require.NoError(t, err)
+			}
+
+			req := &GetRequestObjectRequest{
+				SessionID: tt.sessionID,
+			}
+
+			resp, err := client.GetOIDCRequestObject(ctx, req)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, resp)
+				assert.NotEmpty(t, resp.RequestObject)
+
+				// Verify nonce was stored in session
+				session, _ := mockDB.Sessions.GetByID(ctx, tt.sessionID)
+				assert.NotEmpty(t, session.OpenID4VP.RequestObjectNonce)
+			}
+		})
+	}
+}
+
+// TestProcessCallback tests the ProcessCallback handler
+func TestProcessCallback(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name             string
+		sessionID        string
+		code             string
+		errorParam       string
+		sessionSetup     func(*db.Session)
+		expectError      bool
+		expectErrorInURI bool
+	}{
+		{
+			name:      "successful callback with code",
+			sessionID: "session-callback-1",
+			code:      "auth-code-123",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusCodeIssued
+				s.OIDCRequest.RedirectURI = "https://client.example.com/callback"
+				s.OIDCRequest.State = "client-state"
+			},
+			expectError: false,
+		},
+		{
+			name:       "callback with error",
+			sessionID:  "session-callback-error",
+			errorParam: "access_denied",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.RedirectURI = "https://client.example.com/callback"
+				s.OIDCRequest.State = "client-state"
+			},
+			expectError:      false,
+			expectErrorInURI: true,
+		},
+		{
+			name:         "session not found",
+			sessionID:    "non-existent-session",
+			code:         "some-code",
+			sessionSetup: nil,
+			expectError:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+
+			// Setup session if needed
+			if tt.sessionSetup != nil {
+				session := &db.Session{
+					ID:        tt.sessionID,
+					Status:    db.SessionStatusPending,
+					CreatedAt: time.Now(),
+					ExpiresAt: time.Now().Add(10 * time.Minute),
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "test-client",
+						RedirectURI: "https://client.example.com/callback",
+						Scope:       "openid",
+						State:       "client-state",
+					},
+					Tokens: db.TokenSet{},
+				}
+				tt.sessionSetup(session)
+				err := mockDB.Sessions.Create(ctx, session)
+				require.NoError(t, err)
+			}
+
+			req := &CallbackRequest{
+				State: tt.sessionID,
+				Code:  tt.code,
+				Error: tt.errorParam,
+			}
+
+			resp, err := client.ProcessCallback(ctx, req)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, resp)
+				assert.NotEmpty(t, resp.RedirectURI)
+
+				if tt.expectErrorInURI {
+					assert.Contains(t, resp.RedirectURI, "error=")
+				} else {
+					assert.Contains(t, resp.RedirectURI, "code=")
+				}
+				assert.Contains(t, resp.RedirectURI, "state=")
+			}
+		})
+	}
+}
+
+// TestGetJWKS_KeyTypes tests the GetJWKS handler with different key types
+func TestGetJWKS_KeyTypes(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name        string
+		setupKey    func() (any, string)
+		expectError bool
+		expectKty   string
+		expectAlg   string
+	}{
+		{
+			name: "RSA key",
+			setupKey: func() (any, string) {
+				key, _ := rsa.GenerateKey(rand.Reader, 2048)
+				return key, "RS256"
+			},
+			expectError: false,
+			expectKty:   "RSA",
+			expectAlg:   "RS256",
+		},
+		{
+			name: "EC P-256 key",
+			setupKey: func() (any, string) {
+				key, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+				return key, "ES256"
+			},
+			expectError: false,
+			expectKty:   "EC",
+			expectAlg:   "ES256",
+		},
+		{
+			name: "EC P-384 key",
+			setupKey: func() (any, string) {
+				key, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+				return key, "ES384"
+			},
+			expectError: false,
+			expectKty:   "EC",
+			expectAlg:   "ES384",
+		},
+		{
+			name: "EC P-521 key",
+			setupKey: func() (any, string) {
+				key, _ := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+				return key, "ES512"
+			},
+			expectError: false,
+			expectKty:   "EC",
+			expectAlg:   "ES512",
+		},
+		{
+			name: "no key configured",
+			setupKey: func() (any, string) {
+				return nil, ""
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, _ := CreateTestClientWithMock(nil)
+
+			// Setup key
+			key, alg := tt.setupKey()
+			if key != nil {
+				client.SetSigningKeyForTesting(key, alg)
+			}
+
+			jwks, err := client.GetJWKS(ctx)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, jwks)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, jwks)
+				require.Len(t, jwks.Keys, 1)
+				assert.Equal(t, tt.expectKty, jwks.Keys[0].Kty)
+				assert.Equal(t, tt.expectAlg, jwks.Keys[0].Alg)
+			}
+		})
 	}
 }

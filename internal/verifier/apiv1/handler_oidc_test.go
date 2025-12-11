@@ -1085,3 +1085,248 @@ func TestAuthenticateOIDCClient(t *testing.T) {
 		})
 	}
 }
+
+// TestAuthorize_FullFlow tests the complete Authorize endpoint flow
+func TestAuthorize_FullFlow(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name          string
+		setupMock     func(*testing.T, *MockSessionCollection, *MockClientCollection)
+		request       *AuthorizeRequest
+		expectError   bool
+		expectedError error
+	}{
+		{
+			name: "successful authorization request",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				client := &db.Client{
+					ClientID:      "test-client",
+					RedirectURIs:  []string{"https://example.com/callback"},
+					ResponseTypes: []string{"code"},
+					AllowedScopes: []string{"openid", "profile", "email"},
+					RequirePKCE:   false,
+				}
+				clients.Create(ctx, client)
+			},
+			request: &AuthorizeRequest{
+				ResponseType: "code",
+				ClientID:     "test-client",
+				RedirectURI:  "https://example.com/callback",
+				Scope:        "openid profile",
+				State:        "random-state",
+				Nonce:        "random-nonce",
+			},
+			expectError: false,
+		},
+		{
+			name: "client not found",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				// No client created
+			},
+			request: &AuthorizeRequest{
+				ResponseType: "code",
+				ClientID:     "nonexistent-client",
+				RedirectURI:  "https://example.com/callback",
+				Scope:        "openid",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidClient,
+		},
+		{
+			name: "invalid redirect URI",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				client := &db.Client{
+					ClientID:      "test-client",
+					RedirectURIs:  []string{"https://example.com/callback"},
+					ResponseTypes: []string{"code"},
+					AllowedScopes: []string{"openid"},
+				}
+				clients.Create(ctx, client)
+			},
+			request: &AuthorizeRequest{
+				ResponseType: "code",
+				ClientID:     "test-client",
+				RedirectURI:  "https://malicious.com/callback",
+				Scope:        "openid",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidRequest,
+		},
+		{
+			name: "unsupported response type",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				client := &db.Client{
+					ClientID:      "test-client",
+					RedirectURIs:  []string{"https://example.com/callback"},
+					ResponseTypes: []string{"code"},
+					AllowedScopes: []string{"openid"},
+				}
+				clients.Create(ctx, client)
+			},
+			request: &AuthorizeRequest{
+				ResponseType: "token",
+				ClientID:     "test-client",
+				RedirectURI:  "https://example.com/callback",
+				Scope:        "openid",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidRequest,
+		},
+		{
+			name: "invalid scope",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				client := &db.Client{
+					ClientID:      "test-client",
+					RedirectURIs:  []string{"https://example.com/callback"},
+					ResponseTypes: []string{"code"},
+					AllowedScopes: []string{"openid", "profile"},
+				}
+				clients.Create(ctx, client)
+			},
+			request: &AuthorizeRequest{
+				ResponseType: "code",
+				ClientID:     "test-client",
+				RedirectURI:  "https://example.com/callback",
+				Scope:        "openid admin",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidScope,
+		},
+		{
+			name: "PKCE required but not provided",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				client := &db.Client{
+					ClientID:      "test-client",
+					RedirectURIs:  []string{"https://example.com/callback"},
+					ResponseTypes: []string{"code"},
+					AllowedScopes: []string{"openid"},
+					RequirePKCE:   true,
+				}
+				clients.Create(ctx, client)
+			},
+			request: &AuthorizeRequest{
+				ResponseType: "code",
+				ClientID:     "test-client",
+				RedirectURI:  "https://example.com/callback",
+				Scope:        "openid",
+			},
+			expectError:   true,
+			expectedError: ErrInvalidRequest,
+		},
+		{
+			name: "successful with PKCE",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				client := &db.Client{
+					ClientID:      "test-client",
+					RedirectURIs:  []string{"https://example.com/callback"},
+					ResponseTypes: []string{"code"},
+					AllowedScopes: []string{"openid", "profile"},
+					RequirePKCE:   true,
+				}
+				clients.Create(ctx, client)
+			},
+			request: &AuthorizeRequest{
+				ResponseType:        "code",
+				ClientID:            "test-client",
+				RedirectURI:         "https://example.com/callback",
+				Scope:               "openid profile",
+				State:               "state-123",
+				Nonce:               "nonce-456",
+				CodeChallenge:       "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+				CodeChallengeMethod: "S256",
+			},
+			expectError: false,
+		},
+		{
+			name: "multiple scopes with different credentials",
+			setupMock: func(t *testing.T, sessions *MockSessionCollection, clients *MockClientCollection) {
+				client := &db.Client{
+					ClientID:      "test-client",
+					RedirectURIs:  []string{"https://example.com/callback"},
+					ResponseTypes: []string{"code"},
+					AllowedScopes: []string{"openid", "profile", "email", "address"},
+				}
+				clients.Create(ctx, client)
+			},
+			request: &AuthorizeRequest{
+				ResponseType: "code",
+				ClientID:     "test-client",
+				RedirectURI:  "https://example.com/callback",
+				Scope:        "openid profile email",
+				State:        "complex-state",
+				Nonce:        "complex-nonce",
+			},
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+			client.cfg.VerifierProxy.ExternalURL = "https://verifier.example.com"
+			client.cfg.VerifierProxy.OIDC.SessionDuration = 900
+			client.cfg.VerifierProxy.DigitalCredentials.Enabled = true
+			client.cfg.VerifierProxy.DigitalCredentials.PreferredFormats = []string{"vc+sd-jwt"}
+			client.cfg.VerifierProxy.DigitalCredentials.UseJAR = true
+			client.cfg.VerifierProxy.DigitalCredentials.ResponseMode = "direct_post.jwt"
+			client.cfg.VerifierProxy.AuthorizationPageCSS.Title = "Test Verifier"
+			client.cfg.VerifierProxy.AuthorizationPageCSS.Theme = "dark"
+
+			// Add presentation template for DCQL query generation
+			template := createSimplePresentationTemplate(t, []string{"openid", "profile", "email", "address"})
+			client.AddPresentationTemplateForTesting(template)
+
+			tt.setupMock(t, mockDB.Sessions, mockDB.Clients)
+
+			// Execute
+			resp, err := client.Authorize(ctx, tt.request)
+
+			// Verify
+			if tt.expectError {
+				assert.Error(t, err)
+				if tt.expectedError != nil {
+					assert.Equal(t, tt.expectedError, err)
+				}
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.NotEmpty(t, resp.SessionID)
+				assert.NotEmpty(t, resp.QRCodeData)
+				assert.NotEmpty(t, resp.QRCodeImageURL)
+				assert.NotEmpty(t, resp.DeepLinkURL)
+				assert.NotEmpty(t, resp.PollURL)
+				assert.Contains(t, resp.QRCodeData, "openid4vp://")
+				assert.Contains(t, resp.QRCodeImageURL, "/qr/")
+				assert.Contains(t, resp.PollURL, "/poll/")
+
+				// Verify DC API configuration
+				assert.Equal(t, []string{"vc+sd-jwt"}, resp.PreferredFormats)
+				assert.True(t, resp.UseJAR)
+				assert.Equal(t, "direct_post.jwt", resp.ResponseMode)
+
+				// Verify CSS configuration
+				assert.Equal(t, "Test Verifier", resp.Title)
+				assert.Equal(t, "dark", resp.Theme)
+				assert.NotEmpty(t, resp.PrimaryColor)
+				assert.NotEmpty(t, resp.SecondaryColor)
+
+				// Verify session was created
+				session, _ := mockDB.Sessions.GetByID(ctx, resp.SessionID)
+				assert.NotNil(t, session)
+				assert.Equal(t, db.SessionStatusPending, session.Status)
+				assert.Equal(t, tt.request.ClientID, session.OIDCRequest.ClientID)
+				assert.Equal(t, tt.request.RedirectURI, session.OIDCRequest.RedirectURI)
+				assert.Equal(t, tt.request.Scope, session.OIDCRequest.Scope)
+				assert.Equal(t, tt.request.State, session.OIDCRequest.State)
+				assert.Equal(t, tt.request.Nonce, session.OIDCRequest.Nonce)
+				if tt.request.CodeChallenge != "" {
+					assert.Equal(t, tt.request.CodeChallenge, session.OIDCRequest.CodeChallenge)
+					assert.Equal(t, tt.request.CodeChallengeMethod, session.OIDCRequest.CodeChallengeMethod)
+				}
+			}
+		})
+	}
+}
+

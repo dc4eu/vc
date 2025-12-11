@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 	"vc/internal/verifier/db"
+	"vc/pkg/configuration"
+	"vc/pkg/openid4vp"
 
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
@@ -35,6 +37,38 @@ func hashPassword(t *testing.T, password string) string {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	require.NoError(t, err)
 	return string(hash)
+}
+
+// createSimplePresentationTemplate creates a basic presentation template for testing
+func createSimplePresentationTemplate(t *testing.T, scopes []string) *configuration.PresentationRequestTemplate {
+	t.Helper()
+	return &configuration.PresentationRequestTemplate{
+		ID:          "test-template",
+		Name:        "Test Template",
+		Description: "Test presentation template",
+		Version:     "1.0",
+		OIDCScopes:  scopes,
+		DCQLQuery: &openid4vp.DCQL{
+			Credentials: []openid4vp.CredentialQuery{
+				{
+					ID:     "test-credential",
+					Format: "vc+sd-jwt",
+					Meta: openid4vp.MetaQuery{
+						VCTValues: []string{"https://example.com/test"},
+					},
+					Claims: []openid4vp.ClaimQuery{
+						{Path: []string{"given_name"}},
+						{Path: []string{"family_name"}},
+					},
+				},
+			},
+		},
+		ClaimMappings: map[string]string{
+			"given_name":  "given_name",
+			"family_name": "family_name",
+		},
+		Enabled: true,
+	}
 }
 
 // createTestSession creates a session for testing

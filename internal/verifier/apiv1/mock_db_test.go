@@ -9,6 +9,7 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/openid4vp"
+	"vc/pkg/sdjwtvc"
 	"vc/pkg/trace"
 
 	"github.com/jellydator/ttlcache/v3"
@@ -256,6 +257,7 @@ func CreateTestClientWithMock(cfg *model.Cfg) (*Client, *MockDBService) {
 		oidcSigningAlg:              "RS256",
 		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
 		requestObjectCache:          ttlcache.New(ttlcache.WithTTL[string, *openid4vp.RequestObject](5 * time.Minute)),
+		credentialCache:             ttlcache.New(ttlcache.WithTTL[string, []sdjwtvc.CredentialCache](5 * time.Minute)),
 	}
 
 	return client, mockDB

@@ -1,11 +1,14 @@
 package apiv1
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"testing"
+	"vc/pkg/sdjwtvc"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestGetKID tests the GetKID method on VerificationDirectPostRequest
@@ -104,4 +107,68 @@ func createTestJWEWithNonStringKID() string {
 	headerBytes, _ := json.Marshal(header)
 	headerB64 := base64.RawStdEncoding.EncodeToString(headerBytes)
 	return headerB64 + ".encrypted_payload.tag"
+}
+
+// TestVerificationCallback tests the VerificationCallback handler
+func TestVerificationCallback(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name              string
+		responseCode      string
+		setupCache        bool
+		expectedCredCount int
+		expectError       bool
+	}{
+		{
+			name:              "successful callback with cached credential",
+			responseCode:      "valid-response-code",
+			setupCache:        true,
+			expectedCredCount: 1,
+			expectError:       false,
+		},
+		{
+			name:         "response code not found in cache",
+			responseCode: "non-existent-code",
+			setupCache:   false,
+			expectError:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, _ := CreateTestClientWithMock(nil)
+
+			// Setup credential cache if needed
+			if tt.setupCache {
+				credentials := []sdjwtvc.CredentialCache{
+					{
+						Credential: map[string]any{
+							"vct": "urn:credential:diploma",
+						},
+						Claims: []sdjwtvc.Discloser{
+							{ClaimName: "given_name", Value: "John"},
+							{ClaimName: "family_name", Value: "Doe"},
+						},
+					},
+				}
+				client.credentialCache.Set(tt.responseCode, credentials, 0)
+			}
+
+			req := &VerificationCallbackRequest{
+				ResponseCode: tt.responseCode,
+			}
+
+			resp, err := client.VerificationCallback(ctx, req)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, resp)
+				assert.Len(t, resp.CredentialData, tt.expectedCredCount)
+			}
+		})
+	}
 }

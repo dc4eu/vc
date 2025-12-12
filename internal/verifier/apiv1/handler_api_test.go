@@ -614,3 +614,236 @@ func TestGetJWKS_KeyTypes(t *testing.T) {
 		})
 	}
 }
+
+// TestProcessDirectPost tests the ProcessDirectPost handler
+func TestProcessDirectPost(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name                   string
+		sessionID              string
+		vpToken                string
+		response               string
+		presentationSubmission string
+		sessionSetup           func(*db.Session)
+		expectError            bool
+		expectedErrorType      error
+		expectShowCredentials  bool
+		expectedStatus         db.SessionStatus
+	}{
+		{
+			name:      "successful direct post with VP token",
+			sessionID: "session-dp-1",
+			vpToken:   "eyJhbGciOiJFUzI1NiJ9.test-payload.signature",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.RedirectURI = "https://client.example.com/callback"
+				s.OIDCRequest.State = "client-state"
+				s.OIDCRequest.Scope = "openid profile"
+			},
+			expectError:    false,
+			expectedStatus: db.SessionStatusCodeIssued,
+		},
+		{
+			name:      "direct post with DC API response parameter",
+			sessionID: "session-dp-2",
+			response:  "encrypted.jwt.token",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.RedirectURI = "https://client.example.com/callback"
+				s.OIDCRequest.State = "client-state"
+			},
+			expectError:    false,
+			expectedStatus: db.SessionStatusCodeIssued,
+		},
+		{
+			name:                   "direct post with presentation submission",
+			sessionID:              "session-dp-3",
+			vpToken:                "eyJhbGciOiJFUzI1NiJ9.test-payload.signature",
+			presentationSubmission: `{"id":"submission-1","definition_id":"def-1"}`,
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.RedirectURI = "https://client.example.com/callback"
+				s.OIDCRequest.State = "client-state"
+			},
+			expectError:    false,
+			expectedStatus: db.SessionStatusCodeIssued,
+		},
+		{
+			name:                   "direct post with invalid presentation submission JSON",
+			sessionID:              "session-dp-4",
+			vpToken:                "eyJhbGciOiJFUzI1NiJ9.test-payload.signature",
+			presentationSubmission: `{invalid json}`,
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.RedirectURI = "https://client.example.com/callback"
+				s.OIDCRequest.State = "client-state"
+			},
+			expectError:    false, // Should continue even with invalid presentation submission
+			expectedStatus: db.SessionStatusCodeIssued,
+		},
+		{
+			name:      "direct post with show credentials enabled",
+			sessionID: "session-dp-5",
+			vpToken:   "eyJhbGciOiJFUzI1NiJ9.test-payload.signature",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.RedirectURI = "https://client.example.com/callback"
+				s.OIDCRequest.State = "client-state"
+				s.OIDCRequest.ShowCredentialDetails = true
+			},
+			expectError:           false,
+			expectShowCredentials: true,
+			expectedStatus:        db.SessionStatusAwaitingPresentation,
+		},
+		{
+			name:              "session not found",
+			sessionID:         "non-existent-session",
+			vpToken:           "some.token.here",
+			expectError:       true,
+			expectedErrorType: ErrSessionNotFound,
+		},
+		{
+			name:      "no vp_token or response provided",
+			sessionID: "session-dp-6",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+			},
+			expectError:       true,
+			expectedErrorType: ErrInvalidRequest,
+		},
+		{
+			name:      "direct post without redirect URI",
+			sessionID: "session-dp-7",
+			vpToken:   "eyJhbGciOiJFUzI1NiJ9.test-payload.signature",
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.RedirectURI = "" // No redirect URI
+				s.OIDCRequest.State = "client-state"
+			},
+			expectError:    false,
+			expectedStatus: db.SessionStatusCodeIssued,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockDB := CreateTestClientWithMock(nil)
+
+			// Setup session if needed
+			if tt.sessionSetup != nil {
+				session := &db.Session{
+					ID:        tt.sessionID,
+					Status:    db.SessionStatusPending,
+					CreatedAt: time.Now(),
+					ExpiresAt: time.Now().Add(10 * time.Minute),
+					OIDCRequest: db.OIDCRequest{
+						ClientID:    "test-client",
+						RedirectURI: "https://client.example.com/callback",
+						Scope:       "openid",
+						State:       "client-state",
+					},
+					OpenID4VP: db.OpenID4VPSession{},
+					Tokens:    db.TokenSet{},
+				}
+				tt.sessionSetup(session)
+				err := mockDB.Sessions.Create(ctx, session)
+				require.NoError(t, err)
+			}
+
+			req := &DirectPostRequest{
+				State:                  tt.sessionID,
+				VPToken:                tt.vpToken,
+				Response:               tt.response,
+				PresentationSubmission: tt.presentationSubmission,
+			}
+
+			resp, err := client.ProcessDirectPost(ctx, req)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				if tt.expectedErrorType != nil {
+					assert.ErrorIs(t, err, tt.expectedErrorType)
+				}
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, resp)
+
+				// Verify session was updated
+				session, _ := mockDB.Sessions.GetByID(ctx, tt.sessionID)
+				assert.Equal(t, tt.expectedStatus, session.Status)
+
+				if tt.expectShowCredentials {
+					// Should redirect to display page
+					assert.Contains(t, resp.RedirectURI, "/verification/display/")
+				} else if session.OIDCRequest.RedirectURI != "" {
+					// Should have authorization code in redirect
+					assert.Contains(t, resp.RedirectURI, "code=")
+					assert.Contains(t, resp.RedirectURI, "state=")
+				}
+			}
+		})
+	}
+}
+
+// TestGenerateSessionID tests the session ID generator
+func TestGenerateSessionID(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	// Generate multiple session IDs and verify they're unique
+	ids := make(map[string]bool)
+	for i := 0; i < 50; i++ {
+		id := client.generateSessionID()
+		assert.NotEmpty(t, id)
+		assert.False(t, ids[id], "session ID should be unique")
+		ids[id] = true
+
+		// Hex encoded 32 bytes should be 64 characters
+		assert.Len(t, id, 64, "session ID should be 64 hex characters")
+	}
+}
+
+// TestContainsOIDC tests the containsOIDC helper method
+func TestContainsOIDC(t *testing.T) {
+	client, _ := CreateTestClientWithMock(nil)
+
+	tests := []struct {
+		name     string
+		slice    []string
+		value    string
+		expected bool
+	}{
+		{
+			name:     "value found",
+			slice:    []string{"openid", "profile", "email"},
+			value:    "openid",
+			expected: true,
+		},
+		{
+			name:     "value not found",
+			slice:    []string{"profile", "email"},
+			value:    "openid",
+			expected: false,
+		},
+		{
+			name:     "empty slice",
+			slice:    []string{},
+			value:    "openid",
+			expected: false,
+		},
+		{
+			name:     "value at end",
+			slice:    []string{"profile", "email", "openid"},
+			value:    "openid",
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := client.containsOIDC(tt.slice, tt.value)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}

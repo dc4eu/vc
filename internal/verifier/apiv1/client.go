@@ -366,10 +366,10 @@ func (c *Client) buildLegacyDCQLQuery(scopes []string) (*openid4vp.DCQL, error) 
 // extractAndMapClaims extracts claims from a VP token and maps them to OIDC claims
 // using the template that matches the requested scopes
 func (c *Client) extractAndMapClaims(ctx context.Context, vpToken string, scopeStr string) (map[string]any, error) {
-	// If no claims extractor, fall back to basic extraction
+	// If no claims extractor, return empty claims
 	if c.claimsExtractor == nil {
-		c.log.Debug("No claims extractor configured, using basic claim extraction")
-		return c.claimsExtractor.ExtractClaimsFromVPToken(ctx, vpToken)
+		c.log.Debug("No claims extractor configured, returning empty claims")
+		return make(map[string]any), nil
 	}
 
 	// If no presentation builder, use basic extraction without mapping

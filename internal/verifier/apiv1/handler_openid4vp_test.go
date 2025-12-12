@@ -220,7 +220,7 @@ func TestHandleDirectPost(t *testing.T) {
 		sessionID              string
 		vpToken                string
 		presentationSubmission any
-		sessionExists          bool
+		sessionSetup           func(*db.Session)
 		expectError            bool
 	}{
 		{
@@ -228,16 +228,29 @@ func TestHandleDirectPost(t *testing.T) {
 			sessionID:              "test-session-dp-1",
 			vpToken:                "eyJhbGciOiJFUzI1NiJ9.test.signature",
 			presentationSubmission: map[string]any{"id": "submission-1"},
-			sessionExists:          true,
-			expectError:            false,
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+			},
+			expectError: false,
 		},
 		{
 			name:                   "session not found",
 			sessionID:              "non-existent-session",
 			vpToken:                "eyJhbGciOiJFUzI1NiJ9.test.signature",
 			presentationSubmission: map[string]any{"id": "submission-1"},
-			sessionExists:          false,
+			sessionSetup:           nil,
 			expectError:            true,
+		},
+		{
+			name:                   "direct post with scope",
+			sessionID:              "test-session-dp-2",
+			vpToken:                "eyJhbGciOiJFUzI1NiJ9.payload.signature",
+			presentationSubmission: nil,
+			sessionSetup: func(s *db.Session) {
+				s.Status = db.SessionStatusPending
+				s.OIDCRequest.Scope = "openid profile"
+			},
+			expectError: false,
 		},
 	}
 
@@ -246,8 +259,9 @@ func TestHandleDirectPost(t *testing.T) {
 			client, mockDB := CreateTestClientWithMock(nil)
 
 			// Setup session if needed
-			if tt.sessionExists {
+			if tt.sessionSetup != nil {
 				session := createTestDBSession(tt.sessionID)
+				tt.sessionSetup(session)
 				err := mockDB.Sessions.Create(ctx, session)
 				require.NoError(t, err)
 			}
@@ -368,7 +382,6 @@ func TestExtractClaimsFromVPToken(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		hasExtractor   bool
 		vpToken        string
 		scope          string
 		expectedClaims int
@@ -376,9 +389,22 @@ func TestExtractClaimsFromVPToken(t *testing.T) {
 	}{
 		{
 			name:           "nil claims extractor returns empty claims",
-			hasExtractor:   false,
 			vpToken:        "test.vp.token",
 			scope:          "openid",
+			expectedClaims: 0,
+			expectError:    false,
+		},
+		{
+			name:           "nil claims extractor with profile scope",
+			vpToken:        "eyJhbGciOiJFUzI1NiJ9.test-payload.signature",
+			scope:          "openid profile",
+			expectedClaims: 0,
+			expectError:    false,
+		},
+		{
+			name:           "nil claims extractor with empty scope",
+			vpToken:        "eyJhbGciOiJFUzI1NiJ9.payload.sig",
+			scope:          "",
 			expectedClaims: 0,
 			expectError:    false,
 		},
@@ -388,9 +414,7 @@ func TestExtractClaimsFromVPToken(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			client, _ := CreateTestClientWithMock(nil)
 
-			// If hasExtractor is true, we would need to set up a mock
-			// For now, we only test the nil case
-
+			// Test with nil claims extractor (which is the default for test client)
 			claims, err := client.extractClaimsFromVPToken(ctx, tt.vpToken, tt.scope)
 
 			if tt.expectError {

@@ -1,7 +1,15 @@
 # Verifier to Verifier-Proxy Migration Plan
 
+> **⚠️ SUPERSEDED**: This document has been superseded by [VERIFIER_MERGE_PLAN.md](./VERIFIER_MERGE_PLAN.md).
+>
+> The migration has been **completed** as of December 2025. The verifier and verifier-proxy services have been successfully merged into a single unified verifier component.
+>
+> This document is preserved for historical reference only.
+
+---
+
 **Date:** November 26, 2025  
-**Status:** Planning Document  
+**Status:** ~~Planning Document~~ **SUPERSEDED**  
 **Author:** Generated Analysis
 
 ## Executive Summary

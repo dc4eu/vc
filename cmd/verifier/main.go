@@ -64,7 +64,7 @@ func main() {
 		panic(err)
 	}
 
-	apiv1, err := apiv1.New(ctx, dbService, notifyService, cfg, log)
+	apiv1, err := apiv1.New(ctx, dbService, notifyService, cfg, tracer, log)
 	if err != nil {
 		panic(err)
 	}

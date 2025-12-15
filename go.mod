@@ -28,6 +28,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.31
 	github.com/lestrrat-go/jwx/v3 v3.0.12
 	github.com/lithammer/shortuuid/v4 v4.2.0
+	github.com/miekg/pkcs11 v1.1.1
 	github.com/moogar0880/problems v1.0.1
 	github.com/multiformats/go-multibase v0.2.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -38,7 +39,6 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.40.0
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.40.0
 	github.com/wealdtech/go-merkletree v1.0.0
 	github.com/xuri/excelize/v2 v2.10.0
 	go.mongodb.org/mongo-driver v1.17.6
@@ -46,7 +46,6 @@ require (
 	go.opentelemetry.io/contrib/propagators/jaeger v1.38.0
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.38.0
-	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
 	go.opentelemetry.io/otel/trace v1.38.0
 	go.uber.org/zap v1.27.1
@@ -126,6 +125,7 @@ require (
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
+	github.com/ljahier/gin-ratelimit v1.0.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/mattermost/xml-roundtrip-validator v0.1.0 // indirect

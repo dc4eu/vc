@@ -2,6 +2,7 @@
 services:
   apigw:
     container_name: "vc_dev_apigw"
+    hostname: "apigw.vc.docker"
     image: docker.sunet.se/dc4eu/apigw:latest
     restart: always
     volumes:
@@ -25,9 +26,11 @@ services:
 
   ui:
     container_name: "vc_dev_ui"
+    hostname: "ui.vc.docker"
     image: docker.sunet.se/dc4eu/ui:latest
     restart: always
     volumes:
+      - ./developer_tools/pki/:/pki:ro
       - ./config.yaml:/config.yaml:ro
       - ./developer_tools/private_ec256.pem:/private_ec256.pem:ro
     depends_on:
@@ -50,9 +53,11 @@ services:
 
   issuer:
     container_name: "vc_dev_issuer"
+    hostname: "issuer.vc.docker"
     image: docker.sunet.se/dc4eu/issuer:latest
     restart: always
     volumes:
+      - ./developer_tools/pki/:/pki:ro
       - ./config.yaml:/config.yaml:ro
       - ./developer_tools/private_ec256.pem:/private_ec256.pem:ro
       - ./metadata/:/metadata/:ro
@@ -67,6 +72,7 @@ services:
 
   verifier:
     container_name: "vc_dev_verifier"
+    hostname: "verifier.vc.docker"
     image: docker.sunet.se/dc4eu/verifier:latest
     restart: always
     volumes:
@@ -89,6 +95,7 @@ services:
 
   verifier-proxy:
     container_name: "vc_dev_verifier_proxy"
+    hostname: "verifier_proxy.vc.docker"
     image: docker.sunet.se/dc4eu/verifier-proxy:latest
     restart: always
     volumes:
@@ -109,9 +116,11 @@ services:
 
   registry:
     container_name: "vc_dev_registry"
+    hostname: "registry.vc.docker"
     image: docker.sunet.se/dc4eu/registry:latest
     restart: always
     volumes:
+      - ./developer_tools/pki/:/pki:ro
       - ./config.yaml:/config.yaml:ro
     depends_on:
       - mongo
@@ -123,9 +132,11 @@ services:
 
   persistent:
     container_name: "vc_dev_persistent"
+    hostname: "persistent.vc.docker"
     image: docker.sunet.se/dc4eu/persistent:latest
     restart: always
     volumes:
+      - ./developer_tools/pki/:/pki:ro
       - ./config.yaml:/config.yaml:ro
     depends_on:
       - mongo
@@ -137,9 +148,11 @@ services:
 
   mockas:
     container_name: "vc_dev_mockas"
+    hostname: "mockas.vc.docker"
     image: docker.sunet.se/dc4eu/mockas:latest
     restart: always
     volumes:
+      - ./developer_tools/pki/:/pki:ro
       - ./config.yaml:/config.yaml:ro
     depends_on:
       apigw:
@@ -169,6 +182,7 @@ services:
   mongo:
     image: mongo:7.0
     container_name: "vc_dev_mongo"
+    hostname: "mongo.vc.docker"
     restart: always
     expose:
       - 27017
@@ -201,6 +215,7 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: vc_dev_jaeger
+    hostname: "jaeger.vc.docker"
     restart: always
     expose:
       - 16686

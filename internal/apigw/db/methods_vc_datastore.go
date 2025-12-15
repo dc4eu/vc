@@ -27,9 +27,9 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 
 	indexDocumentIDInAuthenticSourceUniq := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "meta.document_id", Value: 1},
-			primitive.E{Key: "meta.authentic_source", Value: 1},
-			primitive.E{Key: "meta.document_type", Value: 1},
+			bson.E{Key: "meta.document_id", Value: 1},
+			bson.E{Key: "meta.authentic_source", Value: 1},
+			bson.E{Key: "meta.vct", Value: 1},
 		},
 		Options: options.Index().SetName("document_unique_within_namespace").SetUnique(true),
 	}
@@ -199,7 +199,7 @@ type GetDocumentQuery struct {
 func (c *VCDatastoreColl) GetDocument(ctx context.Context, query *GetDocumentQuery) (*model.Document, error) {
 	filter := bson.M{
 		"meta.authentic_source": bson.M{"$eq": query.Meta.AuthenticSource},
-		"meta.document_type":    bson.M{"$eq": query.Meta.DocumentType},
+		"meta.vct":              bson.M{"$eq": query.Meta.VCT},
 		"meta.document_id":      bson.M{"$eq": query.Meta.DocumentID},
 		//"identities.authentic_source_person_id": bson.M{"$eq": query.Identity.AuthenticSourcePersonID},
 	}

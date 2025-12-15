@@ -7,12 +7,11 @@
 package apiv1_issuer
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -85,6 +84,8 @@ func (x *MakeSDJWTRequest) GetJwk() *Jwk {
 type MakeSDJWTReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Credentials   []*Credential          `protobuf:"bytes,1,rep,name=credentials,proto3" json:"credentials,omitempty"`
+	TslSection    int64                  `protobuf:"varint,2,opt,name=tsl_section,json=tslSection,proto3" json:"tsl_section,omitempty"` // Token Status List section
+	TslIndex      int64                  `protobuf:"varint,3,opt,name=tsl_index,json=tslIndex,proto3" json:"tsl_index,omitempty"`       // Token Status List index
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -124,6 +125,20 @@ func (x *MakeSDJWTReply) GetCredentials() []*Credential {
 		return x.Credentials
 	}
 	return nil
+}
+
+func (x *MakeSDJWTReply) GetTslSection() int64 {
+	if x != nil {
+		return x.TslSection
+	}
+	return 0
+}
+
+func (x *MakeSDJWTReply) GetTslIndex() int64 {
+	if x != nil {
+		return x.TslIndex
+	}
+	return 0
 }
 
 type Credential struct {
@@ -410,9 +425,12 @@ const file_v1_issuer_proto_rawDesc = "" +
 	"\x10MakeSDJWTRequest\x12\x14\n" +
 	"\x05scope\x18\x01 \x01(\tR\x05scope\x12\"\n" +
 	"\fdocumentData\x18\x02 \x01(\fR\fdocumentData\x12 \n" +
-	"\x03jwk\x18\x03 \x01(\v2\x0e.v1.issuer.jwkR\x03jwk\"I\n" +
+	"\x03jwk\x18\x03 \x01(\v2\x0e.v1.issuer.jwkR\x03jwk\"\x87\x01\n" +
 	"\x0eMakeSDJWTReply\x127\n" +
-	"\vcredentials\x18\x01 \x03(\v2\x15.v1.issuer.CredentialR\vcredentials\",\n" +
+	"\vcredentials\x18\x01 \x03(\v2\x15.v1.issuer.CredentialR\vcredentials\x12\x1f\n" +
+	"\vtsl_section\x18\x02 \x01(\x03R\n" +
+	"tslSection\x12\x1b\n" +
+	"\ttsl_index\x18\x03 \x01(\x03R\btslIndex\",\n" +
 	"\n" +
 	"Credential\x12\x1e\n" +
 	"\n" +

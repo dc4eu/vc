@@ -3,6 +3,7 @@ package httphelpers
 import (
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 	"vc/pkg/logger"
@@ -29,25 +30,62 @@ func mockClient(ctx context.Context, t *testing.T) *Client {
 	return client
 }
 
-type mockBindingURI struct {
-	ID string `uri:"id"`
+// testRequestStruct contains all binding tag types for testing.
+type testRequestStruct struct {
+	ID     string `uri:"id"`
+	Query  string `form:"query"`
+	Accept string `header:"Accept"`
 }
 
 func TestBindingRequest(t *testing.T) {
 	tts := []struct {
-		name            string
-		inputStructName string
-		httpMethod      string
-		httpURL         *url.URL
-		acceptHeader    string
-		want            any
+		name       string
+		path       string
+		rawQuery   string
+		params     gin.Params
+		header     http.Header
+		wantID     string
+		wantQuery  string
+		wantAccept string
 	}{
 		{
-			name:            "test1",
-			httpMethod:      http.MethodGet,
-			httpURL:         &url.URL{Path: "/statuslists/12345"},
-			inputStructName: "mockBindingURI",
-			acceptHeader:    "application/json",
+			name:   "URIBinding",
+			path:   "/items/123",
+			params: gin.Params{{Key: "id", Value: "123"}},
+			header: http.Header{},
+			wantID: "123",
+		},
+		{
+			name:      "QueryBinding",
+			path:      "/items",
+			rawQuery:  "query=searchterm",
+			header:    http.Header{},
+			wantQuery: "searchterm",
+		},
+		{
+			name: "HeaderBinding",
+			path: "/items",
+			header: http.Header{
+				"Accept": []string{"application/statuslist+jwt"},
+			},
+			wantAccept: "application/statuslist+jwt",
+		},
+		{
+			name:     "AllBindings",
+			path:     "/items/456",
+			rawQuery: "query=alltest",
+			params:   gin.Params{{Key: "id", Value: "456"}},
+			header: http.Header{
+				"Accept": []string{"application/statuslist+cwt"},
+			},
+			wantID:     "456",
+			wantQuery:  "alltest",
+			wantAccept: "application/statuslist+cwt",
+		},
+		{
+			name:   "EmptyValues",
+			path:   "/items",
+			header: http.Header{},
 		},
 	}
 
@@ -55,31 +93,25 @@ func TestBindingRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := t.Context()
 			client := mockClient(ctx, t)
+			gin.SetMode(gin.TestMode)
 
-			ginContext := &gin.Context{
-				Request: &http.Request{
-					Method: tt.httpMethod,
-					URL:    tt.httpURL,
-					Header: http.Header{
-						"Accept": []string{tt.acceptHeader},
-					},
-				},
-				Writer: nil,
-				Params: gin.Params{},
-				Keys:   map[any]any{},
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+
+			c.Request = &http.Request{
+				Method: http.MethodGet,
+				URL:    &url.URL{Path: tt.path, RawQuery: tt.rawQuery},
+				Header: tt.header,
 			}
+			c.Params = tt.params
 
-			switch tt.inputStructName {
-			case "mockBindingURI":
-				req := &mockBindingURI{}
-				err := client.Binding.Request(ctx, ginContext, req)
-				assert.NoError(t, err)
+			req := &testRequestStruct{}
+			err := client.Binding.Request(ctx, c, req)
 
-				t.Logf("output: %s", req)
-			default:
-				t.Fatalf("unknown input struct name: %s", tt.inputStructName)
-			}
-
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantID, req.ID)
+			assert.Equal(t, tt.wantQuery, req.Query)
+			assert.Equal(t, tt.wantAccept, req.Accept)
 		})
 	}
 }

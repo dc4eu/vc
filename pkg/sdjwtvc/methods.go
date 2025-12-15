@@ -26,6 +26,17 @@ type CredentialOptions struct {
 	DecoyDigests int
 	// ExpirationDays: number of days until credential expires (default: 365)
 	ExpirationDays int
+	// TokenStatusList contains the Token Status List reference for credential revocation per draft-ietf-oauth-status-list
+	TokenStatusList *TokenStatusListReference
+}
+
+// TokenStatusListReference contains the status list reference to embed in a credential
+// per draft-ietf-oauth-status-list Section 5 (Referenced Token)
+type TokenStatusListReference struct {
+	// Index is the index within the section for this credential's status
+	Index int64
+	// URI is the full Status List Token URI (e.g., https://example.com/statuslists/0)
+	URI string
 }
 
 // BuildCredential creates a complete SD-JWT credential with additional options
@@ -131,6 +142,16 @@ func (c *Client) BuildCredentialWithSigner(ctx context.Context, issuer string, s
 	// Add confirmation claim with holder's public key
 	body["cnf"] = map[string]any{
 		"jwk": holderJWK,
+	}
+
+	// Add status claim if provided (per draft-ietf-oauth-status-list Section 5)
+	if opts.TokenStatusList != nil && opts.TokenStatusList.URI != "" {
+		body["status"] = map[string]any{
+			"status_list": map[string]any{
+				"idx": opts.TokenStatusList.Index,
+				"uri": opts.TokenStatusList.URI,
+			},
+		}
 	}
 
 	// Create JWT header using signer's algorithm and key ID

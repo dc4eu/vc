@@ -40,8 +40,6 @@ type Service struct {
 	VCAuthorizationContextColl *VCAuthorizationContextColl
 	VCUsersColl                *VCUsersColl
 	VCCredentialOfferColl      *VCCredentialOfferColl
-	StatusListColl             *StatusListColl
-	StatusListMetadata         *StatusListMetadataColl
 }
 
 // New creates a new database service
@@ -94,16 +92,6 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 	service.VCCredentialOfferColl, err = NewCredentialOfferColl(ctx, "credential_offer", service, log.New("VCCredentialOfferColl"))
 	if err != nil {
 		service.log.Error(err, "failed to create credential offer collection")
-		return nil, err
-	}
-
-	service.StatusListColl, err = NewStatusListColl(ctx, "status_list_v2", service, log.New("status_list_v2"))
-	if err != nil {
-		return nil, err
-	}
-
-	service.StatusListMetadata, err = NewStatusListMetadataColl(ctx, "status_list_metadata", service, log.New("status_list_metadata"))
-	if err != nil {
 		return nil, err
 	}
 

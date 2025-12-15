@@ -12,12 +12,11 @@ import (
 	"time"
 
 	apiv1_issuer "vc/internal/gen/issuer/apiv1_issuer"
+	"vc/pkg/grpchelpers"
 	"vc/pkg/openid4vci"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/codes"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // endpointSAMLMetadata returns the SAML Service Provider metadata XML
@@ -241,7 +240,7 @@ func (s *Service) createCredentialViaSAML(ctx context.Context, credentialType st
 	defer span.End()
 
 	// Connect to issuer gRPC service
-	conn, err := grpc.NewClient(s.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpchelpers.NewClientConn(s.cfg.APIGW.IssuerClient)
 	if err != nil {
 		s.log.Error(err, "Failed to connect to issuer")
 		return "", fmt.Errorf("failed to connect to issuer: %w", err)

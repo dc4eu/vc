@@ -15,11 +15,9 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
-
 	//"go.opentelemetry.io/otel/api/trace/tracetest"
 	//"go.opentelemetry.io/otel/exporters/stdout"
 	//"go.opentelemetry.io/otel/sdk/export/trace/tracetest"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 )
 
 // Tracer is a wrapper for opentelemetry tracer
@@ -51,7 +49,8 @@ func New(ctx context.Context, cfg *model.Cfg, serviceName string, log *logger.Lo
 
 // NewForTesting return a new tracer for testing purpose without exporting the trace
 func NewForTesting(ctx context.Context, projectName string, log *logger.Log) (*Tracer, error) {
-	exp, err := newStdOutExporter()
+	// Use a no-op exporter that discards all spans
+	exp, err := newNoOpExporter()
 	if err != nil {
 		return nil, err
 	}
@@ -75,10 +74,19 @@ func (t *Tracer) Shutdown(ctx context.Context) error {
 	return t.TP.Shutdown(ctx)
 }
 
-func newStdOutExporter() (*stdouttrace.Exporter, error) {
-	opts := stdouttrace.WithPrettyPrint()
-	return stdouttrace.New(opts)
+// noOpExporter is an exporter that discards all spans
+type noOpExporter struct{}
 
+func (e *noOpExporter) ExportSpans(ctx context.Context, spans []sdktrace.ReadOnlySpan) error {
+	return nil
+}
+
+func (e *noOpExporter) Shutdown(ctx context.Context) error {
+	return nil
+}
+
+func newNoOpExporter() (sdktrace.SpanExporter, error) {
+	return &noOpExporter{}, nil
 }
 
 func newExporter(ctx context.Context, cfg *model.Cfg) (sdktrace.SpanExporter, error) {

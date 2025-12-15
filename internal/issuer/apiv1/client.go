@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"os"
 	"vc/internal/gen/issuer/apiv1_issuer"
+	"vc/internal/gen/registry/apiv1_registry"
 	"vc/internal/issuer/auditlog"
+	"vc/pkg/grpchelpers"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
@@ -17,6 +19,7 @@ import (
 	"vc/pkg/trace"
 
 	"github.com/golang-jwt/jwt/v5"
+	"google.golang.org/grpc"
 )
 
 //	@title		Issuer API
@@ -25,17 +28,19 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg        *model.Cfg
-	log        *logger.Log
-	tracer     *trace.Tracer
-	auditLog   *auditlog.Service
-	signer     signing.Signer
-	privateKey any // Can be *ecdsa.PrivateKey or *rsa.PrivateKey (legacy, kept for JWK creation)
-	publicKey  any // Can be *ecdsa.PublicKey or *rsa.PublicKey
-	jwkClaim   jwt.MapClaims
-	jwkBytes   []byte
-	jwkProto   *apiv1_issuer.Jwk
-	kid        string
+	cfg            *model.Cfg
+	log            *logger.Log
+	tracer         *trace.Tracer
+	auditLog       *auditlog.Service
+	signer         signing.Signer
+	privateKey     any // Can be *ecdsa.PrivateKey or *rsa.PrivateKey (legacy, kept for JWK creation)
+	publicKey      any // Can be *ecdsa.PublicKey or *rsa.PublicKey
+	jwkClaim       jwt.MapClaims
+	jwkBytes       []byte
+	jwkProto       *apiv1_issuer.Jwk
+	kid            string
+	registryConn   *grpc.ClientConn
+	registryClient apiv1_registry.RegistryServiceClient
 }
 
 // New creates a new instance of the public api
@@ -50,6 +55,10 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 	}
 
 	if err := c.initSigner(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := c.initRegistryClient(ctx); err != nil {
 		return nil, err
 	}
 
@@ -185,4 +194,37 @@ func (c *Client) parsePrivateKey(keyByte []byte) (any, error) {
 	}
 
 	return nil, fmt.Errorf("unable to parse private key in any supported format")
+}
+
+// initRegistryClient initializes the gRPC client connection to the registry service
+func (c *Client) initRegistryClient(ctx context.Context) error {
+	cfg := c.cfg.Issuer.RegistryClient
+	if cfg.Addr == "" {
+		c.log.Info("Registry client not configured, skipping initialization")
+		return nil
+	}
+
+	conn, err := grpchelpers.NewClientConn(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to create registry client connection: %w", err)
+	}
+
+	c.registryConn = conn
+	c.registryClient = apiv1_registry.NewRegistryServiceClient(conn)
+
+	c.log.Info("Registry client initialized", "addr", cfg.Addr, "tls_enabled", cfg.TLS)
+	return nil
+}
+
+// Close closes all client connections
+func (c *Client) Close() error {
+	if c.registryConn != nil {
+		return c.registryConn.Close()
+	}
+	return nil
+}
+
+// RegistryClient returns the registry gRPC client, may be nil if not configured
+func (c *Client) RegistryClient() apiv1_registry.RegistryServiceClient {
+	return c.registryClient
 }

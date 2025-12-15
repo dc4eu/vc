@@ -7,28 +7,7 @@ import (
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/helpers"
 	"vc/pkg/sdjwtvc"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
-
-// GetRequest holds the request
-type GetRequest struct {
-	FirstName       string `json:"first_name"`
-	LastName        string `json:"last_name"`
-	BirthDate       string `json:"birth_date"`
-	AuthenticSource string `json:"authentic_source"`
-}
-
-// GetReply is the reply
-type GetReply struct {
-	JWT string `json:"jwt"`
-}
-
-// Get gets a credential
-func (c *Client) Get(ctx context.Context, indata *GetRequest) (*GetReply, error) {
-	return nil, nil
-}
 
 // CreateCredentialRequest is the request for Credential
 type CreateCredentialRequest struct {
@@ -40,13 +19,17 @@ type CreateCredentialRequest struct {
 // CreateCredentialReply is the reply for Credential
 type CreateCredentialReply struct {
 	//Data *sdjwt.PresentationFlat `json:"data"`
-	Data []*apiv1_issuer.Credential `json:"data"`
+	Data       []*apiv1_issuer.Credential `json:"data"`
+	TSLSection int64                      `json:"tsl_section"`
+	TSLIndex   int64                      `json:"tsl_index"`
 }
 
 // MakeSDJWT creates a credential generically for any credential type
 func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*CreateCredentialReply, error) {
 	ctx, span := c.tracer.Start(ctx, "apiv1:CreateCredential")
 	defer span.End()
+
+	c.log.Debug("MakeSDJWT", "req", req)
 
 	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
 		c.log.Debug("Validation", "err", err)
@@ -71,6 +54,30 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		return nil, fmt.Errorf("document validation failed: %w", err)
 	}
 
+	// Build credential options
+	opts := &sdjwtvc.CredentialOptions{}
+
+	// Call registry to allocate a status list entry for revocation support
+	if c.registryClient == nil {
+		return nil, fmt.Errorf("registry client not configured")
+	}
+
+	grpcReply, err := c.registryClient.TSLAddStatus(ctx, &apiv1_registry.TSLAddStatusRequest{
+		Status: 0, // VALID status for new credential
+	})
+	if err != nil {
+		c.log.Error(err, "failed to get status list entry from registry")
+		return nil, fmt.Errorf("failed to allocate status list entry: %w", err)
+	}
+
+	// Construct status URI based on registry endpoint and section
+	statusURI := fmt.Sprintf("%s/statuslists/%d", c.cfg.Registry.ExternalServerURL, grpcReply.GetSection())
+	opts.TokenStatusList = &sdjwtvc.TokenStatusListReference{
+		Index: grpcReply.GetIndex(),
+		URI:   statusURI,
+	}
+	c.log.Debug("status list entry allocated", "section", grpcReply.GetSection(), "index", grpcReply.GetIndex(), "uri", statusURI)
+
 	// Build SD-JWT using sdjwtvc package with the signer interface
 	sdClient := sdjwtvc.New()
 	token, err := sdClient.BuildCredentialWithSigner(
@@ -81,7 +88,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		req.DocumentData,
 		req.JWK,
 		vctm,
-		nil, // Use default options
+		opts,
 	)
 	if err != nil {
 		c.log.Error(err, "failed to create sdjwt", "scope", req.Scope)
@@ -96,68 +103,10 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 				Credential: token,
 			},
 		},
+		TSLSection: grpcReply.GetSection(),
+		TSLIndex:   grpcReply.GetIndex(),
 	}
 
-	return reply, nil
-}
-
-// RevokeRequest is the request for GenericRevoke
-type RevokeRequest struct {
-	AuthenticSource string `json:"authentic_source"`
-	VCT             string `json:"vct"`
-	DocumentID      string `json:"document_id"`
-	RevocationID    string `json:"revocation_id"`
-}
-
-// RevokeReply is the reply for GenericRevoke
-type RevokeReply struct {
-	Data struct {
-		Status bool `json:"status"`
-	}
-}
-
-// Revoke revokes a document
-//
-//	@Summary		Revoke
-//	@ID				generic-revoke
-//	@Description	Revoke endpoint
-//	@Tags			dc4eu
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	RevokeReply				"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		RevokeRequest			true	" "
-//	@Router			/revoke [post]
-func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
-	ctx, span := c.tracer.Start(ctx, "apiv1:Revoke")
-	defer span.End()
-
-	optInsecure := grpc.WithTransportCredentials(insecure.NewCredentials())
-
-	conn, err := grpc.NewClient(c.cfg.Registry.GRPCServer.Addr, optInsecure)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	client := apiv1_registry.NewRegistryServiceClient(conn)
-	resp, err := client.Revoke(ctx, &apiv1_registry.RevokeRequest{
-		Entity: "mura",
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// AuditLog
-	c.auditLog.AddAuditLog(ctx, "revoke", "mura")
-
-	reply := &RevokeReply{
-		Data: struct {
-			Status bool `json:"status"`
-		}{
-			Status: resp.Status,
-		},
-	}
 	return reply, nil
 }
 

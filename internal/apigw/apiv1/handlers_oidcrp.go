@@ -9,12 +9,11 @@ import (
 	"time"
 
 	apiv1_issuer "vc/internal/gen/issuer/apiv1_issuer"
+	"vc/pkg/grpchelpers"
 	"vc/pkg/oidcrp"
 	"vc/pkg/openid4vci"
 
 	"go.opentelemetry.io/otel/codes"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // OIDCRPInitiateRequest represents the request to initiate OIDC authentication
@@ -158,7 +157,7 @@ func (c *Client) createCredentialViaOIDCRP(ctx context.Context, credentialType s
 	defer span.End()
 
 	// Connect to issuer gRPC service
-	conn, err := grpc.NewClient(c.cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpchelpers.NewClientConn(c.cfg.APIGW.IssuerClient)
 	if err != nil {
 		c.log.Error(err, "Failed to connect to issuer")
 		return "", fmt.Errorf("failed to connect to issuer: %w", err)

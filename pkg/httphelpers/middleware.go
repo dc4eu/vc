@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lithammer/shortuuid/v4"
+	ginratelimit "github.com/ljahier/gin-ratelimit"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
@@ -132,4 +133,23 @@ func (m *middlewareHandler) UserSession(name, authKey, encKey string, opts sessi
 	store := cookie.NewStore([]byte(authKey), []byte(encKey))
 	store.Options(opts)
 	return sessions.Sessions(name, store)
+}
+
+// RateLimiter implements a token bucket rate limiter using gin-ratelimit
+type RateLimiter struct {
+	tokenBucket *ginratelimit.TokenBucket
+}
+
+// NewRateLimiter creates a new rate limiter using token bucket algorithm.
+// requestsPerMinute: maximum requests allowed per minute per IP
+func NewRateLimiter(requestsPerMinute int) *RateLimiter {
+	tb := ginratelimit.NewTokenBucket(requestsPerMinute, 1*time.Minute)
+	return &RateLimiter{
+		tokenBucket: tb,
+	}
+}
+
+// Middleware returns a Gin middleware handler that enforces rate limiting by IP
+func (rl *RateLimiter) Middleware() gin.HandlerFunc {
+	return ginratelimit.RateLimitByIP(rl.tokenBucket)
 }

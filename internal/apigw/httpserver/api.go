@@ -66,10 +66,6 @@ type Apiv1 interface {
 	GetVCTMFromScope(ctx context.Context, req *apiv1.GetVCTMFromScopeRequest) (*sdjwtvc.VCTM, error)
 	SVGTemplateReply(ctx context.Context, req *apiv1.SVGTemplateRequest) (*apiv1.SVGTemplateReply, error)
 
-	// Status lists endpoints
-	StatusLists(ctx context.Context, req *apiv1.StatusListsRequest) (string, error)
-
-
 	// OIDC RP endpoints
 	OIDCRPInitiate(ctx context.Context, req *apiv1.OIDCRPInitiateRequest, oidcrpService interface{}) (*apiv1.OIDCRPInitiateResponse, error)
 	OIDCRPCallback(ctx context.Context, req *apiv1.OIDCRPCallbackRequest, oidcrpService interface{}) (*apiv1.OIDCRPCallbackResponse, error)

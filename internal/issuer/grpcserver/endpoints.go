@@ -18,9 +18,9 @@ func (s *Service) MakeSDJWT(ctx context.Context, in *apiv1_issuer.MakeSDJWTReque
 	}
 
 	return &apiv1_issuer.MakeSDJWTReply{
-		//Jwt:         reply.Data.JWT,
-		//Disclosures: reply.Data.Disclosures,
 		Credentials: reply.Data,
+		TslSection:  reply.TSLSection,
+		TslIndex:    reply.TSLIndex,
 	}, nil
 }
 

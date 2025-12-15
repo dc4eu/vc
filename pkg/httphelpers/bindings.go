@@ -3,12 +3,11 @@ package httphelpers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"reflect"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // bindingHandler is the bindingHandler object for httphelpers
@@ -26,30 +25,40 @@ func (b *bindingHandler) FastAndSimple(ctx context.Context, c *gin.Context, v an
 }
 
 func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) error {
-	//if err := c.ShouldBind(v); err != nil {
-	//	b.log.Debug("error", "error", err)
-	//	return err
-	//}
+	_, span := b.client.tracer.Start(ctx, "httpserver:bindRequest")
+	defer span.End()
 
-	if err := c.BindUri(v); err != nil {
+	// Bind URI parameters (e.g., /path/:id) - without validation
+	if err := c.ShouldBindUri(v); err != nil {
+		// Ignore validation errors from URI binding, only fail on actual binding errors
+		if _, ok := err.(validator.ValidationErrors); !ok {
+			return err
+		}
+	}
+
+	// Bind JSON body if present
+	if c.Request.ContentLength > 0 && c.ContentType() == "application/json" {
+		if err := c.ShouldBindJSON(v); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Bind form data if present (application/x-www-form-urlencoded or multipart/form-data)
+	if c.Request.ContentLength > 0 && (c.ContentType() == "application/x-www-form-urlencoded" || c.ContentType() == "multipart/form-data") {
+		if err := c.ShouldBind(v); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// For non-JSON/form requests, bind query parameters and headers, then validate
+	if err := c.ShouldBindQuery(v); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (b *bindingHandler) RequestV2(ctx context.Context, c *gin.Context, v any) error {
-	typ := reflect.TypeOf(v)
-	fmt.Println("type", typ, typ.Kind())
-
-	for i := 0; i < typ.NumField(); i++ {
-		// Get the field, returns https://golang.org/pkg/reflect/#StructField
-		field := typ.Field(i)
-
-		// Get the field tag value
-		tag := field.Tag.Get("uri")
-
-		fmt.Printf("%d. %v (%v), tag: '%v'\n", i+1, field.Name, field.Type.Name(), tag)
+	if err := c.ShouldBindHeader(v); err != nil {
+		return err
 	}
 
 	return nil

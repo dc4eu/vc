@@ -74,16 +74,20 @@ type QRCfg struct {
 	Size          int `yaml:"size" validate:"required"`
 }
 
-// SMT Spares Merkel Tree configuration
-type SMT struct {
-	UpdatePeriodicity int    `yaml:"update_periodicity" validate:"required"`
-	InitLeaf          string `yaml:"init_leaf" validate:"required"`
-}
-
 // GRPCServer holds the rpc configuration
 type GRPCServer struct {
-	Addr     string `yaml:"addr" validate:"required"`
-	Insecure bool   `yaml:"insecure"`
+	Addr     string  `yaml:"addr" validate:"required"`
+	Insecure bool    `yaml:"insecure"`
+	TLS      GRPCTLS `yaml:"tls,omitempty"`
+}
+
+// GRPCTLS holds the mTLS configuration for gRPC server
+type GRPCTLS struct {
+	Enabled                   bool              `yaml:"enabled"`
+	CertFilePath              string            `yaml:"cert_file_path" validate:"required_if=Enabled true"`              // Server certificate
+	KeyFilePath               string            `yaml:"key_file_path" validate:"required_if=Enabled true"`               // Server private key
+	ClientCAPath              string            `yaml:"client_ca_path" validate:"required_if=Enabled true"`              // CA to verify client certificates (for mTLS)
+	AllowedClientFingerprints map[string]string `yaml:"allowed_client_fingerprints" validate:"required_if=Enabled true"` // SHA256 fingerprint -> friendly name (e.g., "a1b2c3..." -> "issuer-prod")
 }
 
 // PDF holds the pdf configuration (special Ladok case)
@@ -340,14 +344,25 @@ type AttributeConfig struct {
 
 // Issuer holds the issuer configuration
 type Issuer struct {
-	APIServer      APIServer    `yaml:"api_server" validate:"required"`
-	Identifier     string       `yaml:"identifier" validate:"required"`
-	GRPCServer     GRPCServer   `yaml:"grpc_server" validate:"required"`
-	SigningKeyPath string       `yaml:"signing_key_path" validate:"required_without=PKCS11"`
-	PKCS11         *PKCS11      `yaml:"pkcs11" validate:"omitempty"`
-	JWTAttribute   JWTAttribute `yaml:"jwt_attribute" validate:"required"`
-	IssuerURL      string       `yaml:"issuer_url" validate:"required"`
-	WalletURL      string       `yaml:"wallet_url"`
+	APIServer      APIServer     `yaml:"api_server" validate:"required"`
+	Identifier     string        `yaml:"identifier" validate:"required"`
+	GRPCServer     GRPCServer    `yaml:"grpc_server" validate:"required"`
+	SigningKeyPath string        `yaml:"signing_key_path" validate:"required_without=PKCS11"`
+	PKCS11         *PKCS11       `yaml:"pkcs11" validate:"omitempty"`
+	JWTAttribute   JWTAttribute  `yaml:"jwt_attribute" validate:"required"`
+	IssuerURL      string        `yaml:"issuer_url" validate:"required"`
+	WalletURL      string        `yaml:"wallet_url"`
+	RegistryClient GRPCClientTLS `yaml:"registry_client" validate:"omitempty"`
+}
+
+// GRPCClientTLS holds mTLS configuration for gRPC client connections
+type GRPCClientTLS struct {
+	Addr         string `yaml:"addr" validate:"required"` // Registry gRPC server address
+	TLS          bool   `yaml:"tls"`                      // Enable TLS
+	CertFilePath string `yaml:"cert_file_path"`           // Client certificate for mTLS
+	KeyFilePath  string `yaml:"key_file_path"`            // Client private key for mTLS
+	CAFilePath   string `yaml:"ca_file_path"`             // CA certificate to verify server
+	ServerName   string `yaml:"server_name"`              // Server name for TLS verification (optional)
 }
 
 // PKCS11 holds PKCS#11 HSM configuration
@@ -361,9 +376,19 @@ type PKCS11 struct {
 
 // Registry holds the registry configuration
 type Registry struct {
-	APIServer  APIServer  `yaml:"api_server" validate:"required"`
-	SMT        SMT        `yaml:"smt" validate:"required"`
-	GRPCServer GRPCServer `yaml:"grpc_server" validate:"required"`
+	APIServer         APIServer        `yaml:"api_server" validate:"required"`
+	ExternalServerURL string           `yaml:"external_server_url" validate:"required"`
+	GRPCServer        GRPCServer       `yaml:"grpc_server" validate:"required"`
+	TokenStatusLists  TokenStatusLists `yaml:"token_status_lists,omitempty" validate:"omitempty"`
+	AdminGUI          AdminGUI         `yaml:"admin_gui,omitempty" validate:"omitempty"`
+}
+
+// AdminGUI holds the admin GUI configuration
+type AdminGUI struct {
+	Enabled       bool   `yaml:"enabled"`
+	Username      string `yaml:"username" validate:"required_if=Enabled true"`
+	Password      string `yaml:"password" validate:"required_if=Enabled true"`
+	SessionSecret string `yaml:"session_secret" validate:"required_if=Enabled true"` // Secret for session cookies
 }
 
 // Persistent holds the persistent storage configuration
@@ -547,6 +572,20 @@ type APIGW struct {
 	ExternalServerURL string           `yaml:"external_server_url" validate:"required"`
 	SAML              SAMLConfig       `yaml:"saml,omitempty" validate:"omitempty"`
 	OIDCRP            OIDCRPConfig     `yaml:"oidcrp,omitempty" validate:"omitempty"`
+	IssuerClient      GRPCClientTLS    `yaml:"issuer_client" validate:"required"`   // gRPC client config for issuer
+	RegistryClient    GRPCClientTLS    `yaml:"registry_client" validate:"required"` // gRPC client config for registry
+}
+
+// TokenStatusLists holds the configuration for Token Status List (TSL) per draft-ietf-oauth-status-list
+type TokenStatusLists struct {
+	// SigningKeyPath is the path to the ECDSA P-256 private key for signing Status List Tokens.
+	SigningKeyPath string `yaml:"signing_key_path" validate:"required"`
+	// TokenRefreshInterval is how often (in seconds) new Status List Tokens are generated. Default: 43200 (12 hours)
+	TokenRefreshInterval int64 `yaml:"token_refresh_interval" default:"43200"`
+	// SectionSize is the number of entries (decoys) per section. Default: 1000000 (1 million)
+	SectionSize int64 `yaml:"section_size" default:"1000000"`
+	// RateLimitRequestsPerMinute is the maximum requests per minute per IP for statuslists endpoints. Default: 60
+	RateLimitRequestsPerMinute int `yaml:"rate_limit_requests_per_minute" default:"60"`
 }
 
 // OTEL holds the opentelemetry configuration

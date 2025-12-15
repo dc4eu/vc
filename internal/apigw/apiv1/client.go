@@ -7,7 +7,9 @@ import (
 	"crypto/x509"
 	"time"
 	"vc/internal/apigw/db"
-	"vc/internal/apigw/statusissuer"
+	"vc/internal/gen/issuer/apiv1_issuer"
+	"vc/internal/gen/registry/apiv1_registry"
+	"vc/pkg/grpchelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -25,33 +27,45 @@ import (
 
 // Client holds the public api object
 type Client struct {
-	cfg                         *model.Cfg
-	db                          *db.Service
-	log                         *logger.Log
-	tracer                      *trace.Tracer
-	datastoreClient             *vcclient.Client
-	issuerMetadata              *openid4vci.CredentialIssuerMetadataParameters
-	issuerMetadataSigningKey    any
-	issuerMetadataSigningCert   *x509.Certificate
-	issuerMetadataSigningChain  []string
-	oauth2Metadata              *oauth2.AuthorizationServerMetadata
-	oauth2MetadataSigningKey    any
-	oauth2MetadataSigningChain  []string
-	ephemeralEncryptionKeyCache *ttlcache.Cache[string, jwk.Key]
-	svgTemplateCache            *ttlcache.Cache[string, SVGTemplateReply]
-	documentCache               *ttlcache.Cache[string, map[string]model.CompleteDocument]
+	cfg                           *model.Cfg
+	db                            *db.Service
+	authContextStore              db.AuthorizationContextStore
+	usersStore                    db.UsersStore
+	credentialOfferStore          db.CredentialOfferStore
+	datastoreStore                db.DatastoreStore
+	log                           *logger.Log
+	tracer                        *trace.Tracer
+	datastoreClient               *vcclient.Client
+	issuerClient                  apiv1_issuer.IssuerServiceClient
+	registryClient                apiv1_registry.RegistryServiceClient
+	issuerMetadata                *openid4vci.CredentialIssuerMetadataParameters
+	issuerMetadataSigningKey      any
+	issuerMetadataSigningCert     *x509.Certificate
+	issuerMetadataSigningChain    []string
+	oauth2Metadata                *oauth2.AuthorizationServerMetadata
+	oauth2MetadataSigningKey      any
+	oauth2MetadataSigningChain    []string
+	CredentialOfferLookupMetadata *CredentialOfferLookupMetadata
+	ephemeralEncryptionKeyCache   *ttlcache.Cache[string, jwk.Key]
+	svgTemplateCache              *ttlcache.Cache[string, SVGTemplateReply]
+	documentCache                 *ttlcache.Cache[string, map[string]*model.CompleteDocument]
 }
 
 // New creates a new instance of the public api
 func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.Cfg, log *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:                         cfg,
-		db:                          db,
-		log:                         log.New("apiv1"),
-		tracer:                      tracer,
-		ephemeralEncryptionKeyCache: ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
-		svgTemplateCache:            ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
-		documentCache:               ttlcache.New(ttlcache.WithTTL[string, map[string]model.CompleteDocument](5 * time.Minute)),
+		cfg:                           cfg,
+		db:                            db,
+		authContextStore:              db.VCAuthorizationContextColl,
+		usersStore:                    db.VCUsersColl,
+		credentialOfferStore:          db.VCCredentialOfferColl,
+		datastoreStore:                db.VCDatastoreColl,
+		log:                           log.New("apiv1"),
+		tracer:                        tracer,
+		CredentialOfferLookupMetadata: &CredentialOfferLookupMetadata{},
+		ephemeralEncryptionKeyCache:   ttlcache.New(ttlcache.WithTTL[string, jwk.Key](10 * time.Minute)),
+		svgTemplateCache:              ttlcache.New(ttlcache.WithTTL[string, SVGTemplateReply](2 * time.Hour)),
+		documentCache:                 ttlcache.New(ttlcache.WithTTL[string, map[string]*model.CompleteDocument](5 * time.Minute)),
 	}
 
 	// Start the ephemeral encryption key cache
@@ -87,7 +101,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	}
 
 	// Initialize gRPC client for issuer service
-	issuerConn, err := grpc.NewClient(cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	issuerConn, err := grpchelpers.NewClientConn(cfg.APIGW.IssuerClient)
 	if err != nil {
 		c.log.Error(err, "Failed to create gRPC connection to issuer")
 		return nil, err
@@ -95,7 +109,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	c.issuerClient = apiv1_issuer.NewIssuerServiceClient(issuerConn)
 
 	// Initialize gRPC client for registry service
-	registryConn, err := grpc.NewClient(cfg.Registry.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	registryConn, err := grpchelpers.NewClientConn(cfg.APIGW.RegistryClient)
 	if err != nil {
 		c.log.Error(err, "Failed to create gRPC connection to registry")
 		return nil, err

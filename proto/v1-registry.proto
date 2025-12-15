@@ -4,35 +4,43 @@ package v1.registry;
 
 option go_package = "vc/internal/gen/registry/apiv1_registry";
 
-import "v1-status-model.proto";
-
 service RegistryService {
-    rpc Add (AddRequest) returns (AddReply) {}
-    rpc Revoke (RevokeRequest) returns (RevokeReply) {}
-    rpc Validate (ValidateRequest) returns (ValidateReply) {}
-    rpc Status (v1.status.StatusRequest) returns (v1.status.StatusReply) {}
+    // Token Status List operations
+    rpc TSLAddStatus (TSLAddStatusRequest) returns (TSLAddStatusReply) {}
+    rpc TSLUpdateStatus (TSLUpdateStatusRequest) returns (TSLUpdateStatusReply) {}
+    // Credential subject operations
+    rpc SaveCredentialSubject (SaveCredentialSubjectRequest) returns (SaveCredentialSubjectReply) {}
 }
 
-message AddRequest {
-    string Entity = 1;
+// Token Status List messages
+message TSLAddStatusRequest {
+    uint32 Status = 1; // Status value (0=VALID, 1=INVALID, 2=SUSPENDED)
 }
 
-message AddReply {
-    bool Status = 1; 
+message TSLAddStatusReply {
+    int64 Section = 1; // Section where the status was added
+    int64 Index = 2;   // Index within the section
 }
 
-message RevokeRequest {
-    string Entity = 1;
+message TSLUpdateStatusRequest {
+    int64 Section = 1;  // Section ID
+    int64 Index = 2;    // Index within the section
+    uint32 Status = 3;  // New status value (0=VALID, 1=INVALID, 2=SUSPENDED)
 }
 
-message RevokeReply {
-    bool Status = 1;
+message TSLUpdateStatusReply {
+    // Empty reply, success indicated by no error
 }
 
-message ValidateRequest {
-    string Entity = 1;
+// Credential subject messages
+message SaveCredentialSubjectRequest {
+    string FirstName = 1;   // Subject's first name
+    string LastName = 2;    // Subject's last name
+    string DateOfBirth = 3; // Subject's date of birth (YYYY-MM-DD)
+    int64 Section = 4;      // Token Status List section
+    int64 Index = 5;        // Token Status List index
 }
 
-message ValidateReply {
-    bool Valid = 1;
+message SaveCredentialSubjectReply {
+    // Empty reply, success indicated by no error
 }

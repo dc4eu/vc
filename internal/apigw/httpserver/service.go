@@ -146,8 +146,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "authorization/consent/svg-template", http.StatusOK, s.endpointOAuthAuthorizationConsentSvgTemplate)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "token", http.StatusOK, s.endpointOAuthToken)
 
-	s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "statuslists/:id", http.StatusOK, s.endpointStatusLists)
-
 	// Register SAML endpoints if enabled (build tag dependent)
 	s.registerSAMLRoutes(ctx, rgRoot)
 

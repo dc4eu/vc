@@ -1,4 +1,4 @@
-.PHONY : docker-build docker-push release build-issuer-hsm build-apigw-saml build-apigw-oidcrp build-apigw-all test-saml test-oidcrp test-vc20 test-pkcs11 test-all-tags docker-build-apigw-saml docker-build-apigw-oidcrp docker-build-apigw-all docker-build-issuer-hsm pki
+.PHONY : docker-build docker-push release build-issuer-hsm build-apigw-saml build-apigw-oidcrp build-apigw-all test-saml test-oidcrp test-vc20 test-pkcs11 test-all-tags docker-build-apigw-saml docker-build-apigw-oidcrp docker-build-apigw-all docker-build-issuer-hsm pki pki-clean
 
 NAME 					:= vc
 LDFLAGS                 := -ldflags "-w -s --extldflags '-static'"
@@ -10,8 +10,11 @@ W3C_TEST_SUITE_DIR      := /tmp/w3c-test-suite
 
 pki:
 	$(info Setting up PKI)
-	cd pki/; ./create_pki.sh
-	cd developer_tools/; ./gen_ec_sign_key.sh; ./gen_rsa_sign_key.sh
+	./developer_tools/scripts/create_pki.sh
+
+pki-clean:
+	$(info Cleaning PKI material)
+	rm -rf developer_tools/pki
 
 test: test-apigw test-issuer test-mockas test-persistent test-registry test-ui test-verifier test-verifier-proxy
 

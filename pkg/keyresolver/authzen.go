@@ -8,10 +8,8 @@ import (
 	"crypto/ed25519"
 	"fmt"
 
-	"github.com/SUNET/go-trust/pkg/authzen"
-	"github.com/SUNET/go-trust/pkg/authzenclient"
-
-	localAuthzen "vc/pkg/authzen"
+	"github.com/sirosfoundation/go-trust/pkg/authzen"
+	"github.com/sirosfoundation/go-trust/pkg/authzenclient"
 )
 
 // TrustEvaluator validates whether a resolved key should be trusted
@@ -108,40 +106,6 @@ func (g *GoTrustEvaluator) EvaluateTrustECDSAWithContext(ctx context.Context, su
 // GetClient returns the underlying authzenclient.Client.
 func (g *GoTrustEvaluator) GetClient() *authzenclient.Client {
 	return g.client
-}
-
-// AuthZENTrustEvaluator uses the local AuthZEN client for trust evaluation.
-// Deprecated: Use GoTrustEvaluator instead, which provides more features
-// including discovery and better error handling.
-type AuthZENTrustEvaluator struct {
-	client *localAuthzen.Client
-}
-
-// NewAuthZENTrustEvaluator creates a trust evaluator using local AuthZEN client.
-// Deprecated: Use NewGoTrustEvaluator instead.
-func NewAuthZENTrustEvaluator(baseURL string) *AuthZENTrustEvaluator {
-	return &AuthZENTrustEvaluator{
-		client: localAuthzen.NewClient(baseURL),
-	}
-}
-
-// EvaluateTrust validates the name-to-key binding via local AuthZEN client.
-func (a *AuthZENTrustEvaluator) EvaluateTrust(subjectID string, publicKey ed25519.PublicKey, role string) (bool, error) {
-	// Convert Ed25519 public key to JWK format for AuthZEN evaluation
-	jwk := localAuthzen.JWKFromEd25519(publicKey)
-
-	decision, err := a.client.EvaluateJWK(subjectID, jwk, role)
-	if err != nil {
-		return false, fmt.Errorf("authzen trust evaluation failed: %w", err)
-	}
-
-	return decision, nil
-}
-
-// GetClient returns the underlying local AuthZEN client for advanced usage.
-// Deprecated: Use GoTrustEvaluator.GetClient() instead.
-func (a *AuthZENTrustEvaluator) GetClient() *localAuthzen.Client {
-	return a.client
 }
 
 // ValidatingResolver wraps a resolver with trust evaluation

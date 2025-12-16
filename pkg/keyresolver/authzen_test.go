@@ -137,35 +137,6 @@ func TestValidatingResolver_ResolveEd25519_ResolutionError(t *testing.T) {
 	}
 }
 
-func TestAuthZENTrustEvaluator_EvaluateTrust(t *testing.T) {
-	pubKey, _, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		t.Fatalf("failed to generate key: %v", err)
-	}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"decision": true}`))
-	}))
-	defer server.Close()
-
-	evaluator := NewAuthZENTrustEvaluator(server.URL)
-	trusted, err := evaluator.EvaluateTrust("did:web:example.com", pubKey, "")
-	if err != nil {
-		t.Fatalf("failed to evaluate trust: %v", err)
-	}
-	if !trusted {
-		t.Fatal("expected trusted decision")
-	}
-}
-
-func TestAuthZENTrustEvaluator_GetClient(t *testing.T) {
-	evaluator := NewAuthZENTrustEvaluator("https://pdp.example.com")
-	if evaluator.GetClient() == nil {
-		t.Fatal("expected non-nil client")
-	}
-}
-
 // mockTrustEvaluator is a test helper
 type mockTrustEvaluator struct {
 	decision bool

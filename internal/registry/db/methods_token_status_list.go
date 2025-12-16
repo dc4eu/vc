@@ -11,6 +11,8 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
+const maxRandomLimit int = 3
+
 // TokenStatusListColl is the collection for status list
 type TokenStatusListColl struct {
 	Service *Service
@@ -139,7 +141,7 @@ func (c *TokenStatusListColl) CreateNewSection(ctx context.Context, section int6
 	for i := int64(0); i < sectionSize; i++ {
 		docs = append(docs, &TokenStatusListDoc{
 			Index:   i,
-			Status:  uint8(rand.IntN(3)),
+			Status:  uint8(rand.IntN(maxRandomLimit)),
 			Decoy:   true,
 			Section: int64(section),
 		})
@@ -217,7 +219,7 @@ func (c *TokenStatusListColl) Add(ctx context.Context, section int64, status uin
 		}
 
 		filter := bson.M{"index": decoy.Index, "section": section}
-		updateDoc := bson.M{"$set": bson.M{"status": rand.Int64N(3)}}
+		updateDoc := bson.M{"$set": bson.M{"status": rand.IntN(maxRandomLimit)}}
 
 		_, err := c.Coll.UpdateOne(ctx, filter, updateDoc)
 		if err != nil {

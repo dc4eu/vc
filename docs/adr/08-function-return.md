@@ -2,7 +2,7 @@
 
 ## Decision
 
-We want to return a variable, if applicable named reply
+When returning a single variable use the name "reply" unless the context makes this inappropriate.
 
 ## Rationale
 

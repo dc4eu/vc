@@ -12,7 +12,7 @@ type SearchPersonRequest struct {
 	DateOfBirth string `form:"date_of_birth"`
 }
 
-// PersonResult represents a person with their TSL info and current status
+// PersonResult represents a person with their Token Status List info and current status
 type PersonResult struct {
 	FirstName   string
 	LastName    string
@@ -49,11 +49,11 @@ func (c *Client) SearchPerson(ctx context.Context, req *SearchPersonRequest) (*S
 			Index:       doc.Index,
 		}
 
-		// Fetch current status from TSL
+		// Fetch current status from Token Status List
 		if c.adminDB != nil {
-			tslDoc, err := c.adminDB.FindOne(ctx, doc.Section, doc.Index)
-			if err == nil && tslDoc != nil {
-				result.Status = tslDoc.Status
+			tokenStatusListDoc, err := c.adminDB.FindOne(ctx, doc.Section, doc.Index)
+			if err == nil && tokenStatusListDoc != nil {
+				result.Status = tokenStatusListDoc.Status
 			}
 		}
 
@@ -74,7 +74,7 @@ type UpdateStatusRequest struct {
 	SearchDateOfBirth string `form:"search_date_of_birth"`
 }
 
-// UpdateStatus updates the status of a credential in the TSL
+// UpdateStatus updates the status of a credential in the Token Status List
 func (c *Client) UpdateStatus(ctx context.Context, req *UpdateStatusRequest) error {
 	if c.adminDB == nil {
 		return fmt.Errorf("database not configured")
@@ -85,9 +85,9 @@ func (c *Client) UpdateStatus(ctx context.Context, req *UpdateStatusRequest) err
 		return err
 	}
 
-	// Invalidate the TSL cache for this section so changes are reflected
-	if c.tslIssuer != nil {
-		if invalidator, ok := c.tslIssuer.(interface{ InvalidateSection(int64) }); ok {
+	// Invalidate the Token Status List cache for this section so changes are reflected
+	if c.tokenStatusListIssuer != nil {
+		if invalidator, ok := c.tokenStatusListIssuer.(interface{ InvalidateSection(int64) }); ok {
 			invalidator.InvalidateSection(req.Section)
 		}
 	}

@@ -76,7 +76,7 @@ func ParseKeyFromFile(path string) (any, error) {
 	}
 	block, rest := pem.Decode([]byte(pemData))
 	if block == nil || len(rest) > 0 {
-		return nil, fmt.Errorf("failed to decode PEM block from file: %s", path)
+		return nil, errors.New("failed to decode PEM block from file")
 	}
 
 	// Support multiple key formats

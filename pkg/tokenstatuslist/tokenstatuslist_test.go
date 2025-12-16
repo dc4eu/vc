@@ -1,4 +1,4 @@
-package tsl
+package tokenstatuslist
 
 import (
 	"crypto/ecdsa"

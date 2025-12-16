@@ -22,27 +22,27 @@ const (
 )
 
 // Token Status List messages
-type TSLAddStatusRequest struct {
+type TokenStatusListAddStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        uint32                 `protobuf:"varint,1,opt,name=Status,proto3" json:"Status,omitempty"` // Status value (0=VALID, 1=INVALID, 2=SUSPENDED)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TSLAddStatusRequest) Reset() {
-	*x = TSLAddStatusRequest{}
+func (x *TokenStatusListAddStatusRequest) Reset() {
+	*x = TokenStatusListAddStatusRequest{}
 	mi := &file_v1_registry_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TSLAddStatusRequest) String() string {
+func (x *TokenStatusListAddStatusRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TSLAddStatusRequest) ProtoMessage() {}
+func (*TokenStatusListAddStatusRequest) ProtoMessage() {}
 
-func (x *TSLAddStatusRequest) ProtoReflect() protoreflect.Message {
+func (x *TokenStatusListAddStatusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,19 +54,19 @@ func (x *TSLAddStatusRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TSLAddStatusRequest.ProtoReflect.Descriptor instead.
-func (*TSLAddStatusRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use TokenStatusListAddStatusRequest.ProtoReflect.Descriptor instead.
+func (*TokenStatusListAddStatusRequest) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *TSLAddStatusRequest) GetStatus() uint32 {
+func (x *TokenStatusListAddStatusRequest) GetStatus() uint32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-type TSLAddStatusReply struct {
+type TokenStatusListAddStatusReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Section       int64                  `protobuf:"varint,1,opt,name=Section,proto3" json:"Section,omitempty"` // Section where the status was added
 	Index         int64                  `protobuf:"varint,2,opt,name=Index,proto3" json:"Index,omitempty"`     // Index within the section
@@ -74,20 +74,20 @@ type TSLAddStatusReply struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TSLAddStatusReply) Reset() {
-	*x = TSLAddStatusReply{}
+func (x *TokenStatusListAddStatusReply) Reset() {
+	*x = TokenStatusListAddStatusReply{}
 	mi := &file_v1_registry_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TSLAddStatusReply) String() string {
+func (x *TokenStatusListAddStatusReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TSLAddStatusReply) ProtoMessage() {}
+func (*TokenStatusListAddStatusReply) ProtoMessage() {}
 
-func (x *TSLAddStatusReply) ProtoReflect() protoreflect.Message {
+func (x *TokenStatusListAddStatusReply) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -99,26 +99,26 @@ func (x *TSLAddStatusReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TSLAddStatusReply.ProtoReflect.Descriptor instead.
-func (*TSLAddStatusReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use TokenStatusListAddStatusReply.ProtoReflect.Descriptor instead.
+func (*TokenStatusListAddStatusReply) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *TSLAddStatusReply) GetSection() int64 {
+func (x *TokenStatusListAddStatusReply) GetSection() int64 {
 	if x != nil {
 		return x.Section
 	}
 	return 0
 }
 
-func (x *TSLAddStatusReply) GetIndex() int64 {
+func (x *TokenStatusListAddStatusReply) GetIndex() int64 {
 	if x != nil {
 		return x.Index
 	}
 	return 0
 }
 
-type TSLUpdateStatusRequest struct {
+type TokenStatusListUpdateStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Section       int64                  `protobuf:"varint,1,opt,name=Section,proto3" json:"Section,omitempty"` // Section ID
 	Index         int64                  `protobuf:"varint,2,opt,name=Index,proto3" json:"Index,omitempty"`     // Index within the section
@@ -127,20 +127,20 @@ type TSLUpdateStatusRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TSLUpdateStatusRequest) Reset() {
-	*x = TSLUpdateStatusRequest{}
+func (x *TokenStatusListUpdateStatusRequest) Reset() {
+	*x = TokenStatusListUpdateStatusRequest{}
 	mi := &file_v1_registry_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TSLUpdateStatusRequest) String() string {
+func (x *TokenStatusListUpdateStatusRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TSLUpdateStatusRequest) ProtoMessage() {}
+func (*TokenStatusListUpdateStatusRequest) ProtoMessage() {}
 
-func (x *TSLUpdateStatusRequest) ProtoReflect() protoreflect.Message {
+func (x *TokenStatusListUpdateStatusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -152,52 +152,52 @@ func (x *TSLUpdateStatusRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TSLUpdateStatusRequest.ProtoReflect.Descriptor instead.
-func (*TSLUpdateStatusRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use TokenStatusListUpdateStatusRequest.ProtoReflect.Descriptor instead.
+func (*TokenStatusListUpdateStatusRequest) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *TSLUpdateStatusRequest) GetSection() int64 {
+func (x *TokenStatusListUpdateStatusRequest) GetSection() int64 {
 	if x != nil {
 		return x.Section
 	}
 	return 0
 }
 
-func (x *TSLUpdateStatusRequest) GetIndex() int64 {
+func (x *TokenStatusListUpdateStatusRequest) GetIndex() int64 {
 	if x != nil {
 		return x.Index
 	}
 	return 0
 }
 
-func (x *TSLUpdateStatusRequest) GetStatus() uint32 {
+func (x *TokenStatusListUpdateStatusRequest) GetStatus() uint32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-type TSLUpdateStatusReply struct {
+type TokenStatusListUpdateStatusReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TSLUpdateStatusReply) Reset() {
-	*x = TSLUpdateStatusReply{}
+func (x *TokenStatusListUpdateStatusReply) Reset() {
+	*x = TokenStatusListUpdateStatusReply{}
 	mi := &file_v1_registry_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TSLUpdateStatusReply) String() string {
+func (x *TokenStatusListUpdateStatusReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TSLUpdateStatusReply) ProtoMessage() {}
+func (*TokenStatusListUpdateStatusReply) ProtoMessage() {}
 
-func (x *TSLUpdateStatusReply) ProtoReflect() protoreflect.Message {
+func (x *TokenStatusListUpdateStatusReply) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -209,8 +209,8 @@ func (x *TSLUpdateStatusReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TSLUpdateStatusReply.ProtoReflect.Descriptor instead.
-func (*TSLUpdateStatusReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use TokenStatusListUpdateStatusReply.ProtoReflect.Descriptor instead.
+func (*TokenStatusListUpdateStatusReply) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{3}
 }
 
@@ -331,27 +331,27 @@ var File_v1_registry_proto protoreflect.FileDescriptor
 
 const file_v1_registry_proto_rawDesc = "" +
 	"\n" +
-	"\x11v1-registry.proto\x12\vv1.registry\"-\n" +
-	"\x13TSLAddStatusRequest\x12\x16\n" +
-	"\x06Status\x18\x01 \x01(\rR\x06Status\"C\n" +
-	"\x11TSLAddStatusReply\x12\x18\n" +
+	"\x11v1-registry.proto\x12\vv1.registry\"9\n" +
+	"\x1fTokenStatusListAddStatusRequest\x12\x16\n" +
+	"\x06Status\x18\x01 \x01(\rR\x06Status\"O\n" +
+	"\x1dTokenStatusListAddStatusReply\x12\x18\n" +
 	"\aSection\x18\x01 \x01(\x03R\aSection\x12\x14\n" +
-	"\x05Index\x18\x02 \x01(\x03R\x05Index\"`\n" +
-	"\x16TSLUpdateStatusRequest\x12\x18\n" +
+	"\x05Index\x18\x02 \x01(\x03R\x05Index\"l\n" +
+	"\"TokenStatusListUpdateStatusRequest\x12\x18\n" +
 	"\aSection\x18\x01 \x01(\x03R\aSection\x12\x14\n" +
 	"\x05Index\x18\x02 \x01(\x03R\x05Index\x12\x16\n" +
-	"\x06Status\x18\x03 \x01(\rR\x06Status\"\x16\n" +
-	"\x14TSLUpdateStatusReply\"\xaa\x01\n" +
+	"\x06Status\x18\x03 \x01(\rR\x06Status\"\"\n" +
+	" TokenStatusListUpdateStatusReply\"\xaa\x01\n" +
 	"\x1cSaveCredentialSubjectRequest\x12\x1c\n" +
 	"\tFirstName\x18\x01 \x01(\tR\tFirstName\x12\x1a\n" +
 	"\bLastName\x18\x02 \x01(\tR\bLastName\x12 \n" +
 	"\vDateOfBirth\x18\x03 \x01(\tR\vDateOfBirth\x12\x18\n" +
 	"\aSection\x18\x04 \x01(\x03R\aSection\x12\x14\n" +
 	"\x05Index\x18\x05 \x01(\x03R\x05Index\"\x1c\n" +
-	"\x1aSaveCredentialSubjectReply2\xb1\x02\n" +
-	"\x0fRegistryService\x12R\n" +
-	"\fTSLAddStatus\x12 .v1.registry.TSLAddStatusRequest\x1a\x1e.v1.registry.TSLAddStatusReply\"\x00\x12[\n" +
-	"\x0fTSLUpdateStatus\x12#.v1.registry.TSLUpdateStatusRequest\x1a!.v1.registry.TSLUpdateStatusReply\"\x00\x12m\n" +
+	"\x1aSaveCredentialSubjectReply2\xf9\x02\n" +
+	"\x0fRegistryService\x12v\n" +
+	"\x18TokenStatusListAddStatus\x12,.v1.registry.TokenStatusListAddStatusRequest\x1a*.v1.registry.TokenStatusListAddStatusReply\"\x00\x12\x7f\n" +
+	"\x1bTokenStatusListUpdateStatus\x12/.v1.registry.TokenStatusListUpdateStatusRequest\x1a-.v1.registry.TokenStatusListUpdateStatusReply\"\x00\x12m\n" +
 	"\x15SaveCredentialSubject\x12).v1.registry.SaveCredentialSubjectRequest\x1a'.v1.registry.SaveCredentialSubjectReply\"\x00B)Z'vc/internal/gen/registry/apiv1_registryb\x06proto3"
 
 var (
@@ -368,19 +368,19 @@ func file_v1_registry_proto_rawDescGZIP() []byte {
 
 var file_v1_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_v1_registry_proto_goTypes = []any{
-	(*TSLAddStatusRequest)(nil),          // 0: v1.registry.TSLAddStatusRequest
-	(*TSLAddStatusReply)(nil),            // 1: v1.registry.TSLAddStatusReply
-	(*TSLUpdateStatusRequest)(nil),       // 2: v1.registry.TSLUpdateStatusRequest
-	(*TSLUpdateStatusReply)(nil),         // 3: v1.registry.TSLUpdateStatusReply
-	(*SaveCredentialSubjectRequest)(nil), // 4: v1.registry.SaveCredentialSubjectRequest
-	(*SaveCredentialSubjectReply)(nil),   // 5: v1.registry.SaveCredentialSubjectReply
+	(*TokenStatusListAddStatusRequest)(nil),    // 0: v1.registry.TokenStatusListAddStatusRequest
+	(*TokenStatusListAddStatusReply)(nil),      // 1: v1.registry.TokenStatusListAddStatusReply
+	(*TokenStatusListUpdateStatusRequest)(nil), // 2: v1.registry.TokenStatusListUpdateStatusRequest
+	(*TokenStatusListUpdateStatusReply)(nil),   // 3: v1.registry.TokenStatusListUpdateStatusReply
+	(*SaveCredentialSubjectRequest)(nil),       // 4: v1.registry.SaveCredentialSubjectRequest
+	(*SaveCredentialSubjectReply)(nil),         // 5: v1.registry.SaveCredentialSubjectReply
 }
 var file_v1_registry_proto_depIdxs = []int32{
-	0, // 0: v1.registry.RegistryService.TSLAddStatus:input_type -> v1.registry.TSLAddStatusRequest
-	2, // 1: v1.registry.RegistryService.TSLUpdateStatus:input_type -> v1.registry.TSLUpdateStatusRequest
+	0, // 0: v1.registry.RegistryService.TokenStatusListAddStatus:input_type -> v1.registry.TokenStatusListAddStatusRequest
+	2, // 1: v1.registry.RegistryService.TokenStatusListUpdateStatus:input_type -> v1.registry.TokenStatusListUpdateStatusRequest
 	4, // 2: v1.registry.RegistryService.SaveCredentialSubject:input_type -> v1.registry.SaveCredentialSubjectRequest
-	1, // 3: v1.registry.RegistryService.TSLAddStatus:output_type -> v1.registry.TSLAddStatusReply
-	3, // 4: v1.registry.RegistryService.TSLUpdateStatus:output_type -> v1.registry.TSLUpdateStatusReply
+	1, // 3: v1.registry.RegistryService.TokenStatusListAddStatus:output_type -> v1.registry.TokenStatusListAddStatusReply
+	3, // 4: v1.registry.RegistryService.TokenStatusListUpdateStatus:output_type -> v1.registry.TokenStatusListUpdateStatusReply
 	5, // 5: v1.registry.RegistryService.SaveCredentialSubject:output_type -> v1.registry.SaveCredentialSubjectReply
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type

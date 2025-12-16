@@ -9,7 +9,7 @@ import (
 	"vc/internal/registry/db"
 	"vc/internal/registry/grpcserver"
 	"vc/internal/registry/httpserver"
-	"vc/internal/registry/tslissuer"
+	"vc/internal/registry/tokenstatuslistissuer"
 	"vc/pkg/configuration"
 	"vc/pkg/logger"
 	"vc/pkg/trace"
@@ -50,18 +50,18 @@ func main() {
 		panic(err)
 	}
 
-	tslIssuerService, err := tslissuer.New(ctx, cfg, dbService, log)
-	services["tslIssuerService"] = tslIssuerService
+	tokenStatusListIssuerService, err := tokenstatuslistissuer.New(ctx, cfg, dbService, log)
+	services["tokenStatusListIssuerService"] = tokenStatusListIssuerService
 	if err != nil {
 		panic(err)
 	}
 
-	apiv1Client, err := apiv1.New(ctx, cfg, tslIssuerService, dbService, log)
+	apiv1Client, err := apiv1.New(ctx, cfg, tokenStatusListIssuerService, dbService, log)
 	if err != nil {
 		panic(err)
 	}
 
-	grpcService, err := grpcserver.New(ctx, tslIssuerService, apiv1Client, cfg, log)
+	grpcService, err := grpcserver.New(ctx, tokenStatusListIssuerService, apiv1Client, cfg, log)
 	services["grpcService"] = grpcService
 	if err != nil {
 		panic(err)

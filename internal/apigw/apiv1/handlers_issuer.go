@@ -160,8 +160,8 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			FirstName:   identity.GivenName,
 			LastName:    identity.FamilyName,
 			DateOfBirth: identity.BirthDate,
-			Section:     reply.TslSection,
-			Index:       reply.TslIndex,
+			Section:     reply.TokenStatusListSection,
+			Index:       reply.TokenStatusListIndex,
 		})
 		if err != nil {
 			c.log.Error(err, "failed to save credential subject to registry")

@@ -11,24 +11,26 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-// TSLColl is the collection for status list
-type TSLColl struct {
+const maxRandomLimit int = 3
+
+// TokenStatusListColl is the collection for status list
+type TokenStatusListColl struct {
 	Service *Service
 	Coll    *mongo.Collection
 	log     *logger.Log
 }
 
-// TSLDoc represents a document in the Token Status List document
-type TSLDoc struct {
+// TokenStatusListDoc represents a document in the Token Status List document
+type TokenStatusListDoc struct {
 	Index   int64 `bson:"index"`
 	Status  uint8 `bson:"status"`
 	Decoy   bool  `bson:"decoy"`
 	Section int64 `bson:"section"`
 }
 
-// NewTSLColl creates a new Token Status List coll
-func NewTSLColl(ctx context.Context, collName string, service *Service, log *logger.Log) (*TSLColl, error) {
-	c := &TSLColl{
+// NewTokenStatusListColl creates a new Token Status List coll
+func NewTokenStatusListColl(ctx context.Context, collName string, service *Service, log *logger.Log) (*TokenStatusListColl, error) {
+	c := &TokenStatusListColl{
 		log:     log,
 		Service: service,
 	}
@@ -45,8 +47,8 @@ func NewTSLColl(ctx context.Context, collName string, service *Service, log *log
 }
 
 // InitializeIfEmpty checks if the collection is empty and initializes it with sample data
-func (c *TSLColl) InitializeIfEmpty(ctx context.Context) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:initializeIfEmpty")
+func (c *TokenStatusListColl) InitializeIfEmpty(ctx context.Context) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:initializeIfEmpty")
 	defer span.End()
 
 	count, err := c.CountDocs(ctx, bson.M{})
@@ -73,8 +75,8 @@ func (c *TSLColl) InitializeIfEmpty(ctx context.Context) error {
 	return nil
 }
 
-func (c *TSLColl) createIndex(ctx context.Context) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:createIndex")
+func (c *TokenStatusListColl) createIndex(ctx context.Context) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:createIndex")
 	defer span.End()
 
 	indexUniq := mongo.IndexModel{
@@ -93,8 +95,8 @@ func (c *TSLColl) createIndex(ctx context.Context) error {
 }
 
 // CountDocs counts documents matching the filter
-func (c *TSLColl) CountDocs(ctx context.Context, filter bson.M) (int64, error) {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:countDocs")
+func (c *TokenStatusListColl) CountDocs(ctx context.Context, filter bson.M) (int64, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:countDocs")
 	defer span.End()
 
 	count, err := c.Coll.CountDocuments(ctx, filter)
@@ -107,13 +109,13 @@ func (c *TSLColl) CountDocs(ctx context.Context, filter bson.M) (int64, error) {
 }
 
 // FindOne finds a single status entry by section and index
-func (c *TSLColl) FindOne(ctx context.Context, section, index int64) (*TSLDoc, error) {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:findOne")
+func (c *TokenStatusListColl) FindOne(ctx context.Context, section, index int64) (*TokenStatusListDoc, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:findOne")
 	defer span.End()
 
 	filter := bson.M{"section": section, "index": index}
 
-	var doc TSLDoc
+	var doc TokenStatusListDoc
 	err := c.Coll.FindOne(ctx, filter).Decode(&doc)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
@@ -126,8 +128,8 @@ func (c *TSLColl) FindOne(ctx context.Context, section, index int64) (*TSLDoc, e
 
 // CreateNewSection creates a new section with decoy entries.
 // If sectionSize is 0 or negative, it defaults to 500,000.
-func (c *TSLColl) CreateNewSection(ctx context.Context, section int64, sectionSize int64) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:createNewSection")
+func (c *TokenStatusListColl) CreateNewSection(ctx context.Context, section int64, sectionSize int64) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:createNewSection")
 	defer span.End()
 
 	// Default to 500,000 if not set
@@ -135,11 +137,11 @@ func (c *TSLColl) CreateNewSection(ctx context.Context, section int64, sectionSi
 		sectionSize = 500000
 	}
 
-	docs := []*TSLDoc{}
+	docs := []*TokenStatusListDoc{}
 	for i := int64(0); i < sectionSize; i++ {
-		docs = append(docs, &TSLDoc{
+		docs = append(docs, &TokenStatusListDoc{
 			Index:   i,
-			Status:  uint8(rand.IntN(3)),
+			Status:  uint8(rand.IntN(maxRandomLimit)),
 			Decoy:   true,
 			Section: int64(section),
 		})
@@ -156,8 +158,8 @@ func (c *TSLColl) CreateNewSection(ctx context.Context, section int64, sectionSi
 	return nil
 }
 
-func (c *TSLColl) getRandomDecoys(ctx context.Context, section int64) ([]TSLDoc, error) {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:getRandomDecoyIndexes")
+func (c *TokenStatusListColl) getRandomDecoys(ctx context.Context, section int64) ([]TokenStatusListDoc, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:getRandomDecoyIndexes")
 	defer span.End()
 	match := bson.D{{Key: "section", Value: section}, {Key: "decoy", Value: true}}
 	sample := bson.M{"size": 10}
@@ -174,7 +176,7 @@ func (c *TSLColl) getRandomDecoys(ctx context.Context, section int64) ([]TSLDoc,
 		return nil, err
 	}
 
-	var docs []TSLDoc
+	var docs []TokenStatusListDoc
 	if err = cursor.All(ctx, &docs); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		c.log.Error(err, "cant decode decoy indexes")
@@ -185,8 +187,8 @@ func (c *TSLColl) getRandomDecoys(ctx context.Context, section int64) ([]TSLDoc,
 }
 
 // Add adds a new status to the status list collection, return index of the added status or an error
-func (c *TSLColl) Add(ctx context.Context, section int64, status uint8) (int64, error) {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:add")
+func (c *TokenStatusListColl) Add(ctx context.Context, section int64, status uint8) (int64, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:add")
 	defer span.End()
 
 	decoys, err := c.getRandomDecoys(ctx, section)
@@ -196,8 +198,8 @@ func (c *TSLColl) Add(ctx context.Context, section int64, status uint8) (int64, 
 
 	c.log.Debug("add", "decoys", decoys)
 
-	doc := &TSLDoc{
-		Index:   decoys[rand.IntN(len(decoys)-1)].Index,
+	doc := &TokenStatusListDoc{
+		Index:   decoys[rand.IntN(len(decoys))].Index,
 		Status:  status,
 		Decoy:   false,
 		Section: section,
@@ -217,7 +219,7 @@ func (c *TSLColl) Add(ctx context.Context, section int64, status uint8) (int64, 
 		}
 
 		filter := bson.M{"index": decoy.Index, "section": section}
-		updateDoc := bson.M{"$set": bson.M{"status": rand.Int64N(3)}}
+		updateDoc := bson.M{"$set": bson.M{"status": rand.IntN(maxRandomLimit)}}
 
 		_, err := c.Coll.UpdateOne(ctx, filter, updateDoc)
 		if err != nil {
@@ -232,8 +234,8 @@ func (c *TSLColl) Add(ctx context.Context, section int64, status uint8) (int64, 
 
 // GetAllStatusesForSection retrieves all status entries for a given section, ordered by index.
 // Returns a slice of status values (uint8) suitable for encoding into a Status List Token.
-func (c *TSLColl) GetAllStatusesForSection(ctx context.Context, section int64) ([]uint8, error) {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:getAllStatusesForSection")
+func (c *TokenStatusListColl) GetAllStatusesForSection(ctx context.Context, section int64) ([]uint8, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:getAllStatusesForSection")
 	defer span.End()
 
 	filter := bson.M{"section": section}
@@ -247,7 +249,7 @@ func (c *TSLColl) GetAllStatusesForSection(ctx context.Context, section int64) (
 	}
 	defer cursor.Close(ctx)
 
-	var docs []TSLDoc
+	var docs []TokenStatusListDoc
 	if err = cursor.All(ctx, &docs); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		c.log.Error(err, "cant decode statuses", "section", section)
@@ -263,8 +265,8 @@ func (c *TSLColl) GetAllStatusesForSection(ctx context.Context, section int64) (
 }
 
 // UpdateStatus updates the status of an existing entry at the given section and index.
-func (c *TSLColl) UpdateStatus(ctx context.Context, section int64, index int64, status uint8) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl:updateStatus")
+func (c *TokenStatusListColl) UpdateStatus(ctx context.Context, section int64, index int64, status uint8) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list:updateStatus")
 	defer span.End()
 
 	filter := bson.M{"section": section, "index": index}

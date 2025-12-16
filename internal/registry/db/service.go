@@ -20,10 +20,10 @@ type Service struct {
 	log         *logger.Log
 	cfg         *model.Cfg
 
-	// Status List collections (MongoDB)
-	TSLColl            *TSLColl
-	TSLMetadata        *TSLMetadataColl
-	CredentialSubjects *CredentialSubjectsColl
+	// Token Status List collections (MongoDB)
+	TokenStatusListColl         *TokenStatusListColl
+	TokenStatusListMetadata     *TokenStatusListMetadataColl
+	CredentialSubjects          *CredentialSubjectsColl
 }
 
 // New creates a new database service
@@ -39,14 +39,14 @@ func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.
 		return nil, err
 	}
 
-	// Initialize Status List collections
+	// Initialize Token Status List collections
 	var err error
-	s.TSLColl, err = NewTSLColl(ctx, "tsl", s, log.New("tsl"))
+	s.TokenStatusListColl, err = NewTokenStatusListColl(ctx, "token_status_list", s, log.New("token_status_list"))
 	if err != nil {
 		return nil, err
 	}
 
-	s.TSLMetadata, err = NewTSLMetadataColl(ctx, "tsl_metadata", s, log.New("tsl_metadata"))
+	s.TokenStatusListMetadata, err = NewTokenStatusListMetadataColl(ctx, "token_status_list_metadata", s, log.New("token_status_list_metadata"))
 	if err != nil {
 		return nil, err
 	}

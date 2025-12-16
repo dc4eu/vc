@@ -20,13 +20,13 @@ func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, erro
 // endpointStatusLists handles GET /statuslists/:id
 // Returns a Status List Token (JWT or CWT) for the specified section.
 func (s *Service) endpointStatusLists(ctx context.Context, c *gin.Context) (any, error) {
-	request := &apiv1.StatusListsRequest{}
+	request := &apiv1.TokenStatusListsRequest{}
 
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		return nil, err
 	}
 
-	reply, err := s.apiv1.StatusLists(ctx, request)
+	reply, err := s.apiv1.TokenStatusLists(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -37,10 +37,10 @@ func (s *Service) endpointStatusLists(ctx context.Context, c *gin.Context) (any,
 	return reply, nil
 }
 
-// endpointStatusListAggregation handles GET /.well-known/statuslist-aggregation
+// endpointTokenStatusListAggregation handles GET /.well-known/statuslist-aggregation
 // Returns a JSON array of URIs linking to all Status List Tokens.
-func (s *Service) endpointStatusListAggregation(ctx context.Context, c *gin.Context) (any, error) {
-	reply, err := s.apiv1.StatusListAggregation(ctx)
+func (s *Service) endpointTokenStatusListAggregation(ctx context.Context, c *gin.Context) (any, error) {
+	reply, err := s.apiv1.TokenStatusListAggregation(ctx)
 	if err != nil {
 		return nil, err
 	}

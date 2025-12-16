@@ -82,12 +82,12 @@ func (x *MakeSDJWTRequest) GetJwk() *Jwk {
 }
 
 type MakeSDJWTReply struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Credentials   []*Credential          `protobuf:"bytes,1,rep,name=credentials,proto3" json:"credentials,omitempty"`
-	TslSection    int64                  `protobuf:"varint,2,opt,name=tsl_section,json=tslSection,proto3" json:"tsl_section,omitempty"` // Token Status List section
-	TslIndex      int64                  `protobuf:"varint,3,opt,name=tsl_index,json=tslIndex,proto3" json:"tsl_index,omitempty"`       // Token Status List index
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	Credentials            []*Credential          `protobuf:"bytes,1,rep,name=credentials,proto3" json:"credentials,omitempty"`
+	TokenStatusListSection int64                  `protobuf:"varint,2,opt,name=token_status_list_section,json=tokenStatusListSection,proto3" json:"token_status_list_section,omitempty"` // Token Status List section
+	TokenStatusListIndex   int64                  `protobuf:"varint,3,opt,name=token_status_list_index,json=tokenStatusListIndex,proto3" json:"token_status_list_index,omitempty"`       // Token Status List index
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *MakeSDJWTReply) Reset() {
@@ -127,16 +127,16 @@ func (x *MakeSDJWTReply) GetCredentials() []*Credential {
 	return nil
 }
 
-func (x *MakeSDJWTReply) GetTslSection() int64 {
+func (x *MakeSDJWTReply) GetTokenStatusListSection() int64 {
 	if x != nil {
-		return x.TslSection
+		return x.TokenStatusListSection
 	}
 	return 0
 }
 
-func (x *MakeSDJWTReply) GetTslIndex() int64 {
+func (x *MakeSDJWTReply) GetTokenStatusListIndex() int64 {
 	if x != nil {
-		return x.TslIndex
+		return x.TokenStatusListIndex
 	}
 	return 0
 }
@@ -425,12 +425,11 @@ const file_v1_issuer_proto_rawDesc = "" +
 	"\x10MakeSDJWTRequest\x12\x14\n" +
 	"\x05scope\x18\x01 \x01(\tR\x05scope\x12\"\n" +
 	"\fdocumentData\x18\x02 \x01(\fR\fdocumentData\x12 \n" +
-	"\x03jwk\x18\x03 \x01(\v2\x0e.v1.issuer.jwkR\x03jwk\"\x87\x01\n" +
+	"\x03jwk\x18\x03 \x01(\v2\x0e.v1.issuer.jwkR\x03jwk\"\xbb\x01\n" +
 	"\x0eMakeSDJWTReply\x127\n" +
-	"\vcredentials\x18\x01 \x03(\v2\x15.v1.issuer.CredentialR\vcredentials\x12\x1f\n" +
-	"\vtsl_section\x18\x02 \x01(\x03R\n" +
-	"tslSection\x12\x1b\n" +
-	"\ttsl_index\x18\x03 \x01(\x03R\btslIndex\",\n" +
+	"\vcredentials\x18\x01 \x03(\v2\x15.v1.issuer.CredentialR\vcredentials\x129\n" +
+	"\x19token_status_list_section\x18\x02 \x01(\x03R\x16tokenStatusListSection\x125\n" +
+	"\x17token_status_list_index\x18\x03 \x01(\x03R\x14tokenStatusListIndex\",\n" +
 	"\n" +
 	"Credential\x12\x1e\n" +
 	"\n" +

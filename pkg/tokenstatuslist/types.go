@@ -1,8 +1,8 @@
-// Package tsl provides types and functions for Token Status List (TSL) operations
+// Package tokenstatuslist provides types and functions for Token Status List operations
 // per draft-ietf-oauth-status-list specification.
 //
 // The package supports both JWT (Section 5) and CWT (Section 6) formats for Status List Tokens.
-package tsl
+package tokenstatuslist
 
 import (
 	"bytes"
@@ -58,7 +58,7 @@ type StatusList struct {
 	// Subject is the URI of the Status List Token (REQUIRED, must match uri in Referenced Token)
 	Subject string
 
-	// TTL is the time to live in seconds (RECOMMENDED)
+	// TTL is the time-to-live in seconds for caching, as specified in the draft-ietf-oauth-status-list specification (RECOMMENDED).
 	TTL int64
 
 	// ExpiresIn is the duration until the token expires (RECOMMENDED)

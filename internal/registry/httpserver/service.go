@@ -65,7 +65,7 @@ func New(ctx context.Context, cfg *model.Cfg, api *apiv1.Client, tracer *trace.T
 	rgStatuslists := rgRoot.Group("statuslists")
 	rgStatuslists.Use(s.statusListsRateLimiter.Middleware())
 	// Section 9.3: Status List Aggregation at /statuslists returns list of all Status List Token URIs
-	s.httpHelpers.Server.RegEndpoint(ctx, rgStatuslists, http.MethodGet, "", http.StatusOK, s.endpointStatusListAggregation)
+	s.httpHelpers.Server.RegEndpoint(ctx, rgStatuslists, http.MethodGet, "", http.StatusOK, s.endpointTokenStatusListAggregation)
 	// Section 8.1: Individual Status List Token at /statuslists/:id
 	s.httpHelpers.Server.RegEndpoint(ctx, rgStatuslists, http.MethodGet, ":id", http.StatusOK, s.endpointStatusLists)
 

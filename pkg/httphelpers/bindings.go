@@ -36,6 +36,14 @@ func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) err
 		}
 	}
 
+	// Always bind headers first (they're always available)
+	if err := c.ShouldBindHeader(v); err != nil {
+		// Ignore validation errors from header binding, validate at the end
+		if _, ok := err.(validator.ValidationErrors); !ok {
+			return err
+		}
+	}
+
 	// Bind JSON body if present
 	if c.Request.ContentLength > 0 && c.ContentType() == "application/json" {
 		if err := c.ShouldBindJSON(v); err != nil {
@@ -52,12 +60,8 @@ func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) err
 		return nil
 	}
 
-	// For non-JSON/form requests, bind query parameters and headers, then validate
+	// For non-JSON/form requests, bind query parameters
 	if err := c.ShouldBindQuery(v); err != nil {
-		return err
-	}
-
-	if err := c.ShouldBindHeader(v); err != nil {
 		return err
 	}
 

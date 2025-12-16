@@ -8,22 +8,22 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-// TSLMetadataColl is the collection for status list metadata
-type TSLMetadataColl struct {
+// TokenStatusListMetadataColl is the collection for status list metadata
+type TokenStatusListMetadataColl struct {
 	Service *Service
 	Coll    *mongo.Collection
 	log     *logger.Log
 }
 
-// TSLMetadataDoc represents a document in the status list metadata collection
-type TSLMetadataDoc struct {
+// TokenStatusListMetadataDoc represents a document in the status list metadata collection
+type TokenStatusListMetadataDoc struct {
 	CurrentSection int64   `bson:"current_section"`
 	Sections       []int64 `bson:"sections"`
 }
 
-// NewTSLMetadataColl creates a new StatusListMetadataColl
-func NewTSLMetadataColl(ctx context.Context, collName string, service *Service, log *logger.Log) (*TSLMetadataColl, error) {
-	c := &TSLMetadataColl{
+// NewTokenStatusListMetadataColl creates a new StatusListMetadataColl
+func NewTokenStatusListMetadataColl(ctx context.Context, collName string, service *Service, log *logger.Log) (*TokenStatusListMetadataColl, error) {
+	c := &TokenStatusListMetadataColl{
 		log:     log,
 		Service: service,
 	}
@@ -39,16 +39,16 @@ func NewTSLMetadataColl(ctx context.Context, collName string, service *Service, 
 	return c, nil
 }
 
-func (c *TSLMetadataColl) initMetadataDoc(ctx context.Context) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl_metadata:initMetadataDoc")
+func (c *TokenStatusListMetadataColl) initMetadataDoc(ctx context.Context) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list_metadata:initMetadataDoc")
 	defer span.End()
 
-	doc := &TSLMetadataDoc{}
+	doc := &TokenStatusListMetadataDoc{}
 
 	err := c.Coll.FindOne(ctx, bson.M{}).Decode(&doc)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			doc = &TSLMetadataDoc{
+			doc = &TokenStatusListMetadataDoc{
 				CurrentSection: 0,
 				Sections:       []int64{0},
 			}
@@ -62,11 +62,11 @@ func (c *TSLMetadataColl) initMetadataDoc(ctx context.Context) error {
 }
 
 // GetCurrentSection returns the current section number
-func (c *TSLMetadataColl) GetCurrentSection(ctx context.Context) (int64, error) {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl_metadata:getCurrentSection")
+func (c *TokenStatusListMetadataColl) GetCurrentSection(ctx context.Context) (int64, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list_metadata:getCurrentSection")
 	defer span.End()
 
-	var doc TSLMetadataDoc
+	var doc TokenStatusListMetadataDoc
 
 	err := c.Coll.FindOne(ctx, bson.M{}).Decode(&doc)
 	if err != nil {
@@ -77,11 +77,11 @@ func (c *TSLMetadataColl) GetCurrentSection(ctx context.Context) (int64, error) 
 }
 
 // UpdateCurrentSection updates the current section and adds it to the sections list
-func (c *TSLMetadataColl) UpdateCurrentSection(ctx context.Context, newSection int64) error {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl_metadata:updateCurrentSection")
+func (c *TokenStatusListMetadataColl) UpdateCurrentSection(ctx context.Context, newSection int64) error {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list_metadata:updateCurrentSection")
 	defer span.End()
 
-	doc := &TSLMetadataDoc{}
+	doc := &TokenStatusListMetadataDoc{}
 	if err := c.Coll.FindOne(ctx, bson.M{}).Decode(doc); err != nil {
 		return err
 	}
@@ -101,11 +101,11 @@ func (c *TSLMetadataColl) UpdateCurrentSection(ctx context.Context, newSection i
 
 // GetAllSections returns all section IDs that have been created.
 // Used for Status List Aggregation (Section 9.3).
-func (c *TSLMetadataColl) GetAllSections(ctx context.Context) ([]int64, error) {
-	ctx, span := c.Service.tracer.Start(ctx, "db:tsl_metadata:getAllSections")
+func (c *TokenStatusListMetadataColl) GetAllSections(ctx context.Context) ([]int64, error) {
+	ctx, span := c.Service.tracer.Start(ctx, "db:token_status_list_metadata:getAllSections")
 	defer span.End()
 
-	var doc TSLMetadataDoc
+	var doc TokenStatusListMetadataDoc
 
 	err := c.Coll.FindOne(ctx, bson.M{}).Decode(&doc)
 	if err != nil {

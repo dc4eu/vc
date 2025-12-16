@@ -1,4 +1,4 @@
-package tslissuer
+package tokenstatuslistissuer
 
 import (
 	"context"
@@ -6,29 +6,29 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"vc/pkg/tsl"
+	"vc/pkg/tokenstatuslist"
 )
 
-// TokenConfig embeds tsl.TokenConfig and adds signing method configuration.
+// TokenConfig embeds tokenstatuslist.TokenConfig and adds signing method configuration.
 type TokenConfig struct {
-	tsl.TokenConfig
+	tokenstatuslist.TokenConfig
 
 	// SigningMethod is the JWT signing method (e.g., jwt.SigningMethodES256)
 	SigningMethod jwt.SigningMethod
 }
 
 // GenerateStatusListTokenJWT creates a signed Status List Token JWT per Section 5.1
-// using the tsl package for core Token Status List operations.
+// using the tokenstatuslist package for core Token Status List operations.
 func (s *Service) GenerateStatusListTokenJWT(ctx context.Context, cfg TokenConfig) (string, error) {
-	// Create StatusList using tsl package
-	sl := tsl.NewWithConfig(cfg.Statuses, cfg.Issuer, cfg.Subject)
+	// Create StatusList using tokenstatuslist package
+	sl := tokenstatuslist.NewWithConfig(cfg.Statuses, cfg.Issuer, cfg.Subject)
 	sl.TTL = cfg.TTL
 	sl.ExpiresIn = cfg.ExpiresIn
 	sl.KeyID = cfg.KeyID
 	sl.AggregationURI = cfg.AggregationURI
 
-	// Generate JWT using tsl package
-	jwtCfg := tsl.JWTSigningConfig{
+	// Generate JWT using tokenstatuslist package
+	jwtCfg := tokenstatuslist.JWTSigningConfig{
 		SigningKey:    s.signingKey,
 		SigningMethod: cfg.SigningMethod,
 	}
@@ -37,19 +37,19 @@ func (s *Service) GenerateStatusListTokenJWT(ctx context.Context, cfg TokenConfi
 }
 
 // GenerateStatusListTokenCWT creates a signed Status List Token CWT per Section 6.1
-// using the tsl package for core Token Status List operations.
+// using the tokenstatuslist package for core Token Status List operations.
 func (s *Service) GenerateStatusListTokenCWT(ctx context.Context, cfg TokenConfig) ([]byte, error) {
-	// Create StatusList using tsl package
-	sl := tsl.NewWithConfig(cfg.Statuses, cfg.Issuer, cfg.Subject)
+	// Create StatusList using tokenstatuslist package
+	sl := tokenstatuslist.NewWithConfig(cfg.Statuses, cfg.Issuer, cfg.Subject)
 	sl.TTL = cfg.TTL
 	sl.ExpiresIn = cfg.ExpiresIn
 	sl.KeyID = cfg.KeyID
 	sl.AggregationURI = cfg.AggregationURI
 
-	// Generate CWT using tsl package
-	cwtCfg := tsl.CWTSigningConfig{
+	// Generate CWT using tokenstatuslist package
+	cwtCfg := tokenstatuslist.CWTSigningConfig{
 		SigningKey: s.signingKey,
-		Algorithm:  tsl.CoseAlgES256,
+		Algorithm:  tokenstatuslist.CoseAlgES256,
 	}
 
 	return sl.GenerateCWT(cwtCfg)
@@ -58,12 +58,12 @@ func (s *Service) GenerateStatusListTokenCWT(ctx context.Context, cfg TokenConfi
 // GetStatusListForSection retrieves all statuses for a given section from the database.
 // Returns a slice of status values suitable for encoding into a Status List Token.
 func (s *Service) GetStatusListForSection(ctx context.Context, section int64) ([]uint8, error) {
-	return s.statusListColl.GetAllStatusesForSection(ctx, section)
+	return s.tokenStatusListColl.GetAllStatusesForSection(ctx, section)
 }
 
 // CreateNewSectionIfNeeded checks if the current section has enough decoys and creates a new section if needed.
 func (s *Service) CreateNewSectionIfNeeded(ctx context.Context) (int64, error) {
-	currentSection, err := s.statusListMetadata.GetCurrentSection(ctx)
+	currentSection, err := s.tokenStatusListMetadata.GetCurrentSection(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -72,7 +72,7 @@ func (s *Service) CreateNewSectionIfNeeded(ctx context.Context) (int64, error) {
 		"section": currentSection,
 		"decoy":   true,
 	}
-	numberOfDecoyDocs, err := s.statusListColl.CountDocs(ctx, countFilter)
+	numberOfDecoyDocs, err := s.tokenStatusListColl.CountDocs(ctx, countFilter)
 	if err != nil {
 		return 0, err
 	}
@@ -80,11 +80,11 @@ func (s *Service) CreateNewSectionIfNeeded(ctx context.Context) (int64, error) {
 	if numberOfDecoyDocs <= 1000 {
 		newSection := currentSection + 1
 		sectionSize := s.cfg.Registry.TokenStatusLists.SectionSize
-		if err := s.statusListColl.CreateNewSection(ctx, newSection, sectionSize); err != nil {
+		if err := s.tokenStatusListColl.CreateNewSection(ctx, newSection, sectionSize); err != nil {
 			return 0, err
 		}
 
-		if err := s.statusListMetadata.UpdateCurrentSection(ctx, newSection); err != nil {
+		if err := s.tokenStatusListMetadata.UpdateCurrentSection(ctx, newSection); err != nil {
 			return 0, err
 		}
 		return newSection, nil
@@ -100,7 +100,7 @@ func (s *Service) AddStatus(ctx context.Context, status uint8) (int64, int64, er
 		return 0, 0, err
 	}
 
-	index, err := s.statusListColl.Add(ctx, currentSection, status)
+	index, err := s.tokenStatusListColl.Add(ctx, currentSection, status)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -110,10 +110,10 @@ func (s *Service) AddStatus(ctx context.Context, status uint8) (int64, int64, er
 
 // GetAllSections returns all section IDs for Status List Aggregation (Section 9.3).
 func (s *Service) GetAllSections(ctx context.Context) ([]int64, error) {
-	return s.statusListMetadata.GetAllSections(ctx)
+	return s.tokenStatusListMetadata.GetAllSections(ctx)
 }
 
 // UpdateStatus updates the status of an existing entry at the given section and index.
 func (s *Service) UpdateStatus(ctx context.Context, section int64, index int64, status uint8) error {
-	return s.statusListColl.UpdateStatus(ctx, section, index, status)
+	return s.tokenStatusListColl.UpdateStatus(ctx, section, index, status)
 }

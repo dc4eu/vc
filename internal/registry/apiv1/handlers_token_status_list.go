@@ -4,12 +4,12 @@ import (
 	"context"
 	"strconv"
 	"vc/internal/registry/db"
-	"vc/pkg/tsl"
+	"vc/pkg/tokenstatuslist"
 )
 
-// StatusListsRequest represents the request for fetching a Status List Token.
+// TokenStatusListsRequest represents the request for fetching a Status List Token.
 // Per draft-ietf-oauth-status-list Section 8.1
-type StatusListsRequest struct {
+type TokenStatusListsRequest struct {
 	// ID is the section identifier for the status list (from URI path)
 	ID int64 `json:"id" uri:"id" validate:"gte=0"`
 
@@ -22,9 +22,9 @@ type StatusListsRequest struct {
 	Accept string `json:"-" header:"Accept"`
 }
 
-// StatusListsResponse represents the response containing a Status List Token.
+// TokenStatusListsResponse represents the response containing a Status List Token.
 // Content-Type should be: application/statuslist+jwt or application/statuslist+cwt
-type StatusListsResponse struct {
+type TokenStatusListsResponse struct {
 	// Token is the signed Status List Token (JWT string or CWT bytes)
 	Token []byte `json:"token"`
 
@@ -46,7 +46,7 @@ type StatusListsResponse struct {
 // Response:
 //   - Content-Type: application/statuslist+jwt or application/statuslist+cwt
 //   - Body: The signed Status List Token
-func (c *Client) StatusLists(ctx context.Context, req *StatusListsRequest) (*StatusListsResponse, error) {
+func (c *Client) TokenStatusLists(ctx context.Context, req *TokenStatusListsRequest) (*TokenStatusListsResponse, error) {
 	c.log.Debug("status_lists", "request", req)
 
 	// Check for time parameter (historical resolution - Section 8.4)
@@ -54,7 +54,7 @@ func (c *Client) StatusLists(ctx context.Context, req *StatusListsRequest) (*Sta
 		// Historical resolution is not currently supported
 		// Per Section 8.4, we should return an error if we can't provide historical data
 		c.log.Info("historical resolution requested but not supported", "time", *req.Time)
-		return nil, tsl.ErrHistoricalResolutionNotSupported
+		return nil, tokenstatuslist.ErrHistoricalResolutionNotSupported
 	}
 
 	// Determine response format based on Accept header (content negotiation)
@@ -63,27 +63,27 @@ func (c *Client) StatusLists(ctx context.Context, req *StatusListsRequest) (*Sta
 	var contentType string
 
 	switch req.Accept {
-	case tsl.MediaTypeCWT:
+	case tokenstatuslist.MediaTypeCWT:
 		// CWT format requested - get from cache
-		cwtBytes := c.tslIssuer.GetCachedCWT(req.ID)
+		cwtBytes := c.tokenStatusListIssuer.GetCachedCWT(req.ID)
 		if cwtBytes == nil {
 			c.log.Info("CWT not found in cache", "section", req.ID)
-			return nil, tsl.ErrSectionNotFound
+			return nil, tokenstatuslist.ErrSectionNotFound
 		}
 		token = cwtBytes
-		contentType = tsl.MediaTypeCWT
+		contentType = tokenstatuslist.MediaTypeCWT
 	default:
 		// JWT format (default) - get from cache
-		jwtStr := c.tslIssuer.GetCachedJWT(req.ID)
+		jwtStr := c.tokenStatusListIssuer.GetCachedJWT(req.ID)
 		if jwtStr == "" {
 			c.log.Info("JWT not found in cache", "section", req.ID)
-			return nil, tsl.ErrSectionNotFound
+			return nil, tokenstatuslist.ErrSectionNotFound
 		}
 		token = []byte(jwtStr)
-		contentType = tsl.MediaTypeJWT
+		contentType = tokenstatuslist.MediaTypeJWT
 	}
 
-	reply := &StatusListsResponse{
+	reply := &TokenStatusListsResponse{
 		Token:       token,
 		ContentType: contentType,
 	}
@@ -91,15 +91,15 @@ func (c *Client) StatusLists(ctx context.Context, req *StatusListsRequest) (*Sta
 	return reply, nil
 }
 
-// StatusListAggregationResponse represents the Status List Aggregation response per Section 9.3.
+// TokenStatusListAggregationResponse represents the Status List Aggregation response per Section 9.3.
 // This provides a list of Status List Token URIs for pre-fetching and caching.
 // Content-Type: application/json
-type StatusListAggregationResponse struct {
+type TokenStatusListAggregationResponse struct {
 	// StatusLists is a JSON array of URIs linking to Status List Tokens
 	StatusLists []string `json:"status_lists"`
 }
 
-// StatusListAggregation handles requests for Status List Aggregation per Section 9.3.
+// TokenStatusListAggregation handles requests for Status List Aggregation per Section 9.3.
 // This endpoint returns a JSON array of URIs linking to all available Status List Tokens.
 // Relying Parties can use this to pre-fetch and cache Status List Tokens.
 //
@@ -109,11 +109,11 @@ type StatusListAggregationResponse struct {
 // Per Section 9.3:
 // "The Status List Aggregation URI provides a list of Status List Token URIs.
 // This aggregation in JSON and the media type return MUST be application/json."
-func (c *Client) StatusListAggregation(ctx context.Context) (*StatusListAggregationResponse, error) {
+func (c *Client) TokenStatusListAggregation(ctx context.Context) (*TokenStatusListAggregationResponse, error) {
 	c.log.Debug("status_list_aggregation")
 
 	// Get all sections from the metadata
-	sections, err := c.tslIssuer.GetAllSections(ctx)
+	sections, err := c.tokenStatusListIssuer.GetAllSections(ctx)
 	if err != nil {
 		c.log.Error(err, "failed to get all sections")
 		return nil, err
@@ -128,7 +128,7 @@ func (c *Client) StatusListAggregation(ctx context.Context) (*StatusListAggregat
 		statusLists = append(statusLists, uri)
 	}
 
-	reply := &StatusListAggregationResponse{
+	reply := &TokenStatusListAggregationResponse{
 		StatusLists: statusLists,
 	}
 
@@ -146,7 +146,7 @@ type SaveCredentialSubjectRequest struct {
 	Index       int64  `json:"index" validate:"gte=0"`
 }
 
-// SaveCredentialSubject saves credential subject info linked to a TSL entry
+// SaveCredentialSubject saves credential subject info linked to a Token Status List entry
 func (c *Client) SaveCredentialSubject(ctx context.Context, req *SaveCredentialSubjectRequest) error {
 	if c.credentialSubjects == nil {
 		c.log.Debug("credential subjects store not configured, skipping save")

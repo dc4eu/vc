@@ -19,9 +19,9 @@ type CreateCredentialRequest struct {
 // CreateCredentialReply is the reply for Credential
 type CreateCredentialReply struct {
 	//Data *sdjwt.PresentationFlat `json:"data"`
-	Data       []*apiv1_issuer.Credential `json:"data"`
-	TSLSection int64                      `json:"tsl_section"`
-	TSLIndex   int64                      `json:"tsl_index"`
+	Data                   []*apiv1_issuer.Credential `json:"data"`
+	TokenStatusListSection int64                      `json:"token_status_list_section"`
+	TokenStatusListIndex   int64                      `json:"token_status_list_index"`
 }
 
 // MakeSDJWT creates a credential generically for any credential type
@@ -62,7 +62,7 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 		return nil, fmt.Errorf("registry client not configured")
 	}
 
-	grpcReply, err := c.registryClient.TSLAddStatus(ctx, &apiv1_registry.TSLAddStatusRequest{
+	grpcReply, err := c.registryClient.TokenStatusListAddStatus(ctx, &apiv1_registry.TokenStatusListAddStatusRequest{
 		Status: 0, // VALID status for new credential
 	})
 	if err != nil {
@@ -103,8 +103,8 @@ func (c *Client) MakeSDJWT(ctx context.Context, req *CreateCredentialRequest) (*
 				Credential: token,
 			},
 		},
-		TSLSection: grpcReply.GetSection(),
-		TSLIndex:   grpcReply.GetIndex(),
+		TokenStatusListSection: grpcReply.GetSection(),
+		TokenStatusListIndex:   grpcReply.GetIndex(),
 	}
 
 	return reply, nil

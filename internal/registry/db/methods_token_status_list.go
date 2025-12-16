@@ -199,7 +199,7 @@ func (c *TokenStatusListColl) Add(ctx context.Context, section int64, status uin
 	c.log.Debug("add", "decoys", decoys)
 
 	doc := &TokenStatusListDoc{
-		Index:   decoys[rand.IntN(len(decoys)-1)].Index,
+		Index:   decoys[rand.IntN(len(decoys))].Index,
 		Status:  status,
 		Decoy:   false,
 		Section: section,

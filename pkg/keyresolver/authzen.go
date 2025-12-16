@@ -133,8 +133,11 @@ func (v *ValidatingResolver) ResolveEd25519(verificationMethod string) (ed25519.
 		return nil, err
 	}
 
+	// Extract DID from verification method for trust evaluation
+	subjectID := ExtractDIDFromVerificationMethod(verificationMethod)
+
 	// Then, validate trust
-	trusted, err := v.evaluator.EvaluateTrust(verificationMethod, key, v.role)
+	trusted, err := v.evaluator.EvaluateTrust(subjectID, key, v.role)
 	if err != nil {
 		return nil, fmt.Errorf("trust evaluation failed: %w", err)
 	}
@@ -160,9 +163,12 @@ func (v *ValidatingResolver) ResolveECDSA(verificationMethod string) (*ecdsa.Pub
 		return nil, err
 	}
 
+	// Extract DID from verification method for trust evaluation
+	subjectID := ExtractDIDFromVerificationMethod(verificationMethod)
+
 	// Then, validate trust if evaluator supports ECDSA
 	if ecdsaEvaluator, ok := v.evaluator.(ECDSATrustEvaluator); ok {
-		trusted, err := ecdsaEvaluator.EvaluateTrustECDSA(verificationMethod, key, v.role)
+		trusted, err := ecdsaEvaluator.EvaluateTrustECDSA(subjectID, key, v.role)
 		if err != nil {
 			return nil, fmt.Errorf("ECDSA trust evaluation failed: %w", err)
 		}

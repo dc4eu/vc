@@ -5,6 +5,7 @@ package keyresolver
 import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
+	"crypto/elliptic"
 	"encoding/base64"
 	"fmt"
 	"strings"
@@ -129,31 +130,65 @@ func getVerificationMethods(doc map[string]interface{}) ([]interface{}, error) {
 
 	// OpenID Federation entity configuration - check for JWKS in metadata
 	// The structure is: metadata -> openid_relying_party/openid_provider -> jwks -> keys
-	if metadata, ok := doc["metadata"].(map[string]interface{}); ok {
-		for _, entityType := range []string{"openid_relying_party", "openid_provider", "federation_entity"} {
-			if entityMeta, ok := metadata[entityType].(map[string]interface{}); ok {
-				if jwks, ok := entityMeta["jwks"].(map[string]interface{}); ok {
-					if keys, ok := jwks["keys"].([]interface{}); ok {
-						// Convert JWKs to verification method format
-						result := make([]interface{}, len(keys))
-						for i, key := range keys {
-							if keyMap, ok := key.(map[string]interface{}); ok {
-								// Create a pseudo verification method from the JWK
-								vm := map[string]interface{}{
-									"id":           keyMap["kid"],
-									"publicKeyJwk": keyMap,
-								}
-								result[i] = vm
-							}
-						}
-						return result, nil
-					}
-				}
-			}
-		}
+	if result := extractOpenIDFederationKeys(doc); len(result) > 0 {
+		return result, nil
 	}
 
 	return nil, fmt.Errorf("no verification methods found in metadata")
+}
+
+// extractOpenIDFederationKeys extracts JWKs from OpenID Federation entity configuration.
+// Returns an empty slice if no keys are found (not an error - the document may be a regular DID doc).
+func extractOpenIDFederationKeys(doc map[string]interface{}) []interface{} {
+	metadata, ok := doc["metadata"].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	entityTypes := []string{"openid_relying_party", "openid_provider", "federation_entity"}
+	for _, entityType := range entityTypes {
+		if keys := getJWKSFromEntityMetadata(metadata, entityType); len(keys) > 0 {
+			return keys
+		}
+	}
+	return nil
+}
+
+// getJWKSFromEntityMetadata extracts JWKS keys from a specific entity type's metadata.
+func getJWKSFromEntityMetadata(metadata map[string]interface{}, entityType string) []interface{} {
+	entityMeta, ok := metadata[entityType].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	jwks, ok := entityMeta["jwks"].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	keys, ok := jwks["keys"].([]interface{})
+	if !ok {
+		return nil
+	}
+
+	return convertJWKsToVerificationMethods(keys)
+}
+
+// convertJWKsToVerificationMethods wraps JWKs in pseudo verification method format.
+func convertJWKsToVerificationMethods(keys []interface{}) []interface{} {
+	result := make([]interface{}, 0, len(keys))
+	for _, key := range keys {
+		keyMap, ok := key.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		vm := map[string]interface{}{
+			"id":           keyMap["kid"],
+			"publicKeyJwk": keyMap,
+		}
+		result = append(result, vm)
+	}
+	return result
 }
 
 // matchesVerificationMethod checks if a verification method entry matches the requested ID.
@@ -215,6 +250,7 @@ func decodeMultikeyEd25519(multikey string) (ed25519.PublicKey, error) {
 
 // decodeMultikeyECDSA decodes a multikey-encoded ECDSA public key.
 // P-256 multicodec is 0x1200, P-384 is 0x1201
+// Multicodec uses varint encoding, so 0x1200 becomes 0x80 0x24 in varint
 func decodeMultikeyECDSA(multikey string) (*ecdsa.PublicKey, error) {
 	if len(multikey) == 0 {
 		return nil, fmt.Errorf("empty multikey")
@@ -230,15 +266,36 @@ func decodeMultikeyECDSA(multikey string) (*ecdsa.PublicKey, error) {
 		return nil, fmt.Errorf("multikey too short")
 	}
 
-	// Check multicodec - P-256 compressed is 0x1200 (varint: 0x80 0x24)
-	// For now, we only support P-256 in compressed format
-	// The exact encoding depends on the multicodec version
-	// This is a simplified check
+	// Check multicodec prefix for P-256 (secp256r1)
+	// P-256 compressed public key multicodec: 0x1200 encoded as varint is 0x80 0x24
+	// P-384 compressed public key multicodec: 0x1201 encoded as varint is 0x81 0x24
+	var curve elliptic.Curve
+	var keyData []byte
 
-	// Try to parse as JWK in base64 if the multicodec doesn't match expected patterns
-	// This is a fallback for non-standard encodings
+	if len(decoded) >= 2 && decoded[0] == 0x80 && decoded[1] == 0x24 {
+		// P-256 compressed public key
+		curve = elliptic.P256()
+		keyData = decoded[2:]
+	} else if len(decoded) >= 2 && decoded[0] == 0x81 && decoded[1] == 0x24 {
+		// P-384 compressed public key
+		curve = elliptic.P384()
+		keyData = decoded[2:]
+	} else {
+		// Not a recognized ECDSA multicodec
+		return nil, fmt.Errorf("unrecognized ECDSA multicodec: 0x%02x 0x%02x", decoded[0], decoded[1])
+	}
 
-	return nil, fmt.Errorf("ECDSA multikey decoding not fully implemented")
+	// Parse compressed point format (33 bytes for P-256, 49 for P-384)
+	x, y := elliptic.UnmarshalCompressed(curve, keyData)
+	if x == nil {
+		return nil, fmt.Errorf("failed to unmarshal compressed ECDSA point")
+	}
+
+	return &ecdsa.PublicKey{
+		Curve: curve,
+		X:     x,
+		Y:     y,
+	}, nil
 }
 
 // decodeBase58Ed25519 decodes a base58-encoded Ed25519 public key (legacy format).

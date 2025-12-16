@@ -83,11 +83,11 @@ func NewServerOptions(cfg model.GRPCServer) ([]grpc.ServerOption, error) {
 // normalizeFingerprint normalizes a fingerprint string for comparison.
 // Removes "SHA256:" prefix, colons, spaces, and converts to lowercase.
 func normalizeFingerprint(fp string) string {
-	fp = strings.TrimPrefix(fp, "SHA256:")
+	fp = strings.ToLower(fp)
 	fp = strings.TrimPrefix(fp, "sha256:")
 	fp = strings.ReplaceAll(fp, ":", "")
 	fp = strings.ReplaceAll(fp, " ", "")
-	return strings.ToLower(fp)
+	return fp
 }
 
 // CertFingerprint calculates the SHA256 fingerprint of a certificate.

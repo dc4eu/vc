@@ -2,7 +2,7 @@ package httpserver
 
 import (
 	"fmt"
-	"strings"
+	"html"
 	"vc/internal/registry/apiv1"
 )
 
@@ -59,7 +59,7 @@ const adminCSS = `
 func loginPageHTML(errorMsg string) string {
 	var errorHTML string
 	if errorMsg != "" {
-		errorHTML = fmt.Sprintf(`<div class="alert alert-error">%s</div>`, escapeHTML(errorMsg))
+		errorHTML = fmt.Sprintf(`<div class="alert alert-error">%s</div>`, html.EscapeString(errorMsg))
 	}
 
 	return fmt.Sprintf(`<!DOCTYPE html>
@@ -125,17 +125,17 @@ func dashboardPageHTML(username string) string {
 		</div>
 	</div>
 </body>
-</html>`, adminCSS, navBarHTML(username), escapeHTML(username))
+</html>`, adminCSS, navBarHTML(username), html.EscapeString(username))
 }
 
 // searchPageHTML generates the search page HTML
 func searchPageHTML(errorMsg string, result *apiv1.SearchPersonReply, successMsg string, searchParams *apiv1.SearchPersonRequest) string {
 	var alertHTML string
 	if errorMsg != "" {
-		alertHTML = fmt.Sprintf(`<div class="alert alert-error">%s</div>`, escapeHTML(errorMsg))
+		alertHTML = fmt.Sprintf(`<div class="alert alert-error">%s</div>`, html.EscapeString(errorMsg))
 	}
 	if successMsg != "" {
-		alertHTML = fmt.Sprintf(`<div class="alert alert-success">%s</div>`, escapeHTML(successMsg))
+		alertHTML = fmt.Sprintf(`<div class="alert alert-success">%s</div>`, html.EscapeString(successMsg))
 	}
 
 	var resultHTML string
@@ -180,12 +180,12 @@ func searchPageHTML(errorMsg string, result *apiv1.SearchPersonReply, successMsg
 						</form>
 					</td>
 				</tr>`,
-				escapeHTML(person.FirstName),
-				escapeHTML(person.LastName),
-				escapeHTML(person.DateOfBirth),
+				html.EscapeString(person.FirstName),
+				html.EscapeString(person.LastName),
+				html.EscapeString(person.DateOfBirth),
 				statusClass, person.Status, statusLabel,
 				person.Section, person.Index,
-				escapeHTML(searchFirstName), escapeHTML(searchLastName), escapeHTML(searchDateOfBirth),
+				html.EscapeString(searchFirstName), html.EscapeString(searchLastName), html.EscapeString(searchDateOfBirth),
 				selected(person.Status == 0), selected(person.Status == 1), selected(person.Status == 2))
 		}
 
@@ -257,7 +257,7 @@ func searchPageHTML(errorMsg string, result *apiv1.SearchPersonReply, successMsg
 	</div>
 </body>
 </html>`, adminCSS, navBarHTML(""), alertHTML,
-		escapeHTML(searchFirstName), escapeHTML(searchLastName), escapeHTML(searchDateOfBirth),
+		html.EscapeString(searchFirstName), html.EscapeString(searchLastName), html.EscapeString(searchDateOfBirth),
 		resultHTML)
 }
 
@@ -271,7 +271,7 @@ func navBarHTML(username string) string {
 				<form method="POST" action="/admin/logout" style="margin: 0;">
 					<button type="submit" class="btn btn-danger" style="padding: 6px 12px;">Logout</button>
 				</form>
-			</div>`, escapeHTML(username))
+			</div>`, html.EscapeString(username))
 	}
 
 	return fmt.Sprintf(`
@@ -288,15 +288,6 @@ func navBarHTML(username string) string {
 }
 
 // Helper functions
-
-func escapeHTML(s string) string {
-	s = strings.ReplaceAll(s, "&", "&amp;")
-	s = strings.ReplaceAll(s, "<", "&lt;")
-	s = strings.ReplaceAll(s, ">", "&gt;")
-	s = strings.ReplaceAll(s, `"`, "&quot;")
-	s = strings.ReplaceAll(s, "'", "&#39;")
-	return s
-}
 
 func getStatusLabel(status uint8) string {
 	switch status {

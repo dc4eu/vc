@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RegistryService_TSLAddStatus_FullMethodName          = "/v1.registry.RegistryService/TSLAddStatus"
-	RegistryService_TSLUpdateStatus_FullMethodName       = "/v1.registry.RegistryService/TSLUpdateStatus"
-	RegistryService_SaveCredentialSubject_FullMethodName = "/v1.registry.RegistryService/SaveCredentialSubject"
+	RegistryService_TokenStatusListAddStatus_FullMethodName    = "/v1.registry.RegistryService/TokenStatusListAddStatus"
+	RegistryService_TokenStatusListUpdateStatus_FullMethodName = "/v1.registry.RegistryService/TokenStatusListUpdateStatus"
+	RegistryService_SaveCredentialSubject_FullMethodName       = "/v1.registry.RegistryService/SaveCredentialSubject"
 )
 
 // RegistryServiceClient is the client API for RegistryService service.
@@ -29,8 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RegistryServiceClient interface {
 	// Token Status List operations
-	TSLAddStatus(ctx context.Context, in *TSLAddStatusRequest, opts ...grpc.CallOption) (*TSLAddStatusReply, error)
-	TSLUpdateStatus(ctx context.Context, in *TSLUpdateStatusRequest, opts ...grpc.CallOption) (*TSLUpdateStatusReply, error)
+	TokenStatusListAddStatus(ctx context.Context, in *TokenStatusListAddStatusRequest, opts ...grpc.CallOption) (*TokenStatusListAddStatusReply, error)
+	TokenStatusListUpdateStatus(ctx context.Context, in *TokenStatusListUpdateStatusRequest, opts ...grpc.CallOption) (*TokenStatusListUpdateStatusReply, error)
 	// Credential subject operations
 	SaveCredentialSubject(ctx context.Context, in *SaveCredentialSubjectRequest, opts ...grpc.CallOption) (*SaveCredentialSubjectReply, error)
 }
@@ -43,20 +43,20 @@ func NewRegistryServiceClient(cc grpc.ClientConnInterface) RegistryServiceClient
 	return &registryServiceClient{cc}
 }
 
-func (c *registryServiceClient) TSLAddStatus(ctx context.Context, in *TSLAddStatusRequest, opts ...grpc.CallOption) (*TSLAddStatusReply, error) {
+func (c *registryServiceClient) TokenStatusListAddStatus(ctx context.Context, in *TokenStatusListAddStatusRequest, opts ...grpc.CallOption) (*TokenStatusListAddStatusReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TSLAddStatusReply)
-	err := c.cc.Invoke(ctx, RegistryService_TSLAddStatus_FullMethodName, in, out, cOpts...)
+	out := new(TokenStatusListAddStatusReply)
+	err := c.cc.Invoke(ctx, RegistryService_TokenStatusListAddStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *registryServiceClient) TSLUpdateStatus(ctx context.Context, in *TSLUpdateStatusRequest, opts ...grpc.CallOption) (*TSLUpdateStatusReply, error) {
+func (c *registryServiceClient) TokenStatusListUpdateStatus(ctx context.Context, in *TokenStatusListUpdateStatusRequest, opts ...grpc.CallOption) (*TokenStatusListUpdateStatusReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TSLUpdateStatusReply)
-	err := c.cc.Invoke(ctx, RegistryService_TSLUpdateStatus_FullMethodName, in, out, cOpts...)
+	out := new(TokenStatusListUpdateStatusReply)
+	err := c.cc.Invoke(ctx, RegistryService_TokenStatusListUpdateStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +78,8 @@ func (c *registryServiceClient) SaveCredentialSubject(ctx context.Context, in *S
 // for forward compatibility.
 type RegistryServiceServer interface {
 	// Token Status List operations
-	TSLAddStatus(context.Context, *TSLAddStatusRequest) (*TSLAddStatusReply, error)
-	TSLUpdateStatus(context.Context, *TSLUpdateStatusRequest) (*TSLUpdateStatusReply, error)
+	TokenStatusListAddStatus(context.Context, *TokenStatusListAddStatusRequest) (*TokenStatusListAddStatusReply, error)
+	TokenStatusListUpdateStatus(context.Context, *TokenStatusListUpdateStatusRequest) (*TokenStatusListUpdateStatusReply, error)
 	// Credential subject operations
 	SaveCredentialSubject(context.Context, *SaveCredentialSubjectRequest) (*SaveCredentialSubjectReply, error)
 	mustEmbedUnimplementedRegistryServiceServer()
@@ -92,11 +92,11 @@ type RegistryServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRegistryServiceServer struct{}
 
-func (UnimplementedRegistryServiceServer) TSLAddStatus(context.Context, *TSLAddStatusRequest) (*TSLAddStatusReply, error) {
-	return nil, status.Error(codes.Unimplemented, "method TSLAddStatus not implemented")
+func (UnimplementedRegistryServiceServer) TokenStatusListAddStatus(context.Context, *TokenStatusListAddStatusRequest) (*TokenStatusListAddStatusReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method TokenStatusListAddStatus not implemented")
 }
-func (UnimplementedRegistryServiceServer) TSLUpdateStatus(context.Context, *TSLUpdateStatusRequest) (*TSLUpdateStatusReply, error) {
-	return nil, status.Error(codes.Unimplemented, "method TSLUpdateStatus not implemented")
+func (UnimplementedRegistryServiceServer) TokenStatusListUpdateStatus(context.Context, *TokenStatusListUpdateStatusRequest) (*TokenStatusListUpdateStatusReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method TokenStatusListUpdateStatus not implemented")
 }
 func (UnimplementedRegistryServiceServer) SaveCredentialSubject(context.Context, *SaveCredentialSubjectRequest) (*SaveCredentialSubjectReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method SaveCredentialSubject not implemented")
@@ -122,38 +122,38 @@ func RegisterRegistryServiceServer(s grpc.ServiceRegistrar, srv RegistryServiceS
 	s.RegisterService(&RegistryService_ServiceDesc, srv)
 }
 
-func _RegistryService_TSLAddStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TSLAddStatusRequest)
+func _RegistryService_TokenStatusListAddStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenStatusListAddStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RegistryServiceServer).TSLAddStatus(ctx, in)
+		return srv.(RegistryServiceServer).TokenStatusListAddStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RegistryService_TSLAddStatus_FullMethodName,
+		FullMethod: RegistryService_TokenStatusListAddStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RegistryServiceServer).TSLAddStatus(ctx, req.(*TSLAddStatusRequest))
+		return srv.(RegistryServiceServer).TokenStatusListAddStatus(ctx, req.(*TokenStatusListAddStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RegistryService_TSLUpdateStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TSLUpdateStatusRequest)
+func _RegistryService_TokenStatusListUpdateStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenStatusListUpdateStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RegistryServiceServer).TSLUpdateStatus(ctx, in)
+		return srv.(RegistryServiceServer).TokenStatusListUpdateStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RegistryService_TSLUpdateStatus_FullMethodName,
+		FullMethod: RegistryService_TokenStatusListUpdateStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RegistryServiceServer).TSLUpdateStatus(ctx, req.(*TSLUpdateStatusRequest))
+		return srv.(RegistryServiceServer).TokenStatusListUpdateStatus(ctx, req.(*TokenStatusListUpdateStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -184,12 +184,12 @@ var RegistryService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RegistryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "TSLAddStatus",
-			Handler:    _RegistryService_TSLAddStatus_Handler,
+			MethodName: "TokenStatusListAddStatus",
+			Handler:    _RegistryService_TokenStatusListAddStatus_Handler,
 		},
 		{
-			MethodName: "TSLUpdateStatus",
-			Handler:    _RegistryService_TSLUpdateStatus_Handler,
+			MethodName: "TokenStatusListUpdateStatus",
+			Handler:    _RegistryService_TokenStatusListUpdateStatus_Handler,
 		},
 		{
 			MethodName: "SaveCredentialSubject",

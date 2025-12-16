@@ -6,29 +6,29 @@ option go_package = "vc/internal/gen/registry/apiv1_registry";
 
 service RegistryService {
     // Token Status List operations
-    rpc TSLAddStatus (TSLAddStatusRequest) returns (TSLAddStatusReply) {}
-    rpc TSLUpdateStatus (TSLUpdateStatusRequest) returns (TSLUpdateStatusReply) {}
+    rpc TokenStatusListAddStatus (TokenStatusListAddStatusRequest) returns (TokenStatusListAddStatusReply) {}
+    rpc TokenStatusListUpdateStatus (TokenStatusListUpdateStatusRequest) returns (TokenStatusListUpdateStatusReply) {}
     // Credential subject operations
     rpc SaveCredentialSubject (SaveCredentialSubjectRequest) returns (SaveCredentialSubjectReply) {}
 }
 
 // Token Status List messages
-message TSLAddStatusRequest {
+message TokenStatusListAddStatusRequest {
     uint32 Status = 1; // Status value (0=VALID, 1=INVALID, 2=SUSPENDED)
 }
 
-message TSLAddStatusReply {
+message TokenStatusListAddStatusReply {
     int64 Section = 1; // Section where the status was added
     int64 Index = 2;   // Index within the section
 }
 
-message TSLUpdateStatusRequest {
+message TokenStatusListUpdateStatusRequest {
     int64 Section = 1;  // Section ID
     int64 Index = 2;    // Index within the section
     uint32 Status = 3;  // New status value (0=VALID, 1=INVALID, 2=SUSPENDED)
 }
 
-message TSLUpdateStatusReply {
+message TokenStatusListUpdateStatusReply {
     // Empty reply, success indicated by no error
 }
 

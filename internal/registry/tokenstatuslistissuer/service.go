@@ -1,4 +1,4 @@
-package tslissuer
+package tokenstatuslistissuer
 
 import (
 	"context"
@@ -14,16 +14,16 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/pki"
-	"vc/pkg/tsl"
+	"vc/pkg/tokenstatuslist"
 )
 
-// Service is the status list issuer service
+// Service is the token status list issuer service
 type Service struct {
-	cfg                *model.Cfg
-	statusListColl     db.StatusListStore
-	statusListMetadata db.StatusListMetadataStore
-	signingKey         any // Can be *ecdsa.PrivateKey or *rsa.PrivateKey
-	log                *logger.Log
+	cfg                        *model.Cfg
+	tokenStatusListColl        db.TokenStatusListStore
+	tokenStatusListMetadata    db.TokenStatusListMetadataStore
+	signingKey                 any // Can be *ecdsa.PrivateKey or *rsa.PrivateKey
+	log                        *logger.Log
 
 	// Caches for JWT and CWT tokens keyed by section (as string)
 	jwtCache *ttlcache.Cache[string, string]
@@ -40,7 +40,7 @@ type Service struct {
 	stopCh chan struct{}
 }
 
-// New creates a new status list issuer service
+// New creates a new token status list issuer service
 func New(ctx context.Context, cfg *model.Cfg, dbService *db.Service, log *logger.Log) (*Service, error) {
 	refreshSeconds := cfg.Registry.TokenStatusLists.TokenRefreshInterval
 	if refreshSeconds <= 0 {
@@ -51,13 +51,13 @@ func New(ctx context.Context, cfg *model.Cfg, dbService *db.Service, log *logger
 	tokenValidity := refreshInterval - (5 * time.Minute)
 
 	s := &Service{
-		cfg:                cfg,
-		statusListColl:     dbService.TSLColl,
-		statusListMetadata: dbService.TSLMetadata,
-		log:                log.New("tsl_issuer"),
-		jwtCache:           ttlcache.New(ttlcache.WithTTL[string, string](tokenValidity)),
-		cwtCache:           ttlcache.New(ttlcache.WithTTL[string, []byte](tokenValidity)),
-		refreshInterval:    refreshInterval,
+		cfg:                         cfg,
+		tokenStatusListColl:         dbService.TokenStatusListColl,
+		tokenStatusListMetadata:     dbService.TokenStatusListMetadata,
+		log:                         log.New("token_status_list_issuer"),
+		jwtCache:                    ttlcache.New(ttlcache.WithTTL[string, string](tokenValidity)),
+		cwtCache:                    ttlcache.New(ttlcache.WithTTL[string, []byte](tokenValidity)),
+		refreshInterval:             refreshInterval,
 		tokenValidity:      tokenValidity,
 		ttl:                refreshSeconds,
 		stopCh:             make(chan struct{}),
@@ -66,18 +66,18 @@ func New(ctx context.Context, cfg *model.Cfg, dbService *db.Service, log *logger
 	// Load signing key
 	key, err := pki.ParseKeyFromFile(cfg.Registry.TokenStatusLists.SigningKeyPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load TSL signing key: %w", err)
+		return nil, fmt.Errorf("failed to load Token Status List signing key: %w", err)
 	}
 	privateKey, ok := key.(*ecdsa.PrivateKey)
 	if !ok {
-		return nil, fmt.Errorf("TSL signing key is not a valid ECDSA private key, path: %s", cfg.Registry.TokenStatusLists.SigningKeyPath)
+		return nil, fmt.Errorf("Token Status List signing key is not a valid ECDSA private key, path: %s", cfg.Registry.TokenStatusLists.SigningKeyPath)
 	}
 	s.signingKey = privateKey
-	s.log.Info("Loaded TSL signing key", "path", cfg.Registry.TokenStatusLists.SigningKeyPath)
+	s.log.Info("Loaded Token Status List signing key", "path", cfg.Registry.TokenStatusLists.SigningKeyPath)
 
 	// Initialize database if empty
-	if err := s.statusListColl.InitializeIfEmpty(ctx); err != nil {
-		return nil, fmt.Errorf("failed to initialize status list database: %w", err)
+	if err := s.tokenStatusListColl.InitializeIfEmpty(ctx); err != nil {
+		return nil, fmt.Errorf("failed to initialize Token Status List database: %w", err)
 	}
 
 	// Start cache cleanup goroutines
@@ -87,7 +87,7 @@ func New(ctx context.Context, cfg *model.Cfg, dbService *db.Service, log *logger
 	// Start the refresh goroutine
 	go s.refreshLoop(ctx)
 
-	s.log.Info("Started TSL cache refresh", "interval", refreshInterval, "validity", tokenValidity)
+	s.log.Info("Started Token Status List cache refresh", "interval", refreshInterval, "validity", tokenValidity)
 
 	return s, nil
 }
@@ -145,7 +145,7 @@ func (s *Service) refreshLoop(ctx context.Context) {
 
 // refreshAllSections refreshes the cache for all available sections
 func (s *Service) refreshAllSections(ctx context.Context) {
-	sections, err := s.statusListMetadata.GetAllSections(ctx)
+	sections, err := s.tokenStatusListMetadata.GetAllSections(ctx)
 	if err != nil {
 		s.log.Error(err, "Failed to get sections for cache refresh")
 		return
@@ -160,7 +160,7 @@ func (s *Service) refreshAllSections(ctx context.Context) {
 
 // refreshSection refreshes the cache for a single section
 func (s *Service) refreshSection(ctx context.Context, section int64) {
-	statuses, err := s.statusListColl.GetAllStatusesForSection(ctx, section)
+	statuses, err := s.tokenStatusListColl.GetAllStatusesForSection(ctx, section)
 	if err != nil {
 		s.log.Error(err, "Failed to get statuses for section", "section", section)
 		return
@@ -179,7 +179,7 @@ func (s *Service) refreshSection(ctx context.Context, section int64) {
 
 	// Token config
 	tokenCfg := TokenConfig{
-		TokenConfig: tsl.TokenConfig{
+		TokenConfig: tokenstatuslist.TokenConfig{
 			Subject:   subject,
 			Issuer:    issuer,
 			Statuses:  statuses,

@@ -1,6 +1,6 @@
-// Package tsl provides types and errors for Token Status List (TSL) operations
+// Package tokenstatuslist provides types and errors for Token Status List operations
 // per draft-ietf-oauth-status-list specification.
-package tsl
+package tokenstatuslist
 
 import "errors"
 

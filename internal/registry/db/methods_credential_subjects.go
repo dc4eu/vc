@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-// CredentialSubjectsColl is the collection for credential subjects (person info linked to TSL entries)
+// CredentialSubjectsColl is the collection for credential subjects (person info linked to Token Status List entries)
 type CredentialSubjectsColl struct {
 	Service *Service
 	Coll    *mongo.Collection
@@ -57,8 +57,8 @@ func (c *CredentialSubjectsColl) createIndexes(ctx context.Context) error {
 		},
 	}
 
-	// Unique index for section+index (one person per TSL entry)
-	tslIndex := mongo.IndexModel{
+	// Unique index for section+index (one person per Token Status List entry)
+	tokenStatusListIndex := mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "section", Value: 1},
 			{Key: "index", Value: 1},
@@ -66,7 +66,7 @@ func (c *CredentialSubjectsColl) createIndexes(ctx context.Context) error {
 		Options: options.Index().SetUnique(true),
 	}
 
-	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{nameIndex, tslIndex})
+	_, err := c.Coll.Indexes().CreateMany(ctx, []mongo.IndexModel{nameIndex, tokenStatusListIndex})
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return err

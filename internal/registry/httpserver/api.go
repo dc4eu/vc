@@ -11,8 +11,8 @@ type Apiv1 interface {
 	Status(ctx context.Context, req *apiv1_status.StatusRequest) (*apiv1_status.StatusReply, error)
 
 	// Token Status List endpoints
-	StatusLists(ctx context.Context, req *apiv1.StatusListsRequest) (*apiv1.StatusListsResponse, error)
-	StatusListAggregation(ctx context.Context) (*apiv1.StatusListAggregationResponse, error)
+	TokenStatusLists(ctx context.Context, req *apiv1.TokenStatusListsRequest) (*apiv1.TokenStatusListsResponse, error)
+	TokenStatusListAggregation(ctx context.Context) (*apiv1.TokenStatusListAggregationResponse, error)
 
 	// Admin GUI endpoints
 	SearchPerson(ctx context.Context, req *apiv1.SearchPersonRequest) (*apiv1.SearchPersonReply, error)

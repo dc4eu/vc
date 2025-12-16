@@ -170,8 +170,8 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			FirstName:   identity.GivenName,
 			LastName:    identity.FamilyName,
 			DateOfBirth: identity.BirthDate,
-			Section:     reply.TslSection,
-			Index:       reply.TslIndex,
+			Section:     reply.TokenStatusListSection,
+			Index:       reply.TokenStatusListIndex,
 		})
 		if err != nil {
 			// Log error but don't fail the request - credential was already created

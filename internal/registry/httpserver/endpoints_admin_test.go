@@ -32,11 +32,11 @@ func (m *mockApiv1) Status(ctx context.Context, req *apiv1_status.StatusRequest)
 	return &apiv1_status.StatusReply{}, nil
 }
 
-func (m *mockApiv1) StatusLists(ctx context.Context, req *apiv1.StatusListsRequest) (*apiv1.StatusListsResponse, error) {
+func (m *mockApiv1) TokenStatusLists(ctx context.Context, req *apiv1.TokenStatusListsRequest) (*apiv1.TokenStatusListsResponse, error) {
 	return nil, nil
 }
 
-func (m *mockApiv1) StatusListAggregation(ctx context.Context) (*apiv1.StatusListAggregationResponse, error) {
+func (m *mockApiv1) TokenStatusListAggregation(ctx context.Context) (*apiv1.TokenStatusListAggregationResponse, error) {
 	return nil, nil
 }
 

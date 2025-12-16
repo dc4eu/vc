@@ -5,8 +5,8 @@ import (
 	"vc/internal/registry/apiv1"
 )
 
-// TSLIssuer interface for Token Status List operations
-type TSLIssuer interface {
+// TokenStatusListIssuer interface for Token Status List operations
+type TokenStatusListIssuer interface {
 	AddStatus(ctx context.Context, status uint8) (int64, int64, error)
 	UpdateStatus(ctx context.Context, section int64, index int64, status uint8) error
 }

@@ -7,16 +7,16 @@ import (
 	"vc/pkg/model"
 )
 
-// TSLIssuer defines the interface for the TSL issuer service
-type TSLIssuer interface {
+// TokenStatusListIssuer defines the interface for the Token Status List issuer service
+type TokenStatusListIssuer interface {
 	GetCachedJWT(section int64) string
 	GetCachedCWT(section int64) []byte
 	GetAllSections(ctx context.Context) ([]int64, error)
 }
 
-// AdminDBStore defines the interface for admin GUI database operations on TSL
+// AdminDBStore defines the interface for admin GUI database operations on Token Status List
 type AdminDBStore interface {
-	FindOne(ctx context.Context, section, index int64) (*db.TSLDoc, error)
+	FindOne(ctx context.Context, section, index int64) (*db.TokenStatusListDoc, error)
 	UpdateStatus(ctx context.Context, section, index int64, status uint8) error
 }
 
@@ -28,11 +28,11 @@ type CredentialSubjectsStore interface {
 
 // Client holds the public api object
 type Client struct {
-	cfg                *model.Cfg
-	log                *logger.Log
-	tslIssuer          TSLIssuer
-	adminDB            AdminDBStore
-	credentialSubjects CredentialSubjectsStore
+	cfg                     *model.Cfg
+	log                     *logger.Log
+	tokenStatusListIssuer   TokenStatusListIssuer
+	adminDB                 AdminDBStore
+	credentialSubjects      CredentialSubjectsStore
 }
 
 //	@title		Registry API
@@ -40,15 +40,15 @@ type Client struct {
 //	@BasePath	/api/v1
 
 // New creates a new instance of the public api
-func New(ctx context.Context, cfg *model.Cfg, tslIssuer TSLIssuer, dbService *db.Service, log *logger.Log) (*Client, error) {
+func New(ctx context.Context, cfg *model.Cfg, tokenStatusListIssuer TokenStatusListIssuer, dbService *db.Service, log *logger.Log) (*Client, error) {
 	c := &Client{
-		cfg:       cfg,
-		log:       log.New("apiv1"),
-		tslIssuer: tslIssuer,
+		cfg:                   cfg,
+		log:                   log.New("apiv1"),
+		tokenStatusListIssuer: tokenStatusListIssuer,
 	}
 
 	if dbService != nil {
-		c.adminDB = dbService.TSLColl
+		c.adminDB = dbService.TokenStatusListColl
 		c.credentialSubjects = dbService.CredentialSubjects
 	}
 

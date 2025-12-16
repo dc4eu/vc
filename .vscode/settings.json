@@ -90,6 +90,7 @@
         "swaggo",
         "testcontainers",
         "timestamppb",
+        "tokenstatuslist",
         "tslissuer",
         "ttlcache",
         "vcclient",

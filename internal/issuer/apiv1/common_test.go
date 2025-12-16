@@ -22,16 +22,16 @@ type mockRegistryClient struct {
 	index   int64
 }
 
-func (m *mockRegistryClient) TSLAddStatus(ctx context.Context, in *apiv1_registry.TSLAddStatusRequest, opts ...grpc.CallOption) (*apiv1_registry.TSLAddStatusReply, error) {
+func (m *mockRegistryClient) TokenStatusListAddStatus(ctx context.Context, in *apiv1_registry.TokenStatusListAddStatusRequest, opts ...grpc.CallOption) (*apiv1_registry.TokenStatusListAddStatusReply, error) {
 	m.index++
-	return &apiv1_registry.TSLAddStatusReply{
+	return &apiv1_registry.TokenStatusListAddStatusReply{
 		Section: m.section,
 		Index:   m.index,
 	}, nil
 }
 
-func (m *mockRegistryClient) TSLUpdateStatus(ctx context.Context, in *apiv1_registry.TSLUpdateStatusRequest, opts ...grpc.CallOption) (*apiv1_registry.TSLUpdateStatusReply, error) {
-	return &apiv1_registry.TSLUpdateStatusReply{}, nil
+func (m *mockRegistryClient) TokenStatusListUpdateStatus(ctx context.Context, in *apiv1_registry.TokenStatusListUpdateStatusRequest, opts ...grpc.CallOption) (*apiv1_registry.TokenStatusListUpdateStatusReply, error) {
+	return &apiv1_registry.TokenStatusListUpdateStatusReply{}, nil
 }
 
 func (m *mockRegistryClient) SaveCredentialSubject(ctx context.Context, in *apiv1_registry.SaveCredentialSubjectRequest, opts ...grpc.CallOption) (*apiv1_registry.SaveCredentialSubjectReply, error) {
@@ -122,7 +122,7 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 	client, err := New(ctx, audit, cfg, tracer, log.New("apiv1"))
 	assert.NoError(t, err)
 
-	// Inject mock registry client for status list allocation
+	// Inject mock registry client for Token Status List allocation
 	client.registryClient = &mockRegistryClient{section: 0, index: 0}
 
 	// Override key if RSA is requested for testing

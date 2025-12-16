@@ -13,7 +13,7 @@ import (
 
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/tsl"
+	"vc/pkg/tokenstatuslist"
 )
 
 // int64Ptr is a helper to create a pointer to an int64
@@ -21,23 +21,23 @@ func int64Ptr(v int64) *int64 {
 	return &v
 }
 
-// mockTSLIssuer is a mock implementation of the TSLIssuer interface for testing
-type mockTSLIssuer struct {
+// mockTokenStatusListIssuer is a mock implementation of the TokenStatusListIssuer interface for testing
+type mockTokenStatusListIssuer struct {
 	jwtCache *ttlcache.Cache[string, string]
 	cwtCache *ttlcache.Cache[string, []byte]
 	sections []int64
 	err      error
 }
 
-func newMockTSLIssuer() *mockTSLIssuer {
-	return &mockTSLIssuer{
+func newMockTokenStatusListIssuer() *mockTokenStatusListIssuer {
+	return &mockTokenStatusListIssuer{
 		jwtCache: ttlcache.New(ttlcache.WithTTL[string, string](time.Hour)),
 		cwtCache: ttlcache.New(ttlcache.WithTTL[string, []byte](time.Hour)),
 		sections: []int64{},
 	}
 }
 
-func (m *mockTSLIssuer) GetCachedJWT(section int64) string {
+func (m *mockTokenStatusListIssuer) GetCachedJWT(section int64) string {
 	key := strconv.FormatInt(section, 10)
 	item := m.jwtCache.Get(key)
 	if item == nil {
@@ -46,7 +46,7 @@ func (m *mockTSLIssuer) GetCachedJWT(section int64) string {
 	return item.Value()
 }
 
-func (m *mockTSLIssuer) GetCachedCWT(section int64) []byte {
+func (m *mockTokenStatusListIssuer) GetCachedCWT(section int64) []byte {
 	key := strconv.FormatInt(section, 10)
 	item := m.cwtCache.Get(key)
 	if item == nil {
@@ -55,42 +55,42 @@ func (m *mockTSLIssuer) GetCachedCWT(section int64) []byte {
 	return item.Value()
 }
 
-func (m *mockTSLIssuer) GetAllSections(ctx context.Context) ([]int64, error) {
+func (m *mockTokenStatusListIssuer) GetAllSections(ctx context.Context) ([]int64, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
 	return m.sections, nil
 }
 
-func (m *mockTSLIssuer) SetJWT(section int64, jwt string) {
+func (m *mockTokenStatusListIssuer) SetJWT(section int64, jwt string) {
 	key := strconv.FormatInt(section, 10)
 	m.jwtCache.Set(key, jwt, ttlcache.DefaultTTL)
 }
 
-func (m *mockTSLIssuer) SetCWT(section int64, cwt []byte) {
+func (m *mockTokenStatusListIssuer) SetCWT(section int64, cwt []byte) {
 	key := strconv.FormatInt(section, 10)
 	m.cwtCache.Set(key, cwt, ttlcache.DefaultTTL)
 }
 
-func (m *mockTSLIssuer) SetSections(sections []int64) {
+func (m *mockTokenStatusListIssuer) SetSections(sections []int64) {
 	m.sections = sections
 }
 
-func (m *mockTSLIssuer) SetError(err error) {
+func (m *mockTokenStatusListIssuer) SetError(err error) {
 	m.err = err
 }
 
 // newTestClient creates a Client with mock dependencies for testing
-func newTestClient() (*Client, *mockTSLIssuer) {
-	mock := newMockTSLIssuer()
+func newTestClient() (*Client, *mockTokenStatusListIssuer) {
+	mock := newMockTokenStatusListIssuer()
 	client := &Client{
 		cfg: &model.Cfg{
 			Registry: model.Registry{
 				ExternalServerURL: "https://example.com",
 			},
 		},
-		log:       logger.NewSimple("test"),
-		tslIssuer: mock,
+		log:                   logger.NewSimple("test"),
+		tokenStatusListIssuer: mock,
 	}
 	return client, mock
 }
@@ -99,7 +99,7 @@ func newTestClient() (*Client, *mockTSLIssuer) {
 // StatusLists Handler Tests
 // ============================================================================
 
-func TestStatusLists_Success_JWT(t *testing.T) {
+func TestTokenStatusLists_Success_JWT(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -107,40 +107,40 @@ func TestStatusLists_Success_JWT(t *testing.T) {
 	expectedJWT := "eyJhbGciOiJFUzI1NiIsInR5cCI6InN0YXR1c2xpc3Qrand0In0.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwic3ViIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9zdGF0dXNsaXN0cy8xIiwiZXhwIjoyMjkxNzIwMTcwLCJpYXQiOjE2ODY5MjAxNzAsInN0YXR1c19saXN0Ijp7ImJpdHMiOjgsImxzdCI6ImVOcmJ1UmdBQWhjQlhRIn0sInR0bCI6NDMyMDB9.signature"
 	mock.SetJWT(1, expectedJWT)
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     1,
 		Accept: "", // Default to JWT
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	assert.Equal(t, tsl.MediaTypeJWT, resp.ContentType)
+	assert.Equal(t, tokenstatuslist.MediaTypeJWT, resp.ContentType)
 	assert.Equal(t, expectedJWT, string(resp.Token))
 }
 
-func TestStatusLists_Success_JWT_ExplicitAcceptHeader(t *testing.T) {
+func TestTokenStatusLists_Success_JWT_ExplicitAcceptHeader(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	expectedJWT := "eyJhbGciOiJFUzI1NiJ9.payload.signature"
 	mock.SetJWT(42, expectedJWT)
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     42,
-		Accept: tsl.MediaTypeJWT,
+		Accept: tokenstatuslist.MediaTypeJWT,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	assert.Equal(t, tsl.MediaTypeJWT, resp.ContentType)
+	assert.Equal(t, tokenstatuslist.MediaTypeJWT, resp.ContentType)
 	assert.Equal(t, expectedJWT, string(resp.Token))
 }
 
-func TestStatusLists_Success_CWT(t *testing.T) {
+func TestTokenStatusLists_Success_CWT(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -148,85 +148,85 @@ func TestStatusLists_Success_CWT(t *testing.T) {
 	expectedCWT := []byte{0xD2, 0x84, 0x43, 0xA1, 0x01, 0x26, 0xA0, 0x58, 0x24}
 	mock.SetCWT(1, expectedCWT)
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     1,
-		Accept: tsl.MediaTypeCWT,
+		Accept: tokenstatuslist.MediaTypeCWT,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	assert.Equal(t, tsl.MediaTypeCWT, resp.ContentType)
+	assert.Equal(t, tokenstatuslist.MediaTypeCWT, resp.ContentType)
 	assert.Equal(t, expectedCWT, resp.Token)
 }
 
-func TestStatusLists_SectionNotFound_JWT(t *testing.T) {
+func TestTokenStatusLists_SectionNotFound_JWT(t *testing.T) {
 	client, _ := newTestClient()
 	ctx := context.Background()
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     999, // Non-existent section
 		Accept: "",  // Default JWT
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	assert.Nil(t, resp)
-	assert.ErrorIs(t, err, tsl.ErrSectionNotFound)
+	assert.ErrorIs(t, err, tokenstatuslist.ErrSectionNotFound)
 }
 
-func TestStatusLists_SectionNotFound_CWT(t *testing.T) {
+func TestTokenStatusLists_SectionNotFound_CWT(t *testing.T) {
 	client, _ := newTestClient()
 	ctx := context.Background()
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     999, // Non-existent section
-		Accept: tsl.MediaTypeCWT,
+		Accept: tokenstatuslist.MediaTypeCWT,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	assert.Nil(t, resp)
-	assert.ErrorIs(t, err, tsl.ErrSectionNotFound)
+	assert.ErrorIs(t, err, tokenstatuslist.ErrSectionNotFound)
 }
 
-func TestStatusLists_HistoricalResolution_NotSupported(t *testing.T) {
+func TestTokenStatusLists_HistoricalResolution_NotSupported(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	// Add data to cache so we know it's not a "not found" error
 	mock.SetJWT(1, "some.jwt.token")
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:   1,
 		Time: int64Ptr(1686920170), // Valid Unix timestamp
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	assert.Nil(t, resp)
-	assert.ErrorIs(t, err, tsl.ErrHistoricalResolutionNotSupported)
+	assert.ErrorIs(t, err, tokenstatuslist.ErrHistoricalResolutionNotSupported)
 }
 
-// TestStatusLists_NegativeTimeParameter tests that negative timestamps are valid
+// TestTokenStatusLists_NegativeTimeParameter tests that negative timestamps are valid
 // (they represent dates before Unix epoch 1970-01-01) but still return historical
 // resolution not supported
-func TestStatusLists_NegativeTimeParameter(t *testing.T) {
+func TestTokenStatusLists_NegativeTimeParameter(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	mock.SetJWT(1, "some.jwt.token")
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:   1,
 		Time: int64Ptr(-1234567890), // Valid negative timestamp (before 1970)
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	assert.Nil(t, resp)
 	// Negative timestamps are valid int64, so we get historical not supported
-	assert.ErrorIs(t, err, tsl.ErrHistoricalResolutionNotSupported)
+	assert.ErrorIs(t, err, tokenstatuslist.ErrHistoricalResolutionNotSupported)
 }
 
-func TestStatusLists_UnrecognizedAcceptHeader_DefaultsToJWT(t *testing.T) {
+func TestTokenStatusLists_UnrecognizedAcceptHeader_DefaultsToJWT(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -243,22 +243,22 @@ func TestStatusLists_UnrecognizedAcceptHeader_DefaultsToJWT(t *testing.T) {
 
 	for _, accept := range testCases {
 		t.Run(accept, func(t *testing.T) {
-			req := &StatusListsRequest{
+			req := &TokenStatusListsRequest{
 				ID:     1,
 				Accept: accept,
 			}
 
-			resp, err := client.StatusLists(ctx, req)
+			resp, err := client.TokenStatusLists(ctx, req)
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 
-			assert.Equal(t, tsl.MediaTypeJWT, resp.ContentType)
+			assert.Equal(t, tokenstatuslist.MediaTypeJWT, resp.ContentType)
 			assert.Equal(t, expectedJWT, string(resp.Token))
 		})
 	}
 }
 
-func TestStatusLists_MultipleSections(t *testing.T) {
+func TestTokenStatusLists_MultipleSections(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -274,30 +274,30 @@ func TestStatusLists_MultipleSections(t *testing.T) {
 	sections := []int64{0, 1, 100}
 	for _, section := range sections {
 		t.Run("JWT_section_"+strconv.FormatInt(section, 10), func(t *testing.T) {
-			req := &StatusListsRequest{
+			req := &TokenStatusListsRequest{
 				ID:     section,
-				Accept: tsl.MediaTypeJWT,
+				Accept: tokenstatuslist.MediaTypeJWT,
 			}
-			resp, err := client.StatusLists(ctx, req)
+			resp, err := client.TokenStatusLists(ctx, req)
 			require.NoError(t, err)
 			require.NotNil(t, resp)
-			assert.Equal(t, tsl.MediaTypeJWT, resp.ContentType)
+			assert.Equal(t, tokenstatuslist.MediaTypeJWT, resp.ContentType)
 		})
 
 		t.Run("CWT_section_"+strconv.FormatInt(section, 10), func(t *testing.T) {
-			req := &StatusListsRequest{
+			req := &TokenStatusListsRequest{
 				ID:     section,
-				Accept: tsl.MediaTypeCWT,
+				Accept: tokenstatuslist.MediaTypeCWT,
 			}
-			resp, err := client.StatusLists(ctx, req)
+			resp, err := client.TokenStatusLists(ctx, req)
 			require.NoError(t, err)
 			require.NotNil(t, resp)
-			assert.Equal(t, tsl.MediaTypeCWT, resp.ContentType)
+			assert.Equal(t, tokenstatuslist.MediaTypeCWT, resp.ContentType)
 		})
 	}
 }
 
-func TestStatusLists_LargeSectionID(t *testing.T) {
+func TestTokenStatusLists_LargeSectionID(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -306,57 +306,57 @@ func TestStatusLists_LargeSectionID(t *testing.T) {
 	expectedJWT := "jwt.for.large.section"
 	mock.SetJWT(largeSectionID, expectedJWT)
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID: largeSectionID,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 	assert.Equal(t, expectedJWT, string(resp.Token))
 }
 
-func TestStatusLists_ZeroSectionID(t *testing.T) {
+func TestTokenStatusLists_ZeroSectionID(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	expectedJWT := "jwt.for.section.zero"
 	mock.SetJWT(0, expectedJWT)
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID: 0,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 	assert.Equal(t, expectedJWT, string(resp.Token))
 }
 
 // ============================================================================
-// StatusListAggregation Handler Tests
+// TokenStatusListAggregation Handler Tests
 // ============================================================================
 
-func TestStatusListAggregation_Success_Empty(t *testing.T) {
+func TestTokenStatusListAggregation_Success_Empty(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	mock.SetSections([]int64{})
 
-	resp, err := client.StatusListAggregation(ctx)
+	resp, err := client.TokenStatusListAggregation(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
 	assert.Empty(t, resp.StatusLists)
 }
 
-func TestStatusListAggregation_Success_SingleSection(t *testing.T) {
+func TestTokenStatusListAggregation_Success_SingleSection(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	mock.SetSections([]int64{1})
 
-	resp, err := client.StatusListAggregation(ctx)
+	resp, err := client.TokenStatusListAggregation(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
@@ -364,13 +364,13 @@ func TestStatusListAggregation_Success_SingleSection(t *testing.T) {
 	assert.Equal(t, "https://example.com/statuslists/1", resp.StatusLists[0])
 }
 
-func TestStatusListAggregation_Success_MultipleSections(t *testing.T) {
+func TestTokenStatusListAggregation_Success_MultipleSections(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	mock.SetSections([]int64{0, 1, 2, 10, 100})
 
-	resp, err := client.StatusListAggregation(ctx)
+	resp, err := client.TokenStatusListAggregation(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
@@ -386,19 +386,19 @@ func TestStatusListAggregation_Success_MultipleSections(t *testing.T) {
 	assert.Equal(t, expected, resp.StatusLists)
 }
 
-func TestStatusListAggregation_Error_DatabaseFailure(t *testing.T) {
+func TestTokenStatusListAggregation_Error_DatabaseFailure(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	dbError := errors.New("database connection failed")
 	mock.SetError(dbError)
 
-	resp, err := client.StatusListAggregation(ctx)
+	resp, err := client.TokenStatusListAggregation(ctx)
 	assert.Nil(t, resp)
 	assert.ErrorIs(t, err, dbError)
 }
 
-func TestStatusListAggregation_DifferentBaseURLs(t *testing.T) {
+func TestTokenStatusListAggregation_DifferentBaseURLs(t *testing.T) {
 	testCases := []struct {
 		name        string
 		baseURL     string
@@ -428,7 +428,7 @@ func TestStatusListAggregation_DifferentBaseURLs(t *testing.T) {
 			mock.SetSections([]int64{1})
 
 			ctx := context.Background()
-			resp, err := client.StatusListAggregation(ctx)
+			resp, err := client.TokenStatusListAggregation(ctx)
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 
@@ -438,14 +438,14 @@ func TestStatusListAggregation_DifferentBaseURLs(t *testing.T) {
 	}
 }
 
-func TestStatusListAggregation_LargeSectionNumbers(t *testing.T) {
+func TestTokenStatusListAggregation_LargeSectionNumbers(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
 	// Test with large section numbers
 	mock.SetSections([]int64{0, 999999, 1000000})
 
-	resp, err := client.StatusListAggregation(ctx)
+	resp, err := client.TokenStatusListAggregation(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
@@ -459,42 +459,42 @@ func TestStatusListAggregation_LargeSectionNumbers(t *testing.T) {
 // Request/Response Type Tests
 // ============================================================================
 
-func TestStatusListsRequest_Fields(t *testing.T) {
+func TestTokenStatusListsRequest_Fields(t *testing.T) {
 	timeVal := int64(1686920170)
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     42,
 		Time:   &timeVal,
-		Accept: tsl.MediaTypeCWT,
+		Accept: tokenstatuslist.MediaTypeCWT,
 	}
 
 	assert.Equal(t, int64(42), req.ID)
 	assert.Equal(t, int64(1686920170), *req.Time)
-	assert.Equal(t, tsl.MediaTypeCWT, req.Accept)
+	assert.Equal(t, tokenstatuslist.MediaTypeCWT, req.Accept)
 }
 
-func TestStatusListsRequest_NilTime(t *testing.T) {
-	req := &StatusListsRequest{
+func TestTokenStatusListsRequest_NilTime(t *testing.T) {
+	req := &TokenStatusListsRequest{
 		ID:     42,
-		Accept: tsl.MediaTypeCWT,
+		Accept: tokenstatuslist.MediaTypeCWT,
 	}
 
 	assert.Equal(t, int64(42), req.ID)
 	assert.Nil(t, req.Time)
-	assert.Equal(t, tsl.MediaTypeCWT, req.Accept)
+	assert.Equal(t, tokenstatuslist.MediaTypeCWT, req.Accept)
 }
 
-func TestStatusListsResponse_Fields(t *testing.T) {
-	resp := &StatusListsResponse{
+func TestTokenStatusListsResponse_Fields(t *testing.T) {
+	resp := &TokenStatusListsResponse{
 		Token:       []byte("test-token"),
-		ContentType: tsl.MediaTypeJWT,
+		ContentType: tokenstatuslist.MediaTypeJWT,
 	}
 
 	assert.Equal(t, []byte("test-token"), resp.Token)
-	assert.Equal(t, tsl.MediaTypeJWT, resp.ContentType)
+	assert.Equal(t, tokenstatuslist.MediaTypeJWT, resp.ContentType)
 }
 
-func TestStatusListAggregationResponse_Fields(t *testing.T) {
-	resp := &StatusListAggregationResponse{
+func TestTokenStatusListAggregationResponse_Fields(t *testing.T) {
+	resp := &TokenStatusListAggregationResponse{
 		StatusLists: []string{
 			"https://example.com/statuslists/1",
 			"https://example.com/statuslists/2",
@@ -509,36 +509,36 @@ func TestStatusListAggregationResponse_Fields(t *testing.T) {
 // Edge Cases and Boundary Tests
 // ============================================================================
 
-func TestStatusLists_EmptyJWTInCache(t *testing.T) {
+func TestTokenStatusLists_EmptyJWTInCache(t *testing.T) {
 	client, _ := newTestClient()
 	ctx := context.Background()
 
 	// Empty cache - section not found
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID: 1,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	assert.Nil(t, resp)
-	assert.ErrorIs(t, err, tsl.ErrSectionNotFound)
+	assert.ErrorIs(t, err, tokenstatuslist.ErrSectionNotFound)
 }
 
-func TestStatusLists_EmptyCWTInCache(t *testing.T) {
+func TestTokenStatusLists_EmptyCWTInCache(t *testing.T) {
 	client, _ := newTestClient()
 	ctx := context.Background()
 
 	// Similar to JWT, nil/empty CWT should be not found
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     1,
-		Accept: tsl.MediaTypeCWT,
+		Accept: tokenstatuslist.MediaTypeCWT,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	assert.Nil(t, resp)
-	assert.ErrorIs(t, err, tsl.ErrSectionNotFound)
+	assert.ErrorIs(t, err, tokenstatuslist.ErrSectionNotFound)
 }
 
-func TestStatusLists_CWTWithBinaryData(t *testing.T) {
+func TestTokenStatusLists_CWTWithBinaryData(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -549,19 +549,19 @@ func TestStatusLists_CWTWithBinaryData(t *testing.T) {
 	}
 	mock.SetCWT(1, binaryData)
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID:     1,
-		Accept: tsl.MediaTypeCWT,
+		Accept: tokenstatuslist.MediaTypeCWT,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
 	assert.Equal(t, binaryData, resp.Token)
 }
 
-func TestStatusLists_JWTWithSpecialCharacters(t *testing.T) {
+func TestTokenStatusLists_JWTWithSpecialCharacters(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -569,16 +569,16 @@ func TestStatusLists_JWTWithSpecialCharacters(t *testing.T) {
 	jwtToken := "eyJhbGciOiJFUzI1NiIsInR5cCI6InN0YXR1c2xpc3Qrand0In0.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwic3ViIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9zdGF0dXNsaXN0cy8xIn0.MEUCIQDnGL_-gEP-3Z0xBLJJKz6x_d1WBHdPFX0H8oNTn8A4ngIgYbw7E6ydR0WC5sF8xGCNW7EzNqVZ8EH3qJNs0MxVH-A"
 	mock.SetJWT(1, jwtToken)
 
-	req := &StatusListsRequest{
+	req := &TokenStatusListsRequest{
 		ID: 1,
 	}
 
-	resp, err := client.StatusLists(ctx, req)
+	resp, err := client.TokenStatusLists(ctx, req)
 	require.NoError(t, err)
 	assert.Equal(t, jwtToken, string(resp.Token))
 }
 
-func TestStatusLists_TimeParameter_ValidTimestamps(t *testing.T) {
+func TestTokenStatusLists_TimeParameter_ValidTimestamps(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -595,14 +595,14 @@ func TestStatusLists_TimeParameter_ValidTimestamps(t *testing.T) {
 
 	for _, ts := range validTimestamps {
 		t.Run("timestamp_"+strconv.FormatInt(ts, 10), func(t *testing.T) {
-			req := &StatusListsRequest{
+			req := &TokenStatusListsRequest{
 				ID:   1,
 				Time: int64Ptr(ts),
 			}
 
-			resp, err := client.StatusLists(ctx, req)
+			resp, err := client.TokenStatusLists(ctx, req)
 			assert.Nil(t, resp)
-			assert.ErrorIs(t, err, tsl.ErrHistoricalResolutionNotSupported)
+			assert.ErrorIs(t, err, tokenstatuslist.ErrHistoricalResolutionNotSupported)
 		})
 	}
 }
@@ -611,7 +611,7 @@ func TestStatusLists_TimeParameter_ValidTimestamps(t *testing.T) {
 // Concurrency Tests
 // ============================================================================
 
-func TestStatusLists_ConcurrentAccess(t *testing.T) {
+func TestTokenStatusLists_ConcurrentAccess(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -623,14 +623,14 @@ func TestStatusLists_ConcurrentAccess(t *testing.T) {
 	done := make(chan bool)
 	for i := 0; i < 100; i++ {
 		go func(i int) {
-			var req *StatusListsRequest
+			var req *TokenStatusListsRequest
 			if i%2 == 0 {
-				req = &StatusListsRequest{ID: 1, Accept: tsl.MediaTypeJWT}
+				req = &TokenStatusListsRequest{ID: 1, Accept: tokenstatuslist.MediaTypeJWT}
 			} else {
-				req = &StatusListsRequest{ID: 1, Accept: tsl.MediaTypeCWT}
+				req = &TokenStatusListsRequest{ID: 1, Accept: tokenstatuslist.MediaTypeCWT}
 			}
 
-			resp, err := client.StatusLists(ctx, req)
+			resp, err := client.TokenStatusLists(ctx, req)
 			assert.NoError(t, err)
 			assert.NotNil(t, resp)
 			done <- true
@@ -643,7 +643,7 @@ func TestStatusLists_ConcurrentAccess(t *testing.T) {
 	}
 }
 
-func TestStatusListAggregation_ConcurrentAccess(t *testing.T) {
+func TestTokenStatusListAggregation_ConcurrentAccess(t *testing.T) {
 	client, mock := newTestClient()
 	ctx := context.Background()
 
@@ -652,7 +652,7 @@ func TestStatusListAggregation_ConcurrentAccess(t *testing.T) {
 	done := make(chan bool)
 	for i := 0; i < 50; i++ {
 		go func() {
-			resp, err := client.StatusListAggregation(ctx)
+			resp, err := client.TokenStatusListAggregation(ctx)
 			assert.NoError(t, err)
 			assert.NotNil(t, resp)
 			assert.Len(t, resp.StatusLists, 5)
@@ -671,8 +671,8 @@ func TestStatusListAggregation_ConcurrentAccess(t *testing.T) {
 
 func TestMediaTypeConstants(t *testing.T) {
 	// Verify the media type constants match the spec
-	assert.Equal(t, "application/statuslist+jwt", tsl.MediaTypeJWT)
-	assert.Equal(t, "application/statuslist+cwt", tsl.MediaTypeCWT)
+	assert.Equal(t, "application/statuslist+jwt", tokenstatuslist.MediaTypeJWT)
+	assert.Equal(t, "application/statuslist+cwt", tokenstatuslist.MediaTypeCWT)
 }
 
 // ============================================================================
@@ -681,14 +681,14 @@ func TestMediaTypeConstants(t *testing.T) {
 
 func TestErrorTypes(t *testing.T) {
 	// Verify error types are properly defined
-	assert.NotNil(t, tsl.ErrSectionNotFound)
-	assert.NotNil(t, tsl.ErrInvalidTimeParameter)
-	assert.NotNil(t, tsl.ErrHistoricalResolutionNotSupported)
+	assert.NotNil(t, tokenstatuslist.ErrSectionNotFound)
+	assert.NotNil(t, tokenstatuslist.ErrInvalidTimeParameter)
+	assert.NotNil(t, tokenstatuslist.ErrHistoricalResolutionNotSupported)
 
 	// Verify error messages are meaningful
-	assert.Contains(t, tsl.ErrSectionNotFound.Error(), "not found")
-	assert.Contains(t, tsl.ErrInvalidTimeParameter.Error(), "time")
-	assert.Contains(t, tsl.ErrHistoricalResolutionNotSupported.Error(), "historical")
+	assert.Contains(t, tokenstatuslist.ErrSectionNotFound.Error(), "not found")
+	assert.Contains(t, tokenstatuslist.ErrInvalidTimeParameter.Error(), "time")
+	assert.Contains(t, tokenstatuslist.ErrHistoricalResolutionNotSupported.Error(), "historical")
 }
 
 // ============================================================================
@@ -703,7 +703,7 @@ func TestNew(t *testing.T) {
 		},
 	}
 	log := logger.NewSimple("test")
-	mock := newMockTSLIssuer()
+	mock := newMockTokenStatusListIssuer()
 
 	client, err := New(ctx, cfg, mock, nil, log)
 	require.NoError(t, err)
@@ -711,14 +711,14 @@ func TestNew(t *testing.T) {
 
 	assert.Equal(t, cfg, client.cfg)
 	assert.NotNil(t, client.log)
-	assert.Equal(t, mock, client.tslIssuer)
+	assert.Equal(t, mock, client.tokenStatusListIssuer)
 }
 
 // ============================================================================
 // Interface Compliance Test
 // ============================================================================
 
-func TestMockTSLIssuer_ImplementsInterface(t *testing.T) {
-	// Verify that mockTSLIssuer implements TSLIssuer interface
-	var _ TSLIssuer = (*mockTSLIssuer)(nil)
+func TestMockTokenStatusListIssuer_ImplementsInterface(t *testing.T) {
+	// Verify that mockTokenStatusListIssuer implements TokenStatusListIssuer interface
+	var _ TokenStatusListIssuer = (*mockTokenStatusListIssuer)(nil)
 }

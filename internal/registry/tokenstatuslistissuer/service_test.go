@@ -1,4 +1,4 @@
-package tslissuer
+package tokenstatuslistissuer
 
 import (
 	"context"
@@ -26,7 +26,7 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/trace"
-	"vc/pkg/tsl"
+	"vc/pkg/tokenstatuslist"
 )
 
 // testSuite holds the test infrastructure
@@ -279,7 +279,7 @@ func TestNew_InvalidKeyPath(t *testing.T) {
 	service, err := New(suite.ctx, suite.cfg, suite.dbService, suite.log)
 	assert.Error(t, err)
 	assert.Nil(t, service)
-	assert.Contains(t, err.Error(), "failed to load TSL signing key")
+	assert.Contains(t, err.Error(), "failed to load Token Status List signing key")
 }
 
 func TestNew_RSAKeyRejected(t *testing.T) {
@@ -351,7 +351,7 @@ func TestAddStatus_Success(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// Add a valid status
-	section, index, err := service.AddStatus(suite.ctx, tsl.StatusValid)
+	section, index, err := service.AddStatus(suite.ctx, tokenstatuslist.StatusValid)
 	require.NoError(t, err)
 	assert.Equal(t, int64(0), section) // Should be section 0
 	assert.GreaterOrEqual(t, index, int64(0))
@@ -370,7 +370,7 @@ func TestAddStatus_MultipleStatuses(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// Add multiple statuses
-	statuses := []uint8{tsl.StatusValid, tsl.StatusInvalid, tsl.StatusSuspended}
+	statuses := []uint8{tokenstatuslist.StatusValid, tokenstatuslist.StatusInvalid, tokenstatuslist.StatusSuspended}
 	results := make([]struct {
 		section int64
 		index   int64
@@ -530,7 +530,7 @@ func TestGenerateStatusListTokenJWT_Success(t *testing.T) {
 	statuses := []uint8{0, 1, 2, 0, 1}
 
 	cfg := TokenConfig{
-		TokenConfig: tsl.TokenConfig{
+		TokenConfig: tokenstatuslist.TokenConfig{
 			Subject:   "https://example.com/statuslists/1",
 			Issuer:    "https://example.com",
 			Statuses:  statuses,
@@ -560,7 +560,7 @@ func TestGenerateStatusListTokenCWT_Success(t *testing.T) {
 	statuses := []uint8{0, 1, 2, 0, 1}
 
 	cfg := TokenConfig{
-		TokenConfig: tsl.TokenConfig{
+		TokenConfig: tokenstatuslist.TokenConfig{
 			Subject:   "https://example.com/statuslists/1",
 			Issuer:    "https://example.com",
 			Statuses:  statuses,
@@ -630,7 +630,7 @@ func TestCreateNewSectionIfNeeded_CreatesNewSection(t *testing.T) {
 	// Add statuses to consume decoys (each AddStatus converts one decoy to a real status)
 	// We need to consume more than 500 decoys to get below 1000 threshold
 	for i := 0; i < 501; i++ {
-		_, _, err := service.AddStatus(suite.ctx, tsl.StatusValid)
+		_, _, err := service.AddStatus(suite.ctx, tokenstatuslist.StatusValid)
 		require.NoError(t, err)
 	}
 
@@ -640,7 +640,7 @@ func TestCreateNewSectionIfNeeded_CreatesNewSection(t *testing.T) {
 	assert.Equal(t, int64(1), section, "Should create new section when decoys <= 1000")
 
 	// Verify we can now add to the new section
-	newSection, _, err := service.AddStatus(suite.ctx, tsl.StatusInvalid)
+	newSection, _, err := service.AddStatus(suite.ctx, tokenstatuslist.StatusInvalid)
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), newSection, "New statuses should be added to section 1")
 }
@@ -660,7 +660,7 @@ func TestCreateNewSectionIfNeeded_BoundaryDecoyCount(t *testing.T) {
 	assert.Equal(t, int64(0), section)
 
 	// Add one status to consume one decoy (now 1000 decoys remaining)
-	_, _, err = service.AddStatus(suite.ctx, tsl.StatusValid)
+	_, _, err = service.AddStatus(suite.ctx, tokenstatuslist.StatusValid)
 	require.NoError(t, err)
 
 	// Now exactly 1000 decoys, should create new section (threshold is <=1000)
@@ -679,7 +679,7 @@ func TestCreateNewSectionIfNeeded_AboveBoundaryDecoyCount(t *testing.T) {
 	defer service.Close(suite.ctx)
 
 	// Add one status (now 1001 decoys remaining, still > 1000)
-	_, _, err = service.AddStatus(suite.ctx, tsl.StatusValid)
+	_, _, err = service.AddStatus(suite.ctx, tokenstatuslist.StatusValid)
 	require.NoError(t, err)
 
 	// Should stay on section 0 (1001 > 1000)
@@ -699,7 +699,7 @@ func TestCreateNewSectionIfNeeded_MultipleSections(t *testing.T) {
 
 	// Consume 10 decoys to trigger first section change
 	for i := 0; i < 10; i++ {
-		_, _, err := service.AddStatus(suite.ctx, tsl.StatusValid)
+		_, _, err := service.AddStatus(suite.ctx, tokenstatuslist.StatusValid)
 		require.NoError(t, err)
 	}
 
@@ -710,7 +710,7 @@ func TestCreateNewSectionIfNeeded_MultipleSections(t *testing.T) {
 
 	// Continue adding to consume decoys in section 1
 	for i := 0; i < 10; i++ {
-		_, _, err := service.AddStatus(suite.ctx, tsl.StatusValid)
+		_, _, err := service.AddStatus(suite.ctx, tokenstatuslist.StatusValid)
 		require.NoError(t, err)
 	}
 
@@ -813,7 +813,7 @@ func TestIntegration_AddStatusAndRetrieve(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Add a new status
-	section, index, err := service.AddStatus(suite.ctx, tsl.StatusInvalid)
+	section, index, err := service.AddStatus(suite.ctx, tokenstatuslist.StatusInvalid)
 	require.NoError(t, err)
 	t.Logf("Added status at section=%d, index=%d", section, index)
 
@@ -823,7 +823,7 @@ func TestIntegration_AddStatusAndRetrieve(t *testing.T) {
 	require.Greater(t, len(statuses), int(index))
 
 	// The status at the index should be what we set
-	assert.Equal(t, tsl.StatusInvalid, statuses[index])
+	assert.Equal(t, tokenstatuslist.StatusInvalid, statuses[index])
 }
 
 func TestIntegration_CacheConsistency(t *testing.T) {

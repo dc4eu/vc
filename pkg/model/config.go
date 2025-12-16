@@ -576,15 +576,15 @@ type APIGW struct {
 	RegistryClient    GRPCClientTLS    `yaml:"registry_client" validate:"required"` // gRPC client config for registry
 }
 
-// TokenStatusLists holds the configuration for Token Status List (TSL) per draft-ietf-oauth-status-list
+// TokenStatusLists holds the configuration for Token Status List per draft-ietf-oauth-status-list
 type TokenStatusLists struct {
-	// SigningKeyPath is the path to the ECDSA P-256 private key for signing Status List Tokens.
+	// SigningKeyPath is the path to the ECDSA P-256 private key for signing Token Status List tokens.
 	SigningKeyPath string `yaml:"signing_key_path" validate:"required"`
-	// TokenRefreshInterval is how often (in seconds) new Status List Tokens are generated. Default: 43200 (12 hours)
+	// TokenRefreshInterval is how often (in seconds) new Token Status List tokens are generated. Default: 43200 (12 hours)
 	TokenRefreshInterval int64 `yaml:"token_refresh_interval" default:"43200"`
 	// SectionSize is the number of entries (decoys) per section. Default: 1000000 (1 million)
 	SectionSize int64 `yaml:"section_size" default:"1000000"`
-	// RateLimitRequestsPerMinute is the maximum requests per minute per IP for statuslists endpoints. Default: 60
+	// RateLimitRequestsPerMinute is the maximum requests per minute per IP for token status list endpoints. Default: 60
 	RateLimitRequestsPerMinute int `yaml:"rate_limit_requests_per_minute" default:"60"`
 }
 

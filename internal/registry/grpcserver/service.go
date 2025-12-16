@@ -14,22 +14,22 @@ import (
 
 // Service is the service object for grpcserver
 type Service struct {
-	tslIssuer  TSLIssuer
-	apiv1      Apiv1
-	log        *logger.Log
-	cfg        *model.Cfg
-	listener   net.Listener
-	grpcServer *grpc.Server
+	tokenStatusListIssuer TokenStatusListIssuer
+	apiv1                 Apiv1
+	log                   *logger.Log
+	cfg                   *model.Cfg
+	listener              net.Listener
+	grpcServer            *grpc.Server
 	apiv1_registry.RegistryServiceServer
 }
 
 // New creates a new gRPC server service
-func New(ctx context.Context, tslIssuer TSLIssuer, apiv1 Apiv1, cfg *model.Cfg, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, tokenStatusListIssuer TokenStatusListIssuer, apiv1 Apiv1, cfg *model.Cfg, log *logger.Log) (*Service, error) {
 	s := &Service{
-		log:       log.New("grpcserver"),
-		cfg:       cfg,
-		tslIssuer: tslIssuer,
-		apiv1:     apiv1,
+		log:                   log.New("grpcserver"),
+		cfg:                   cfg,
+		tokenStatusListIssuer: tokenStatusListIssuer,
+		apiv1:                 apiv1,
 	}
 
 	// Configure server options using helper

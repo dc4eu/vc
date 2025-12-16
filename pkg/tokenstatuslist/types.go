@@ -58,7 +58,7 @@ type StatusList struct {
 	// Subject is the URI of the Status List Token (REQUIRED, must match uri in Referenced Token)
 	Subject string
 
-	// TTL is the time to live in seconds (RECOMMENDED)
+	// TTL is the time-to-live in seconds for caching, as specified in the draft-ietf-oauth-status-list specification (RECOMMENDED).
 	TTL int64
 
 	// ExpiresIn is the duration until the token expires (RECOMMENDED)

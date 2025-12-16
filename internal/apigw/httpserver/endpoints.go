@@ -289,19 +289,12 @@ func (s *Service) endpointOIDCCredential(ctx context.Context, c *gin.Context) (a
 	ctx, span := s.tracer.Start(ctx, "httpserver:endpointOIDCredential")
 	defer span.End()
 
-	credentialRequestHeader := &openid4vci.CredentialRequestHeader{}
-	if err := c.BindHeader(credentialRequestHeader); err != nil {
-		return nil, err
-	}
-
 	request := &openid4vci.CredentialRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		s.log.Error(err, "binding error")
 		return nil, err
 	}
-
-	request.Headers = credentialRequestHeader
 
 	reply, err := s.apiv1.OIDCCredential(ctx, request)
 	if err != nil {

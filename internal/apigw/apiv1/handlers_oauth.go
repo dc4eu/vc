@@ -138,7 +138,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 		return nil, err
 	}
 
-	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.Header.DPOP)
+	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.DPOP)
 	if err != nil {
 		c.log.Error(err, "dpop validation error")
 		return nil, err

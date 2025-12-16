@@ -47,30 +47,19 @@ func (c *Client) OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, erro
 //	@Param			req	body		openid4vci.CredentialRequest	true	" "
 //	@Router			/credential [post]
 func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
-	c.log.Debug("credential", "req", req.Proof.ProofType, "format", req.Format)
-
-	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.Headers.DPoP)
+	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.DPoP)
 	if err != nil {
 		c.log.Error(err, "failed to validate DPoP JWT")
 		return nil, err
 	}
 
-	jti := dpop.JTI
-
-	sig := strings.Split(req.Headers.DPoP, ".")[2]
-	c.log.Debug("DPoP JWT", "jti", jti, "sig", sig, "dpop JWK", sig)
-	c.log.Debug("Credential request header", "authorization", req.Headers.Authorization, "dpop", req.Headers.DPoP)
-
-	requestATH := req.Headers.HashAuthorizeToken()
+	requestATH := req.HashAuthorizeToken()
 
 	if !dpop.IsAccessTokenDPoP(requestATH) {
 		return nil, errors.New("invalid DPoP token")
 	}
 
-	// "DPoP H4fFxp2hDZ-KY-_am35sXBJStQn9plmV_UC_bk20heA="
-	accessToken := strings.TrimPrefix(req.Headers.Authorization, "DPoP ")
-
-	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "accessToken", accessToken)
+	accessToken := strings.TrimPrefix(req.Authorization, "DPoP ")
 
 	authContext, err := c.authContextStore.GetWithAccessToken(ctx, accessToken)
 	if err != nil {
@@ -78,14 +67,16 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, err
 	}
 
-	c.log.Debug("credential", "authContext", authContext)
+	if len(authContext.Scope) == 0 {
+		c.log.Error(nil, "no scope found in auth context")
+		return nil, errors.New("no scope found in auth context")
+	}
 
 	document := &model.CompleteDocument{}
 
 	// TODO(masv): make this flexible, use config.yaml credential constructor
 	switch authContext.Scope[0] {
 	case "ehic", "pda1", "diploma":
-		c.log.Debug("ehic/pda1/diploma scope detected")
 		docs := c.documentCache.Get(authContext.SessionID).Value()
 		if docs == nil {
 			c.log.Error(nil, "no documents found in cache for session", "session_id", authContext.SessionID)
@@ -97,7 +88,6 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		}
 
 	case "pid_1_5":
-		c.log.Debug("pid scope detected")
 		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
@@ -106,12 +96,10 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			Identity: authContext.Identity,
 		})
 		if err != nil {
-			c.log.Debug("failed to get document", "error", err)
 			return nil, err
 		}
 
 	case "pid_1_8":
-		c.log.Debug("pid scope detected")
 		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
@@ -120,30 +108,37 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			Identity: authContext.Identity,
 		})
 		if err != nil {
-			c.log.Debug("failed to get document", "error", err)
 			return nil, err
 		}
 
 	default:
 		c.log.Error(nil, "unsupported scope", "scope", authContext.Scope)
+		return nil, errors.New("unsupported scope")
 	}
 
 	documentData, err := json.Marshal(document.DocumentData)
 	if err != nil {
-		c.log.Debug("failed to marshal document data", "error", err)
-		return nil, err
-	}
-	c.log.Debug("Here 0", "documentData", string(documentData))
-
-	jwk, err := req.Proof.ExtractJWK()
-	if err != nil {
-		c.log.Error(err, "failed to extract JWK from proof")
 		return nil, err
 	}
 
-	c.log.Debug("Here 1", "jwk", jwk)
+	// Extract JWK from proof (singular) or proofs (plural/batch)
+	var jwk *apiv1_issuer.Jwk
+	if req.Proof != nil {
+		jwk, err = req.Proof.ExtractJWK()
+		if err != nil {
+			c.log.Error(err, "failed to extract JWK from proof")
+			return nil, err
+		}
+	} else if req.Proofs != nil {
+		jwk, err = req.Proofs.ExtractJWK()
+		if err != nil {
+			c.log.Error(err, "failed to extract JWK from proofs")
+			return nil, err
+		}
+	} else {
+		return nil, errors.New("no proof found in credential request")
+	}
 
-	// Use the pre-initialized gRPC client
 	reply, err := c.issuerClient.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
 		Scope:        authContext.Scope[0],
 		DocumentData: documentData,
@@ -154,14 +149,9 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, err
 	}
 
-	c.log.Debug("MakeSDJWT reply", "reply", reply)
-
 	if reply == nil {
-		c.log.Debug("MakeSDJWT reply is nil")
 		return nil, errors.New("MakeSDJWT reply is nil")
 	}
-
-	c.log.Debug("Here 2")
 
 	// Save credential subject info to registry for status management
 	if len(document.Identities) > 0 {
@@ -174,34 +164,24 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			Index:       reply.TslIndex,
 		})
 		if err != nil {
-			// Log error but don't fail the request - credential was already created
 			c.log.Error(err, "failed to save credential subject to registry")
-		} else {
-			c.log.Debug("saved credential subject", "given_name", identity.GivenName, "family_name", identity.FamilyName)
 		}
 	}
 
 	response := &openid4vci.CredentialResponse{}
 	switch len(reply.Credentials) {
 	case 0:
-		c.log.Debug("No credentials returned from issuer")
 		return nil, helpers.ErrNoDocumentFound
 	case 1:
-		credential := reply.Credentials[0].Credential
 		response.Credentials = []openid4vci.Credential{
 			{
-				Credential: credential,
+				Credential: reply.Credentials[0].Credential,
 			},
 		}
-		c.log.Debug("Single credential returned from issuer")
 		return response, nil
 	default:
-		c.log.Debug("Multiple credentials returned from issuer")
-		//response.Credentials = reply.Credentials
 		return nil, errors.New("multiple credentials returned from issuer, not supported")
 	}
-
-	//return response, nil
 }
 
 // OIDCDeferredCredential https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoin

@@ -59,9 +59,8 @@ func TestProofTypes(t *testing.T) {
 		{
 			name: "jwt",
 			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType: "jwt",
-					JWT:       mockJWTWithKidAndJwk,
+				Proofs: &Proofs{
+					JWT: []ProofJWTToken{mockJWTWithKidAndJwk},
 				},
 			},
 			errStr: "invalid_credential_request",
@@ -69,8 +68,8 @@ func TestProofTypes(t *testing.T) {
 		{
 			name: "jwt_missing",
 			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType: "jwt",
+				Proofs: &Proofs{
+					JWT: []ProofJWTToken{},
 				},
 			},
 			errStr: "invalid_credential_request",
@@ -78,17 +77,19 @@ func TestProofTypes(t *testing.T) {
 		{
 			name: "di_vp",
 			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType: "di_vp",
-					DIVP: map[string]interface{}{
-						"@context": []interface{}{"https://www.w3.org/ns/credentials/v2"},
-						"type":     []interface{}{"VerifiablePresentation"},
-						"proof": map[string]interface{}{
-							"type":               "DataIntegrityProof",
-							"cryptosuite":        "eddsa-2022",
-							"proofPurpose":       "authentication",
-							"verificationMethod": "did:key:z6MkvrFpBNCoYewiaeBLgjUDvLxUtnK5R6mqh5XPvLsrPsro",
-							"domain":             "https://example.com",
+				Proofs: &Proofs{
+					DIVP: []ProofDIVP{
+						{
+							Context: []string{"https://www.w3.org/ns/credentials/v2"},
+							Type:    []string{"VerifiablePresentation"},
+							Proof: &DIVPProof{
+								Type:               "DataIntegrityProof",
+								Cryptosuite:        "eddsa-rdfc-2022",
+								ProofPurpose:       "authentication",
+								VerificationMethod: "did:key:z6MkvrFpBNCoYewiaeBLgjUDvLxUtnK5R6mqh5XPvLsrPsro",
+								Domain:             "https://example.com",
+								ProofValue:         "z5Y9cYzRxFd3C1qL5Z",
+							},
 						},
 					},
 				},
@@ -98,8 +99,8 @@ func TestProofTypes(t *testing.T) {
 		{
 			name: "di_vp_missing",
 			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType: "di_vp",
+				Proofs: &Proofs{
+					DIVP: []ProofDIVP{},
 				},
 			},
 			errStr: "invalid_credential_request",
@@ -107,8 +108,7 @@ func TestProofTypes(t *testing.T) {
 		{
 			name: "attestation",
 			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType:   "attestation",
+				Proofs: &Proofs{
 					Attestation: mockKeyAttestation,
 				},
 			},
@@ -117,34 +117,23 @@ func TestProofTypes(t *testing.T) {
 		{
 			name: "attestation_missing",
 			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType: "attestation",
+				Proofs: &Proofs{
+					Attestation: "",
 				},
 			},
 			errStr: "invalid_credential_request",
 		},
 		{
-			name: "invalid_proof_type",
+			name: "nil_proofs",
 			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType: "mura",
-				},
+				Proofs: nil,
 			},
 			errStr: "invalid_credential_request",
 		},
 		{
-			name: "nil_proof",
+			name: "empty_proofs",
 			cr: &CredentialRequest{
-				Proof: nil,
-			},
-			errStr: "invalid_credential_request",
-		},
-		{
-			name: "empty_proof_type",
-			cr: &CredentialRequest{
-				Proof: &Proof{
-					ProofType: "",
-				},
+				Proofs: &Proofs{},
 			},
 			errStr: "invalid_credential_request",
 		},
@@ -166,10 +155,10 @@ func TestProofTypes(t *testing.T) {
 }
 
 // Mock JWT with both kid and jwk (invalid per spec)
-var mockJWTWithKidAndJwk = "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtleS0xIiwidHlwIjoib3BlbmlkNHZjaS1wcm9vZitqd3QiLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJ0ZXN0IiwieSI6InRlc3QifX0.eyJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tIiwiaWF0IjoxMzAwODE5MzgwfQ.invalid"
+var mockJWTWithKidAndJwk ProofJWTToken = "eyJhbGciOiJFUzI1NiIsImtpZCI6ImtleS0xIiwidHlwIjoib3BlbmlkNHZjaS1wcm9vZitqd3QiLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJ0ZXN0IiwieSI6InRlc3QifX0.eyJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tIiwiaWF0IjoxMzAwODE5MzgwfQ.invalid"
 
 // Mock key attestation JWT
-var mockKeyAttestation = "eyJhbGciOiJFUzI1NiIsInR5cCI6ImtleS1hdHRlc3RhdGlvbitqd3QifQ.eyJpYXQiOjEzMDA4MTkzODAsImF0dGVzdGVkX2tleXMiOlt7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoidGVzdCIsInkiOiJ0ZXN0In1dfQ.invalid"
+var mockKeyAttestation ProofAttestation = "eyJhbGciOiJFUzI1NiIsInR5cCI6ImtleS1hdHRlc3RhdGlvbitqd3QifQ.eyJpYXQiOjEzMDA4MTkzODAsImF0dGVzdGVkX2tleXMiOlt7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoidGVzdCIsInkiOiJ0ZXN0In1dfQ.invalid"
 
 func TestVerifyProof(t *testing.T) {
 	tts := []struct {
@@ -181,9 +170,8 @@ func TestVerifyProof(t *testing.T) {
 			name: "valid jwt",
 			credentialRequest: &CredentialRequest{
 				CredentialIdentifier: "ci_123",
-				Proof: &Proof{
-					ProofType: "jwt",
-					JWT:       mockJWTWithKidAndJwk,
+				Proofs: &Proofs{
+					JWT: []ProofJWTToken{mockJWTWithKidAndJwk},
 				},
 				CredentialResponseEncryption: &CredentialResponseEncryption{},
 			},
@@ -205,12 +193,12 @@ func TestVerifyJWTProof(t *testing.T) {
 	privateKey := generateTestEC256Key(t)
 
 	t.Run("valid JWT proof", func(t *testing.T) {
-		jwt := createValidJWTProof(t, privateKey, "https://issuer.example.com")
+		jwt := ProofJWTToken(createValidJWTProof(t, privateKey, "https://issuer.example.com"))
 		opts := &VerifyProofOptions{
 			Audience: "https://issuer.example.com",
 			CNonce:   "test-nonce",
 		}
-		err := verifyJWTProof(jwt, &privateKey.PublicKey, opts)
+		err := jwt.Verify(&privateKey.PublicKey, opts)
 		assert.NoError(t, err)
 	})
 
@@ -220,9 +208,10 @@ func TestVerifyJWTProof(t *testing.T) {
 		token := jwtv5.NewWithClaims(jwtv5.SigningMethodNone, claims)
 		token.Header["typ"] = "openid4vci-proof+jwt"
 		token.Header["jwk"] = map[string]interface{}{"kty": "EC"}
-		jwt, _ := token.SignedString(jwtv5.UnsafeAllowNoneSignatureType)
+		jwtStr, _ := token.SignedString(jwtv5.UnsafeAllowNoneSignatureType)
+		jwt := ProofJWTToken(jwtStr)
 
-		err := verifyJWTProof(jwt, &privateKey.PublicKey, nil)
+		err := jwt.Verify(&privateKey.PublicKey, nil)
 		assert.Error(t, err)
 		// The error type should indicate invalid credential request
 		assert.Contains(t, err.Error(), "invalid_credential_request")
@@ -233,9 +222,10 @@ func TestVerifyJWTProof(t *testing.T) {
 		token := jwtv5.NewWithClaims(jwtv5.SigningMethodES256, claims)
 		// Not setting typ header
 		token.Header["jwk"] = map[string]interface{}{"kty": "EC"}
-		jwt, _ := token.SignedString(privateKey)
+		jwtStr, _ := token.SignedString(privateKey)
+		jwt := ProofJWTToken(jwtStr)
 
-		err := verifyJWTProof(jwt, &privateKey.PublicKey, nil)
+		err := jwt.Verify(&privateKey.PublicKey, nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_credential_request")
 	})
@@ -245,9 +235,10 @@ func TestVerifyJWTProof(t *testing.T) {
 		token := jwtv5.NewWithClaims(jwtv5.SigningMethodES256, claims)
 		token.Header["typ"] = "wrong-type"
 		token.Header["jwk"] = map[string]interface{}{"kty": "EC"}
-		jwt, _ := token.SignedString(privateKey)
+		jwtStr, _ := token.SignedString(privateKey)
+		jwt := ProofJWTToken(jwtStr)
 
-		err := verifyJWTProof(jwt, &privateKey.PublicKey, nil)
+		err := jwt.Verify(&privateKey.PublicKey, nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_credential_request")
 	})
@@ -263,9 +254,10 @@ func TestVerifyJWTProof(t *testing.T) {
 			"y":   "test",
 			"d":   "private-key-material", // This should be rejected
 		}
-		jwt, _ := token.SignedString(privateKey)
+		jwtStr, _ := token.SignedString(privateKey)
+		jwt := ProofJWTToken(jwtStr)
 
-		err := verifyJWTProof(jwt, &privateKey.PublicKey, nil)
+		err := jwt.Verify(&privateKey.PublicKey, nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_credential_request")
 	})
@@ -279,74 +271,78 @@ func TestVerifyJWTProof(t *testing.T) {
 		token := jwtv5.NewWithClaims(jwtv5.SigningMethodES256, claims)
 		token.Header["typ"] = "openid4vci-proof+jwt"
 		token.Header["jwk"] = map[string]interface{}{"kty": "EC", "crv": "P-256", "x": "test", "y": "test"}
-		jwt, _ := token.SignedString(privateKey)
+		jwtStr, _ := token.SignedString(privateKey)
+		jwt := ProofJWTToken(jwtStr)
 
 		// Test with matching nonce
 		opts := &VerifyProofOptions{CNonce: "correct-nonce"}
-		err := verifyJWTProof(jwt, &privateKey.PublicKey, opts)
+		err := jwt.Verify(&privateKey.PublicKey, opts)
 		assert.NoError(t, err)
 
 		// Test with wrong nonce
 		opts = &VerifyProofOptions{CNonce: "wrong-nonce"}
-		err = verifyJWTProof(jwt, &privateKey.PublicKey, opts)
+		err = jwt.Verify(&privateKey.PublicKey, opts)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_nonce")
 	})
 }
 
-func TestVerifyDIVPProof(t *testing.T) {
+func TestDIVPVerify(t *testing.T) {
 	t.Run("valid di_vp proof", func(t *testing.T) {
-		divp := map[string]interface{}{
-			"@context": []interface{}{"https://www.w3.org/ns/credentials/v2"},
-			"type":     []interface{}{"VerifiablePresentation"},
-			"proof": map[string]interface{}{
-				"type":               "DataIntegrityProof",
-				"cryptosuite":        "eddsa-2022",
-				"proofPurpose":       "authentication",
-				"verificationMethod": "did:key:test",
-				"domain":             "https://issuer.example.com",
-				"challenge":          "test-nonce",
+		divp := &ProofDIVP{
+			Context: []string{"https://www.w3.org/ns/credentials/v2"},
+			Type:    []string{"VerifiablePresentation"},
+			Proof: &DIVPProof{
+				Type:               "DataIntegrityProof",
+				Cryptosuite:        "eddsa-rdfc-2022",
+				ProofPurpose:       "authentication",
+				VerificationMethod: "did:key:test",
+				Domain:             "https://issuer.example.com",
+				Challenge:          "test-nonce",
+				ProofValue:         "z5Y9cYzRxFd3C1qL5Z",
 			},
 		}
 		opts := &VerifyProofOptions{
 			Audience: "https://issuer.example.com",
 			CNonce:   "test-nonce",
 		}
-		err := verifyDIVPProof(divp, opts)
+		err := divp.Verify(opts)
 		assert.NoError(t, err)
 	})
 
 	t.Run("missing @context rejected", func(t *testing.T) {
-		divp := map[string]interface{}{
-			"type": []interface{}{"VerifiablePresentation"},
+		divp := &ProofDIVP{
+			Type: []string{"VerifiablePresentation"},
 		}
-		err := verifyDIVPProof(divp, nil)
+		err := divp.Verify(nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_credential_request")
 	})
 
 	t.Run("missing VerifiablePresentation type rejected", func(t *testing.T) {
-		divp := map[string]interface{}{
-			"@context": []interface{}{"https://www.w3.org/ns/credentials/v2"},
-			"type":     []interface{}{"SomeOtherType"},
+		divp := &ProofDIVP{
+			Context: []string{"https://www.w3.org/ns/credentials/v2"},
+			Type:    []string{"SomeOtherType"},
 		}
-		err := verifyDIVPProof(divp, nil)
+		err := divp.Verify(nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_credential_request")
 	})
 
 	t.Run("wrong proofPurpose rejected", func(t *testing.T) {
-		divp := map[string]interface{}{
-			"@context": []interface{}{"https://www.w3.org/ns/credentials/v2"},
-			"type":     []interface{}{"VerifiablePresentation"},
-			"proof": map[string]interface{}{
-				"proofPurpose":       "assertionMethod", // Should be "authentication"
-				"domain":             "https://issuer.example.com",
-				"cryptosuite":        "eddsa-2022",
-				"verificationMethod": "did:key:test",
+		divp := &ProofDIVP{
+			Context: []string{"https://www.w3.org/ns/credentials/v2"},
+			Type:    []string{"VerifiablePresentation"},
+			Proof: &DIVPProof{
+				Type:               "DataIntegrityProof",
+				ProofPurpose:       "assertionMethod", // Should be "authentication"
+				Domain:             "https://issuer.example.com",
+				Cryptosuite:        "eddsa-rdfc-2022",
+				VerificationMethod: "did:key:test",
+				ProofValue:         "z5Y9cYzRxFd3C1qL5Z",
 			},
 		}
-		err := verifyDIVPProof(divp, nil)
+		err := divp.Verify(nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_credential_request")
 	})
@@ -355,12 +351,13 @@ func TestVerifyDIVPProof(t *testing.T) {
 func TestVerifyAttestationProof(t *testing.T) {
 	t.Run("valid attestation", func(t *testing.T) {
 		// This mock attestation has all required claims
-		err := verifyAttestationProof(mockKeyAttestation, nil)
+		err := mockKeyAttestation.Verify(nil)
 		assert.NoError(t, err)
 	})
 
 	t.Run("invalid attestation format", func(t *testing.T) {
-		err := verifyAttestationProof("not-a-jwt", nil)
+		invalidAttestation := ProofAttestation("not-a-jwt")
+		err := invalidAttestation.Verify(nil)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid_credential_request")
 	})
@@ -370,11 +367,10 @@ func TestVerifyProofWithOptions(t *testing.T) {
 	privateKey := generateTestEC256Key(t)
 
 	t.Run("with audience validation", func(t *testing.T) {
-		jwt := createValidJWTProof(t, privateKey, "https://correct-issuer.com")
+		jwt := ProofJWTToken(createValidJWTProof(t, privateKey, "https://correct-issuer.com"))
 		cr := &CredentialRequest{
-			Proof: &Proof{
-				ProofType: "jwt",
-				JWT:       jwt,
+			Proofs: &Proofs{
+				JWT: []ProofJWTToken{jwt},
 			},
 		}
 		opts := &VerifyProofOptions{
@@ -386,11 +382,10 @@ func TestVerifyProofWithOptions(t *testing.T) {
 	})
 
 	t.Run("audience mismatch", func(t *testing.T) {
-		jwt := createValidJWTProof(t, privateKey, "https://wrong-issuer.com")
+		jwt := ProofJWTToken(createValidJWTProof(t, privateKey, "https://wrong-issuer.com"))
 		cr := &CredentialRequest{
-			Proof: &Proof{
-				ProofType: "jwt",
-				JWT:       jwt,
+			Proofs: &Proofs{
+				JWT: []ProofJWTToken{jwt},
 			},
 		}
 		opts := &VerifyProofOptions{
@@ -406,63 +401,53 @@ func TestVerifyProofWithOptions(t *testing.T) {
 func TestVerifyProofErrorDescriptions(t *testing.T) {
 	privateKey := generateTestEC256Key(t)
 
-	t.Run("nil proof returns proper error description", func(t *testing.T) {
-		cr := &CredentialRequest{Proof: nil}
+	t.Run("nil proofs returns proper error description", func(t *testing.T) {
+		cr := &CredentialRequest{Proofs: nil}
 		err := cr.VerifyProof(privateKey.Public())
 		assert.Error(t, err)
 		openidErr, ok := err.(*Error)
 		assert.True(t, ok)
 		assert.Equal(t, ErrInvalidCredentialRequest, openidErr.Err)
-		assert.Equal(t, "proof is required", openidErr.ErrorDescription)
+		assert.Equal(t, "proofs is required", openidErr.ErrorDescription)
 	})
 
-	t.Run("empty proof_type returns proper error description", func(t *testing.T) {
-		cr := &CredentialRequest{Proof: &Proof{ProofType: ""}}
+	t.Run("empty proofs returns proper error description", func(t *testing.T) {
+		cr := &CredentialRequest{Proofs: &Proofs{}}
 		err := cr.VerifyProof(privateKey.Public())
 		assert.Error(t, err)
 		openidErr, ok := err.(*Error)
 		assert.True(t, ok)
 		assert.Equal(t, ErrInvalidCredentialRequest, openidErr.Err)
-		assert.Equal(t, "proof_type is required", openidErr.ErrorDescription)
+		assert.Equal(t, "at least one proof type (jwt, di_vp, or attestation) is required in proofs", openidErr.ErrorDescription)
 	})
 
-	t.Run("missing jwt field returns proper error description", func(t *testing.T) {
-		cr := &CredentialRequest{Proof: &Proof{ProofType: "jwt"}}
+	t.Run("empty jwt array returns proper error description", func(t *testing.T) {
+		cr := &CredentialRequest{Proofs: &Proofs{JWT: []ProofJWTToken{}}}
 		err := cr.VerifyProof(privateKey.Public())
 		assert.Error(t, err)
 		openidErr, ok := err.(*Error)
 		assert.True(t, ok)
 		assert.Equal(t, ErrInvalidCredentialRequest, openidErr.Err)
-		assert.Equal(t, "jwt field is required for proof_type 'jwt'", openidErr.ErrorDescription)
+		assert.Equal(t, "at least one proof type (jwt, di_vp, or attestation) is required in proofs", openidErr.ErrorDescription)
 	})
 
-	t.Run("missing di_vp field returns proper error description", func(t *testing.T) {
-		cr := &CredentialRequest{Proof: &Proof{ProofType: "di_vp"}}
+	t.Run("empty di_vp array returns proper error description", func(t *testing.T) {
+		cr := &CredentialRequest{Proofs: &Proofs{DIVP: []ProofDIVP{}}}
 		err := cr.VerifyProof(privateKey.Public())
 		assert.Error(t, err)
 		openidErr, ok := err.(*Error)
 		assert.True(t, ok)
 		assert.Equal(t, ErrInvalidCredentialRequest, openidErr.Err)
-		assert.Equal(t, "di_vp field is required for proof_type 'di_vp'", openidErr.ErrorDescription)
+		assert.Equal(t, "at least one proof type (jwt, di_vp, or attestation) is required in proofs", openidErr.ErrorDescription)
 	})
 
-	t.Run("missing attestation field returns proper error description", func(t *testing.T) {
-		cr := &CredentialRequest{Proof: &Proof{ProofType: "attestation"}}
+	t.Run("empty attestation returns proper error description", func(t *testing.T) {
+		cr := &CredentialRequest{Proofs: &Proofs{Attestation: ""}}
 		err := cr.VerifyProof(privateKey.Public())
 		assert.Error(t, err)
 		openidErr, ok := err.(*Error)
 		assert.True(t, ok)
 		assert.Equal(t, ErrInvalidCredentialRequest, openidErr.Err)
-		assert.Equal(t, "attestation field is required for proof_type 'attestation'", openidErr.ErrorDescription)
-	})
-
-	t.Run("unsupported proof_type returns proper error description", func(t *testing.T) {
-		cr := &CredentialRequest{Proof: &Proof{ProofType: "unknown"}}
-		err := cr.VerifyProof(privateKey.Public())
-		assert.Error(t, err)
-		openidErr, ok := err.(*Error)
-		assert.True(t, ok)
-		assert.Equal(t, ErrInvalidCredentialRequest, openidErr.Err)
-		assert.Equal(t, "unsupported proof_type: unknown", openidErr.ErrorDescription)
+		assert.Equal(t, "at least one proof type (jwt, di_vp, or attestation) is required in proofs", openidErr.ErrorDescription)
 	})
 }

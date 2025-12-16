@@ -96,10 +96,13 @@ func ValidateAndParseDPoPJWT(dPopJWT string) (*DPoP, error) {
 	jwkClaim := map[string]any{}
 
 	token, err := jwt.ParseWithClaims(dPopJWT, claims, func(token *jwt.Token) (any, error) {
-		j := token.Header["jwk"].(map[string]any)
-		fmt.Println("JWK in token header:", j)
+		jwkHeader, jwkOk := token.Header["jwk"].(map[string]any)
+		if !jwkOk {
+			return nil, fmt.Errorf("jwk header not found or invalid type in token")
+		}
+		fmt.Println("JWK in token header:", jwkHeader)
 
-		b, err := json.Marshal(j)
+		b, err := json.Marshal(jwkHeader)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal JWK: %w", err)
 		}
@@ -113,11 +116,8 @@ func ValidateAndParseDPoPJWT(dPopJWT string) (*DPoP, error) {
 			return nil, fmt.Errorf("unexpected token type: %v", token.Header["typ"])
 		}
 
-		var ok bool
-		jwkClaim, ok = token.Header["jwk"].(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("jwk header not found in token")
-		}
+		// Use the already-checked jwkHeader
+		jwkClaim = jwkHeader
 
 		alg := token.Header["alg"]
 		switch jwt.GetSigningMethod(alg.(string)).(type) {

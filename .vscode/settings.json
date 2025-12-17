@@ -29,11 +29,13 @@
         "grpcserver",
         "GUNET",
         "httphelpers",
+        "IACA",
         "jsonschema",
         "jwks",
         "JWKSURI",
         "Karlsson",
         "keyasint",
+        "Keyfunc",
         "kvclient",
         "Ladok",
         "LDPVP",
@@ -49,6 +51,7 @@
         "nosec",
         "Numerify",
         "OIDCRP",
+        "OIDMDL",
         "oneof",
         "openbadge",
         "opentelemetry",
@@ -91,11 +94,14 @@
         "swaggo",
         "testcontainers",
         "timestamppb",
+        "toarray",
         "tokenstatuslist",
+        "Transportstyrelsen",
         "tslissuer",
         "ttlcache",
         "vcclient",
-        "VCTM"
+        "VCTM",
+        "VICAL"
     ],
     "makefile.configureOnOpen": false
 }

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/pki"
@@ -353,6 +354,14 @@ type Issuer struct {
 	IssuerURL      string        `yaml:"issuer_url" validate:"required"`
 	WalletURL      string        `yaml:"wallet_url"`
 	RegistryClient GRPCClientTLS `yaml:"registry_client" validate:"omitempty"`
+	MDoc           *MDocConfig   `yaml:"mdoc" validate:"omitempty"` // mDL/mdoc configuration
+}
+
+// MDocConfig holds mDL (ISO 18013-5) issuer configuration
+type MDocConfig struct {
+	CertificateChainPath string        `yaml:"certificate_chain_path" validate:"required"` // Path to PEM certificate chain
+	DefaultValidity      time.Duration `yaml:"default_validity"`                           // Default credential validity (e.g., "365d")
+	DigestAlgorithm      string        `yaml:"digest_algorithm"`                           // "SHA-256", "SHA-384", or "SHA-512"
 }
 
 // GRPCClientTLS holds mTLS configuration for gRPC client connections

@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/helpers"
+	"vc/pkg/mdoc"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
@@ -139,8 +141,24 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, errors.New("no proof found in credential request")
 	}
 
+	// Branch based on requested credential format
+	switch req.Format {
+	case "mso_mdoc":
+		return c.issueMDoc(ctx, authContext.Scope[0], documentData, jwk, document)
+
+	case "vc+sd-jwt", "dc+sd-jwt":
+		return c.issueSDJWT(ctx, authContext.Scope[0], documentData, jwk, document)
+
+	default:
+		c.log.Error(nil, "unsupported or missing credential format", "format", req.Format)
+		return nil, errors.New("unsupported or missing credential format: " + req.Format)
+	}
+}
+
+// issueSDJWT issues an SD-JWT credential
+func (c *Client) issueSDJWT(ctx context.Context, scope string, documentData []byte, jwk *apiv1_issuer.Jwk, document *model.CompleteDocument) (*openid4vci.CredentialResponse, error) {
 	reply, err := c.issuerClient.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		Scope:        authContext.Scope[0],
+		Scope:        scope,
 		DocumentData: documentData,
 		Jwk:          jwk,
 	})
@@ -182,6 +200,86 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	default:
 		return nil, errors.New("multiple credentials returned from issuer, not supported")
 	}
+}
+
+// issueMDoc issues an mDL/mDoc credential (ISO 18013-5)
+func (c *Client) issueMDoc(ctx context.Context, scope string, documentData []byte, jwk *apiv1_issuer.Jwk, document *model.CompleteDocument) (*openid4vci.CredentialResponse, error) {
+	// Convert JWK to COSE key bytes for mDoc
+	deviceKeyBytes, err := convertJWKToCOSEKey(jwk)
+	if err != nil {
+		c.log.Error(err, "failed to convert JWK to COSE key")
+		return nil, err
+	}
+
+	reply, err := c.issuerClient.MakeMDoc(ctx, &apiv1_issuer.MakeMDocRequest{
+		Scope:           scope,
+		DocType:         mdoc.DocType, // org.iso.18013.5.1.mDL
+		DocumentData:    documentData,
+		DevicePublicKey: deviceKeyBytes,
+		DeviceKeyFormat: "cose",
+	})
+	if err != nil {
+		c.log.Error(err, "failed to call MakeMDoc")
+		return nil, err
+	}
+
+	if reply == nil {
+		return nil, errors.New("MakeMDoc reply is nil")
+	}
+
+	// Save credential subject info to registry for status management
+	if len(document.Identities) > 0 && reply.StatusListSection > 0 {
+		identity := document.Identities[0]
+		_, err = c.registryClient.SaveCredentialSubject(ctx, &apiv1_registry.SaveCredentialSubjectRequest{
+			FirstName:   identity.GivenName,
+			LastName:    identity.FamilyName,
+			DateOfBirth: identity.BirthDate,
+			Section:     reply.StatusListSection,
+			Index:       reply.StatusListIndex,
+		})
+		if err != nil {
+			c.log.Error(err, "failed to save credential subject to registry")
+		}
+	}
+
+	// For mDoc, the credential is CBOR bytes - encode as base64 for JSON response
+	mdocBase64 := base64.StdEncoding.EncodeToString(reply.Mdoc)
+
+	response := &openid4vci.CredentialResponse{
+		Credentials: []openid4vci.Credential{
+			{
+				Credential: mdocBase64,
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// convertJWKToCOSEKey converts a JWK to CBOR-encoded COSE_Key bytes
+func convertJWKToCOSEKey(jwk *apiv1_issuer.Jwk) ([]byte, error) {
+	if jwk == nil {
+		return nil, errors.New("JWK is nil")
+	}
+
+	// Decode the X and Y coordinates from base64url
+	xBytes, err := base64.RawURLEncoding.DecodeString(jwk.X)
+	if err != nil {
+		return nil, errors.New("failed to decode JWK X coordinate")
+	}
+
+	yBytes, err := base64.RawURLEncoding.DecodeString(jwk.Y)
+	if err != nil {
+		return nil, errors.New("failed to decode JWK Y coordinate")
+	}
+
+	// Create COSE_Key from JWK
+	coseKey, err := mdoc.NewCOSEKeyFromCoordinates(jwk.Kty, jwk.Crv, xBytes, yBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return coseKey.Bytes()
 }
 
 // OIDCDeferredCredential https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoin

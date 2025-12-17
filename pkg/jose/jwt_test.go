@@ -43,7 +43,7 @@ func TestMakeJWT(t *testing.T) {
 	t.Run("creates signed JWT successfully", func(t *testing.T) {
 		keyPath := createTestKeyForJWT(t)
 
-		jwk, privateKey, err := CreateJWK(keyPath)
+		jwk, privateKey, err := CreateECJWK(keyPath)
 		require.NoError(t, err)
 
 		header := jwt.MapClaims{

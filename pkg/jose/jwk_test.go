@@ -249,6 +249,23 @@ func TestCreateJWK(t *testing.T) {
 		assert.Equal(t, "P-256", jwk.CRV)
 		assert.NotEmpty(t, jwk.X)
 		assert.NotEmpty(t, jwk.Y)
+		assert.Empty(t, jwk.N)
+		assert.Empty(t, jwk.E)
+		assert.NotNil(t, privateKey)
+	})
+
+	t.Run("creates JWK from RSA key", func(t *testing.T) {
+		keyPath := createTestRSAKey(t)
+
+		jwk, privateKey, err := CreateJWK(keyPath)
+		require.NoError(t, err)
+
+		assert.Equal(t, "RSA", jwk.KTY)
+		assert.Empty(t, jwk.CRV)
+		assert.Empty(t, jwk.X)
+		assert.Empty(t, jwk.Y)
+		assert.NotEmpty(t, jwk.N)
+		assert.NotEmpty(t, jwk.E)
 		assert.NotNil(t, privateKey)
 	})
 
@@ -257,15 +274,62 @@ func TestCreateJWK(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("returns error for invalid key", func(t *testing.T) {
+		keyPath := createInvalidKeyFile(t)
+		_, _, err := CreateJWK(keyPath)
+		assert.Error(t, err)
+	})
+}
+
+func TestCreateECJWK(t *testing.T) {
+	t.Run("creates JWK from EC key", func(t *testing.T) {
+		keyPath := createTestECKey(t)
+
+		jwk, privateKey, err := CreateECJWK(keyPath)
+		require.NoError(t, err)
+
+		assert.Equal(t, "EC", jwk.KTY)
+		assert.Equal(t, "P-256", jwk.CRV)
+		assert.NotEmpty(t, jwk.X)
+		assert.NotEmpty(t, jwk.Y)
+		assert.NotNil(t, privateKey)
+	})
+
 	t.Run("returns error for RSA key", func(t *testing.T) {
 		keyPath := createTestRSAKey(t)
-		_, _, err := CreateJWK(keyPath)
+		_, _, err := CreateECJWK(keyPath)
 		assert.Error(t, err)
 	})
 
 	t.Run("returns error for invalid key", func(t *testing.T) {
 		keyPath := createInvalidKeyFile(t)
-		_, _, err := CreateJWK(keyPath)
+		_, _, err := CreateECJWK(keyPath)
+		assert.Error(t, err)
+	})
+}
+
+func TestCreateRSAJWK(t *testing.T) {
+	t.Run("creates JWK from RSA key", func(t *testing.T) {
+		keyPath := createTestRSAKey(t)
+
+		jwk, privateKey, err := CreateRSAJWK(keyPath)
+		require.NoError(t, err)
+
+		assert.Equal(t, "RSA", jwk.KTY)
+		assert.NotEmpty(t, jwk.N)
+		assert.NotEmpty(t, jwk.E)
+		assert.NotNil(t, privateKey)
+	})
+
+	t.Run("returns error for EC key", func(t *testing.T) {
+		keyPath := createTestECKey(t)
+		_, _, err := CreateRSAJWK(keyPath)
+		assert.Error(t, err)
+	})
+
+	t.Run("returns error for invalid key", func(t *testing.T) {
+		keyPath := createInvalidKeyFile(t)
+		_, _, err := CreateRSAJWK(keyPath)
 		assert.Error(t, err)
 	})
 }

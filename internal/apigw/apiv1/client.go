@@ -9,6 +9,7 @@ import (
 	"vc/internal/apigw/db"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
+	"vc/pkg/grpchelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -18,8 +19,6 @@ import (
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 //	@title		Datastore API
@@ -102,7 +101,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	}
 
 	// Initialize gRPC client for issuer service
-	issuerConn, err := grpc.NewClient(cfg.Issuer.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	issuerConn, err := grpchelpers.NewClientConn(cfg.APIGW.IssuerClient)
 	if err != nil {
 		c.log.Error(err, "Failed to create gRPC connection to issuer")
 		return nil, err
@@ -110,7 +109,7 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 	c.issuerClient = apiv1_issuer.NewIssuerServiceClient(issuerConn)
 
 	// Initialize gRPC client for registry service
-	registryConn, err := grpc.NewClient(cfg.Registry.GRPCServer.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	registryConn, err := grpchelpers.NewClientConn(cfg.APIGW.RegistryClient)
 	if err != nil {
 		c.log.Error(err, "Failed to create gRPC connection to registry")
 		return nil, err

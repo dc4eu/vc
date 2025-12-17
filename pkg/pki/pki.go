@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"log"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -76,16 +76,38 @@ func ParseKeyFromFile(path string) (any, error) {
 	}
 	block, rest := pem.Decode([]byte(pemData))
 	if block == nil || len(rest) > 0 {
-		log.Fatal("Key decoding error")
+		return nil, errors.New("failed to decode PEM block from file")
 	}
-	if block.Type != "PRIVATE KEY" {
-		log.Fatal("Key type error")
+
+	// Support multiple key formats
+	switch block.Type {
+	case "PRIVATE KEY":
+		// PKCS#8 format
+		key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse PKCS#8 private key: %w", err)
+		}
+		return key, nil
+
+	case "EC PRIVATE KEY":
+		// SEC1/EC format
+		key, err := x509.ParseECPrivateKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse EC private key: %w", err)
+		}
+		return key, nil
+
+	case "RSA PRIVATE KEY":
+		// PKCS#1 RSA format
+		key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse RSA private key: %w", err)
+		}
+		return key, nil
+
+	default:
+		return nil, fmt.Errorf("unsupported key type: %s", block.Type)
 	}
-	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return key, nil
 }
 
 func Base64EncodeCertificate(cert *x509.Certificate) string {

@@ -113,6 +113,11 @@ func (c *Client) do(ctx context.Context, req *http.Request, reply any, prefixRep
 		return nil, err
 	}
 
+	// Skip decoding if no reply is expected
+	if reply == nil {
+		return resp, nil
+	}
+
 	var r any
 	if prefixReplyJSONWithData {
 		r = &struct {

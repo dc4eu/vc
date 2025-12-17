@@ -7,13 +7,11 @@
 package apiv1_registry
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-	apiv1_status "vc/internal/gen/status/apiv1_status"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -23,27 +21,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type AddRequest struct {
+// Token Status List messages
+type TokenStatusListAddStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entity        string                 `protobuf:"bytes,1,opt,name=Entity,proto3" json:"Entity,omitempty"`
+	Status        uint32                 `protobuf:"varint,1,opt,name=Status,proto3" json:"Status,omitempty"` // Status value (0=VALID, 1=INVALID, 2=SUSPENDED)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *AddRequest) Reset() {
-	*x = AddRequest{}
+func (x *TokenStatusListAddStatusRequest) Reset() {
+	*x = TokenStatusListAddStatusRequest{}
 	mi := &file_v1_registry_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AddRequest) String() string {
+func (x *TokenStatusListAddStatusRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AddRequest) ProtoMessage() {}
+func (*TokenStatusListAddStatusRequest) ProtoMessage() {}
 
-func (x *AddRequest) ProtoReflect() protoreflect.Message {
+func (x *TokenStatusListAddStatusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,39 +54,40 @@ func (x *AddRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AddRequest.ProtoReflect.Descriptor instead.
-func (*AddRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use TokenStatusListAddStatusRequest.ProtoReflect.Descriptor instead.
+func (*TokenStatusListAddStatusRequest) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *AddRequest) GetEntity() string {
+func (x *TokenStatusListAddStatusRequest) GetStatus() uint32 {
 	if x != nil {
-		return x.Entity
+		return x.Status
 	}
-	return ""
+	return 0
 }
 
-type AddReply struct {
+type TokenStatusListAddStatusReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        bool                   `protobuf:"varint,1,opt,name=Status,proto3" json:"Status,omitempty"`
+	Section       int64                  `protobuf:"varint,1,opt,name=Section,proto3" json:"Section,omitempty"` // Section where the status was added
+	Index         int64                  `protobuf:"varint,2,opt,name=Index,proto3" json:"Index,omitempty"`     // Index within the section
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *AddReply) Reset() {
-	*x = AddReply{}
+func (x *TokenStatusListAddStatusReply) Reset() {
+	*x = TokenStatusListAddStatusReply{}
 	mi := &file_v1_registry_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AddReply) String() string {
+func (x *TokenStatusListAddStatusReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AddReply) ProtoMessage() {}
+func (*TokenStatusListAddStatusReply) ProtoMessage() {}
 
-func (x *AddReply) ProtoReflect() protoreflect.Message {
+func (x *TokenStatusListAddStatusReply) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -99,39 +99,48 @@ func (x *AddReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AddReply.ProtoReflect.Descriptor instead.
-func (*AddReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use TokenStatusListAddStatusReply.ProtoReflect.Descriptor instead.
+func (*TokenStatusListAddStatusReply) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AddReply) GetStatus() bool {
+func (x *TokenStatusListAddStatusReply) GetSection() int64 {
 	if x != nil {
-		return x.Status
+		return x.Section
 	}
-	return false
+	return 0
 }
 
-type RevokeRequest struct {
+func (x *TokenStatusListAddStatusReply) GetIndex() int64 {
+	if x != nil {
+		return x.Index
+	}
+	return 0
+}
+
+type TokenStatusListUpdateStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entity        string                 `protobuf:"bytes,1,opt,name=Entity,proto3" json:"Entity,omitempty"`
+	Section       int64                  `protobuf:"varint,1,opt,name=Section,proto3" json:"Section,omitempty"` // Section ID
+	Index         int64                  `protobuf:"varint,2,opt,name=Index,proto3" json:"Index,omitempty"`     // Index within the section
+	Status        uint32                 `protobuf:"varint,3,opt,name=Status,proto3" json:"Status,omitempty"`   // New status value (0=VALID, 1=INVALID, 2=SUSPENDED)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RevokeRequest) Reset() {
-	*x = RevokeRequest{}
+func (x *TokenStatusListUpdateStatusRequest) Reset() {
+	*x = TokenStatusListUpdateStatusRequest{}
 	mi := &file_v1_registry_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RevokeRequest) String() string {
+func (x *TokenStatusListUpdateStatusRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RevokeRequest) ProtoMessage() {}
+func (*TokenStatusListUpdateStatusRequest) ProtoMessage() {}
 
-func (x *RevokeRequest) ProtoReflect() protoreflect.Message {
+func (x *TokenStatusListUpdateStatusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -143,83 +152,94 @@ func (x *RevokeRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RevokeRequest.ProtoReflect.Descriptor instead.
-func (*RevokeRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use TokenStatusListUpdateStatusRequest.ProtoReflect.Descriptor instead.
+func (*TokenStatusListUpdateStatusRequest) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *RevokeRequest) GetEntity() string {
+func (x *TokenStatusListUpdateStatusRequest) GetSection() int64 {
 	if x != nil {
-		return x.Entity
+		return x.Section
 	}
-	return ""
+	return 0
 }
 
-type RevokeReply struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        bool                   `protobuf:"varint,1,opt,name=Status,proto3" json:"Status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RevokeReply) Reset() {
-	*x = RevokeReply{}
-	mi := &file_v1_registry_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RevokeReply) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RevokeReply) ProtoMessage() {}
-
-func (x *RevokeReply) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_registry_proto_msgTypes[3]
+func (x *TokenStatusListUpdateStatusRequest) GetIndex() int64 {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.Index
 	}
-	return mi.MessageOf(x)
+	return 0
 }
 
-// Deprecated: Use RevokeReply.ProtoReflect.Descriptor instead.
-func (*RevokeReply) Descriptor() ([]byte, []int) {
-	return file_v1_registry_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *RevokeReply) GetStatus() bool {
+func (x *TokenStatusListUpdateStatusRequest) GetStatus() uint32 {
 	if x != nil {
 		return x.Status
 	}
-	return false
+	return 0
 }
 
-type ValidateRequest struct {
+type TokenStatusListUpdateStatusReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Entity        string                 `protobuf:"bytes,1,opt,name=Entity,proto3" json:"Entity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateRequest) Reset() {
-	*x = ValidateRequest{}
+func (x *TokenStatusListUpdateStatusReply) Reset() {
+	*x = TokenStatusListUpdateStatusReply{}
+	mi := &file_v1_registry_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TokenStatusListUpdateStatusReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TokenStatusListUpdateStatusReply) ProtoMessage() {}
+
+func (x *TokenStatusListUpdateStatusReply) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_registry_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TokenStatusListUpdateStatusReply.ProtoReflect.Descriptor instead.
+func (*TokenStatusListUpdateStatusReply) Descriptor() ([]byte, []int) {
+	return file_v1_registry_proto_rawDescGZIP(), []int{3}
+}
+
+// Credential subject messages
+type SaveCredentialSubjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FirstName     string                 `protobuf:"bytes,1,opt,name=FirstName,proto3" json:"FirstName,omitempty"`     // Subject's first name
+	LastName      string                 `protobuf:"bytes,2,opt,name=LastName,proto3" json:"LastName,omitempty"`       // Subject's last name
+	DateOfBirth   string                 `protobuf:"bytes,3,opt,name=DateOfBirth,proto3" json:"DateOfBirth,omitempty"` // Subject's date of birth (YYYY-MM-DD)
+	Section       int64                  `protobuf:"varint,4,opt,name=Section,proto3" json:"Section,omitempty"`        // Token Status List section
+	Index         int64                  `protobuf:"varint,5,opt,name=Index,proto3" json:"Index,omitempty"`            // Token Status List index
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveCredentialSubjectRequest) Reset() {
+	*x = SaveCredentialSubjectRequest{}
 	mi := &file_v1_registry_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateRequest) String() string {
+func (x *SaveCredentialSubjectRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateRequest) ProtoMessage() {}
+func (*SaveCredentialSubjectRequest) ProtoMessage() {}
 
-func (x *ValidateRequest) ProtoReflect() protoreflect.Message {
+func (x *SaveCredentialSubjectRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -231,39 +251,66 @@ func (x *ValidateRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateRequest.ProtoReflect.Descriptor instead.
-func (*ValidateRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use SaveCredentialSubjectRequest.ProtoReflect.Descriptor instead.
+func (*SaveCredentialSubjectRequest) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ValidateRequest) GetEntity() string {
+func (x *SaveCredentialSubjectRequest) GetFirstName() string {
 	if x != nil {
-		return x.Entity
+		return x.FirstName
 	}
 	return ""
 }
 
-type ValidateReply struct {
+func (x *SaveCredentialSubjectRequest) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *SaveCredentialSubjectRequest) GetDateOfBirth() string {
+	if x != nil {
+		return x.DateOfBirth
+	}
+	return ""
+}
+
+func (x *SaveCredentialSubjectRequest) GetSection() int64 {
+	if x != nil {
+		return x.Section
+	}
+	return 0
+}
+
+func (x *SaveCredentialSubjectRequest) GetIndex() int64 {
+	if x != nil {
+		return x.Index
+	}
+	return 0
+}
+
+type SaveCredentialSubjectReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Valid         bool                   `protobuf:"varint,1,opt,name=Valid,proto3" json:"Valid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateReply) Reset() {
-	*x = ValidateReply{}
+func (x *SaveCredentialSubjectReply) Reset() {
+	*x = SaveCredentialSubjectReply{}
 	mi := &file_v1_registry_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateReply) String() string {
+func (x *SaveCredentialSubjectReply) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateReply) ProtoMessage() {}
+func (*SaveCredentialSubjectReply) ProtoMessage() {}
 
-func (x *ValidateReply) ProtoReflect() protoreflect.Message {
+func (x *SaveCredentialSubjectReply) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_registry_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -275,41 +322,37 @@ func (x *ValidateReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateReply.ProtoReflect.Descriptor instead.
-func (*ValidateReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use SaveCredentialSubjectReply.ProtoReflect.Descriptor instead.
+func (*SaveCredentialSubjectReply) Descriptor() ([]byte, []int) {
 	return file_v1_registry_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *ValidateReply) GetValid() bool {
-	if x != nil {
-		return x.Valid
-	}
-	return false
 }
 
 var File_v1_registry_proto protoreflect.FileDescriptor
 
 const file_v1_registry_proto_rawDesc = "" +
 	"\n" +
-	"\x11v1-registry.proto\x12\vv1.registry\x1a\x15v1-status-model.proto\"$\n" +
-	"\n" +
-	"AddRequest\x12\x16\n" +
-	"\x06Entity\x18\x01 \x01(\tR\x06Entity\"\"\n" +
-	"\bAddReply\x12\x16\n" +
-	"\x06Status\x18\x01 \x01(\bR\x06Status\"'\n" +
-	"\rRevokeRequest\x12\x16\n" +
-	"\x06Entity\x18\x01 \x01(\tR\x06Entity\"%\n" +
-	"\vRevokeReply\x12\x16\n" +
-	"\x06Status\x18\x01 \x01(\bR\x06Status\")\n" +
-	"\x0fValidateRequest\x12\x16\n" +
-	"\x06Entity\x18\x01 \x01(\tR\x06Entity\"%\n" +
-	"\rValidateReply\x12\x14\n" +
-	"\x05Valid\x18\x01 \x01(\bR\x05Valid2\x92\x02\n" +
-	"\x0fRegistryService\x127\n" +
-	"\x03Add\x12\x17.v1.registry.AddRequest\x1a\x15.v1.registry.AddReply\"\x00\x12@\n" +
-	"\x06Revoke\x12\x1a.v1.registry.RevokeRequest\x1a\x18.v1.registry.RevokeReply\"\x00\x12F\n" +
-	"\bValidate\x12\x1c.v1.registry.ValidateRequest\x1a\x1a.v1.registry.ValidateReply\"\x00\x12<\n" +
-	"\x06Status\x12\x18.v1.status.StatusRequest\x1a\x16.v1.status.StatusReply\"\x00B)Z'vc/internal/gen/registry/apiv1_registryb\x06proto3"
+	"\x11v1-registry.proto\x12\vv1.registry\"9\n" +
+	"\x1fTokenStatusListAddStatusRequest\x12\x16\n" +
+	"\x06Status\x18\x01 \x01(\rR\x06Status\"O\n" +
+	"\x1dTokenStatusListAddStatusReply\x12\x18\n" +
+	"\aSection\x18\x01 \x01(\x03R\aSection\x12\x14\n" +
+	"\x05Index\x18\x02 \x01(\x03R\x05Index\"l\n" +
+	"\"TokenStatusListUpdateStatusRequest\x12\x18\n" +
+	"\aSection\x18\x01 \x01(\x03R\aSection\x12\x14\n" +
+	"\x05Index\x18\x02 \x01(\x03R\x05Index\x12\x16\n" +
+	"\x06Status\x18\x03 \x01(\rR\x06Status\"\"\n" +
+	" TokenStatusListUpdateStatusReply\"\xaa\x01\n" +
+	"\x1cSaveCredentialSubjectRequest\x12\x1c\n" +
+	"\tFirstName\x18\x01 \x01(\tR\tFirstName\x12\x1a\n" +
+	"\bLastName\x18\x02 \x01(\tR\bLastName\x12 \n" +
+	"\vDateOfBirth\x18\x03 \x01(\tR\vDateOfBirth\x12\x18\n" +
+	"\aSection\x18\x04 \x01(\x03R\aSection\x12\x14\n" +
+	"\x05Index\x18\x05 \x01(\x03R\x05Index\"\x1c\n" +
+	"\x1aSaveCredentialSubjectReply2\xf9\x02\n" +
+	"\x0fRegistryService\x12v\n" +
+	"\x18TokenStatusListAddStatus\x12,.v1.registry.TokenStatusListAddStatusRequest\x1a*.v1.registry.TokenStatusListAddStatusReply\"\x00\x12\x7f\n" +
+	"\x1bTokenStatusListUpdateStatus\x12/.v1.registry.TokenStatusListUpdateStatusRequest\x1a-.v1.registry.TokenStatusListUpdateStatusReply\"\x00\x12m\n" +
+	"\x15SaveCredentialSubject\x12).v1.registry.SaveCredentialSubjectRequest\x1a'.v1.registry.SaveCredentialSubjectReply\"\x00B)Z'vc/internal/gen/registry/apiv1_registryb\x06proto3"
 
 var (
 	file_v1_registry_proto_rawDescOnce sync.Once
@@ -325,26 +368,22 @@ func file_v1_registry_proto_rawDescGZIP() []byte {
 
 var file_v1_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_v1_registry_proto_goTypes = []any{
-	(*AddRequest)(nil),                 // 0: v1.registry.AddRequest
-	(*AddReply)(nil),                   // 1: v1.registry.AddReply
-	(*RevokeRequest)(nil),              // 2: v1.registry.RevokeRequest
-	(*RevokeReply)(nil),                // 3: v1.registry.RevokeReply
-	(*ValidateRequest)(nil),            // 4: v1.registry.ValidateRequest
-	(*ValidateReply)(nil),              // 5: v1.registry.ValidateReply
-	(*apiv1_status.StatusRequest)(nil), // 6: v1.status.StatusRequest
-	(*apiv1_status.StatusReply)(nil),   // 7: v1.status.StatusReply
+	(*TokenStatusListAddStatusRequest)(nil),    // 0: v1.registry.TokenStatusListAddStatusRequest
+	(*TokenStatusListAddStatusReply)(nil),      // 1: v1.registry.TokenStatusListAddStatusReply
+	(*TokenStatusListUpdateStatusRequest)(nil), // 2: v1.registry.TokenStatusListUpdateStatusRequest
+	(*TokenStatusListUpdateStatusReply)(nil),   // 3: v1.registry.TokenStatusListUpdateStatusReply
+	(*SaveCredentialSubjectRequest)(nil),       // 4: v1.registry.SaveCredentialSubjectRequest
+	(*SaveCredentialSubjectReply)(nil),         // 5: v1.registry.SaveCredentialSubjectReply
 }
 var file_v1_registry_proto_depIdxs = []int32{
-	0, // 0: v1.registry.RegistryService.Add:input_type -> v1.registry.AddRequest
-	2, // 1: v1.registry.RegistryService.Revoke:input_type -> v1.registry.RevokeRequest
-	4, // 2: v1.registry.RegistryService.Validate:input_type -> v1.registry.ValidateRequest
-	6, // 3: v1.registry.RegistryService.Status:input_type -> v1.status.StatusRequest
-	1, // 4: v1.registry.RegistryService.Add:output_type -> v1.registry.AddReply
-	3, // 5: v1.registry.RegistryService.Revoke:output_type -> v1.registry.RevokeReply
-	5, // 6: v1.registry.RegistryService.Validate:output_type -> v1.registry.ValidateReply
-	7, // 7: v1.registry.RegistryService.Status:output_type -> v1.status.StatusReply
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	0, // 0: v1.registry.RegistryService.TokenStatusListAddStatus:input_type -> v1.registry.TokenStatusListAddStatusRequest
+	2, // 1: v1.registry.RegistryService.TokenStatusListUpdateStatus:input_type -> v1.registry.TokenStatusListUpdateStatusRequest
+	4, // 2: v1.registry.RegistryService.SaveCredentialSubject:input_type -> v1.registry.SaveCredentialSubjectRequest
+	1, // 3: v1.registry.RegistryService.TokenStatusListAddStatus:output_type -> v1.registry.TokenStatusListAddStatusReply
+	3, // 4: v1.registry.RegistryService.TokenStatusListUpdateStatus:output_type -> v1.registry.TokenStatusListUpdateStatusReply
+	5, // 5: v1.registry.RegistryService.SaveCredentialSubject:output_type -> v1.registry.SaveCredentialSubjectReply
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

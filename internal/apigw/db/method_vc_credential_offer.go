@@ -5,10 +5,9 @@ import (
 	"vc/pkg/logger"
 	"vc/pkg/openid4vci"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -39,7 +38,7 @@ func (c *VCCredentialOfferColl) createIndex(ctx context.Context) error {
 
 	indexCredentialOfferURIUniq := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "uuid", Value: 1},
+			bson.E{Key: "uuid", Value: 1},
 		},
 		Options: options.Index().SetName("credential_offer_uuid_uniq").SetUnique(true),
 	}

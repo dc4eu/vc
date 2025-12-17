@@ -7,6 +7,7 @@ import (
 	"vc/pkg/logger"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // bindingHandler is the bindingHandler object for httphelpers
@@ -24,12 +25,43 @@ func (b *bindingHandler) FastAndSimple(ctx context.Context, c *gin.Context, v an
 }
 
 func (b *bindingHandler) Request(ctx context.Context, c *gin.Context, v any) error {
-	if err := c.ShouldBind(v); err != nil {
-		b.log.Debug("error", "error", err)
-		return err
+	_, span := b.client.tracer.Start(ctx, "httpserver:bindRequest")
+	defer span.End()
+
+	// Bind URI parameters (e.g., /path/:id) - without validation
+	if err := c.ShouldBindUri(v); err != nil {
+		// Ignore validation errors from URI binding, only fail on actual binding errors
+		if _, ok := err.(validator.ValidationErrors); !ok {
+			return err
+		}
 	}
 
-	if err := c.BindUri(v); err != nil {
+	// Always bind headers first (they're always available)
+	if err := c.ShouldBindHeader(v); err != nil {
+		// Ignore validation errors from header binding, validate at the end
+		if _, ok := err.(validator.ValidationErrors); !ok {
+			return err
+		}
+	}
+
+	// Bind JSON body if present
+	if c.Request.ContentLength > 0 && c.ContentType() == "application/json" {
+		if err := c.ShouldBindJSON(v); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Bind form data if present (application/x-www-form-urlencoded or multipart/form-data)
+	if c.Request.ContentLength > 0 && (c.ContentType() == "application/x-www-form-urlencoded" || c.ContentType() == "multipart/form-data") {
+		if err := c.ShouldBind(v); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// For non-JSON/form requests, bind query parameters
+	if err := c.ShouldBindQuery(v); err != nil {
 		return err
 	}
 

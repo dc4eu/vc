@@ -9,7 +9,7 @@ common:
     #timeout: 10
   credential_offer:
     wallet_url: ""
-    issuer_url: "http://vc_dev_issuer:8080"
+    issuer_url: "http://issuer.vc.docker:8080"
     type: "credential_offer"
     qr:
       recovery_level: 2
@@ -67,13 +67,13 @@ authentic_sources:
   SUNET_v1:
     country_code: "SE"
     notification_endpoint:
-      url: "http://vc_dev_apigw:8080/api/v1/document/notify"
+      url: "http://apigw.vc.docker:8080/api/v1/document/notify"
     authentic_source_endpoint:
-      url: "http://vc_dev_apigw:8080"
+      url: "http://apigw.vc.docker:8080"
     signature_service_endpoint:
-      url: "http://vc_dev_issuer:8080"
+      url: "http://issuer.vc.docker:8080"
     revocation_service_endpoint:
-      url: "http://vc_dev_apigw:8080/api/v1/document/revok"
+      url: "http://apigw.vc.docker:8080/api/v1/document/revok"
     credential_types:
       EHIC:
         profile: "SD-JWT"
@@ -82,15 +82,15 @@ authentic_sources:
   SUNET_v2:
     country_code: "SE"
     notification_endpoint:
-      url: "http://vc_dev_apigw:8080/api/v1/document/notify"
+      url: "http://apigw.vc.docker:8080/api/v1/document/notify"
     authentic_source_endpoint:
-      url: "http://vc_dev_mockas:8080"
+      url: "http://mockas.vc.docker:8080"
     signature_service_endpoint:
-      url: "http://vc_dev_issuer:8080"
+      url: "http://issuer.vc.docker:8080"
     revocation_service_endpoint:
-      url: "http://vc_dev_apigw:8080/api/v1/document/revok"
+      url: "http://apigw.vc.docker:8080/api/v1/document/revok"
     datastore_service_endpoint:
-      url: "http://vc_dev_apigw:8080"
+      url: "http://apigw.vc.docker:8080"
     credential_types:
       EHIC:
         profile: "SD-JWT"
@@ -102,15 +102,17 @@ issuer:
   api_server:
     addr: :8080
   grpc_server:
-    addr: vc_dev_issuer:8090
-  signing_key_path: "/private_ec256.pem"
+    addr: issuer.vc.docker:8090
+  registry_client:
+    addr: registry.vc.docker:8090
+  signing_key_path: "/pki/signing_ec_private.pem"
   #pkcs11:
   #  module_path: /usr/lib/softhsm/libsofthsm2.so
   #  slot_id: 0
   #  pin: "1234"
   #  key_label: "issuer-key"
   #  key_id: "issuer-key-1"
-  issuer_url: "http://172.16.50.2:8080"
+  issuer_url: "http://apigw.vc.docker:8080"
   wallet_url: ""
   jwt_attribute:
     issuer: https://issuer.sunet.se
@@ -124,17 +126,17 @@ verifier:
     addr: :8080
     external_port: :8080
   grpc_server:
-    addr: vc_dev_verifier:8090
+    addr: verifier.vc.docker:8090
   #Replace fqdn with same as in x5c_san_dns cert (used to build web-links etc. example: "vcverifier.sunet.se") - ip is only used when working in local dev env.
-  external_server_url: "http://vc_dev_verifier:8080"
+  external_server_url: "http://verifier.vc.docker:8080"
   supported_wallets:
     "SUNET dev": "https://dev.wallet.sunet.se/cb"
   oauth_server:
-    token_endpoint: "http://vc_dev_verifier:8080/token"
+    token_endpoint: "http://verifier.vc.docker:8080/token"
     metadata:
       path: /metadata/oauth2_metadata.json
-      signing_key_path: "/pki/apigw.key"
-      signing_chain_path: "/pki/apigw.crt"
+      signing_key_path: "/pki/signing_ec_private.pem"
+      signing_chain_path: "/pki/signing_ec_chain.pem"
     clients:
       "1003":
         type: "confidential"
@@ -151,14 +153,14 @@ verifier_proxy:
     addr: :8080
     tls:
       enabled: false
-  external_url: "http://vc_dev_verifier_proxy:8080"
+  external_url: "http://verifier_proxy.vc.docker:8080"
   oidc:
     # OIDC Provider identifier (issuer of ID tokens and access tokens)
     # This identifies the verifier-proxy as an OpenID Provider
     # NOT related to verifiable credential issuance (see cmd/issuer/)
     # Must match the 'iss' claim in ID tokens sent to relying parties
-    issuer: "http://vc_dev_verifier_proxy:8080"
-    signing_key_path: "/private_rsa.pem"
+    issuer: "http://verifier_proxy.vc.docker:8080"
+    signing_key_path: "/pki/signing_rsa_private.pem"
     signing_alg: "RS256"                 # Signing algorithm for ID tokens (RS256, RS384, RS512, ES256, ES384, ES512)
     session_duration: 900                # Session duration in seconds (15 minutes)
     code_duration: 600                   # Authorization code duration in seconds (10 minutes)
@@ -194,11 +196,24 @@ verifier_proxy:
 registry:
   api_server:
     addr: :8080
-  smt:
-    update_periodicity: 5
-    init_leaf: 575cea4a-5725-11ee-8287-2b486b7ace28
+  external_server_url: "http://localhost:8080"
   grpc_server:
-    addr: vc_dev_registry:8090
+    addr: :8090
+    # mTLS configuration (optional)
+    # tls:
+    #   enabled: true
+    #   cert_file_path: "/pki/grpc_server.crt"
+    #   key_file_path: "/pki/grpc_server.key"
+    #   client_ca_path: "/pki/client_ca.crt"  # For mutual TLS
+  # Token Status Lists configuration per draft-ietf-oauth-status-list
+  token_status_lists:
+    signing_key_path: "/pki/signing_ec_private.pem"
+  # Admin GUI configuration (optional)
+  admin_gui:
+    enabled: true
+    username: "admin"
+    password: "admin_1234"  # Change this in production!
+    session_secret: "change-this-to-a-random-32-byte-secret"
 
 persistent:
   api_server:
@@ -212,9 +227,13 @@ apigw:
     enabled: false
     users:
       admin: "secret123"
-  external_server_url: "http://vc_dev_apigw:8080"
+  external_server_url: "http://apigw.vc.docker:8080"
+  issuer_client:
+    addr: issuer.vc.docker:8090
+  registry_client:
+    addr: registry.vc.docker:8090
   credential_offers:
-    issuer_url: http://vc_dev_apigw:8080
+    issuer_url: http://apigw.vc.docker:8080
     wallets:
       sunet_dev: 
         label: SUNET Dev Wallet
@@ -236,11 +255,11 @@ apigw:
     trust_anchors:
       - "https://example.com/trust_anchor.pem"
   oauth_server:
-    token_endpoint: "http://vc_dev_apigw:8080/token"
+    token_endpoint: "http://apigw.vc.docker:8080/token"
     metadata:
       path: /metadata/oauth2_metadata.json
-      signing_key_path: "/pki/apigw.key"
-      signing_chain_path: "/pki/apigw.crt"
+      signing_key_path: "/pki/signing_ec_private.pem"
+      signing_chain_path: "/pki/signing_ec_chain.pem"
     clients:
       "1003":
         type: "confidential"
@@ -253,8 +272,8 @@ apigw:
           - "elm"
   issuer_metadata:
     path: "/metadata/issuer_metadata.json"
-    signing_key_path: "/pki/apigw.key"
-    signing_chain_path: "/pki/apigw.crt"
+    signing_key_path: "/pki/signing_ec_private.pem"
+    signing_chain_path: "/pki/signing_ec_chain.pem"
   # OIDC Relying Party configuration for issuing credentials via external OIDC Providers
   # Requires building with -tags oidcrp
   oidcrp:
@@ -387,7 +406,7 @@ mock_as:
   bootstrap_users:
     - "100"
     - "102"
-  datastore_url: http://vc_dev_apigw:8080
+  datastore_url: http://apigw.vc.docker:8080
 
 ui:
   api_server:
@@ -401,8 +420,8 @@ ui:
   session_inactivity_timeout_in_seconds: 1800
   services:
     apigw:
-      base_url: http://vc_dev_apigw:8080
+      base_url: http://apigw.vc.docker:8080
     mockas:
-      base_url: http://vc_dev_mockas:8080
+      base_url: http://mockas.vc.docker:8080
     verifier:
-      base_url: http://vc_dev_verifier:8080
+      base_url: http://verifier.vc.docker:8080

@@ -1,0 +1,49 @@
+package grpcserver
+
+import (
+	"context"
+
+	"vc/internal/gen/registry/apiv1_registry"
+	"vc/internal/registry/apiv1"
+)
+
+// TokenStatusListAdd adds a new status entry to the Token Status List
+func (s *Service) TokenStatusListAddStatus(ctx context.Context, req *apiv1_registry.TokenStatusListAddStatusRequest) (*apiv1_registry.TokenStatusListAddStatusReply, error) {
+	section, index, err := s.tokenStatusListIssuer.AddStatus(ctx, uint8(req.Status))
+	if err != nil {
+		return nil, err
+	}
+
+	reply := &apiv1_registry.TokenStatusListAddStatusReply{
+		Section: section,
+		Index:   index,
+	}
+
+	return reply, nil
+}
+
+// TokenStatusListUpdate updates an existing status entry in the Token Status List
+func (s *Service) TokenStatusListUpdateStatus(ctx context.Context, req *apiv1_registry.TokenStatusListUpdateStatusRequest) (*apiv1_registry.TokenStatusListUpdateStatusReply, error) {
+	err := s.tokenStatusListIssuer.UpdateStatus(ctx, req.Section, req.Index, uint8(req.Status))
+	if err != nil {
+		return nil, err
+	}
+
+	return &apiv1_registry.TokenStatusListUpdateStatusReply{}, nil
+}
+
+// SaveCredentialSubject saves credential subject info linked to a Token Status List entry
+func (s *Service) SaveCredentialSubject(ctx context.Context, req *apiv1_registry.SaveCredentialSubjectRequest) (*apiv1_registry.SaveCredentialSubjectReply, error) {
+	err := s.apiv1.SaveCredentialSubject(ctx, &apiv1.SaveCredentialSubjectRequest{
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		DateOfBirth: req.DateOfBirth,
+		Section:     req.Section,
+		Index:       req.Index,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &apiv1_registry.SaveCredentialSubjectReply{}, nil
+}

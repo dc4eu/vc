@@ -5,6 +5,7 @@ import (
 	"net"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/issuer/apiv1"
+	"vc/pkg/grpchelpers"
 	"vc/pkg/logger"
 	"vc/pkg/model"
 
@@ -33,7 +34,13 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, log *logger.L
 		s.log.Error(err, "failed to listen", "addr", s.cfg.Issuer.GRPCServer.Addr)
 	}
 
-	s.server = grpc.NewServer()
+	opts, err := grpchelpers.NewServerOptions(s.cfg.Issuer.GRPCServer)
+	if err != nil {
+		s.log.Error(err, "failed to create gRPC server options")
+		return nil, err
+	}
+
+	s.server = grpc.NewServer(opts...)
 	apiv1_issuer.RegisterIssuerServiceServer(s.server, s)
 	s.log.Info("gRPC server listening")
 	if err := s.server.Serve(listener); err != nil {

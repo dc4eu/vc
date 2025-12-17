@@ -163,6 +163,24 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 
 	c.log.Debug("Here 2")
 
+	// Save credential subject info to registry for status management
+	if len(document.Identities) > 0 {
+		identity := document.Identities[0]
+		_, err = c.registryClient.SaveCredentialSubject(ctx, &apiv1_registry.SaveCredentialSubjectRequest{
+			FirstName:   identity.GivenName,
+			LastName:    identity.FamilyName,
+			DateOfBirth: identity.BirthDate,
+			Section:     reply.TokenStatusListSection,
+			Index:       reply.TokenStatusListIndex,
+		})
+		if err != nil {
+			// Log error but don't fail the request - credential was already created
+			c.log.Error(err, "failed to save credential subject to registry")
+		} else {
+			c.log.Debug("saved credential subject", "given_name", identity.GivenName, "family_name", identity.FamilyName)
+		}
+	}
+
 	response := &openid4vci.CredentialResponse{}
 	switch len(reply.Credentials) {
 	case 0:
@@ -225,50 +243,4 @@ func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuer
 	}
 
 	return signedMetadata, nil
-}
-
-// RevokeRequest is the request for GenericRevoke
-type RevokeRequest struct {
-	AuthenticSource string `json:"authentic_source"`
-	VCT             string `json:"vct"`
-	DocumentID      string `json:"document_id"`
-	RevocationID    string `json:"revocation_id"`
-}
-
-// RevokeReply is the reply for GenericRevoke
-type RevokeReply struct {
-	Data struct {
-		Status bool `json:"status"`
-	}
-}
-
-// Revoke revokes a document
-//
-//	@Summary		Revoke
-//	@ID				generic-revoke
-//	@Description	Revoke endpoint
-//	@Tags			dc4eu
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	RevokeReply				"Success"
-//	@Failure		400	{object}	helpers.ErrorResponse	"Bad Request"
-//	@Param			req	body		RevokeRequest			true	" "
-//	@Router			/revoke [post]
-func (c *Client) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeReply, error) {
-	// Use the pre-initialized gRPC client
-	resp, err := c.registryClient.Revoke(ctx, &apiv1_registry.RevokeRequest{
-		Entity: "mura",
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	reply := &RevokeReply{
-		Data: struct {
-			Status bool `json:"status"`
-		}{
-			Status: resp.Status,
-		},
-	}
-	return reply, nil
 }

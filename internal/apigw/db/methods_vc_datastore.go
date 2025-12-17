@@ -8,10 +8,9 @@ import (
 	"vc/pkg/model"
 	"vc/pkg/openid4vci"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -28,9 +27,9 @@ func (c *VCDatastoreColl) createIndex(ctx context.Context) error {
 
 	indexDocumentIDInAuthenticSourceUniq := mongo.IndexModel{
 		Keys: bson.D{
-			primitive.E{Key: "meta.document_id", Value: 1},
-			primitive.E{Key: "meta.authentic_source", Value: 1},
-			primitive.E{Key: "meta.vct", Value: 1},
+			bson.E{Key: "meta.document_id", Value: 1},
+			bson.E{Key: "meta.authentic_source", Value: 1},
+			bson.E{Key: "meta.vct", Value: 1},
 		},
 		Options: options.Index().SetName("document_unique_within_namespace").SetUnique(true),
 	}

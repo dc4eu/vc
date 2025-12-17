@@ -2,27 +2,57 @@ package db
 
 import (
 	"context"
+	"time"
 	"vc/pkg/logger"
 	"vc/pkg/model"
+	"vc/pkg/trace"
 
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
+
+var databaseName = "vc_registry"
 
 // Service is the database service
 type Service struct {
-	db  *gorm.DB
-	log *logger.Log
-	cfg *model.Cfg
+	mongoClient *mongo.Client
+	tracer      *trace.Tracer
+	log         *logger.Log
+	cfg         *model.Cfg
+
+	// Token Status List collections (MongoDB)
+	TokenStatusListColl         *TokenStatusListColl
+	TokenStatusListMetadata     *TokenStatusListMetadataColl
+	CredentialSubjects          *CredentialSubjectsColl
 }
 
 // New creates a new database service
-func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error) {
+func New(ctx context.Context, cfg *model.Cfg, tracer *trace.Tracer, log *logger.Log) (*Service, error) {
 	s := &Service{
-		log: log.New("db"),
-		cfg: cfg,
+		log:    log.New("db"),
+		cfg:    cfg,
+		tracer: tracer,
 	}
-	if err := s.startDB(); err != nil {
+
+	// Start MongoDB for Status Lists
+	if err := s.connectMongo(ctx); err != nil {
+		return nil, err
+	}
+
+	// Initialize Token Status List collections
+	var err error
+	s.TokenStatusListColl, err = NewTokenStatusListColl(ctx, "token_status_list", s, log.New("token_status_list"))
+	if err != nil {
+		return nil, err
+	}
+
+	s.TokenStatusListMetadata, err = NewTokenStatusListMetadataColl(ctx, "token_status_list_metadata", s, log.New("token_status_list_metadata"))
+	if err != nil {
+		return nil, err
+	}
+
+	s.CredentialSubjects, err = NewCredentialSubjectsColl(ctx, "credential_subjects", s, log.New("credential_subjects"))
+	if err != nil {
 		return nil, err
 	}
 
@@ -31,22 +61,37 @@ func New(ctx context.Context, cfg *model.Cfg, log *logger.Log) (*Service, error)
 	return s, nil
 }
 
-func (s *Service) startDB() error {
-	var err error
-	s.db, err = gorm.Open(sqlite.Open("/tmp/test.db"), &gorm.Config{})
+// connectMongo connects to MongoDB
+func (s *Service) connectMongo(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+
+	client, err := mongo.Connect(options.Client().ApplyURI(s.cfg.Common.Mongo.URI))
 	if err != nil {
 		return err
 	}
-	if err := s.db.AutoMigrate(&model.Leaf{}); err != nil {
+	s.mongoClient = client
+
+	// Verify connection
+	if err := s.mongoClient.Ping(ctx, nil); err != nil {
 		return err
 	}
 
+	s.log.Info("MongoDB connected")
 	return nil
 }
 
-// Close closes the database connection
+// Close closes the database connections
 func (s *Service) Close(ctx context.Context) error {
 	s.log.Info("Stopped")
+
+	// Close MongoDB connection
+	if s.mongoClient != nil {
+		if err := s.mongoClient.Disconnect(ctx); err != nil {
+			s.log.Error(err, "failed to disconnect MongoDB")
+		}
+	}
+
 	ctx.Done()
 	return nil
 }

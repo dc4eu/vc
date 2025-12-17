@@ -5,77 +5,38 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"testing"
-	"vc/internal/gen/issuer/apiv1_issuer"
+	"vc/internal/gen/registry/apiv1_registry"
 	"vc/internal/issuer/auditlog"
-	"vc/pkg/education"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/pid"
 	"vc/pkg/signing"
-	"vc/pkg/socialsecurity"
 	"vc/pkg/trace"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
 )
 
-var mockJWK = &apiv1_issuer.Jwk{
-	Kid: "default_signing_key_id",
-	Crv: "P-256",
-	Kty: "EC",
-	X:   "cyViIENmqo4D2CVOc2uGZbe5a8NheCyvN9CsF7ui3tk",
-	Y:   "XA0lVXgjgZzFTDwkndZEo-zVr9ieO2rY9HGiiaaASog",
-	D:   "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE",
+// mockRegistryClient implements apiv1_registry.RegistryServiceClient for testing
+type mockRegistryClient struct {
+	section int64
+	index   int64
 }
 
-var (
-	mockPID = &pid.Document{
-		Identity: &model.Identity{
-			FamilyName: "test_family-name",
-			GivenName:  "test_given-name",
-			BirthDate:  "2000-01-01",
-		},
-	}
+func (m *mockRegistryClient) TokenStatusListAddStatus(ctx context.Context, in *apiv1_registry.TokenStatusListAddStatusRequest, opts ...grpc.CallOption) (*apiv1_registry.TokenStatusListAddStatusReply, error) {
+	m.index++
+	return &apiv1_registry.TokenStatusListAddStatusReply{
+		Section: m.section,
+		Index:   m.index,
+	}, nil
+}
 
-	mockPDA1 = &socialsecurity.PDA1Document{
-		PersonalAdministrativeNumber: "1234",
-		Employer: socialsecurity.Employer{
-			ID:   "09809384",
-			Name: "SUNET",
-		},
-		WorkAddress: socialsecurity.WorkAddress{
-			Formatted:      "Tulegatan 11",
-			Street_address: "Tulegatan 11",
-			House_number:   "11",
-			Postal_code:    "11353",
-			Locality:       "Stockholm",
-			Region:         "Stockholm",
-			Country:        "SE",
-		},
-		IssuingAuthority: socialsecurity.IssuingAuthority{
-			ID:   "123123",
-			Name: "SUNET",
-		},
-		LegislationCountry: "SE",
-		DateOfExpiry:       "2023-01-01",
-		DateOfIssuance:     "2021-01-01",
-		DocumentNumber:     "09809834",
-	}
+func (m *mockRegistryClient) TokenStatusListUpdateStatus(ctx context.Context, in *apiv1_registry.TokenStatusListUpdateStatusRequest, opts ...grpc.CallOption) (*apiv1_registry.TokenStatusListUpdateStatusReply, error) {
+	return &apiv1_registry.TokenStatusListUpdateStatusReply{}, nil
+}
 
-	mockDiploma = map[string]any{}
-
-	mockEHIC = &socialsecurity.EHICDocument{
-		PersonalAdministrativeNumber: "",
-		IssuingAuthority:             socialsecurity.IssuingAuthority{},
-		IssuingCountry:               "",
-		DateOfExpiry:                 "",
-		DateOfIssuance:               "",
-		DocumentNumber:               "",
-	}
-
-	mockELM = &education.ELMDocument{}
-
-	mockMicroCredential = map[string]any{}
-)
+func (m *mockRegistryClient) SaveCredentialSubject(ctx context.Context, in *apiv1_registry.SaveCredentialSubjectRequest, opts ...grpc.CallOption) (*apiv1_registry.SaveCredentialSubjectReply, error) {
+	return &apiv1_registry.SaveCredentialSubjectReply{}, nil
+}
 
 func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logger.Log) *Client {
 	cfg := &model.Cfg{
@@ -141,6 +102,9 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 				Kid:                      "",
 			},
 		},
+		Registry: model.Registry{
+			ExternalServerURL: "https://test-registry.sunet.se",
+		},
 	}
 
 	tracer, err := trace.NewForTesting(ctx, "test", log.New("trace"))
@@ -157,6 +121,9 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 
 	client, err := New(ctx, audit, cfg, tracer, log.New("apiv1"))
 	assert.NoError(t, err)
+
+	// Inject mock registry client for Token Status List allocation
+	client.registryClient = &mockRegistryClient{section: 0, index: 0}
 
 	// Override key if RSA is requested for testing
 	if keyType == "rsa" {

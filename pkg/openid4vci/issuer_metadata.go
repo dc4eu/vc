@@ -138,7 +138,8 @@ type CredentialConfigurationsSupported struct {
 	CryptographicBindingMethodsSupported []string `json:"cryptographic_binding_methods_supported,omitempty" yaml:"cryptographic_binding_methods_supported,omitempty" validate:"omitempty,dive,oneof=jwk cose_key did:example"`
 
 	// CredentialSigningAlgValuesSupported: OPTIONAL. Array of case sensitive strings that identify the algorithms that the Issuer uses to sign the issued Credential. Algorithm names used are determined by the Credential format and are defined in Appendix A.
-	CredentialSigningAlgValuesSupported []string `json:"credential_signing_alg_values_supported,omitempty" yaml:"credential_signing_alg_values_supported,omitempty"`
+	// For dc+sd-jwt format, these are strings like "ES256". For mso_mdoc format, these are COSE algorithm identifiers (integers like -7 for ES256).
+	CredentialSigningAlgValuesSupported []any `json:"credential_signing_alg_values_supported,omitempty" yaml:"credential_signing_alg_values_supported,omitempty"`
 
 	// ProofTypesSupported: OPTIONAL. Object that describes specifics of the key proof(s) that the Credential Issuer supports. This object contains a list of name/value pairs, where each name is a unique identifier of the supported proof type(s). Valid values are defined in Section 7.2.1, other values MAY be used. This identifier is also used by the Wallet in the Credential Request as defined in Section 7.2. The value in the name/value pair is an object that contains metadata about the key proof and contains the following parameters defined by this specification:
 	ProofTypesSupported map[string]ProofsTypesSupported `json:"proof_types_supported" yaml:"proof_types_supported"`

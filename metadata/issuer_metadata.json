@@ -67,6 +67,36 @@
         }
       }
     },
+    "pid_1_5_mdoc": {
+      "scope": "pid_1_5",
+      "doctype": "eu.europa.ec.eudi.pid.1",
+      "format": "mso_mdoc",
+      "display": [
+        {
+          "name": "PID mDoc ARF 1.5",
+          "description": "Person Identification Data (ISO 18013-5 mdoc)",
+          "background_image": {
+            "uri": "http://vc_dev_apigw:8080/images/background-image.png"
+          },
+          "background_color": "#1b263b",
+          "text_color": "#FFFFFF",
+          "locale": "en-US"
+        }
+      ],
+      "cryptographic_binding_methods_supported": [
+        "cose_key"
+      ],
+      "credential_signing_alg_values_supported": [
+        -7
+      ],
+      "proof_types_supported": {
+        "jwt": {
+          "proof_signing_alg_values_supported": [
+            "ES256"
+          ]
+        }
+      }
+    },
     "pid_1_8": {
       "scope": "pid_1_8",
       "vct": "urn:eudi:pid:arf-1.8:1",

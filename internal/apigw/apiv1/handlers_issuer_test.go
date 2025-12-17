@@ -395,8 +395,8 @@ func TestOIDCCredential_SuccessfulIssuance(t *testing.T) {
 		Proofs: &openid4vci.Proofs{
 			JWT: []openid4vci.ProofJWTToken{openid4vci.ProofJWTToken(proofJWT)},
 		},
-		Format:               "vc+sd-jwt",
-		CredentialIdentifier: "pid",
+		CredentialConfigurationID: "vc+sd-jwt",
+		CredentialIdentifier:      "",
 	}
 
 	// Verify request structure

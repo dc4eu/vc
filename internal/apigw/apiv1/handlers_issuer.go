@@ -141,8 +141,15 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, errors.New("no proof found in credential request")
 	}
 
+	// Determine credential format from credential_configuration_id or credential_identifier
+	format, err := c.resolveCredentialFormat(req)
+	if err != nil {
+		c.log.Error(err, "failed to resolve credential format")
+		return nil, err
+	}
+
 	// Branch based on requested credential format
-	switch req.Format {
+	switch format {
 	case "mso_mdoc":
 		return c.issueMDoc(ctx, authContext.Scope[0], documentData, jwk, document)
 
@@ -150,9 +157,42 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return c.issueSDJWT(ctx, authContext.Scope[0], documentData, jwk, document)
 
 	default:
-		c.log.Error(nil, "unsupported or missing credential format", "format", req.Format)
-		return nil, errors.New("unsupported or missing credential format: " + req.Format)
+		c.log.Error(nil, "unsupported or missing credential format", "format", format)
+		return nil, errors.New("unsupported or missing credential format: " + format)
 	}
+}
+
+// resolveCredentialFormat determines the credential format from the request.
+// According to OpenID4VCI spec, the format is derived from the credential_configuration_id
+// which maps to a credential configuration in the issuer metadata.
+func (c *Client) resolveCredentialFormat(req *openid4vci.CredentialRequest) (string, error) {
+	// Use credential_configuration_id to look up the format from issuer metadata
+	if req.CredentialConfigurationID != "" {
+		if c.issuerMetadata != nil && c.issuerMetadata.CredentialConfigurationsSupported != nil {
+			if config, ok := c.issuerMetadata.CredentialConfigurationsSupported[req.CredentialConfigurationID]; ok {
+				return config.Format, nil
+			}
+		}
+		return "", errors.New("unknown credential_configuration_id: " + req.CredentialConfigurationID)
+	}
+
+	// Use credential_identifier to look up the format
+	// The credential_identifier maps to a credential configuration via authorization_details from the token response
+	// For now, we'll attempt to find a matching configuration by identifier
+	if req.CredentialIdentifier != "" {
+		if c.issuerMetadata != nil && c.issuerMetadata.CredentialConfigurationsSupported != nil {
+			// Try to match by credential identifier (may be same as configuration ID in some cases)
+			if config, ok := c.issuerMetadata.CredentialConfigurationsSupported[req.CredentialIdentifier]; ok {
+				return config.Format, nil
+			}
+			// If not found directly, we need the authorization context to resolve credential_identifier
+			// For now, default to dc+sd-jwt as a fallback
+			return "dc+sd-jwt", nil
+		}
+		return "", errors.New("unknown credential_identifier: " + req.CredentialIdentifier)
+	}
+
+	return "", errors.New("either credential_configuration_id or credential_identifier must be provided")
 }
 
 // issueSDJWT issues an SD-JWT credential

@@ -20,7 +20,7 @@ func TestCredentialValidation(t *testing.T) {
 		{
 			name: "test",
 			credentialRequest: &CredentialRequest{
-				Format: "vc+ldp",
+				CredentialConfigurationID: "vc+ldp",
 			},
 			tokenResponse: &TokenResponse{
 				AccessToken:     "",

@@ -28,8 +28,8 @@ var mockIssuerMetadata = &CredentialIssuerMetadataParameters{
 			VCT:                                  "urn:eudi:pid:1",
 			Format:                               "vc+sd-jwt",
 			Scope:                                "pid:sd_jwt_vc",
-			CryptographicBindingMethodsSupported: []string{"ES256"},
-			CredentialSigningAlgValuesSupported:  []string{"ES256"},
+			CryptographicBindingMethodsSupported: []string{"jwk"},
+			CredentialSigningAlgValuesSupported:  []any{"ES256"},
 			ProofTypesSupported: map[string]ProofsTypesSupported{
 				"jwt": {
 					ProofSigningAlgValuesSupported: []string{"ES256"},
@@ -52,8 +52,8 @@ var mockIssuerMetadata = &CredentialIssuerMetadataParameters{
 			Format:                               "mso_mdoc",
 			Scope:                                "pid:mso_mdoc",
 			Doctype:                              "eu.europa.ec.eudi.pid.1",
-			CryptographicBindingMethodsSupported: []string{"ES256"},
-			CredentialSigningAlgValuesSupported:  []string{"ES256"},
+			CryptographicBindingMethodsSupported: []string{"cose_key"},
+			CredentialSigningAlgValuesSupported:  []any{float64(-7)},
 			ProofTypesSupported: map[string]ProofsTypesSupported{
 				"jwt": {
 					ProofSigningAlgValuesSupported: []string{"ES256"},
@@ -76,8 +76,8 @@ var mockIssuerMetadata = &CredentialIssuerMetadataParameters{
 			VCT:                                  "urn:credential:diploma",
 			Format:                               "vc+sd-jwt",
 			Scope:                                "diploma",
-			CryptographicBindingMethodsSupported: []string{"ES256"},
-			CredentialSigningAlgValuesSupported:  []string{"ES256"},
+			CryptographicBindingMethodsSupported: []string{"jwk"},
+			CredentialSigningAlgValuesSupported:  []any{"ES256"},
 			ProofTypesSupported: map[string]ProofsTypesSupported{
 				"jwt": {
 					ProofSigningAlgValuesSupported: []string{"ES256"},
@@ -102,8 +102,8 @@ var mockIssuerMetadata = &CredentialIssuerMetadataParameters{
 			VCT:                                  "urn:credential:ehic",
 			Format:                               "vc+sd-jwt",
 			Scope:                                "ehic",
-			CryptographicBindingMethodsSupported: []string{"ES256"},
-			CredentialSigningAlgValuesSupported:  []string{"ES256"},
+			CryptographicBindingMethodsSupported: []string{"jwk"},
+			CredentialSigningAlgValuesSupported:  []any{"ES256"},
 			ProofTypesSupported: map[string]ProofsTypesSupported{
 				"jwt": {
 					ProofSigningAlgValuesSupported: []string{"ES256"},
@@ -126,8 +126,8 @@ var mockIssuerMetadata = &CredentialIssuerMetadataParameters{
 			VCT:                                  "urn:eu.europa.ec.eudi:por:1",
 			Format:                               "vc+sd-jwt",
 			Scope:                                "por:sd_jwt_vc",
-			CryptographicBindingMethodsSupported: []string{"ES256"},
-			CredentialSigningAlgValuesSupported:  []string{"ES256"},
+			CryptographicBindingMethodsSupported: []string{"jwk"},
+			CredentialSigningAlgValuesSupported:  []any{"ES256"},
 			ProofTypesSupported: map[string]ProofsTypesSupported{
 				"jwt": {
 					ProofSigningAlgValuesSupported: []string{"ES256"},
@@ -147,7 +147,6 @@ var mockIssuerMetadata = &CredentialIssuerMetadataParameters{
 			},
 		},
 	},
-	SignedMetadata: "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsIng1YyI6WyJNSUlDTGpDQ0FkV2dBd0lCQWdJVWRnRVNiVEc5bnhTWFZJbUZkRkhIQUhHSjlSNHdDZ1lJS29aSXpqMEVBd0l3SURFUk1BOEdBMVVFQXd3SWQzZFhZV3hzWlhReEN6QUpCZ05WQkFZVEFrZFNNQjRYRFRJMU1ETXlNREE0TlRJME4xb1hEVE0xTURNeE9EQTROVEkwTjFvd01ERWhNQjhHQTFVRUF3d1laR1Z0YnkxcGMzTjFaWEl1ZDNkM1lXeHNaWFF1YjNKbk1Rc3dDUVlEVlFRR0V3SkhVakJaTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEEwSUFCT3NlU20xY1VSWnJpbkdNMGFFZHNMM21ERzlvbTBtUTFFSmR0bG1VQkl5RWxvcTZsdVlqNkdvQnA5VnpacDYwcGpZWSt5dEpiV2tiQURJVXNteXFibitqZ2R3d2dka3dId1lEVlIwakJCZ3dGb0FVZkhqNGJ6eXZvNHVuSHlzR3QrcE5hMFhzQmFJd0NRWURWUjBUQkFJd0FEQUxCZ05WSFE4RUJBTUNCYUF3RXdZRFZSMGxCQXd3Q2dZSUt3WUJCUVVIQXdFd2FnWURWUjBSQkdNd1lZSVlkMkZzYkdWMExXVnVkR1Z5Y0hKcGMyVXRhWE56ZFdWeWdoTnBjM04xWlhJdWQzZDNZV3hzWlhRdWIzSm5naGhrWlcxdkxXbHpjM1ZsY2k1M2QzZGhiR3hsZEM1dmNtZUNGbkZoTFdsemMzVmxjaTUzZDNkaGJHeGxkQzV2Y21jd0hRWURWUjBPQkJZRUZLYWZhODdEUWJyWFlZdUplN1lvQ29Kb0dLL0xNQW9HQ0NxR1NNNDlCQU1DQTBjQU1FUUNJQjRXM1NiMG5LYm5iOFk3YUlaNG5qSkc3bEdTbTF4V09XUU1yQ3dneDlONUFpQmxJYTRFQVdmOU5pNFVNZVdGU1dJMktPQzVwUnlPQUVCU0dhdzlTK1BUd0E9PSJdfQ.eyJjcmVkZW50aWFsX2lzc3VlciI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UiLCJjcmVkZW50aWFsX2VuZHBvaW50IjoiaHR0cHM6Ly9pc3N1ZXIuZGV2LndhbGxldC5zdW5ldC5zZS9vcGVuaWQ0dmNpL2NyZWRlbnRpYWwiLCJkaXNwbGF5IjpbeyJuYW1lIjoiU1VORVQgd3dXYWxsZXQgSXNzdWVyIiwibG9jYWxlIjoiZW4tVVMifV0sImNyZWRlbnRpYWxfY29uZmlndXJhdGlvbnNfc3VwcG9ydGVkIjp7InVybjpldWRpOnBpZDoxIjp7InNjb3BlIjoicGlkOnNkX2p3dF92YyIsInZjdCI6InVybjpldWRpOnBpZDoxIiwiZGlzcGxheSI6W3sibmFtZSI6IlBJRCBTRC1KV1QgVkMiLCJkZXNjcmlwdGlvbiI6IlBlcnNvbiBJZGVudGlmaWNhdGlvbiBEYXRhIiwiYmFja2dyb3VuZF9pbWFnZSI6eyJ1cmkiOiJodHRwczovL2lzc3Vlci5kZXYud2FsbGV0LnN1bmV0LnNlL2ltYWdlcy9iYWNrZ3JvdW5kLWltYWdlLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzFiMjYzYiIsInRleHRfY29sb3IiOiIjRkZGRkZGIiwibG9jYWxlIjoiZW4tVVMifV0sImZvcm1hdCI6InZjK3NkLWp3dCIsImNyeXB0b2dyYXBoaWNfYmluZGluZ19tZXRob2RzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJjcmVkZW50aWFsX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXSwicHJvb2ZfdHlwZXNfc3VwcG9ydGVkIjp7Imp3dCI6eyJwcm9vZl9zaWduaW5nX2FsZ192YWx1ZXNfc3VwcG9ydGVkIjpbIkVTMjU2Il19fX0sImV1LmV1cm9wYS5lYy5ldWRpLnBpZC4xIjp7InNjb3BlIjoicGlkOm1zb19tZG9jIiwiZG9jdHlwZSI6ImV1LmV1cm9wYS5lYy5ldWRpLnBpZC4xIiwiZGlzcGxheSI6W3sibmFtZSI6IlBJRCAtIE1ET0MiLCJkZXNjcmlwdGlvbiI6IlBlcnNvbiBJZGVudGlmaWNhdGlvbiBEYXRhIiwiYmFja2dyb3VuZF9pbWFnZSI6eyJ1cmkiOiJodHRwczovL2lzc3Vlci5kZXYud2FsbGV0LnN1bmV0LnNlL2ltYWdlcy9iYWNrZ3JvdW5kLWltYWdlLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzRDQzNERCIsInRleHRfY29sb3IiOiIjMDAwMDAwIiwibG9jYWxlIjoiZW4tVVMifV0sImZvcm1hdCI6Im1zb19tZG9jIiwiY3J5cHRvZ3JhcGhpY19iaW5kaW5nX21ldGhvZHNfc3VwcG9ydGVkIjpbIkVTMjU2Il0sImNyZWRlbnRpYWxfc2lnbmluZ19hbGdfdmFsdWVzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJwcm9vZl90eXBlc19zdXBwb3J0ZWQiOnsiand0Ijp7InByb29mX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXX19fSwidXJuOmNyZWRlbnRpYWw6ZGlwbG9tYSI6eyJzY29wZSI6ImRpcGxvbWEiLCJ2Y3QiOiJ1cm46Y3JlZGVudGlhbDpkaXBsb21hIiwiZm9ybWF0IjoidmMrc2Qtand0IiwiZGlzcGxheSI6W3sibmFtZSI6IkJhY2hlbG9yIERpcGxvbWEgLSBTRC1KV1QgVkMiLCJiYWNrZ3JvdW5kX2ltYWdlIjp7InVyaSI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UvaW1hZ2VzL2JhY2tncm91bmQtaW1hZ2UucG5nIn0sImxvZ28iOnsidXJpIjoiaHR0cHM6Ly9pc3N1ZXIuZGV2LndhbGxldC5zdW5ldC5zZS9pbWFnZXMvZGlwbG9tYS1sb2dvLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2IxZDNmZiIsInRleHRfY29sb3IiOiIjZmZmZmZmIiwibG9jYWxlIjoiZW4tVVMifV0sImNyeXB0b2dyYXBoaWNfYmluZGluZ19tZXRob2RzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJjcmVkZW50aWFsX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXSwicHJvb2ZfdHlwZXNfc3VwcG9ydGVkIjp7Imp3dCI6eyJwcm9vZl9zaWduaW5nX2FsZ192YWx1ZXNfc3VwcG9ydGVkIjpbIkVTMjU2Il19fX0sInVybjpjcmVkZW50aWFsOmVoaWMiOnsic2NvcGUiOiJlaGljIiwidmN0IjoidXJuOmNyZWRlbnRpYWw6ZWhpYyIsImZvcm1hdCI6InZjK3NkLWp3dCIsImRpc3BsYXkiOlt7Im5hbWUiOiJFSElDIC0gU0QtSldUIFZDIiwiZGVzY3JpcHRpb24iOiJFdXJvcGVhbiBIZWFsdGggSW5zdXJhbmNlIENhcmQiLCJiYWNrZ3JvdW5kX2ltYWdlIjp7InVyaSI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UvaW1hZ2VzL2JhY2tncm91bmQtaW1hZ2UucG5nIn0sImJhY2tncm91bmRfY29sb3IiOiIjMWIyNjNiIiwidGV4dF9jb2xvciI6IiNGRkZGRkYiLCJsb2NhbGUiOiJlbi1VUyJ9XSwiY3J5cHRvZ3JhcGhpY19iaW5kaW5nX21ldGhvZHNfc3VwcG9ydGVkIjpbIkVTMjU2Il0sImNyZWRlbnRpYWxfc2lnbmluZ19hbGdfdmFsdWVzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJwcm9vZl90eXBlc19zdXBwb3J0ZWQiOnsiand0Ijp7InByb29mX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXX19fSwidXJuOmV1LmV1cm9wYS5lYy5ldWRpOnBvcjoxIjp7InNjb3BlIjoicG9yOnNkX2p3dF92YyIsInZjdCI6InVybjpldS5ldXJvcGEuZWMuZXVkaTpwb3I6MSIsImRpc3BsYXkiOlt7Im5hbWUiOiJQT1IgLSBTRC1KV1QgVkMiLCJkZXNjcmlwdGlvbiI6IlBvd2VyIG9mIFJlcHJlc2VudGF0aW9uIiwiYmFja2dyb3VuZF9pbWFnZSI6eyJ1cmkiOiJodHRwczovL2lzc3Vlci5kZXYud2FsbGV0LnN1bmV0LnNlL2ltYWdlcy9iYWNrZ3JvdW5kLWltYWdlLnBuZyJ9LCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2MzYjI1ZCIsInRleHRfY29sb3IiOiIjMzYzNTMxIiwibG9jYWxlIjoiZW4tVVMifV0sImZvcm1hdCI6InZjK3NkLWp3dCIsImNyeXB0b2dyYXBoaWNfYmluZGluZ19tZXRob2RzX3N1cHBvcnRlZCI6WyJFUzI1NiJdLCJjcmVkZW50aWFsX3NpZ25pbmdfYWxnX3ZhbHVlc19zdXBwb3J0ZWQiOlsiRVMyNTYiXSwicHJvb2ZfdHlwZXNfc3VwcG9ydGVkIjp7Imp3dCI6eyJwcm9vZl9zaWduaW5nX2FsZ192YWx1ZXNfc3VwcG9ydGVkIjpbIkVTMjU2Il19fX19LCJtZG9jX2lhY2FzX3VyaSI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UvbWRvYy1pYWNhcyIsImlhdCI6MTc0NzA1NTQxNCwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZGV2LndhbGxldC5zdW5ldC5zZSIsInN1YiI6Imh0dHBzOi8vaXNzdWVyLmRldi53YWxsZXQuc3VuZXQuc2UifQ.lScrOAAR4J6GEc3oSK8AUYLRETWKZksQnJT-Dk4Pf82ZsYdnKxARRCJmgCPjr0-UvJFEsWDWbAxRWtBN74oSaA",
 }
 
 func TestValidateMetadata(t *testing.T) {
@@ -275,7 +274,7 @@ func TestMarshal(t *testing.T) {
 				Format:                               "vc+sd-jwt",
 				Scope:                                "EHIC",
 				CryptographicBindingMethodsSupported: []string{"did:example"},
-				CredentialSigningAlgValuesSupported:  []string{"ES256"},
+				CredentialSigningAlgValuesSupported:  []any{"ES256"},
 				CredentialDefinition: CredentialDefinition{
 					Type: []string{"VerifiableCredential", "EHICCredential"},
 				},
@@ -341,7 +340,7 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 		assert.Equal(t, "http://vc_dev_apigw:8080/credential", metadata.CredentialEndpoint)
 
 		assert.NotEmpty(t, metadata.CredentialConfigurationsSupported, "credential_configurations_supported is required")
-		assert.Len(t, metadata.CredentialConfigurationsSupported, 5, "Expected 5 credential configurations")
+		assert.Len(t, metadata.CredentialConfigurationsSupported, 6, "Expected 6 credential configurations")
 	})
 
 	// Validate display properties
@@ -356,6 +355,7 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 		expectedConfigs := []string{
 			"diploma",
 			"pid_1_5",
+			"pid_1_5_mdoc",
 			"pid_1_8",
 			"ehic",
 			"pda1",
@@ -367,21 +367,31 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 				require.True(t, exists, "Configuration %s should exist", configID)
 
 				// Validate format
-				assert.Equal(t, "dc+sd-jwt", config.Format, "All credentials should use dc+sd-jwt format")
+				assert.Contains(t, []string{"dc+sd-jwt", "mso_mdoc"}, config.Format,
+					"Credential should use a valid format (dc+sd-jwt or mso_mdoc)")
 
 				// Validate scope
 				assert.NotEmpty(t, config.Scope, "Scope should not be empty")
 
-				// Validate VCT
-				assert.NotEmpty(t, config.VCT, "VCT should not be empty")
+				// For SD-JWT format, validate VCT; for mdoc, validate doctype
+				if config.Format == "dc+sd-jwt" {
+					assert.NotEmpty(t, config.VCT, "VCT should not be empty for SD-JWT format")
+				} else if config.Format == "mso_mdoc" {
+					assert.NotEmpty(t, config.Doctype, "Doctype should not be empty for mso_mdoc format")
+				}
 
 				// Validate cryptographic binding methods
-				assert.Contains(t, config.CryptographicBindingMethodsSupported, "jwk",
-					"Should support jwk binding method")
+				if config.Format == "dc+sd-jwt" {
+					assert.Contains(t, config.CryptographicBindingMethodsSupported, "jwk",
+						"SD-JWT should support jwk binding method")
+				} else if config.Format == "mso_mdoc" {
+					assert.Contains(t, config.CryptographicBindingMethodsSupported, "cose_key",
+						"mso_mdoc should support cose_key binding method")
+				}
 
 				// Validate signing algorithms
-				assert.Contains(t, config.CredentialSigningAlgValuesSupported, "ES256",
-					"Should support ES256 signing algorithm")
+				assert.NotEmpty(t, config.CredentialSigningAlgValuesSupported,
+					"Should have credential signing algorithms")
 
 				// Validate proof types
 				assert.NotEmpty(t, config.ProofTypesSupported, "Proof types should not be empty")
@@ -442,6 +452,30 @@ func TestCredentialIssuerMetadataParameters_UnmarshalFromFile(t *testing.T) {
 		assert.Equal(t, "urn:eudi:pda1:1", pda1.VCT)
 		assert.Equal(t, "PDA1 - SD-JWT VC", pda1.Display[0].Name)
 		assert.Equal(t, "European Portable Document Application", pda1.Display[0].Description)
+	})
+
+	t.Run("PID 1.5 mDoc Configuration", func(t *testing.T) {
+		pidMdoc, exists := metadata.CredentialConfigurationsSupported["pid_1_5_mdoc"]
+		require.True(t, exists, "pid_1_5_mdoc configuration should exist")
+
+		// Format should be mso_mdoc
+		assert.Equal(t, "mso_mdoc", pidMdoc.Format)
+
+		// Should have doctype instead of VCT
+		assert.Equal(t, "eu.europa.ec.eudi.pid.1", pidMdoc.Doctype)
+		assert.Empty(t, pidMdoc.VCT, "mso_mdoc format should not have vct")
+
+		// Scope can be shared with SD-JWT version
+		assert.Equal(t, "pid_1_5", pidMdoc.Scope)
+
+		// Binding method should be cose_key for mso_mdoc
+		assert.Contains(t, pidMdoc.CryptographicBindingMethodsSupported, "cose_key")
+
+		// Display properties
+		assert.Equal(t, "PID mDoc ARF 1.5", pidMdoc.Display[0].Name)
+		assert.Equal(t, "Person Identification Data (ISO 18013-5 mdoc)", pidMdoc.Display[0].Description)
+		assert.Equal(t, "#1b263b", pidMdoc.Display[0].BackgroundColor)
+		assert.Equal(t, "#FFFFFF", pidMdoc.Display[0].TextColor)
 	})
 }
 
@@ -516,15 +550,25 @@ func TestCredentialIssuerMetadataParameters_OpenID4VCI_Compliance(t *testing.T) 
 	})
 
 	t.Run("Credential Format - SD-JWT VC", func(t *testing.T) {
-		// All credentials in the file use dc+sd-jwt format
-		for configID, config := range metadata.CredentialConfigurationsSupported {
-			assert.Equal(t, "dc+sd-jwt", config.Format,
-				"Configuration %s should use dc+sd-jwt format per Appendix A.3", configID)
-
-			// For SD-JWT VC format, vct parameter should be present
-			assert.NotEmpty(t, config.VCT,
-				"Configuration %s should have vct parameter for dc+sd-jwt format", configID)
+		// Count credentials by format
+		sdJwtCount := 0
+		mdocCount := 0
+		for _, config := range metadata.CredentialConfigurationsSupported {
+			switch config.Format {
+			case "dc+sd-jwt":
+				sdJwtCount++
+				// For SD-JWT VC format, vct parameter should be present
+				assert.NotEmpty(t, config.VCT,
+					"vct should be present for dc+sd-jwt format")
+			case "mso_mdoc":
+				mdocCount++
+				// For mso_mdoc format, doctype parameter should be present
+				assert.NotEmpty(t, config.Doctype,
+					"doctype should be present for mso_mdoc format")
+			}
 		}
+		assert.Equal(t, 5, sdJwtCount, "Should have 5 SD-JWT VC credentials")
+		assert.Equal(t, 1, mdocCount, "Should have 1 mso_mdoc credential")
 	})
 
 	t.Run("Cryptographic Binding Methods", func(t *testing.T) {
@@ -579,6 +623,43 @@ func TestCredentialIssuerMetadataParameters_OpenID4VCI_Compliance(t *testing.T) 
 			}
 		}
 	})
+
+	t.Run("Appendix A.2 - ISO mdoc Format", func(t *testing.T) {
+		// Find all mso_mdoc configurations
+		mdocConfigs := make(map[string]CredentialConfigurationsSupported)
+		for configID, config := range metadata.CredentialConfigurationsSupported {
+			if config.Format == "mso_mdoc" {
+				mdocConfigs[configID] = config
+			}
+		}
+
+		require.NotEmpty(t, mdocConfigs, "Should have at least one mso_mdoc configuration")
+
+		for configID, config := range mdocConfigs {
+			t.Run(configID, func(t *testing.T) {
+				// doctype: REQUIRED for mso_mdoc format (Appendix A.2.1)
+				assert.NotEmpty(t, config.Doctype,
+					"mso_mdoc format requires doctype parameter per Appendix A.2.1")
+
+				// VCT should NOT be present for mso_mdoc (that's for SD-JWT)
+				assert.Empty(t, config.VCT,
+					"mso_mdoc format should not have vct parameter")
+
+				// Cryptographic binding: should use cose_key
+				assert.Contains(t, config.CryptographicBindingMethodsSupported, "cose_key",
+					"mso_mdoc format should support cose_key binding method")
+
+				// Credential signing algorithms should use COSE algorithm identifiers
+				// -7 = ES256 in COSE
+				assert.NotEmpty(t, config.CredentialSigningAlgValuesSupported,
+					"Should have credential signing algorithms")
+
+				// Validate display properties
+				assert.NotEmpty(t, config.Display, "Should have display properties")
+				assert.NotEmpty(t, config.Display[0].Name, "Display should have a name")
+			})
+		}
+	})
 }
 
 func TestCredentialConfigurationsSupported_StructureCompliance(t *testing.T) {
@@ -595,10 +676,16 @@ func TestCredentialConfigurationsSupported_StructureCompliance(t *testing.T) {
 			// format: REQUIRED
 			assert.NotEmpty(t, config.Format, "format is REQUIRED")
 
-			// For dc+sd-jwt format:
-			if config.Format == "dc+sd-jwt" {
+			// Format-specific requirements
+			switch config.Format {
+			case "dc+sd-jwt":
 				// vct should be present (Appendix A.3.2)
 				assert.NotEmpty(t, config.VCT, "vct should be present for dc+sd-jwt format")
+			case "mso_mdoc":
+				// doctype should be present (Appendix A.2.1)
+				assert.NotEmpty(t, config.Doctype, "doctype should be present for mso_mdoc format")
+			default:
+				t.Errorf("Unknown format: %s", config.Format)
 			}
 
 			// scope: OPTIONAL but present in our metadata

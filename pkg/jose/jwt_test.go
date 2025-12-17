@@ -2,13 +2,7 @@ package jose
 
 import (
 	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -16,54 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createTestKeyForJWT(t *testing.T) string {
-	t.Helper()
-
-	// Generate ECDSA P-256 key
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	require.NoError(t, err)
-
-	// Encode to PEM
-	keyBytes, err := x509.MarshalECPrivateKey(privateKey)
-	require.NoError(t, err)
-
-	pemBlock := &pem.Block{
-		Type:  "EC PRIVATE KEY",
-		Bytes: keyBytes,
-	}
-
-	// Write to temp file
-	tmpDir := t.TempDir()
-	keyPath := filepath.Join(tmpDir, "test_key.pem")
-	require.NoError(t, os.WriteFile(keyPath, pem.EncodeToMemory(pemBlock), 0600))
-
-	return keyPath
-}
-
-func createTestRSAKeyForJWT(t *testing.T) string {
-	t.Helper()
-
-	// Generate RSA 2048-bit key
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	require.NoError(t, err)
-
-	// Encode to PEM (PKCS1 format - "RSA PRIVATE KEY")
-	pemBlock := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
-	}
-
-	// Write to temp file
-	tmpDir := t.TempDir()
-	keyPath := filepath.Join(tmpDir, "test_rsa_key.pem")
-	require.NoError(t, os.WriteFile(keyPath, pem.EncodeToMemory(pemBlock), 0600))
-
-	return keyPath
-}
-
 func TestMakeJWT(t *testing.T) {
 	t.Run("creates signed JWT with EC key", func(t *testing.T) {
-		keyPath := createTestKeyForJWT(t)
+		keyPath := createTestECKey(t)
 
 		jwk, privateKey, err := CreateJWK(keyPath)
 		require.NoError(t, err)
@@ -96,7 +45,7 @@ func TestMakeJWT(t *testing.T) {
 	})
 
 	t.Run("creates signed JWT with RSA key", func(t *testing.T) {
-		keyPath := createTestRSAKeyForJWT(t)
+		keyPath := createTestRSAKey(t)
 
 		jwk, privateKey, err := CreateJWK(keyPath)
 		require.NoError(t, err)

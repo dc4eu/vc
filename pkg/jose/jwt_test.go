@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"os"
@@ -39,12 +40,35 @@ func createTestKeyForJWT(t *testing.T) string {
 	return keyPath
 }
 
+func createTestRSAKeyForJWT(t *testing.T) string {
+	t.Helper()
+
+	// Generate RSA 2048-bit key
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	// Encode to PEM (PKCS1 format - "RSA PRIVATE KEY")
+	pemBlock := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+	}
+
+	// Write to temp file
+	tmpDir := t.TempDir()
+	keyPath := filepath.Join(tmpDir, "test_rsa_key.pem")
+	require.NoError(t, os.WriteFile(keyPath, pem.EncodeToMemory(pemBlock), 0600))
+
+	return keyPath
+}
+
 func TestMakeJWT(t *testing.T) {
-	t.Run("creates signed JWT successfully", func(t *testing.T) {
+	t.Run("creates signed JWT with EC key", func(t *testing.T) {
 		keyPath := createTestKeyForJWT(t)
 
-		jwk, privateKey, err := CreateECJWK(keyPath)
+		jwk, privateKey, err := CreateJWK(keyPath)
 		require.NoError(t, err)
+
+		ecKey := privateKey.(*ecdsa.PrivateKey)
 
 		header := jwt.MapClaims{
 			"alg": "ES256",
@@ -59,13 +83,46 @@ func TestMakeJWT(t *testing.T) {
 			"jwk":   jwk,
 		}
 
-		signedToken, err := MakeJWT(header, body, jwt.SigningMethodES256, privateKey)
+		signedToken, err := MakeJWT(header, body, jwt.SigningMethodES256, ecKey)
 		require.NoError(t, err)
 		assert.NotEmpty(t, signedToken)
 
 		// Verify the token can be parsed
 		token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
-			return &privateKey.PublicKey, nil
+			return &ecKey.PublicKey, nil
+		})
+		require.NoError(t, err)
+		assert.True(t, token.Valid)
+	})
+
+	t.Run("creates signed JWT with RSA key", func(t *testing.T) {
+		keyPath := createTestRSAKeyForJWT(t)
+
+		jwk, privateKey, err := CreateJWK(keyPath)
+		require.NoError(t, err)
+
+		rsaKey := privateKey.(*rsa.PrivateKey)
+
+		header := jwt.MapClaims{
+			"alg": "RS256",
+			"typ": "JWT",
+			"kid": "rsa-key-1",
+		}
+		body := jwt.MapClaims{
+			"iss":   "joe",
+			"aud":   "https://example.com",
+			"iat":   1300819380,
+			"nonce": "n-0S6_WzA2Mj",
+			"jwk":   jwk,
+		}
+
+		signedToken, err := MakeJWT(header, body, jwt.SigningMethodRS256, rsaKey)
+		require.NoError(t, err)
+		assert.NotEmpty(t, signedToken)
+
+		// Verify the token can be parsed
+		token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
+			return &rsaKey.PublicKey, nil
 		})
 		require.NoError(t, err)
 		assert.True(t, token.Valid)

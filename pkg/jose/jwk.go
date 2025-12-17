@@ -2,8 +2,6 @@ package jose
 
 import (
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/rsa"
 	"encoding/json"
 	"errors"
 	"os"
@@ -49,97 +47,9 @@ func ParseSigningKey(signingKeyPath string) (crypto.PrivateKey, error) {
 	return nil, errors.New("unsupported key type: expected EC or RSA private key in PEM format")
 }
 
-// ParseECSigningKey parses an EC private key from a PEM file
-func ParseECSigningKey(signingKeyPath string) (*ecdsa.PrivateKey, error) {
-	keyByte, err := os.ReadFile(filepath.Clean(signingKeyPath))
-	if err != nil {
-		return nil, err
-	}
-	if keyByte == nil {
-		return nil, errors.New("private key missing")
-	}
-
-	privateKey, err := jwt.ParseECPrivateKeyFromPEM(keyByte)
-	if err != nil {
-		return nil, err
-	}
-
-	return privateKey, nil
-}
-
-// ParseRSASigningKey parses an RSA private key from a PEM file
-func ParseRSASigningKey(signingKeyPath string) (*rsa.PrivateKey, error) {
-	keyByte, err := os.ReadFile(filepath.Clean(signingKeyPath))
-	if err != nil {
-		return nil, err
-	}
-	if keyByte == nil {
-		return nil, errors.New("private key missing")
-	}
-
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(keyByte)
-	if err != nil {
-		return nil, err
-	}
-
-	return privateKey, nil
-}
-
 // CreateJWK creates a JWK from a signing key file (supports EC and RSA)
 func CreateJWK(signingKeyPath string) (*JWK, crypto.PrivateKey, error) {
 	privateKey, err := ParseSigningKey(signingKeyPath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	key, err := jwk.Import(privateKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Marshal to JSON and unmarshal to our JWK struct
-	jwkJSON, err := json.Marshal(key)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	result := &JWK{}
-	if err := json.Unmarshal(jwkJSON, result); err != nil {
-		return nil, nil, err
-	}
-
-	return result, privateKey, nil
-}
-
-// CreateECJWK creates a JWK from an EC signing key file
-func CreateECJWK(signingKeyPath string) (*JWK, *ecdsa.PrivateKey, error) {
-	privateKey, err := ParseECSigningKey(signingKeyPath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	key, err := jwk.Import(privateKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Marshal to JSON and unmarshal to our JWK struct
-	jwkJSON, err := json.Marshal(key)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	result := &JWK{}
-	if err := json.Unmarshal(jwkJSON, result); err != nil {
-		return nil, nil, err
-	}
-
-	return result, privateKey, nil
-}
-
-// CreateRSAJWK creates a JWK from an RSA signing key file
-func CreateRSAJWK(signingKeyPath string) (*JWK, *rsa.PrivateKey, error) {
-	privateKey, err := ParseRSASigningKey(signingKeyPath)
 	if err != nil {
 		return nil, nil, err
 	}

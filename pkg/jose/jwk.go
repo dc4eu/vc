@@ -4,9 +4,7 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/rsa"
-	"crypto/x509"
 	"encoding/json"
-	"encoding/pem"
 	"errors"
 	"os"
 	"path/filepath"
@@ -24,6 +22,7 @@ type JWK struct {
 }
 
 // ParseSigningKey parses a private key from a PEM file (supports EC and RSA in various formats)
+// Handles SEC1, PKCS1, and PKCS8 formats automatically.
 func ParseSigningKey(signingKeyPath string) (crypto.PrivateKey, error) {
 	keyByte, err := os.ReadFile(filepath.Clean(signingKeyPath))
 	if err != nil {
@@ -33,32 +32,17 @@ func ParseSigningKey(signingKeyPath string) (crypto.PrivateKey, error) {
 		return nil, errors.New("private key missing")
 	}
 
-	// Try EC first (SEC1 and PKCS8 formats)
+	// Try EC (handles SEC1 and PKCS8 formats)
 	if privateKey, err := jwt.ParseECPrivateKeyFromPEM(keyByte); err == nil {
 		return privateKey, nil
 	}
 
-	// Try RSA (PKCS1 and PKCS8 formats)
+	// Try RSA (handles PKCS1 and PKCS8 formats)
 	if privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(keyByte); err == nil {
 		return privateKey, nil
 	}
 
-	// Try PKCS8 generic (handles both EC and RSA in PKCS8 format)
-	block, _ := pem.Decode(keyByte)
-	if block != nil && block.Type == "PRIVATE KEY" {
-		if privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes); err == nil {
-			return privateKey, nil
-		}
-	}
-
-	// Try PKCS1 RSA explicitly
-	if block != nil && block.Type == "RSA PRIVATE KEY" {
-		if privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
-			return privateKey, nil
-		}
-	}
-
-	return nil, errors.New("unsupported key type: expected EC or RSA private key in PEM format (SEC1, PKCS1, or PKCS8)")
+	return nil, errors.New("unsupported key type: expected EC or RSA private key in PEM format")
 }
 
 // ParseECSigningKey parses an EC private key from a PEM file

@@ -30,9 +30,6 @@ func ParseSigningKey(signingKeyPath string) (crypto.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	if keyByte == nil {
-		return nil, errors.New("private key missing")
-	}
 
 	// Try EC (handles SEC1 and PKCS8 formats)
 	if privateKey, err := jwt.ParseECPrivateKeyFromPEM(keyByte); err == nil {

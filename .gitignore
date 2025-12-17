@@ -40,3 +40,5 @@ playwright-screenshots/
 
 # VS Code MCP configuration (contains personal tokens)
 .vscode/mcp.json
+
+ISO_IEC_18013_5_2021_EN.pdf

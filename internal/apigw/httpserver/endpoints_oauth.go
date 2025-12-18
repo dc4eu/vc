@@ -89,20 +89,11 @@ func (s *Service) endpointOAuthToken(ctx context.Context, c *gin.Context) (any, 
 
 	session := sessions.Default(c)
 
-	tokenRequestHeader := &openid4vci.TokenRequestHeader{}
-	if err := c.BindHeader(tokenRequestHeader); err != nil {
-		span.SetStatus(codes.Error, err.Error())
-		s.log.Error(err, "binding header error")
-		return nil, err
-	}
-
 	request := &openid4vci.TokenRequest{}
 	if err := s.httpHelpers.Binding.Request(ctx, c, request); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-
-	request.Header = tokenRequestHeader
 
 	reply, err := s.apiv1.OAuthToken(ctx, request)
 	if err != nil {

@@ -18,7 +18,8 @@
 				"Plex.vscode-protolint",
 				"ms-azuretools.vscode-docker",
 				"zenghongtu.vscode-asciiflow2",
-				"Gruntfuggly.todo-tree"
+				"Gruntfuggly.todo-tree",
+				"tomoki1207.pdf"
 			]
 		}
 	},

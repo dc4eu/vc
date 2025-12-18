@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var mockProofJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6Im9wZW5pZDR2Y2ktcHJvb2Yrand0IiwiandrIjp7ImNydiI6IlAtMjU2IiwiZXh0Ijp0cnVlLCJrZXlfb3BzIjpbInZlcmlmeSJdLCJrdHkiOiJFQyIsIngiOiJ1aGZ3M3pyOWJBWTlERDV0QkN0RVVfOVdNaFdvTWFlYVVSNGY3U2dKQzlvIiwieSI6ImJZR2JlV2xWYlJrNktxT1hRX0VUeWxaZ3NKMDR0Nld5UTZiZFhYMHUxV0UifX0.eyJub25jZSI6IiIsImF1ZCI6Imh0dHBzOi8vdmMtaW50ZXJvcC0zLnN1bmV0LnNlIiwiaXNzIjoiMTAwMyIsImlhdCI6MTc1MTM2ODI1NX0.ri7zfnClkmVYFPRxV5IWiatmXHjmDNcd9FGJJNngUFjvDkVIfeYKr-bb_aUXU0DgkesIi8XvyKM149tlP-e6gA"
+var mockProofJWT ProofJWTToken = "eyJhbGciOiJFUzI1NiIsInR5cCI6Im9wZW5pZDR2Y2ktcHJvb2Yrand0IiwiandrIjp7ImNydiI6IlAtMjU2IiwiZXh0Ijp0cnVlLCJrZXlfb3BzIjpbInZlcmlmeSJdLCJrdHkiOiJFQyIsIngiOiJ1aGZ3M3pyOWJBWTlERDV0QkN0RVVfOVdNaFdvTWFlYVVSNGY3U2dKQzlvIiwieSI6ImJZR2JlV2xWYlJrNktxT1hRX0VUeWxaZ3NKMDR0Nld5UTZiZFhYMHUxV0UifX0.eyJub25jZSI6IiIsImF1ZCI6Imh0dHBzOi8vdmMtaW50ZXJvcC0zLnN1bmV0LnNlIiwiaXNzIjoiMTAwMyIsImlhdCI6MTc1MTM2ODI1NX0.ri7zfnClkmVYFPRxV5IWiatmXHjmDNcd9FGJJNngUFjvDkVIfeYKr-bb_aUXU0DgkesIi8XvyKM149tlP-e6gA"
 
 func TestCredentialValidation(t *testing.T) {
 	tts := []struct {
@@ -20,7 +20,7 @@ func TestCredentialValidation(t *testing.T) {
 		{
 			name: "test",
 			credentialRequest: &CredentialRequest{
-				Format: "vc+ldp",
+				CredentialConfigurationID: "vc+ldp",
 			},
 			tokenResponse: &TokenResponse{
 				AccessToken:     "",
@@ -56,12 +56,12 @@ func TestCredentialValidation(t *testing.T) {
 func TestHashAuthorizeToken(t *testing.T) {
 	tts := []struct {
 		name     string
-		header   CredentialRequestHeader
+		request  CredentialRequest
 		expected string
 	}{
 		{
 			name: "test",
-			header: CredentialRequestHeader{
+			request: CredentialRequest{
 				Authorization: "DPoP yRPOM7mz7sPllePuy3oka7k1uJtdy1q97zjxaT4y11I=",
 			},
 			expected: "dHN_VHc7eNSICfPTvtw4gr_8XIH7g91jo8_Bq2bmAcc",
@@ -69,7 +69,7 @@ func TestHashAuthorizeToken(t *testing.T) {
 	}
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.header.HashAuthorizeToken()
+			got := tt.request.HashAuthorizeToken()
 			assert.Equal(t, tt.expected, got, "HashAuthorizeToken should return expected value")
 		})
 	}
@@ -78,14 +78,13 @@ func TestHashAuthorizeToken(t *testing.T) {
 func TestExtractJWK(t *testing.T) {
 	tts := []struct {
 		name string
-		have *Proof
+		have *Proofs
 		want *apiv1_issuer.Jwk
 	}{
 		{
 			name: "test",
-			have: &Proof{
-				ProofType: "jwt",
-				JWT:       mockProofJWT,
+			have: &Proofs{
+				JWT: []ProofJWTToken{mockProofJWT},
 			},
 			want: &apiv1_issuer.Jwk{
 				Crv:    "P-256",

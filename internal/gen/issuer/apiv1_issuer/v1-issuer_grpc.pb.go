@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	IssuerService_MakeSDJWT_FullMethodName = "/v1.issuer.IssuerService/MakeSDJWT"
+	IssuerService_MakeMDoc_FullMethodName  = "/v1.issuer.IssuerService/MakeMDoc"
 	IssuerService_JWKS_FullMethodName      = "/v1.issuer.IssuerService/JWKS"
 )
 
@@ -28,6 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IssuerServiceClient interface {
 	MakeSDJWT(ctx context.Context, in *MakeSDJWTRequest, opts ...grpc.CallOption) (*MakeSDJWTReply, error)
+	MakeMDoc(ctx context.Context, in *MakeMDocRequest, opts ...grpc.CallOption) (*MakeMDocReply, error)
 	JWKS(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*JwksReply, error)
 }
 
@@ -49,6 +51,16 @@ func (c *issuerServiceClient) MakeSDJWT(ctx context.Context, in *MakeSDJWTReques
 	return out, nil
 }
 
+func (c *issuerServiceClient) MakeMDoc(ctx context.Context, in *MakeMDocRequest, opts ...grpc.CallOption) (*MakeMDocReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MakeMDocReply)
+	err := c.cc.Invoke(ctx, IssuerService_MakeMDoc_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *issuerServiceClient) JWKS(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*JwksReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(JwksReply)
@@ -64,6 +76,7 @@ func (c *issuerServiceClient) JWKS(ctx context.Context, in *Empty, opts ...grpc.
 // for forward compatibility.
 type IssuerServiceServer interface {
 	MakeSDJWT(context.Context, *MakeSDJWTRequest) (*MakeSDJWTReply, error)
+	MakeMDoc(context.Context, *MakeMDocRequest) (*MakeMDocReply, error)
 	JWKS(context.Context, *Empty) (*JwksReply, error)
 	mustEmbedUnimplementedIssuerServiceServer()
 }
@@ -77,6 +90,9 @@ type UnimplementedIssuerServiceServer struct{}
 
 func (UnimplementedIssuerServiceServer) MakeSDJWT(context.Context, *MakeSDJWTRequest) (*MakeSDJWTReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method MakeSDJWT not implemented")
+}
+func (UnimplementedIssuerServiceServer) MakeMDoc(context.Context, *MakeMDocRequest) (*MakeMDocReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method MakeMDoc not implemented")
 }
 func (UnimplementedIssuerServiceServer) JWKS(context.Context, *Empty) (*JwksReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method JWKS not implemented")
@@ -120,6 +136,24 @@ func _IssuerService_MakeSDJWT_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IssuerService_MakeMDoc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MakeMDocRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IssuerServiceServer).MakeMDoc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IssuerService_MakeMDoc_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IssuerServiceServer).MakeMDoc(ctx, req.(*MakeMDocRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _IssuerService_JWKS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
@@ -148,6 +182,10 @@ var IssuerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakeSDJWT",
 			Handler:    _IssuerService_MakeSDJWT_Handler,
+		},
+		{
+			MethodName: "MakeMDoc",
+			Handler:    _IssuerService_MakeMDoc_Handler,
 		},
 		{
 			MethodName: "JWKS",

@@ -184,12 +184,10 @@ func TestOIDCCredential_InvalidDPoP(t *testing.T) {
 
 	ctx := context.Background()
 	req := &openid4vci.CredentialRequest{
-		Headers: &openid4vci.CredentialRequestHeader{
-			DPoP:          "invalid.jwt.token",
-			Authorization: "DPoP test-access-token",
-		},
-		Proof: &openid4vci.Proof{
-			ProofType: "jwt",
+		DPoP:          "invalid.jwt.token",
+		Authorization: "DPoP test-access-token",
+		Proofs: &openid4vci.Proofs{
+			JWT: []openid4vci.ProofJWTToken{"test.jwt.token"},
 		},
 	}
 
@@ -392,23 +390,19 @@ func TestOIDCCredential_SuccessfulIssuance(t *testing.T) {
 
 	// Build credential request matching the actual structure
 	req := &openid4vci.CredentialRequest{
-		Headers: &openid4vci.CredentialRequestHeader{
-			DPoP:          dpopJWT,
-			Authorization: "DPoP " + accessToken,
+		DPoP:          dpopJWT,
+		Authorization: "DPoP " + accessToken,
+		Proofs: &openid4vci.Proofs{
+			JWT: []openid4vci.ProofJWTToken{openid4vci.ProofJWTToken(proofJWT)},
 		},
-		Proof: &openid4vci.Proof{
-			ProofType: "jwt",
-			JWT:       proofJWT,
-		},
-		Format:               "vc+sd-jwt",
-		CredentialIdentifier: "pid",
+		CredentialConfigurationID: "vc+sd-jwt",
+		CredentialIdentifier:      "",
 	}
 
 	// Verify request structure
-	assert.NotNil(t, req.Headers)
-	assert.Equal(t, "DPoP "+accessToken, req.Headers.Authorization)
-	assert.NotNil(t, req.Proof)
-	assert.Equal(t, "jwt", req.Proof.ProofType)
+	assert.Equal(t, "DPoP "+accessToken, req.Authorization)
+	assert.NotNil(t, req.Proofs)
+	assert.Equal(t, openid4vci.ProofJWTToken(proofJWT), req.Proofs.JWT[0])
 
 	t.Log("✓ DPoP JWT created and validated")
 	t.Log("✓ Proof JWT created with embedded JWK")

@@ -2,10 +2,13 @@ package apiv1
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"time"
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/helpers"
+	"vc/pkg/mdoc"
 	"vc/pkg/sdjwtvc"
 )
 
@@ -124,6 +127,116 @@ func (c *Client) JWKS(ctx context.Context, in *apiv1_issuer.Empty) (*apiv1_issue
 	reply := &apiv1_issuer.JwksReply{
 		Issuer: c.cfg.Issuer.JWTAttribute.Issuer,
 		Jwks:   keys,
+	}
+
+	return reply, nil
+}
+
+// CreateMDocRequest is the request for creating an mDL credential
+type CreateMDocRequest struct {
+	Scope           string `json:"scope" validate:"required"`
+	DocType         string `json:"doc_type" validate:"required"`
+	DocumentData    []byte `json:"document_data" validate:"required"`
+	DevicePublicKey []byte `json:"device_public_key" validate:"required"`
+	DeviceKeyFormat string `json:"device_key_format"` // "cose", "jwk", or "x509"
+}
+
+// CreateMDocReply is the reply for mDL credential creation
+type CreateMDocReply struct {
+	MDoc               []byte `json:"mdoc"`
+	StatusListSection  int64  `json:"status_list_section"`
+	StatusListIndex    int64  `json:"status_list_index"`
+	ValidFrom          string `json:"valid_from"`
+	ValidUntil         string `json:"valid_until"`
+}
+
+// MakeMDoc creates an mDL credential per ISO 18013-5
+func (c *Client) MakeMDoc(ctx context.Context, req *CreateMDocRequest) (*CreateMDocReply, error) {
+	ctx, span := c.tracer.Start(ctx, "apiv1:MakeMDoc")
+	defer span.End()
+
+	c.log.Debug("MakeMDoc", "scope", req.Scope, "doc_type", req.DocType)
+
+	if err := helpers.Check(ctx, c.cfg, req, c.log); err != nil {
+		c.log.Debug("Validation", "err", err)
+		return nil, err
+	}
+
+	// Get credential constructor from config based on scope
+	credentialConstructor := c.cfg.GetCredentialConstructor(req.Scope)
+	if credentialConstructor == nil {
+		return nil, fmt.Errorf("unsupported scope: %s", req.Scope)
+	}
+
+	// Check if mdoc issuer is initialized
+	if c.mdocIssuer == nil {
+		return nil, fmt.Errorf("mdoc issuer not configured")
+	}
+
+	// Parse device public key based on format
+	keyFormat := req.DeviceKeyFormat
+	if keyFormat == "" {
+		keyFormat = "cose" // Default to COSE format
+	}
+
+	deviceKey, err := mdoc.ParseDeviceKey(req.DevicePublicKey, keyFormat)
+	if err != nil {
+		c.log.Error(err, "failed to parse device public key", "format", keyFormat)
+		return nil, fmt.Errorf("failed to parse device public key: %w", err)
+	}
+
+	// Parse document data into MDoc structure
+	var mdocData mdoc.MDoc
+	if err := json.Unmarshal(req.DocumentData, &mdocData); err != nil {
+		c.log.Error(err, "failed to parse document data")
+		return nil, fmt.Errorf("failed to parse document data: %w", err)
+	}
+
+	// Allocate status list entry for revocation support (if registry is configured)
+	var statusSection, statusIndex int64
+	if c.registryClient != nil {
+		grpcReply, err := c.registryClient.TokenStatusListAddStatus(ctx, &apiv1_registry.TokenStatusListAddStatusRequest{
+			Status: 0, // VALID status for new credential
+		})
+		if err != nil {
+			c.log.Info("failed to allocate status list entry, issuing without revocation support", "error", err)
+		} else {
+			statusSection = grpcReply.GetSection()
+			statusIndex = grpcReply.GetIndex()
+			c.log.Debug("status list entry allocated for mdoc", "section", statusSection, "index", statusIndex)
+		}
+	}
+
+	// Issue the mDL
+	issuanceReq := &mdoc.IssuanceRequest{
+		DevicePublicKey: deviceKey,
+		MDoc:            &mdocData,
+	}
+
+	issued, err := c.mdocIssuer.Issue(issuanceReq)
+	if err != nil {
+		c.log.Error(err, "failed to issue mdoc")
+		return nil, fmt.Errorf("failed to issue mdoc: %w", err)
+	}
+
+	// Encode the document to CBOR
+	encoder, err := mdoc.NewCBOREncoder()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create CBOR encoder: %w", err)
+	}
+
+	mdocBytes, err := encoder.Marshal(issued.Document)
+	if err != nil {
+		c.log.Error(err, "failed to encode mdoc")
+		return nil, fmt.Errorf("failed to encode mdoc: %w", err)
+	}
+
+	reply := &CreateMDocReply{
+		MDoc:              mdocBytes,
+		StatusListSection: statusSection,
+		StatusListIndex:   statusIndex,
+		ValidFrom:         issued.ValidFrom.Format(time.RFC3339),
+		ValidUntil:        issued.ValidUntil.Format(time.RFC3339),
 	}
 
 	return reply, nil

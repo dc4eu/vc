@@ -2,13 +2,10 @@ package openid4vci
 
 //"client_id=1003&grant_type=authorization_code&code=b4af17ce-1c56-4546-9118-d60f6b301e44&code_verifier=vXshCcXYcceHZWukHCOVTN2WhXTJujgblBuokp8ofUw&redirect_uri=https%3A%2F%2Fdev.wallet.sunet.se"}
 
-type TokenRequestHeader struct {
-	DPOP string `header:"dpop" validate:"required"`
-}
-
 // TokenRequest https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-13.html#name-token-request
 type TokenRequest struct {
-	Header *TokenRequestHeader
+	// Header field
+	DPOP string `header:"dpop" validate:"required"`
 
 	// Pre-Authorized Code Flow
 	// PreAuthorizedCode The code representing the authorization to obtain Credentials of a certain type. This parameter MUST be present if the grant_type is urn:ietf:params:oauth:grant-type:pre-authorized_code.

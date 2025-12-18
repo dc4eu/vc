@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"vc/internal/gen/issuer/apiv1_issuer"
@@ -12,18 +11,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-//{"body": "{\"format\":\"vc+sd-jwt\",\
-//"proof\":{\"proof_type\":\"jwt\",
-// \"jwt\":\"eyJhbGciOiJFUzI1NiIsInR5cCI6Im9wZW5pZDR2Y2ktcHJvb2Yrand0IiwiandrIjp7ImNydiI6IlAtMjU2IiwiZXh0Ijp0cnVlLCJrZXlfb3BzIjpbInZlcmlmeSJdLCJrdHkiOiJFQyIsIngiOiJLYURFejhybkt3RGVHeXB6RlNwclRxX3BLZjNLLXFZdzU2dW4xSjcyYkZRIiwieSI6IkFNV0d2Umo3QU9Zc3dGNU5BSU55Rnk3OUdUVjJOR1ktcG5PM0JKZHpwMDAifX0.eyJub25jZSI6IiIsImF1ZCI6Imh0dHBzOi8vdmMtaW50ZXJvcC0zLnN1bmV0LnNlIiwiaXNzIjoiMTAwMyIsImlhdCI6MTc0ODUzNTQ3OH0.hlZrNbnzD8eR7Ulmp6qv4A4Ev-GLvhUgZ4P3ZURSd1C7OVFhhzgiPoAW41TYMcgFPuuwNsftebBUEncC4mWcKA\"},\
-//"vct\":\"DiplomaCredential\"}"}
-
-type CredentialRequestHeader struct {
-	DPoP          string `header:"dpop" validate:"required"`
-	Authorization string `header:"Authorization" validate:"required"`
-}
-
 // HashAuthorizeToken hashes the Authorization header using SHA-256 and encodes it in Base64 URL format.
-func (c *CredentialRequestHeader) HashAuthorizeToken() string {
+func (c *CredentialRequest) HashAuthorizeToken() string {
 	token := strings.TrimPrefix(c.Authorization, "DPoP ")
 	fmt.Println("Token: ", token)
 
@@ -37,27 +26,40 @@ func (c *CredentialRequestHeader) HashAuthorizeToken() string {
 
 // CredentialRequest https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
 type CredentialRequest struct {
-	Headers *CredentialRequestHeader
+	// Header fields
+	DPoP          string `header:"dpop" validate:"required"`
+	Authorization string `header:"Authorization" validate:"required"`
 
-	// Format REQUIRED when the credential_identifiers parameter was not returned from the Token Response. It MUST NOT be used otherwise. It is a String that determines the format of the Credential to be issued, which may determine the type and any other information related to the Credential to be issued. Credential Format Profiles consist of the Credential format specific parameters that are defined in Appendix A. When this parameter is used, the credential_identifier Credential Request parameter MUST NOT be present.
-	Format string `json:"format"`
+	// CredentialIdentifier REQUIRED when an Authorization Details of type openid_credential was returned
+	// from the Token Response. It MUST NOT be used otherwise. A string that identifies a Credential Dataset
+	// that is requested for issuance. When this parameter is used, the credential_configuration_id MUST NOT be present.
+	CredentialIdentifier string `json:"credential_identifier,omitempty" validate:"required_without=CredentialConfigurationID,excluded_with=CredentialConfigurationID"`
 
-	// Proof OPTIONAL. Object containing the proof of possession of the cryptographic key material the issued Credential would be bound to. The proof object is REQUIRED if the proof_types_supported parameter is non-empty and present in the credential_configurations_supported parameter of the Issuer metadata for the requested Credential. The proof object MUST contain the following:
-	Proof *Proof `json:"proof"`
+	// CredentialConfigurationID REQUIRED if a credential_identifiers parameter was not returned from
+	// the Token Response as part of the authorization_details parameter. It MUST NOT be used otherwise.
+	// String that uniquely identifies one of the keys in the name/value pairs stored in the
+	// credential_configurations_supported Credential Issuer metadata. When this parameter is used,
+	// the credential_identifier MUST NOT be present.
+	CredentialConfigurationID string `json:"credential_configuration_id,omitempty" validate:"required_without=CredentialIdentifier,excluded_with=CredentialIdentifier"`
 
-	// REQUIRED when credential_identifiers parameter was returned from the Token Response. It MUST NOT be used otherwise. It is a String that identifies a Credential that is being requested to be issued. When this parameter is used, the format parameter and any other Credential format specific parameters such as those defined in Appendix A MUST NOT be present.
-	CredentialIdentifier string `json:"credential_identifier"`
+	// Proofs OPTIONAL. Object providing one or more proof of possessions of the cryptographic key material
+	// to which the issued Credential instances will be bound to. The proofs parameter contains exactly one
+	// parameter named as the proof type in Appendix F, the value set for this parameter is a non-empty array
+	// containing parameters as defined by the corresponding proof type.
+	Proofs *Proofs `json:"proofs,omitempty" validate:"omitempty"`
 
-	// CredentialIdentifier REQUIRED when credential_identifiers parameter was returned from the Token Response. It MUST NOT be used otherwise. It is a String that identifies a Credential that is being requested to be issued. When this parameter is used, the format parameter and any other Credential format specific parameters such as those defined in Appendix A MUST NOT be present.
-	CredentialResponseEncryption *CredentialResponseEncryption `json:"credential_response_encryption"`
+	// Proof OPTIONAL. Single proof object for non-batch requests.
+	// Deprecated: Use Proofs instead. This field is kept for backward compatibility with older wallets.
+	Proof *Proof `json:"proof,omitempty" validate:"omitempty"`
 
-	//VCT string `json:"vct" validate:"required"`
+	// CredentialResponseEncryption OPTIONAL. Object containing information for encrypting the Credential Response.
+	// If this request element is not present, the corresponding credential response returned is not encrypted.
+	CredentialResponseEncryption *CredentialResponseEncryption `json:"credential_response_encryption,omitempty" validate:"omitempty"`
 }
 
-// IsAccessTokenDPoP checks if the Authorize header belong to DPoP proof
-func (c *CredentialRequestHeader) IsAccessTokenDPoP() bool {
-
-	return false
+// IsAccessTokenDPoP checks if the Authorization header belongs to DPoP proof
+func (c *CredentialRequest) IsAccessTokenDPoP() bool {
+	return strings.HasPrefix(c.Authorization, "DPoP ")
 }
 
 // Validate validates the CredentialRequest based claims in TokenResponse
@@ -103,62 +105,86 @@ type JWK struct {
 	KTY string `json:"kty" validate:"required"`
 	X   string `json:"x" validate:"required"`
 	Y   string `json:"y" validate:"required"`
-	D   string `json:"d" validate:"required"`
 }
 
-// Proof https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
-// Proof types defined in Appendix F of the OpenID4VCI 1.0 specification.
+// Proof represents a single proof object (used in non-batch requests)
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-proof-types
 type Proof struct {
-	// ProofType REQUIRED. String denoting the key proof type. The value of this parameter determines other parameters in the key proof object and its respective processing rules.
-	// Valid values: jwt, di_vp, attestation
-	ProofType string `json:"proof_type" validate:"required,oneof=jwt di_vp attestation"`
+	// ProofType REQUIRED. String denoting the key proof type.
+	ProofType string `json:"proof_type" validate:"required"`
 
-	// JWT contains the JWT when proof_type is "jwt"
+	// JWT The JWT proof, when proof_type is "jwt"
 	JWT string `json:"jwt,omitempty"`
-	// DIVP contains the Data Integrity Verifiable Presentation when proof_type is "di_vp"
-	DIVP any `json:"di_vp,omitempty"`
-	// Attestation contains the key attestation JWT when proof_type is "attestation"
-	Attestation string `json:"attestation,omitempty"`
+
+	// CWT The CWT proof, when proof_type is "cwt"
+	CWT string `json:"cwt,omitempty"`
+
+	// LDPVp The Linked Data Proof VP, when proof_type is "ldp_vp"
+	LDPVp any `json:"ldp_vp,omitempty"`
 }
 
+// ExtractJWK extracts the holder's public key from the proof
 func (p *Proof) ExtractJWK() (*apiv1_issuer.Jwk, error) {
-	if p.JWT == "" {
-		return nil, fmt.Errorf("JWT is empty")
+	switch p.ProofType {
+	case "jwt":
+		if p.JWT == "" {
+			return nil, fmt.Errorf("jwt proof is empty")
+		}
+		token := ProofJWTToken(p.JWT)
+		return token.ExtractJWK()
+	default:
+		return nil, fmt.Errorf("unsupported proof type: %s", p.ProofType)
 	}
-
-	headerBase64 := strings.Split(p.JWT, ".")[0]
-
-	headerByte, err := base64.RawStdEncoding.DecodeString(headerBase64)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode JWT header: %w", err)
-	}
-
-	headerMap := map[string]any{}
-	if err := json.Unmarshal(headerByte, &headerMap); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JWT header: %w", err)
-	}
-
-	jwkMap, ok := headerMap["jwk"]
-	if !ok {
-		return nil, fmt.Errorf("jwk not found in JWT header")
-	}
-
-	jwkByte, err := json.Marshal(jwkMap)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal JWK: %w", err)
-	}
-
-	jwk := &apiv1_issuer.Jwk{}
-	if err := json.Unmarshal(jwkByte, jwk); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JWK: %w", err)
-	}
-
-	return jwk, nil
 }
 
-// CredentialResponseEncryption holds the JWK for encryption
+// Proofs https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
+// Contains arrays of proofs by type for batch credential requests.
+// Only one proof type should be used per request.
+type Proofs struct {
+	// JWT contains an array of JWTs as defined in Appendix F.1
+	JWT []ProofJWTToken `json:"jwt,omitempty"`
+
+	// DIVP contains an array of W3C Verifiable Presentations
+	// signed using Data Integrity Proof as defined in Appendix F.2
+	DIVP []ProofDIVP `json:"di_vp,omitempty"`
+
+	// Attestation contains a single JWT representing a key attestation
+	// as defined in Appendix D.1
+	Attestation ProofAttestation `json:"attestation,omitempty"`
+}
+
+// ExtractJWK extracts the holder's public key (JWK) from the proofs.
+// It automatically detects which proof type is present and extracts accordingly:
+// - jwt: from the jwk header of the first JWT
+// - di_vp: from the verificationMethod of the first proof
+// - attestation: from the attested_keys claim
+func (p *Proofs) ExtractJWK() (*apiv1_issuer.Jwk, error) {
+	// Check which proof type is present and extract accordingly
+	if len(p.JWT) > 0 {
+		return p.JWT[0].ExtractJWK()
+	}
+
+	if len(p.DIVP) > 0 {
+		return p.DIVP[0].ExtractJWK()
+	}
+
+	if p.Attestation != "" {
+		return p.Attestation.ExtractJWK()
+	}
+
+	return nil, fmt.Errorf("no proofs found")
+}
+
+// CredentialResponseEncryption contains information for encrypting the Credential Response.
+// https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
 type CredentialResponseEncryption struct {
-	JWK JWK    `json:"jwk" validate:"required"`
-	Alg string `json:"alg" validate:"required"`
+	// JWK REQUIRED. Object containing a single public key as a JWK used for encrypting the Credential Response.
+	JWK JWK `json:"jwk" validate:"required"`
+
+	// Enc REQUIRED. JWE enc algorithm for encrypting Credential Responses.
 	Enc string `json:"enc" validate:"required"`
+
+	// Zip OPTIONAL. JWE zip algorithm for compressing Credential Responses prior to encryption.
+	// If absent then compression MUST not be used.
+	Zip string `json:"zip,omitempty"`
 }

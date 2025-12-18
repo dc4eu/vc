@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/helpers"
+	"vc/pkg/mdoc"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
@@ -47,30 +49,19 @@ func (c *Client) OIDCNonce(ctx context.Context) (*openid4vci.NonceResponse, erro
 //	@Param			req	body		openid4vci.CredentialRequest	true	" "
 //	@Router			/credential [post]
 func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
-	c.log.Debug("credential", "req", req.Proof.ProofType, "format", req.Format)
-
-	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.Headers.DPoP)
+	dpop, err := oauth2.ValidateAndParseDPoPJWT(req.DPoP)
 	if err != nil {
 		c.log.Error(err, "failed to validate DPoP JWT")
 		return nil, err
 	}
 
-	jti := dpop.JTI
-
-	sig := strings.Split(req.Headers.DPoP, ".")[2]
-	c.log.Debug("DPoP JWT", "jti", jti, "sig", sig, "dpop JWK", sig)
-	c.log.Debug("Credential request header", "authorization", req.Headers.Authorization, "dpop", req.Headers.DPoP)
-
-	requestATH := req.Headers.HashAuthorizeToken()
+	requestATH := req.HashAuthorizeToken()
 
 	if !dpop.IsAccessTokenDPoP(requestATH) {
 		return nil, errors.New("invalid DPoP token")
 	}
 
-	// "DPoP H4fFxp2hDZ-KY-_am35sXBJStQn9plmV_UC_bk20heA="
-	accessToken := strings.TrimPrefix(req.Headers.Authorization, "DPoP ")
-
-	c.log.Debug("DPoP token is valid", "dpop", dpop, "requestATH", requestATH, "accessToken", accessToken)
+	accessToken := strings.TrimPrefix(req.Authorization, "DPoP ")
 
 	authContext, err := c.authContextStore.GetWithAccessToken(ctx, accessToken)
 	if err != nil {
@@ -78,14 +69,16 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, err
 	}
 
-	c.log.Debug("credential", "authContext", authContext)
+	if len(authContext.Scope) == 0 {
+		c.log.Error(nil, "no scope found in auth context")
+		return nil, errors.New("no scope found in auth context")
+	}
 
 	document := &model.CompleteDocument{}
 
 	// TODO(masv): make this flexible, use config.yaml credential constructor
 	switch authContext.Scope[0] {
 	case "ehic", "pda1", "diploma":
-		c.log.Debug("ehic/pda1/diploma scope detected")
 		docs := c.documentCache.Get(authContext.SessionID).Value()
 		if docs == nil {
 			c.log.Error(nil, "no documents found in cache for session", "session_id", authContext.SessionID)
@@ -97,7 +90,6 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		}
 
 	case "pid_1_5":
-		c.log.Debug("pid scope detected")
 		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
@@ -106,12 +98,10 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			Identity: authContext.Identity,
 		})
 		if err != nil {
-			c.log.Debug("failed to get document", "error", err)
 			return nil, err
 		}
 
 	case "pid_1_8":
-		c.log.Debug("pid scope detected")
 		document, err = c.datastoreStore.GetDocumentWithIdentity(ctx, &db.GetDocumentQuery{
 			Meta: &model.MetaData{
 				AuthenticSource: authContext.AuthenticSource,
@@ -120,32 +110,95 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			Identity: authContext.Identity,
 		})
 		if err != nil {
-			c.log.Debug("failed to get document", "error", err)
 			return nil, err
 		}
 
 	default:
 		c.log.Error(nil, "unsupported scope", "scope", authContext.Scope)
+		return nil, errors.New("unsupported scope")
 	}
 
 	documentData, err := json.Marshal(document.DocumentData)
 	if err != nil {
-		c.log.Debug("failed to marshal document data", "error", err)
 		return nil, err
 	}
-	c.log.Debug("Here 0", "documentData", string(documentData))
 
-	jwk, err := req.Proof.ExtractJWK()
+	// Extract JWK from proof (singular) or proofs (plural/batch)
+	var jwk *apiv1_issuer.Jwk
+	if req.Proof != nil {
+		jwk, err = req.Proof.ExtractJWK()
+		if err != nil {
+			c.log.Error(err, "failed to extract JWK from proof")
+			return nil, err
+		}
+	} else if req.Proofs != nil {
+		jwk, err = req.Proofs.ExtractJWK()
+		if err != nil {
+			c.log.Error(err, "failed to extract JWK from proofs")
+			return nil, err
+		}
+	} else {
+		return nil, errors.New("no proof found in credential request")
+	}
+
+	// Determine credential format from credential_configuration_id or credential_identifier
+	format, err := c.resolveCredentialFormat(req)
 	if err != nil {
-		c.log.Error(err, "failed to extract JWK from proof")
+		c.log.Error(err, "failed to resolve credential format")
 		return nil, err
 	}
 
-	c.log.Debug("Here 1", "jwk", jwk)
+	// Branch based on requested credential format
+	switch format {
+	case "mso_mdoc":
+		return c.issueMDoc(ctx, authContext.Scope[0], documentData, jwk, document)
 
-	// Use the pre-initialized gRPC client
+	case "vc+sd-jwt", "dc+sd-jwt":
+		return c.issueSDJWT(ctx, authContext.Scope[0], documentData, jwk, document)
+
+	default:
+		c.log.Error(nil, "unsupported or missing credential format", "format", format)
+		return nil, errors.New("unsupported or missing credential format: " + format)
+	}
+}
+
+// resolveCredentialFormat determines the credential format from the request.
+// According to OpenID4VCI spec, the format is derived from the credential_configuration_id
+// which maps to a credential configuration in the issuer metadata.
+func (c *Client) resolveCredentialFormat(req *openid4vci.CredentialRequest) (string, error) {
+	// Use credential_configuration_id to look up the format from issuer metadata
+	if req.CredentialConfigurationID != "" {
+		if c.issuerMetadata != nil && c.issuerMetadata.CredentialConfigurationsSupported != nil {
+			if config, ok := c.issuerMetadata.CredentialConfigurationsSupported[req.CredentialConfigurationID]; ok {
+				return config.Format, nil
+			}
+		}
+		return "", errors.New("unknown credential_configuration_id: " + req.CredentialConfigurationID)
+	}
+
+	// Use credential_identifier to look up the format
+	// The credential_identifier maps to a credential configuration via authorization_details from the token response
+	// For now, we'll attempt to find a matching configuration by identifier
+	if req.CredentialIdentifier != "" {
+		if c.issuerMetadata != nil && c.issuerMetadata.CredentialConfigurationsSupported != nil {
+			// Try to match by credential identifier (may be same as configuration ID in some cases)
+			if config, ok := c.issuerMetadata.CredentialConfigurationsSupported[req.CredentialIdentifier]; ok {
+				return config.Format, nil
+			}
+			// If not found directly, we need the authorization context to resolve credential_identifier
+			// For now, default to dc+sd-jwt as a fallback
+			return "dc+sd-jwt", nil
+		}
+		return "", errors.New("unknown credential_identifier: " + req.CredentialIdentifier)
+	}
+
+	return "", errors.New("either credential_configuration_id or credential_identifier must be provided")
+}
+
+// issueSDJWT issues an SD-JWT credential
+func (c *Client) issueSDJWT(ctx context.Context, scope string, documentData []byte, jwk *apiv1_issuer.Jwk, document *model.CompleteDocument) (*openid4vci.CredentialResponse, error) {
 	reply, err := c.issuerClient.MakeSDJWT(ctx, &apiv1_issuer.MakeSDJWTRequest{
-		Scope:        authContext.Scope[0],
+		Scope:        scope,
 		DocumentData: documentData,
 		Jwk:          jwk,
 	})
@@ -154,14 +207,9 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 		return nil, err
 	}
 
-	c.log.Debug("MakeSDJWT reply", "reply", reply)
-
 	if reply == nil {
-		c.log.Debug("MakeSDJWT reply is nil")
 		return nil, errors.New("MakeSDJWT reply is nil")
 	}
-
-	c.log.Debug("Here 2")
 
 	// Save credential subject info to registry for status management
 	if len(document.Identities) > 0 {
@@ -174,34 +222,104 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 			Index:       reply.TokenStatusListIndex,
 		})
 		if err != nil {
-			// Log error but don't fail the request - credential was already created
 			c.log.Error(err, "failed to save credential subject to registry")
-		} else {
-			c.log.Debug("saved credential subject", "given_name", identity.GivenName, "family_name", identity.FamilyName)
 		}
 	}
 
 	response := &openid4vci.CredentialResponse{}
 	switch len(reply.Credentials) {
 	case 0:
-		c.log.Debug("No credentials returned from issuer")
 		return nil, helpers.ErrNoDocumentFound
 	case 1:
-		credential := reply.Credentials[0].Credential
 		response.Credentials = []openid4vci.Credential{
 			{
-				Credential: credential,
+				Credential: reply.Credentials[0].Credential,
 			},
 		}
-		c.log.Debug("Single credential returned from issuer")
 		return response, nil
 	default:
-		c.log.Debug("Multiple credentials returned from issuer")
-		//response.Credentials = reply.Credentials
 		return nil, errors.New("multiple credentials returned from issuer, not supported")
 	}
+}
 
-	//return response, nil
+// issueMDoc issues an mDL/mDoc credential (ISO 18013-5)
+func (c *Client) issueMDoc(ctx context.Context, scope string, documentData []byte, jwk *apiv1_issuer.Jwk, document *model.CompleteDocument) (*openid4vci.CredentialResponse, error) {
+	// Convert JWK to COSE key bytes for mDoc
+	deviceKeyBytes, err := convertJWKToCOSEKey(jwk)
+	if err != nil {
+		c.log.Error(err, "failed to convert JWK to COSE key")
+		return nil, err
+	}
+
+	reply, err := c.issuerClient.MakeMDoc(ctx, &apiv1_issuer.MakeMDocRequest{
+		Scope:           scope,
+		DocType:         mdoc.DocType, // org.iso.18013.5.1.mDL
+		DocumentData:    documentData,
+		DevicePublicKey: deviceKeyBytes,
+		DeviceKeyFormat: "cose",
+	})
+	if err != nil {
+		c.log.Error(err, "failed to call MakeMDoc")
+		return nil, err
+	}
+
+	if reply == nil {
+		return nil, errors.New("MakeMDoc reply is nil")
+	}
+
+	// Save credential subject info to registry for status management
+	if len(document.Identities) > 0 && reply.StatusListSection > 0 {
+		identity := document.Identities[0]
+		_, err = c.registryClient.SaveCredentialSubject(ctx, &apiv1_registry.SaveCredentialSubjectRequest{
+			FirstName:   identity.GivenName,
+			LastName:    identity.FamilyName,
+			DateOfBirth: identity.BirthDate,
+			Section:     reply.StatusListSection,
+			Index:       reply.StatusListIndex,
+		})
+		if err != nil {
+			c.log.Error(err, "failed to save credential subject to registry")
+		}
+	}
+
+	// For mDoc, the credential is CBOR bytes - encode as base64 for JSON response
+	mdocBase64 := base64.StdEncoding.EncodeToString(reply.Mdoc)
+
+	response := &openid4vci.CredentialResponse{
+		Credentials: []openid4vci.Credential{
+			{
+				Credential: mdocBase64,
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// convertJWKToCOSEKey converts a JWK to CBOR-encoded COSE_Key bytes
+func convertJWKToCOSEKey(jwk *apiv1_issuer.Jwk) ([]byte, error) {
+	if jwk == nil {
+		return nil, errors.New("JWK is nil")
+	}
+
+	// Decode the X and Y coordinates from base64url
+	xBytes, err := base64.RawURLEncoding.DecodeString(jwk.X)
+	if err != nil {
+		return nil, errors.New("failed to decode JWK X coordinate")
+	}
+
+	yBytes, err := base64.RawURLEncoding.DecodeString(jwk.Y)
+	if err != nil {
+		return nil, errors.New("failed to decode JWK Y coordinate")
+	}
+
+	// Create COSE_Key from JWK
+	coseKey, err := mdoc.NewCOSEKeyFromCoordinates(jwk.Kty, jwk.Crv, xBytes, yBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return coseKey.Bytes()
 }
 
 // OIDCDeferredCredential https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-endpoin

@@ -29,13 +29,20 @@ func NewClaimsExtractor() *ClaimsExtractor {
 	}
 }
 
-// ExtractClaimsFromVPToken extracts claims from a VP token in SD-JWT format
-// Returns a map of disclosed claims from the credential
+// ExtractClaimsFromVPToken extracts claims from a VP token.
+// Automatically detects the format (SD-JWT or mdoc) and extracts claims accordingly.
+// Returns a map of disclosed claims from the credential.
 func (ce *ClaimsExtractor) ExtractClaimsFromVPToken(ctx context.Context, vpToken string) (map[string]any, error) {
 	if vpToken == "" {
 		return nil, fmt.Errorf("VP token is empty")
 	}
 
+	// Check if this is an mdoc format token
+	if IsMDocFormat(vpToken) {
+		return ExtractMDocClaims(vpToken)
+	}
+
+	// Default to SD-JWT format
 	// Use sdjwtvc.Token.Parse() to extract disclosed claims
 	parsed, err := sdjwtvc.Token(vpToken).Parse()
 	if err != nil {

@@ -14,6 +14,7 @@ import (
 	"vc/pkg/grpchelpers"
 	"vc/pkg/helpers"
 	"vc/pkg/logger"
+	"vc/pkg/mdoc"
 	"vc/pkg/model"
 	"vc/pkg/signing"
 	"vc/pkg/trace"
@@ -41,6 +42,7 @@ type Client struct {
 	kid            string
 	registryConn   *grpc.ClientConn
 	registryClient apiv1_registry.RegistryServiceClient
+	mdocIssuer     *mdoc.Issuer // mDL issuer for ISO 18013-5 credentials
 }
 
 // New creates a new instance of the public api
@@ -69,6 +71,12 @@ func New(ctx context.Context, auditLog *auditlog.Service, cfg *model.Cfg, tracer
 		}
 
 		credentialInfo.Attributes = credentialInfo.VCTM.Attributes()
+	}
+
+	// Initialize mDL issuer if certificate chain is configured
+	if err := c.initMDocIssuer(ctx); err != nil {
+		c.log.Info("mDL issuer not initialized", "error", err)
+		// Non-fatal: mDL issuance will be unavailable but SD-JWT will work
 	}
 
 	c.log.Info("Started")
@@ -214,6 +222,80 @@ func (c *Client) initRegistryClient(ctx context.Context) error {
 
 	c.log.Info("Registry client initialized", "addr", cfg.Addr, "tls_enabled", cfg.TLS)
 	return nil
+}
+
+// initMDocIssuer initializes the mDL issuer for ISO 18013-5 credentials
+func (c *Client) initMDocIssuer(ctx context.Context) error {
+	// Check if mDL configuration is available
+	if c.cfg.Issuer.MDoc == nil {
+		return fmt.Errorf("mDL configuration not found")
+	}
+
+	mdocCfg := c.cfg.Issuer.MDoc
+
+	// Read and parse the certificate chain
+	if mdocCfg.CertificateChainPath == "" {
+		return fmt.Errorf("certificate chain path not configured for mDL")
+	}
+
+	certChain, err := c.loadCertificateChain(mdocCfg.CertificateChainPath)
+	if err != nil {
+		return fmt.Errorf("failed to load certificate chain: %w", err)
+	}
+
+	// Get the signing key - reuse the existing private key if it's ECDSA
+	var signerKey *ecdsa.PrivateKey
+	switch key := c.privateKey.(type) {
+	case *ecdsa.PrivateKey:
+		signerKey = key
+	default:
+		return fmt.Errorf("mDL requires ECDSA signing key, got %T", c.privateKey)
+	}
+
+	// Create the mDL issuer
+	issuer, err := mdoc.NewIssuer(mdoc.IssuerConfig{
+		SignerKey:        signerKey,
+		CertificateChain: certChain,
+		DefaultValidity:  mdocCfg.DefaultValidity,
+		DigestAlgorithm:  mdoc.DigestAlgorithm(mdocCfg.DigestAlgorithm),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create mDL issuer: %w", err)
+	}
+
+	c.mdocIssuer = issuer
+	c.log.Info("mDL issuer initialized", "cert_chain_length", len(certChain))
+	return nil
+}
+
+// loadCertificateChain loads X.509 certificates from a PEM file
+func (c *Client) loadCertificateChain(path string) ([]*x509.Certificate, error) {
+	certPEM, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read certificate file: %w", err)
+	}
+
+	var certs []*x509.Certificate
+	for {
+		block, rest := pem.Decode(certPEM)
+		if block == nil {
+			break
+		}
+		if block.Type == "CERTIFICATE" {
+			cert, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse certificate: %w", err)
+			}
+			certs = append(certs, cert)
+		}
+		certPEM = rest
+	}
+
+	if len(certs) == 0 {
+		return nil, fmt.Errorf("no certificates found in file")
+	}
+
+	return certs, nil
 }
 
 // Close closes all client connections

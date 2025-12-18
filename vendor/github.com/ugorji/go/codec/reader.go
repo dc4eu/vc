@@ -202,12 +202,6 @@ func (z *ioDecReader) checkErr() {
 	halt.onerror(z.readErr())
 }
 
-func (z *ioDecReader) unexpectedEOF() {
-	z.checkErr()
-	// if no error, still halt with unexpected EOF
-	halt.error(io.ErrUnexpectedEOF)
-}
-
 func (z *ioDecReader) readOne() (b byte, err error) {
 	n, err := z.r.Read(z.b[:])
 	if n == 1 {
@@ -260,12 +254,13 @@ func (z *ioDecReader) fillbuf(bufsize uint) (numShift, numRead uint) {
 		numRead += uint(n)
 		z.wc += uint(n)
 		if err != nil {
+			// if os read dealine, and we have read something, return
 			z.err = err
 			if err == io.EOF {
-				z.done = true // leading to UnexpectedEOF if another Read is called
+				z.done = true
 			} else if errors.Is(err, os.ErrDeadlineExceeded) {
 				// os read deadline, but some bytes read: return (don't store err)
-				z.err = nil // allow for a retry next time fillbuf is called
+				z.err = nil
 			}
 			return
 		}
@@ -384,16 +379,14 @@ func (z *ioDecReader) readxb(n uint) (out []byte, useBuf bool) {
 
 	// -------- NOT BUFIO ------
 
-	var n3 int
-	var err error
 	useBuf = true
 	out = z.buf
 	r0 := uint(len(out))
 	r := r0
 	nn := int(n)
+	var n2 uint
 	for nn > 0 {
-		halt.onerror(err) // check error whenever there's more to read
-		n2 := r + decInferLen(int(nn), z.maxInitLen, 1)
+		n2 = r + decInferLen(int(nn), z.maxInitLen, 1)
 		if cap(out) < int(n2) {
 			out2 := z.blist.putGet(out, int(n2))[:n2] // make([]byte, len2+len3)
 			copy(out2, out)
@@ -401,12 +394,13 @@ func (z *ioDecReader) readxb(n uint) (out []byte, useBuf bool) {
 		} else {
 			out = out[:n2]
 		}
-		n3, err = z.r.Read(out[r:n2])
+		n3, err := z.r.Read(out[r:n2])
 		if n3 > 0 {
 			z.l = out[r+uint(n3)-1]
 			nn -= n3
 			r += uint(n3)
 		}
+		halt.onerror(err)
 	}
 	z.buf = out[:r0+n]
 	out = out[r0 : r0+n]
@@ -450,13 +444,10 @@ func (z *ioDecReader) skip(n uint) {
 		}
 	}
 
-	var r uint
-	var n3 int
-	var err error
+	var r, n2 uint
 	nn := int(n)
 	for nn > 0 {
-		halt.onerror(err)
-		n2 := uint(nn)
+		n2 = uint(nn)
 		if z.recording {
 			r = uint(len(out))
 			n2 = r + decInferLen(int(nn), z.maxInitLen, 1)
@@ -468,12 +459,13 @@ func (z *ioDecReader) skip(n uint) {
 				out = out[:n2]
 			}
 		}
-		n3, err = z.r.Read(out[r:n2])
+		n3, err := z.r.Read(out[r:n2])
 		if n3 > 0 {
 			z.l = out[r+uint(n3)-1]
 			z.n += uint(n3)
 			nn -= n3
 		}
+		halt.onerror(err)
 	}
 	if z.recording {
 		z.buf = out
@@ -551,12 +543,12 @@ func (z *ioDecReader) skipWhitespace() (tok byte) {
 	BUFIO:
 		if pos == z.wc {
 			if z.done {
-				z.unexpectedEOF()
+				halt.onerror(io.ErrUnexpectedEOF)
 			}
 			numshift, numread := z.fillbuf(0)
 			pos -= numshift
 			if numread == 0 {
-				z.unexpectedEOF()
+				halt.onerror(io.ErrUnexpectedEOF)
 			}
 		}
 		tok = z.buf[pos]
@@ -596,13 +588,13 @@ func (z *ioDecReader) readUntil(stop1, stop2 byte) (bs []byte, tok byte) {
 	BUFIO:
 		if pos == z.wc {
 			if z.done {
-				z.unexpectedEOF()
+				halt.onerror(io.ErrUnexpectedEOF)
 			}
 			numshift, numread := z.fillbuf(0)
 			start -= numshift
 			pos -= numshift
 			if numread == 0 {
-				z.unexpectedEOF()
+				halt.onerror(io.ErrUnexpectedEOF)
 			}
 		}
 		tok = z.buf[pos]

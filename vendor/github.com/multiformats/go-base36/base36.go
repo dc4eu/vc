@@ -1,5 +1,7 @@
 /*
+
 Package base36 provides a reasonably fast implementation of a binary base36 codec.
+
 */
 package base36
 
@@ -12,7 +14,7 @@ import (
 
 const UcAlphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const LcAlphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
-const maxDigitOrdinal = 'z'
+const maxDigitOrdinal = byte('z')
 const maxDigitValueB36 = 35
 
 var revAlphabet [maxDigitOrdinal + 1]byte
@@ -39,49 +41,58 @@ func EncodeToStringLc(b []byte) string { return encode(b, LcAlphabet) }
 
 func encode(inBuf []byte, al string) string {
 
-	bufsz := len(inBuf)
-	zcnt := 0
-	for zcnt < bufsz && inBuf[zcnt] == 0 {
+	// As a polar opposite to the base58 implementation, using a uint32 here is
+	// significantly slower
+	var carry uint64
+
+	var encIdx, valIdx, zcnt, high int
+
+	inSize := len(inBuf)
+	for zcnt < inSize && inBuf[zcnt] == 0 {
 		zcnt++
 	}
 
-	// It is crucial to make this as short as possible, especially for
-	// the usual case of CIDs.
-	bufsz = zcnt +
-		// This is an integer simplification of
-		// ceil(log(256)/log(36))
-		(bufsz-zcnt)*277/179 + 1
+	// Really this is log(256)/log(36) or 1.55, but integer math is easier
+	// Use 2 as a constant and just overallocate
+	encSize := (inSize - zcnt) * 2
 
-	// Note: pools *DO NOT* help, the overhead of zeroing
+	// Allocate one big buffer up front
+	// Note: pools *DO NOT* help, the overhead of zeroing the val-half (see below)
 	// kills any performance gain to be had
-	out := make([]byte, bufsz)
+	outBuf := make([]byte, (zcnt + encSize*2))
 
-	var idx, stopIdx int
-	var carry uint32
+	// use the second half for the temporary numeric buffer
+	val := outBuf[encSize+zcnt:]
 
-	stopIdx = bufsz - 1
+	high = encSize - 1
 	for _, b := range inBuf[zcnt:] {
-		idx = bufsz - 1
-		for carry = uint32(b); idx > stopIdx || carry != 0; idx-- {
-			carry += uint32((out[idx])) * 256
-			out[idx] = byte(carry % 36)
+		valIdx = encSize - 1
+		for carry = uint64(b); valIdx > high || carry != 0; valIdx-- {
+			carry += uint64((val[valIdx])) * 256
+			val[valIdx] = byte(carry % 36)
 			carry /= 36
 		}
-		stopIdx = idx
+		high = valIdx
 	}
 
-	// Determine the additional "zero-gap" in the buffer (aside from zcnt)
-	for stopIdx = zcnt; stopIdx < bufsz && out[stopIdx] == 0; stopIdx++ {
+	// Reset the value index to the first significant value position
+	for valIdx = 0; valIdx < encSize && val[valIdx] == 0; valIdx++ {
 	}
 
-	// Now encode the values with actual alphabet in-place
-	vBuf := out[stopIdx-zcnt:]
-	bufsz = len(vBuf)
-	for idx = 0; idx < bufsz; idx++ {
-		out[idx] = al[vBuf[idx]]
+	// Now write the known-length result to first half of buffer
+	encSize += zcnt - valIdx
+
+	for encIdx = 0; encIdx < zcnt; encIdx++ {
+		outBuf[encIdx] = '0'
 	}
 
-	return string(out[:bufsz])
+	for encIdx < encSize {
+		outBuf[encIdx] = al[val[valIdx]]
+		encIdx++
+		valIdx++
+	}
+
+	return string(outBuf[:encSize])
 }
 
 // DecodeString takes a base36 encoded string and returns a slice of the decoded
@@ -92,27 +103,30 @@ func DecodeString(s string) ([]byte, error) {
 		return nil, fmt.Errorf("can not decode zero-length string")
 	}
 
-	zcnt := 0
-	for zcnt < len(s) && s[zcnt] == '0' {
+	var zcnt int
+
+	for i := 0; i < len(s) && s[i] == '0'; i++ {
 		zcnt++
 	}
 
-	// the 32bit algo stretches the result up to 2 times
-	binu := make([]byte, 2*(((len(s))*179/277)+1)) // no more than 84 bytes when len(s) <= 64
-	outi := make([]uint32, (len(s)+3)/4)           // no more than 16 bytes when len(s) <= 64
+	var t, c uint64
+
+	outi := make([]uint32, (len(s)+3)/4)
+	binu := make([]byte, (len(s)+3)*3)
 
 	for _, r := range s {
-		if r > maxDigitOrdinal || revAlphabet[r] > maxDigitValueB36 {
+		if r > rune(maxDigitOrdinal) || revAlphabet[r] > maxDigitValueB36 {
 			return nil, fmt.Errorf("invalid base36 character (%q)", r)
 		}
 
-		c := uint64(revAlphabet[r])
+		c = uint64(revAlphabet[r])
 
 		for j := len(outi) - 1; j >= 0; j-- {
-			t := uint64(outi[j])*36 + c
+			t = uint64(outi[j])*36 + c
 			c = (t >> 32)
 			outi[j] = uint32(t & 0xFFFFFFFF)
 		}
+
 	}
 
 	mask := (uint(len(s)%4) * 8)
@@ -120,24 +134,20 @@ func DecodeString(s string) ([]byte, error) {
 		mask = 32
 	}
 	mask -= 8
-
-	outidx := 0
-	for j := 0; j < len(outi); j++ {
+	var j, cnt int
+	for j, cnt = 0, 0; j < len(outi); j++ {
 		for mask < 32 { // loop relies on uint overflow
-			binu[outidx] = byte(outi[j] >> mask)
+			binu[cnt] = byte(outi[j] >> mask)
 			mask -= 8
-			outidx++
+			cnt++
 		}
 		mask = 24
 	}
 
-	// find the most significant byte post-decode, if any
-	for msb := zcnt; msb < outidx; msb++ {
-		if binu[msb] > 0 {
-			return binu[msb-zcnt : outidx : outidx], nil
+	for n := zcnt; n < len(binu); n++ {
+		if binu[n] > 0 {
+			return binu[n-zcnt : cnt], nil
 		}
 	}
-
-	// it's all zeroes
-	return binu[:outidx:outidx], nil
+	return binu[:cnt], nil
 }

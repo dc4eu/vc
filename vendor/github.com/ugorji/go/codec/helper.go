@@ -1481,7 +1481,7 @@ type structFieldInfoPathNode struct {
 	structFieldInfoNode
 }
 
-// depth returns number of valid nodes in the hierarchy
+// depth returns number of valid nodes in the hierachy
 func (path *structFieldInfoPathNode) depth() (d int) {
 TOP:
 	if path != nil {

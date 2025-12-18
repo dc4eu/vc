@@ -13,8 +13,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/SUNET/go-trust/pkg/authzen"
-	"github.com/SUNET/go-trust/pkg/authzenclient"
+	"github.com/sirosfoundation/go-trust/pkg/authzen"
+	"github.com/sirosfoundation/go-trust/pkg/authzenclient"
 )
 
 func TestNewGoTrustResolver(t *testing.T) {

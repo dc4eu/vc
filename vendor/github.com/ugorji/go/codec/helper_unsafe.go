@@ -69,7 +69,7 @@ import (
 //   Here, type.IfaceIndir() --> true
 //   flagIndir is always true
 //
-// This knowledge is used across this file, e.g. in rv2i and rvRefPtr
+// This knowlege is used across this file, e.g. in rv2i and rvRefPtr
 
 const safeMode = false
 

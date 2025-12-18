@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/SUNET/go-trust/pkg/authzen"
-	"github.com/SUNET/go-trust/pkg/authzenclient"
+	"github.com/sirosfoundation/go-trust/pkg/authzen"
+	"github.com/sirosfoundation/go-trust/pkg/authzenclient"
 )
 
 // GoTrustResolver uses go-trust authzenclient for key resolution via AuthZEN protocol.

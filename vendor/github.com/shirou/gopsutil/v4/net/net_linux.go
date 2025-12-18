@@ -50,25 +50,26 @@ func IOCountersByFileWithContext(_ context.Context, pernic bool, filename string
 		return nil, err
 	}
 
+	parts := make([]string, 2)
+
 	statlen := len(lines) - 1
 
 	ret := make([]IOCountersStat, 0, statlen)
 
 	for _, line := range lines[2:] {
-		// Split interface name and stats data at the last ":"
 		separatorPos := strings.LastIndex(line, ":")
 		if separatorPos == -1 {
 			continue
 		}
-		interfacePart := line[0:separatorPos]
-		statsPart := line[separatorPos+1:]
+		parts[0] = line[0:separatorPos]
+		parts[1] = line[separatorPos+1:]
 
-		interfaceName := strings.TrimSpace(interfacePart)
+		interfaceName := strings.TrimSpace(parts[0])
 		if interfaceName == "" {
 			continue
 		}
 
-		fields := strings.Fields(strings.TrimSpace(statsPart))
+		fields := strings.Fields(strings.TrimSpace(parts[1]))
 		bytesRecv, err := strconv.ParseUint(fields[0], 10, 64)
 		if err != nil {
 			return ret, err
@@ -609,7 +610,7 @@ func getProcInodesAllWithContext(ctx context.Context, root string, maxConn int) 
 	return ret, nil
 }
 
-// decodeAddress decode address represents addr in proc/net/*
+// decodeAddress decode addresse represents addr in proc/net/*
 // ex:
 // "0500000A:0016" -> "10.0.0.5", 22
 // "0085002452100113070057A13F025401:0035" -> "2400:8500:1301:1052:a157:7:154:23f", 53

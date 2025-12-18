@@ -11,7 +11,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/SUNET/go-trust/pkg/authzen"
+	"github.com/sirosfoundation/go-trust/pkg/authzen"
 )
 
 func TestNewGoTrustEvaluator(t *testing.T) {

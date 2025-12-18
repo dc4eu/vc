@@ -12,10 +12,9 @@ const (
 	oneMinusAlpha = 1 - rttAlpha
 	rttBeta       = 0.25
 	oneMinusBeta  = 1 - rttBeta
+	// The default RTT used before an RTT sample is taken.
+	defaultInitialRTT = 100 * time.Millisecond
 )
-
-// The default RTT used before an RTT sample is taken
-const DefaultInitialRTT = 100 * time.Millisecond
 
 // RTTStats provides round-trip statistics
 type RTTStats struct {
@@ -27,14 +26,6 @@ type RTTStats struct {
 	meanDeviation atomic.Int64 // nanoseconds
 
 	maxAckDelay atomic.Int64 // nanoseconds
-}
-
-func NewRTTStats() *RTTStats {
-	var rttStats RTTStats
-	rttStats.minRTT.Store(DefaultInitialRTT.Nanoseconds())
-	rttStats.latestRTT.Store(DefaultInitialRTT.Nanoseconds())
-	rttStats.smoothedRTT.Store(DefaultInitialRTT.Nanoseconds())
-	return &rttStats
 }
 
 // MinRTT Returns the minRTT for the entire connection.
@@ -67,8 +58,8 @@ func (r *RTTStats) MaxAckDelay() time.Duration {
 
 // PTO gets the probe timeout duration.
 func (r *RTTStats) PTO(includeMaxAckDelay bool) time.Duration {
-	if !r.hasMeasurement {
-		return 2 * DefaultInitialRTT
+	if r.SmoothedRTT() == 0 {
+		return 2 * defaultInitialRTT
 	}
 	pto := r.SmoothedRTT() + max(4*r.MeanDeviation(), protocol.TimerGranularity)
 	if includeMaxAckDelay {
@@ -88,9 +79,9 @@ func (r *RTTStats) UpdateRTT(sendDelta, ackDelay time.Duration) {
 	// the client may cause a high ackDelay to result in underestimation of the
 	// r.minRTT.
 	minRTT := time.Duration(r.minRTT.Load())
-	if !r.hasMeasurement || minRTT > sendDelta {
+	if minRTT == 0 || minRTT > sendDelta {
 		minRTT = sendDelta
-		r.minRTT.Store(sendDelta.Nanoseconds())
+		r.minRTT.Store(int64(sendDelta))
 	}
 
 	// Correct for ackDelay if information received from the peer results in a
@@ -100,23 +91,19 @@ func (r *RTTStats) UpdateRTT(sendDelta, ackDelay time.Duration) {
 	if sample-minRTT >= ackDelay {
 		sample -= ackDelay
 	}
-	r.latestRTT.Store(sample.Nanoseconds())
+	r.latestRTT.Store(int64(sample))
 	// First time call.
 	if !r.hasMeasurement {
 		r.hasMeasurement = true
-		r.smoothedRTT.Store(sample.Nanoseconds())
-		r.meanDeviation.Store(sample.Nanoseconds() / 2)
+		r.smoothedRTT.Store(int64(sample))
+		r.meanDeviation.Store(int64(sample / 2))
 	} else {
 		smoothedRTT := r.SmoothedRTT()
 		meanDev := time.Duration(oneMinusBeta*float32(r.MeanDeviation()/time.Microsecond)+rttBeta*float32((smoothedRTT-sample).Abs()/time.Microsecond)) * time.Microsecond
 		newSmoothedRTT := time.Duration((float32(smoothedRTT/time.Microsecond)*oneMinusAlpha)+(float32(sample/time.Microsecond)*rttAlpha)) * time.Microsecond
-		r.meanDeviation.Store(meanDev.Nanoseconds())
-		r.smoothedRTT.Store(newSmoothedRTT.Nanoseconds())
+		r.meanDeviation.Store(int64(meanDev))
+		r.smoothedRTT.Store(int64(newSmoothedRTT))
 	}
-}
-
-func (r *RTTStats) HasMeasurement() bool {
-	return r.hasMeasurement
 }
 
 // SetMaxAckDelay sets the max_ack_delay
@@ -140,9 +127,9 @@ func (r *RTTStats) SetInitialRTT(t time.Duration) {
 
 func (r *RTTStats) ResetForPathMigration() {
 	r.hasMeasurement = false
-	r.minRTT.Store(DefaultInitialRTT.Nanoseconds())
-	r.latestRTT.Store(DefaultInitialRTT.Nanoseconds())
-	r.smoothedRTT.Store(DefaultInitialRTT.Nanoseconds())
+	r.minRTT.Store(0)
+	r.latestRTT.Store(0)
+	r.smoothedRTT.Store(0)
 	r.meanDeviation.Store(0)
 	// max_ack_delay remains valid
 }

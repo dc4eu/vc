@@ -20,6 +20,7 @@ func typeParseMethods(ctx *Context, typ reflect.Type) (
 	copyingMethods map[string]*reflect.Method, postCopyMethod *reflect.Method) {
 	ptrType := reflect.PointerTo(typ)
 	numMethods := ptrType.NumMethod()
+	copyingMethods = make(map[string]*reflect.Method, numMethods)
 	for i := 0; i < numMethods; i++ {
 		method := ptrType.Method(i)
 		switch {
@@ -30,9 +31,6 @@ func typeParseMethods(ctx *Context, typ reflect.Type) (
 			}
 			if method.Type.Out(0) != errType {
 				continue
-			}
-			if copyingMethods == nil {
-				copyingMethods = make(map[string]*reflect.Method)
 			}
 			copyingMethods[method.Name] = &method
 
@@ -49,6 +47,9 @@ func typeParseMethods(ctx *Context, typ reflect.Type) (
 			}
 			postCopyMethod = &method
 		}
+	}
+	if len(copyingMethods) == 0 {
+		copyingMethods = nil
 	}
 	return copyingMethods, postCopyMethod
 }

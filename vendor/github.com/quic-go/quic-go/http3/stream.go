@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"github.com/quic-go/quic-go"
-	"github.com/quic-go/quic-go/http3/qlog"
-	"github.com/quic-go/quic-go/qlogwriter"
 
 	"github.com/quic-go/qpack"
 )
@@ -43,38 +41,32 @@ type Stream struct {
 
 	bytesRemainingInFrame uint64
 
-	qlogger qlogwriter.Recorder
-
-	parseTrailer  func(io.Reader, *headersFrame) error
+	parseTrailer  func(io.Reader, uint64) error
 	parsedTrailer bool
 }
 
-func newStream(
-	str datagramStream,
-	conn *Conn,
-	trace *httptrace.ClientTrace,
-	parseTrailer func(io.Reader, *headersFrame) error,
-	qlogger qlogwriter.Recorder,
-) *Stream {
+func newStream(str datagramStream, conn *Conn, trace *httptrace.ClientTrace, parseTrailer func(io.Reader, uint64) error) *Stream {
 	return &Stream{
 		datagramStream: str,
 		conn:           conn,
 		buf:            make([]byte, 16),
-		qlogger:        qlogger,
 		parseTrailer:   parseTrailer,
 		frameParser: &frameParser{
-			r:         &tracingReader{Reader: str, trace: trace},
-			streamID:  str.StreamID(),
 			closeConn: conn.CloseWithError,
+			r:         &tracingReader{Reader: str, trace: trace},
 		},
 	}
 }
 
 func (s *Stream) Read(b []byte) (int, error) {
+	fp := &frameParser{
+		r:         s.datagramStream,
+		closeConn: s.conn.CloseWithError,
+	}
 	if s.bytesRemainingInFrame == 0 {
 	parseLoop:
 		for {
-			frame, err := s.frameParser.ParseNext(s.qlogger)
+			frame, err := fp.ParseNext()
 			if err != nil {
 				return 0, err
 			}
@@ -90,11 +82,10 @@ func (s *Stream) Read(b []byte) (int, error) {
 					continue
 				}
 				if s.parsedTrailer {
-					maybeQlogInvalidHeadersFrame(s.qlogger, s.StreamID(), f.Length)
 					return 0, errors.New("additional HEADERS frame received after trailers")
 				}
 				s.parsedTrailer = true
-				return 0, s.parseTrailer(s.datagramStream, f)
+				return 0, s.parseTrailer(s.datagramStream, f.Length)
 			default:
 				s.conn.CloseWithError(quic.ApplicationErrorCode(ErrCodeFrameUnexpected), "")
 				// parseNextFrame skips over unknown frame types
@@ -122,16 +113,6 @@ func (s *Stream) hasMoreData() bool {
 func (s *Stream) Write(b []byte) (int, error) {
 	s.buf = s.buf[:0]
 	s.buf = (&dataFrame{Length: uint64(len(b))}).Append(s.buf)
-	if s.qlogger != nil {
-		s.qlogger.RecordEvent(qlog.FrameCreated{
-			StreamID: s.StreamID(),
-			Raw: qlog.RawInfo{
-				Length:        len(s.buf) + len(b),
-				PayloadLength: len(b),
-			},
-			Frame: qlog.Frame{Frame: qlog.DataFrame{}},
-		})
-	}
 	if _, err := s.datagramStream.Write(s.buf); err != nil {
 		return 0, err
 	}
@@ -170,7 +151,7 @@ type RequestStream struct {
 
 	decoder            *qpack.Decoder
 	requestWriter      *requestWriter
-	maxHeaderBytes     int
+	maxHeaderBytes     uint64
 	reqDone            chan<- struct{}
 	disableCompression bool
 	response           *http.Response
@@ -186,7 +167,7 @@ func newRequestStream(
 	reqDone chan<- struct{},
 	decoder *qpack.Decoder,
 	disableCompression bool,
-	maxHeaderBytes int,
+	maxHeaderBytes uint64,
 	rsp *http.Response,
 ) *RequestStream {
 	return &RequestStream{
@@ -305,7 +286,7 @@ func (s *RequestStream) sendRequestHeader(req *http.Request) error {
 	}
 	s.isConnect = req.Method == http.MethodConnect
 	s.sentRequest = true
-	return s.requestWriter.WriteRequestHeader(s.str.datagramStream, req, s.requestedGzip, s.str.StreamID(), s.str.qlogger)
+	return s.requestWriter.WriteRequestHeader(s.str.datagramStream, req, s.requestedGzip)
 }
 
 // ReadResponse reads the HTTP response from the stream.
@@ -318,7 +299,7 @@ func (s *RequestStream) ReadResponse() (*http.Response, error) {
 	if !s.sentRequest {
 		return nil, errors.New("http3: invalid duplicate use of RequestStream.ReadResponse before SendRequestHeader")
 	}
-	frame, err := s.str.frameParser.ParseNext(s.str.qlogger)
+	frame, err := s.str.frameParser.ParseNext()
 	if err != nil {
 		s.str.CancelRead(quic.StreamErrorCode(ErrCodeFrameError))
 		s.str.CancelWrite(quic.StreamErrorCode(ErrCodeFrameError))
@@ -329,37 +310,27 @@ func (s *RequestStream) ReadResponse() (*http.Response, error) {
 		s.str.conn.CloseWithError(quic.ApplicationErrorCode(ErrCodeFrameUnexpected), "expected first frame to be a HEADERS frame")
 		return nil, errors.New("http3: expected first frame to be a HEADERS frame")
 	}
-	if hf.Length > uint64(s.maxHeaderBytes) {
-		maybeQlogInvalidHeadersFrame(s.str.qlogger, s.str.StreamID(), hf.Length)
+	if hf.Length > s.maxHeaderBytes {
 		s.str.CancelRead(quic.StreamErrorCode(ErrCodeFrameError))
 		s.str.CancelWrite(quic.StreamErrorCode(ErrCodeFrameError))
 		return nil, fmt.Errorf("http3: HEADERS frame too large: %d bytes (max: %d)", hf.Length, s.maxHeaderBytes)
 	}
 	headerBlock := make([]byte, hf.Length)
 	if _, err := io.ReadFull(s.str.datagramStream, headerBlock); err != nil {
-		maybeQlogInvalidHeadersFrame(s.str.qlogger, s.str.StreamID(), hf.Length)
 		s.str.CancelRead(quic.StreamErrorCode(ErrCodeRequestIncomplete))
 		s.str.CancelWrite(quic.StreamErrorCode(ErrCodeRequestIncomplete))
 		return nil, fmt.Errorf("http3: failed to read response headers: %w", err)
 	}
-	decodeFn := s.decoder.Decode(headerBlock)
-	var hfs []qpack.HeaderField
-	if s.str.qlogger != nil {
-		hfs = make([]qpack.HeaderField, 0, 16)
+	hfs, err := s.decoder.DecodeFull(headerBlock)
+	if err != nil {
+		// TODO: use the right error code
+		s.str.conn.CloseWithError(quic.ApplicationErrorCode(ErrCodeGeneralProtocolError), "")
+		return nil, fmt.Errorf("http3: failed to decode response headers: %w", err)
 	}
 	res := s.response
-	err = updateResponseFromHeaders(res, decodeFn, s.maxHeaderBytes, &hfs)
-	if s.str.qlogger != nil {
-		qlogParsedHeadersFrame(s.str.qlogger, s.str.StreamID(), hf, hfs)
-	}
-	if err != nil {
-		errCode := ErrCodeMessageError
-		var qpackErr *qpackError
-		if errors.As(err, &qpackErr) {
-			errCode = ErrCodeQPACKDecompressionFailed
-		}
-		s.str.CancelRead(quic.StreamErrorCode(errCode))
-		s.str.CancelWrite(quic.StreamErrorCode(errCode))
+	if err := updateResponseFromHeaders(res, hfs); err != nil {
+		s.str.CancelRead(quic.StreamErrorCode(ErrCodeMessageError))
+		s.str.CancelWrite(quic.StreamErrorCode(ErrCodeMessageError))
 		return nil, fmt.Errorf("http3: invalid response: %w", err)
 	}
 

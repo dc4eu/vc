@@ -5,11 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"maps"
 
 	"github.com/quic-go/quic-go"
-	"github.com/quic-go/quic-go/http3/qlog"
-	"github.com/quic-go/quic-go/qlogwriter"
 	"github.com/quic-go/quic-go/quicvarint"
 )
 
@@ -22,40 +19,16 @@ type frame any
 
 var errHijacked = errors.New("hijacked")
 
-type countingByteReader struct {
-	quicvarint.Reader
-	NumRead int
-}
-
-func (r *countingByteReader) ReadByte() (byte, error) {
-	b, err := r.Reader.ReadByte()
-	if err == nil {
-		r.NumRead++
-	}
-	return b, err
-}
-
-func (r *countingByteReader) Read(b []byte) (int, error) {
-	n, err := r.Reader.Read(b)
-	r.NumRead += n
-	return n, err
-}
-
-func (r *countingByteReader) Reset() {
-	r.NumRead = 0
-}
-
 type frameParser struct {
 	r                   io.Reader
-	streamID            quic.StreamID
 	closeConn           func(quic.ApplicationErrorCode, string) error
 	unknownFrameHandler unknownFrameHandlerFunc
 }
 
-func (p *frameParser) ParseNext(qlogger qlogwriter.Recorder) (frame, error) {
-	r := &countingByteReader{Reader: quicvarint.NewReader(p.r)}
+func (p *frameParser) ParseNext() (frame, error) {
+	qr := quicvarint.NewReader(p.r)
 	for {
-		t, err := quicvarint.Read(r)
+		t, err := quicvarint.Read(qr)
 		if err != nil {
 			if p.unknownFrameHandler != nil {
 				hijacked, err := p.unknownFrameHandler(0, err)
@@ -79,83 +52,31 @@ func (p *frameParser) ParseNext(qlogger qlogwriter.Recorder) (frame, error) {
 			}
 			// If the unknownFrameHandler didn't process the frame, it is our responsibility to skip it.
 		}
-		l, err := quicvarint.Read(r)
+		l, err := quicvarint.Read(qr)
 		if err != nil {
 			return nil, err
 		}
 
 		switch t {
-		case 0x0: // DATA
-			if qlogger != nil {
-				qlogger.RecordEvent(qlog.FrameParsed{
-					StreamID: p.streamID,
-					Raw: qlog.RawInfo{
-						Length:        int(l) + r.NumRead,
-						PayloadLength: int(l),
-					},
-					Frame: qlog.Frame{Frame: qlog.DataFrame{}},
-				})
-			}
+		case 0x0:
 			return &dataFrame{Length: l}, nil
-		case 0x1: // HEADERS
-			return &headersFrame{
-				Length:    l,
-				headerLen: r.NumRead,
-			}, nil
-		case 0x4: // SETTINGS
-			return parseSettingsFrame(r, l, p.streamID, qlogger)
-		case 0x3: // unsupported: CANCEL_PUSH
-			if qlogger != nil {
-				qlogger.RecordEvent(qlog.FrameParsed{
-					StreamID: p.streamID,
-					Raw:      qlog.RawInfo{Length: r.NumRead, PayloadLength: int(l)},
-					Frame:    qlog.Frame{Frame: qlog.CancelPushFrame{}},
-				})
-			}
-		case 0x5: // unsupported: PUSH_PROMISE
-			if qlogger != nil {
-				qlogger.RecordEvent(qlog.FrameParsed{
-					StreamID: p.streamID,
-					Raw:      qlog.RawInfo{Length: r.NumRead, PayloadLength: int(l)},
-					Frame:    qlog.Frame{Frame: qlog.PushPromiseFrame{}},
-				})
-			}
-		case 0x7: // GOAWAY
-			return parseGoAwayFrame(r, l, p.streamID, qlogger)
-		case 0xd: // unsupported: MAX_PUSH_ID
-			if qlogger != nil {
-				qlogger.RecordEvent(qlog.FrameParsed{
-					StreamID: p.streamID,
-					Raw:      qlog.RawInfo{Length: r.NumRead, PayloadLength: int(l)},
-					Frame:    qlog.Frame{Frame: qlog.MaxPushIDFrame{}},
-				})
-			}
-		case 0x2, 0x6, 0x8, 0x9: // reserved frame types
-			if qlogger != nil {
-				qlogger.RecordEvent(qlog.FrameParsed{
-					StreamID: p.streamID,
-					Raw:      qlog.RawInfo{Length: r.NumRead + int(l), PayloadLength: int(l)},
-					Frame:    qlog.Frame{Frame: qlog.ReservedFrame{Type: t}},
-				})
-			}
+		case 0x1:
+			return &headersFrame{Length: l}, nil
+		case 0x4:
+			return parseSettingsFrame(p.r, l)
+		case 0x3: // CANCEL_PUSH
+		case 0x5: // PUSH_PROMISE
+		case 0x7:
+			return parseGoAwayFrame(qr, l)
+		case 0xd: // MAX_PUSH_ID
+		case 0x2, 0x6, 0x8, 0x9:
 			p.closeConn(quic.ApplicationErrorCode(ErrCodeFrameUnexpected), "")
 			return nil, fmt.Errorf("http3: reserved frame type: %d", t)
-		default:
-			// unknown frame types
-			if qlogger != nil {
-				qlogger.RecordEvent(qlog.FrameParsed{
-					StreamID: p.streamID,
-					Raw:      qlog.RawInfo{Length: r.NumRead, PayloadLength: int(l)},
-					Frame:    qlog.Frame{Frame: qlog.UnknownFrame{Type: t}},
-				})
-			}
 		}
-
-		// skip over the payload
-		if _, err := io.CopyN(io.Discard, r, int64(l)); err != nil {
+		// skip over unknown frames
+		if _, err := io.CopyN(io.Discard, qr, int64(l)); err != nil {
 			return nil, err
 		}
-		r.Reset()
 	}
 }
 
@@ -169,8 +90,7 @@ func (f *dataFrame) Append(b []byte) []byte {
 }
 
 type headersFrame struct {
-	Length    uint64
-	headerLen int // number of bytes read for type and length field
+	Length uint64
 }
 
 func (f *headersFrame) Append(b []byte) []byte {
@@ -179,8 +99,6 @@ func (f *headersFrame) Append(b []byte) []byte {
 }
 
 const (
-	// SETTINGS_MAX_FIELD_SECTION_SIZE
-	settingMaxFieldSectionSize = 0x6
 	// Extended CONNECT, RFC 9220
 	settingExtendedConnect = 0x8
 	// HTTP Datagrams, RFC 9297
@@ -188,18 +106,13 @@ const (
 )
 
 type settingsFrame struct {
-	MaxFieldSectionSize int64 // SETTINGS_MAX_FIELD_SECTION_SIZE, -1 if not set
+	Datagram        bool // HTTP Datagrams, RFC 9297
+	ExtendedConnect bool // Extended CONNECT, RFC 9220
 
-	Datagram        bool              // HTTP Datagrams, RFC 9297
-	ExtendedConnect bool              // Extended CONNECT, RFC 9220
-	Other           map[uint64]uint64 // all settings that we don't explicitly recognize
+	Other map[uint64]uint64 // all settings that we don't explicitly recognize
 }
 
-func pointer[T any](v T) *T {
-	return &v
-}
-
-func parseSettingsFrame(r *countingByteReader, l uint64, streamID quic.StreamID, qlogger qlogwriter.Recorder) (*settingsFrame, error) {
+func parseSettingsFrame(r io.Reader, l uint64) (*settingsFrame, error) {
 	if l > 8*(1<<10) {
 		return nil, fmt.Errorf("unexpected size for SETTINGS frame: %d", l)
 	}
@@ -210,10 +123,9 @@ func parseSettingsFrame(r *countingByteReader, l uint64, streamID quic.StreamID,
 		}
 		return nil, err
 	}
-	frame := &settingsFrame{MaxFieldSectionSize: -1}
+	frame := &settingsFrame{}
 	b := bytes.NewReader(buf)
-	settingsFrame := qlog.SettingsFrame{MaxFieldSectionSize: -1}
-	var readMaxFieldSectionSize, readDatagram, readExtendedConnect bool
+	var readDatagram, readExtendedConnect bool
 	for b.Len() > 0 {
 		id, err := quicvarint.Read(b)
 		if err != nil { // should not happen. We allocated the whole frame already.
@@ -225,13 +137,6 @@ func parseSettingsFrame(r *countingByteReader, l uint64, streamID quic.StreamID,
 		}
 
 		switch id {
-		case settingMaxFieldSectionSize:
-			if readMaxFieldSectionSize {
-				return nil, fmt.Errorf("duplicate setting: %d", id)
-			}
-			readMaxFieldSectionSize = true
-			frame.MaxFieldSectionSize = int64(val)
-			settingsFrame.MaxFieldSectionSize = int64(val)
 		case settingExtendedConnect:
 			if readExtendedConnect {
 				return nil, fmt.Errorf("duplicate setting: %d", id)
@@ -241,9 +146,6 @@ func parseSettingsFrame(r *countingByteReader, l uint64, streamID quic.StreamID,
 				return nil, fmt.Errorf("invalid value for SETTINGS_ENABLE_CONNECT_PROTOCOL: %d", val)
 			}
 			frame.ExtendedConnect = val == 1
-			if qlogger != nil {
-				settingsFrame.ExtendedConnect = pointer(frame.ExtendedConnect)
-			}
 		case settingDatagram:
 			if readDatagram {
 				return nil, fmt.Errorf("duplicate setting: %d", id)
@@ -253,9 +155,6 @@ func parseSettingsFrame(r *countingByteReader, l uint64, streamID quic.StreamID,
 				return nil, fmt.Errorf("invalid value for SETTINGS_H3_DATAGRAM: %d", val)
 			}
 			frame.Datagram = val == 1
-			if qlogger != nil {
-				settingsFrame.Datagram = pointer(frame.Datagram)
-			}
 		default:
 			if _, ok := frame.Other[id]; ok {
 				return nil, fmt.Errorf("duplicate setting: %d", id)
@@ -266,27 +165,12 @@ func parseSettingsFrame(r *countingByteReader, l uint64, streamID quic.StreamID,
 			frame.Other[id] = val
 		}
 	}
-	if qlogger != nil {
-		settingsFrame.Other = maps.Clone(frame.Other)
-
-		qlogger.RecordEvent(qlog.FrameParsed{
-			StreamID: streamID,
-			Raw: qlog.RawInfo{
-				Length:        r.NumRead,
-				PayloadLength: int(l),
-			},
-			Frame: qlog.Frame{Frame: settingsFrame},
-		})
-	}
 	return frame, nil
 }
 
 func (f *settingsFrame) Append(b []byte) []byte {
 	b = quicvarint.Append(b, 0x4)
 	var l int
-	if f.MaxFieldSectionSize >= 0 {
-		l += quicvarint.Len(settingMaxFieldSectionSize) + quicvarint.Len(uint64(f.MaxFieldSectionSize))
-	}
 	for id, val := range f.Other {
 		l += quicvarint.Len(id) + quicvarint.Len(val)
 	}
@@ -297,10 +181,6 @@ func (f *settingsFrame) Append(b []byte) []byte {
 		l += quicvarint.Len(settingExtendedConnect) + quicvarint.Len(1)
 	}
 	b = quicvarint.Append(b, uint64(l))
-	if f.MaxFieldSectionSize >= 0 {
-		b = quicvarint.Append(b, settingMaxFieldSectionSize)
-		b = quicvarint.Append(b, uint64(f.MaxFieldSectionSize))
-	}
 	if f.Datagram {
 		b = quicvarint.Append(b, settingDatagram)
 		b = quicvarint.Append(b, 1)
@@ -320,24 +200,17 @@ type goAwayFrame struct {
 	StreamID quic.StreamID
 }
 
-func parseGoAwayFrame(r *countingByteReader, l uint64, streamID quic.StreamID, qlogger qlogwriter.Recorder) (*goAwayFrame, error) {
+func parseGoAwayFrame(r io.ByteReader, l uint64) (*goAwayFrame, error) {
 	frame := &goAwayFrame{}
-	startLen := r.NumRead
-	id, err := quicvarint.Read(r)
+	cbr := countingByteReader{ByteReader: r}
+	id, err := quicvarint.Read(&cbr)
 	if err != nil {
 		return nil, err
 	}
-	if r.NumRead-startLen != int(l) {
+	if cbr.Read != int(l) {
 		return nil, errors.New("GOAWAY frame: inconsistent length")
 	}
 	frame.StreamID = quic.StreamID(id)
-	if qlogger != nil {
-		qlogger.RecordEvent(qlog.FrameParsed{
-			StreamID: streamID,
-			Raw:      qlog.RawInfo{Length: r.NumRead, PayloadLength: int(l)},
-			Frame:    qlog.Frame{Frame: qlog.GoAwayFrame{StreamID: frame.StreamID}},
-		})
-	}
 	return frame, nil
 }
 

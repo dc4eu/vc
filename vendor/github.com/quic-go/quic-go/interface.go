@@ -10,7 +10,7 @@ import (
 
 	"github.com/quic-go/quic-go/internal/handshake"
 	"github.com/quic-go/quic-go/internal/protocol"
-	"github.com/quic-go/quic-go/qlogwriter"
+	"github.com/quic-go/quic-go/logging"
 )
 
 // The StreamID is the ID of a QUIC stream.
@@ -189,8 +189,7 @@ type Config struct {
 	// Enable QUIC Stream Resets with Partial Delivery.
 	// See https://datatracker.ietf.org/doc/html/draft-ietf-quic-reliable-stream-reset-07.
 	EnableStreamResetPartialDelivery bool
-
-	Tracer func(ctx context.Context, isClient bool, connID ConnectionID) qlogwriter.Trace
+	Tracer                           func(context.Context, logging.Perspective, ConnectionID) *logging.ConnectionTracer
 }
 
 // ClientHelloInfo contains information about an incoming connection attempt.

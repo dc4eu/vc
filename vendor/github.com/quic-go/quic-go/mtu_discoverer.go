@@ -6,8 +6,7 @@ import (
 	"github.com/quic-go/quic-go/internal/protocol"
 	"github.com/quic-go/quic-go/internal/utils"
 	"github.com/quic-go/quic-go/internal/wire"
-	"github.com/quic-go/quic-go/qlog"
-	"github.com/quic-go/quic-go/qlogwriter"
+	"github.com/quic-go/quic-go/logging"
 )
 
 type mtuDiscoverer interface {
@@ -104,7 +103,7 @@ type mtuFinder struct {
 	// We're therefore not concerned about overflows of this counter.
 	generation uint8
 
-	qlogger qlogwriter.Recorder
+	tracer *logging.ConnectionTracer
 }
 
 var _ mtuDiscoverer = &mtuFinder{}
@@ -112,12 +111,12 @@ var _ mtuDiscoverer = &mtuFinder{}
 func newMTUDiscoverer(
 	rttStats *utils.RTTStats,
 	start, max protocol.ByteCount,
-	qlogger qlogwriter.Recorder,
+	tracer *logging.ConnectionTracer,
 ) *mtuFinder {
 	f := &mtuFinder{
 		inFlight: protocol.InvalidByteCount,
 		rttStats: rttStats,
-		qlogger:  qlogger,
+		tracer:   tracer,
 	}
 	f.init(start, max)
 	return f
@@ -224,11 +223,8 @@ func (h *mtuFinderAckHandler) OnAcked(wire.Frame) {
 			}
 		}
 	}
-	if h.qlogger != nil {
-		h.qlogger.RecordEvent(qlog.MTUUpdated{
-			Value: int(size),
-			Done:  h.done(),
-		})
+	if h.tracer != nil && h.tracer.UpdatedMTU != nil {
+		h.tracer.UpdatedMTU(size, h.done())
 	}
 }
 

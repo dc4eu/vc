@@ -80,6 +80,9 @@ func New(ctx context.Context, cfg *model.Cfg, api *apiv1.Client, tracer *trace.T
 			SameSite: http.SameSiteStrictMode,
 		}
 
+		// Redirect root to admin login
+		s.httpHelpers.Server.RegEndpoint(ctx, rgRoot, http.MethodGet, "", http.StatusFound, s.endpointRootRedirect)
+
 		rgAdmin := rgRoot.Group("/admin")
 		// Public routes (no auth required)
 		s.httpHelpers.Server.RegEndpoint(ctx, rgAdmin, http.MethodGet, "/login", http.StatusOK, s.endpointAdminLoginPage)

@@ -2,11 +2,17 @@ package httpserver
 
 import (
 	"context"
+	"net/http"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/internal/registry/apiv1"
 
 	"github.com/gin-gonic/gin"
 )
+
+func (s *Service) endpointRootRedirect(ctx context.Context, c *gin.Context) (any, error) {
+	c.Redirect(http.StatusFound, "/admin/login")
+	return nil, nil
+}
 
 func (s *Service) endpointHealth(ctx context.Context, c *gin.Context) (any, error) {
 	request := &apiv1_status.StatusRequest{}

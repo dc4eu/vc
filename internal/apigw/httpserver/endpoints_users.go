@@ -29,7 +29,7 @@ func (s *Service) endpointAddPIDUser(ctx context.Context, c *gin.Context) (any, 
 		return nil, err
 	}
 
-	return nil, nil
+	return gin.H{}, nil
 }
 
 func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any, error) {
@@ -67,7 +67,7 @@ func (s *Service) endpointLoginPIDUser(ctx context.Context, c *gin.Context) (any
 		return nil, err
 	}
 
-	return nil, nil
+	return gin.H{}, nil
 }
 
 func (s *Service) endpointUserAuthenticSourceLookup(ctx context.Context, c *gin.Context) (any, error) {

@@ -214,8 +214,23 @@ func TestSdSuite_Verify_TamperedProof(t *testing.T) {
 		t.Fatalf("proofValue not found in proof JSON: %v", proofJSON)
 	}
 
-	// Just change the last character
-	tamperedProofValue := proofValue[:len(proofValue)-1] + "A"
+	// Tamper with a character in the middle of the base signature region
+	// The proof value format is: multibase prefix (u) + base64url(CBOR tag + [baseSignature, ...])
+	// We change a character around position 10 to affect the base signature
+	var tamperedProofValue string
+	if len(proofValue) > 15 {
+		// Change character at position 10 (in the base signature region)
+		tamperedRunes := []rune(proofValue)
+		// Toggle a bit by changing the character
+		if tamperedRunes[10] == 'A' {
+			tamperedRunes[10] = 'B'
+		} else {
+			tamperedRunes[10] = 'A'
+		}
+		tamperedProofValue = string(tamperedRunes)
+	} else {
+		tamperedProofValue = proofValue[:len(proofValue)-1] + "A"
+	}
 
 	// Update proofJSON
 	// We need to preserve the structure

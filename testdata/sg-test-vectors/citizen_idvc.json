@@ -1,0 +1,36 @@
+{
+    "@context": [
+        "https://www.w3.org/ns/credentials/v2",
+        "https://schemas.accredify.io/idvc/contexts/citizen-id-v1.jsonld"
+    ],
+    "credentialSubject": {
+        "fullName": "Tan Ah Kow",
+        "id": "did:example:singaporean12345",
+        "mobileNumber": "19201473354",
+        "nationalRegistrationIdentityCard": "S9988776A",
+        "passportNumber": "S9988776A",
+        "type": "CitizenIDCredential",
+        "nationality": "SG"
+    },
+    "id": "urn:uuid:e1234567-89ab-cdef-0123-987654abcdef",
+    "issuer": {
+        "id": "did:web:vc-issuer.accredify.io:organizations:9c7308e9-a770-4be8-bc0d-21d9cac585bc",
+        "name": "Accredify"
+    },
+    "type": [
+        "VerifiableCredential",
+        "CitizenIDCredential"
+    ],
+    "validFrom": "2025-08-25T00:00:00Z",
+    "validUntil": "2026-08-25T00:00:00Z",
+    "proof": [
+        {
+            "type": "DataIntegrityProof",
+            "cryptosuite": "eddsa-rdfc-2022",
+            "created": "2025-08-25T03:01:05Z",
+            "verificationMethod": "did:web:vc-issuer.accredify.io:organizations:9c7308e9-a770-4be8-bc0d-21d9cac585bc#key-iAGgYQTUeDjqcf2OdNINUtE7hXM5caMKV4pFxsxkp7U",
+            "proofPurpose": "assertionMethod",
+            "proofValue": "zJxWqWnxEx72SjJWDS26hf3N5KoxbKZ6DceSqFpGwppaqS9v8WHBxr6VU8gbNfreAn2WDDVYZs44LfnZgeTXmb7g"
+        }
+    ]
+}

@@ -119,7 +119,7 @@ type TrustOptions struct {
 }
 
 // GetEffectiveAction returns the action name to use for policy routing.
-// Priority: 1. Explicit Action field, 2. Composed from Role + CredentialType, 3. Role alone
+// Priority: 1. Explicit Action field, 2. Composed from Role + CredentialType/DocType, 3. Role alone
 func (r *EvaluationRequest) GetEffectiveAction() string {
 	// If explicit action is set, use it
 	if r.Action != "" {
@@ -136,13 +136,23 @@ func (r *EvaluationRequest) GetEffectiveAction() string {
 		return string(RolePIDProvider)
 	}
 
+	// For mDL documents, use mDL-specific policy
+	if r.DocType == "org.iso.18013.5.1.mDL" {
+		if r.Role == RoleIssuer || r.Role == RoleCredentialIssuer {
+			return "mdl-issuer"
+		}
+		if r.Role == RoleVerifier || r.Role == RoleCredentialVerifier {
+			return "mdl-verifier"
+		}
+	}
+
 	// For credential issuers, use credential-issuer policy
-	if r.Role == RoleIssuer && r.CredentialType != "" {
+	if (r.Role == RoleIssuer || r.Role == RoleCredentialIssuer) && (r.CredentialType != "" || r.DocType != "") {
 		return string(RoleCredentialIssuer)
 	}
 
 	// For verifiers, use credential-verifier policy
-	if r.Role == RoleVerifier {
+	if r.Role == RoleVerifier || r.Role == RoleCredentialVerifier {
 		return string(RoleCredentialVerifier)
 	}
 

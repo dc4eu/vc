@@ -168,7 +168,7 @@ func (v *Verifier) verifyDocumentWithContext(ctx context.Context, doc *Document)
 	result.IssuerCertificate = dsCert
 
 	// Step 3: Verify the certificate chain against trusted IACAs
-	if err := v.verifyCertificateChainWithContext(ctx, certChain); err != nil {
+	if err := v.verifyCertificateChainWithContext(ctx, certChain, doc.DocType); err != nil {
 		result.Errors = append(result.Errors, fmt.Errorf("certificate chain verification failed: %w", err))
 		result.Valid = false
 		return result
@@ -229,12 +229,12 @@ func (v *Verifier) parseIssuerAuth(data []byte) (*COSESign1, error) {
 
 // verifyCertificateChain verifies the DS certificate chain against trusted IACAs.
 func (v *Verifier) verifyCertificateChain(chain []*x509.Certificate) error {
-	return v.verifyCertificateChainWithContext(context.Background(), chain)
+	return v.verifyCertificateChainWithContext(context.Background(), chain, "")
 }
 
 // verifyCertificateChainWithContext verifies the DS certificate chain against trusted IACAs
 // with a provided context for external trust evaluation.
-func (v *Verifier) verifyCertificateChainWithContext(ctx context.Context, chain []*x509.Certificate) error {
+func (v *Verifier) verifyCertificateChainWithContext(ctx context.Context, chain []*x509.Certificate, docType string) error {
 	if len(chain) == 0 {
 		return errors.New("empty certificate chain")
 	}
@@ -260,7 +260,8 @@ func (v *Verifier) verifyCertificateChainWithContext(ctx context.Context, chain 
 			SubjectID: issuerID,
 			KeyType:   trust.KeyTypeX5C,
 			Key:       chain,
-			Role:      trust.RoleIssuer,
+			Role:      trust.RoleCredentialIssuer,
+			DocType:   docType,
 		})
 
 		if err != nil {

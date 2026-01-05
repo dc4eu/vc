@@ -393,6 +393,21 @@ func TestEvaluationRequest_GetEffectiveAction(t *testing.T) {
 			req:    EvaluationRequest{Role: RoleIssuer},
 			expect: "issuer",
 		},
+		{
+			name:   "mDL docType issuer becomes mdl-issuer",
+			req:    EvaluationRequest{Role: RoleCredentialIssuer, DocType: "org.iso.18013.5.1.mDL"},
+			expect: "mdl-issuer",
+		},
+		{
+			name:   "mDL docType verifier becomes mdl-verifier",
+			req:    EvaluationRequest{Role: RoleCredentialVerifier, DocType: "org.iso.18013.5.1.mDL"},
+			expect: "mdl-verifier",
+		},
+		{
+			name:   "credential issuer with docType becomes credential-issuer",
+			req:    EvaluationRequest{Role: RoleCredentialIssuer, DocType: "org.iso.18013.5.1.PID"},
+			expect: "credential-issuer",
+		},
 	}
 
 	for _, tt := range tests {

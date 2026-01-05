@@ -59,6 +59,10 @@ type VerificationOptions struct {
 	TrustEvaluator trust.TrustEvaluator
 	// TrustContext: context for trust evaluation (optional, defaults to context.Background())
 	TrustContext context.Context
+	// CredentialType: credential type for policy routing (e.g., "PID", "mDL")
+	// If set, this is passed to the TrustEvaluator for policy-based routing.
+	// If not set, it will be extracted from the 'vct' claim if present.
+	CredentialType string
 }
 
 // ParseAndVerify parses and verifies an SD-JWT credential
@@ -128,10 +132,17 @@ func (c *Client) ParseAndVerify(sdJWT string, publicKey any, opts *VerificationO
 			// Extract issuer identifier for trust evaluation
 			// Priority: 1. iss claim (if parseable), 2. leaf certificate CN
 			issuerID := ""
+			credentialType := opts.CredentialType
 			if preToken.Claims != nil {
 				if claims, ok := preToken.Claims.(jwt.MapClaims); ok {
 					if iss, ok := claims["iss"].(string); ok {
 						issuerID = iss
+					}
+					// Extract vct for credential type if not explicitly set
+					if credentialType == "" {
+						if vct, ok := claims["vct"].(string); ok {
+							credentialType = vct
+						}
 					}
 				}
 			}
@@ -146,10 +157,11 @@ func (c *Client) ParseAndVerify(sdJWT string, publicKey any, opts *VerificationO
 			}
 
 			trustDecision, err := opts.TrustEvaluator.Evaluate(ctx, &trust.EvaluationRequest{
-				SubjectID: issuerID,
-				KeyType:   trust.KeyTypeX5C,
-				Key:       chain,
-				Role:      trust.RoleIssuer,
+				SubjectID:      issuerID,
+				KeyType:        trust.KeyTypeX5C,
+				Key:            chain,
+				Role:           trust.RoleCredentialIssuer,
+				CredentialType: credentialType,
 			})
 
 			if err != nil {

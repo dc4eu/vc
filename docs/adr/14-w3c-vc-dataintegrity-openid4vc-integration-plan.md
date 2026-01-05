@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+**Implemented** (Phases 1-2 complete)
 
 ## Context
 
@@ -194,47 +194,110 @@ default:
 }
 ```
 
-### Phase 3: Key Resolution and Trust
+### Phase 3: Key Resolution and Trust via go-trust
 
-**Goal**: Enable DID-based key resolution for W3C VC verification.
+**Goal**: Unified key resolution and trust evaluation using the go-trust service.
 
-#### 3.1 DID Key Resolver
+#### Architecture Overview
 
-Create `pkg/keyresolver/did_resolver.go`:
+The `go-trust` service provides a unified interface for both:
+1. **Key Resolution** - Resolving verification methods to public keys
+2. **Trust Evaluation** - Verifying name-to-key bindings via trust frameworks
+
+This design ensures that key resolution and trust verification are handled consistently, with policy-based decisions about which trust anchors and frameworks to use.
+
+#### 3.1 go-trust Integration
+
+The `VC20KeyResolver` interface delegates to go-trust for all key resolution except self-contained DIDs:
 
 ```go
 package keyresolver
 
-// DIDKeyResolver resolves public keys from DID documents
-type DIDKeyResolver struct {
-    // HTTPClient for fetching DID documents
-    HTTPClient *http.Client
+// GoTrustKeyResolver resolves keys and evaluates trust via go-trust service
+type GoTrustKeyResolver struct {
+    // GoTrustClient is the client for the go-trust service
+    GoTrustClient *gotrust.Client
     
-    // Cache for resolved DID documents
-    Cache *ttlcache.Cache[string, *DIDDocument]
-    
-    // SupportedMethods lists supported DID methods
-    SupportedMethods []string // e.g., ["did:key", "did:web", "did:ebsi"]
+    // LocalResolver handles self-contained DIDs (did:key, did:jwk)
+    LocalResolver *LocalDIDResolver
 }
 
-// ResolveKey resolves a verification method URI to a public key
-func (r *DIDKeyResolver) ResolveKey(ctx context.Context, verificationMethod string) (crypto.PublicKey, error)
+// ResolveKey resolves a verification method to a public key with trust evaluation
+func (r *GoTrustKeyResolver) ResolveKey(ctx context.Context, verificationMethod string) (crypto.PublicKey, error) {
+    // Check if this is a self-contained DID method
+    if r.isLocalDID(verificationMethod) {
+        return r.LocalResolver.Resolve(ctx, verificationMethod)
+    }
+    
+    // Delegate to go-trust for resolution + trust evaluation
+    return r.GoTrustClient.ResolveAndVerify(ctx, verificationMethod)
+}
+
+// isLocalDID returns true for self-contained DID methods
+func (r *GoTrustKeyResolver) isLocalDID(vm string) bool {
+    return strings.HasPrefix(vm, "did:key:") || strings.HasPrefix(vm, "did:jwk:")
+}
 ```
 
-**Supported DID Methods**:
-1. `did:key` - Self-contained, no network fetch needed
-2. `did:web` - Fetch `.well-known/did.json` from domain
-3. `did:ebsi` - EBSI DID resolver (EU trust framework)
+#### 3.2 Local DID Resolution (Self-Contained Methods)
 
-#### 3.2 Trust Framework Integration
-
-For ETSI TL (Trusted List) integration:
+For DID methods where key material is embedded in the identifier itself, no external resolution or trust evaluation is needed:
 
 ```go
-type TrustFramework interface {
-    // IsTrustedIssuer checks if an issuer is in a trusted list
-    IsTrustedIssuer(ctx context.Context, issuerDID string, tlURL string) (bool, error)
+// LocalDIDResolver handles self-contained DID methods
+type LocalDIDResolver struct{}
+
+// Resolve extracts public key from self-contained DIDs
+func (r *LocalDIDResolver) Resolve(ctx context.Context, verificationMethod string) (crypto.PublicKey, error)
+```
+
+**Supported Local Methods**:
+1. `did:key` - Multicodec-encoded public key in the identifier
+2. `did:jwk` - Base64url-encoded JWK in the identifier
+
+These methods are inherently trustless - the key is the identifier. Trust decisions for self-contained DIDs must be made at a higher level (e.g., trusted issuer allowlists).
+
+#### 3.3 Trust Evaluation via go-trust
+
+The go-trust service handles trust evaluation for all other resolution methods:
+
+| Trust Framework | go-trust Responsibility |
+|-----------------|------------------------|
+| **did:web** | Resolve DID document, verify domain binding |
+| **did:ebsi** | Resolve via EBSI resolver, verify trust chain |
+| **ETSI Trusted Lists** | Resolve issuer, verify against TL entries |
+| **OpenID Federation** | Resolve entity statement chain, verify trust marks |
+| **X.509 / PKIX** | Validate certificate chain against trust anchors |
+
+```go
+// Example go-trust client usage
+type GoTrustClient interface {
+    // ResolveAndVerify resolves a verification method and evaluates trust
+    // Returns the public key only if trust evaluation succeeds
+    ResolveAndVerify(ctx context.Context, verificationMethod string) (crypto.PublicKey, error)
+    
+    // ResolveWithPolicy resolves with explicit policy selection
+    ResolveWithPolicy(ctx context.Context, verificationMethod string, policy string) (crypto.PublicKey, error)
 }
+```
+
+#### 3.4 Configuration
+
+```yaml
+verifier:
+  key_resolver:
+    # go-trust service endpoint
+    go_trust_url: "https://trust.example.com"
+    
+    # Trust policies to apply
+    trust_policies:
+      - "etsi_tl:eu-lotl"
+      - "openid_federation:eduGAIN"
+    
+    # Local resolution for self-contained DIDs (always enabled)
+    local_did_methods:
+      - "did:key"
+      - "did:jwk"
 ```
 
 ### Phase 4: Verifiable Presentations
@@ -296,32 +359,98 @@ func CheckBitstringStatus(statusListURL string, statusIndex int) (bool, error)
 
 ### Implementation Order
 
-| Phase | Component | Priority | Effort |
-|-------|-----------|----------|--------|
-| 1.1 | VC20Handler | High | 2-3 days |
-| 1.2 | Format identifiers | High | 0.5 days |
-| 1.3 | DCQL support | Medium | 1 day |
-| 2.1 | Issuer metadata | High | 0.5 days |
-| 2.2 | MakeVC20 handler | High | 2 days |
-| 2.3 | Format routing | High | 0.5 days |
-| 3.1 | DID resolver | High | 2 days |
-| 3.2 | Trust framework | Medium | 1-2 days |
-| 4.1 | VP builder | Medium | 1 day |
-| 5.1 | Status list | Low | 2 days |
+| Phase | Component | Priority | Effort | Status |
+|-------|-----------|----------|--------|--------|
+| 1.1 | VC20Handler | High | 2-3 days | ✅ Complete |
+| 1.2 | Format identifiers | High | 0.5 days | ✅ Complete |
+| 1.3 | DCQL support | Medium | 1 day | ✅ Complete |
+| 2.1 | Issuer metadata | High | 0.5 days | ✅ Complete |
+| 2.2 | MakeVC20 handler | High | 2 days | ✅ Complete |
+| 2.3 | Format routing | High | 0.5 days | ✅ Complete |
+| 3.1 | go-trust integration | High | 2 days | ✅ Complete |
+| 3.2 | Local DID resolver (did:key, did:jwk) | Medium | 0.5 days | ✅ Complete |
+| 3.3 | Trust policy config | Medium | 1 day | ✅ Complete |
+| 4.1 | VP builder | Medium | 1 day | ✅ Complete |
+| 5.1 | Status list | Low | 2 days | 🔄 In Review |
 
-**Total estimated effort**: 12-15 days
+### Implementation Notes
+
+**Completed Components (January 2026):**
+
+- **VC20Handler** (`pkg/openid4vp/vc20_handler.go`):
+  - Supports `ecdsa-rdfc-2019`, `ecdsa-sd-2023`, and `eddsa-rdfc-2022` cryptosuites
+  - Key resolution via `VC20KeyResolver` interface
+  - Trusted issuer validation
+  - CreateCredential for signing new credentials
+  - VerifyAndExtract for verification
+  - Build-tagged with `vc20`
+
+- **Format Identifiers**:
+  - `ldp_vc` and `vc+ld+json` constants defined
+  - Integrated into API gateway format routing
+
+- **MakeVC20 Handler** (`internal/issuer/apiv1/handlers_vc20.go`):
+  - gRPC endpoint for credential issuance
+  - Supports all three cryptosuites
+  - Status list allocation for revocation
+  - Build-tagged with `vc20`
+
+- **Format Routing** (`internal/apigw/apiv1/handlers_issuer.go`):
+  - `issueVC20()` method added
+  - Routes `ldp_vc` and `vc+ld+json` formats to MakeVC20
+
+- **Issuer Metadata** (`pkg/openid4vci/issuer_metadata.go`):
+  - Added `Cryptosuite` field to `CredentialConfigurationsSupported`
+
+**Completed Phase 3 (Key Resolution) - January 2026:**
+
+- **GoTrustResolver** (`pkg/keyresolver/gotrust_adapter.go`):
+  - Integrates with go-trust via AuthZEN client
+  - Handles did:web, did:ebsi, ETSI TL, OpenID Federation, X.509
+  - `ResolveEd25519` and `ResolveECDSA` methods with trust evaluation
+
+- **LocalResolver** (`pkg/keyresolver/resolver.go`):
+  - Handles self-contained DIDs: did:key, did:jwk
+  - `CanResolveLocally()` function for routing decisions
+  - Ed25519 and ECDSA key extraction from multikey format
+
+- **SmartResolver** (`pkg/keyresolver/resolver.go`):
+  - Routes between local and remote resolution
+  - Falls back to go-trust for non-local DIDs
+
+- **VC20ResolverAdapter** (`pkg/keyresolver/vc20_adapter.go`):
+  - Bridges keyresolver interfaces to `openid4vp.VC20KeyResolver`
+  - `ECDSAOnlyAdapter`, `Ed25519OnlyAdapter`, `CompositeVC20Resolver`
+
+**Completed Phase 4 (VP Builder) - January 2026:**
+
+- **VPBuilder** (`pkg/openid4vp/vc20_vp_builder.go`):
+  - `BuildVC20Presentation()` creates signed W3C Verifiable Presentations
+  - Supports EdDSA (`eddsa-rdfc-2022`) and ECDSA (`ecdsa-rdfc-2019`) signing
+  - `challenge`/`nonce` binding for holder authentication
+  - `domain` binding for audience restriction
+  - Configurable via `VPBuildOptions`
+
+**Phase 5 (Status List) - In Separate PR:**
+
+- BitstringStatusList implementation under review
+- See PR for status list credential support
+
+**Total effort completed**: ~12 days
 
 ### Testing Strategy
 
 #### Unit Tests
 - `pkg/openid4vp/vc20_handler_test.go` - Handler verification tests
-- `pkg/keyresolver/did_resolver_test.go` - DID resolution tests
+- `pkg/keyresolver/gotrust_resolver_test.go` - go-trust integration tests
+- `pkg/keyresolver/local_did_test.go` - Self-contained DID tests
 - Integration with existing W3C conformance test vectors
 
 #### Integration Tests
 - End-to-end issuance flow with `ldp_vc` format
 - End-to-end presentation/verification flow
 - Cross-format interoperability (SD-JWT wallet receiving VC20 request)
+- go-trust integration tests with mock trust service
 
 #### Conformance Tests
 - W3C VC Data Integrity test suite

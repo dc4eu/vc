@@ -1,6 +1,24 @@
 # W3C VC Data Integrity OpenID4VP Handler - Implementation Specification
 
+**Status: Implemented** (January 2026)
+
 This document provides detailed implementation specifications for integrating W3C Verifiable Credentials Data Integrity with OpenID4VP, ensuring feature parity with existing SD-JWT and mDoc handlers.
+
+## Implementation Summary
+
+The handler is implemented in `pkg/openid4vp/vc20_handler.go` with the `vc20` build tag.
+
+**Supported Cryptosuites:**
+- `ecdsa-rdfc-2019` - Standard ECDSA Data Integrity proofs
+- `ecdsa-sd-2023` - ECDSA Selective Disclosure (BASE and DERIVED proofs)
+- `eddsa-rdfc-2022` - EdDSA Data Integrity proofs
+
+**Key Features:**
+- Key resolution via pluggable `VC20KeyResolver` interface
+- Trusted issuer validation
+- CreateCredential for signing new credentials
+- VerifyAndExtract for credential verification
+- VP and VC parsing (base64url and plain JSON)
 
 ## Handler Interface Design
 
@@ -295,10 +313,99 @@ func (h *VC20Handler) verifyECDSASd2023(
 }
 ```
 
-## DID Key Resolver Implementation
+## Key Resolution Architecture
+
+Key resolution and trust evaluation are unified through the **go-trust** service, with local resolution for self-contained DID methods.
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     VC20Handler                                  │
+│                         │                                        │
+│                   VC20KeyResolver                                │
+│                         │                                        │
+│         ┌───────────────┴───────────────┐                       │
+│         │                               │                        │
+│   LocalDIDResolver              GoTrustKeyResolver               │
+│   (did:key, did:jwk)            (all other methods)              │
+│         │                               │                        │
+│   Self-contained             ┌──────────┴──────────┐            │
+│   key extraction             │    go-trust API     │            │
+│                              │                      │            │
+│                              │  - did:web           │            │
+│                              │  - did:ebsi          │            │
+│                              │  - ETSI TL           │            │
+│                              │  - OpenID Fed        │            │
+│                              │  - X.509/PKIX        │            │
+│                              └──────────────────────┘            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### GoTrust Key Resolver
 
 ```go
-// pkg/keyresolver/did_resolver.go
+// pkg/keyresolver/gotrust_resolver.go
+
+package keyresolver
+
+import (
+    "context"
+    "crypto"
+    "strings"
+    
+    "github.com/sirosfoundation/go-trust/client"
+)
+
+// GoTrustKeyResolver resolves keys via go-trust with trust evaluation
+type GoTrustKeyResolver struct {
+    // GoTrustClient handles resolution and trust verification
+    goTrustClient *client.Client
+    
+    // LocalResolver handles self-contained DIDs
+    localResolver *LocalDIDResolver
+    
+    // TrustPolicies to apply during resolution
+    trustPolicies []string
+}
+
+// NewGoTrustKeyResolver creates a resolver with go-trust backend
+func NewGoTrustKeyResolver(goTrustURL string, policies []string) (*GoTrustKeyResolver, error) {
+    gtClient, err := client.New(goTrustURL)
+    if err != nil {
+        return nil, err
+    }
+    
+    return &GoTrustKeyResolver{
+        goTrustClient: gtClient,
+        localResolver: NewLocalDIDResolver(),
+        trustPolicies: policies,
+    }, nil
+}
+
+// ResolveKey resolves a verification method to a public key
+func (r *GoTrustKeyResolver) ResolveKey(ctx context.Context, verificationMethod string) (crypto.PublicKey, error) {
+    // Self-contained DIDs are resolved locally (no trust evaluation needed)
+    if r.isLocalDID(verificationMethod) {
+        return r.localResolver.Resolve(ctx, verificationMethod)
+    }
+    
+    // All other methods go through go-trust for resolution + trust evaluation
+    return r.goTrustClient.ResolveAndVerify(ctx, verificationMethod, r.trustPolicies)
+}
+
+// isLocalDID returns true for self-contained DID methods
+func (r *GoTrustKeyResolver) isLocalDID(vm string) bool {
+    return strings.HasPrefix(vm, "did:key:") || strings.HasPrefix(vm, "did:jwk:")
+}
+```
+
+### Local DID Resolver (Self-Contained Methods)
+
+For DID methods where the key material is embedded in the identifier:
+
+```go
+// pkg/keyresolver/local_did_resolver.go
 
 package keyresolver
 
@@ -309,82 +416,39 @@ import (
     "crypto/ed25519"
     "crypto/elliptic"
     "encoding/base64"
-    "encoding/json"
     "fmt"
-    "net/http"
+    "math/big"
     "strings"
-    "time"
     
-    "github.com/jellydator/ttlcache/v3"
     "github.com/multiformats/go-multibase"
 )
 
-// DIDDocument represents a DID Document
-type DIDDocument struct {
-    Context            []string             `json:"@context"`
-    ID                 string               `json:"id"`
-    VerificationMethod []VerificationMethod `json:"verificationMethod"`
-    Authentication     []any                `json:"authentication,omitempty"`
-    AssertionMethod    []any                `json:"assertionMethod,omitempty"`
+// LocalDIDResolver handles self-contained DID methods
+type LocalDIDResolver struct{}
+
+// NewLocalDIDResolver creates a new local resolver
+func NewLocalDIDResolver() *LocalDIDResolver {
+    return &LocalDIDResolver{}
 }
 
-// VerificationMethod represents a verification method in a DID Document
-type VerificationMethod struct {
-    ID                 string `json:"id"`
-    Type               string `json:"type"`
-    Controller         string `json:"controller"`
-    PublicKeyMultibase string `json:"publicKeyMultibase,omitempty"`
-    PublicKeyJwk       *JWK   `json:"publicKeyJwk,omitempty"`
-}
-
-// JWK represents a JSON Web Key
-type JWK struct {
-    Kty string `json:"kty"`
-    Crv string `json:"crv,omitempty"`
-    X   string `json:"x,omitempty"`
-    Y   string `json:"y,omitempty"`
-}
-
-// DIDKeyResolver resolves DID verification methods to public keys
-type DIDKeyResolver struct {
-    httpClient *http.Client
-    cache      *ttlcache.Cache[string, *DIDDocument]
-}
-
-// NewDIDKeyResolver creates a new resolver
-func NewDIDKeyResolver() *DIDKeyResolver {
-    return &DIDKeyResolver{
-        httpClient: &http.Client{Timeout: 10 * time.Second},
-        cache: ttlcache.New[string, *DIDDocument](
-            ttlcache.WithTTL[string, *DIDDocument](5 * time.Minute),
-        ),
-    }
-}
-
-// ResolveKey resolves a verification method to a public key
-func (r *DIDKeyResolver) ResolveKey(ctx context.Context, verificationMethod string) (crypto.PublicKey, error) {
-    // Parse verification method
-    did, fragment, err := r.parseVerificationMethod(verificationMethod)
-    if err != nil {
-        return nil, err
+// Resolve extracts public key from self-contained DIDs
+func (r *LocalDIDResolver) Resolve(ctx context.Context, verificationMethod string) (crypto.PublicKey, error) {
+    // Extract DID from verification method (may include fragment)
+    did := strings.Split(verificationMethod, "#")[0]
+    
+    if strings.HasPrefix(did, "did:key:") {
+        return r.resolveDidKey(did)
     }
     
-    // Determine DID method
-    method := r.extractMethod(did)
-    
-    switch method {
-    case "key":
-        return r.resolveDidKey(did, fragment)
-    case "web":
-        return r.resolveDidWeb(ctx, did, fragment)
-    default:
-        return nil, fmt.Errorf("unsupported DID method: %s", method)
+    if strings.HasPrefix(did, "did:jwk:") {
+        return r.resolveDidJwk(did)
     }
+    
+    return nil, fmt.Errorf("unsupported local DID method: %s", did)
 }
 
-// resolveDidKey resolves did:key (self-contained, no network fetch)
-func (r *DIDKeyResolver) resolveDidKey(did, fragment string) (crypto.PublicKey, error) {
-    // Extract multibase-encoded public key from DID
+// resolveDidKey extracts key from did:key (multicodec-encoded)
+func (r *LocalDIDResolver) resolveDidKey(did string) (crypto.PublicKey, error) {
     // did:key:z6Mk... -> multibase-encoded public key
     parts := strings.Split(did, ":")
     if len(parts) < 3 {
@@ -399,127 +463,90 @@ func (r *DIDKeyResolver) resolveDidKey(did, fragment string) (crypto.PublicKey, 
         return nil, fmt.Errorf("failed to decode multibase key: %w", err)
     }
     
-    // Parse multicodec prefix and extract key
-    // 0xed01 = Ed25519, 0x1200 = P-256, 0x1201 = P-384, etc.
     return r.parseMulticodecKey(keyBytes)
 }
 
-// resolveDidWeb resolves did:web by fetching DID document
-func (r *DIDKeyResolver) resolveDidWeb(ctx context.Context, did, fragment string) (crypto.PublicKey, error) {
-    // Check cache
-    if doc := r.cache.Get(did); doc != nil {
-        return r.extractKeyFromDocument(doc.Value(), fragment)
+// resolveDidJwk extracts key from did:jwk (base64url-encoded JWK)
+func (r *LocalDIDResolver) resolveDidJwk(did string) (crypto.PublicKey, error) {
+    // did:jwk:<base64url-encoded-jwk>
+    parts := strings.Split(did, ":")
+    if len(parts) < 3 {
+        return nil, fmt.Errorf("invalid did:jwk format: %s", did)
     }
     
-    // Build URL from did:web
-    // did:web:example.com -> https://example.com/.well-known/did.json
-    // did:web:example.com:path:to -> https://example.com/path/to/did.json
-    url, err := r.didWebToURL(did)
+    jwkBytes, err := base64.RawURLEncoding.DecodeString(parts[2])
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("failed to decode JWK: %w", err)
     }
     
-    // Fetch DID document
-    req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-    if err != nil {
-        return nil, err
-    }
-    req.Header.Set("Accept", "application/did+json, application/json")
-    
-    resp, err := r.httpClient.Do(req)
-    if err != nil {
-        return nil, fmt.Errorf("failed to fetch DID document: %w", err)
-    }
-    defer resp.Body.Close()
-    
-    if resp.StatusCode != http.StatusOK {
-        return nil, fmt.Errorf("DID document fetch failed: %d", resp.StatusCode)
+    var jwk JWK
+    if err := json.Unmarshal(jwkBytes, &jwk); err != nil {
+        return nil, fmt.Errorf("failed to parse JWK: %w", err)
     }
     
-    var doc DIDDocument
-    if err := json.NewDecoder(resp.Body).Decode(&doc); err != nil {
-        return nil, fmt.Errorf("failed to parse DID document: %w", err)
-    }
-    
-    // Cache document
-    r.cache.Set(did, &doc, ttlcache.DefaultTTL)
-    
-    return r.extractKeyFromDocument(&doc, fragment)
+    return r.parseJWKKey(&jwk)
 }
 
-// extractKeyFromDocument extracts a public key from a DID document
-func (r *DIDKeyResolver) extractKeyFromDocument(doc *DIDDocument, fragment string) (crypto.PublicKey, error) {
-    targetID := doc.ID + "#" + fragment
+// parseMulticodecKey parses a multicodec-prefixed key
+func (r *LocalDIDResolver) parseMulticodecKey(keyBytes []byte) (crypto.PublicKey, error) {
+    if len(keyBytes) < 2 {
+        return nil, fmt.Errorf("key bytes too short")
+    }
     
-    for _, vm := range doc.VerificationMethod {
-        if vm.ID == targetID || vm.ID == fragment {
-            return r.parseVerificationMethodKey(&vm)
+    // Check multicodec prefix
+    // 0xed01 = Ed25519 public key
+    // 0x1200 = P-256 public key (compressed)
+    // 0x1201 = P-384 public key (compressed)
+    
+    if keyBytes[0] == 0xed && keyBytes[1] == 0x01 {
+        // Ed25519: 32 bytes after prefix
+        if len(keyBytes) < 34 {
+            return nil, fmt.Errorf("Ed25519 key too short")
         }
+        return ed25519.PublicKey(keyBytes[2:34]), nil
     }
     
-    return nil, fmt.Errorf("verification method not found: %s", targetID)
+    if keyBytes[0] == 0x80 && keyBytes[1] == 0x24 {
+        // P-256 compressed: 33 bytes after prefix
+        return r.decompressP256Key(keyBytes[2:])
+    }
+    
+    return nil, fmt.Errorf("unsupported multicodec prefix: %x%x", keyBytes[0], keyBytes[1])
 }
+```
 
-// parseVerificationMethodKey extracts public key from verification method
-func (r *DIDKeyResolver) parseVerificationMethodKey(vm *VerificationMethod) (crypto.PublicKey, error) {
-    // Try publicKeyMultibase first
-    if vm.PublicKeyMultibase != "" {
-        _, keyBytes, err := multibase.Decode(vm.PublicKeyMultibase)
-        if err != nil {
-            return nil, err
-        }
-        return r.parseMulticodecKey(keyBytes)
-    }
-    
-    // Try publicKeyJwk
-    if vm.PublicKeyJwk != nil {
-        return r.parseJWKKey(vm.PublicKeyJwk)
-    }
-    
-    return nil, fmt.Errorf("no supported key format in verification method")
-}
+### Trust Evaluation via go-trust
 
-// parseJWKKey parses a JWK to a public key
-func (r *DIDKeyResolver) parseJWKKey(jwk *JWK) (crypto.PublicKey, error) {
-    switch jwk.Kty {
-    case "EC":
-        return r.parseECJWK(jwk)
-    case "OKP":
-        return r.parseOKPJWK(jwk)
-    default:
-        return nil, fmt.Errorf("unsupported key type: %s", jwk.Kty)
-    }
-}
+The go-trust service handles all trust frameworks:
 
-// parseECJWK parses an EC JWK
-func (r *DIDKeyResolver) parseECJWK(jwk *JWK) (*ecdsa.PublicKey, error) {
-    var curve elliptic.Curve
-    switch jwk.Crv {
-    case "P-256":
-        curve = elliptic.P256()
-    case "P-384":
-        curve = elliptic.P384()
-    case "P-521":
-        curve = elliptic.P521()
-    default:
-        return nil, fmt.Errorf("unsupported curve: %s", jwk.Crv)
-    }
+| Verification Method | go-trust Responsibility |
+|---------------------|------------------------|
+| `did:web:example.com#key-1` | Resolve DID document, verify domain binding |
+| `did:ebsi:...` | Resolve via EBSI resolver, verify trust registry |
+| `https://issuer.example.com/keys/1` | Resolve JWKS, evaluate ETSI TL or OpenID Fed |
+| X.509 certificate | Validate chain against configured trust anchors |
+
+The key insight is that **go-trust provides both resolution AND trust evaluation** - it doesn't just fetch keys, it verifies that the name-to-key binding is trusted according to configured policies.
+
+### Configuration Example
+
+```yaml
+verifier:
+  key_resolver:
+    # go-trust service endpoint
+    go_trust_url: "https://trust.example.com"
     
-    x, err := base64.RawURLEncoding.DecodeString(jwk.X)
-    if err != nil {
-        return nil, err
-    }
-    y, err := base64.RawURLEncoding.DecodeString(jwk.Y)
-    if err != nil {
-        return nil, err
-    }
+    # Trust policies (evaluated by go-trust)
+    trust_policies:
+      - "etsi_tl:eu-lotl"           # EU Trusted List
+      - "openid_federation:eduGAIN" # eduGAIN federation
+      - "pkix:internal_ca"          # Internal PKI
     
-    return &ecdsa.PublicKey{
-        Curve: curve,
-        X:     new(big.Int).SetBytes(x),
-        Y:     new(big.Int).SetBytes(y),
-    }, nil
-}
+    # Local methods (always available, no go-trust needed)
+    # These are inherently trustless - key IS the identifier
+    local_did_methods:
+      - "did:key"
+      - "did:jwk"
 ```
 
 ## DCQL Format Support
@@ -655,37 +682,45 @@ func (c *Client) MakeVC20(ctx context.Context, req *CreateVC20Request) (*CreateV
 
 ## Feature Parity Matrix
 
-| Feature | SD-JWT | mDoc | W3C VC (planned) |
-|---------|--------|------|------------------|
-| **Issuance** | ✅ | ✅ | 🔄 Phase 2 |
-| **Verification** | ✅ | ✅ | 🔄 Phase 1 |
-| **Selective Disclosure** | ✅ | ✅ | 🔄 (ecdsa-sd-2023) |
-| **Holder Binding** | ✅ (cnf) | ✅ (device key) | 🔄 (proof.challenge) |
-| **Revocation** | ✅ (status list) | ✅ | 🔄 (BitstringStatusList) |
-| **DCQL Query** | ✅ | ✅ | 🔄 Phase 1.3 |
-| **Presentation** | ✅ | ✅ | 🔄 Phase 4 |
-| **Trust Framework** | ✅ (ETSI TL) | ✅ | 🔄 Phase 3.2 |
+| Feature | SD-JWT | mDoc | W3C VC (Status) |
+|---------|--------|------|-----------------|
+| **Issuance** | ✅ | ✅ | ✅ Complete |
+| **Verification** | ✅ | ✅ | ✅ Complete |
+| **Selective Disclosure** | ✅ | ✅ | ✅ (ecdsa-sd-2023) |
+| **Holder Binding** | ✅ (cnf) | ✅ (device key) | ⏳ (proof.challenge) |
+| **Revocation** | ✅ (status list) | ✅ | ⏳ (BitstringStatusList) |
+| **DCQL Query** | ✅ | ✅ | 🔄 Partial |
+| **Presentation** | ✅ | ✅ | ⏳ Phase 4 |
+| **Trust Framework** | ✅ (ETSI TL) | ✅ | ⏳ Phase 3.2 |
 
 ## Testing Requirements
 
-### Unit Tests
-```go
-// pkg/openid4vp/vc20_handler_test.go
+### Unit Tests (Implemented)
 
-func TestVC20Handler_VerifyAndExtract_ECDSA2019(t *testing.T)
-func TestVC20Handler_VerifyAndExtract_ECDSASD2023_Base(t *testing.T)
-func TestVC20Handler_VerifyAndExtract_ECDSASD2023_Derived(t *testing.T)
-func TestVC20Handler_VerifyAndExtract_UntrustedIssuer(t *testing.T)
-func TestVC20Handler_VerifyAndExtract_ExpiredCredential(t *testing.T)
-func TestVC20Handler_VerifyAndExtract_InvalidSignature(t *testing.T)
+The following tests are implemented in `pkg/openid4vp/vc20_handler_test.go`:
+
+```go
+func TestVC20Handler_VerifyAndExtract_ECDSA2019(t *testing.T)          // ✅
+func TestVC20Handler_VerifyAndExtract_ECDSA2019_WithStaticKey(t *testing.T) // ✅
+func TestVC20Handler_VerifyAndExtract_ECDSASD2023_Base(t *testing.T)   // ✅
+func TestVC20Handler_VerifyAndExtract_EdDSA2022(t *testing.T)          // ✅
+func TestVC20Handler_CreateCredential_ECDSA2019(t *testing.T)          // ✅
+func TestVC20Handler_CreateCredential_ECDSASD2023(t *testing.T)        // ✅
+func TestVC20Handler_CreateCredential_EdDSA2022(t *testing.T)          // ✅
 ```
 
-### Integration Tests
-```go
-// internal/verifier/apiv1/handler_openid4vp_vc20_test.go
+Issuer handler tests in `internal/issuer/apiv1/handlers_vc20_test.go`:
 
-func TestOpenID4VP_VC20_EndToEnd(t *testing.T)
-func TestOpenID4VP_VC20_SelectiveDisclosure(t *testing.T)
+```go
+func TestMakeVC20_ECDSA2019(t *testing.T)                              // ✅
+func TestMakeVC20_ECDSASD2023(t *testing.T)                            // ✅
+func TestMakeVC20_DefaultCryptosuite(t *testing.T)                     // ✅
+func TestMakeVC20_InvalidCryptosuite(t *testing.T)                     // ✅
+func TestMakeVC20_InvalidDocumentData(t *testing.T)                    // ✅
+func TestMakeVC20_RoundTrip(t *testing.T)                              // ✅
+```
+
+### Integration Tests (Pending)
 func TestOpenID4VP_VC20_CrossFormat(t *testing.T) // Wallet with SD-JWT, verifier requests ldp_vc
 ```
 

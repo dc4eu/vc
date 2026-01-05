@@ -10,6 +10,7 @@ option go_package = "vc/internal/gen/issuer/apiv1_issuer";
 service IssuerService {
     rpc MakeSDJWT (MakeSDJWTRequest) returns (MakeSDJWTReply) {}
     rpc MakeMDoc (MakeMDocRequest) returns (MakeMDocReply) {}
+    rpc MakeVC20 (MakeVC20Request) returns (MakeVC20Reply) {}
     rpc JWKS (Empty) returns (JwksReply) {}
 }
 
@@ -68,4 +69,24 @@ message jwk {
     string d = 6;
     repeated string key_ops = 7;
     bool ext = 8;
+}
+
+// MakeVC20Request is the request for creating a W3C VC 2.0 Data Integrity credential
+message MakeVC20Request {
+    string scope = 1;                     // Credential scope (e.g., "pid", "ehic")
+    bytes document_data = 2;              // JSON encoded credential subject data
+    repeated string credential_types = 3; // Credential types (e.g., ["VerifiableCredential", "PersonIdentificationData"])
+    string subject_did = 4;               // Optional subject DID for holder binding
+    string cryptosuite = 5;               // Cryptosuite: "ecdsa-rdfc-2019", "ecdsa-sd-2023", or "eddsa-rdfc-2022"
+    repeated string mandatory_pointers = 6; // JSON pointers for mandatory claims (SD-2023 only)
+}
+
+// MakeVC20Reply contains the issued W3C VC 2.0 credential
+message MakeVC20Reply {
+    bytes credential = 1;              // JSON-LD encoded credential with Data Integrity proof
+    string credential_id = 2;          // The credential's unique ID (urn:uuid:...)
+    int64 status_list_section = 3;     // Status list section (if revocation enabled)
+    int64 status_list_index = 4;       // Status list index
+    string valid_from = 5;             // RFC3339 timestamp
+    string valid_until = 6;            // RFC3339 timestamp (optional)
 }

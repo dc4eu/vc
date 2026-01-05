@@ -137,6 +137,22 @@ func (p *Proof) ExtractJWK() (*apiv1_issuer.Jwk, error) {
 	}
 }
 
+// ExtractSubjectDID extracts the subject DID from the proof if available.
+// For JWT proofs, this would typically come from the JWT claims.
+// Returns empty string if no subject DID is found.
+func (p *Proof) ExtractSubjectDID() string {
+	switch p.ProofType {
+	case "jwt":
+		if p.JWT == "" {
+			return ""
+		}
+		token := ProofJWTToken(p.JWT)
+		return token.ExtractSubjectDID()
+	default:
+		return ""
+	}
+}
+
 // Proofs https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-request
 // Contains arrays of proofs by type for batch credential requests.
 // Only one proof type should be used per request.

@@ -131,6 +131,10 @@ type CredentialConfigurationsSupported struct {
 	// Doctype MDOC specific parameter
 	Doctype string `json:"doctype,omitempty" yaml:"doctype,omitempty"`
 
+	// Cryptosuite: OPTIONAL. For ldp_vc and vc+ld+json formats, identifies the cryptographic suite used for
+	// Data Integrity Proofs. Valid values include: ecdsa-rdfc-2019, ecdsa-sd-2023, eddsa-rdfc-2022.
+	Cryptosuite string `json:"cryptosuite,omitempty" yaml:"cryptosuite,omitempty"`
+
 	// Scope: OPTIONAL. A JSON string identifying the scope value that this Credential Issuer supports for this particular Credential. The value can be the same across multiple credential_configurations_supported objects. The Authorization Server MUST be able to uniquely identify the Credential Issuer based on the scope value. The Wallet can use this value in the Authorization Request as defined in Section 5.1.2. Scope values in this Credential Issuer metadata MAY duplicate those in the scopes_supported parameter of the Authorization Server.
 	Scope string `json:"scope,omitempty" yaml:"scope,omitempty"`
 

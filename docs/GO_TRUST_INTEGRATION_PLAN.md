@@ -1,8 +1,32 @@
 # Go-Trust AuthZEN Client Integration Plan
 
-This document outlines the detailed implementation plan for replacing the local authzen client with go-trust's `authzenclient` package.
+**Status: ✅ Implemented** (January 2026)
 
-## Current State
+This document outlines the implementation of go-trust's `authzenclient` package integration. The implementation is complete in `pkg/trust/` and `pkg/keyresolver/`.
+
+## Implementation Summary
+
+The integration has been completed with a unified trust package that provides:
+
+1. **`pkg/trust/` package** - Protocol-agnostic trust evaluation:
+   - `TrustEvaluator` interface for all credential formats
+   - `GoTrustEvaluator` using go-trust AuthZEN client
+   - `LocalTrustEvaluator` for offline x5c validation
+   - `CompositeEvaluator` for combining multiple strategies
+   - Policy-based routing via `action.name` (e.g., pid-provider, credential-issuer)
+
+2. **`pkg/keyresolver/` updates**:
+   - `vc20_adapter.go` - Bridges trust package to VC20 key resolver interface
+   - `resolver.go` - Local DID resolution (did:key, did:jwk)
+   - `gotrust_testserver_test.go` - Integration tests
+
+## Original Plan
+
+The original implementation plan is preserved below for reference.
+
+---
+
+## Historical Context
 
 ### Local Implementation
 

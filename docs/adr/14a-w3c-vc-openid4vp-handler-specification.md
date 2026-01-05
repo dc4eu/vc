@@ -687,11 +687,11 @@ func (c *Client) MakeVC20(ctx context.Context, req *CreateVC20Request) (*CreateV
 | **Issuance** | ✅ | ✅ | ✅ Complete |
 | **Verification** | ✅ | ✅ | ✅ Complete |
 | **Selective Disclosure** | ✅ | ✅ | ✅ (ecdsa-sd-2023) |
-| **Holder Binding** | ✅ (cnf) | ✅ (device key) | ⏳ (proof.challenge) |
-| **Revocation** | ✅ (status list) | ✅ | ⏳ (BitstringStatusList) |
-| **DCQL Query** | ✅ | ✅ | 🔄 Partial |
-| **Presentation** | ✅ | ✅ | ⏳ Phase 4 |
-| **Trust Framework** | ✅ (ETSI TL) | ✅ | ⏳ Phase 3.2 |
+| **Holder Binding** | ✅ (cnf) | ✅ (device key) | ✅ (proof.challenge) |
+| **Revocation** | ✅ (status list) | ✅ | 🔄 Planned (BitstringStatusList) |
+| **DCQL Query** | ✅ | ✅ | ✅ Complete |
+| **Presentation** | ✅ | ✅ | ✅ Complete (VP Builder) |
+| **Trust Framework** | ✅ (ETSI TL) | ✅ | ✅ Complete (pkg/trust) |
 
 ## Testing Requirements
 

@@ -370,8 +370,9 @@ func CheckBitstringStatus(statusListURL string, statusIndex int) (bool, error)
 | 3.1 | go-trust integration | High | 2 days | ✅ Complete |
 | 3.2 | Local DID resolver (did:key, did:jwk) | Medium | 0.5 days | ✅ Complete |
 | 3.3 | Trust policy config | Medium | 1 day | ✅ Complete |
+| 3.4 | Unified trust package | High | 2 days | ✅ Complete |
 | 4.1 | VP builder | Medium | 1 day | ✅ Complete |
-| 5.1 | Status list | Low | 2 days | 🔄 In Review |
+| 5.1 | Status list | Low | 2 days | 🔄 Planned |
 
 ### Implementation Notes
 
@@ -436,7 +437,29 @@ func CheckBitstringStatus(statusListURL string, statusIndex int) (bool, error)
 - BitstringStatusList implementation under review
 - See PR for status list credential support
 
-**Total effort completed**: ~12 days
+**Total effort completed**: ~14 days
+
+**Unified Trust Package** (`pkg/trust/`) - January 2026:
+
+- **TrustEvaluator Interface** (`pkg/trust/trust.go`):
+  - Protocol-agnostic trust evaluation interface
+  - `EvaluationRequest` with Role→action.name mapping via `GetEffectiveAction()`
+  - Supports JWK, X5C, and raw public key validation
+  - Role constants for PID provider, credential issuer/verifier
+
+- **GoTrustEvaluator** (`pkg/trust/gotrust.go`, build tag: vc20):
+  - Uses go-trust AuthZEN client for trust decisions
+  - Policy-based routing via action.name (pid-provider, credential-issuer, etc.)
+  - DID resolution via `ResolveKey()` method
+
+- **LocalTrustEvaluator** (`pkg/trust/local.go`):
+  - Offline x5c validation against local certificate pool
+  - Role restrictions and custom verification
+  - Certificate chain validation with expiry checking
+
+- **CompositeEvaluator** (`pkg/trust/composite.go`):
+  - Combines multiple TrustEvaluators with strategies
+  - FirstSuccess, AllMustSucceed, Fallback patterns
 
 ### Testing Strategy
 

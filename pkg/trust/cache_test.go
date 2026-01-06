@@ -10,7 +10,44 @@ import (
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/sirosfoundation/go-trust/pkg/trustapi"
 )
+
+// testReq creates an EvaluationRequest for testing
+func testReq(subjectID string, keyType KeyType, role Role) *EvaluationRequest {
+	return &EvaluationRequest{
+		EvaluationRequest: trustapi.EvaluationRequest{
+			SubjectID: subjectID,
+			KeyType:   keyType,
+			Role:      role,
+		},
+	}
+}
+
+// testReqWithKey creates an EvaluationRequest with a key for testing
+func testReqWithKey(subjectID string, keyType KeyType, key any, role Role) *EvaluationRequest {
+	return &EvaluationRequest{
+		EvaluationRequest: trustapi.EvaluationRequest{
+			SubjectID: subjectID,
+			KeyType:   keyType,
+			Key:       key,
+			Role:      role,
+		},
+	}
+}
+
+// testReqWithOptions creates an EvaluationRequest with options for testing
+func testReqWithOptions(subjectID string, keyType KeyType, role Role, opts *TrustOptions) *EvaluationRequest {
+	return &EvaluationRequest{
+		EvaluationRequest: trustapi.EvaluationRequest{
+			SubjectID: subjectID,
+			KeyType:   keyType,
+			Role:      role,
+			Options:   opts,
+		},
+	}
+}
 
 func TestTrustCache_BasicOperations(t *testing.T) {
 	cache := NewTrustCache(TrustCacheConfig{
@@ -18,11 +55,7 @@ func TestTrustCache_BasicOperations(t *testing.T) {
 	})
 	defer cache.Stop()
 
-	req := &EvaluationRequest{
-		SubjectID: "did:web:example.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-	}
+	req := testReq("did:web:example.com", KeyTypeJWK, RoleIssuer)
 
 	decision := &TrustDecision{
 		Trusted:        true,
@@ -60,16 +93,8 @@ func TestTrustCache_DifferentRequests(t *testing.T) {
 	cache := NewTrustCache(TrustCacheConfig{})
 	defer cache.Stop()
 
-	req1 := &EvaluationRequest{
-		SubjectID: "did:web:issuer1.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-	}
-	req2 := &EvaluationRequest{
-		SubjectID: "did:web:issuer2.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-	}
+	req1 := testReq("did:web:issuer1.com", KeyTypeJWK, RoleIssuer)
+	req2 := testReq("did:web:issuer2.com", KeyTypeJWK, RoleIssuer)
 
 	decision1 := &TrustDecision{Trusted: true, Reason: "issuer1"}
 	decision2 := &TrustDecision{Trusted: false, Reason: "issuer2"}
@@ -92,16 +117,8 @@ func TestTrustCache_KeyTypeDistinction(t *testing.T) {
 	cache := NewTrustCache(TrustCacheConfig{})
 	defer cache.Stop()
 
-	reqJWK := &EvaluationRequest{
-		SubjectID: "https://issuer.example.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-	}
-	reqX5C := &EvaluationRequest{
-		SubjectID: "https://issuer.example.com",
-		KeyType:   KeyTypeX5C,
-		Role:      RoleIssuer,
-	}
+	reqJWK := testReq("https://issuer.example.com", KeyTypeJWK, RoleIssuer)
+	reqX5C := testReq("https://issuer.example.com", KeyTypeX5C, RoleIssuer)
 
 	decisionJWK := &TrustDecision{Trusted: true, Reason: "jwk"}
 	decisionX5C := &TrustDecision{Trusted: true, Reason: "x5c"}
@@ -121,16 +138,8 @@ func TestTrustCache_RoleDistinction(t *testing.T) {
 	cache := NewTrustCache(TrustCacheConfig{})
 	defer cache.Stop()
 
-	reqIssuer := &EvaluationRequest{
-		SubjectID: "did:web:example.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-	}
-	reqVerifier := &EvaluationRequest{
-		SubjectID: "did:web:example.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleVerifier,
-	}
+	reqIssuer := testReq("did:web:example.com", KeyTypeJWK, RoleIssuer)
+	reqVerifier := testReq("did:web:example.com", KeyTypeJWK, RoleVerifier)
 
 	decisionIssuer := &TrustDecision{Trusted: true, Reason: "issuer"}
 	decisionVerifier := &TrustDecision{Trusted: false, Reason: "verifier"}
@@ -154,18 +163,8 @@ func TestTrustCache_KeyFingerprintX5C(t *testing.T) {
 	cert1 := createTestCert(t, "CN=Test1")
 	cert2 := createTestCert(t, "CN=Test2")
 
-	req1 := &EvaluationRequest{
-		SubjectID: "https://issuer.example.com",
-		KeyType:   KeyTypeX5C,
-		Key:       []*x509.Certificate{cert1},
-		Role:      RoleIssuer,
-	}
-	req2 := &EvaluationRequest{
-		SubjectID: "https://issuer.example.com",
-		KeyType:   KeyTypeX5C,
-		Key:       []*x509.Certificate{cert2},
-		Role:      RoleIssuer,
-	}
+	req1 := testReqWithKey("https://issuer.example.com", KeyTypeX5C, []*x509.Certificate{cert1}, RoleIssuer)
+	req2 := testReqWithKey("https://issuer.example.com", KeyTypeX5C, []*x509.Certificate{cert2}, RoleIssuer)
 
 	decision1 := &TrustDecision{Trusted: true, Reason: "cert1"}
 	decision2 := &TrustDecision{Trusted: true, Reason: "cert2"}
@@ -191,11 +190,7 @@ func TestTrustCache_Clear(t *testing.T) {
 	defer cache.Stop()
 
 	for i := 0; i < 5; i++ {
-		req := &EvaluationRequest{
-			SubjectID: "did:web:example.com",
-			KeyType:   KeyTypeJWK,
-			Role:      Role("role-" + string(rune('a'+i))),
-		}
+		req := testReq("did:web:example.com", KeyTypeJWK, Role("role-"+string(rune('a'+i))))
 		cache.Set(req, &TrustDecision{Trusted: true})
 	}
 
@@ -228,11 +223,7 @@ func TestCachingTrustEvaluator(t *testing.T) {
 	})
 	defer caching.Stop()
 
-	req := &EvaluationRequest{
-		SubjectID: "did:web:example.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-	}
+	req := testReq("did:web:example.com", KeyTypeJWK, RoleIssuer)
 
 	// First call should hit the evaluator
 	_, err := caching.Evaluate(context.Background(), req)
@@ -265,12 +256,7 @@ func TestCachingTrustEvaluator_BypassCache(t *testing.T) {
 	caching := NewCachingTrustEvaluator(mockEvaluator, TrustCacheConfig{})
 	defer caching.Stop()
 
-	req := &EvaluationRequest{
-		SubjectID: "did:web:example.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-		Options:   &TrustOptions{BypassCache: true},
-	}
+	req := testReqWithOptions("did:web:example.com", KeyTypeJWK, RoleIssuer, &TrustOptions{BypassCache: true})
 
 	// Both calls should hit the evaluator (bypass cache)
 	caching.Evaluate(context.Background(), req)
@@ -293,11 +279,7 @@ func TestCachingTrustEvaluator_NegativeNotCached(t *testing.T) {
 	caching := NewCachingTrustEvaluator(mockEvaluator, TrustCacheConfig{})
 	defer caching.Stop()
 
-	req := &EvaluationRequest{
-		SubjectID: "did:web:untrusted.com",
-		KeyType:   KeyTypeJWK,
-		Role:      RoleIssuer,
-	}
+	req := testReq("did:web:untrusted.com", KeyTypeJWK, RoleIssuer)
 
 	// Negative decisions are not cached by default
 	caching.Evaluate(context.Background(), req)

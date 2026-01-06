@@ -10,6 +10,8 @@ import (
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/sirosfoundation/go-trust/pkg/trustapi"
 )
 
 // createTestCertChain creates a test certificate chain (leaf + root).
@@ -88,10 +90,12 @@ func TestLocalTrustEvaluator_X5C(t *testing.T) {
 
 	t.Run("valid chain is trusted", func(t *testing.T) {
 		decision, err := eval.Evaluate(ctx, &EvaluationRequest{
-			SubjectID: "https://issuer.example.com",
-			KeyType:   KeyTypeX5C,
-			Key:       chain,
-			Role:      RoleIssuer,
+			EvaluationRequest: trustapi.EvaluationRequest{
+				SubjectID: "https://issuer.example.com",
+				KeyType:   KeyTypeX5C,
+				Key:       chain,
+				Role:      RoleIssuer,
+			},
 		})
 
 		if err != nil {
@@ -106,9 +110,11 @@ func TestLocalTrustEvaluator_X5C(t *testing.T) {
 		untrustedChain, _, _ := createTestCertChain(t) // Different root
 
 		decision, err := eval.Evaluate(ctx, &EvaluationRequest{
-			SubjectID: "https://issuer.example.com",
-			KeyType:   KeyTypeX5C,
-			Key:       untrustedChain,
+			EvaluationRequest: trustapi.EvaluationRequest{
+				SubjectID: "https://issuer.example.com",
+				KeyType:   KeyTypeX5C,
+				Key:       untrustedChain,
+			},
 		})
 
 		if err != nil {
@@ -121,9 +127,11 @@ func TestLocalTrustEvaluator_X5C(t *testing.T) {
 
 	t.Run("subject mismatch is rejected", func(t *testing.T) {
 		decision, err := eval.Evaluate(ctx, &EvaluationRequest{
-			SubjectID: "https://different.example.com", // Doesn't match cert CN
-			KeyType:   KeyTypeX5C,
-			Key:       chain,
+			EvaluationRequest: trustapi.EvaluationRequest{
+				SubjectID: "https://different.example.com", // Doesn't match cert CN
+				KeyType:   KeyTypeX5C,
+				Key:       chain,
+			},
 		})
 
 		if err != nil {
@@ -168,8 +176,10 @@ func TestLocalTrustEvaluator_ExpiredCert(t *testing.T) {
 	})
 
 	decision, err := eval.Evaluate(context.Background(), &EvaluationRequest{
-		KeyType: KeyTypeX5C,
-		Key:     []*x509.Certificate{leafCert, rootCert},
+		EvaluationRequest: trustapi.EvaluationRequest{
+			KeyType: KeyTypeX5C,
+			Key:     []*x509.Certificate{leafCert, rootCert},
+		},
 	})
 
 	if err != nil {
@@ -195,10 +205,12 @@ func TestLocalTrustEvaluator_RoleRestriction(t *testing.T) {
 
 	t.Run("allowed role is accepted", func(t *testing.T) {
 		decision, err := eval.Evaluate(ctx, &EvaluationRequest{
-			SubjectID: "https://issuer.example.com",
-			KeyType:   KeyTypeX5C,
-			Key:       chain,
-			Role:      RoleIssuer,
+			EvaluationRequest: trustapi.EvaluationRequest{
+				SubjectID: "https://issuer.example.com",
+				KeyType:   KeyTypeX5C,
+				Key:       chain,
+				Role:      RoleIssuer,
+			},
 		})
 
 		if err != nil {
@@ -211,10 +223,12 @@ func TestLocalTrustEvaluator_RoleRestriction(t *testing.T) {
 
 	t.Run("disallowed role is rejected", func(t *testing.T) {
 		decision, err := eval.Evaluate(ctx, &EvaluationRequest{
-			SubjectID: "https://issuer.example.com",
-			KeyType:   KeyTypeX5C,
-			Key:       chain,
-			Role:      RoleVerifier, // Not in allowed roles
+			EvaluationRequest: trustapi.EvaluationRequest{
+				SubjectID: "https://issuer.example.com",
+				KeyType:   KeyTypeX5C,
+				Key:       chain,
+				Role:      RoleVerifier, // Not in allowed roles
+			},
 		})
 
 		if err != nil {
@@ -240,9 +254,11 @@ func TestCompositeEvaluator_FirstSuccess(t *testing.T) {
 	composite := NewCompositeEvaluator(StrategyFirstSuccess, rejectingEval, acceptingEval)
 
 	decision, err := composite.Evaluate(context.Background(), &EvaluationRequest{
-		SubjectID: "https://issuer.example.com",
-		KeyType:   KeyTypeX5C,
-		Key:       chain,
+		EvaluationRequest: trustapi.EvaluationRequest{
+			SubjectID: "https://issuer.example.com",
+			KeyType:   KeyTypeX5C,
+			Key:       chain,
+		},
 	})
 
 	if err != nil {
@@ -263,9 +279,11 @@ func TestCompositeEvaluator_Fallback(t *testing.T) {
 	composite := NewCompositeEvaluator(StrategyFallback, acceptingEval)
 
 	decision, err := composite.Evaluate(context.Background(), &EvaluationRequest{
-		SubjectID: "https://issuer.example.com",
-		KeyType:   KeyTypeX5C,
-		Key:       chain,
+		EvaluationRequest: trustapi.EvaluationRequest{
+			SubjectID: "https://issuer.example.com",
+			KeyType:   KeyTypeX5C,
+			Key:       chain,
+		},
 	})
 
 	if err != nil {
@@ -355,57 +373,57 @@ func TestLocalTrustEvaluator_SupportsKeyType(t *testing.T) {
 func TestEvaluationRequest_GetEffectiveAction(t *testing.T) {
 	tests := []struct {
 		name   string
-		req    EvaluationRequest
+		req    *EvaluationRequest
 		expect string
 	}{
 		{
 			name:   "explicit action takes precedence",
-			req:    EvaluationRequest{Action: "custom-policy", Role: RoleIssuer},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Action: "custom-policy", Role: RoleIssuer}},
 			expect: "custom-policy",
 		},
 		{
 			name:   "no role returns empty",
-			req:    EvaluationRequest{},
+			req:    &EvaluationRequest{},
 			expect: "",
 		},
 		{
 			name:   "PID issuer becomes pid-provider",
-			req:    EvaluationRequest{Role: RoleIssuer, CredentialType: "PID"},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleIssuer, CredentialType: "PID"}},
 			expect: "pid-provider",
 		},
 		{
 			name:   "generic issuer with credential type becomes credential-issuer",
-			req:    EvaluationRequest{Role: RoleIssuer, CredentialType: "mDL"},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleIssuer, CredentialType: "mDL"}},
 			expect: "credential-issuer",
 		},
 		{
 			name:   "verifier becomes credential-verifier",
-			req:    EvaluationRequest{Role: RoleVerifier},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleVerifier}},
 			expect: "credential-verifier",
 		},
 		{
 			name:   "wallet provider stays as-is",
-			req:    EvaluationRequest{Role: RoleWalletProvider},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleWalletProvider}},
 			expect: "wallet_provider",
 		},
 		{
 			name:   "issuer without credential type stays as issuer",
-			req:    EvaluationRequest{Role: RoleIssuer},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleIssuer}},
 			expect: "issuer",
 		},
 		{
 			name:   "mDL docType issuer becomes mdl-issuer",
-			req:    EvaluationRequest{Role: RoleCredentialIssuer, DocType: "org.iso.18013.5.1.mDL"},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleCredentialIssuer, DocType: "org.iso.18013.5.1.mDL"}},
 			expect: "mdl-issuer",
 		},
 		{
 			name:   "mDL docType verifier becomes mdl-verifier",
-			req:    EvaluationRequest{Role: RoleCredentialVerifier, DocType: "org.iso.18013.5.1.mDL"},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleCredentialVerifier, DocType: "org.iso.18013.5.1.mDL"}},
 			expect: "mdl-verifier",
 		},
 		{
 			name:   "credential issuer with docType becomes credential-issuer",
-			req:    EvaluationRequest{Role: RoleCredentialIssuer, DocType: "org.iso.18013.5.1.PID"},
+			req:    &EvaluationRequest{EvaluationRequest: trustapi.EvaluationRequest{Role: RoleCredentialIssuer, DocType: "org.iso.18013.5.1.PID"}},
 			expect: "credential-issuer",
 		},
 	}

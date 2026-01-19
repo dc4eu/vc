@@ -6,8 +6,6 @@ import * as ecdsaSd2023Cryptosuite from '@digitalbazaar/ecdsa-sd-2023-cryptosuit
 import {DataIntegrityProof} from '@digitalbazaar/data-integrity';
 import jsigs from 'jsonld-signatures';
 import {readFileSync} from 'fs';
-import {createLoader} from '@digitalbazaar/did-io';
-import {documentLoader as defaultLoader} from '@digitalbazaar/jsonld-document-loader';
 
 const {createConfirmCryptosuite} = ecdsaSd2023Cryptosuite;
 const {purposes: {AssertionProofPurpose}} = jsigs;

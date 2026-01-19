@@ -25,8 +25,8 @@ import (
 	"vc/internal/registry/db"
 	"vc/pkg/logger"
 	"vc/pkg/model"
-	"vc/pkg/trace"
 	"vc/pkg/tokenstatuslist"
+	"vc/pkg/trace"
 )
 
 // testSuite holds the test infrastructure
@@ -134,7 +134,7 @@ func base64Encode(data []byte) string {
 // initializeConfiguration creates test configuration
 func (s *testSuite) initializeConfiguration() {
 	s.cfg = &model.Cfg{
-		Common: model.Common{
+		Common: &model.Common{
 			Production: false,
 			Log: model.Log{
 				FolderPath: "",
@@ -143,7 +143,7 @@ func (s *testSuite) initializeConfiguration() {
 				URI: "", // Will be set after MongoDB container starts
 			},
 		},
-		Registry: model.Registry{
+		Registry: &model.Registry{
 			ExternalServerURL: "https://registry.example.com",
 			TokenStatusLists: model.TokenStatusLists{
 				SigningKeyPath:       s.keyPath,

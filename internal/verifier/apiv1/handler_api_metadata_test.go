@@ -13,7 +13,7 @@ func TestGetDiscoveryMetadata(t *testing.T) {
 	ctx := context.Background()
 
 	cfg := &model.Cfg{
-		VerifierProxy: model.VerifierProxy{
+		VerifierProxy: &model.VerifierProxy{
 			ExternalURL: "https://verifier.example.com",
 			OIDC: model.OIDCConfig{
 				Issuer:      "https://verifier.example.com",
@@ -88,7 +88,7 @@ func TestGetDiscoveryMetadata_NoCredentials(t *testing.T) {
 	ctx := context.Background()
 
 	cfg := &model.Cfg{
-		VerifierProxy: model.VerifierProxy{
+		VerifierProxy: &model.VerifierProxy{
 			ExternalURL: "https://verifier.example.com",
 			OIDC: model.OIDCConfig{
 				Issuer:      "https://verifier.example.com",
@@ -142,7 +142,7 @@ func TestGetDiscoveryMetadata_CustomExternalURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := &model.Cfg{
-				VerifierProxy: model.VerifierProxy{
+				VerifierProxy: &model.VerifierProxy{
 					ExternalURL: tt.externalURL,
 					OIDC: model.OIDCConfig{
 						Issuer:      tt.externalURL,
@@ -173,7 +173,7 @@ func TestGetJWKS(t *testing.T) {
 	ctx := context.Background()
 
 	cfg := &model.Cfg{
-		VerifierProxy: model.VerifierProxy{
+		VerifierProxy: &model.VerifierProxy{
 			ExternalURL: "https://verifier.example.com",
 			OIDC: model.OIDCConfig{
 				Issuer:      "https://verifier.example.com",
@@ -261,7 +261,7 @@ func BenchmarkGetDiscoveryMetadata(b *testing.B) {
 	ctx := context.Background()
 
 	cfg := &model.Cfg{
-		VerifierProxy: model.VerifierProxy{
+		VerifierProxy: &model.VerifierProxy{
 			ExternalURL: "https://verifier.example.com",
 			OIDC: model.OIDCConfig{
 				Issuer:      "https://verifier.example.com",
@@ -289,7 +289,7 @@ func BenchmarkGetDiscoveryMetadata(b *testing.B) {
 // BenchmarkGetJWKS benchmarks JWKS generation
 func BenchmarkGetJWKS(b *testing.B) {
 	cfg := &model.Cfg{
-		VerifierProxy: model.VerifierProxy{
+		VerifierProxy: &model.VerifierProxy{
 			ExternalURL: "https://verifier.example.com",
 			OIDC: model.OIDCConfig{
 				Issuer:      "https://verifier.example.com",

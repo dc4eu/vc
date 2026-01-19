@@ -35,7 +35,6 @@ type Client struct {
 	datastoreStore                db.DatastoreStore
 	log                           *logger.Log
 	tracer                        *trace.Tracer
-	datastoreClient               *vcclient.Client
 	issuerClient                  apiv1_issuer.IssuerServiceClient
 	registryClient                apiv1_registry.RegistryServiceClient
 	issuerMetadata                *openid4vci.CredentialIssuerMetadataParameters
@@ -89,15 +88,6 @@ func New(ctx context.Context, db *db.Service, tracer *trace.Tracer, cfg *model.C
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	// Specifies the issuer configuration based on the issuer identifier, should be initialized in main I guess.
-	issuerIdentifier := cfg.Issuer.Identifier
-	issuerCFG := cfg.AuthenticSources[issuerIdentifier]
-
-	c.datastoreClient, err = vcclient.New(&vcclient.Config{ApigwFQDN: issuerCFG.AuthenticSourceEndpoint.URL}, c.log)
-	if err != nil {
-		return nil, err
 	}
 
 	// Initialize gRPC client for issuer service

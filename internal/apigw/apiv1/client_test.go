@@ -50,7 +50,7 @@ func TestCreateCredentialOfferLookupMetadata(t *testing.T) {
 					VCTMFilePath: "../../../metadata/vctm_pid_arf_1_8.json",
 				},
 			},
-			APIGW: model.APIGW{
+			APIGW: &model.APIGW{
 				CredentialOffers: model.CredentialOffers{
 					Wallets: map[string]model.CredentialOfferWallets{
 						"dc4eu": {
@@ -149,7 +149,7 @@ func TestCreateCredentialOfferLookupMetadata_EmptyConfig(t *testing.T) {
 		log: logger.NewSimple("test"),
 		cfg: &model.Cfg{
 			CredentialConstructor: map[string]*model.CredentialConstructor{},
-			APIGW: model.APIGW{
+			APIGW: &model.APIGW{
 				CredentialOffers: model.CredentialOffers{
 					Wallets: map[string]model.CredentialOfferWallets{},
 				},
@@ -188,7 +188,7 @@ func TestCreateCredentialOfferLookupMetadata_JSONOutput(t *testing.T) {
 				"pid_1_5":                {VCTMFilePath: "../../../metadata/vctm_pid_arf_1_5.json"},
 				"pid_1_8":                {VCTMFilePath: "../../../metadata/vctm_pid_arf_1_8.json"},
 			},
-			APIGW: model.APIGW{
+			APIGW: &model.APIGW{
 				CredentialOffers: model.CredentialOffers{
 					Wallets: map[string]model.CredentialOfferWallets{
 						"dc4eu":       {Label: "DC4EU Wallet"},

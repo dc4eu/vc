@@ -37,11 +37,11 @@ func TestSaveTransaction(t *testing.T) {
 			ctx := context.Background()
 
 			cfg := &model.Cfg{
-				Common: model.Common{},
-				Issuer: model.Issuer{
+				Common: &model.Common{},
+				Issuer: &model.Issuer{
 					APIServer: model.APIServer{},
 				},
-				Verifier: model.Verifier{},
+				Verifier: &model.Verifier{},
 			}
 
 			log := logger.NewSimple("testing")

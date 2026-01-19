@@ -88,7 +88,7 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 				AuthMethod:   "basic",
 			},
 		},
-		Issuer: model.Issuer{
+		Issuer: &model.Issuer{
 			APIServer:      model.APIServer{},
 			Identifier:     "",
 			GRPCServer:     model.GRPCServer{},
@@ -102,7 +102,7 @@ func mockNewClient(ctx context.Context, t *testing.T, keyType string, log *logge
 				Kid:                      "",
 			},
 		},
-		Registry: model.Registry{
+		Registry: &model.Registry{
 			ExternalServerURL: "https://test-registry.sunet.se",
 		},
 	}

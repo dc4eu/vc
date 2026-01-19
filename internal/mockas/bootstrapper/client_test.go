@@ -290,7 +290,7 @@ func TestUserUpload(t *testing.T) {
 
 			client := &Client{
 				cfg: &model.Cfg{
-					MockAS: model.MockAS{
+					MockAS: &model.MockAS{
 						BootstrapUsers: tt.bootstrapUsers,
 					},
 				},
@@ -723,7 +723,7 @@ func TestDocumentUploader(t *testing.T) {
 
 			client := &Client{
 				cfg: &model.Cfg{
-					MockAS: model.MockAS{
+					MockAS: &model.MockAS{
 						BootstrapUsers: tt.bootstrapUsers,
 					},
 				},

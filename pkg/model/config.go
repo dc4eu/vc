@@ -675,17 +675,17 @@ type AuthenticSource struct {
 
 // Cfg is the main configuration structure for this application
 type Cfg struct {
-	Common           Common                     `yaml:"common"`
+	Common           *Common                    `yaml:"common"`
 	AuthenticSources map[string]AuthenticSource `yaml:"authentic_sources" validate:"omitempty"`
-	APIGW            APIGW                      `yaml:"apigw" validate:"omitempty"`
-	Issuer           Issuer                     `yaml:"issuer" validate:"omitempty"`
-	Verifier         Verifier                   `yaml:"verifier" validate:"omitempty"`
-	VerifierProxy    VerifierProxy              `yaml:"verifier_proxy" validate:"omitempty"`
-	Datastore        Datastore                  `yaml:"datastore" validate:"omitempty"`
-	Registry         Registry                   `yaml:"registry" validate:"omitempty"`
-	Persistent       Persistent                 `yaml:"persistent" validate:"omitempty"`
-	MockAS           MockAS                     `yaml:"mock_as" validate:"omitempty"`
-	UI               UI                         `yaml:"ui" validate:"omitempty"`
+	APIGW            *APIGW                     `yaml:"apigw" validate:"omitempty"`
+	Issuer           *Issuer                    `yaml:"issuer" validate:"omitempty"`
+	Verifier         *Verifier                  `yaml:"verifier" validate:"omitempty"`
+	VerifierProxy    *VerifierProxy             `yaml:"verifier_proxy" validate:"omitempty"`
+	Datastore        *Datastore                 `yaml:"datastore" validate:"omitempty"`
+	Registry         *Registry                  `yaml:"registry" validate:"omitempty"`
+	Persistent       *Persistent                `yaml:"persistent" validate:"omitempty"`
+	MockAS           *MockAS                    `yaml:"mock_as" validate:"omitempty"`
+	UI               *UI                        `yaml:"ui" validate:"omitempty"`
 	// CredentialConstructor maps OAuth2 scope values to their constructor configuration
 	// Key: OAuth2 scope (e.g., "pid", "ehic", "diploma") - matches AuthorizationContext.Scope
 	// The constructor contains the VCT URN and other configuration for issuing that credential type

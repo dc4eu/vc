@@ -225,7 +225,7 @@ func CreateTestClientWithMock(cfg *model.Cfg) (*Client, *MockDBService) {
 
 	if cfg == nil {
 		cfg = &model.Cfg{
-			VerifierProxy: model.VerifierProxy{
+			VerifierProxy: &model.VerifierProxy{
 				ExternalURL: "https://verifier.example.com",
 				OIDC: model.OIDCConfig{
 					Issuer:               "https://verifier.example.com",

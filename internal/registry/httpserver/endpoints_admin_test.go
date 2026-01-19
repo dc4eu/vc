@@ -62,7 +62,7 @@ func setupTestService(t *testing.T) *Service {
 	require.NoError(t, err)
 
 	cfg := &model.Cfg{
-		Registry: model.Registry{
+		Registry: &model.Registry{
 			AdminGUI: model.AdminGUI{
 				Enabled:       true,
 				Username:      "admin",

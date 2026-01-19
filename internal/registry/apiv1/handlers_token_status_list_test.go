@@ -85,7 +85,7 @@ func newTestClient() (*Client, *mockTokenStatusListIssuer) {
 	mock := newMockTokenStatusListIssuer()
 	client := &Client{
 		cfg: &model.Cfg{
-			Registry: model.Registry{
+			Registry: &model.Registry{
 				ExternalServerURL: "https://example.com",
 			},
 		},
@@ -698,7 +698,7 @@ func TestErrorTypes(t *testing.T) {
 func TestNew(t *testing.T) {
 	ctx := context.Background()
 	cfg := &model.Cfg{
-		Registry: model.Registry{
+		Registry: &model.Registry{
 			ExternalServerURL: "https://example.com",
 		},
 	}

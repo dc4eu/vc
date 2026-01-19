@@ -98,6 +98,8 @@ authentic_sources:
         profile: "SD-JWT"
 
 issuer:
+  issuer_url: "http://apigw.vc.docker:8080"
+  wallet_url: ""
   identifier: "SUNET_v1"
   api_server:
     addr: :8080
@@ -112,8 +114,6 @@ issuer:
   #  pin: "1234"
   #  key_label: "issuer-key"
   #  key_id: "issuer-key-1"
-  issuer_url: "http://apigw.vc.docker:8080"
-  wallet_url: ""
   jwt_attribute:
     issuer: https://issuer.sunet.se
     enable_not_before: true

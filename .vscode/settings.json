@@ -96,6 +96,7 @@
         "timestamppb",
         "toarray",
         "tokenstatuslist",
+        "tokenstatuslistissuer",
         "Transportstyrelsen",
         "tslissuer",
         "ttlcache",

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"hash"
 	"testing"
+	"vc/pkg/jose"
 )
 
 // mockFailingHash implements hash.Hash but fails on Write
@@ -130,7 +131,7 @@ func TestSign_JSONMarshalError(t *testing.T) {
 		"iss": "test",
 	}
 
-	signingMethod, _ := getSigningMethodFromKey(privateKey)
+	signingMethod, _ := jose.GetSigningMethodFromKey(privateKey)
 
 	_, err := Sign(header, payload, signingMethod, privateKey)
 	if err == nil {

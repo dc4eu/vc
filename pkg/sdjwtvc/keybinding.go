@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"hash"
 	"time"
+	"vc/pkg/jose"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/sha3"
@@ -58,7 +59,7 @@ func CreateKeyBindingJWT(
 	}
 
 	// Determine signing method from private key
-	signingMethod, algName := getSigningMethodFromKey(holderPrivateKey)
+	signingMethod, algName := jose.GetSigningMethodFromKey(holderPrivateKey)
 
 	// Create JWT header
 	// Per section 4.3: typ MUST be "kb+jwt"

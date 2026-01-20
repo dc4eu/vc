@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 	"vc/internal/apigw/db"
+	"vc/pkg/jose"
 	"vc/pkg/model"
 	"vc/pkg/openid4vp"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwe"
@@ -129,7 +129,8 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 
 	c.log.Debug("Authorization request", "request", authorizationRequest)
 
-	signedJWT, err := authorizationRequest.Sign(jwt.SigningMethodRS256, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
+	signingMethod, _ := jose.GetSigningMethodFromKey(c.issuerMetadataSigningKey)
+	signedJWT, err := authorizationRequest.Sign(signingMethod, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
 	if err != nil {
 		c.log.Error(err, "failed to sign authorization request")
 		return "", err

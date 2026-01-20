@@ -2,6 +2,8 @@ package jose
 
 import (
 	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/rsa"
 	"testing"
 
@@ -92,5 +94,92 @@ func TestMakeJWT(t *testing.T) {
 		// Use a string instead of a key
 		_, err := MakeJWT(header, body, jwt.SigningMethodES256, "not-a-key")
 		assert.Error(t, err)
+	})
+}
+
+func TestGetSigningMethodFromKey_RSA(t *testing.T) {
+	t.Run("RSA_2048_returns_RS256", func(t *testing.T) {
+		key, err := rsa.GenerateKey(rand.Reader, 2048)
+		require.NoError(t, err)
+
+		method, alg := GetSigningMethodFromKey(key)
+
+		assert.Equal(t, jwt.SigningMethodRS256, method)
+		assert.Equal(t, "RS256", alg)
+	})
+
+	t.Run("RSA_3072_returns_RS384", func(t *testing.T) {
+		key, err := rsa.GenerateKey(rand.Reader, 3072)
+		require.NoError(t, err)
+
+		method, alg := GetSigningMethodFromKey(key)
+
+		assert.Equal(t, jwt.SigningMethodRS384, method)
+		assert.Equal(t, "RS384", alg)
+	})
+
+	t.Run("RSA_4096_returns_RS512", func(t *testing.T) {
+		key, err := rsa.GenerateKey(rand.Reader, 4096)
+		require.NoError(t, err)
+
+		method, alg := GetSigningMethodFromKey(key)
+
+		assert.Equal(t, jwt.SigningMethodRS512, method)
+		assert.Equal(t, "RS512", alg)
+	})
+}
+
+func TestGetSigningMethodFromKey_ECDSA(t *testing.T) {
+	t.Run("P256_returns_ES256", func(t *testing.T) {
+		key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		require.NoError(t, err)
+
+		method, alg := GetSigningMethodFromKey(key)
+
+		assert.Equal(t, jwt.SigningMethodES256, method)
+		assert.Equal(t, "ES256", alg)
+	})
+
+	t.Run("P384_returns_ES384", func(t *testing.T) {
+		key, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+		require.NoError(t, err)
+
+		method, alg := GetSigningMethodFromKey(key)
+
+		assert.Equal(t, jwt.SigningMethodES384, method)
+		assert.Equal(t, "ES384", alg)
+	})
+
+	t.Run("P521_returns_ES512", func(t *testing.T) {
+		key, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+		require.NoError(t, err)
+
+		method, alg := GetSigningMethodFromKey(key)
+
+		assert.Equal(t, jwt.SigningMethodES512, method)
+		assert.Equal(t, "ES512", alg)
+	})
+}
+
+func TestGetSigningMethodFromKey_UnknownKeyType(t *testing.T) {
+	t.Run("string_defaults_to_ES256", func(t *testing.T) {
+		method, alg := GetSigningMethodFromKey("not a key")
+
+		assert.Equal(t, jwt.SigningMethodES256, method)
+		assert.Equal(t, "ES256", alg)
+	})
+
+	t.Run("int_defaults_to_ES256", func(t *testing.T) {
+		method, alg := GetSigningMethodFromKey(12345)
+
+		assert.Equal(t, jwt.SigningMethodES256, method)
+		assert.Equal(t, "ES256", alg)
+	})
+
+	t.Run("nil_defaults_to_ES256", func(t *testing.T) {
+		method, alg := GetSigningMethodFromKey(nil)
+
+		assert.Equal(t, jwt.SigningMethodES256, method)
+		assert.Equal(t, "ES256", alg)
 	})
 }

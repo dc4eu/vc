@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"testing"
+	"vc/pkg/jose"
 
 	"golang.org/x/crypto/sha3"
 )
@@ -296,8 +297,8 @@ func TestSign(t *testing.T) {
 			"sub": "user123",
 		}
 
-		_, algName := getSigningMethodFromKey(privateKey)
-		signingMethod, _ := getSigningMethodFromKey(privateKey)
+		_, algName := jose.GetSigningMethodFromKey(privateKey)
+		signingMethod, _ := jose.GetSigningMethodFromKey(privateKey)
 
 		token, err := Sign(header, payload, signingMethod, privateKey)
 		if err != nil {
@@ -327,7 +328,7 @@ func TestSign(t *testing.T) {
 			"iss": make(chan int),
 		}
 
-		signingMethod, _ := getSigningMethodFromKey(privateKey)
+		signingMethod, _ := jose.GetSigningMethodFromKey(privateKey)
 
 		_, err = Sign(header, payload, signingMethod, privateKey)
 		if err == nil {

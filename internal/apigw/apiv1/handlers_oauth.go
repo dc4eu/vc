@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 	"vc/pkg/helpers"
+	"vc/pkg/jose"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -166,7 +166,8 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 func (c *Client) OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error) {
 	c.log.Debug("metadata request")
 
-	signedMetadata, err := c.oauth2Metadata.Sign(jwt.SigningMethodRS256, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain)
+	signingMethod, _ := jose.GetSigningMethodFromKey(c.oauth2MetadataSigningKey)
+	signedMetadata, err := c.oauth2Metadata.Sign(signingMethod, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain)
 	if err != nil {
 		return nil, err
 	}

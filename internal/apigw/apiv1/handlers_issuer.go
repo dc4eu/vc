@@ -10,12 +10,11 @@ import (
 	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/registry/apiv1_registry"
 	"vc/pkg/helpers"
+	"vc/pkg/jose"
 	"vc/pkg/mdoc"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 // OIDCCredentialOffer https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-credential-offer-endpoint
@@ -430,7 +429,8 @@ func (c *Client) OIDCNotification(ctx context.Context, req *openid4vci.Notificat
 func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error) {
 	c.log.Debug("metadata request")
 
-	signedMetadata, err := c.issuerMetadata.Sign(jwt.SigningMethodRS256, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
+	signingMethod, _ := jose.GetSigningMethodFromKey(c.issuerMetadataSigningKey)
+	signedMetadata, err := c.issuerMetadata.Sign(signingMethod, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
 	if err != nil {
 		return nil, err
 	}

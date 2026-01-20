@@ -156,6 +156,10 @@ func (c *Client) OIDCCredential(ctx context.Context, req *openid4vci.CredentialR
 	case "vc+sd-jwt", "dc+sd-jwt":
 		return c.issueSDJWT(ctx, authContext.Scope[0], documentData, jwk, document)
 
+	case "ldp_vc", "vc+ld+json":
+		// W3C VC 2.0 Data Integrity credential
+		return c.issueVC20(ctx, authContext.Scope[0], documentData, document, req)
+
 	default:
 		c.log.Error(nil, "unsupported or missing credential format", "format", format)
 		return nil, errors.New("unsupported or missing credential format: " + format)
@@ -289,6 +293,81 @@ func (c *Client) issueMDoc(ctx context.Context, scope string, documentData []byt
 		Credentials: []openid4vci.Credential{
 			{
 				Credential: mdocBase64,
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// issueVC20 issues a W3C VC 2.0 Data Integrity credential
+func (c *Client) issueVC20(ctx context.Context, scope string, documentData []byte, document *model.CompleteDocument, req *openid4vci.CredentialRequest) (*openid4vci.CredentialResponse, error) {
+	// Extract cryptosuite from credential configuration
+	var cryptosuite string
+	var mandatoryPointers []string
+	var credentialTypes []string
+
+	if req.CredentialConfigurationID != "" && c.issuerMetadata != nil {
+		if config, ok := c.issuerMetadata.CredentialConfigurationsSupported[req.CredentialConfigurationID]; ok {
+			cryptosuite = config.Cryptosuite
+			credentialTypes = config.CredentialDefinition.Type
+			// Mandatory pointers could be specified in config in future
+		}
+	}
+
+	// Default cryptosuite if not specified
+	if cryptosuite == "" {
+		cryptosuite = "ecdsa-rdfc-2019"
+	}
+
+	// Default credential types
+	if len(credentialTypes) == 0 {
+		credentialTypes = []string{"VerifiableCredential"}
+	}
+
+	// Extract subject DID from proof if available
+	var subjectDID string
+	if req.Proof != nil {
+		subjectDID = req.Proof.ExtractSubjectDID()
+	}
+
+	reply, err := c.issuerClient.MakeVC20(ctx, &apiv1_issuer.MakeVC20Request{
+		Scope:             scope,
+		DocumentData:      documentData,
+		CredentialTypes:   credentialTypes,
+		SubjectDid:        subjectDID,
+		Cryptosuite:       cryptosuite,
+		MandatoryPointers: mandatoryPointers,
+	})
+	if err != nil {
+		c.log.Error(err, "failed to call MakeVC20")
+		return nil, err
+	}
+
+	if reply == nil {
+		return nil, errors.New("MakeVC20 reply is nil")
+	}
+
+	// Save credential subject info to registry for status management
+	if len(document.Identities) > 0 && reply.StatusListSection > 0 {
+		identity := document.Identities[0]
+		_, err = c.registryClient.SaveCredentialSubject(ctx, &apiv1_registry.SaveCredentialSubjectRequest{
+			FirstName:   identity.GivenName,
+			LastName:    identity.FamilyName,
+			DateOfBirth: identity.BirthDate,
+			Section:     reply.StatusListSection,
+			Index:       reply.StatusListIndex,
+		})
+		if err != nil {
+			c.log.Error(err, "failed to save credential subject to registry")
+		}
+	}
+
+	response := &openid4vci.CredentialResponse{
+		Credentials: []openid4vci.Credential{
+			{
+				// VC20 Data Integrity credentials are JSON-LD, return as-is
+				Credential: string(reply.Credential),
 			},
 		},
 	}

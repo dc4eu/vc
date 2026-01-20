@@ -176,6 +176,39 @@ func (p ProofJWTToken) ExtractJWK() (*apiv1_issuer.Jwk, error) {
 	return nil, fmt.Errorf("no key binding found in JWT header (jwk, kid, or x5c required)")
 }
 
+// ExtractSubjectDID extracts the subject DID from the JWT claims.
+// This looks for an "iss" (issuer) claim which in OpenID4VCI proof JWTs
+// typically represents the holder's DID. Returns empty string if not found.
+func (p ProofJWTToken) ExtractSubjectDID() string {
+	if p == "" {
+		return ""
+	}
+
+	parts := strings.Split(string(p), ".")
+	if len(parts) < 2 {
+		return ""
+	}
+
+	claimsBase64 := parts[1]
+	claimsByte, err := base64.RawURLEncoding.DecodeString(claimsBase64)
+	if err != nil {
+		// Try standard encoding as fallback
+		claimsByte, err = base64.RawStdEncoding.DecodeString(claimsBase64)
+		if err != nil {
+			return ""
+		}
+	}
+
+	var claims ProofJWTClaims
+	if err := json.Unmarshal(claimsByte, &claims); err != nil {
+		return ""
+	}
+
+	// The "iss" claim in an OpenID4VCI proof JWT represents the client_id,
+	// which for DID-based wallets is typically the holder's DID
+	return claims.Iss
+}
+
 // Verify verifies a JWT proof according to OpenID4VCI 1.0 Appendix F.1
 // https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-jwt-proof-type
 func (p ProofJWTToken) Verify(publicKey crypto.PublicKey, opts *VerifyProofOptions) error {

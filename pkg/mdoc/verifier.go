@@ -2,23 +2,35 @@
 package mdoc
 
 import (
+	"context"
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"time"
+
+	"vc/pkg/trust"
+
+	"github.com/sirosfoundation/go-trust/pkg/trustapi"
 )
 
 // Verifier verifies mDL documents according to ISO/IEC 18013-5:2021.
 type Verifier struct {
 	trustList           *IACATrustList
+	trustEvaluator      trust.TrustEvaluator
 	skipRevocationCheck bool
 	clock               func() time.Time
 }
 
 // VerifierConfig contains configuration options for the Verifier.
 type VerifierConfig struct {
-	// TrustList is the list of trusted IACA certificates.
+	// TrustList is the list of trusted IACA certificates (local trust anchors).
+	// Either TrustList or TrustEvaluator must be provided.
 	TrustList *IACATrustList
+
+	// TrustEvaluator is an optional trust evaluator for validating certificate chains
+	// using an external trust framework (e.g., go-trust). When both TrustList and
+	// TrustEvaluator are provided, TrustEvaluator takes precedence for trust decisions.
+	TrustEvaluator trust.TrustEvaluator
 
 	// SkipRevocationCheck skips CRL/OCSP revocation checking if true.
 	SkipRevocationCheck bool
@@ -63,8 +75,8 @@ type DocumentVerificationResult struct {
 
 // NewVerifier creates a new Verifier with the given configuration.
 func NewVerifier(config VerifierConfig) (*Verifier, error) {
-	if config.TrustList == nil {
-		return nil, errors.New("trust list is required")
+	if config.TrustList == nil && config.TrustEvaluator == nil {
+		return nil, errors.New("either TrustList or TrustEvaluator is required")
 	}
 
 	clock := config.Clock
@@ -74,6 +86,7 @@ func NewVerifier(config VerifierConfig) (*Verifier, error) {
 
 	return &Verifier{
 		trustList:           config.TrustList,
+		trustEvaluator:      config.TrustEvaluator,
 		skipRevocationCheck: config.SkipRevocationCheck,
 		clock:               clock,
 	}, nil
@@ -81,6 +94,12 @@ func NewVerifier(config VerifierConfig) (*Verifier, error) {
 
 // VerifyDeviceResponse verifies a complete DeviceResponse.
 func (v *Verifier) VerifyDeviceResponse(response *DeviceResponse) *VerificationResult {
+	return v.VerifyDeviceResponseWithContext(context.Background(), response)
+}
+
+// VerifyDeviceResponseWithContext verifies a complete DeviceResponse with a context.
+// The context is used for external trust evaluation when TrustEvaluator is configured.
+func (v *Verifier) VerifyDeviceResponseWithContext(ctx context.Context, response *DeviceResponse) *VerificationResult {
 	result := &VerificationResult{
 		Valid:     true,
 		Documents: make([]DocumentVerificationResult, 0, len(response.Documents)),
@@ -101,7 +120,7 @@ func (v *Verifier) VerifyDeviceResponse(response *DeviceResponse) *VerificationR
 
 	// Verify each document
 	for _, doc := range response.Documents {
-		docResult := v.VerifyDocument(&doc)
+		docResult := v.verifyDocumentWithContext(ctx, &doc)
 		result.Documents = append(result.Documents, docResult)
 		if !docResult.Valid {
 			result.Valid = false
@@ -113,6 +132,11 @@ func (v *Verifier) VerifyDeviceResponse(response *DeviceResponse) *VerificationR
 
 // VerifyDocument verifies a single Document.
 func (v *Verifier) VerifyDocument(doc *Document) DocumentVerificationResult {
+	return v.verifyDocumentWithContext(context.Background(), doc)
+}
+
+// verifyDocumentWithContext verifies a single Document with a context for trust evaluation.
+func (v *Verifier) verifyDocumentWithContext(ctx context.Context, doc *Document) DocumentVerificationResult {
 	result := DocumentVerificationResult{
 		DocType:          doc.DocType,
 		Valid:            true,
@@ -146,7 +170,7 @@ func (v *Verifier) VerifyDocument(doc *Document) DocumentVerificationResult {
 	result.IssuerCertificate = dsCert
 
 	// Step 3: Verify the certificate chain against trusted IACAs
-	if err := v.verifyCertificateChain(certChain); err != nil {
+	if err := v.verifyCertificateChainWithContext(ctx, certChain, doc.DocType); err != nil {
 		result.Errors = append(result.Errors, fmt.Errorf("certificate chain verification failed: %w", err))
 		result.Valid = false
 		return result
@@ -207,6 +231,12 @@ func (v *Verifier) parseIssuerAuth(data []byte) (*COSESign1, error) {
 
 // verifyCertificateChain verifies the DS certificate chain against trusted IACAs.
 func (v *Verifier) verifyCertificateChain(chain []*x509.Certificate) error {
+	return v.verifyCertificateChainWithContext(context.Background(), chain, "")
+}
+
+// verifyCertificateChainWithContext verifies the DS certificate chain against trusted IACAs
+// with a provided context for external trust evaluation.
+func (v *Verifier) verifyCertificateChainWithContext(ctx context.Context, chain []*x509.Certificate, docType string) error {
 	if len(chain) == 0 {
 		return errors.New("empty certificate chain")
 	}
@@ -220,6 +250,39 @@ func (v *Verifier) verifyCertificateChain(chain []*x509.Certificate) error {
 	}
 	if now.After(dsCert.NotAfter) {
 		return fmt.Errorf("certificate expired: valid until %s", dsCert.NotAfter)
+	}
+
+	// If TrustEvaluator is configured, use it for trust decisions
+	if v.trustEvaluator != nil {
+		// Extract issuer identifier from the DS certificate
+		// For mDOC, this is typically the issuing_country or issuing_authority
+		issuerID := extractMDocIssuerID(dsCert)
+
+		decision, err := v.trustEvaluator.Evaluate(ctx, &trust.EvaluationRequest{
+			EvaluationRequest: trustapi.EvaluationRequest{
+				SubjectID: issuerID,
+				KeyType:   trust.KeyTypeX5C,
+				Key:       chain,
+				Role:      trust.RoleCredentialIssuer,
+				DocType:   docType,
+			},
+		})
+
+		if err != nil {
+			return fmt.Errorf("trust evaluation failed: %w", err)
+		}
+
+		if !decision.Trusted {
+			return fmt.Errorf("issuer not trusted: %s", decision.Reason)
+		}
+
+		// Trust evaluator approved the chain
+		return nil
+	}
+
+	// Fall back to local trust list verification
+	if v.trustList == nil {
+		return errors.New("no trust configuration available")
 	}
 
 	// Find a trusted IACA that issued this certificate
@@ -262,6 +325,30 @@ func (v *Verifier) verifyCertificateChain(chain []*x509.Certificate) error {
 	}
 
 	return nil
+}
+
+// extractMDocIssuerID extracts an issuer identifier from an mDOC DS certificate.
+// This looks for the issuing country/authority in the certificate.
+func extractMDocIssuerID(cert *x509.Certificate) string {
+	// Try to get a meaningful issuer identifier:
+	// 1. Organization (e.g., "Department of Motor Vehicles")
+	// 2. Country code (e.g., "SE" for Sweden)
+	// 3. Common Name (CN)
+
+	if len(cert.Subject.Organization) > 0 {
+		return cert.Subject.Organization[0]
+	}
+
+	if len(cert.Subject.Country) > 0 {
+		return cert.Subject.Country[0]
+	}
+
+	if cert.Subject.CommonName != "" {
+		return cert.Subject.CommonName
+	}
+
+	// Fallback: use the issuer's Common Name
+	return cert.Issuer.CommonName
 }
 
 // validateMSO validates the Mobile Security Object content.

@@ -1,9 +1,11 @@
 package sdjwtvc
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -12,7 +14,10 @@ import (
 	"strings"
 	"time"
 
+	"vc/pkg/trust"
+
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirosfoundation/go-trust/pkg/trustapi"
 )
 
 // VerificationResult contains the result of SD-JWT verification
@@ -49,6 +54,16 @@ type VerificationOptions struct {
 	AllowedClockSkew time.Duration
 	// ValidateTime: whether to validate exp/iat claims (default: true)
 	ValidateTime bool
+	// TrustEvaluator: optional trust evaluator for validating issuer's key
+	// When set and x5c header is present, the certificate chain will be validated
+	// against the trust framework. If not set, the provided public key is used directly.
+	TrustEvaluator trust.TrustEvaluator
+	// TrustContext: context for trust evaluation (optional, defaults to context.Background())
+	TrustContext context.Context
+	// CredentialType: credential type for policy routing (e.g., "PID", "mDL")
+	// If set, this is passed to the TrustEvaluator for policy-based routing.
+	// If not set, it will be extracted from the 'vct' claim if present.
+	CredentialType string
 }
 
 // ParseAndVerify parses and verifies an SD-JWT credential
@@ -95,8 +110,82 @@ func (c *Client) ParseAndVerify(sdJWT string, publicKey any, opts *VerificationO
 		}
 	}
 
-	// Step 2: Verify issuer-signed JWT signature (§6.2)
-	token, err := c.verifyJWTSignature(issuerJWT, publicKey)
+	// Step 2: Parse JWT header to check for x5c (before signature verification)
+	// If x5c is present and TrustEvaluator is configured, extract the public key
+	// from the certificate chain and validate trust
+	verificationKey := publicKey
+	var certChain []*x509.Certificate
+
+	// Pre-parse to get header without verification
+	preParser := jwt.NewParser(jwt.WithoutClaimsValidation())
+	preToken, _, _ := preParser.ParseUnverified(issuerJWT, jwt.MapClaims{})
+
+	if preToken != nil {
+		// Check for x5c header
+		if x5cRaw, ok := preToken.Header["x5c"]; ok && opts.TrustEvaluator != nil {
+			chain, err := parseX5CHeader(x5cRaw)
+			if err != nil {
+				result.Errors = append(result.Errors, fmt.Errorf("failed to parse x5c header: %w", err))
+				return result, err
+			}
+			certChain = chain
+
+			// Extract issuer identifier for trust evaluation
+			// Priority: 1. iss claim (if parseable), 2. leaf certificate CN
+			issuerID := ""
+			credentialType := opts.CredentialType
+			if preToken.Claims != nil {
+				if claims, ok := preToken.Claims.(jwt.MapClaims); ok {
+					if iss, ok := claims["iss"].(string); ok {
+						issuerID = iss
+					}
+					// Extract vct for credential type if not explicitly set
+					if credentialType == "" {
+						if vct, ok := claims["vct"].(string); ok {
+							credentialType = vct
+						}
+					}
+				}
+			}
+			if issuerID == "" && len(chain) > 0 {
+				issuerID = chain[0].Subject.CommonName
+			}
+
+			// Evaluate trust
+			ctx := opts.TrustContext
+			if ctx == nil {
+				ctx = context.Background()
+			}
+
+			trustDecision, err := opts.TrustEvaluator.Evaluate(ctx, &trust.EvaluationRequest{
+				EvaluationRequest: trustapi.EvaluationRequest{
+					SubjectID:      issuerID,
+					KeyType:        trust.KeyTypeX5C,
+					Key:            chain,
+					Role:           trust.RoleCredentialIssuer,
+					CredentialType: credentialType,
+				},
+			})
+
+			if err != nil {
+				result.Errors = append(result.Errors, fmt.Errorf("trust evaluation failed: %w", err))
+				return result, err
+			}
+
+			if !trustDecision.Trusted {
+				result.Errors = append(result.Errors, fmt.Errorf("issuer not trusted: %s", trustDecision.Reason))
+				return result, fmt.Errorf("issuer not trusted: %s", trustDecision.Reason)
+			}
+
+			// Use the public key from the leaf certificate
+			if len(chain) > 0 {
+				verificationKey = chain[0].PublicKey
+			}
+		}
+	}
+
+	// Step 3: Verify issuer-signed JWT signature (§6.2)
+	token, err := c.verifyJWTSignature(issuerJWT, verificationKey)
 	if err != nil {
 		result.Errors = append(result.Errors, fmt.Errorf("signature verification failed: %w", err))
 		return result, err
@@ -114,13 +203,18 @@ func (c *Client) ParseAndVerify(sdJWT string, publicKey any, opts *VerificationO
 	}
 	result.Claims = claims
 
-	// Step 3: Validate SD-JWT VC structure (draft-13 §3.2.2)
+	// Store certificate chain if present (for later inspection)
+	if certChain != nil {
+		result.Header["_certChain"] = certChain
+	}
+
+	// Step 4: Validate SD-JWT VC structure (draft-13 §3.2.2)
 	if err := c.validateSDJWTVCStructure(result.Header, claims, opts); err != nil {
 		result.Errors = append(result.Errors, err)
 		return result, err
 	}
 
-	// Step 4: Extract VCTM from header (draft-13 §6)
+	// Step 5: Extract VCTM from header (draft-13 §6)
 	// VCTM decoding is optional and errors are non-fatal (don't add to Errors)
 	if vctmEncoded, ok := result.Header["vctm"]; ok {
 		vctm, _ := decodeVCTM(vctmEncoded)
@@ -508,4 +602,45 @@ func decodeVCTM(vctmEncoded any) (*VCTM, error) {
 		// Just skip VCTM if it's in an unexpected format
 		return nil, nil
 	}
+}
+
+// parseX5CHeader parses the x5c header into a certificate chain.
+// The x5c header is an array of base64-encoded DER certificates,
+// with the leaf certificate first.
+func parseX5CHeader(x5cRaw any) ([]*x509.Certificate, error) {
+	x5cArray, ok := x5cRaw.([]any)
+	if !ok {
+		return nil, fmt.Errorf("x5c header must be an array")
+	}
+
+	if len(x5cArray) == 0 {
+		return nil, fmt.Errorf("x5c header is empty")
+	}
+
+	certs := make([]*x509.Certificate, 0, len(x5cArray))
+	for i, certRaw := range x5cArray {
+		certB64, ok := certRaw.(string)
+		if !ok {
+			return nil, fmt.Errorf("x5c[%d] is not a string", i)
+		}
+
+		// x5c uses standard base64 encoding (not URL-safe)
+		certDER, err := base64.StdEncoding.DecodeString(certB64)
+		if err != nil {
+			// Try URL-safe base64 as fallback
+			certDER, err = base64.RawURLEncoding.DecodeString(certB64)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode x5c[%d]: %w", i, err)
+			}
+		}
+
+		cert, err := x509.ParseCertificate(certDER)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse x5c[%d]: %w", i, err)
+		}
+
+		certs = append(certs, cert)
+	}
+
+	return certs, nil
 }

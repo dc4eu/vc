@@ -8,6 +8,7 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -89,7 +90,55 @@ func (m *MultiResolver) ResolveECDSA(verificationMethod string) (*ecdsa.PublicKe
 	return nil, fmt.Errorf("all ECDSA resolvers failed: %v", errors[len(errors)-1])
 }
 
-// LocalResolver resolves keys from local data (multikey, did:key)
+// SmartResolver intelligently routes key resolution requests based on the DID method:
+// - Self-contained DIDs (did:key, did:jwk) are resolved locally without external calls
+// - All other DIDs are resolved via go-trust for both key resolution and trust evaluation
+type SmartResolver struct {
+	local  *LocalResolver
+	remote Resolver // Usually GoTrustResolver
+}
+
+// NewSmartResolver creates a resolver that routes based on DID method.
+// The remote resolver is used for all non-local DIDs (did:web, did:ebsi, etc.).
+func NewSmartResolver(remote Resolver) *SmartResolver {
+	return &SmartResolver{
+		local:  NewLocalResolver(),
+		remote: remote,
+	}
+}
+
+// ResolveEd25519 routes to local or remote resolver based on the DID method.
+func (s *SmartResolver) ResolveEd25519(verificationMethod string) (ed25519.PublicKey, error) {
+	if CanResolveLocally(verificationMethod) {
+		return s.local.ResolveEd25519(verificationMethod)
+	}
+	return s.remote.ResolveEd25519(verificationMethod)
+}
+
+// ResolveECDSA routes to local or remote resolver based on the DID method.
+func (s *SmartResolver) ResolveECDSA(verificationMethod string) (*ecdsa.PublicKey, error) {
+	if CanResolveLocally(verificationMethod) {
+		return s.local.ResolveECDSA(verificationMethod)
+	}
+
+	// Check if remote resolver supports ECDSA
+	if ecdsaResolver, ok := s.remote.(ECDSAResolver); ok {
+		return ecdsaResolver.ResolveECDSA(verificationMethod)
+	}
+	return nil, fmt.Errorf("remote resolver does not support ECDSA")
+}
+
+// GetLocalResolver returns the local resolver for direct access if needed.
+func (s *SmartResolver) GetLocalResolver() *LocalResolver {
+	return s.local
+}
+
+// GetRemoteResolver returns the remote resolver for direct access if needed.
+func (s *SmartResolver) GetRemoteResolver() Resolver {
+	return s.remote
+}
+
+// LocalResolver resolves keys from local data (multikey, did:key, did:jwk)
 type LocalResolver struct{}
 
 // NewLocalResolver creates a resolver that handles local key formats
@@ -97,11 +146,26 @@ func NewLocalResolver() *LocalResolver {
 	return &LocalResolver{}
 }
 
+// CanResolveLocally returns true if the verification method can be resolved
+// locally without contacting external services (i.e., self-contained DIDs).
+// This includes did:key and did:jwk methods, as well as raw multikey formats.
+func CanResolveLocally(verificationMethod string) bool {
+	return strings.HasPrefix(verificationMethod, "did:key:") ||
+		strings.HasPrefix(verificationMethod, "did:jwk:") ||
+		strings.HasPrefix(verificationMethod, "z") || // multibase base58-btc
+		strings.HasPrefix(verificationMethod, "u") // multibase base64url
+}
+
 // ResolveEd25519 extracts Ed25519 keys from local formats
 func (l *LocalResolver) ResolveEd25519(verificationMethod string) (ed25519.PublicKey, error) {
 	// Handle did:key format
 	if strings.HasPrefix(verificationMethod, "did:key:") {
-		return l.resolveDidKey(verificationMethod)
+		return l.resolveDidKeyEd25519(verificationMethod)
+	}
+
+	// Handle did:jwk format (base64url-encoded JWK)
+	if strings.HasPrefix(verificationMethod, "did:jwk:") {
+		return l.resolveDidJwkEd25519(verificationMethod)
 	}
 
 	// Handle multikey format directly
@@ -112,8 +176,28 @@ func (l *LocalResolver) ResolveEd25519(verificationMethod string) (ed25519.Publi
 	return nil, fmt.Errorf("unsupported verification method format: %s", verificationMethod)
 }
 
-// resolveDidKey extracts the public key from a did:key identifier
-func (l *LocalResolver) resolveDidKey(didKey string) (ed25519.PublicKey, error) {
+// ResolveECDSA extracts ECDSA keys from local formats (did:key, did:jwk, multikey)
+func (l *LocalResolver) ResolveECDSA(verificationMethod string) (*ecdsa.PublicKey, error) {
+	// Handle did:key format
+	if strings.HasPrefix(verificationMethod, "did:key:") {
+		return l.resolveDidKeyECDSA(verificationMethod)
+	}
+
+	// Handle did:jwk format (base64url-encoded JWK)
+	if strings.HasPrefix(verificationMethod, "did:jwk:") {
+		return l.resolveDidJwkECDSA(verificationMethod)
+	}
+
+	// Handle multikey format directly
+	if strings.HasPrefix(verificationMethod, "u") || strings.HasPrefix(verificationMethod, "z") {
+		return decodeMultikeyECDSA(verificationMethod)
+	}
+
+	return nil, fmt.Errorf("unsupported verification method format: %s", verificationMethod)
+}
+
+// resolveDidKeyEd25519 extracts an Ed25519 public key from a did:key identifier
+func (l *LocalResolver) resolveDidKeyEd25519(didKey string) (ed25519.PublicKey, error) {
 	// did:key format: did:key:{multikey}#{fragment}
 	// We need to extract the multikey part
 
@@ -127,7 +211,7 @@ func (l *LocalResolver) resolveDidKey(didKey string) (ed25519.PublicKey, error) 
 	}
 
 	multikey := parts[0]
-	fmt.Printf("[DEBUG] resolveDidKey: extracted multikey=%s from didKey=%s\n", multikey, didKey)
+	fmt.Printf("[DEBUG] resolveDidKeyEd25519: extracted multikey=%s from didKey=%s\n", multikey, didKey)
 	key, err := l.decodeMultikey(multikey)
 	if err != nil {
 		fmt.Printf("[DEBUG] resolveDidKey: decodeMultikey failed: %v\n", err)
@@ -208,28 +292,158 @@ func (l *LocalResolver) decodeMultikey(multikey string) (ed25519.PublicKey, erro
 	return ed25519.PublicKey(pubKeyBytes), nil
 }
 
+// resolveDidKeyECDSA extracts an ECDSA public key from a did:key identifier
+func (l *LocalResolver) resolveDidKeyECDSA(didKey string) (*ecdsa.PublicKey, error) {
+	// did:key format: did:key:{multikey}#{fragment}
+	// Remove "did:key:" prefix
+	withoutPrefix := strings.TrimPrefix(didKey, "did:key:")
+
+	// Split on # to get the multikey (before fragment)
+	parts := strings.Split(withoutPrefix, "#")
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("invalid did:key format: %s", didKey)
+	}
+
+	multikey := parts[0]
+	return decodeMultikeyECDSA(multikey)
+}
+
+// resolveDidJwkEd25519 extracts an Ed25519 public key from a did:jwk identifier.
+// did:jwk format: did:jwk:<base64url-encoded-JWK>
+func (l *LocalResolver) resolveDidJwkEd25519(didJwk string) (ed25519.PublicKey, error) {
+	jwk, err := l.parseDidJwk(didJwk)
+	if err != nil {
+		return nil, err
+	}
+	return JWKToEd25519(jwk)
+}
+
+// resolveDidJwkECDSA extracts an ECDSA public key from a did:jwk identifier.
+// did:jwk format: did:jwk:<base64url-encoded-JWK>
+func (l *LocalResolver) resolveDidJwkECDSA(didJwk string) (*ecdsa.PublicKey, error) {
+	jwk, err := l.parseDidJwk(didJwk)
+	if err != nil {
+		return nil, err
+	}
+	return JWKToECDSA(jwk)
+}
+
+// parseDidJwk extracts and decodes the JWK from a did:jwk identifier.
+func (l *LocalResolver) parseDidJwk(didJwk string) (map[string]interface{}, error) {
+	// did:jwk format: did:jwk:<base64url-encoded-JWK>#<optional-fragment>
+	// Remove "did:jwk:" prefix
+	withoutPrefix := strings.TrimPrefix(didJwk, "did:jwk:")
+
+	// Split on # to get the encoded JWK (before fragment)
+	parts := strings.Split(withoutPrefix, "#")
+	if len(parts) == 0 || parts[0] == "" {
+		return nil, fmt.Errorf("invalid did:jwk format: %s", didJwk)
+	}
+
+	encodedJwk := parts[0]
+
+	// Base64url decode the JWK
+	jwkBytes, err := base64.RawURLEncoding.DecodeString(encodedJwk)
+	if err != nil {
+		// Try with padding as some implementations may include it
+		jwkBytes, err = base64.URLEncoding.DecodeString(encodedJwk)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode did:jwk: %w", err)
+		}
+	}
+
+	// Parse JSON into map
+	var jwk map[string]interface{}
+	if err := json.Unmarshal(jwkBytes, &jwk); err != nil {
+		return nil, fmt.Errorf("failed to parse JWK JSON: %w", err)
+	}
+
+	return jwk, nil
+}
+
 // StaticResolver provides a simple key->value resolver for testing
 type StaticResolver struct {
-	keys map[string]ed25519.PublicKey
+	ed25519Keys map[string]ed25519.PublicKey
+	ecdsaKeys   map[string]*ecdsa.PublicKey
 }
 
 // NewStaticResolver creates a resolver with a static key map
 func NewStaticResolver() *StaticResolver {
 	return &StaticResolver{
-		keys: make(map[string]ed25519.PublicKey),
+		ed25519Keys: make(map[string]ed25519.PublicKey),
+		ecdsaKeys:   make(map[string]*ecdsa.PublicKey),
 	}
 }
 
-// AddKey adds a key to the static resolver
+// AddKey adds an Ed25519 key to the static resolver
 func (s *StaticResolver) AddKey(verificationMethod string, publicKey ed25519.PublicKey) {
-	s.keys[verificationMethod] = publicKey
+	s.ed25519Keys[verificationMethod] = publicKey
+}
+
+// AddECDSAKey adds an ECDSA key to the static resolver
+func (s *StaticResolver) AddECDSAKey(verificationMethod string, publicKey *ecdsa.PublicKey) {
+	s.ecdsaKeys[verificationMethod] = publicKey
 }
 
 // ResolveEd25519 looks up the key in the static map
 func (s *StaticResolver) ResolveEd25519(verificationMethod string) (ed25519.PublicKey, error) {
-	key, ok := s.keys[verificationMethod]
+	key, ok := s.ed25519Keys[verificationMethod]
 	if !ok {
 		return nil, fmt.Errorf("key not found: %s", verificationMethod)
 	}
 	return key, nil
+}
+
+// ResolveECDSA looks up an ECDSA key in the static map
+func (s *StaticResolver) ResolveECDSA(verificationMethod string) (*ecdsa.PublicKey, error) {
+	key, ok := s.ecdsaKeys[verificationMethod]
+	if !ok {
+		return nil, fmt.Errorf("ECDSA key not found: %s", verificationMethod)
+	}
+	return key, nil
+}
+
+// ResolverConfig holds configuration for creating a key resolver.
+// This mirrors the TrustConfig from the application config.
+type ResolverConfig struct {
+	// GoTrustURL is the URL of the go-trust PDP service.
+	// If empty, only local DID methods will be supported.
+	GoTrustURL string
+
+	// LocalDIDMethods specifies additional DID methods to resolve locally.
+	// did:key and did:jwk are always resolved locally.
+	LocalDIDMethods []string
+
+	// Enabled controls whether trust evaluation is performed.
+	// When false, keys are resolved but not validated against trust frameworks.
+	Enabled bool
+}
+
+// NewResolverFromConfig creates a key resolver based on configuration.
+// If GoTrustURL is set, creates a SmartResolver that uses LocalResolver for
+// self-contained DIDs (did:key, did:jwk) and GoTrustResolver for everything else.
+// If GoTrustURL is empty, creates a LocalResolver that only handles self-contained DIDs.
+func NewResolverFromConfig(cfg ResolverConfig) (Resolver, error) {
+	// If no go-trust URL, only local resolution is possible
+	if cfg.GoTrustURL == "" {
+		return NewLocalResolver(), nil
+	}
+
+	// Create go-trust resolver for remote DIDs
+	goTrustResolver := NewGoTrustResolver(cfg.GoTrustURL)
+
+	// Create smart resolver that routes based on DID method
+	return NewSmartResolver(goTrustResolver), nil
+}
+
+// NewResolverWithGoTrust creates a SmartResolver with go-trust integration.
+// This is a convenience function for common use cases.
+func NewResolverWithGoTrust(goTrustURL string) *SmartResolver {
+	return NewSmartResolver(NewGoTrustResolver(goTrustURL))
+}
+
+// NewLocalOnlyResolver creates a resolver that only handles local DIDs.
+// Use this when go-trust is not available or not needed.
+func NewLocalOnlyResolver() *LocalResolver {
+	return NewLocalResolver()
 }

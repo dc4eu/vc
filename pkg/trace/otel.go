@@ -29,7 +29,16 @@ type Tracer struct {
 
 // New return a new tracer
 func New(ctx context.Context, cfg *model.Cfg, serviceName string, log *logger.Log) (*Tracer, error) {
-	exp, err := newExporter(ctx, cfg)
+	var exp sdktrace.SpanExporter
+	var err error
+
+	// Use no-op exporter if cfg.Common is nil (test environment) or tracing is not configured
+	if cfg == nil || cfg.Common == nil || cfg.Common.Tracing.Addr == "" {
+		exp, err = newNoOpExporter()
+	} else {
+		exp, err = newExporter(ctx, cfg)
+	}
+
 	if err != nil {
 		return nil, err
 	}

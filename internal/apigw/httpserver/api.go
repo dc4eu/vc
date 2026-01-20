@@ -3,7 +3,6 @@ package httpserver
 import (
 	"context"
 	"vc/internal/apigw/apiv1"
-	"vc/internal/gen/issuer/apiv1_issuer"
 	"vc/internal/gen/status/apiv1_status"
 	"vc/pkg/model"
 	"vc/pkg/oauth2"
@@ -27,10 +26,6 @@ type Apiv1 interface {
 	RevokeDocument(ctx context.Context, req *apiv1.RevokeDocumentRequest) error
 	AddConsent(ctx context.Context, req *apiv1.AddConsentRequest) error
 	GetConsent(ctx context.Context, req *apiv1.GetConsentRequest) (*model.Consent, error)
-
-	// SatosaCredential endpoints, remove after transition from Satosa to OIDC4VCI
-	SatosaCredential(ctx context.Context, req *apiv1.CredentialRequest) (*apiv1_issuer.MakeSDJWTReply, error)
-	JWKS(ctx context.Context) (*apiv1_issuer.JwksReply, error)
 
 	// datastore endpoints - disabled in production
 	SearchDocuments(ctx context.Context, req *model.SearchDocumentsRequest) (*model.SearchDocumentsReply, error)

@@ -184,10 +184,6 @@ func New(ctx context.Context, cfg *model.Cfg, apiv1 *apiv1.Client, tracer *trace
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodGet, "/user/authentic_source/lookup", http.StatusOK, s.endpointUserAuthenticSourceLookup)
 	s.httpHelpers.Server.RegEndpoint(ctx, rgOAuthSession, http.MethodPost, "/user/authentic_source/lookup", http.StatusOK, s.endpointUserAuthenticSourceLookup)
 
-	// SatosaCredential remove after refactoring
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodPost, "credential", http.StatusOK, s.endpointSatosaCredential)
-	s.httpHelpers.Server.RegEndpoint(ctx, rgAPIv1, http.MethodGet, "/credential/.well-known/jwks", http.StatusOK, s.endpointJWKS)
-
 	//verification endpoints
 	rgVerification := rgRoot.Group("/verification")
 	s.httpHelpers.Server.RegEndpoint(ctx, rgVerification, http.MethodGet, "/request-object", http.StatusOK, s.endpointVerificationRequestObject)

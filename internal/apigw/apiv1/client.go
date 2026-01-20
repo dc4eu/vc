@@ -15,7 +15,6 @@ import (
 	"vc/pkg/oauth2"
 	"vc/pkg/openid4vci"
 	"vc/pkg/trace"
-	"vc/pkg/vcclient"
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"

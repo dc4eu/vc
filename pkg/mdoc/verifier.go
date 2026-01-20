@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"vc/pkg/trust"
+
+	"github.com/sirosfoundation/go-trust/pkg/trustapi"
 )
 
 // Verifier verifies mDL documents according to ISO/IEC 18013-5:2021.
@@ -257,11 +259,13 @@ func (v *Verifier) verifyCertificateChainWithContext(ctx context.Context, chain 
 		issuerID := extractMDocIssuerID(dsCert)
 
 		decision, err := v.trustEvaluator.Evaluate(ctx, &trust.EvaluationRequest{
-			SubjectID: issuerID,
-			KeyType:   trust.KeyTypeX5C,
-			Key:       chain,
-			Role:      trust.RoleCredentialIssuer,
-			DocType:   docType,
+			EvaluationRequest: trustapi.EvaluationRequest{
+				SubjectID: issuerID,
+				KeyType:   trust.KeyTypeX5C,
+				Key:       chain,
+				Role:      trust.RoleCredentialIssuer,
+				DocType:   docType,
+			},
 		})
 
 		if err != nil {

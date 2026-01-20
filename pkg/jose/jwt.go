@@ -24,19 +24,19 @@ func MakeJWT(header, body jwt.MapClaims, signingMethod jwt.SigningMethod, signin
 	return signedToken, nil
 }
 
-// GetSigningMethodFromKey determines the JWT signing method from the private key type
-func GetSigningMethodFromKey(privateKey any) jwt.SigningMethod {
+// GetSigningMethodFromKey determines the JWT signing method and algorithm name from the private key
+func GetSigningMethodFromKey(privateKey any) (jwt.SigningMethod, string) {
 	// Check if the key is RSA
 	if rsaKey, ok := privateKey.(*rsa.PrivateKey); ok {
 		// Determine RSA algorithm based on key size
 		keySize := rsaKey.N.BitLen()
 		switch {
 		case keySize >= 4096:
-			return jwt.SigningMethodRS512
+			return jwt.SigningMethodRS512, "RS512"
 		case keySize >= 3072:
-			return jwt.SigningMethodRS384
+			return jwt.SigningMethodRS384, "RS384"
 		default:
-			return jwt.SigningMethodRS256
+			return jwt.SigningMethodRS256, "RS256"
 		}
 	}
 
@@ -45,17 +45,17 @@ func GetSigningMethodFromKey(privateKey any) jwt.SigningMethod {
 		// Determine algorithm based on the curve of the ECDSA key
 		switch ecKey.Curve.Params().Name {
 		case "P-256":
-			return jwt.SigningMethodES256
+			return jwt.SigningMethodES256, "ES256"
 		case "P-384":
-			return jwt.SigningMethodES384
+			return jwt.SigningMethodES384, "ES384"
 		case "P-521":
-			return jwt.SigningMethodES512
+			return jwt.SigningMethodES512, "ES512"
 		default:
 			// Default to ES256 for unknown curves
-			return jwt.SigningMethodES256
+			return jwt.SigningMethodES256, "ES256"
 		}
 	}
 
-	// Default to RS256 if key type is unknown
-	return jwt.SigningMethodRS256
+	// Default to ES256 if key type is unknown
+	return jwt.SigningMethodES256, "ES256"
 }

@@ -350,7 +350,7 @@ func (c *Client) OIDCNotification(ctx context.Context, req *openid4vci.Notificat
 func (c *Client) OIDCMetadata(ctx context.Context) (*openid4vci.CredentialIssuerMetadataParameters, error) {
 	c.log.Debug("metadata request")
 
-	signingMethod := jose.GetSigningMethodFromKey(c.issuerMetadataSigningKey)
+	signingMethod, _ := jose.GetSigningMethodFromKey(c.issuerMetadataSigningKey)
 	signedMetadata, err := c.issuerMetadata.Sign(signingMethod, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
 	if err != nil {
 		return nil, err

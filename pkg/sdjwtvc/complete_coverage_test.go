@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"testing"
+	"vc/pkg/jose"
 
 	"golang.org/x/crypto/sha3"
 )
@@ -201,10 +202,10 @@ func TestComprehensiveCoverage(t *testing.T) {
 		}
 	})
 
-	t.Run("getSigningMethodFromKey_with_all_curve_types", func(t *testing.T) {
+	t.Run("jose.GetSigningMethodFromKey_with_all_curve_types", func(t *testing.T) {
 		// Test P-256
 		keyP256, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-		method, alg := getSigningMethodFromKey(keyP256)
+		method, alg := jose.GetSigningMethodFromKey(keyP256)
 		if alg != "ES256" {
 			t.Errorf("Expected ES256 for P-256, got %s", alg)
 		}
@@ -214,47 +215,47 @@ func TestComprehensiveCoverage(t *testing.T) {
 
 		// Test P-384
 		keyP384, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-		_, alg = getSigningMethodFromKey(keyP384)
+		_, alg = jose.GetSigningMethodFromKey(keyP384)
 		if alg != "ES384" {
 			t.Errorf("Expected ES384 for P-384, got %s", alg)
 		}
 
 		// Test P-521
 		keyP521, _ := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-		_, alg = getSigningMethodFromKey(keyP521)
+		_, alg = jose.GetSigningMethodFromKey(keyP521)
 		if alg != "ES512" {
 			t.Errorf("Expected ES512 for P-521, got %s", alg)
 		}
 
 		// Test RSA 2048
 		keyRSA2048, _ := rsa.GenerateKey(rand.Reader, 2048)
-		_, alg = getSigningMethodFromKey(keyRSA2048)
+		_, alg = jose.GetSigningMethodFromKey(keyRSA2048)
 		if alg != "RS256" {
 			t.Errorf("Expected RS256 for RSA 2048, got %s", alg)
 		}
 
 		// Test RSA 3072
 		keyRSA3072, _ := rsa.GenerateKey(rand.Reader, 3072)
-		_, alg = getSigningMethodFromKey(keyRSA3072)
+		_, alg = jose.GetSigningMethodFromKey(keyRSA3072)
 		if alg != "RS384" {
 			t.Errorf("Expected RS384 for RSA 3072, got %s", alg)
 		}
 
 		// Test RSA 4096
 		keyRSA4096, _ := rsa.GenerateKey(rand.Reader, 4096)
-		_, alg = getSigningMethodFromKey(keyRSA4096)
+		_, alg = jose.GetSigningMethodFromKey(keyRSA4096)
 		if alg != "RS512" {
 			t.Errorf("Expected RS512 for RSA 4096, got %s", alg)
 		}
 
 		// Test unknown key type (string)
-		_, alg = getSigningMethodFromKey("unknown")
+		_, alg = jose.GetSigningMethodFromKey("unknown")
 		if alg != "ES256" {
 			t.Errorf("Expected ES256 default for unknown key, got %s", alg)
 		}
 
 		// Test another unknown type (int)
-		_, alg = getSigningMethodFromKey(12345)
+		_, alg = jose.GetSigningMethodFromKey(12345)
 		if alg != "ES256" {
 			t.Errorf("Expected ES256 default for int key, got %s", alg)
 		}

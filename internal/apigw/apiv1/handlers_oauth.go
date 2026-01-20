@@ -166,7 +166,7 @@ func (c *Client) OAuthToken(ctx context.Context, req *openid4vci.TokenRequest) (
 func (c *Client) OAuthMetadata(ctx context.Context) (*oauth2.AuthorizationServerMetadata, error) {
 	c.log.Debug("metadata request")
 
-	signingMethod := jose.GetSigningMethodFromKey(c.oauth2MetadataSigningKey)
+	signingMethod, _ := jose.GetSigningMethodFromKey(c.oauth2MetadataSigningKey)
 	signedMetadata, err := c.oauth2Metadata.Sign(signingMethod, c.oauth2MetadataSigningKey, c.oauth2MetadataSigningChain)
 	if err != nil {
 		return nil, err

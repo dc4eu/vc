@@ -2,9 +2,7 @@ package sdjwtvc
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"crypto/rand"
-	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
@@ -14,8 +12,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"vc/pkg/jose"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/sha3"
 )
@@ -71,7 +69,7 @@ func (c *Client) BuildCredential(issuer string, kid string, privateKey any, vct 
 	}
 
 	// Determine signing algorithm from private key
-	signingMethod, algName := getSigningMethodFromKey(privateKey)
+	signingMethod, algName := jose.GetSigningMethodFromKey(privateKey)
 
 	// Create JWT header
 	// Per SD-JWT VC draft-13 section 3.2.1: typ MUST be "dc+sd-jwt"
@@ -184,42 +182,6 @@ func (c *Client) BuildCredentialWithSigner(ctx context.Context, issuer string, s
 	signedToken = Combine(signedToken, disclosures, "")
 
 	return signedToken, nil
-}
-
-// getSigningMethodFromKey determines the JWT signing method and algorithm name from the private key
-func getSigningMethodFromKey(privateKey any) (jwt.SigningMethod, string) {
-	// Check if the key is RSA
-	if rsaKey, ok := privateKey.(*rsa.PrivateKey); ok {
-		// Determine RSA algorithm based on key size
-		keySize := rsaKey.N.BitLen()
-		switch {
-		case keySize >= 4096:
-			return jwt.SigningMethodRS512, "RS512"
-		case keySize >= 3072:
-			return jwt.SigningMethodRS384, "RS384"
-		default:
-			return jwt.SigningMethodRS256, "RS256"
-		}
-	}
-
-	// Check if the key is ECDSA
-	if ecKey, ok := privateKey.(*ecdsa.PrivateKey); ok {
-		// Determine algorithm based on the curve of the ECDSA key
-		switch ecKey.Curve.Params().Name {
-		case "P-256":
-			return jwt.SigningMethodES256, "ES256"
-		case "P-384":
-			return jwt.SigningMethodES384, "ES384"
-		case "P-521":
-			return jwt.SigningMethodES512, "ES512"
-		default:
-			// Default to ES256 for unknown curves
-			return jwt.SigningMethodES256, "ES256"
-		}
-	}
-
-	// Default to ES256 if key type is unknown
-	return jwt.SigningMethodES256, "ES256"
 }
 
 // MakeCredential creates a SD-JWT credential with optional decoy digests.

@@ -7,6 +7,7 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"testing"
+	"vc/pkg/jose"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -320,7 +321,7 @@ func TestBuildCredential_VCTMEncoding(t *testing.T) {
 
 func TestGetSigningMethodFromKey_UnknownKeyType(t *testing.T) {
 	// Test with a non-crypto key type
-	signingMethod, algName := getSigningMethodFromKey("not a key")
+	signingMethod, algName := jose.GetSigningMethodFromKey("not a key")
 
 	// Should default to ES256
 	assert.NotNil(t, signingMethod)
@@ -333,7 +334,7 @@ func TestGetSigningMethodFromKey_UnknownECDSACurve(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test that it defaults to ES256 for known curves
-	signingMethod, algName := getSigningMethodFromKey(privateKey)
+	signingMethod, algName := jose.GetSigningMethodFromKey(privateKey)
 	assert.NotNil(t, signingMethod)
 	assert.Equal(t, "ES256", algName)
 }

@@ -1,0 +1,46 @@
+{
+    "@context": [
+        "https://www.w3.org/ns/credentials/v2",
+        "https://schemas.accredify.io/idvc/corporate-id/v1/context"
+    ],
+    "id": "urn:uuid:fa1d513c-85ac-498b-85b5-96788dfb5b26",
+    "type": [
+        "VerifiableCredential",
+        "CorporateIDCredential"
+    ],
+    "issuer": {
+        "id": "did:web:vc-issuer.accredify.io:organizations:9c7308e9-a770-4be8-bc0d-21d9cac585bc",
+        "name": "Accredify"
+    },
+    "credentialSubject": {
+        "id": "urn:uuid:d0137f0e-712b-47f9-844f-cc5cb481e2cd",
+        "authorisationScope": [
+            "Registration of establishment",
+            "Registration of changes"
+        ],
+        "companyName": "Accredify Pte. Ltd.",
+        "companyUEN": "201807660K",
+        "companyAddress": {
+            "@type": "PostalAddress",
+            "addressCountry": "SG",
+            "postalCode": "339213",
+            "streetAddress": "30A KALLANG PLACE, #11-06"
+        },
+        "mobileNumber": "19201473354",
+        "fullName": "Tan Ah Kow",
+        "nationalRegistrationIdentityCard": "S9988776A",
+        "passportNumber": "S9988776A",
+        "position": "Director",
+        "type": "CorporateIDCredential"
+    },
+    "validFrom": "2025-10-30T00:00:00Z",
+    "validUntil": "2025-11-30T00:00:00Z",
+    "proof": {
+        "type": "DataIntegrityProof",
+        "cryptosuite": "eddsa-rdfc-2022",
+        "created": "2025-10-30T05:14:38Z",
+        "verificationMethod": "did:web:vc-issuer.accredify.io:organizations:9c7308e9-a770-4be8-bc0d-21d9cac585bc#key-iAGgYQTUeDjqcf2OdNINUtE7hXM5caMKV4pFxsxkp7U",
+        "proofPurpose": "assertionMethod",
+        "proofValue": "z3KY8KQ6TG1ZRy6U54xsXUXM36DHoefbbcDcVPKp49KndLdQkkFJtqu6NVHTcVX3L9JFCqYuYTz9H8Zi7j5ugsHPG"
+    }
+}

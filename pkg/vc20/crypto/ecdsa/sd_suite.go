@@ -2,13 +2,11 @@ package ecdsa
 
 import (
 	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 
@@ -21,6 +19,10 @@ import (
 
 const (
 	CryptosuiteSd2023 = "ecdsa-sd-2023"
+
+	// CBOR tags for ECDSA-SD proofs (W3C spec Section 3.5.2 and 3.5.7)
+	cborTagBaseProof    = 23808 // 0xd9 0x5d 0x00 - Base proof header
+	cborTagDerivedProof = 23809 // 0xd9 0x5d 0x01 - Derived proof header
 )
 
 // SdSuite implements the ECDSA Selective Disclosure Cryptosuite v1.0
@@ -97,75 +99,81 @@ func (s *SdSuite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, op
 		skolemizedQuads[i] = skolemizeQuad(quad, hmacKey)
 	}
 
-	// 4. Separate Mandatory and Non-Mandatory
-	// For now, assume all are non-mandatory (selective)
-	// TODO: Implement mandatory pointer logic
-	mandatoryQuads := []string{}
-	nonMandatoryQuads := skolemizedQuads
+	// 4. Separate Mandatory and Non-Mandatory N-Quads
+	// Per W3C spec Section 3.6.2 Base Proof Transformation:
+	// Use mandatory pointers to determine which N-Quads are mandatory
+	var mandatoryQuads []string
+	var nonMandatoryQuads []string
 
-	// 5. Group Non-Mandatory Quads
-	// Map: GroupID -> []Quad
-	groups := make(map[string][]string)
+	if len(opts.MandatoryPointers) > 0 {
+		// Get the original JSON-LD document for pointer selection
+		var docJSON any
+		originalJSON := cred.OriginalJSON()
+		if originalJSON != "" {
+			if err := json.Unmarshal([]byte(originalJSON), &docJSON); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal original JSON: %w", err)
+			}
+		} else {
+			// Fallback: marshal the credential
+			jsonBytes, err := json.Marshal(cred)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal credential: %w", err)
+			}
+			if err := json.Unmarshal(jsonBytes, &docJSON); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal credential JSON: %w", err)
+			}
+		}
 
-	for _, quad := range nonMandatoryQuads {
-		// Parse quad to find subject and object
-		s, p, o, g := parseQuadComponents(quad)
-		_ = p
-		_ = g
+		// Remove proof from document for pointer selection
+		removeProof(docJSON)
 
-		// If subject is blank node
-		if strings.HasPrefix(s, "_:") {
-			groups[s] = append(groups[s], quad)
+		// Select mandatory N-Quads based on pointers from original (non-skolemized) quads
+		mandatorySet := make(map[string]bool)
+		selectedMandatory := selectMandatoryNQuads(docJSON, quads, opts.MandatoryPointers)
+		for _, q := range selectedMandatory {
+			mandatorySet[q] = true
 		}
-		// If object is blank node
-		if strings.HasPrefix(o, "_:") {
-			groups[o] = append(groups[o], quad)
+
+		// Now map to skolemized quads - need to track which original quads became which skolemized quads
+		mandatoryIndices := make(map[int]bool)
+		for i, q := range quads {
+			if mandatorySet[q] {
+				mandatoryIndices[i] = true
+			}
 		}
-		// If neither
-		if !strings.HasPrefix(s, "_:") && !strings.HasPrefix(o, "_:") {
-			groups[s] = append(groups[s], quad)
+
+		for i, q := range skolemizedQuads {
+			if mandatoryIndices[i] {
+				mandatoryQuads = append(mandatoryQuads, q)
+			} else {
+				nonMandatoryQuads = append(nonMandatoryQuads, q)
+			}
 		}
+	} else {
+		// No mandatory pointers - all quads are non-mandatory
+		nonMandatoryQuads = skolemizedQuads
 	}
 
-	// 6. Sign Groups
-	// Generate ephemeral key
+	// 5. Generate ephemeral key pair (proof-scoped)
 	ephemeralKey, err := ecdsa.GenerateKey(key.Curve, rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate ephemeral key: %w", err)
 	}
 
-	// We need to order the groups to ensure deterministic signature order?
-	// The spec says "signatures" is a list.
-	// We need to map signatures to groups.
-	// The Derived Proof will contain a subset of signatures.
-	// The holder needs to know which signature corresponds to which quad/group.
-	// The spec says: "The signatures array contains the signatures for the non-mandatory N-Quads."
-	// "The order of signatures MUST correspond to the order of the groups."
-	// But what is the order of groups?
-	// "Sort the keys of the group map..."
-
-	groupKeys := make([]string, 0, len(groups))
-	for k := range groups {
-		groupKeys = append(groupKeys, k)
-	}
-	sort.Strings(groupKeys)
-
+	// 6. Sign Individual Non-Mandatory N-Quads
+	// Per W3C spec Section 3.6.5 Base Proof Serialization:
+	// "Initialize signatures to an array where each element holds the result of digitally signing
+	// the UTF-8 representation of each N-Quad string in nonMandatory, in order."
 	var signatures [][]byte
 
-	for _, k := range groupKeys {
-		groupQuads := groups[k]
-		// Canonicalize group (sort quads)
-		sort.Strings(groupQuads)
-		// Join with newlines
-		groupStr := strings.Join(groupQuads, "\n") + "\n"
-
-		// Hash
-		hash := sha256.Sum256([]byte(groupStr))
+	for _, quad := range nonMandatoryQuads {
+		// Hash the UTF-8 representation of the N-Quad
+		hash := sha256.Sum256([]byte(quad))
 
 		// Sign with ephemeral key
 		r, s, err := ecdsa.Sign(rand.Reader, ephemeralKey, hash[:])
 		if err != nil {
-			return nil, fmt.Errorf("failed to sign group %s: %w", k, err)
+			return nil, fmt.Errorf("failed to sign N-Quad: %w", err)
 		}
 
 		// Serialize signature
@@ -213,30 +221,41 @@ func (s *SdSuite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, op
 	proofHash := sha256.Sum256([]byte(proofCanonical))
 
 	// Mandatory Hash
-	// If no mandatory quads, hash of empty string? Or hash of nothing?
-	// Spec: "Hash the canonicalized mandatory N-Quads."
+	// Per W3C spec Section 3.4.17 hashMandatoryNQuads:
+	// "Join all of the mandatory N-Quad strings together using a single newline between each"
+	// "Return the result of SHA-256 hashing the UTF-8 representation of the joined mandatory N-Quads"
 	var mandatoryHash []byte
 	if len(mandatoryQuads) > 0 {
-		sort.Strings(mandatoryQuads)
+		// Per W3C spec Section 3.4.17 hashMandatoryNQuads:
+		// Join with newlines between each quad, plus trailing newline for final quad
+		// Note: Order is determined by pointer evaluation order, not sorted
 		mandatoryStr := strings.Join(mandatoryQuads, "\n") + "\n"
 		h := sha256.Sum256([]byte(mandatoryStr))
 		mandatoryHash = h[:]
 	} else {
-		// Hash of empty string?
+		// Per spec, if no mandatory quads, hash is SHA-256 of empty string
 		h := sha256.Sum256([]byte(""))
 		mandatoryHash = h[:]
 	}
 
-	// Ephemeral Public Key
-	ephemeralPubBytes := ellipticMarshal(ephemeralKey.PublicKey)
+	// Ephemeral Public Key - use compressed format with multicodec prefix
+	// Per W3C spec Section 3.6.5: "multikey expression of the public key"
+	// "starting with the bytes 0x80 and 0x24 (multikey p256-pub header as varint)"
+	ephemeralPubBytes := ellipticMarshalCompressed(ephemeralKey.PublicKey)
 
 	// Combine for Base Signature
-	// hash(proofHash + ephemeralPub + mandatoryHash)
+	// Per W3C spec Section 3.5.1 serializeSignData:
+	// "Return the concatenation of proofHash, publicKey, and mandatoryHash"
 	combined := append(proofHash[:], ephemeralPubBytes...)
 	combined = append(combined, mandatoryHash...)
 
+	// Hash the combined data before signing
+	// Note: JavaScript WebCrypto API automatically hashes the data when signing with ECDSA,
+	// but Go's crypto/ecdsa expects pre-hashed data. We must hash the combined data first.
+	combinedHash := sha256.Sum256(combined)
+
 	// Sign with Issuer Key
-	sigR, sigS, err := ecdsa.Sign(rand.Reader, key, combined)
+	sigR, sigS, err := ecdsa.Sign(rand.Reader, key, combinedHash[:])
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign base proof: %w", err)
 	}
@@ -251,15 +270,22 @@ func (s *SdSuite) Sign(cred *credential.RDFCredential, key *ecdsa.PrivateKey, op
 		MandatoryPointers: opts.MandatoryPointers,
 	}
 
-	// Encode CBOR
-	cborBytes, err := cbor.Marshal(bpv)
+	// Encode CBOR with BASE proof header
+	// Per W3C spec Section 3.5.2 serializeBaseProofValue:
+	// "Initialize a byte array, proofValue, that starts with the ECDSA-SD base proof header bytes 0xd9, 0x5d, and 0x00"
+	cborArrayBytes, err := cbor.Marshal(bpv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal CBOR: %w", err)
 	}
 
-	// Encode Multibase (base64url header 'u')
-	// Spec says "multibase-encoded base proof value".
-	// Usually base64url is 'u'.
+	// Add CBOR tag header for BASE proof (tag 23808 = 0x5d00)
+	cborBytes := make([]byte, 3+len(cborArrayBytes))
+	cborBytes[0] = 0xd9 // CBOR tag marker for 2-byte tag
+	cborBytes[1] = 0x5d // High byte of tag 23808
+	cborBytes[2] = 0x00 // Low byte of tag 23808
+	copy(cborBytes[3:], cborArrayBytes)
+
+	// Encode Multibase (base64url-no-pad header 'u')
 	proofValue, err := multibase.Encode(multibase.Base64url, cborBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode multibase: %w", err)
@@ -391,16 +417,31 @@ func (s *SdSuite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) e
 		return fmt.Errorf("failed to decode proofValue: %w", err)
 	}
 
+	// Check for CBOR tag headers per W3C spec
+	// BASE proof header: 0xd9 0x5d 0x00 (tag 23808)
+	// DERIVED proof header: 0xd9 0x5d 0x01 (tag 23809)
+	isBaseProof := false
+	isDerivedProof := false
+	cborData := proofValueBytes
+
+	if len(proofValueBytes) >= 3 && proofValueBytes[0] == 0xd9 && proofValueBytes[1] == 0x5d {
+		if proofValueBytes[2] == 0x00 {
+			isBaseProof = true
+			cborData = proofValueBytes[3:] // Strip CBOR tag header
+		} else if proofValueBytes[2] == 0x01 {
+			isDerivedProof = true
+			cborData = proofValueBytes[3:] // Strip CBOR tag header
+		}
+	}
+
 	// Try to decode as BaseProofValue
 	var baseProof BaseProofValueArray
-	isBaseProof := true
-	if err := cbor.Unmarshal(proofValueBytes, &baseProof); err != nil {
-		// Try DerivedProofValue
-		isBaseProof = false
-	} else {
-		// Check if it has HmacKey (Base Proof specific)
-		if len(baseProof.HmacKey) == 0 {
-			isBaseProof = false
+	if !isDerivedProof {
+		if err := cbor.Unmarshal(cborData, &baseProof); err == nil {
+			// Check if it has HmacKey (Base Proof specific)
+			if len(baseProof.HmacKey) > 0 {
+				isBaseProof = true
+			}
 		}
 	}
 
@@ -409,7 +450,7 @@ func (s *SdSuite) Verify(cred *credential.RDFCredential, key *ecdsa.PublicKey) e
 	}
 
 	var derivedProof DerivedProofValueArray
-	if err := cbor.Unmarshal(proofValueBytes, &derivedProof); err != nil {
+	if err := cbor.Unmarshal(cborData, &derivedProof); err != nil {
 		return fmt.Errorf("failed to unmarshal proof value as Base or Derived proof: %w", err)
 	}
 
@@ -441,33 +482,7 @@ func (s *SdSuite) verifyBaseProof(cred *credential.RDFCredential, key *ecdsa.Pub
 	}
 	proofHash := sha256.Sum256([]byte(proofCanonical))
 
-	// Mandatory Hash
-	// For Base Proof, we have the full document, so we can re-calculate mandatory quads.
-	// But we need the mandatory pointers.
-	// They are in the proof value.
-	// TODO: Implement mandatory pointer selection.
-	// For now, assume empty.
-	mandatoryHash := sha256.Sum256([]byte(""))
-	if len(proof.MandatoryPointers) > 0 {
-		// If we had logic to select mandatory quads, we would use it here.
-		// Since we don't, and we assumed empty in Sign, this matches.
-		// If Sign used pointers, we would fail here.
-	}
-
-	// Ephemeral Public Key
-	ephemeralPub := proof.PublicKey
-
-	combined := append(proofHash[:], ephemeralPub...)
-	combined = append(combined, mandatoryHash[:]...)
-
-	// Verify Base Signature
-	if !verifySignature(key, combined, proof.BaseSignature) {
-		return fmt.Errorf("base signature verification failed")
-	}
-
-	// 2. Verify Individual Signatures
-	// We need to reconstruct groups and verify them against proof.Signatures
-	// Transform document to N-Quads
+	// Get the credential document for mandatory pointer selection
 	credWithoutProof, err := cred.CredentialWithoutProof()
 	if err != nil {
 		return fmt.Errorf("failed to get credential without proof: %w", err)
@@ -478,52 +493,134 @@ func (s *SdSuite) verifyBaseProof(cred *credential.RDFCredential, key *ecdsa.Pub
 	}
 	quads := parseNQuads(nquadsStr)
 
-	// Skolemize
-	skolemizedQuads := make([]string, len(quads))
-	for i, quad := range quads {
-		skolemizedQuads[i] = skolemizeQuad(quad, proof.HmacKey)
-	}
-
-	// Group (assuming all non-mandatory)
-	groups := make(map[string][]string)
-	for _, quad := range skolemizedQuads {
-		s, _, o, _ := parseQuadComponents(quad)
-		if strings.HasPrefix(s, "_:") {
-			groups[s] = append(groups[s], quad)
+	// Calculate Mandatory Hash
+	// If there are mandatory pointers, select the corresponding N-Quads and hash them
+	var mandatoryHash [32]byte
+	if len(proof.MandatoryPointers) > 0 {
+		// Get the original JSON-LD document for pointer selection
+		var docJSON any
+		originalJSON := cred.OriginalJSON()
+		if originalJSON != "" {
+			if err := json.Unmarshal([]byte(originalJSON), &docJSON); err != nil {
+				return fmt.Errorf("failed to unmarshal original JSON: %w", err)
+			}
+		} else {
+			// Fallback: marshal the credential
+			jsonBytes, err := json.Marshal(cred)
+			if err != nil {
+				return fmt.Errorf("failed to marshal credential: %w", err)
+			}
+			if err := json.Unmarshal(jsonBytes, &docJSON); err != nil {
+				return fmt.Errorf("failed to unmarshal credential JSON: %w", err)
+			}
 		}
-		if strings.HasPrefix(o, "_:") {
-			groups[o] = append(groups[o], quad)
+
+		// Remove proof from document for pointer selection
+		removeProof(docJSON)
+
+		// Select mandatory N-Quads based on pointers
+		mandatoryQuads := selectMandatoryNQuads(docJSON, quads, proof.MandatoryPointers)
+
+		// Hash mandatory quads (joined with newlines)
+		if len(mandatoryQuads) > 0 {
+			// Join with newlines between each quad, plus trailing newline for final quad
+			mandatoryStr := strings.Join(mandatoryQuads, "\n") + "\n"
+			mandatoryHash = sha256.Sum256([]byte(mandatoryStr))
+		} else {
+			// No mandatory quads found - use empty hash
+			mandatoryHash = sha256.Sum256([]byte(""))
 		}
-		if !strings.HasPrefix(s, "_:") && !strings.HasPrefix(o, "_:") {
-			groups[s] = append(groups[s], quad)
+	} else {
+		// No mandatory pointers - use empty hash
+		mandatoryHash = sha256.Sum256([]byte(""))
+	}
+
+	// Ephemeral Public Key
+	ephemeralPub := proof.PublicKey
+
+	combined := append(proofHash[:], ephemeralPub...)
+	combined = append(combined, mandatoryHash[:]...)
+
+	// Hash the combined data before verification
+	// Note: JavaScript WebCrypto API automatically hashes the data when verifying with ECDSA,
+	// but Go's crypto/ecdsa expects pre-hashed data. We must hash the combined data first.
+	combinedHash := sha256.Sum256(combined)
+
+	// Verify Base Signature
+	if !verifySignature(key, combinedHash[:], proof.BaseSignature) {
+		return fmt.Errorf("base signature verification failed")
+	}
+
+	// 2. Verify Individual N-Quad Signatures
+	// Per W3C spec Section 3.6.7: verify each signature against the UTF-8 representation
+	// of the corresponding non-mandatory N-Quad
+
+	// First, get non-mandatory quads by excluding mandatory ones
+	var nonMandatoryQuads []string
+
+	if len(proof.MandatoryPointers) > 0 {
+		// Get the original JSON-LD document for pointer selection
+		var docJSON any
+		originalJSON := cred.OriginalJSON()
+		if originalJSON != "" {
+			if err := json.Unmarshal([]byte(originalJSON), &docJSON); err != nil {
+				return fmt.Errorf("failed to unmarshal original JSON: %w", err)
+			}
+		} else {
+			jsonBytes, err := json.Marshal(cred)
+			if err != nil {
+				return fmt.Errorf("failed to marshal credential: %w", err)
+			}
+			if err := json.Unmarshal(jsonBytes, &docJSON); err != nil {
+				return fmt.Errorf("failed to unmarshal credential JSON: %w", err)
+			}
+		}
+		removeProof(docJSON)
+
+		// Find mandatory quads based on original (non-skolemized) quads
+		mandatorySet := make(map[string]bool)
+		selectedMandatory := selectMandatoryNQuads(docJSON, quads, proof.MandatoryPointers)
+		for _, q := range selectedMandatory {
+			mandatorySet[q] = true
+		}
+
+		// Track which original quads are mandatory
+		mandatoryIndices := make(map[int]bool)
+		for i, q := range quads {
+			if mandatorySet[q] {
+				mandatoryIndices[i] = true
+			}
+		}
+
+		// Skolemize and collect non-mandatory quads
+		for i, quad := range quads {
+			if !mandatoryIndices[i] {
+				nonMandatoryQuads = append(nonMandatoryQuads, skolemizeQuad(quad, proof.HmacKey))
+			}
+		}
+	} else {
+		// All quads are non-mandatory
+		for _, quad := range quads {
+			nonMandatoryQuads = append(nonMandatoryQuads, skolemizeQuad(quad, proof.HmacKey))
 		}
 	}
 
-	groupKeys := make([]string, 0, len(groups))
-	for k := range groups {
-		groupKeys = append(groupKeys, k)
-	}
-	sort.Strings(groupKeys)
-
-	if len(groupKeys) != len(proof.Signatures) {
-		return fmt.Errorf("number of groups (%d) does not match number of signatures (%d)", len(groupKeys), len(proof.Signatures))
+	// Check signature count matches non-mandatory quad count
+	if len(nonMandatoryQuads) != len(proof.Signatures) {
+		return fmt.Errorf("number of non-mandatory quads (%d) does not match number of signatures (%d)", len(nonMandatoryQuads), len(proof.Signatures))
 	}
 
-	// Parse Ephemeral Key
-	x, y := elliptic.Unmarshal(key.Curve, proof.PublicKey)
-	if x == nil {
-		return fmt.Errorf("invalid ephemeral public key")
+	// Parse Ephemeral Key - handles both uncompressed (0x04) and multicodec + compressed (0x8024)
+	ephemeralKey, err := parseEphemeralPublicKey(proof.PublicKey, key.Curve)
+	if err != nil {
+		return fmt.Errorf("failed to parse ephemeral public key: %w", err)
 	}
-	ephemeralKey := &ecdsa.PublicKey{Curve: key.Curve, X: x, Y: y}
 
-	for i, k := range groupKeys {
-		groupQuads := groups[k]
-		sort.Strings(groupQuads)
-		groupStr := strings.Join(groupQuads, "\n") + "\n"
-		hash := sha256.Sum256([]byte(groupStr))
-
+	// Verify each signature against its corresponding N-Quad
+	for i, quad := range nonMandatoryQuads {
+		hash := sha256.Sum256([]byte(quad))
 		if !verifySignature(ephemeralKey, hash[:], proof.Signatures[i]) {
-			return fmt.Errorf("signature verification failed for group %s", k)
+			return fmt.Errorf("signature verification failed for N-Quad %d", i)
 		}
 	}
 
@@ -612,7 +709,12 @@ func (s *SdSuite) verifyDerivedProof(cred *credential.RDFCredential, key *ecdsa.
 	combined := append(proofHash[:], ephemeralPub...)
 	combined = append(combined, mandatoryHash[:]...)
 
-	if !verifySignature(key, combined, proof.BaseSignature) {
+	// Hash the combined data before verification
+	// Note: JavaScript WebCrypto API automatically hashes the data when verifying with ECDSA,
+	// but Go's crypto/ecdsa expects pre-hashed data. We must hash the combined data first.
+	combinedHash := sha256.Sum256(combined)
+
+	if !verifySignature(key, combinedHash[:], proof.BaseSignature) {
 		return fmt.Errorf("base signature verification failed")
 	}
 
@@ -669,53 +771,39 @@ func (s *SdSuite) verifyDerivedProof(cred *credential.RDFCredential, key *ecdsa.
 
 	mappedQuads := parseNQuads(nquadsStr)
 
-	// Group
-	groups := make(map[string][]string)
-	for _, quad := range mappedQuads {
-		s, _, o, _ := parseQuadComponents(quad)
-		if strings.HasPrefix(s, "_:") {
-			groups[s] = append(groups[s], quad)
+	// Separate mandatory and non-mandatory quads using MandatoryIndexes
+	// MandatoryIndexes contains indices into the mapped quads that are mandatory
+	mandatorySet := make(map[int]bool)
+	for _, idx := range proof.MandatoryIndexes {
+		mandatorySet[idx] = true
+	}
+
+	// Collect non-mandatory quads - these are the ones we verify signatures for
+	var nonMandatoryQuads []string
+	for i, quad := range mappedQuads {
+		if !mandatorySet[i] {
+			nonMandatoryQuads = append(nonMandatoryQuads, quad)
 		}
-		if strings.HasPrefix(o, "_:") {
-			groups[o] = append(groups[o], quad)
-		}
-		if !strings.HasPrefix(s, "_:") && !strings.HasPrefix(o, "_:") {
-			groups[s] = append(groups[s], quad)
-		}
 	}
 
-	groupKeys := make([]string, 0, len(groups))
-	for k := range groups {
-		groupKeys = append(groupKeys, k)
-	}
-	sort.Strings(groupKeys)
-
-	// Verify signatures for groups
-	// We have `proof.Signatures`.
-	// But this list might be a subset of the original signatures?
-	// Or does it contain ONLY the signatures for the revealed groups?
-	// Spec: "The signatures array contains the signatures for the non-mandatory N-Quads that are revealed."
-	// "The order of signatures MUST correspond to the order of the groups."
-
-	if len(groupKeys) != len(proof.Signatures) {
-		return fmt.Errorf("number of groups (%d) does not match number of signatures (%d)", len(groupKeys), len(proof.Signatures))
+	// Verify signatures for non-mandatory quads
+	// proof.Signatures contains signatures for the revealed non-mandatory N-Quads
+	if len(nonMandatoryQuads) != len(proof.Signatures) {
+		return fmt.Errorf("number of non-mandatory quads (%d) does not match number of signatures (%d)", len(nonMandatoryQuads), len(proof.Signatures))
 	}
 
-	// Parse Ephemeral Key
-	x, y := elliptic.Unmarshal(key.Curve, proof.PublicKey)
-	if x == nil {
-		return fmt.Errorf("invalid ephemeral public key")
+	// Parse Ephemeral Key - handles both uncompressed (0x04) and multicodec + compressed (0x8024)
+	ephemeralKey, err := parseEphemeralPublicKey(proof.PublicKey, key.Curve)
+	if err != nil {
+		return fmt.Errorf("failed to parse ephemeral public key: %w", err)
 	}
-	ephemeralKey := &ecdsa.PublicKey{Curve: key.Curve, X: x, Y: y}
 
-	for i, k := range groupKeys {
-		groupQuads := groups[k]
-		sort.Strings(groupQuads)
-		groupStr := strings.Join(groupQuads, "\n") + "\n"
-		hash := sha256.Sum256([]byte(groupStr))
+	// Verify each signature against its corresponding N-Quad
+	for i, quad := range nonMandatoryQuads {
+		hash := sha256.Sum256([]byte(quad))
 
 		if !verifySignature(ephemeralKey, hash[:], proof.Signatures[i]) {
-			return fmt.Errorf("signature verification failed for group %s", k)
+			return fmt.Errorf("signature verification failed for N-Quad %d", i)
 		}
 	}
 
@@ -766,8 +854,17 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 		return nil, fmt.Errorf("failed to decode proofValue: %w", err)
 	}
 
+	// Handle CBOR tag header (0xd9 0x5d 0x00 for BASE proof)
+	cborData := proofValueBytes
+	if len(proofValueBytes) >= 3 && proofValueBytes[0] == 0xd9 && proofValueBytes[1] == 0x5d {
+		if proofValueBytes[2] != 0x00 {
+			return nil, fmt.Errorf("expected BASE proof (0xd9 0x5d 0x00) but got 0xd9 0x5d 0x%02x", proofValueBytes[2])
+		}
+		cborData = proofValueBytes[3:]
+	}
+
 	var baseProof BaseProofValueArray
-	if err := cbor.Unmarshal(proofValueBytes, &baseProof); err != nil {
+	if err := cbor.Unmarshal(cborData, &baseProof); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal base proof: %w", err)
 	}
 
@@ -787,106 +884,83 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 		skolemizedQuads[i] = skolemizeQuad(quad, baseProof.HmacKey)
 	}
 
-	// 3. Select Revealed Quads
-	// We assume revealIndices refers to the sorted list of non-mandatory quads?
-	// Or indices into the original list?
-	// The user gives indices. Let's assume they are indices into `skolemizedQuads`.
-	// But wait, `skolemizedQuads` order depends on canonicalization.
-	// The user needs to know the order.
-	// This API is low-level.
+	// 3. Select Revealed Quads Based on Individual N-Quads
+	// Per W3C spec, signatures are for individual non-mandatory N-Quads
+	// revealIndices specifies which non-mandatory N-Quads to reveal
 
-	// Filter quads
-	// Also need to keep track of which groups are revealed to filter signatures.
-
-	// We need to reconstruct the groups to know which signature corresponds to which quad.
-	// Grouping
-	// 1. Identify which groups the selected quads belong to.
-	// 2. Collect ALL quads from those groups.
-	// 3. These are the `revealedQuads`.
-
-	// But wait, if I have to reveal the whole group, and the group is "all attributes of the DID", then I reveal everything.
-	// This implies `ecdsa-sd-2023` requires using blank nodes for selective disclosure of attributes?
-	// Yes, likely. The credential structure must use blank nodes (e.g. `credentialSubject` is a blank node, or attributes are broken out).
-
-	// Re-implement grouping to map GroupID -> Quads
-	groups := make(map[string][]string)
-	for _, quad := range skolemizedQuads {
-		s, _, o, _ := parseQuadComponents(quad)
-		if strings.HasPrefix(s, "_:") {
-			groups[s] = append(groups[s], quad)
+	// First, separate mandatory from non-mandatory quads
+	// Get original JSON-LD document
+	originalJSON := cred.OriginalJSON()
+	var docJSON any
+	if originalJSON != "" {
+		if err := json.Unmarshal([]byte(originalJSON), &docJSON); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal original JSON: %w", err)
 		}
-		if strings.HasPrefix(o, "_:") {
-			groups[o] = append(groups[o], quad)
+	} else {
+		// Fall back to marshaling the credential
+		jsonBytes, err := json.Marshal(cred)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal credential: %w", err)
 		}
-		if !strings.HasPrefix(s, "_:") && !strings.HasPrefix(o, "_:") {
-			groups[s] = append(groups[s], quad)
+		if err := json.Unmarshal(jsonBytes, &docJSON); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal credential JSON: %w", err)
+		}
+	}
+	removeProof(docJSON)
+
+	// Identify mandatory quads based on original (non-skolemized) quads
+	mandatorySet := make(map[string]bool)
+	if len(baseProof.MandatoryPointers) > 0 {
+		selectedMandatory := selectMandatoryNQuads(docJSON, quads, baseProof.MandatoryPointers)
+		for _, q := range selectedMandatory {
+			mandatorySet[q] = true
 		}
 	}
 
-	// Determine which groups are targeted by revealIndices
-	targetGroups := make(map[string]bool)
-	for _, idx := range revealIndices {
-		if idx < 0 || idx >= len(skolemizedQuads) {
-			continue
-		}
-		quad := skolemizedQuads[idx]
-		s, _, o, _ := parseQuadComponents(quad)
-		if strings.HasPrefix(s, "_:") {
-			targetGroups[s] = true
-		}
-		if strings.HasPrefix(o, "_:") {
-			targetGroups[o] = true
-		}
-		if !strings.HasPrefix(s, "_:") && !strings.HasPrefix(o, "_:") {
-			targetGroups[s] = true
+	// Build non-mandatory quads list (preserving order)
+	var nonMandatoryIndices []int
+	var nonMandatorySkolemized []string
+	for i, q := range quads {
+		if !mandatorySet[q] {
+			nonMandatoryIndices = append(nonMandatoryIndices, i)
+			nonMandatorySkolemized = append(nonMandatorySkolemized, skolemizedQuads[i])
 		}
 	}
 
-	// Collect all quads from target groups
-	// And collect signatures
-
-	// We need the sorted group keys from the Base Proof generation to match signatures
-	allGroupKeys := make([]string, 0, len(groups))
-	for k := range groups {
-		allGroupKeys = append(allGroupKeys, k)
+	// Validate signature count
+	if len(baseProof.Signatures) != len(nonMandatorySkolemized) {
+		return nil, fmt.Errorf("base proof signatures count (%d) does not match non-mandatory quads count (%d)", len(baseProof.Signatures), len(nonMandatorySkolemized))
 	}
-	sort.Strings(allGroupKeys)
 
+	// Select which non-mandatory N-Quads and signatures to reveal
 	var derivedSignatures [][]byte
-	var finalRevealedQuads []string
-
-	// We need to know which signature corresponds to which group key.
-	// The Base Proof has `Signatures` array corresponding to `allGroupKeys`.
-
-	if len(baseProof.Signatures) != len(allGroupKeys) {
-		return nil, fmt.Errorf("base proof signatures count (%d) does not match groups count (%d)", len(baseProof.Signatures), len(allGroupKeys))
-	}
+	var revealedSkolemizedQuads []string
 
 	// Label Map: NewID -> HMAC_ID
 	labelMap := make(map[string]string)
-	// We need to generate new IDs for the revealed blank nodes.
-	// Map: HMAC_ID -> NewID
 	hmacToNew := make(map[string]string)
 
-	for i, k := range allGroupKeys {
-		if targetGroups[k] {
-			// This group is revealed
+	// Create a set of indices to reveal for quick lookup
+	revealSet := make(map[int]bool)
+	for _, idx := range revealIndices {
+		if idx >= 0 && idx < len(nonMandatorySkolemized) {
+			revealSet[idx] = true
+		}
+	}
+
+	// Collect revealed quads and their signatures
+	for i := range nonMandatorySkolemized {
+		if revealSet[i] {
 			derivedSignatures = append(derivedSignatures, baseProof.Signatures[i])
+			revealedSkolemizedQuads = append(revealedSkolemizedQuads, nonMandatorySkolemized[i])
 
-			// Add quads
-			// We need to deduplicate quads if they are in multiple revealed groups?
-			// A quad is a string.
-			for _, q := range groups[k] {
-				finalRevealedQuads = append(finalRevealedQuads, q)
-			}
-
-			// Handle Label Map
-			// If k is a blank node (HMAC'd), we need to assign a new ID.
-			if strings.HasPrefix(k, "_:") {
-				hmacID := k[2:] // remove _:
+			// Track blank nodes for label mapping
+			quad := nonMandatorySkolemized[i]
+			re := regexp.MustCompile(`_:[a-zA-Z0-9\-_]+`)
+			matches := re.FindAllString(quad, -1)
+			for _, match := range matches {
+				hmacID := match[2:] // remove _:
 				if _, exists := hmacToNew[hmacID]; !exists {
-					// Generate new ID
-					// Use random identifier as recommended
 					rnd := make([]byte, 16)
 					if _, err := rand.Read(rnd); err != nil {
 						return nil, fmt.Errorf("failed to generate random ID: %w", err)
@@ -899,25 +973,36 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 		}
 	}
 
-	// Deduplicate finalRevealedQuads
-	uniqueQuads := make(map[string]bool)
-	var dedupedQuads []string
-	for _, q := range finalRevealedQuads {
-		if !uniqueQuads[q] {
-			uniqueQuads[q] = true
-			dedupedQuads = append(dedupedQuads, q)
+	// Always include mandatory quads in the derived credential
+	var mandatorySkolemized []string
+	for i, q := range quads {
+		if mandatorySet[q] {
+			mandatorySkolemized = append(mandatorySkolemized, skolemizedQuads[i])
+			// Track blank nodes in mandatory quads too
+			re := regexp.MustCompile(`_:[a-zA-Z0-9\-_]+`)
+			matches := re.FindAllString(skolemizedQuads[i], -1)
+			for _, match := range matches {
+				hmacID := match[2:]
+				if _, exists := hmacToNew[hmacID]; !exists {
+					rnd := make([]byte, 16)
+					if _, err := rand.Read(rnd); err != nil {
+						return nil, fmt.Errorf("failed to generate random ID: %w", err)
+					}
+					newID := fmt.Sprintf("b%x", rnd)
+					hmacToNew[hmacID] = newID
+					labelMap[newID] = hmacID
+				}
+			}
 		}
 	}
 
-	// 4. Create Derived Document
-	// We have dedupedQuads with HMAC IDs.
-	// We need to replace HMAC IDs with New IDs.
-	// We use URNs temporarily to prevent JSON-LD processor from renaming blank nodes during Frame.
+	// Combine mandatory and revealed non-mandatory quads
+	allRevealedQuads := append(mandatorySkolemized, revealedSkolemizedQuads...)
 
-	derivedQuads := make([]string, len(dedupedQuads))
-	for i, quad := range dedupedQuads {
-		// Replace all HMAC IDs with New IDs
-		// We can use regex again
+	// 4. Create Derived Document
+	// Replace HMAC IDs with New IDs using URNs
+	derivedQuads := make([]string, len(allRevealedQuads))
+	for i, quad := range allRevealedQuads {
 		re := regexp.MustCompile(`_:[a-zA-Z0-9\-_]+`)
 		derivedQuads[i] = re.ReplaceAllStringFunc(quad, func(match string) string {
 			hmacID := match[2:]
@@ -930,20 +1015,12 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 				hmacToNew[hmacID] = newID
 				labelMap[newID] = hmacID
 			}
-			// Return URN
 			return fmt.Sprintf("<urn:bn:%s>", newID)
 		})
 	}
 
 	// Convert derivedQuads to JSON-LD
-	// Use json-gold FromRDF
-	// Parse quads back to RDF triples
-	// This is painful without a parser.
-	// But we can construct a simple N-Quads string and parse it with json-gold?
-	// json-gold has `ParseNQuads`.
-
 	derivedNQuadsStr := strings.Join(derivedQuads, "\n")
-	// fmt.Printf("DEBUG: Derived N-Quads:\n%s\n", derivedNQuadsStr)
 
 	// FromRDF
 	fromRdfOpts := ld.NewJsonLdOptions("")
@@ -954,19 +1031,34 @@ func (s *SdSuite) Derive(cred *credential.RDFCredential, revealIndices []int, no
 		return nil, fmt.Errorf("failed to convert to JSON-LD: %w", err)
 	}
 
+	// Calculate mandatory indexes (which of the revealed quads are mandatory)
+	mandatoryIndexes := make([]int, 0)
+	for i := 0; i < len(mandatorySkolemized); i++ {
+		mandatoryIndexes = append(mandatoryIndexes, i)
+	}
+
 	// 5. Create Derived Proof
 	derivedProofValue := DerivedProofValueArray{
 		BaseSignature:    baseProof.BaseSignature,
 		PublicKey:        baseProof.PublicKey,
 		Signatures:       derivedSignatures,
 		LabelMap:         labelMap,
-		MandatoryIndexes: []int{}, // Empty for now
+		MandatoryIndexes: mandatoryIndexes,
 	}
 
-	cborBytes, err := cbor.Marshal(derivedProofValue)
+	cborArrayBytes, err := cbor.Marshal(derivedProofValue)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal derived proof: %w", err)
 	}
+
+	// Add CBOR tag header for DERIVED proof (tag 23809 = 0x5d01)
+	// Per W3C spec Section 3.5.3 serializeDerivedProofValue:
+	// "Initialize a byte array, proofValue, that starts with the ECDSA-SD disclosure proof header bytes 0xd9, 0x5d, and 0x01"
+	cborBytes := make([]byte, 3+len(cborArrayBytes))
+	cborBytes[0] = 0xd9 // CBOR tag marker for 2-byte tag
+	cborBytes[1] = 0x5d // High byte of tag 23809
+	cborBytes[2] = 0x01 // Low byte of tag 23809
+	copy(cborBytes[3:], cborArrayBytes)
 
 	proofValue, err := multibase.Encode(multibase.Base64url, cborBytes)
 	if err != nil {

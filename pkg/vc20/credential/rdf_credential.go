@@ -259,15 +259,35 @@ func (rc *RDFCredential) CredentialWithoutProofForTypes(targetTypes ...string) (
 		}
 	}
 
+	// Create filtered dataset
+	filteredDataset := &ld.RDFDataset{
+		Graphs: filteredGraphs,
+	}
+
+	// Convert filtered dataset back to JSON-LD for canonicalization
+	// This is needed because directly serializing relative IRIs to N-Quads
+	// produces invalid N-Quads (e.g., <UniversityDegreeCredential> without scheme)
+	api := ld.NewJsonLdApi()
+	opts := ld.NewJsonLdOptions("")
+	opts.DocumentLoader = GetGlobalLoader()
+
+	// Convert RDF dataset to JSON-LD using the API directly
+	jsonLdDoc, err := api.FromRDF(filteredDataset, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert filtered dataset to JSON-LD: %w", err)
+	}
+
+	// Serialize JSON-LD to string
+	jsonBytes, err := json.Marshal(jsonLdDoc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize JSON-LD: %w", err)
+	}
+
 	// Create new credential without proof
 	credWithoutProof := &RDFCredential{
-		dataset: &ld.RDFDataset{
-			Graphs: filteredGraphs,
-		},
-		// We don't have original JSON for the filtered credential
-		// But we can set it to empty string, and CanonicalForm will handle it
-		// by converting dataset to JSON-LD first
-		originalJSON: "",
+		dataset: filteredDataset,
+		// Store the JSON-LD representation for proper canonicalization
+		originalJSON: string(jsonBytes),
 		processor:    rc.processor,
 		options:      rc.options,
 	}
@@ -414,6 +434,71 @@ func (rc *RDFCredential) MarshalJSON() ([]byte, error) {
 // Deprecated: Use json.Marshal instead
 func (rc *RDFCredential) ToJSON() ([]byte, error) {
 	return rc.MarshalJSON()
+}
+
+// ToCompactJSON returns the credential as compact JSON-LD using the original context.
+// This is useful when you need to work with JSON pointers or preserve the original structure.
+// If original JSON is available, it returns that directly (preserving the exact structure).
+// Otherwise, it falls back to expanding and then compacting.
+func (rc *RDFCredential) ToCompactJSON() ([]byte, error) {
+	// If we have original JSON, return it directly - this preserves the exact structure
+	// which is important for selective disclosure and JSON pointer operations
+	if rc.originalJSON != "" {
+		return []byte(rc.originalJSON), nil
+	}
+
+	if rc.dataset == nil {
+		return nil, fmt.Errorf("RDF dataset is nil")
+	}
+
+	// First get the expanded JSON-LD
+	serializer := &ld.NQuadRDFSerializer{}
+	nquads, err := serializer.Serialize(rc.dataset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize dataset to N-Quads: %w", err)
+	}
+	nquadsStr, ok := nquads.(string)
+	if !ok {
+		return nil, fmt.Errorf("unexpected serialization result: %T", nquads)
+	}
+
+	opts := rc.options
+	if opts == nil {
+		opts = ld.NewJsonLdOptions("")
+		opts.DocumentLoader = GetGlobalLoader()
+	}
+	if opts.Format == "" {
+		opts.Format = "application/n-quads"
+	}
+
+	expanded, err := rc.processor.FromRDF(nquadsStr, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert RDF to JSON-LD: %w", err)
+	}
+
+	// Fallback to W3C VC v2 context
+	context := map[string]any{
+		"@context": []any{
+			"https://www.w3.org/ns/credentials/v2",
+		},
+	}
+
+	// Compact the expanded JSON-LD
+	compactOpts := ld.NewJsonLdOptions("")
+	compactOpts.DocumentLoader = GetGlobalLoader()
+
+	compacted, err := rc.processor.Compact(expanded, context, compactOpts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to compact JSON-LD: %w", err)
+	}
+
+	// Marshal to JSON
+	jsonBytes, err := json.Marshal(compacted)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal compact JSON: %w", err)
+	}
+
+	return jsonBytes, nil
 }
 
 // OriginalJSON returns the original JSON input

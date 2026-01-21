@@ -74,7 +74,7 @@ run-w3c-test: build-vc20-test-server
 
 gosec:
 	$(info Run gosec)
-	gosec -color -tests -exclude-dir=internal/gen ./...
+	gosec -color -tests -tags vc20 -exclude-dir=internal/gen ./...
 
 staticcheck:
 	$(info Run staticcheck)
@@ -82,7 +82,7 @@ staticcheck:
 
 vulncheck:
 	$(info Run vulncheck)
-	govulncheck -show verbose ./...
+	govulncheck -scan package -tags vc20 ./...
 
 start:
 	$(info Run!)

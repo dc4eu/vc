@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
 func (c *Client) createJWK(ctx context.Context) error {
@@ -17,7 +17,7 @@ func (c *Client) createJWK(ctx context.Context) error {
 	defer cancel()
 
 	// Create JWK from private key (supports both ECDSA and RSA)
-	key, err := jwk.New(c.privateKey)
+	key, err := jwk.Import(c.privateKey)
 	if err != nil {
 		return fmt.Errorf("failed to create JWK from private key: %w", err)
 	}
@@ -32,7 +32,11 @@ func (c *Client) createJWK(ctx context.Context) error {
 		return fmt.Errorf("failed to set kid: %w", err)
 	}
 
-	c.kid = key.KeyID()
+	keyID, ok := key.KeyID()
+	if !ok {
+		return fmt.Errorf("failed to get key ID")
+	}
+	c.kid = keyID
 
 	// Marshal JWK to JSON
 	c.jwkBytes, err = json.MarshalIndent(key, "", "  ")

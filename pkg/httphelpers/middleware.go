@@ -82,8 +82,8 @@ func (m *middlewareHandler) Crash(ctx context.Context) gin.HandlerFunc {
 		defer func() {
 			if r := recover(); r != nil {
 				status := c.Writer.Status()
-				log.Trace("crash", "error", r, "status", status, "url", c.Request.URL.Path, "method", c.Request.Method)
-				m.client.Rendering.Content(ctx, c, 500, gin.H{"data": nil, "error": helpers.NewError("internal_server_error")})
+				log.Error(nil, "panic recovered", "error", r, "status", status, "url", c.Request.URL.Path, "method", c.Request.Method)
+				m.client.Rendering.Content(ctx, c, 500, gin.H{"data": nil, "error": helpers.NewErrorDetails("internal_server_error", r)})
 			}
 		}()
 		c.Next()

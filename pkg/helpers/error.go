@@ -10,7 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/kaptinlin/jsonschema"
 	"github.com/moogar0880/problems"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var (
@@ -52,8 +52,9 @@ var (
 
 // Error is a struct that represents an error
 type Error struct {
-	Title string `json:"title" `
-	Err   any    `json:"details"`
+	Title      string `json:"title"`
+	Err        any    `json:"details"`
+	HTTPStatus int    `json:"-"` // HTTP status code to return, 0 means auto-detect
 }
 
 func (e *Error) Error() string {
@@ -77,6 +78,16 @@ func NewError(title string) *Error {
 
 func NewErrorDetails(title string, err any) *Error {
 	return &Error{Title: title, Err: err}
+}
+
+// NewErrorWithStatus creates a new Error with an explicit HTTP status code
+func NewErrorWithStatus(title string, httpStatus int) *Error {
+	return &Error{Title: title, HTTPStatus: httpStatus}
+}
+
+// NewErrorDetailsWithStatus creates a new Error with details and an explicit HTTP status code
+func NewErrorDetailsWithStatus(title string, err any, httpStatus int) *Error {
+	return &Error{Title: title, Err: err, HTTPStatus: httpStatus}
 }
 
 // NewErrorFromError creates a new Error from an error

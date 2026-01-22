@@ -115,6 +115,7 @@ func StatusCode(err *Error) int {
 	case ErrTemporarilyUnavailable:
 		return http.StatusServiceUnavailable
 	default:
-		return http.StatusTeapot
+		// Default to 400 Bad Request for unknown OpenID4VCI errors
+		return http.StatusBadRequest
 	}
 }

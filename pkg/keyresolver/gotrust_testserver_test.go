@@ -883,12 +883,12 @@ func TestValidatingResolver_WithTestServer_ECDSA_Untrusted(t *testing.T) {
 }
 
 func TestValidatingResolver_WithTestServer_ECDSANotSupported(t *testing.T) {
-	// Test that ValidatingResolver returns an error when the underlying resolver
-	// doesn't support ECDSA
+	// Test that ValidatingResolver returns an error when there's no ECDSA key
+	// registered for the requested verification method
 	srv := testserver.New(testserver.WithAcceptAll())
 	defer srv.Close()
 
-	// StaticResolver only supports Ed25519, not ECDSA
+	// StaticResolver has an Ed25519 key but no ECDSA key for this verification method
 	staticResolver := NewStaticResolver()
 	pubKey, _, _ := ed25519.GenerateKey(rand.Reader)
 	staticResolver.AddKey("did:web:example.com#key-1", pubKey)
@@ -898,9 +898,10 @@ func TestValidatingResolver_WithTestServer_ECDSANotSupported(t *testing.T) {
 
 	_, err := validatingResolver.ResolveECDSA("did:web:example.com#key-1")
 	if err == nil {
-		t.Fatal("expected error when resolver doesn't support ECDSA")
+		t.Fatal("expected error when no ECDSA key is registered")
 	}
-	if !stringContains(err.Error(), "does not support ECDSA") {
+	// StaticResolver returns "ECDSA key not found" when the key doesn't exist
+	if !stringContains(err.Error(), "not found") {
 		t.Errorf("unexpected error: %v", err)
 	}
 }

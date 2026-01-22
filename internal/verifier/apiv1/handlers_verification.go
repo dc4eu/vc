@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"vc/pkg/jose"
 	"vc/pkg/model"
 	"vc/pkg/openid4vp"
 	"vc/pkg/sdjwtvc"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/lestrrat-go/jwx/v3/jwa"
@@ -41,7 +41,8 @@ func (c *Client) VerificationRequestObject(ctx context.Context, req *Verificatio
 		return "", errors.New("request object not found")
 	}
 
-	signedJWT, err := requestObject.Sign(jwt.SigningMethodRS256, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
+	signingMethod, _ := jose.GetSigningMethodFromKey(c.issuerMetadataSigningKey)
+	signedJWT, err := requestObject.Sign(signingMethod, c.issuerMetadataSigningKey, c.issuerMetadataSigningChain)
 	if err != nil {
 		c.log.Error(err, "failed to sign authorization request")
 		return "", err

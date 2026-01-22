@@ -34,7 +34,7 @@ require (
 	github.com/multiformats/go-multibase v0.2.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/piprate/json-gold v0.7.0
-	github.com/sirosfoundation/go-trust v0.0.0-20260101183952-bc5ea0be2c57
+	github.com/sirosfoundation/go-trust v0.0.0-20260106083242-7ebd9308a293
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/files v1.0.1

@@ -571,6 +571,176 @@ func (x *Jwk) GetExt() bool {
 	return false
 }
 
+// MakeVC20Request is the request for creating a W3C VC 2.0 Data Integrity credential
+type MakeVC20Request struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Scope             string                 `protobuf:"bytes,1,opt,name=scope,proto3" json:"scope,omitempty"`                                                  // Credential scope (e.g., "pid", "ehic")
+	DocumentData      []byte                 `protobuf:"bytes,2,opt,name=document_data,json=documentData,proto3" json:"document_data,omitempty"`                // JSON encoded credential subject data
+	CredentialTypes   []string               `protobuf:"bytes,3,rep,name=credential_types,json=credentialTypes,proto3" json:"credential_types,omitempty"`       // Credential types (e.g., ["VerifiableCredential", "PersonIdentificationData"])
+	SubjectDid        string                 `protobuf:"bytes,4,opt,name=subject_did,json=subjectDid,proto3" json:"subject_did,omitempty"`                      // Optional subject DID for holder binding
+	Cryptosuite       string                 `protobuf:"bytes,5,opt,name=cryptosuite,proto3" json:"cryptosuite,omitempty"`                                      // Cryptosuite: "ecdsa-rdfc-2019", "ecdsa-sd-2023", or "eddsa-rdfc-2022"
+	MandatoryPointers []string               `protobuf:"bytes,6,rep,name=mandatory_pointers,json=mandatoryPointers,proto3" json:"mandatory_pointers,omitempty"` // JSON pointers for mandatory claims (SD-2023 only)
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *MakeVC20Request) Reset() {
+	*x = MakeVC20Request{}
+	mi := &file_v1_issuer_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MakeVC20Request) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MakeVC20Request) ProtoMessage() {}
+
+func (x *MakeVC20Request) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_issuer_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MakeVC20Request.ProtoReflect.Descriptor instead.
+func (*MakeVC20Request) Descriptor() ([]byte, []int) {
+	return file_v1_issuer_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *MakeVC20Request) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+func (x *MakeVC20Request) GetDocumentData() []byte {
+	if x != nil {
+		return x.DocumentData
+	}
+	return nil
+}
+
+func (x *MakeVC20Request) GetCredentialTypes() []string {
+	if x != nil {
+		return x.CredentialTypes
+	}
+	return nil
+}
+
+func (x *MakeVC20Request) GetSubjectDid() string {
+	if x != nil {
+		return x.SubjectDid
+	}
+	return ""
+}
+
+func (x *MakeVC20Request) GetCryptosuite() string {
+	if x != nil {
+		return x.Cryptosuite
+	}
+	return ""
+}
+
+func (x *MakeVC20Request) GetMandatoryPointers() []string {
+	if x != nil {
+		return x.MandatoryPointers
+	}
+	return nil
+}
+
+// MakeVC20Reply contains the issued W3C VC 2.0 credential
+type MakeVC20Reply struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Credential        []byte                 `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`                                           // JSON-LD encoded credential with Data Integrity proof
+	CredentialId      string                 `protobuf:"bytes,2,opt,name=credential_id,json=credentialId,proto3" json:"credential_id,omitempty"`                   // The credential's unique ID (urn:uuid:...)
+	StatusListSection int64                  `protobuf:"varint,3,opt,name=status_list_section,json=statusListSection,proto3" json:"status_list_section,omitempty"` // Status list section (if revocation enabled)
+	StatusListIndex   int64                  `protobuf:"varint,4,opt,name=status_list_index,json=statusListIndex,proto3" json:"status_list_index,omitempty"`       // Status list index
+	ValidFrom         string                 `protobuf:"bytes,5,opt,name=valid_from,json=validFrom,proto3" json:"valid_from,omitempty"`                            // RFC3339 timestamp
+	ValidUntil        string                 `protobuf:"bytes,6,opt,name=valid_until,json=validUntil,proto3" json:"valid_until,omitempty"`                         // RFC3339 timestamp (optional)
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *MakeVC20Reply) Reset() {
+	*x = MakeVC20Reply{}
+	mi := &file_v1_issuer_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MakeVC20Reply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MakeVC20Reply) ProtoMessage() {}
+
+func (x *MakeVC20Reply) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_issuer_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MakeVC20Reply.ProtoReflect.Descriptor instead.
+func (*MakeVC20Reply) Descriptor() ([]byte, []int) {
+	return file_v1_issuer_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *MakeVC20Reply) GetCredential() []byte {
+	if x != nil {
+		return x.Credential
+	}
+	return nil
+}
+
+func (x *MakeVC20Reply) GetCredentialId() string {
+	if x != nil {
+		return x.CredentialId
+	}
+	return ""
+}
+
+func (x *MakeVC20Reply) GetStatusListSection() int64 {
+	if x != nil {
+		return x.StatusListSection
+	}
+	return 0
+}
+
+func (x *MakeVC20Reply) GetStatusListIndex() int64 {
+	if x != nil {
+		return x.StatusListIndex
+	}
+	return 0
+}
+
+func (x *MakeVC20Reply) GetValidFrom() string {
+	if x != nil {
+		return x.ValidFrom
+	}
+	return ""
+}
+
+func (x *MakeVC20Reply) GetValidUntil() string {
+	if x != nil {
+		return x.ValidUntil
+	}
+	return ""
+}
+
 var File_v1_issuer_proto protoreflect.FileDescriptor
 
 const file_v1_issuer_proto_rawDesc = "" +
@@ -617,10 +787,30 @@ const file_v1_issuer_proto_rawDesc = "" +
 	"\x01y\x18\x05 \x01(\tR\x01y\x12\f\n" +
 	"\x01d\x18\x06 \x01(\tR\x01d\x12\x17\n" +
 	"\akey_ops\x18\a \x03(\tR\x06keyOps\x12\x10\n" +
-	"\x03ext\x18\b \x01(\bR\x03ext2\xcc\x01\n" +
+	"\x03ext\x18\b \x01(\bR\x03ext\"\xe9\x01\n" +
+	"\x0fMakeVC20Request\x12\x14\n" +
+	"\x05scope\x18\x01 \x01(\tR\x05scope\x12#\n" +
+	"\rdocument_data\x18\x02 \x01(\fR\fdocumentData\x12)\n" +
+	"\x10credential_types\x18\x03 \x03(\tR\x0fcredentialTypes\x12\x1f\n" +
+	"\vsubject_did\x18\x04 \x01(\tR\n" +
+	"subjectDid\x12 \n" +
+	"\vcryptosuite\x18\x05 \x01(\tR\vcryptosuite\x12-\n" +
+	"\x12mandatory_pointers\x18\x06 \x03(\tR\x11mandatoryPointers\"\xf0\x01\n" +
+	"\rMakeVC20Reply\x12\x1e\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\fR\n" +
+	"credential\x12#\n" +
+	"\rcredential_id\x18\x02 \x01(\tR\fcredentialId\x12.\n" +
+	"\x13status_list_section\x18\x03 \x01(\x03R\x11statusListSection\x12*\n" +
+	"\x11status_list_index\x18\x04 \x01(\x03R\x0fstatusListIndex\x12\x1d\n" +
+	"\n" +
+	"valid_from\x18\x05 \x01(\tR\tvalidFrom\x12\x1f\n" +
+	"\vvalid_until\x18\x06 \x01(\tR\n" +
+	"validUntil2\x90\x02\n" +
 	"\rIssuerService\x12E\n" +
 	"\tMakeSDJWT\x12\x1b.v1.issuer.MakeSDJWTRequest\x1a\x19.v1.issuer.MakeSDJWTReply\"\x00\x12B\n" +
-	"\bMakeMDoc\x12\x1a.v1.issuer.MakeMDocRequest\x1a\x18.v1.issuer.MakeMDocReply\"\x00\x120\n" +
+	"\bMakeMDoc\x12\x1a.v1.issuer.MakeMDocRequest\x1a\x18.v1.issuer.MakeMDocReply\"\x00\x12B\n" +
+	"\bMakeVC20\x12\x1a.v1.issuer.MakeVC20Request\x1a\x18.v1.issuer.MakeVC20Reply\"\x00\x120\n" +
 	"\x04JWKS\x12\x10.v1.issuer.Empty\x1a\x14.v1.issuer.JwksReply\"\x00B%Z#vc/internal/gen/issuer/apiv1_issuerb\x06proto3"
 
 var (
@@ -635,7 +825,7 @@ func file_v1_issuer_proto_rawDescGZIP() []byte {
 	return file_v1_issuer_proto_rawDescData
 }
 
-var file_v1_issuer_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_v1_issuer_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_v1_issuer_proto_goTypes = []any{
 	(*MakeSDJWTRequest)(nil), // 0: v1.issuer.MakeSDJWTRequest
 	(*MakeSDJWTReply)(nil),   // 1: v1.issuer.MakeSDJWTReply
@@ -646,23 +836,27 @@ var file_v1_issuer_proto_goTypes = []any{
 	(*JwksReply)(nil),        // 6: v1.issuer.JwksReply
 	(*Keys)(nil),             // 7: v1.issuer.keys
 	(*Jwk)(nil),              // 8: v1.issuer.jwk
+	(*MakeVC20Request)(nil),  // 9: v1.issuer.MakeVC20Request
+	(*MakeVC20Reply)(nil),    // 10: v1.issuer.MakeVC20Reply
 }
 var file_v1_issuer_proto_depIdxs = []int32{
-	8, // 0: v1.issuer.MakeSDJWTRequest.jwk:type_name -> v1.issuer.jwk
-	4, // 1: v1.issuer.MakeSDJWTReply.credentials:type_name -> v1.issuer.Credential
-	7, // 2: v1.issuer.JwksReply.jwks:type_name -> v1.issuer.keys
-	8, // 3: v1.issuer.keys.keys:type_name -> v1.issuer.jwk
-	0, // 4: v1.issuer.IssuerService.MakeSDJWT:input_type -> v1.issuer.MakeSDJWTRequest
-	2, // 5: v1.issuer.IssuerService.MakeMDoc:input_type -> v1.issuer.MakeMDocRequest
-	5, // 6: v1.issuer.IssuerService.JWKS:input_type -> v1.issuer.Empty
-	1, // 7: v1.issuer.IssuerService.MakeSDJWT:output_type -> v1.issuer.MakeSDJWTReply
-	3, // 8: v1.issuer.IssuerService.MakeMDoc:output_type -> v1.issuer.MakeMDocReply
-	6, // 9: v1.issuer.IssuerService.JWKS:output_type -> v1.issuer.JwksReply
-	7, // [7:10] is the sub-list for method output_type
-	4, // [4:7] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	8,  // 0: v1.issuer.MakeSDJWTRequest.jwk:type_name -> v1.issuer.jwk
+	4,  // 1: v1.issuer.MakeSDJWTReply.credentials:type_name -> v1.issuer.Credential
+	7,  // 2: v1.issuer.JwksReply.jwks:type_name -> v1.issuer.keys
+	8,  // 3: v1.issuer.keys.keys:type_name -> v1.issuer.jwk
+	0,  // 4: v1.issuer.IssuerService.MakeSDJWT:input_type -> v1.issuer.MakeSDJWTRequest
+	2,  // 5: v1.issuer.IssuerService.MakeMDoc:input_type -> v1.issuer.MakeMDocRequest
+	9,  // 6: v1.issuer.IssuerService.MakeVC20:input_type -> v1.issuer.MakeVC20Request
+	5,  // 7: v1.issuer.IssuerService.JWKS:input_type -> v1.issuer.Empty
+	1,  // 8: v1.issuer.IssuerService.MakeSDJWT:output_type -> v1.issuer.MakeSDJWTReply
+	3,  // 9: v1.issuer.IssuerService.MakeMDoc:output_type -> v1.issuer.MakeMDocReply
+	10, // 10: v1.issuer.IssuerService.MakeVC20:output_type -> v1.issuer.MakeVC20Reply
+	6,  // 11: v1.issuer.IssuerService.JWKS:output_type -> v1.issuer.JwksReply
+	8,  // [8:12] is the sub-list for method output_type
+	4,  // [4:8] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_v1_issuer_proto_init() }
@@ -676,7 +870,7 @@ func file_v1_issuer_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_issuer_proto_rawDesc), len(file_v1_issuer_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

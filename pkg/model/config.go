@@ -431,6 +431,45 @@ type VerifierProxy struct {
 	DigitalCredentials   DigitalCredentialsConfig   `yaml:"digital_credentials,omitempty"`
 	AuthorizationPageCSS AuthorizationPageCSSConfig `yaml:"authorization_page_css,omitempty"`
 	CredentialDisplay    CredentialDisplayConfig    `yaml:"credential_display,omitempty"`
+	Trust                TrustConfig                `yaml:"trust,omitempty"`
+}
+
+// TrustConfig holds configuration for key resolution and trust evaluation via go-trust.
+// This is used for validating W3C VC Data Integrity proofs and other trust-related operations.
+type TrustConfig struct {
+	// GoTrustURL is the URL of the go-trust PDP (Policy Decision Point) service.
+	// Example: "https://trust.example.com/pdp"
+	// If empty, trust evaluation is disabled and only local DID methods will work.
+	GoTrustURL string `yaml:"go_trust_url,omitempty"`
+
+	// LocalDIDMethods specifies which DID methods can be resolved locally without go-trust.
+	// Self-contained methods like "did:key" and "did:jwk" are always resolved locally.
+	// Default: ["did:key", "did:jwk"]
+	LocalDIDMethods []string `yaml:"local_did_methods,omitempty"`
+
+	// TrustPolicies configures per-role trust evaluation policies.
+	// The key is the role (e.g., "issuer", "verifier") and the value contains policy settings.
+	TrustPolicies map[string]TrustPolicyConfig `yaml:"trust_policies,omitempty"`
+
+	// Enabled controls whether trust evaluation is enabled.
+	// When false, keys are resolved but not validated against trust frameworks.
+	// Default: true
+	Enabled bool `yaml:"enabled,omitempty"`
+}
+
+// TrustPolicyConfig defines trust policy settings for a specific role.
+type TrustPolicyConfig struct {
+	// TrustFrameworks lists the accepted trust frameworks for this role.
+	// Examples: "did:web", "did:ebsi", "etsi-tl", "openid-federation", "x509"
+	TrustFrameworks []string `yaml:"trust_frameworks,omitempty"`
+
+	// TrustAnchors specifies trusted root entities for this role.
+	// Format depends on the trust framework (e.g., DID for did:web, federation entity for OpenID Fed).
+	TrustAnchors []string `yaml:"trust_anchors,omitempty"`
+
+	// RequireRevocationCheck enforces revocation status checking for this role.
+	// Default: false
+	RequireRevocationCheck bool `yaml:"require_revocation_check,omitempty"`
 }
 
 // OIDCConfig holds OIDC-specific configuration for the verifier-proxy's role as an OpenID Provider.

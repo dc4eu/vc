@@ -7,13 +7,14 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"testing"
+	"vc/pkg/jose"
 )
 
 // TestGetSigningMethodFromKey_AllKeyTypes tests all key type branches
 func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 	t.Run("RSA_2048", func(t *testing.T) {
 		key, _ := rsa.GenerateKey(rand.Reader, 2048)
-		method, alg := getSigningMethodFromKey(key)
+		method, alg := jose.GetSigningMethodFromKey(key)
 		if alg != "RS256" {
 			t.Errorf("Expected RS256, got %s", alg)
 		}
@@ -24,7 +25,7 @@ func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 
 	t.Run("RSA_3072", func(t *testing.T) {
 		key, _ := rsa.GenerateKey(rand.Reader, 3072)
-		method, alg := getSigningMethodFromKey(key)
+		method, alg := jose.GetSigningMethodFromKey(key)
 		if alg != "RS384" {
 			t.Errorf("Expected RS384, got %s", alg)
 		}
@@ -35,7 +36,7 @@ func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 
 	t.Run("RSA_4096", func(t *testing.T) {
 		key, _ := rsa.GenerateKey(rand.Reader, 4096)
-		method, alg := getSigningMethodFromKey(key)
+		method, alg := jose.GetSigningMethodFromKey(key)
 		if alg != "RS512" {
 			t.Errorf("Expected RS512, got %s", alg)
 		}
@@ -46,7 +47,7 @@ func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 
 	t.Run("ECDSA_P256", func(t *testing.T) {
 		key, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-		method, alg := getSigningMethodFromKey(key)
+		method, alg := jose.GetSigningMethodFromKey(key)
 		if alg != "ES256" {
 			t.Errorf("Expected ES256, got %s", alg)
 		}
@@ -57,7 +58,7 @@ func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 
 	t.Run("ECDSA_P384", func(t *testing.T) {
 		key, _ := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-		method, alg := getSigningMethodFromKey(key)
+		method, alg := jose.GetSigningMethodFromKey(key)
 		if alg != "ES384" {
 			t.Errorf("Expected ES384, got %s", alg)
 		}
@@ -68,7 +69,7 @@ func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 
 	t.Run("ECDSA_P521", func(t *testing.T) {
 		key, _ := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-		method, alg := getSigningMethodFromKey(key)
+		method, alg := jose.GetSigningMethodFromKey(key)
 		if alg != "ES512" {
 			t.Errorf("Expected ES512, got %s", alg)
 		}
@@ -79,7 +80,7 @@ func TestGetSigningMethodFromKey_AllKeyTypes(t *testing.T) {
 
 	t.Run("unknown_key_type", func(t *testing.T) {
 		// Pass a string (unknown type)
-		method, alg := getSigningMethodFromKey("invalid-key")
+		method, alg := jose.GetSigningMethodFromKey("invalid-key")
 		// Should default to ES256
 		if alg != "ES256" {
 			t.Errorf("Expected ES256 default, got %s", alg)

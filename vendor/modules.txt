@@ -24,15 +24,6 @@ github.com/PaesslerAG/gval
 # github.com/PaesslerAG/jsonpath v0.1.1
 ## explicit
 github.com/PaesslerAG/jsonpath
-# github.com/PuerkitoBio/goquery v1.11.0
-## explicit; go 1.24.0
-github.com/PuerkitoBio/goquery
-# github.com/ThalesGroup/crypto11 v1.6.0
-## explicit; go 1.25.1
-github.com/ThalesGroup/crypto11
-# github.com/andybalholm/cascadia v1.3.3
-## explicit; go 1.16
-github.com/andybalholm/cascadia
 # github.com/beevik/etree v1.6.0
 ## explicit; go 1.23.0
 github.com/beevik/etree
@@ -51,7 +42,7 @@ github.com/brianvoe/gofakeit/v7/source
 # github.com/bytedance/gopkg v0.1.3
 ## explicit; go 1.18
 github.com/bytedance/gopkg/lang/dirtmake
-# github.com/bytedance/sonic v1.14.2
+# github.com/bytedance/sonic v1.15.0
 ## explicit; go 1.18
 github.com/bytedance/sonic
 github.com/bytedance/sonic/ast
@@ -86,7 +77,7 @@ github.com/bytedance/sonic/internal/utils
 github.com/bytedance/sonic/option
 github.com/bytedance/sonic/unquote
 github.com/bytedance/sonic/utf8
-# github.com/bytedance/sonic/loader v0.4.0
+# github.com/bytedance/sonic/loader v0.5.0
 ## explicit; go 1.16
 github.com/bytedance/sonic/loader
 github.com/bytedance/sonic/loader/internal/abi
@@ -356,7 +347,7 @@ github.com/gorilla/securecookie
 # github.com/gorilla/sessions v1.4.0
 ## explicit; go 1.23
 github.com/gorilla/sessions
-# github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4
+# github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.5
 ## explicit; go 1.24.0
 github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule
 github.com/grpc-ecosystem/grpc-gateway/v2/runtime
@@ -460,9 +451,6 @@ github.com/klauspost/cpuid/v2
 ## explicit; go 1.18
 github.com/leodido/go-urn
 github.com/leodido/go-urn/scim/schema
-# github.com/lestrrat-go/backoff/v2 v2.0.8
-## explicit; go 1.16
-github.com/lestrrat-go/backoff/v2
 # github.com/lestrrat-go/blackmagic v1.0.4
 ## explicit; go 1.23
 github.com/lestrrat-go/blackmagic
@@ -496,9 +484,6 @@ github.com/lestrrat-go/jwx/v3/jwk
 github.com/lestrrat-go/jwx/v3/jwk/ecdsa
 github.com/lestrrat-go/jwx/v3/jwk/jwkbb
 github.com/lestrrat-go/jwx/v3/transform
-# github.com/lestrrat-go/option v1.0.1
-## explicit; go 1.16
-github.com/lestrrat-go/option
 # github.com/lestrrat-go/option/v2 v2.0.0
 ## explicit; go 1.23
 github.com/lestrrat-go/option/v2
@@ -520,7 +505,7 @@ github.com/mattermost/xml-roundtrip-validator
 # github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
-# github.com/miekg/pkcs11 v1.1.1
+# github.com/miekg/pkcs11 v1.1.2
 ## explicit; go 1.12
 github.com/miekg/pkcs11
 # github.com/moby/docker-image-spec v1.3.1
@@ -560,9 +545,6 @@ github.com/montanaflynn/stats
 # github.com/moogar0880/problems v1.0.1
 ## explicit; go 1.24
 github.com/moogar0880/problems
-# github.com/moov-io/signedxml v1.2.3
-## explicit; go 1.21.0
-github.com/moov-io/signedxml
 # github.com/morikuni/aec v1.0.0
 ## explicit
 github.com/morikuni/aec
@@ -699,25 +681,18 @@ github.com/shirou/gopsutil/v4/process
 # github.com/shopspring/decimal v1.4.0
 ## explicit; go 1.10
 github.com/shopspring/decimal
-# github.com/sirosfoundation/g119612 v0.0.0-20251216105546-cea1e5c9b953
-## explicit; go 1.23.0
-github.com/sirosfoundation/g119612/pkg/etsi119612
-# github.com/sirosfoundation/go-trust v0.0.0-20260101183952-bc5ea0be2c57
+# github.com/sirosfoundation/g119612 v0.0.0-20260108094825-5b3123230280
+## explicit; go 1.25.1
+github.com/sirosfoundation/g119612/pkg/logging
+# github.com/sirosfoundation/go-trust v0.0.0-20260110233605-ed2e7e9dd77c
 ## explicit; go 1.25.1
 github.com/sirosfoundation/go-trust/pkg/api
 github.com/sirosfoundation/go-trust/pkg/authzen
 github.com/sirosfoundation/go-trust/pkg/authzenclient
-github.com/sirosfoundation/go-trust/pkg/dsig
-github.com/sirosfoundation/go-trust/pkg/logging
-github.com/sirosfoundation/go-trust/pkg/pipeline
 github.com/sirosfoundation/go-trust/pkg/registry
 github.com/sirosfoundation/go-trust/pkg/registry/didweb
 github.com/sirosfoundation/go-trust/pkg/testserver
 github.com/sirosfoundation/go-trust/pkg/trustapi
-github.com/sirosfoundation/go-trust/pkg/utils
-github.com/sirosfoundation/go-trust/pkg/utils/x509util
-github.com/sirosfoundation/go-trust/pkg/validation
-github.com/sirosfoundation/go-trust/xslt
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
@@ -750,9 +725,6 @@ github.com/testcontainers/testcontainers-go/internal/core
 github.com/testcontainers/testcontainers-go/internal/core/network
 github.com/testcontainers/testcontainers-go/log
 github.com/testcontainers/testcontainers-go/wait
-# github.com/thales-e-security/pool v0.0.2
-## explicit; go 1.12
-github.com/thales-e-security/pool
 # github.com/tiendc/go-deepcopy v1.7.2
 ## explicit; go 1.18
 github.com/tiendc/go-deepcopy
@@ -811,7 +783,7 @@ github.com/youmark/pkcs8
 # github.com/yusufpapurcu/wmi v1.2.4
 ## explicit; go 1.16
 github.com/yusufpapurcu/wmi
-# go.mongodb.org/mongo-driver v1.17.6
+# go.mongodb.org/mongo-driver v1.17.7
 ## explicit; go 1.18
 go.mongodb.org/mongo-driver/bson
 go.mongodb.org/mongo-driver/bson/bsoncodec
@@ -864,7 +836,7 @@ go.mongodb.org/mongo-driver/x/mongo/driver/operation
 go.mongodb.org/mongo-driver/x/mongo/driver/session
 go.mongodb.org/mongo-driver/x/mongo/driver/topology
 go.mongodb.org/mongo-driver/x/mongo/driver/wiremessage
-# go.mongodb.org/mongo-driver/v2 v2.4.1
+# go.mongodb.org/mongo-driver/v2 v2.4.2
 ## explicit; go 1.19
 go.mongodb.org/mongo-driver/v2/bson
 go.mongodb.org/mongo-driver/v2/event
@@ -1112,10 +1084,10 @@ golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/imports
 golang.org/x/tools/internal/modindex
 golang.org/x/tools/internal/stdlib
-# google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3
+# google.golang.org/genproto/googleapis/api v0.0.0-20260120221211-b8f7ae30c516
 ## explicit; go 1.24.0
 google.golang.org/genproto/googleapis/api/httpbody
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20260114163908-3f89685c29c3
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20260120221211-b8f7ae30c516
 ## explicit; go 1.24.0
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.78.0

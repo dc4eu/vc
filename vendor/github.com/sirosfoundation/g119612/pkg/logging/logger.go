@@ -1,5 +1,4 @@
-// Package logging provides a unified logging interface for the go-trust application.package logging
-
+// Package logging provides a unified logging interface for the g119612 package.
 package logging
 
 import (

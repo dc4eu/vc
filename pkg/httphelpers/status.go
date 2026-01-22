@@ -40,6 +40,16 @@ func StatusCode(ctx context.Context, err error) int {
 		case helpers.ErrInternalServerError:
 			return http.StatusInternalServerError
 		default:
+			// Check if the wrapped error is a known error type
+			if errHelper, ok := err.Err.(*helpers.Error); ok {
+				switch errHelper {
+				case helpers.ErrDocumentAlreadyExists, helpers.ErrDuplicateKey:
+					return http.StatusConflict
+				case helpers.ErrNoDocumentFound, helpers.ErrNoIdentityFound:
+					return http.StatusNotFound
+				}
+			}
+			
 			// Check error title/message for other helpers.Error instances
 			return inferStatusFromErrorTitle(err.Title)
 		}

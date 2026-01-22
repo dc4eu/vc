@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -99,12 +100,22 @@ func checkResponse(r *http.Response) error {
 	switch r.StatusCode {
 	case 200, 201, 202, 204, 304:
 		return nil
+	case 400:
+		return errors.New("bad request")
 	case 401:
 		return errors.New("unauthorized")
+	case 403:
+		return errors.New("forbidden")
+	case 404:
+		return errors.New("not found")
+	case 409:
+		return errors.New("document already exists")
 	case 500:
-		return errors.New("invalid")
+		return errors.New("internal server error")
+	case 503:
+		return errors.New("service unavailable")
 	}
-	return errors.New("invalid request")
+	return fmt.Errorf("unexpected status code: %d", r.StatusCode)
 }
 
 func (c *Client) call(ctx context.Context, method, path string, body, reply any) (*http.Response, error) {

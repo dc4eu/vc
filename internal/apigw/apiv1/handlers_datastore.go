@@ -45,7 +45,7 @@ func (c *Client) Upload(ctx context.Context, req *vcclient.UploadRequest) error 
 	}
 
 	credentialOfferParameter := openid4vci.CredentialOfferParameters{
-		CredentialIssuer: c.cfg.Issuer.IssuerURL,
+		CredentialIssuer: c.cfg.APIGW.CredentialOffers.IssuerURL,
 		CredentialConfigurationIDs: []string{
 			req.Meta.Scope,
 		},
